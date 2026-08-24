@@ -18,7 +18,10 @@ from evaluation.benchmark_qwen3_32b_c1_tp_decode import (
     _dense_local_decoder,
     _padded_decoder,
 )
-from evaluation.simulate_qwen3_32b_c1_tp_decode import _communication_bytes
+from evaluation.simulate_qwen3_32b_c1_tp_decode import (
+    _communication_bytes,
+    _write_feature_major_arena,
+)
 
 
 def _write_checkpoint(
@@ -172,6 +175,12 @@ def test_factor_packer_preserves_tp_source_and_decoder_order(tmp_path: Path) -> 
         for layer, value in zip(packed, attention)
     )
     compact_latent = torch.cat(local_latents, dim=1)
+    feature_major_arena = torch.empty(
+        packed[0].plan.total_width,
+        compact_latent.shape[0],
+    )
+    _write_feature_major_arena(feature_major_arena, packed, attention)
+    torch.testing.assert_close(feature_major_arena.transpose(0, 1), compact_latent)
     observed = compact_latent @ packed[0].global_decoder
     expected = sum(
         (

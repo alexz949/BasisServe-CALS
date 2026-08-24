@@ -148,3 +148,14 @@ python -m pytest -q tests/test_capsule_imports.py tests/test_gqa_routed_ov_joint
 
 Large calibration, fitting, PPL, lm-eval, and distributed benchmarks still need
 the original model/dataset artifacts and suitable GPU resources.
+
+
+## Experimental feature-major one-sided ragged transport
+
+An opt-in prototype is documented in
+[`docs/feature_ragged_one_sided.md`](docs/feature_ragged_one_sided.md). It adds a
+feature-major receive arena, a two-sided direct control, and an NCCL 2.29+
+one-sided `PutSignal`/`WaitSignal` path followed by one decoder GEMM. The
+existing ragged collective remains available as a benchmark control. RMA
+requires a coherent PyTorch/NCCL 2.29+ environment; the current `lowrank`
+environment is NCCL 2.28.9 and can validate only `feature_direct`.

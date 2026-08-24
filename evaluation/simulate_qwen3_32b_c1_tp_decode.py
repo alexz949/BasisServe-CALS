@@ -7,6 +7,7 @@ ordering without requiring an eight-GPU allocation.  It reports:
 
 * measured sequential single-GPU latency;
 * an isolated parallel-compute floor built from the slowest virtual rank;
+* feature-major arena construction and one-big-GEMM equivalence;
 * exact logical collective byte counts for TP8.
 
 It never models or reports NCCL latency, and its rows/s are not full-model
@@ -32,12 +33,18 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-import torch
-from torch import Tensor
-from torch.nn import functional as F
+import torch  # noqa: E402
+from torch import Tensor  # noqa: E402
+from torch.nn import functional as F  # noqa: E402
 
-from basisserve.core.c1_tp_decode import C1TPFactorLoader, PackedC1TPLayer
-from evaluation.benchmark_qwen3_32b_c1_tp_decode import (
+from basisserve.core.c1_tp_decode import (  # noqa: E402
+    C1TPFactorLoader,
+    PackedC1TPLayer,
+)
+from basisserve.kernels.feature_ragged_allgather import (  # noqa: E402
+    decode_feature_major,
+)
+from evaluation.benchmark_qwen3_32b_c1_tp_decode import (  # noqa: E402
     _dense_local_decoder,
     _dtype,
     _padded_decoder,
@@ -46,7 +53,7 @@ from evaluation.benchmark_qwen3_32b_c1_tp_decode import (
 )
 
 
-FORMAT = "basisserve.qwen3_32b.c1_tp_decode_single_gpu_simulation.v1"
+FORMAT = "basisserve.qwen3_32b.c1_tp_decode_single_gpu_simulation.v2"
 
 
 def _quantile(values: Sequence[float], fraction: float) -> float:
@@ -118,6 +125,31 @@ def _padded_latent(
         latent = source.encode_local_attention(local_attention)
         blocks.append(F.pad(latent, (0, maximum_width - latent.shape[1])))
     return torch.cat(blocks, dim=1)
+
+
+def _write_feature_major_arena(
+    arena: Tensor,
+    packed: Sequence[PackedC1TPLayer],
+    attention: Sequence[Tensor],
+) -> Tensor:
+    """Encode virtual sources directly into a reusable ``[K, rows]`` arena."""
+
+    if not packed or len(packed) != len(attention):
+        raise ValueError("packed factors and attention must define the same sources")
+    plan = packed[0].plan
+    rows = int(attention[0].shape[0])
+    expected_shape = (plan.total_width, rows)
+    if tuple(arena.shape) != expected_shape:
+        raise ValueError(
+            f"feature-major arena must have shape {expected_shape}, "
+            f"got {tuple(arena.shape)}"
+        )
+    for source, local_attention in zip(packed, attention):
+        local = source.encode_local_attention(local_attention)
+        start = plan.offsets[source.process_rank]
+        width = plan.source_widths[source.process_rank]
+        arena.narrow(0, start, width).copy_(local.transpose(0, 1))
+    return arena
 
 
 def _relative_error(observed: Tensor, reference: Tensor) -> dict[str, float]:
@@ -316,7 +348,12 @@ def _summary_markdown(payload: dict[str, Any]) -> str:
             "",
             "The parallel-compute floor excludes all communication. Logical wire "
             "bytes are accounting values, not NCCL latency measurements. Neither "
-            "column is measured TP8 throughput or full-model tokens/s.",
+            "column is measured TP8 throughput or full-model tokens/s. The "
+            "feature-major path writes a reusable arena and decodes its transposed "
+            "view with one GEMM.",
+            "",
+            "Layers were streamed one at a time; maximum measured per-layer CUDA "
+            f"allocation was `{metadata['maximum_layer_peak_allocated_bytes']}` bytes.",
         ]
     )
     return "\n".join(lines) + "\n"
@@ -367,6 +404,7 @@ def main() -> None:
     records: list[dict[str, Any]] = []
     correctness: list[dict[str, Any]] = []
     artifact_hashes: dict[str, str] = {}
+    layer_memory: dict[str, dict[str, int]] = {}
 
     print(
         json.dumps(
@@ -383,6 +421,7 @@ def main() -> None:
 
     for layer in layers:
         layer_started = time.perf_counter()
+        torch.cuda.reset_peak_memory_stats(device)
         print(
             json.dumps({"event": "layer_start", "layer": layer}),
             flush=True,
@@ -407,6 +446,13 @@ def main() -> None:
             )
             compact_latent = _compact_latent(packed, attention)
             padded_latent = _padded_latent(packed, attention)
+            feature_major_arena = torch.empty(
+                packed[0].plan.total_width,
+                batch,
+                dtype=dtype,
+                device=device,
+            )
+            _write_feature_major_arena(feature_major_arena, packed, attention)
             reference = compact_latent @ packed[0].global_decoder
 
             if batch == args.correctness_batch:
@@ -426,6 +472,10 @@ def main() -> None:
                             for source, local_attention in zip(packed, attention)
                         )
                     ),
+                    "feature_major_ragged_allgather": decode_feature_major(
+                        feature_major_arena,
+                        packed[0].global_decoder,
+                    ),
                     "padded_allgather": padded_latent @ padded_decoder,
                 }
                 for path, observed in candidates.items():
@@ -437,6 +487,7 @@ def main() -> None:
                         relative_tolerance=args.relative_tolerance,
                     )
                     correctness.append({"layer": layer, "path": path, **metrics})
+                del candidates, observed
 
             source_encode = tuple(
                 _measure(
@@ -477,6 +528,15 @@ def main() -> None:
                 iterations=args.iterations,
                 device=device,
             )
+            feature_major_decode = _measure(
+                lambda: decode_feature_major(
+                    feature_major_arena,
+                    packed[0].global_decoder,
+                ),
+                warmup=args.warmup,
+                iterations=args.iterations,
+                device=device,
+            )
             padded_decode = _measure(
                 lambda: padded_latent @ padded_decoder,
                 warmup=args.warmup,
@@ -502,6 +562,13 @@ def main() -> None:
 
             def compact_sequential() -> Tensor:
                 return _compact_latent(packed, attention) @ packed[0].global_decoder
+
+            def feature_major_sequential() -> Tensor:
+                _write_feature_major_arena(feature_major_arena, packed, attention)
+                return decode_feature_major(
+                    feature_major_arena,
+                    packed[0].global_decoder,
+                )
 
             def padded_sequential() -> Tensor:
                 return _padded_latent(packed, attention) @ padded_decoder
@@ -567,6 +634,28 @@ def main() -> None:
                     _path_record(
                         layer=layer,
                         batch=batch,
+                        path="feature_major_ragged_allgather",
+                        sequential=_measure(
+                            feature_major_sequential,
+                            warmup=args.warmup,
+                            iterations=args.iterations,
+                            device=device,
+                        ),
+                        parallel_compute_floor_ms=(
+                            max_encode_p50 + feature_major_decode["p50_ms"]
+                        ),
+                        components={
+                            "per_virtual_rank_encode": source_encode,
+                            "replicated_feature_major_decode": feature_major_decode,
+                            "sequential_arena_fill_included": True,
+                            "parallel_floor_assumes_direct_attention_output": True,
+                        },
+                        communication=communication["compact_ragged_allgather"],
+                        packed=packed,
+                    ),
+                    _path_record(
+                        layer=layer,
+                        batch=batch,
                         path="padded_allgather",
                         sequential=_measure(
                             padded_sequential,
@@ -586,13 +675,31 @@ def main() -> None:
                     ),
                 )
             )
-        del packed, dense_decoders, padded_decoder
+        peak_allocated = int(torch.cuda.max_memory_allocated(device))
+        # Clear closure cells before emptying the allocator cache. This makes
+        # layer streaming observable rather than retaining the final batch's
+        # tensors until the next loop iteration.
+        attention = ()
+        compact_latent = None
+        padded_latent = None
+        feature_major_arena = None
+        reference = None
+        packed = ()
+        dense_decoders = ()
+        padded_decoder = None
         torch.cuda.empty_cache()
+        allocated_after_cleanup = int(torch.cuda.memory_allocated(device))
+        layer_memory[str(layer)] = {
+            "peak_allocated_bytes": peak_allocated,
+            "allocated_after_cleanup_bytes": allocated_after_cleanup,
+        }
         print(
             json.dumps(
                 {
                     "event": "layer_complete",
                     "layer": layer,
+                    "peak_allocated_bytes": peak_allocated,
+                    "allocated_after_cleanup_bytes": allocated_after_cleanup,
                     "elapsed_seconds": time.perf_counter() - layer_started,
                 }
             ),
@@ -622,6 +729,10 @@ def main() -> None:
             "iterations": args.iterations,
             "correctness_batch": args.correctness_batch,
             "relative_tolerance": args.relative_tolerance,
+            "layer_loading": "one C1 factor artifact at a time",
+            "maximum_layer_peak_allocated_bytes": max(
+                row["peak_allocated_bytes"] for row in layer_memory.values()
+            ),
             "simulation_scope": "eight virtual ranks executed sequentially on one GPU",
             "valid_claims": [
                 "C1 TP8 semantic correctness",
@@ -636,6 +747,7 @@ def main() -> None:
             ],
         },
         "correctness": correctness,
+        "layer_memory": layer_memory,
         "records": records,
         "aggregate": _aggregate(records, layer_count=len(layers)),
     }

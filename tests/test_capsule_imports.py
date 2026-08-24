@@ -12,6 +12,8 @@ def test_core_algorithm_imports() -> None:
 
 
 def test_runtime_imports_do_not_compile_cuda_extension() -> None:
+    import basisserve.core.c1_tp_feature_decode  # noqa: F401
+    import basisserve.kernels.feature_ragged_allgather  # noqa: F401
     import basisserve.kernels.ragged_allgather  # noqa: F401
     from basisserve.core.qwen35_gdn_private_ag_runtime import (  # noqa: F401
         Qwen35PrivateAGOutput,
