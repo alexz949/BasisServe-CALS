@@ -22,6 +22,10 @@ from tqdm import tqdm
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 
+WIKITEXT_REPO = "Salesforce/wikitext"
+WIKITEXT_REVISION = "b08601e04326c79dfdd32d625aee71d232d685c3"
+
+
 class SVDLinear(nn.Module):
     def __init__(self, in_features: int, out_features: int, rank: int, bias: bool = False):
         super().__init__()
@@ -204,7 +208,12 @@ def _input_device(model: nn.Module) -> torch.device:
 
 def _load_text(dataset: str, split: str | None) -> str:
     if dataset == "wikitext2":
-        ds = load_dataset("wikitext", "wikitext-2-raw-v1", split=split or "test")
+        ds = load_dataset(
+            WIKITEXT_REPO,
+            "wikitext-2-raw-v1",
+            split=split or "test",
+            revision=WIKITEXT_REVISION,
+        )
         return "\n\n".join(str(text) for text in ds["text"])
     if dataset == "ptb":
         try:

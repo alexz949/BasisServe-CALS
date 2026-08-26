@@ -79,6 +79,13 @@ def parse_args() -> argparse.Namespace:
         "--attn-implementation", choices=("eager", "sdpa"), default="sdpa"
     )
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument(
+        "--device-map",
+        choices=("none", "balanced", "balanced_low_0"),
+        default="none",
+        help="Shard models that do not fit on one GPU across visible GPUs",
+    )
+    parser.add_argument("--max-memory-per-gpu-gib", type=int, default=44)
     parser.add_argument("--torch-num-threads", type=int, default=4)
     return parser.parse_args()
 
@@ -159,7 +166,8 @@ def _validate_attention(config: Any, expected: str) -> dict[str, int | str]:
     num_heads = int(config.num_attention_heads)
     num_kv_heads = int(getattr(config, "num_key_value_heads", num_heads))
     num_layers = int(config.num_hidden_layers)
-    if hidden_size % num_heads or num_heads % num_kv_heads:
+    head_dim = int(getattr(config, "head_dim", 0) or hidden_size // num_heads)
+    if head_dim <= 0 or num_heads % num_kv_heads:
         raise ValueError("checkpoint attention geometry is invalid")
     actual = "mha" if num_heads == num_kv_heads else "gqa"
     if actual != expected:
@@ -171,7 +179,7 @@ def _validate_attention(config: Any, expected: str) -> dict[str, int | str]:
         "num_hidden_layers": num_layers,
         "num_attention_heads": num_heads,
         "num_key_value_heads": num_kv_heads,
-        "head_dim": hidden_size // num_heads,
+        "head_dim": head_dim,
     }
 
 
@@ -266,15 +274,32 @@ def main() -> None:
         "bfloat16": torch.bfloat16,
         "float16": torch.float16,
     }[args.model_dtype]
-    print(f"[Capture] loading model={model_path} device={device}", flush=True)
-    model = AutoModel.from_pretrained(
-        str(model_path),
-        torch_dtype=model_dtype,
-        device_map={"": str(device)},
-        low_cpu_mem_usage=True,
-        attn_implementation=args.attn_implementation,
-        local_files_only=True,
-    ).eval()
+    print(
+        f"[Capture] loading model={model_path} device={device} "
+        f"device_map={args.device_map}",
+        flush=True,
+    )
+    model_kwargs: dict[str, Any] = {
+        "dtype": model_dtype,
+        "low_cpu_mem_usage": True,
+        "attn_implementation": args.attn_implementation,
+        "local_files_only": True,
+    }
+    if args.device_map == "none":
+        model_kwargs["device_map"] = {"": str(device)}
+    else:
+        model_kwargs["device_map"] = args.device_map
+        model_kwargs["max_memory"] = {
+            index: f"{args.max_memory_per_gpu_gib}GiB"
+            for index in range(torch.cuda.device_count())
+        }
+    model = AutoModel.from_pretrained(str(model_path), **model_kwargs).eval()
+    placement = {
+        str(key): str(value)
+        for key, value in getattr(model, "hf_device_map", {}).items()
+    }
+    if any(value in {"cpu", "disk"} for value in placement.values()):
+        raise RuntimeError(f"snapshot capture offloaded model parameters: {placement}")
     geometry = _validate_attention(model.config, args.expected_attention)
     decoder_layers = _decoder_layers(model)
     if len(decoder_layers) != int(geometry["num_hidden_layers"]):
@@ -286,7 +311,7 @@ def main() -> None:
             raise TypeError(f"layer {layer} o_proj is not nn.Linear")
         if module.bias is not None or tuple(module.weight.shape) != (
             int(geometry["hidden_size"]),
-            int(geometry["hidden_size"]),
+            int(geometry["num_attention_heads"]) * int(geometry["head_dim"]),
         ):
             raise ValueError(f"layer {layer} o_proj geometry is unsupported")
 
@@ -294,9 +319,13 @@ def main() -> None:
     capture = _OProjCapture(
         modules=modules,
         rows=rows,
-        input_width=int(geometry["hidden_size"]),
+        input_width=(
+            int(geometry["num_attention_heads"]) * int(geometry["head_dim"])
+        ),
     )
     input_device = model.get_input_embeddings().weight.device
+    if input_device.type != "cuda":
+        raise RuntimeError("model input embeddings were not placed on CUDA")
     try:
         batches = (
             int(windows.shape[0]) + args.batch_size - 1
@@ -387,10 +416,16 @@ def main() -> None:
             "python": sys.version,
             "torch": torch.__version__,
             "transformers": _installed_version("transformers"),
-            "cuda_device": torch.cuda.get_device_name(device),
-            "peak_cuda_allocated_bytes": int(
-                torch.cuda.max_memory_allocated(device)
-            ),
+            "cuda_devices": [
+                torch.cuda.get_device_name(index)
+                for index in range(torch.cuda.device_count())
+            ],
+            "peak_cuda_allocated_bytes": {
+                str(index): int(torch.cuda.max_memory_allocated(index))
+                for index in range(torch.cuda.device_count())
+            },
+            "device_map_strategy": args.device_map,
+            "device_map": placement,
             "torch_num_threads": torch.get_num_threads(),
         },
     }

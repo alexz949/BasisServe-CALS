@@ -256,10 +256,10 @@ def _eval_ppl_fp32_loss(
         f"input_device={input_device} loss_dtype=float32",
         flush=True,
     )
-    for _, batch in tqdm(
+    for batch_index, (_, batch) in enumerate(tqdm(
         _iter_batches(input_ids, seqlen, batch_size, max_samples),
         total=math.ceil(nsamples / batch_size),
-    ):
+    )):
         batch = batch.to(input_device)
         logits = model(input_ids=batch, use_cache=False).logits
         shift_logits = logits[:, :-1, :].float().contiguous()
@@ -268,6 +268,10 @@ def _eval_ppl_fp32_loss(
             shift_logits.view(-1, shift_logits.size(-1)),
             shift_labels.view(-1),
         )
+        if not bool(torch.isfinite(loss).cpu()):
+            raise FloatingPointError(
+                f"non-finite cross entropy at evaluation batch {batch_index}"
+            )
         nll_sum += float(loss.detach().cpu())
         token_count += int(shift_labels.numel())
     if use_cache is not None:

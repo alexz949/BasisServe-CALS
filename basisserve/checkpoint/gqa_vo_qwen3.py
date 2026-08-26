@@ -3,15 +3,20 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
 
+from safetensors.torch import load_file
 import torch
 from torch import nn
 from torch.nn import functional as F
 
 from basisserve.kernels.sageattention import sage_attention_with_compressed_value
+
+
+UNIFORM_ALS_EXPORT_FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
 
 
 @dataclass(frozen=True)
@@ -56,6 +61,15 @@ class GQATiedVOQwen3Attention(nn.Module):
             raise ValueError(
                 "compressed attention backend must be 'native' or 'sage', got "
                 f"{self.attention_backend!r}"
+            )
+        if (
+            self.attention_backend == "native"
+            and getattr(config, "_attn_implementation", None) != "eager"
+        ):
+            raise ValueError(
+                "native compressed C1 attention requires the model to be loaded "
+                "with attn_implementation='eager'; otherwise Transformers may omit "
+                "the causal mask expected by eager_attention_forward"
             )
 
         if v_proj_compressed_weight.ndim != 2:
@@ -380,6 +394,147 @@ def _load_projection_payload(path: Path) -> dict[str, Any]:
     if payload.get("format") != "basisserve.gqa_vo_svdllm.layer.v1":
         raise ValueError(f"unsupported GQA V/O layer payload in {path}")
     return payload
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while chunk := handle.read(8 << 20):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _validate_uniform_als_manifest(
+    model: nn.Module,
+    factor_dir: Path,
+) -> dict[str, Any]:
+    result_path = factor_dir / "results.json"
+    if not result_path.is_file():
+        raise FileNotFoundError(result_path)
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    if (
+        result.get("format") != UNIFORM_ALS_EXPORT_FORMAT
+        or result.get("status") != "complete"
+    ):
+        raise ValueError("uniform C1 ALS result is incomplete or incompatible")
+    config = model.config
+    fit_config = result.get("fit_config", {})
+    expected_geometry = {
+        "model_type": str(config.model_type),
+        "hidden_size": int(config.hidden_size),
+        "num_query_heads": int(config.num_attention_heads),
+        "num_physical_kv_heads": int(config.num_key_value_heads),
+        "head_dim": int(
+            getattr(
+                config,
+                "head_dim",
+                config.hidden_size // config.num_attention_heads,
+            )
+        ),
+        "num_hidden_layers": int(config.num_hidden_layers),
+    }
+    for name, expected in expected_geometry.items():
+        if fit_config.get(name) != expected:
+            raise ValueError(
+                f"uniform C1 ALS/model {name} mismatch: "
+                f"{fit_config.get(name)!r} vs {expected!r}"
+            )
+    layer_count = expected_geometry["num_hidden_layers"]
+    if tuple(map(int, result.get("layers", ()))) != tuple(range(layer_count)):
+        raise ValueError("uniform C1 ALS result does not cover every model layer")
+    artifacts = result.get("artifacts", {})
+    if set(map(int, artifacts)) != set(range(layer_count)):
+        raise ValueError("uniform C1 ALS result has incomplete layer artifacts")
+    rank = int(fit_config.get("cache_rank_per_head", 0))
+    if not 0 < rank <= expected_geometry["head_dim"]:
+        raise ValueError(f"uniform C1 ALS rank is invalid: {rank}")
+    return result
+
+
+@torch.no_grad()
+def install_qwen3_gqa_vo_als_export(
+    model: nn.Module,
+    factor_dir: str | Path,
+) -> list[GQAVOReplacementRecord]:
+    """Install the repository's uniform ALS C1 safetensors without padding V."""
+
+    factor_dir = Path(factor_dir).expanduser().resolve()
+    result = _validate_uniform_als_manifest(model, factor_dir)
+    config = model.config
+    hidden_size = int(config.hidden_size)
+    query_heads = int(config.num_attention_heads)
+    key_value_heads = int(config.num_key_value_heads)
+    head_dim = int(
+        getattr(config, "head_dim", hidden_size // query_heads)
+    )
+    rank = int(result["fit_config"]["cache_rank_per_head"])
+    records: list[GQAVOReplacementRecord] = []
+    for layer_index in range(int(config.num_hidden_layers)):
+        module_name = f"model.layers.{layer_index}.self_attn"
+        base_attention = model.get_submodule(module_name)
+        if isinstance(base_attention, GQATiedVOQwen3Attention):
+            raise ValueError(f"attention module is already compressed: {module_name}")
+        if not isinstance(base_attention.v_proj, nn.Linear):
+            raise TypeError(f"C1 ALS V projection is not linear: {module_name}.v_proj")
+        if not isinstance(base_attention.o_proj, nn.Linear):
+            raise TypeError(f"C1 ALS O projection is not linear: {module_name}.o_proj")
+
+        artifact = result["artifacts"][str(layer_index)]
+        path = factor_dir / str(artifact["file"])
+        if _file_sha256(path) != artifact.get("sha256"):
+            raise ValueError(f"uniform C1 ALS artifact hash mismatch at layer {layer_index}")
+        payload = load_file(str(path), device="cpu")
+        if set(payload) != {"value_coordinate_encoders", "head_output_decoders"}:
+            raise ValueError(f"unexpected uniform C1 tensors at layer {layer_index}")
+        encoders = payload["value_coordinate_encoders"]
+        decoders = payload["head_output_decoders"]
+        if tuple(encoders.shape) != (key_value_heads, head_dim, rank):
+            raise ValueError(f"unexpected C1 encoder shape at layer {layer_index}")
+        if tuple(decoders.shape) != (query_heads, rank, hidden_size):
+            raise ValueError(f"unexpected C1 decoder shape at layer {layer_index}")
+
+        device = base_attention.v_proj.weight.device
+        compute_dtype = torch.float32
+        dense_v = base_attention.v_proj.weight.detach().to(dtype=compute_dtype)
+        grouped_dense_v = dense_v.reshape(key_value_heads, head_dim, hidden_size)
+        compressed_v = torch.bmm(
+            encoders.to(device=device, dtype=compute_dtype).transpose(1, 2),
+            grouped_dense_v,
+        ).reshape(key_value_heads * rank, hidden_size)
+        decoder_weight = (
+            decoders.to(device=device, dtype=compute_dtype)
+            .permute(2, 0, 1)
+            .reshape(hidden_size, query_heads * rank)
+        )
+        compressed_v_bias = None
+        if base_attention.v_proj.bias is not None:
+            dense_v_bias = base_attention.v_proj.bias.detach().to(dtype=compute_dtype)
+            compressed_v_bias = torch.bmm(
+                encoders.to(device=device, dtype=compute_dtype).transpose(1, 2),
+                dense_v_bias.reshape(key_value_heads, head_dim, 1),
+            ).reshape(key_value_heads * rank)
+
+        replacement = GQATiedVOQwen3Attention(
+            base_attention,
+            v_proj_compressed_weight=compressed_v,
+            o_decoder_weight=decoder_weight,
+            v_proj_compressed_bias=compressed_v_bias,
+            o_decoder_bias=base_attention.o_proj.bias,
+        )
+        _replace_module(model, module_name, replacement)
+        records.append(
+            GQAVOReplacementRecord(
+                layer_index=layer_index,
+                module_name=module_name,
+                head_dim=head_dim,
+                value_head_dim=rank,
+                dense_v_width=key_value_heads * head_dim,
+                compressed_v_width=key_value_heads * rank,
+                dense_o_width=query_heads * head_dim,
+                compressed_o_width=query_heads * rank,
+            )
+        )
+    return records
 
 
 @torch.no_grad()

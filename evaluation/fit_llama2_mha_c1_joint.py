@@ -49,10 +49,55 @@ from basisserve.core.gqa_routed_ov_joint import (  # noqa: E402
 FORMAT = "basisserve.llama2_7b.mha_c1_v96_joint.v1"
 LAYER_FORMAT = "basisserve.llama2_7b.mha_c1_v96_joint.layer.v1"
 SNAPSHOT_FORMAT = "basisserve.attention_o_proj_ppl_snapshots.v1"
+COVARIANCE_SNAPSHOT_FORMAT = "basisserve.attention_o_proj_covariances.v1"
+MODEL_LABEL = "Llama-2-7B"
+MODEL_TYPE = "llama"
+ATTENTION_TYPE = "mha"
 NUM_LAYERS = 32
 NUM_HEADS = 32
+NUM_KV_HEADS = 32
 HEAD_DIM = 128
 HIDDEN_SIZE = 4096
+
+
+def activate_model_profile(name: str) -> None:
+    """Select a fixed, audited attention geometry for this fitting entrypoint."""
+
+    global FORMAT, LAYER_FORMAT, MODEL_LABEL, MODEL_TYPE, ATTENTION_TYPE
+    global NUM_LAYERS, NUM_HEADS, NUM_KV_HEADS, HEAD_DIM, HIDDEN_SIZE
+    if name == "llama2_7b":
+        return
+    if name == "qwen3_32b":
+        FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
+        LAYER_FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.layer.v1"
+        MODEL_LABEL = "Qwen3-32B"
+        MODEL_TYPE = "qwen3"
+        ATTENTION_TYPE = "gqa"
+        NUM_LAYERS = 64
+        NUM_HEADS = 64
+        NUM_KV_HEADS = 8
+        HEAD_DIM = 128
+        HIDDEN_SIZE = 5120
+        return
+    if name == "qwen3_8b":
+        FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.v1"
+        LAYER_FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.layer.v1"
+        MODEL_LABEL = "Qwen3-8B-Base"
+        MODEL_TYPE = "qwen3"
+        ATTENTION_TYPE = "gqa"
+        NUM_LAYERS = 36
+        NUM_HEADS = 32
+        NUM_KV_HEADS = 8
+        HEAD_DIM = 128
+        HIDDEN_SIZE = 4096
+        return
+    raise ValueError(f"unknown C1 model profile: {name}")
+
+
+def _head_to_kv_group(*, device: torch.device | str = "cpu") -> Tensor:
+    return torch.arange(NUM_HEADS, device=device, dtype=torch.long) // (
+        NUM_HEADS // NUM_KV_HEADS
+    )
 
 
 def _sha256(path: Path) -> str:
@@ -183,7 +228,7 @@ def _parse_layers(raw: str) -> tuple[int, ...]:
             layers.add(int(piece))
     selected = tuple(sorted(layers))
     if not selected or min(selected) < 0 or max(selected) >= NUM_LAYERS:
-        raise ValueError("selected layers are outside Llama-2-7B")
+        raise ValueError(f"selected layers are outside {MODEL_LABEL}")
     return selected
 
 
@@ -218,18 +263,20 @@ def _weight_only_encoder_initialization(
     target: Tensor,
     *,
     rank: int,
+    mapping: Tensor,
 ) -> tuple[Tensor, list[dict[str, Any]]]:
-    """Return independent weight-only left singular subspaces for all heads."""
+    """Return one pooled weight-only left singular subspace per KV group."""
 
     if target.ndim != 3 or tuple(target.shape[:2]) != (NUM_HEADS, HEAD_DIM):
         raise ValueError("weight-only initialization received an invalid target")
     if not 0 < rank <= HEAD_DIM:
         raise ValueError("weight-only initialization rank is invalid")
-    encoders = target.new_empty(NUM_HEADS, HEAD_DIM, rank)
+    encoders = target.new_empty(NUM_KV_HEADS, HEAD_DIM, rank)
     diagnostics: list[dict[str, Any]] = []
-    for head in range(NUM_HEADS):
-        block = target[head]
-        gram = block @ block.T
+    for group in range(NUM_KV_HEADS):
+        heads = torch.nonzero(mapping == group, as_tuple=False).flatten()
+        block = target.index_select(0, heads)
+        gram = torch.einsum("hio,hjo->ij", block, block)
         gram = 0.5 * (gram + gram.T)
         eigenvalues, eigenvectors = torch.linalg.eigh(gram)
         order = torch.argsort(eigenvalues, descending=True)
@@ -237,15 +284,15 @@ def _weight_only_encoder_initialization(
         basis = _canonicalize_basis_signs(
             eigenvectors.index_select(1, order[:rank])
         )
-        encoders[head].copy_(basis)
+        encoders[group].copy_(basis)
         singular_values = torch.sqrt(eigenvalues)
         total_energy = float(eigenvalues.sum())
         tail_energy = float(eigenvalues[rank:].sum())
         diagnostics.append(
             {
                 "method": "weight-only-svd",
-                "group_index": head,
-                "head_indices": [head],
+                "group_index": group,
+                "head_indices": list(map(int, heads.tolist())),
                 "rank": rank,
                 "leading_singular_values": singular_values[:rank].tolist(),
                 "boundary_singular_value": float(singular_values[rank - 1]),
@@ -275,7 +322,7 @@ def _random_orthogonal_encoder_initialization(
     generator = torch.Generator(device="cpu")
     generator.manual_seed(seed)
     random = torch.randn(
-        NUM_HEADS,
+        NUM_KV_HEADS,
         HEAD_DIM,
         rank,
         generator=generator,
@@ -284,15 +331,23 @@ def _random_orthogonal_encoder_initialization(
     )
     encoders = torch.empty_like(random)
     diagnostics: list[dict[str, Any]] = []
-    for head in range(NUM_HEADS):
-        basis, _ = torch.linalg.qr(random[head], mode="reduced")
+    mapping = _head_to_kv_group()
+    for group in range(NUM_KV_HEADS):
+        basis, _ = torch.linalg.qr(random[group], mode="reduced")
         basis = _canonicalize_basis_signs(basis)
-        encoders[head].copy_(basis)
+        encoders[group].copy_(basis)
         diagnostics.append(
             {
                 "method": "random-orthogonal",
-                "group_index": head,
-                "head_indices": [head],
+                "group_index": group,
+                "head_indices": list(
+                    map(
+                        int,
+                        torch.nonzero(mapping == group, as_tuple=False)
+                        .flatten()
+                        .tolist(),
+                    )
+                ),
                 "rank": rank,
                 "layer_seed": seed,
             }
@@ -305,7 +360,7 @@ def _snapshot_manifest(snapshot_dir: Path) -> dict[str, Any]:
     if not path.is_file():
         raise FileNotFoundError(path)
     manifest = json.loads(path.read_text(encoding="utf-8"))
-    if manifest.get("format") != SNAPSHOT_FORMAT:
+    if manifest.get("format") not in {SNAPSHOT_FORMAT, COVARIANCE_SNAPSHOT_FORMAT}:
         raise ValueError("incompatible attention snapshot format")
     model = manifest.get("model", {})
     observed = (
@@ -318,18 +373,18 @@ def _snapshot_manifest(snapshot_dir: Path) -> dict[str, Any]:
         int(model.get("hidden_size", -1)),
     )
     expected = (
-        "llama",
-        "mha",
+        MODEL_TYPE,
+        ATTENTION_TYPE,
         NUM_LAYERS,
         NUM_HEADS,
-        NUM_HEADS,
+        NUM_KV_HEADS,
         HEAD_DIM,
         HIDDEN_SIZE,
     )
     if observed != expected:
-        raise ValueError(f"unexpected Llama snapshot geometry: {observed}")
+        raise ValueError(f"unexpected {MODEL_LABEL} snapshot geometry: {observed}")
     if tuple(map(int, manifest.get("layers", ()))) != tuple(range(NUM_LAYERS)):
-        raise ValueError("snapshot must cover every Llama decoder layer")
+        raise ValueError(f"snapshot must cover every {MODEL_LABEL} decoder layer")
     return manifest
 
 
@@ -421,7 +476,7 @@ def _fit_config(
             validation_window_start=args.validation_window_start,
         )
     if not 0 < args.cache_rank <= HEAD_DIM:
-        raise ValueError("cache rank is outside the MHA head width")
+        raise ValueError("cache rank is outside the attention head width")
     config = {
         "model": str(Path(manifest["model"]["path"]).expanduser().resolve()),
         "model_config_sha256": manifest["model"]["config_sha256"],
@@ -434,13 +489,21 @@ def _fit_config(
         "fit_rows": args.fit_windows * positions,
         "validation_rows": args.validation_windows * validation_positions,
         "cache_rank_per_head": args.cache_rank,
-        "total_v_cache_rank": NUM_HEADS * args.cache_rank,
-        "dense_v_cache_rank": NUM_HEADS * HEAD_DIM,
+        "model_label": MODEL_LABEL,
+        "model_type": MODEL_TYPE,
+        "attention_type": ATTENTION_TYPE,
+        "num_query_heads": NUM_HEADS,
+        "num_physical_kv_heads": NUM_KV_HEADS,
+        "head_dim": HEAD_DIM,
+        "hidden_size": HIDDEN_SIZE,
+        "num_hidden_layers": NUM_LAYERS,
+        "total_v_cache_rank": NUM_KV_HEADS * args.cache_rank,
+        "dense_v_cache_rank": NUM_KV_HEADS * HEAD_DIM,
         "v_retained_ratio": args.cache_rank / HEAD_DIM,
         "total_kv_retained_ratio_with_dense_k": (
-            NUM_HEADS * HEAD_DIM + NUM_HEADS * args.cache_rank
+            NUM_KV_HEADS * HEAD_DIM + NUM_KV_HEADS * args.cache_rank
         )
-        / (2 * NUM_HEADS * HEAD_DIM),
+        / (2 * NUM_KV_HEADS * HEAD_DIM),
         "work_dtype": args.work_dtype,
         "factor_dtype": args.factor_dtype,
         "encoder_initialization": args.encoder_initialization,
@@ -519,11 +582,52 @@ def _load_snapshot_layer(
     activation = payload["activation"].contiguous()
     weight = payload["weight"].contiguous()
     expected_rows = int(manifest["calibration"]["rows_per_layer"])
-    if tuple(activation.shape) != (expected_rows, HIDDEN_SIZE):
+    query_width = NUM_HEADS * HEAD_DIM
+    if tuple(activation.shape) != (expected_rows, query_width):
         raise ValueError(f"unexpected activation shape at layer {layer}")
-    if tuple(weight.shape) != (HIDDEN_SIZE, HIDDEN_SIZE):
+    if tuple(weight.shape) != (HIDDEN_SIZE, query_width):
         raise ValueError(f"unexpected o_proj shape at layer {layer}")
     return activation, weight, {"path": str(path), **record}
+
+
+def _load_covariance_layer(
+    snapshot_dir: Path,
+    manifest: Mapping[str, Any],
+    layer: int,
+) -> tuple[Tensor, Tensor, Tensor, dict[str, Any]]:
+    if manifest.get("format") != COVARIANCE_SNAPSHOT_FORMAT:
+        raise ValueError("snapshot does not contain covariance sufficient statistics")
+    record = manifest["artifacts"][str(layer)]
+    path = snapshot_dir / record["file"]
+    if _sha256(path) != record["sha256"]:
+        raise ValueError(f"covariance snapshot hash mismatch at layer {layer}")
+    payload = load_file(str(path), device="cpu")
+    expected_width = NUM_HEADS * HEAD_DIM
+    fit = payload["fit_covariance"].contiguous()
+    heldout = payload["heldout_covariance"].contiguous()
+    weight = payload["weight"].contiguous()
+    if tuple(fit.shape) != (expected_width, expected_width):
+        raise ValueError(f"unexpected fit covariance shape at layer {layer}")
+    if tuple(heldout.shape) != (expected_width, expected_width):
+        raise ValueError(f"unexpected held-out covariance shape at layer {layer}")
+    if tuple(weight.shape) != (HIDDEN_SIZE, expected_width):
+        raise ValueError(f"unexpected o_proj shape at layer {layer}")
+    return fit, heldout, weight, {"path": str(path), **record}
+
+
+def _covariance_matrix_to_blocks(
+    covariance: Tensor, *, device: torch.device, dtype: torch.dtype
+) -> Tensor:
+    width = NUM_HEADS * HEAD_DIM
+    if tuple(covariance.shape) != (width, width):
+        raise ValueError("covariance matrix has incompatible attention width")
+    work = covariance.to(device=device, dtype=dtype)
+    blocks = (
+        work.reshape(NUM_HEADS, HEAD_DIM, NUM_HEADS, HEAD_DIM)
+        .permute(0, 2, 1, 3)
+        .contiguous()
+    )
+    return 0.5 * (blocks + blocks.permute(1, 0, 3, 2))
 
 
 @torch.no_grad()
@@ -566,8 +670,8 @@ def _activation_covariance_blocks(
 
 
 def _dense_head_targets(weight: Tensor, *, device: torch.device, dtype: torch.dtype) -> Tensor:
-    if tuple(weight.shape) != (HIDDEN_SIZE, HIDDEN_SIZE):
-        raise ValueError("dense o_proj weight must be 4096 square")
+    if tuple(weight.shape) != (HIDDEN_SIZE, NUM_HEADS * HEAD_DIM):
+        raise ValueError("dense o_proj weight has incompatible attention geometry")
     return (
         weight.to(device=device, dtype=dtype)
         .transpose(0, 1)
@@ -670,6 +774,148 @@ def _verified_prior(path: Path, artifact: Path, layer: int, fit_config: Mapping[
     return record
 
 
+def _write_exact_full_rank_layer(
+    *,
+    layer: int,
+    weight: Tensor,
+    fit_source: Mapping[str, Any],
+    validation_source: Mapping[str, Any],
+    artifact_path: Path,
+    record_path: Path,
+    fit_config: Mapping[str, Any],
+    args: argparse.Namespace,
+    factor_dtype: torch.dtype,
+    started: float,
+) -> dict[str, Any]:
+    """Materialize the analytic dense endpoint when rank equals head width."""
+
+    if args.cache_rank != HEAD_DIM:
+        raise ValueError("exact dense endpoint requires cache rank equal to head_dim")
+    artifact_A = (
+        torch.eye(HEAD_DIM, dtype=factor_dtype)
+        .unsqueeze(0)
+        .repeat(NUM_KV_HEADS, 1, 1)
+        .contiguous()
+    )
+    artifact_D = (
+        weight.transpose(0, 1)
+        .reshape(NUM_HEADS, HEAD_DIM, HIDDEN_SIZE)
+        .to(dtype=factor_dtype)
+        .contiguous()
+    )
+    artifact_tensors = {
+        "value_coordinate_encoders": artifact_A,
+        "head_output_decoders": artifact_D,
+    }
+    _atomic_safetensors(artifact_path, artifact_tensors)
+    checkpoint = {
+        "boundary": "decoder_only",
+        "sweep": 0,
+        "fit_loss": 0.0,
+        "validation_loss": 0.0,
+        "validation_relative_mse": 0.0,
+        "selection_eligible": True,
+    }
+    group_heads = NUM_HEADS // NUM_KV_HEADS
+    empty_cg = {
+        "mode": str(fit_config["encoder_cg_mode"]),
+        "relative_tolerance": float(fit_config["encoder_cg_relative_tolerance"]),
+        "max_iterations": int(fit_config["encoder_cg_max_iterations"]),
+        "aggregate": {
+            "group_solves": 0,
+            "nonzero_rhs_group_solves": 0,
+            "exact_zero_rhs": 0,
+            "total_iterations": 0,
+            "minimum_iterations_nonzero_rhs": 0,
+            "maximum_iterations": 0,
+            "converged_at_tolerance": 0,
+            "negative_curvature": 0,
+            "maximum_relative_residual": 0.0,
+            "maximum_predicted_realized_change_error": 0.0,
+        },
+        "per_sweep": [],
+    }
+    record = {
+        "format": LAYER_FORMAT,
+        "layer": layer,
+        "fit_config": dict(fit_config),
+        "source_snapshot": {
+            "fit": dict(fit_source),
+            "validation": dict(validation_source),
+        },
+        "artifact": {
+            "file": artifact_path.name,
+            "sha256": _sha256(artifact_path),
+            "tensors": {
+                key: {"shape": list(value.shape), "dtype": str(value.dtype)}
+                for key, value in artifact_tensors.items()
+            },
+        },
+        "selection": {
+            "criterion": _selection_criterion(args.selection_boundaries),
+            "boundary_policy": args.selection_boundaries,
+            "boundary": "decoder_only",
+            "sweep": 0,
+            "checkpoints": [checkpoint],
+        },
+        "fit": {"relative_mse": 0.0, "factor_dtype_relative_mse": 0.0},
+        "heldout": {"relative_mse": 0.0, "factor_dtype_relative_mse": 0.0},
+        "covariance": {
+            "fit_absolute_trace_damping": None,
+            "heldout_regularized": False,
+            "skipped_for_exact_full_rank_endpoint": True,
+        },
+        "initialization": [
+            {
+                "group_index": group,
+                "logical_heads": list(
+                    range(group * group_heads, (group + 1) * group_heads)
+                ),
+                "rank": HEAD_DIM,
+                "method": "identity_dense_endpoint",
+            }
+            for group in range(NUM_KV_HEADS)
+        ],
+        "initialization_summary": {
+            "method": "identity_dense_endpoint",
+            "requested_method": args.encoder_initialization,
+            "base_seed": int(args.encoder_initialization_seed),
+            "effective_layer_seed": None,
+        },
+        "solver": {
+            "method": "analytic_exact_full_rank_endpoint",
+            "decoder_objective": args.decoder_objective,
+            "initial_loss": 0.0,
+            "decoder_only_loss": 0.0,
+            "endpoint_loss": 0.0,
+            "endpoint_relative_mse": 0.0,
+            "sweeps": 0,
+            "cg": empty_cg,
+            "attribution": {
+                "anchor_loss": 0.0,
+                "decoder_only_loss": 0.0,
+                "endpoint_loss": 0.0,
+                "initial_decoder_reduction": 0.0,
+                "decoder_reduction": 0.0,
+                "encoder_reduction": 0.0,
+                "total_reduction": 0.0,
+                "decoder_fraction": 0.0,
+                "encoder_fraction": 0.0,
+                "identity_error": 0.0,
+                "steps": [],
+            },
+        },
+        "elapsed_seconds": time.perf_counter() - started,
+    }
+    _atomic_json(record_path, record)
+    print(
+        f"[{MODEL_LABEL} C1] layer={layer} complete exact_dense_endpoint "
+        f"seconds={record['elapsed_seconds']:.2f}",
+        flush=True,
+    )
+    return record
+
+
 @torch.no_grad()
 def _fit_layer(
     *,
@@ -689,79 +935,130 @@ def _fit_layer(
     if args.resume:
         prior = _verified_prior(record_path, artifact_path, layer, fit_config)
         if prior is not None:
-            print(f"[Llama C1] layer={layer} resume=verified", flush=True)
+            print(f"[{MODEL_LABEL} C1] layer={layer} resume=verified", flush=True)
             return prior
     elif artifact_path.exists() or record_path.exists():
         raise FileExistsError(f"partial layer output exists: {record_path}")
 
     work_dtype = _dtype(args.work_dtype)
     factor_dtype = _factor_dtype(args.factor_dtype)
-    activation, weight, fit_source = _load_snapshot_layer(
-        snapshot_dir, snapshot_manifest, layer
+    covariance_snapshot = (
+        snapshot_manifest.get("format") == COVARIANCE_SNAPSHOT_FORMAT
     )
-    if validation_snapshot_dir == snapshot_dir:
-        validation_source_activation = activation
+    if covariance_snapshot:
+        if validation_snapshot_dir != snapshot_dir:
+            raise ValueError(
+                "covariance snapshots contain their own held-out statistics"
+            )
+        calibration = snapshot_manifest["calibration"]
+        if (
+            int(calibration.get("fit_windows", -1)) != args.fit_windows
+            or int(calibration.get("heldout_windows", -1))
+            != args.validation_windows
+        ):
+            raise ValueError(
+                "requested fit/held-out windows differ from covariance snapshot"
+            )
+        fit_matrix, validation_matrix, weight, fit_source = _load_covariance_layer(
+            snapshot_dir, snapshot_manifest, layer
+        )
         validation_source = fit_source
     else:
-        validation_source_activation, validation_weight, validation_source = (
-            _load_snapshot_layer(
-                validation_snapshot_dir,
-                validation_snapshot_manifest,
-                layer,
-            )
+        activation, weight, fit_source = _load_snapshot_layer(
+            snapshot_dir, snapshot_manifest, layer
         )
-        if not torch.equal(weight, validation_weight):
-            raise ValueError(f"fit and validation weights differ at layer {layer}")
-        del validation_weight
+        if validation_snapshot_dir == snapshot_dir:
+            validation_source_activation = activation
+            validation_source = fit_source
+        else:
+            validation_source_activation, validation_weight, validation_source = (
+                _load_snapshot_layer(
+                    validation_snapshot_dir,
+                    validation_snapshot_manifest,
+                    layer,
+                )
+            )
+            if not torch.equal(weight, validation_weight):
+                raise ValueError(f"fit and validation weights differ at layer {layer}")
+            del validation_weight
+    if args.cache_rank == HEAD_DIM:
+        record = _write_exact_full_rank_layer(
+            layer=layer,
+            weight=weight,
+            fit_source=fit_source,
+            validation_source=validation_source,
+            artifact_path=artifact_path,
+            record_path=record_path,
+            fit_config=fit_config,
+            args=args,
+            factor_dtype=factor_dtype,
+            started=started,
+        )
+        del weight
+        return record
     fit_rows = int(fit_config["fit_rows"])
     validation_rows = int(fit_config["validation_rows"])
-    validation_row_start = int(
-        fit_config.get("validation_row_start", fit_rows)
-    )
-    fit_activation = activation[:fit_rows]
-    validation_activation = validation_source_activation[
-        validation_row_start : validation_row_start + validation_rows
-    ]
     print(
-        f"[Llama C1] layer={layer} covariance fit={len(fit_activation)} "
-        f"heldout={len(validation_activation)}",
+        f"[{MODEL_LABEL} C1] layer={layer} covariance fit={fit_rows} "
+        f"heldout={validation_rows} source="
+        f"{'sufficient_statistics' if covariance_snapshot else 'activations'}",
         flush=True,
     )
-    fit_raw = _activation_covariance_blocks(
-        fit_activation,
-        device=device,
-        dtype=work_dtype,
-        row_chunk_size=args.covariance_row_chunk_size,
-    )
+    if covariance_snapshot:
+        fit_raw = _covariance_matrix_to_blocks(
+            fit_matrix, device=device, dtype=work_dtype
+        )
+        validation_covariance = _covariance_matrix_to_blocks(
+            validation_matrix, device=device, dtype=work_dtype
+        )
+        del fit_matrix, validation_matrix
+    else:
+        validation_row_start = int(
+            fit_config.get("validation_row_start", fit_rows)
+        )
+        fit_activation = activation[:fit_rows]
+        validation_activation = validation_source_activation[
+            validation_row_start : validation_row_start + validation_rows
+        ]
+        fit_raw = _activation_covariance_blocks(
+            fit_activation,
+            device=device,
+            dtype=work_dtype,
+            num_heads=NUM_HEADS,
+            head_dim=HEAD_DIM,
+            row_chunk_size=args.covariance_row_chunk_size,
+        )
+        validation_covariance = _activation_covariance_blocks(
+            validation_activation,
+            device=device,
+            dtype=work_dtype,
+            num_heads=NUM_HEADS,
+            head_dim=HEAD_DIM,
+            row_chunk_size=args.covariance_row_chunk_size,
+        )
     fit_covariance, absolute_damping = covariance_with_trace_damping(
         fit_raw, relative_damping=args.covariance_damping
     )
     del fit_raw
-    validation_covariance = _activation_covariance_blocks(
-        validation_activation,
-        device=device,
-        dtype=work_dtype,
-        row_chunk_size=args.covariance_row_chunk_size,
-    )
     target = _dense_head_targets(weight, device=device, dtype=work_dtype)
     fit_objective = quadratic_from_target(
         covariance=fit_covariance,
         target=target,
-        name=f"llama2_mha_c1_v96_fit_layer_{layer:03d}",
+        name=f"{MODEL_TYPE}_c1_fit_layer_{layer:03d}",
         trace_normalize=False,
     )
     validation_objective = quadratic_from_target(
         covariance=validation_covariance,
         target=target,
-        name=f"llama2_mha_c1_v96_heldout_layer_{layer:03d}",
+        name=f"{MODEL_TYPE}_c1_heldout_layer_{layer:03d}",
         trace_normalize=False,
     )
-    mapping = torch.arange(NUM_HEADS, device=device, dtype=torch.long)
+    mapping = _head_to_kv_group(device=device)
     if args.decoder_objective == "full_layer":
         solver_objective = fit_objective
         decoder_coupling_mode = "full_layer"
         solver_group_ranks: tuple[int, ...] | None = (
-            (args.cache_rank,) * NUM_HEADS
+            (args.cache_rank,) * NUM_KV_HEADS
         )
     elif args.decoder_objective == "per_head":
         independent_covariance = mask_routed_covariance(
@@ -772,7 +1069,7 @@ def _fit_layer(
         solver_objective = quadratic_from_target(
             covariance=independent_covariance,
             target=target,
-            name=f"llama2_mha_a3_per_head_v96_fit_layer_{layer:03d}",
+            name=f"{MODEL_TYPE}_a3_per_head_fit_layer_{layer:03d}",
             trace_normalize=False,
         )
         decoder_coupling_mode = "diagonal"
@@ -788,7 +1085,7 @@ def _fit_layer(
             covariance=fit_objective.covariance,
             target=target,
             head_to_kv_group=mapping,
-            group_ranks=(args.cache_rank,) * NUM_HEADS,
+            group_ranks=(args.cache_rank,) * NUM_KV_HEADS,
             covariance_ridge=args.covariance_damping,
         )
         initial_A = initialization.A_unique
@@ -797,6 +1094,7 @@ def _fit_layer(
         initial_A, initialization_groups = _weight_only_encoder_initialization(
             target,
             rank=args.cache_rank,
+            mapping=mapping,
         )
     elif args.encoder_initialization == "random-orthogonal":
         effective_initialization_seed = (
@@ -827,7 +1125,7 @@ def _fit_layer(
         selection_boundaries=args.selection_boundaries,
     )
     print(
-        f"[Llama C1] layer={layer} "
+        f"[{MODEL_LABEL} C1] layer={layer} "
         f"encoder_initialization={args.encoder_initialization} "
         f"decoder_objective={args.decoder_objective}",
         flush=True,
@@ -954,17 +1252,13 @@ def _fit_layer(
     }
     _atomic_json(record_path, record)
     print(
-        f"[Llama C1] layer={layer} complete "
+        f"[{MODEL_LABEL} C1] layer={layer} complete "
         f"heldout={record['heldout']['factor_dtype_relative_mse']:.8g} "
         f"seconds={record['elapsed_seconds']:.2f}",
         flush=True,
     )
     del (
-        activation,
-        validation_source_activation,
         weight,
-        fit_activation,
-        validation_activation,
         fit_covariance,
         validation_covariance,
         target,
@@ -1070,7 +1364,7 @@ def _fit_shard(args: argparse.Namespace) -> None:
     }
     _atomic_json(output_dir / f"shard_{args.layer_shard_index:02d}.json", shard)
     print(
-        f"[Llama C1] shard={args.layer_shard_index}/{args.layer_shard_count} complete",
+        f"[{MODEL_LABEL} C1] shard={args.layer_shard_index}/{args.layer_shard_count} complete",
         flush=True,
     )
 
@@ -1080,10 +1374,10 @@ def _summary(records: Sequence[Mapping[str, Any]], config: Mapping[str, Any]) ->
     cache_rank = int(config["cache_rank_per_head"])
     total_retention = float(config["total_kv_retained_ratio_with_dense_k"])
     lines = [
-        f"# Llama-2-7B MHA C1 V{cache_rank} joint fit",
+        f"# {MODEL_LABEL} {ATTENTION_TYPE.upper()} C1 V{cache_rank} joint fit",
         "",
         (
-            f"- K remains dense; every one of {NUM_HEADS} V heads retains "
+            f"- K remains dense; every one of {NUM_KV_HEADS} physical V heads retains "
             f"rank {cache_rank}/{HEAD_DIM}."
         ),
         (
@@ -1165,7 +1459,7 @@ def _merge(args: argparse.Namespace) -> None:
     (output_dir / "summary.md").write_text(
         _summary(records, fit_config), encoding="utf-8"
     )
-    print(f"[Llama C1] merged {len(records)} layers into {result_path}", flush=True)
+    print(f"[{MODEL_LABEL} C1] merged {len(records)} layers into {result_path}", flush=True)
 
 
 def _add_common(parser: argparse.ArgumentParser) -> None:

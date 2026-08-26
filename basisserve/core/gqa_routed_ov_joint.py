@@ -867,6 +867,7 @@ def solve_free_decoder(
     head_to_kv_group: torch.Tensor,
     coupling_mode: str,
     relative_jitter: float = 0.0,
+    linear_solve_dtype: torch.dtype | None = None,
 ) -> tuple[torch.Tensor, LinearSolveDiagnostics]:
     hessian, rhs = _reduced_normal_equations(
         objective,
@@ -893,25 +894,38 @@ def solve_free_decoder(
             len(partition) * rank,
             hidden,
         )
+        solve_hessian = (
+            block_hessian
+            if linear_solve_dtype is None
+            else block_hessian.to(dtype=linear_solve_dtype)
+        )
+        solve_rhs = (
+            block_rhs
+            if linear_solve_dtype is None
+            else block_rhs.to(dtype=linear_solve_dtype)
+        )
         started = time.monotonic()
-        solved, absolute, condition = _cholesky_with_jitter(
-            block_hessian,
-            block_rhs,
+        solved_work, absolute, condition = _cholesky_with_jitter(
+            solve_hessian,
+            solve_rhs,
             relative_jitter=relative_jitter,
         )
         wall_times.append(time.monotonic() - started)
+        residuals.append(
+            float(
+                torch.linalg.vector_norm(
+                    solve_hessian @ solved_work - solve_rhs
+                )
+                / torch.linalg.vector_norm(solve_rhs).clamp_min(
+                    torch.finfo(solve_rhs.dtype).tiny
+                )
+            )
+        )
+        solved = solved_work.to(dtype=rhs.dtype)
         result.index_copy_(0, index, solved.reshape(len(partition), rank, hidden))
         jitters.append(absolute)
         conditions.append(condition)
         dimensions.append(int(block_hessian.shape[0]))
-        residuals.append(
-            float(
-                torch.linalg.vector_norm(block_hessian @ solved - block_rhs)
-                / torch.linalg.vector_norm(block_rhs).clamp_min(
-                    torch.finfo(block_rhs.dtype).tiny
-                )
-            )
-        )
     return result, LinearSolveDiagnostics(
         partition_sizes=tuple(len(item) for item in partitions),
         absolute_jitters=tuple(jitters),
@@ -958,6 +972,7 @@ def solve_free_decoder_ragged(
     head_to_kv_group: torch.Tensor,
     group_ranks: Sequence[int],
     relative_jitter: float = 0.0,
+    linear_solve_dtype: torch.dtype | None = None,
 ) -> tuple[torch.Tensor, LinearSolveDiagnostics]:
     """Solve the full-layer decoder over only active ragged coordinates."""
 
@@ -986,19 +1001,30 @@ def solve_free_decoder_ragged(
     active = layout.active_flat_indices(device=rhs.device)
     packed_hessian = flat_hessian.index_select(0, active).index_select(1, active)
     packed_rhs = flat_rhs.index_select(0, active)
+    solve_hessian = (
+        packed_hessian
+        if linear_solve_dtype is None
+        else packed_hessian.to(dtype=linear_solve_dtype)
+    )
+    solve_rhs = (
+        packed_rhs
+        if linear_solve_dtype is None
+        else packed_rhs.to(dtype=linear_solve_dtype)
+    )
     started = time.monotonic()
-    solved, absolute, condition = _cholesky_with_jitter(
-        packed_hessian,
-        packed_rhs,
+    solved_work, absolute, condition = _cholesky_with_jitter(
+        solve_hessian,
+        solve_rhs,
         relative_jitter=relative_jitter,
     )
     wall_time = time.monotonic() - started
     residual = float(
-        torch.linalg.vector_norm(packed_hessian @ solved - packed_rhs)
-        / torch.linalg.vector_norm(packed_rhs).clamp_min(
-            torch.finfo(packed_rhs.dtype).tiny
+        torch.linalg.vector_norm(solve_hessian @ solved_work - solve_rhs)
+        / torch.linalg.vector_norm(solve_rhs).clamp_min(
+            torch.finfo(solve_rhs.dtype).tiny
         )
     )
+    solved = solved_work.to(dtype=rhs.dtype)
     flat_result = rhs.new_zeros(heads * padded_rank, hidden)
     flat_result.index_copy_(0, active, solved)
     return flat_result.reshape(heads, padded_rank, hidden), LinearSolveDiagnostics(
@@ -1011,12 +1037,12 @@ def solve_free_decoder_ragged(
     )
 
 
-def evaluate_quadratic(
+def _evaluate_quadratic_with_scale(
     objective: RoutedOVQuadratic,
     A_unique: torch.Tensor,
     D_heads: torch.Tensor,
     head_to_kv_group: torch.Tensor,
-) -> float:
+) -> tuple[float, float]:
     hessian, rhs = _reduced_normal_equations(
         objective,
         A_unique,
@@ -1047,7 +1073,21 @@ def evaluate_quadratic(
             )
     if not torch.isfinite(loss):
         raise FloatingPointError("routed OV objective became non-finite")
-    return float(loss)
+    return float(loss), float(expanded_scale)
+
+
+def evaluate_quadratic(
+    objective: RoutedOVQuadratic,
+    A_unique: torch.Tensor,
+    D_heads: torch.Tensor,
+    head_to_kv_group: torch.Tensor,
+) -> float:
+    return _evaluate_quadratic_with_scale(
+        objective,
+        A_unique,
+        D_heads,
+        head_to_kv_group,
+    )[0]
 
 
 def decoder_is_stationary(
@@ -1991,6 +2031,21 @@ def fit_routed_ov_joint(
     }
     A = initial_A.detach().to(device=device, dtype=work_dtype).clone()
     D = initial_D.detach().to(device=device, dtype=work_dtype).clone()
+    def monotonicity_tolerance(
+        loss: float,
+        *,
+        expanded_scale: float | None = None,
+    ) -> float:
+        relative = max(
+            1.0e-9,
+            1024.0 * torch.finfo(work_dtype).eps,
+        )
+        return relative * max(
+            abs(float(objective.constant)),
+            abs(loss),
+            abs(expanded_scale or 0.0),
+            1.0,
+        )
     mapping = torch.as_tensor(
         head_to_kv_group,
         device=device,
@@ -2033,8 +2088,16 @@ def fit_routed_ov_joint(
 
     def solve_decoder(
         current_A: torch.Tensor,
+        *,
+        relative_jitter_override: float | None = None,
+        linear_solve_dtype_override: torch.dtype | None = None,
     ) -> tuple[torch.Tensor, LinearSolveDiagnostics]:
         if decoder_solver_override is not None:
+            if (
+                relative_jitter_override is not None
+                or linear_solve_dtype_override is not None
+            ):
+                raise ValueError("decoder solver override cannot use numeric retries")
             solved, diagnostics = decoder_solver_override(
                 objective,
                 current_A,
@@ -2056,7 +2119,12 @@ def fit_routed_ov_joint(
                 A_unique=current_A,
                 head_to_kv_group=mapping,
                 coupling_mode=coupling_mode,
-                relative_jitter=decoder_relative_jitter,
+                relative_jitter=(
+                    decoder_relative_jitter
+                    if relative_jitter_override is None
+                    else relative_jitter_override
+                ),
+                linear_solve_dtype=linear_solve_dtype_override,
             )
         if coupling_mode != "full_layer":
             raise ValueError("ragged routed fitting currently requires full-layer coupling")
@@ -2065,7 +2133,12 @@ def fit_routed_ov_joint(
             A_unique=current_A,
             head_to_kv_group=mapping,
             group_ranks=ragged_layout.group_ranks,
-            relative_jitter=decoder_relative_jitter,
+            relative_jitter=(
+                decoder_relative_jitter
+                if relative_jitter_override is None
+                else relative_jitter_override
+            ),
+            linear_solve_dtype=linear_solve_dtype_override,
         )
 
     def decoder_stationarity(
@@ -2134,12 +2207,96 @@ def fit_routed_ov_joint(
 
     A, D, _ = canonicalize_factors(A, D)
     anchor_A = A.clone()
+
+    def monotone_decoder_solve(
+        current_A: torch.Tensor,
+        current_D: torch.Tensor,
+        current_loss: float,
+        *,
+        boundary: str,
+    ) -> tuple[torch.Tensor, LinearSolveDiagnostics, float]:
+        candidate_D, candidate_diagnostics = solve_decoder(current_A)
+        candidate_loss, candidate_scale = _evaluate_quadratic_with_scale(
+            objective, current_A, candidate_D, mapping
+        )
+        tolerance = monotonicity_tolerance(
+            current_loss,
+            expanded_scale=candidate_scale,
+        )
+        if candidate_loss <= current_loss + tolerance:
+            if candidate_loss > current_loss:
+                print(
+                    f"[RoutedOV] {boundary} apparent decoder increase is within "
+                    f"FP{torch.finfo(work_dtype).bits} cancellation tolerance: "
+                    f"before={current_loss:.9g} after={candidate_loss:.9g} "
+                    f"tolerance={tolerance:.9g}",
+                    flush=True,
+                )
+            return candidate_D, candidate_diagnostics, candidate_loss
+        if decoder_solver_override is not None or work_dtype != torch.float32:
+            raise RuntimeError(
+                f"{boundary} free-decoder solve increased the fitted objective: "
+                f"before={current_loss:.9g} after={candidate_loss:.9g} "
+                f"tolerance={tolerance:.9g}"
+            )
+        best_D = candidate_D
+        best_diagnostics = candidate_diagnostics
+        best_loss = candidate_loss
+        requested = float(decoder_relative_jitter)
+        retry_jitters = tuple(
+            value
+            for value in (1.0e-8, 1.0e-7, 1.0e-6, 1.0e-5, 1.0e-4, 1.0e-3)
+            if value != requested
+        )
+        for relative_jitter in retry_jitters:
+            retried_D, retried_diagnostics = solve_decoder(
+                current_A,
+                relative_jitter_override=relative_jitter,
+            )
+            retried_loss, _ = _evaluate_quadratic_with_scale(
+                objective, current_A, retried_D, mapping
+            )
+            if retried_loss < best_loss:
+                best_D = retried_D
+                best_diagnostics = retried_diagnostics
+                best_loss = retried_loss
+            if retried_loss <= current_loss + tolerance:
+                print(
+                    f"[RoutedOV] {boundary} decoder retry "
+                    f"relative_jitter={relative_jitter:.1e} "
+                    f"before={current_loss:.9g} after={retried_loss:.9g}",
+                    flush=True,
+                )
+                return retried_D, retried_diagnostics, retried_loss
+        refined_D, refined_diagnostics = solve_decoder(
+            current_A,
+            relative_jitter_override=0.0,
+            linear_solve_dtype_override=torch.float64,
+        )
+        refined_loss, _ = _evaluate_quadratic_with_scale(
+            objective, current_A, refined_D, mapping
+        )
+        if refined_loss <= current_loss + tolerance:
+            print(
+                f"[RoutedOV] {boundary} decoder retry "
+                f"linear_solve_dtype=float64 before={current_loss:.9g} "
+                f"after={refined_loss:.9g}",
+                flush=True,
+            )
+            return refined_D, refined_diagnostics, refined_loss
+        if refined_loss < best_loss:
+            best_loss = refined_loss
+        raise RuntimeError(
+            f"{boundary} free-decoder retries increased the fitted objective: "
+            f"before={current_loss:.9g} best_after={best_loss:.9g} "
+            f"tolerance={tolerance:.9g}"
+        )
+
     initial_loss = evaluate_quadratic(objective, A, D, mapping)
     emit_checkpoint("anchor", 0, initial_loss)
-    D, first_decoder = solve_decoder(A)
-    decoder_only_loss = evaluate_quadratic(objective, A, D, mapping)
-    if decoder_only_loss > initial_loss + 1e-9 * max(abs(initial_loss), 1.0):
-        raise RuntimeError("initial free-decoder solve increased the fitted objective")
+    D, first_decoder, decoder_only_loss = monotone_decoder_solve(
+        A, D, initial_loss, boundary="initial"
+    )
     emit_checkpoint("decoder_only", 0, decoder_only_loss)
     sweeps: list[RoutedOVSweep] = []
     redecoder_losses: dict[int, float] = {}
@@ -2153,10 +2310,12 @@ def fit_routed_ov_joint(
             decoder_diagnostics = first_decoder
             after_decoder = current_loss
         else:
-            D, decoder_diagnostics = solve_decoder(A)
-            after_decoder = evaluate_quadratic(objective, A, D, mapping)
-        if after_decoder > before_decoder + 1e-9 * max(abs(before_decoder), 1.0):
-            raise RuntimeError("free-decoder solve increased the fitted objective")
+            D, decoder_diagnostics, after_decoder = monotone_decoder_solve(
+                A,
+                D,
+                before_decoder,
+                boundary=f"sweep_{sweep}_redecoder",
+            )
         if sweep > 1:
             redecoder_losses[sweep - 1] = after_decoder
             emit_checkpoint("after_redecoder", sweep - 1, after_decoder)
@@ -2458,8 +2617,16 @@ def fit_routed_ov_joint(
             )
         A, D, qr_error = canonicalize_factors(A, D)
         after_encoders = evaluate_quadratic(objective, A, D, mapping)
-        if after_encoders > after_decoder + 1e-8 * max(abs(after_decoder), 1.0):
-            raise RuntimeError("accepted encoder sweep increased the fitted objective")
+        encoder_tolerance = max(
+            monotonicity_tolerance(after_decoder),
+            1.0e-8 * max(abs(after_decoder), 1.0),
+        )
+        if after_encoders > after_decoder + encoder_tolerance:
+            raise RuntimeError(
+                "accepted encoder sweep increased the fitted objective: "
+                f"before={after_decoder:.9g} after={after_encoders:.9g} "
+                f"tolerance={encoder_tolerance:.9g}"
+            )
         emit_checkpoint("after_encoder", sweep, after_encoders)
         improvement = (before_decoder - after_encoders) / max(abs(before_decoder), 1e-30)
         sweeps.append(
@@ -2485,10 +2652,12 @@ def fit_routed_ov_joint(
     final_decoder_diagnostics = None
     if final_decoder_solve and sweeps:
         final_sweep = sweeps[-1].sweep
-        D, final_decoder_diagnostics = solve_decoder(A)
-        final_loss = evaluate_quadratic(objective, A, D, mapping)
-        if final_loss > current_loss + 1e-9 * max(abs(current_loss), 1.0):
-            raise RuntimeError("final free-decoder solve increased the fitted objective")
+        D, final_decoder_diagnostics, final_loss = monotone_decoder_solve(
+            A,
+            D,
+            current_loss,
+            boundary="final",
+        )
         redecoder_losses[final_sweep] = final_loss
         current_loss = final_loss
         emit_checkpoint("after_redecoder", final_sweep, final_loss)

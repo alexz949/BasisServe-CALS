@@ -351,7 +351,10 @@ def distributed_whitening_cholesky(
             for sample_index in range(local_samples):
                 layer_kwargs = dict(captured_kwargs)
                 result = layer(inputs[sample_index].unsqueeze(0), **layer_kwargs)
-                outputs[sample_index].copy_(result[0][0])
+                # Transformers 5 returns the hidden-state Tensor directly;
+                # older releases returned it as the first tuple element.
+                hidden_states = result if torch.is_tensor(result) else result[0]
+                outputs[sample_index].copy_(hidden_states[0])
         finally:
             handle.remove()
 
