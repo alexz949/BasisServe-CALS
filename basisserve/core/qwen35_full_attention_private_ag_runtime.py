@@ -13,7 +13,7 @@ from basisserve.core.qwen35_gdn_private_ag_runtime import Qwen35PrivateAGOutput
 from basisserve.core.qwen35_gdn_runtime import qwen35_decoder_layers
 
 
-FACTOR_FORMAT = "basisserve.qwen35.full_attention_private_ag_joint_factors.v1"
+FACTOR_FORMAT = "basisserve.qwen35.full_attention_private_ag_joint_factors.v2"
 
 
 def load_qwen35_full_attention_private_ag_factors(

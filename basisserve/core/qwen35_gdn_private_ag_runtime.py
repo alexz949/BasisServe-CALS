@@ -13,7 +13,7 @@ from torch.nn import functional as F
 from basisserve.core.qwen35_gdn_runtime import qwen35_decoder_layers
 
 
-FACTOR_FORMAT = "basisserve.qwen35.gdn_private_ag_joint_factors.v1"
+FACTOR_FORMAT = "basisserve.qwen35.gdn_private_ag_joint_factors.v2"
 
 
 def load_qwen35_gdn_private_ag_factors(path: str | Path) -> dict[str, Any]:

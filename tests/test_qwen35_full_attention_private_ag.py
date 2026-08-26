@@ -38,7 +38,7 @@ def test_full_attention_private_ag_runtime_installs_and_restores() -> None:
     attention = model.model.language_model.layers[0].self_attn
     original = attention.o_proj
     factors = {
-        "format": "basisserve.qwen35.full_attention_private_ag_joint_factors.v1",
+        "format": "basisserve.qwen35.full_attention_private_ag_joint_factors.v2",
         "schema_version": 1,
         "layers": [
             {
@@ -79,7 +79,7 @@ def test_full_attention_runtime_rejects_non_attention_layer() -> None:
             self.model = DummyInner()
 
     factors = {
-        "format": "basisserve.qwen35.full_attention_private_ag_joint_factors.v1",
+        "format": "basisserve.qwen35.full_attention_private_ag_joint_factors.v2",
         "schema_version": 1,
         "layers": [
             {

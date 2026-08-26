@@ -33,11 +33,15 @@ from basisserve.core.qwen35_gdn_private_ag_runtime import (  # noqa: E402
 from basisserve.core.qwen35_postgate_topk import (  # noqa: E402
     Qwen35PostGateTopKRuntime,
 )
-from scripts.collect_qwen35_gdn_moments import _fixed_length_samples  # noqa: E402
 from scripts.eval_qwen35_projected_gdn_nll import _dtype, _evaluate  # noqa: E402
 
 
-FORMAT = "basisserve.qwen35.hybrid_private_ag_ppl.v1"
+from scripts.collect_qwen35_gdn_wo_activations import (  # noqa: E402
+    _load_window_split,
+)
+
+
+FORMAT = "basisserve.qwen35.hybrid_private_ag_ppl.v3"
 
 
 def parse_args() -> argparse.Namespace:
@@ -45,23 +49,21 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model-path", required=True)
     parser.add_argument("--gdn-private-factors", required=True)
     parser.add_argument("--full-private-factors", required=True)
-    parser.add_argument("--dataset-jsonl", required=True)
+    parser.add_argument("--windows", required=True)
     parser.add_argument("--output-json", required=True)
     parser.add_argument(
         "--full-topk-keep-ratios",
-        default="0.5,0.75",
+        default="",
         help="source-local post-gate sparse alternatives; empty disables",
     )
     parser.add_argument("--tp", type=int, default=8)
-    parser.add_argument("--num-samples", type=int, default=256)
-    parser.add_argument("--sample-offset", type=int, default=256)
-    parser.add_argument("--sequence-length", type=int, default=512)
-    parser.add_argument("--batch-size", type=int, default=4)
-    parser.add_argument("--text-field", default="text")
+    parser.add_argument("--num-samples", type=int, default=16)
+    parser.add_argument("--sample-offset", type=int, default=336)
+    parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument(
         "--dtype",
         choices=("bfloat16", "float16", "float32"),
-        default="bfloat16",
+        default="float16",
     )
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--torch-num-threads", type=int, default=4)
@@ -128,77 +130,74 @@ def _cleanup() -> None:
     torch.cuda.empty_cache()
 
 
-def _uniform_private_metadata(records: tuple[Any, ...]) -> dict[str, Any]:
+def _private_metadata(records: tuple[Any, ...]) -> dict[str, Any]:
     if not records:
         raise RuntimeError("Private AG runtime installed no layers")
     first = records[0]
-    geometry = (
-        first.tp_size,
-        first.local_width,
-        first.local_rank,
-        first.total_private_rank,
-    )
     if any(
-        (
-            record.tp_size,
-            record.local_width,
-            record.local_rank,
-            record.total_private_rank,
-        )
-        != geometry
+        (record.tp_size, record.local_width)
+        != (first.tp_size, first.local_width)
         for record in records
     ):
-        raise ValueError("Private AG runtime uses inconsistent layer geometry")
+        raise ValueError("Private AG runtime uses inconsistent TP source geometry")
+    ordered = tuple(sorted(records, key=lambda record: record.layer_index))
+    local_ranks = tuple(int(record.local_rank) for record in ordered)
+    total_ranks = tuple(int(record.total_private_rank) for record in ordered)
+    histogram = {
+        str(rank): local_ranks.count(rank) for rank in sorted(set(local_ranks))
+    }
     return {
-        "layers_installed": len(records),
-        "layer_indices": [record.layer_index for record in records],
+        "layers_installed": len(ordered),
+        "layer_indices": [record.layer_index for record in ordered],
         "tp_size": first.tp_size,
         "local_width": first.local_width,
-        "local_rank": first.local_rank,
-        "total_private_rank": first.total_private_rank,
-        "ring_units": first.total_private_rank,
+        "local_rank_schedule": {
+            str(record.layer_index): int(record.local_rank) for record in ordered
+        },
+        "local_rank_histogram": histogram,
+        "local_rank_sum": sum(local_ranks),
+        "average_local_rank": statistics.fmean(local_ranks),
+        "total_private_rank_schedule": {
+            str(record.layer_index): int(record.total_private_rank)
+            for record in ordered
+        },
+        "average_total_private_rank": statistics.fmean(total_ranks),
+        "ring_units_by_layer": {
+            str(record.layer_index): int(record.total_private_rank)
+            for record in ordered
+        },
+        "communication_fraction_of_dense_allreduce": (
+            sum(local_ranks) / (len(local_ranks) * 2 * first.local_width)
+        ),
     }
 
 
 def main() -> None:
     args = parse_args()
     torch.set_num_threads(args.torch_num_threads)
-    if min(args.num_samples, args.sequence_length, args.batch_size, args.tp) <= 0:
-        raise ValueError("sample, sequence, batch, and TP sizes must be positive")
-    if args.sample_offset < 0:
-        raise ValueError("sample offset must be nonnegative")
+    if min(args.num_samples, args.batch_size, args.tp) <= 0:
+        raise ValueError("sample, batch, and TP sizes must be positive")
     topk_ratios = _ratios(args.full_topk_keep_ratios)
     output_path = Path(args.output_json).expanduser().resolve()
     if output_path.exists():
         raise FileExistsError(f"refusing to overwrite hybrid PPL result: {output_path}")
-    dataset_path = Path(args.dataset_jsonl).expanduser().resolve()
-    if not dataset_path.is_file():
-        raise FileNotFoundError(dataset_path)
+    windows_source = Path(args.windows).expanduser().resolve()
+    samples, records, windows_manifest = _load_window_split(
+        windows_source,
+        sample_offset=args.sample_offset,
+        num_samples=args.num_samples,
+    )
+    samples = samples.long()
+    sequence_length = int(samples.shape[1])
     gdn_path = Path(args.gdn_private_factors).expanduser().resolve()
     full_path = Path(args.full_private_factors).expanduser().resolve()
     gdn_factors = load_qwen35_gdn_private_ag_factors(gdn_path)
     full_factors = load_qwen35_full_attention_private_ag_factors(full_path)
 
-    from transformers import AutoModelForMultimodalLM, AutoTokenizer
+    from transformers import AutoModelForMultimodalLM
 
     model_path = Path(args.model_path).expanduser().resolve()
     model_source = str(model_path) if model_path.exists() else args.model_path
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_source, local_files_only=args.local_files_only
-    )
-    candidate_samples, candidate_records = _fixed_length_samples(
-        dataset_path,
-        tokenizer,
-        text_field=args.text_field,
-        sequence_length=args.sequence_length,
-        num_samples=args.num_samples + args.sample_offset,
-    )
-    samples = candidate_samples[args.sample_offset :]
-    records = candidate_records[args.sample_offset :]
-    if len(samples) != args.num_samples:
-        raise RuntimeError(
-            f"requested {args.num_samples} held-out samples, found {len(samples)}"
-        )
     model = AutoModelForMultimodalLM.from_pretrained(
         model_source,
         dtype=_dtype(args.dtype),
@@ -232,7 +231,7 @@ def main() -> None:
             device=args.device,
             label="gdn_private_ag",
         )
-        gdn_metadata = _uniform_private_metadata(gdn_runtime.records)
+        gdn_metadata = _private_metadata(gdn_runtime.records)
     results.append(
         _serializable(
             candidate,
@@ -258,7 +257,7 @@ def main() -> None:
             device=args.device,
             label="full_private_ag",
         )
-        full_metadata = _uniform_private_metadata(full_runtime.records)
+        full_metadata = _private_metadata(full_runtime.records)
     results.append(
         _serializable(
             candidate,
@@ -285,8 +284,8 @@ def main() -> None:
             device=args.device,
             label="hybrid_private_ag",
         )
-        gdn_metadata = _uniform_private_metadata(gdn_runtime.records)
-        full_metadata = _uniform_private_metadata(full_runtime.records)
+        gdn_metadata = _private_metadata(gdn_runtime.records)
+        full_metadata = _private_metadata(full_runtime.records)
     results.append(
         _serializable(
             candidate,
@@ -326,7 +325,7 @@ def main() -> None:
                 device=args.device,
                 label=f"gdn_private_full_topk_{keep_ratio:g}",
             )
-            gdn_metadata = _uniform_private_metadata(gdn_runtime.records)
+            gdn_metadata = _private_metadata(gdn_runtime.records)
             topk_records = topk_runtime.records
             profile_summaries, _ = topk_runtime.profile_snapshot()
         if not topk_records:
@@ -378,13 +377,18 @@ def main() -> None:
         "model": model_source,
         "gdn_private_factors": str(gdn_path),
         "full_private_factors": str(full_path),
-        "dataset_jsonl": str(dataset_path),
+        "windows": str(
+            windows_source / "windows.safetensors"
+            if windows_source.is_dir()
+            else windows_source
+        ),
+        "windows_sha256": windows_manifest["artifact"]["sha256"],
         "records": list(records),
         "num_samples": args.num_samples,
         "sample_offset": args.sample_offset,
-        "sequence_length": args.sequence_length,
+        "sequence_length": sequence_length,
         "batch_size": args.batch_size,
-        "evaluated_tokens_per_variant": args.num_samples * (args.sequence_length - 1),
+        "evaluated_tokens_per_variant": args.num_samples * (sequence_length - 1),
         "dtype": args.dtype,
         "device": args.device,
         "results": results,

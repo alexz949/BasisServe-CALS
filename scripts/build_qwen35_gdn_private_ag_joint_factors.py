@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Build all-layer activation-aware Qwen3.5 GDN Private AG factors."""
+"""Build decoder-closed ALS factors for all Qwen3.5 GDN output wires."""
 
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
 import os
@@ -22,24 +23,67 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from basisserve.core.qwen35_gdn_private_ag import (  # noqa: E402
-    fit_gdn_private_ag_joint_factors,
+    fit_qwen35_private_ag_joint_factors,
 )
 from basisserve.core.qwen35_gdn_private_ag_runtime import (  # noqa: E402
-    FACTOR_FORMAT,
+    FACTOR_FORMAT as GDN_FACTOR_FORMAT,
 )
-from scripts.collect_qwen35_gdn_wo_activations import FORMAT as MOMENT_FORMAT  # noqa: E402
+from scripts.collect_qwen35_gdn_wo_activations import (  # noqa: E402
+    FORMAT as GDN_MOMENT_FORMAT,
+)
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
+@dataclass(frozen=True)
+class Qwen35PrivateAGBuildSpec:
+    description: str
+    block_type: str
+    moment_format: str
+    factor_format: str
+    tensor_name_template: str
+    log_label: str
+    objective: str
+
+
+GDN_BUILD_SPEC = Qwen35PrivateAGBuildSpec(
+    description=__doc__,
+    block_type="linear_attention",
+    moment_format=GDN_MOMENT_FORMAT,
+    factor_format=GDN_FACTOR_FORMAT,
+    tensor_name_template=(
+        "model.language_model.layers.{layer_index}.linear_attn.out_proj.weight"
+    ),
+    log_label="GDNPrivateAGBuild",
+    objective="decoder_closed_c1_als_gdn_out_proj_reconstruction",
+)
+
+
+def parse_args(spec: Qwen35PrivateAGBuildSpec = GDN_BUILD_SPEC) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=spec.description)
     parser.add_argument("--model-path", required=True)
-    parser.add_argument("--moments", required=True)
+    parser.add_argument("--fit-moments", required=True)
+    parser.add_argument("--heldout-moments", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--layers", default="all")
     parser.add_argument("--tp", type=int, default=8)
-    parser.add_argument("--baseline-rank", type=int, default=1536)
-    parser.add_argument("--decoder-relative-ridge", type=float, default=3.0)
-    parser.add_argument("--relative-damping", type=float, default=1.0e-5)
+    parser.add_argument(
+        "--local-rank",
+        type=int,
+        default=256,
+        help="C1 rank per TP source; 256 gives 75%% reduction for TP8/H=4096.",
+    )
+    parser.add_argument("--encoder-sweeps", type=int, default=5)
+    parser.add_argument("--minimum-encoder-sweeps", type=int, default=1)
+    parser.add_argument("--covariance-damping", type=float, default=1.0e-5)
+    parser.add_argument("--decoder-relative-jitter", type=float, default=1.0e-8)
+    parser.add_argument("--encoder-relative-damping", type=float, default=1.0e-5)
+    parser.add_argument(
+        "--encoder-cg-relative-tolerance", type=float, default=1.0e-5
+    )
+    parser.add_argument("--encoder-cg-max-iterations", type=int, default=32)
+    parser.add_argument("--encoder-cg-fixed-iterations", action="store_true")
+    parser.add_argument("--encoder-relative-tolerance", type=float, default=1.0e-5)
+    parser.add_argument("--encoder-patience", type=int, default=1)
+    parser.add_argument("--maximum-backtracks", type=int, default=8)
     parser.add_argument(
         "--factor-dtype",
         choices=("bfloat16", "float16", "float32"),
@@ -75,33 +119,73 @@ def _weight_map(model_path: Path) -> dict[str, str]:
     return dict(payload["weight_map"])
 
 
-def main() -> None:
-    args = parse_args()
+def _load_moments(
+    path: Path,
+    spec: Qwen35PrivateAGBuildSpec = GDN_BUILD_SPEC,
+) -> dict[str, Any]:
+    payload = torch.load(path, map_location="cpu", weights_only=True)
+    if (
+        payload.get("format") != spec.moment_format
+        or int(payload.get("schema_version", -1)) != 1
+    ):
+        raise ValueError(f"unsupported Qwen3.5 {spec.block_type} moments: {path}")
+    return payload
+
+
+def _record_sample_indices(payload: dict[str, Any]) -> set[int]:
+    return {
+        int(record["sample_index"])
+        for record in payload["collection"].get("records", ())
+    }
+
+
+def _validate_moment_pair(
+    fit: dict[str, Any],
+    heldout: dict[str, Any],
+) -> None:
+    for key in ("geometry", "model"):
+        if fit[key] != heldout[key]:
+            raise ValueError(f"fit and held-out moments differ in {key}")
+    fit_layers = tuple(int(layer["layer_index"]) for layer in fit["layers"])
+    heldout_layers = tuple(int(layer["layer_index"]) for layer in heldout["layers"])
+    if fit_layers != heldout_layers:
+        raise ValueError("fit and held-out moments cover different layers")
+    overlap = _record_sample_indices(fit) & _record_sample_indices(heldout)
+    if overlap:
+        raise ValueError(
+            f"fit and held-out moments reuse calibration windows: {sorted(overlap)[:8]}"
+        )
+
+
+def main(spec: Qwen35PrivateAGBuildSpec = GDN_BUILD_SPEC) -> None:
+    args = parse_args(spec)
     torch.set_num_threads(args.torch_num_threads)
-    if args.tp <= 1 or args.baseline_rank <= 0:
-        raise ValueError("TP and baseline rank must be positive")
+    if args.tp <= 1 or args.local_rank <= 0:
+        raise ValueError("TP and local rank must be positive")
     model_path = Path(args.model_path).expanduser().resolve()
-    moments_path = Path(args.moments).expanduser().resolve()
+    fit_moments_path = Path(args.fit_moments).expanduser().resolve()
+    heldout_moments_path = Path(args.heldout_moments).expanduser().resolve()
     output_path = Path(args.output).expanduser().resolve()
     if output_path.exists():
         raise FileExistsError(f"refusing to overwrite Private AG factors: {output_path}")
-    moments = torch.load(moments_path, map_location="cpu", weights_only=True)
-    if (
-        moments.get("format") != MOMENT_FORMAT
-        or int(moments.get("schema_version", -1)) != 1
-    ):
-        raise ValueError("unsupported Qwen3.5 GDN post-gate moments")
-    by_layer = {int(layer["layer_index"]): layer for layer in moments["layers"]}
+    fit_moments = _load_moments(fit_moments_path, spec)
+    heldout_moments = _load_moments(heldout_moments_path, spec)
+    _validate_moment_pair(fit_moments, heldout_moments)
+    fit_by_layer = {
+        int(layer["layer_index"]): layer for layer in fit_moments["layers"]
+    }
+    heldout_by_layer = {
+        int(layer["layer_index"]): layer for layer in heldout_moments["layers"]
+    }
+    by_layer = fit_by_layer
     available = tuple(sorted(by_layer))
     layers = _parse_layers(args.layers, available)
-    geometry = moments["geometry"]
+    geometry = fit_moments["geometry"]
     input_width = int(geometry["wire_input_width"])
     if input_width % args.tp:
-        raise ValueError("GDN wire does not divide across TP")
-    total_private_rank = 2 * args.baseline_rank
-    if total_private_rank % args.tp:
-        raise ValueError("equal-ring Private AG rank does not divide across TP")
-    local_rank = total_private_rank // args.tp
+        raise ValueError(f"{spec.block_type} wire does not divide across TP")
+    local_rank = args.local_rank
+    total_private_rank = args.tp * local_rank
     local_width = input_width // args.tp
     if local_rank > local_width:
         raise ValueError("Private AG local rank exceeds local wire width")
@@ -121,9 +205,7 @@ def main() -> None:
     for ordinal, layer_index in enumerate(layers, start=1):
         layer_started = time.perf_counter()
         torch.cuda.reset_peak_memory_stats(cuda_index)
-        tensor_name = (
-            f"model.language_model.layers.{layer_index}.linear_attn.out_proj.weight"
-        )
+        tensor_name = spec.tensor_name_template.format(layer_index=layer_index)
         shard_name = weight_map.get(tensor_name)
         if shard_name is None:
             raise KeyError(tensor_name)
@@ -133,20 +215,36 @@ def main() -> None:
             device="cpu",
         ) as handle:
             weight = handle.get_tensor(tensor_name).to(device)
-        moment_payload = by_layer[layer_index]["moments"]
-        rows = int(moment_payload["rows"])
-        second_moment = moment_payload["gram"].to(device) / float(rows)
+        fit_payload = fit_by_layer[layer_index]["moments"]
+        heldout_payload = heldout_by_layer[layer_index]["moments"]
+        fit_rows = int(fit_payload["rows"])
+        heldout_rows = int(heldout_payload["rows"])
+        fit_second_moment = fit_payload["gram"].to(device) / float(fit_rows)
+        heldout_second_moment = (
+            heldout_payload["gram"].to(device) / float(heldout_rows)
+        )
         print(
-            f"[GDNPrivateAGBuild] layer={layer_index} {ordinal}/{len(layers)} phase=fit",
+            f"[{spec.log_label}] layer={layer_index} "
+            f"{ordinal}/{len(layers)} phase=fit",
             flush=True,
         )
-        fitted = fit_gdn_private_ag_joint_factors(
+        fitted = fit_qwen35_private_ag_joint_factors(
             weight,
-            second_moment,
+            fit_second_moment,
+            heldout_second_moment,
             tp_size=args.tp,
             local_rank=local_rank,
-            decoder_relative_ridge=args.decoder_relative_ridge,
-            relative_damping=args.relative_damping,
+            encoder_sweeps=args.encoder_sweeps,
+            minimum_encoder_sweeps=args.minimum_encoder_sweeps,
+            covariance_damping=args.covariance_damping,
+            decoder_relative_jitter=args.decoder_relative_jitter,
+            encoder_relative_damping=args.encoder_relative_damping,
+            encoder_cg_relative_tolerance=args.encoder_cg_relative_tolerance,
+            encoder_cg_max_iterations=args.encoder_cg_max_iterations,
+            encoder_cg_fixed_iterations=args.encoder_cg_fixed_iterations,
+            encoder_relative_tolerance=args.encoder_relative_tolerance,
+            encoder_patience=args.encoder_patience,
+            maximum_backtracks=args.maximum_backtracks,
             factor_dtype=factor_dtype,
         )
         layer_peak = int(torch.cuda.max_memory_allocated(cuda_index))
@@ -155,7 +253,8 @@ def main() -> None:
             {
                 "layer_index": layer_index,
                 "tensor_name": tensor_name,
-                "rows": rows,
+                "fit_rows": fit_rows,
+                "heldout_rows": heldout_rows,
                 "private_encoders": fitted.private_encoders,
                 "joint_decoder_weight": fitted.joint_decoder_weight,
                 "metrics": fitted.metrics,
@@ -164,38 +263,56 @@ def main() -> None:
             }
         )
         print(
-            f"[GDNPrivateAGBuild] layer={layer_index} complete "
-            f"ind={fitted.metrics['independent_relative_output_mse']:.8g} "
-            f"joint={fitted.metrics['joint_relative_output_mse']:.8g} "
-            f"bf16={fitted.metrics['quantized_joint_relative_output_mse']:.8g}",
+            f"[{spec.log_label}] layer={layer_index} complete "
+            f"fit={fitted.metrics['fit_relative_output_mse']:.8g} "
+            f"heldout={fitted.metrics['heldout_relative_output_mse']:.8g} "
+            f"quantized_heldout="
+            f"{fitted.metrics['quantized_heldout_relative_output_mse']:.8g} "
+            f"selected={fitted.metrics['selected_boundary']}:"
+            f"{fitted.metrics['selected_sweep']}",
             flush=True,
         )
-        del weight, second_moment, fitted
+        del weight, fit_second_moment, heldout_second_moment, fitted
         torch.cuda.empty_cache()
 
     elapsed = time.perf_counter() - started
     result = {
-        "format": FACTOR_FORMAT,
+        "format": spec.factor_format,
         "schema_version": 1,
         "command": shlex.join(sys.argv),
         "timestamp_started_utc": timestamp_started,
         "timestamp_finished_utc": datetime.now(timezone.utc).isoformat(),
         "elapsed_seconds": elapsed,
         "model_path": str(model_path),
-        "source_moments": str(moments_path),
+        "fit_moments": str(fit_moments_path),
+        "heldout_moments": str(heldout_moments_path),
         "geometry": geometry,
-        "collection": moments["collection"],
+        "fit_collection": fit_moments["collection"],
+        "heldout_collection": heldout_moments["collection"],
         "layers_requested": list(layers),
         "tp_size": args.tp,
-        "baseline_allreduce_rank": args.baseline_rank,
-        "equal_ring_units": 2 * args.baseline_rank,
         "local_rank": local_rank,
         "total_private_rank": total_private_rank,
-        "decoder_relative_ridge": args.decoder_relative_ridge,
-        "relative_damping": args.relative_damping,
+        "als": {
+            "encoder_sweeps": args.encoder_sweeps,
+            "minimum_encoder_sweeps": args.minimum_encoder_sweeps,
+            "covariance_damping": args.covariance_damping,
+            "decoder_relative_jitter": args.decoder_relative_jitter,
+            "encoder_relative_damping": args.encoder_relative_damping,
+            "encoder_cg_relative_tolerance": (
+                args.encoder_cg_relative_tolerance
+            ),
+            "encoder_cg_max_iterations": args.encoder_cg_max_iterations,
+            "encoder_cg_fixed_iterations": args.encoder_cg_fixed_iterations,
+            "encoder_relative_tolerance": args.encoder_relative_tolerance,
+            "encoder_patience": args.encoder_patience,
+            "maximum_backtracks": args.maximum_backtracks,
+        },
         "factor_dtype": args.factor_dtype,
-        "objective": "activation_aware_complete_gdn_out_proj_reconstruction",
+        "block_type": spec.block_type,
+        "objective": spec.objective,
         "recurrent_state_compressed": False,
+        "attention_cache_compressed": False,
         "layers": output_layers,
         "environment": {
             "conda": os.environ.get("CONDA_DEFAULT_ENV"),
@@ -212,7 +329,7 @@ def main() -> None:
     torch.save(result, temporary)
     os.replace(temporary, output_path)
     print(
-        f"[GDNPrivateAGBuild] complete layers={len(output_layers)} "
+        f"[{spec.log_label}] complete layers={len(output_layers)} "
         f"output={output_path} seconds={elapsed:.3f}",
         flush=True,
     )

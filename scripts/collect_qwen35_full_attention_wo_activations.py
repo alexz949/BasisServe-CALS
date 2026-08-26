@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-"""Collect frozen-window post-gate moments for Qwen3.5 GDN Wo wires."""
+"""Collect frozen-window moments for Qwen3.5 full-attention Wo wires."""
 
 from __future__ import annotations
 
 import argparse
-import hashlib
-import json
+import os
 from pathlib import Path
 import sys
 from typing import Any
 
-from safetensors.torch import load_file
 import torch
 from torch import Tensor, nn
 
@@ -19,16 +17,18 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from basisserve.core.qwen35_gdn_state import Qwen35GDNGeometry  # noqa: E402
 from basisserve.core.qwen35_wo_wire import FullSecondMoment  # noqa: E402
 from scripts.collect_qwen35_gdn_moments import (  # noqa: E402
     _batches,
     _decoder_layers,
     _dtype,
 )
+from scripts.collect_qwen35_gdn_wo_activations import (  # noqa: E402
+    _load_window_split,
+)
 
 
-FORMAT = "basisserve.qwen35.gdn_wo_activation_moments.v2"
+FORMAT = "basisserve.qwen35.full_attention_wo_activation_moments.v1"
 
 
 def parse_args() -> argparse.Namespace:
@@ -51,91 +51,55 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        while chunk := handle.read(8 << 20):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def _load_window_split(
-    source: Path,
-    *,
-    sample_offset: int,
-    num_samples: int,
-) -> tuple[torch.Tensor, tuple[dict[str, Any], ...], dict[str, Any]]:
-    windows_path = source / "windows.safetensors" if source.is_dir() else source
-    manifest_path = windows_path.parent / "manifest.json"
-    if not windows_path.is_file() or not manifest_path.is_file():
-        raise FileNotFoundError(f"missing fixed-window artifact or manifest: {source}")
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("format") != "basisserve.calibration.c4_document_windows.v1":
-        raise ValueError("unsupported calibration-window manifest")
-    artifact = manifest["artifact"]
-    if artifact["file"] != windows_path.name or _sha256(windows_path) != artifact["sha256"]:
-        raise ValueError("calibration-window artifact identity mismatch")
-    input_ids = load_file(str(windows_path), device="cpu")[artifact["tensor"]]
-    if input_ids.ndim != 2 or tuple(input_ids.shape) != tuple(artifact["shape"]):
-        raise ValueError("calibration-window tensor differs from its manifest")
-    stop = sample_offset + num_samples
-    if sample_offset < 0 or num_samples <= 0 or stop > int(input_ids.shape[0]):
-        raise ValueError("requested calibration split lies outside the window bank")
-    records = tuple(manifest["records"][sample_offset:stop])
-    if len(records) != num_samples:
-        raise ValueError("calibration-window manifest has incomplete records")
-    expected_indices = tuple(range(sample_offset, stop))
-    if tuple(int(record["sample_index"]) for record in records) != expected_indices:
-        raise ValueError("calibration-window records are not in canonical sample order")
-    return input_ids[sample_offset:stop].contiguous(), records, manifest
-
-
-class _WoActivationCollector:
+class _FullAttentionWoCollector:
     def __init__(
         self,
         *,
         layer_index: int,
-        module: nn.Module,
+        projection: nn.Module,
         width: int,
         moment_dtype: torch.dtype,
     ) -> None:
         self.layer_index = int(layer_index)
-        self.module = module
+        self.projection = projection
         self.width = int(width)
         self.moments = FullSecondMoment(
             self.width,
-            device=module.out_proj.weight.device,
+            device=projection.weight.device,
             dtype=moment_dtype,
         )
         self.current_shape: tuple[int, int] | None = None
         self.calls = 0
-        self.handle = module.norm.register_forward_hook(self._hook)
+        self.handle = projection.register_forward_pre_hook(self._hook)
 
     def begin(self, batch: int, tokens: int) -> None:
         if self.current_shape is not None:
-            raise RuntimeError("Wo activation collector began twice")
+            raise RuntimeError("full-attention Wo collector began twice")
         self.current_shape = (int(batch), int(tokens))
 
     def finish(self) -> None:
         if self.current_shape is None:
-            raise RuntimeError(f"layer {self.layer_index} norm hook did not run")
+            raise RuntimeError(
+                f"layer {self.layer_index} full-attention o_proj hook did not run"
+            )
         self.current_shape = None
 
     @torch.no_grad()
-    def _hook(self, module: nn.Module, inputs: tuple[Any, ...], output: Tensor) -> None:
+    def _hook(self, module: nn.Module, inputs: tuple[Any, ...]) -> None:
+        del module
         if self.current_shape is None:
-            raise RuntimeError("GDN norm hook ran outside an active collector batch")
-        if not isinstance(output, Tensor):
-            raise TypeError("GDN gated norm output must be a tensor")
+            raise RuntimeError("full-attention o_proj hook ran outside an active batch")
+        if len(inputs) != 1 or not isinstance(inputs[0], Tensor):
+            raise TypeError("full-attention o_proj must receive one tensor")
+        activation = inputs[0]
         batch, tokens = self.current_shape
-        expected = batch * tokens * self.width
-        if output.numel() != expected:
+        expected_shape = (batch, tokens, self.width)
+        if tuple(activation.shape) != expected_shape:
             raise ValueError(
-                f"layer {self.layer_index} post-gate output has {output.numel()} values, "
-                f"expected {expected}"
+                f"layer {self.layer_index} full-attention Wo input has shape "
+                f"{tuple(activation.shape)}, expected {expected_shape}"
             )
-        rows = output.reshape(batch * tokens, self.width)
-        self.moments.update(rows)
+        self.moments.update(activation.reshape(batch * tokens, self.width))
         self.calls += 1
 
     def close(self) -> None:
@@ -145,7 +109,7 @@ class _WoActivationCollector:
         return {
             "layer_index": self.layer_index,
             "calls": self.calls,
-            "out_proj_shape": tuple(map(int, self.module.out_proj.weight.shape)),
+            "o_proj_shape": tuple(map(int, self.projection.weight.shape)),
             "moments": self.moments.state_dict(),
         }
 
@@ -155,7 +119,9 @@ def main() -> None:
     torch.set_num_threads(args.torch_num_threads)
     output_path = Path(args.output).expanduser().resolve()
     if output_path.exists():
-        raise FileExistsError(f"refusing to overwrite Wo activation moments: {output_path}")
+        raise FileExistsError(
+            f"refusing to overwrite full-attention Wo moments: {output_path}"
+        )
     windows_source = Path(args.windows).expanduser().resolve()
     samples, records, windows_manifest = _load_window_split(
         windows_source,
@@ -172,8 +138,7 @@ def main() -> None:
         model_source,
         local_files_only=args.local_files_only,
     )
-    geometry = Qwen35GDNGeometry.from_config(config)
-    width = geometry.num_value_heads * geometry.value_head_dim
+    text_config = config.text_config
     model = AutoModelForMultimodalLM.from_pretrained(
         model_source,
         dtype=_dtype(args.dtype),
@@ -181,24 +146,33 @@ def main() -> None:
         local_files_only=args.local_files_only,
         attn_implementation="sdpa",
     ).eval()
-    collectors: list[_WoActivationCollector] = []
+
+    collectors: list[_FullAttentionWoCollector] = []
+    wire_widths: set[int] = set()
     for layer_index, layer in enumerate(_decoder_layers(model)):
-        linear_attn = getattr(layer, "linear_attn", None)
-        if linear_attn is None:
+        attention = getattr(layer, "self_attn", None)
+        if attention is None:
             continue
+        projection = attention.o_proj
+        width = int(projection.weight.shape[1])
+        wire_widths.add(width)
         collectors.append(
-            _WoActivationCollector(
+            _FullAttentionWoCollector(
                 layer_index=layer_index,
-                module=linear_attn,
+                projection=projection,
                 width=width,
                 moment_dtype=_dtype(args.moment_dtype),
             )
         )
     expected_layers = sum(
-        layer_type == "linear_attention" for layer_type in config.text_config.layer_types
+        layer_type == "full_attention" for layer_type in text_config.layer_types
     )
-    if len(collectors) != expected_layers:
-        raise ValueError(f"found {len(collectors)} GDN modules, expected {expected_layers}")
+    if len(collectors) != expected_layers or len(wire_widths) != 1:
+        raise ValueError(
+            f"found {len(collectors)} uniform full-attention modules, "
+            f"expected {expected_layers}; widths={sorted(wire_widths)}"
+        )
+    wire_width = next(iter(wire_widths))
 
     processed = 0
     try:
@@ -219,7 +193,8 @@ def main() -> None:
                     collector.finish()
                 processed += int(input_ids.shape[0])
                 print(
-                    f"[Wo moments] batch={batch_index} samples={processed}/{len(samples)} "
+                    f"[Full Wo moments] batch={batch_index} "
+                    f"samples={processed}/{len(samples)} "
                     f"tokens={processed * sequence_length}",
                     flush=True,
                 )
@@ -227,6 +202,11 @@ def main() -> None:
         for collector in collectors:
             collector.close()
 
+    windows_path = (
+        windows_source / "windows.safetensors"
+        if windows_source.is_dir()
+        else windows_source
+    )
     payload = {
         "format": FORMAT,
         "schema_version": 1,
@@ -236,21 +216,15 @@ def main() -> None:
             "commit_hash": getattr(config, "_commit_hash", None),
         },
         "geometry": {
-            "num_value_heads": geometry.num_value_heads,
-            "value_head_dim": geometry.value_head_dim,
-            "wire_input_width": width,
-            "hidden_size": int(config.text_config.hidden_size),
+            "num_attention_heads": int(text_config.num_attention_heads),
+            "num_key_value_heads": int(text_config.num_key_value_heads),
+            "head_dim": int(text_config.head_dim),
+            "wire_input_width": wire_width,
+            "hidden_size": int(text_config.hidden_size),
         },
         "collection": {
-            "windows": str(
-                windows_source / "windows.safetensors"
-                if windows_source.is_dir()
-                else windows_source
-            ),
-            "windows_manifest": str(
-                (windows_source if windows_source.is_dir() else windows_source.parent)
-                / "manifest.json"
-            ),
+            "windows": str(windows_path),
+            "windows_manifest": str(windows_path.parent / "manifest.json"),
             "windows_sha256": windows_manifest["artifact"]["sha256"],
             "num_samples": processed,
             "sample_offset": args.sample_offset,
@@ -259,13 +233,15 @@ def main() -> None:
             "model_dtype": args.dtype,
             "moment_dtype": args.moment_dtype,
             "centered": False,
-            "signal": "post_gated_rmsnorm_input_to_out_proj",
+            "signal": "post_sigmoid_gate_input_to_full_attention_o_proj",
             "records": list(records),
         },
         "layers": [collector.state_dict() for collector in collectors],
     }
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(payload, output_path)
+    temporary = output_path.with_suffix(output_path.suffix + ".tmp")
+    torch.save(payload, temporary)
+    os.replace(temporary, output_path)
     print(f"[Saved] {output_path}", flush=True)
 
 
