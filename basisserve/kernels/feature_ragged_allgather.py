@@ -10,7 +10,8 @@ packing kernel is needed.  Decoding is one GEMM::
 
 Two transports share the same layout:
 
-* ``feature_direct``: grouped two-sided ``ncclSend`` / ``ncclRecv`` baseline.
+* ``feature_direct``: in-place NCCL AllGather for uniform widths and an
+  exact-width NCCL ring for ragged widths.
 * ``feature_rma``: NCCL 2.29+ ``PutSignal`` / ``WaitSignal`` one-sided push.
 
 The RMA path is deliberately strict: the workspace is prepared outside the hot
@@ -36,52 +37,43 @@ from basisserve.kernels.ragged_allgather import (
 )
 
 
-_EXTENSION_NAME = "basisserve_feature_ragged_allgather_v3"
+_EXTENSION_NAME = "basisserve_feature_ragged_allgather_v8"
 _DTYPE_TO_CODE = {
     torch.float16: 0,
     torch.bfloat16: 1,
     torch.float32: 2,
 }
+_DIRECT_DTYPES = frozenset((*_DTYPE_TO_CODE, torch.uint8))
 
 
-def _cuda_host_build_paths() -> tuple[Path, Path, str]:
-    """Find CUDA headers and a versioned runtime for the host-only extension."""
+def _cuda_build_paths() -> tuple[list[Path], Path, str, Path]:
+    """Validate the complete CUDA toolkit selected by the cluster module."""
 
-    site_packages = Path(torch.__file__).resolve().parent.parent
-    candidates: list[Path] = []
     configured = os.environ.get("CUDA_HOME") or os.environ.get("CUDA_PATH")
-    if configured:
-        candidates.append(Path(configured))
-    if torch.version.cuda:
-        major = torch.version.cuda.split(".", maxsplit=1)[0]
-        candidates.append(site_packages / "nvidia" / f"cu{major}")
-    candidates.append(site_packages / "nvidia" / "cuda_runtime")
-    candidates.extend(sorted((site_packages / "nvidia").glob("cu*"), reverse=True))
-
-    checked: set[Path] = set()
-    for root in candidates:
-        if root in checked:
-            continue
-        checked.add(root)
-        include_candidates = (
-            root / "include",
-            root / "targets" / "x86_64-linux" / "include",
+    if not configured:
+        raise FileNotFoundError(
+            "CUDA_HOME is unset; load nvidia/cuda12/cuda/12.4.1 before running"
         )
-        library_candidates = (root / "lib64", root / "lib")
-        include = next(
-            (path for path in include_candidates if (path / "cuda_runtime_api.h").is_file()),
-            None,
-        )
-        if include is None:
-            continue
-        for library in library_candidates:
-            unversioned = library / "libcudart.so"
-            if unversioned.is_file():
-                return include, library, "libcudart.so"
-            versioned = sorted(library.glob("libcudart.so.*"), reverse=True)
-            if versioned:
-                return include, library, versioned[0].name
-    raise FileNotFoundError("CUDA headers and runtime library are unavailable")
+    toolkit = Path(configured).expanduser().resolve()
+    nvcc = toolkit / "bin" / "nvcc"
+    if not nvcc.is_file():
+        raise FileNotFoundError(f"CUDA compiler is unavailable: {nvcc}")
+    includes = [toolkit / "include"]
+    for header in ("cuda_runtime_api.h", "crt/host_defines.h", "nv/target"):
+        if not any((path / header).exists() for path in includes):
+            raise FileNotFoundError(f"CUDA build header {header!r} is unavailable")
+    runtime = toolkit / "lib64"
+    if not runtime.is_dir():
+        runtime = toolkit / "lib"
+    unversioned = runtime / "libcudart.so"
+    if unversioned.is_file():
+        runtime_name = unversioned.name
+    else:
+        versioned = sorted(runtime.glob("libcudart.so.*"), reverse=True)
+        if not versioned:
+            raise FileNotFoundError("CUDA runtime library is unavailable")
+        runtime_name = versioned[0].name
+    return includes, runtime, runtime_name, toolkit
 
 
 @lru_cache(maxsize=1)
@@ -90,15 +82,22 @@ def _load_extension():
         raise RuntimeError("feature ragged collectives require CUDA")
 
     _match_loaded_cxx_runtime()
-    from torch.utils import cpp_extension
-
-    source = Path(__file__).resolve().parent / "csrc" / "feature_ragged_allgather.cpp"
-    if not source.exists():
-        raise FileNotFoundError(source)
+    source_root = Path(__file__).resolve().parent / "csrc"
+    sources = (
+        source_root / "feature_ragged_allgather.cpp",
+        source_root / "feature_ragged_allgather_pack.cu",
+    )
+    if any(not source.exists() for source in sources):
+        raise FileNotFoundError("feature-major C++/CUDA extension sources are incomplete")
 
     nccl_include, nccl_library = _nccl_paths()
-    cuda_include, cuda_library, cuda_runtime_name = _cuda_host_build_paths()
-    include_paths = [str(nccl_include), str(cuda_include)]
+    cuda_includes, cuda_library, cuda_runtime_name, cuda_home = _cuda_build_paths()
+    os.environ["CUDA_HOME"] = str(cuda_home)
+    os.environ.setdefault("TORCH_CUDA_ARCH_LIST", "8.0;8.9+PTX")
+    from torch.utils import cpp_extension
+
+    cpp_extension.CUDA_HOME = str(cuda_home)
+    include_paths = [str(nccl_include), *(str(path) for path in cuda_includes)]
     verbose = os.environ.get("BASISSERVE_VERBOSE_BUILD", "0") == "1"
     build_directory = os.environ.get("BASISSERVE_EXT_BUILD_DIR")
 
@@ -115,11 +114,12 @@ def _load_extension():
 
     return cpp_extension.load(
         name=_EXTENSION_NAME,
-        sources=[str(source)],
+        sources=[str(source) for source in sources],
         extra_cflags=["-O3", "-std=c++17"],
+        extra_cuda_cflags=["-O3", "--threads", "4"],
         extra_include_paths=include_paths,
         extra_ldflags=extra_ldflags,
-        with_cuda=False,
+        with_cuda=True,
         build_directory=build_directory,
         verbose=verbose,
     )
@@ -185,6 +185,8 @@ class FeatureRaggedCommunicator:
         self._direct_workspaces: dict[
             tuple[torch.dtype, int, tuple[int, ...], int], torch.Tensor
         ] = {}
+        self._shared_direct_workspace: torch.Tensor | None = None
+        self._shared_direct_shape: tuple[int, int, torch.dtype, int] | None = None
 
     @classmethod
     def from_distributed(
@@ -268,6 +270,33 @@ class FeatureRaggedCommunicator:
                 f"plan has {len(plan.source_widths)} sources, communicator has {self.world_size}"
             )
 
+    def configure_direct_workspace(
+        self,
+        *,
+        tokens: int,
+        max_total_width: int,
+        dtype: torch.dtype,
+    ) -> None:
+        """Allocate one stream-bound arena shared by every sequential layer."""
+
+        selected_tokens = int(tokens)
+        selected_width = int(max_total_width)
+        if selected_tokens <= 0 or selected_width <= 0:
+            raise ValueError("packed direct workspace dimensions must be positive")
+        if dtype not in _DIRECT_DTYPES:
+            raise TypeError(f"packed direct workspace does not support {dtype}")
+        stream = int(torch.cuda.current_stream(self.device).cuda_stream)
+        shape = (selected_tokens, selected_width, dtype, stream)
+        if shape == self._shared_direct_shape:
+            return
+        self._direct_workspaces.clear()
+        self._shared_direct_workspace = torch.empty(
+            selected_tokens * selected_width,
+            dtype=dtype,
+            device=torch.device("cuda", self.device),
+        )
+        self._shared_direct_shape = shape
+
     def prepare_rma(
         self,
         *,
@@ -298,6 +327,70 @@ class FeatureRaggedCommunicator:
         self._check_plan(plan)
         return self._impl.rma_local_feature_view(list(plan.source_widths))
 
+    def direct_local_feature_major_view(
+        self,
+        plan: StaticRaggedPlan,
+        *,
+        tokens: int,
+        dtype: torch.dtype,
+    ) -> torch.Tensor:
+        """Return this rank's packed slot in the shared direct arena."""
+
+        self._check_plan(plan)
+        arena = self._direct_workspace_for_shape(
+            tokens=int(tokens),
+            dtype=dtype,
+            plan=plan,
+        )
+        return arena.narrow(
+            0,
+            plan.offsets[self.rank],
+            plan.source_widths[self.rank],
+        )
+
+    def _direct_workspace_for_shape(
+        self,
+        *,
+        tokens: int,
+        dtype: torch.dtype,
+        plan: StaticRaggedPlan,
+    ) -> torch.Tensor:
+        selected_tokens = int(tokens)
+        if selected_tokens <= 0:
+            raise ValueError("packed direct token count must be positive")
+        stream = int(torch.cuda.current_stream(self.device).cuda_stream)
+        if self._shared_direct_workspace is not None:
+            assert self._shared_direct_shape is not None
+            maximum_tokens, maximum_width, configured_dtype, configured_stream = (
+                self._shared_direct_shape
+            )
+            if dtype != configured_dtype:
+                raise TypeError("packed direct workspace dtype differs from local coordinates")
+            if stream != configured_stream:
+                raise RuntimeError("packed direct workspace belongs to another CUDA stream")
+            if selected_tokens > maximum_tokens or plan.total_width > maximum_width:
+                raise RuntimeError(
+                    "packed direct workspace is smaller than the current layer: "
+                    f"tokens={selected_tokens}/{maximum_tokens}, "
+                    f"width={plan.total_width}/{maximum_width}"
+                )
+            elements = selected_tokens * plan.total_width
+            return self._shared_direct_workspace[:elements].view(
+                plan.total_width,
+                selected_tokens,
+            )
+        key = (dtype, selected_tokens, plan.source_widths, stream)
+        workspace = self._direct_workspaces.get(key)
+        if workspace is None:
+            workspace = torch.empty(
+                plan.total_width,
+                selected_tokens,
+                dtype=dtype,
+                device=torch.device("cuda", self.device),
+            )
+            self._direct_workspaces[key] = workspace
+        return workspace
+
     def _direct_workspace(
         self,
         local: torch.Tensor,
@@ -308,18 +401,11 @@ class FeatureRaggedCommunicator:
         if local.ndim != 2:
             raise ValueError(f"local coordinates must be a matrix, got {tuple(local.shape)}")
         tokens = int(local.shape[1] if local_is_feature_major else local.shape[0])
-        stream = int(torch.cuda.current_stream(self.device).cuda_stream)
-        key = (local.dtype, tokens, plan.source_widths, stream)
-        workspace = self._direct_workspaces.get(key)
-        if workspace is None:
-            workspace = torch.empty(
-                plan.total_width,
-                tokens,
-                dtype=local.dtype,
-                device=torch.device("cuda", self.device),
-            )
-            self._direct_workspaces[key] = workspace
-        return workspace
+        return self._direct_workspace_for_shape(
+            tokens=tokens,
+            dtype=local.dtype,
+            plan=plan,
+        )
 
     def gather(
         self,
@@ -382,6 +468,8 @@ class FeatureRaggedCommunicator:
             torch.cuda.synchronize(self.device)
             self._impl.close()
             self._direct_workspaces.clear()
+            self._shared_direct_workspace = None
+            self._shared_direct_shape = None
             self._closed = True
 
 

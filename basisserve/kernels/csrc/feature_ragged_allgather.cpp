@@ -1,5 +1,7 @@
 #include <torch/extension.h>
 
+#include "feature_ragged_allgather_common.h"
+
 #include <ATen/ATen.h>
 #include <c10/cuda/CUDAGuard.h>
 #include <c10/cuda/CUDAStream.h>
@@ -219,8 +221,20 @@ class FeatureRaggedCommunicator {
     c10::cuda::CUDAGuard guard(device_);
 
     const RaggedPlan plan = make_plan(widths, world_size_);
-    auto [local_fm, batch] = as_feature_major(local, plan.widths[rank_], local_is_feature_major, device_);
-    const auto dtype = local_fm.scalar_type();
+    validate_cuda_tensor(local, device_, "local");
+    TORCH_CHECK(local.dim() == 2, "local must be rank-2");
+    TORCH_CHECK(local.is_contiguous(), "local coordinates must be contiguous");
+    TORCH_CHECK(!local.requires_grad(), "feature ragged transport is inference-only");
+    const int64_t batch = local_is_feature_major ? local.size(1) : local.size(0);
+    const int64_t observed_width =
+        local_is_feature_major ? local.size(0) : local.size(1);
+    TORCH_CHECK(
+        observed_width == plan.widths[rank_],
+        "local coordinate width ",
+        observed_width,
+        " differs from plan width ",
+        plan.widths[rank_]);
+    const auto dtype = local.scalar_type();
     const ncclDataType_t nccl_dtype = to_nccl_dtype(dtype);
     const cudaStream_t stream = c10::cuda::getCurrentCUDAStream(device_).stream();
 
@@ -242,43 +256,77 @@ class FeatureRaggedCommunicator {
           arena.sizes());
       TORCH_CHECK(!arena.requires_grad(), "feature-direct workspace must not require gradients");
     } else {
-      arena = at::empty({plan.total_width, batch}, local_fm.options());
+      arena = at::empty({plan.total_width, batch}, local.options());
     }
     auto own = arena.narrow(0, plan.offsets[rank_], plan.widths[rank_]);
-    own.copy_(local_fm, /*non_blocking=*/true);
+    if (local_is_feature_major) {
+      if (local.data_ptr() != own.data_ptr()) {
+        own.copy_(local, /*non_blocking=*/true);
+      }
+    } else {
+      basisserve::feature_ag::launch_token_to_feature_pack(local, own, stream);
+    }
 
     if (world_size_ > 1) {
-      BASIS_NCCL_CHECK(ncclGroupStart());
-      ncclResult_t first_error = ncclSuccess;
-      for (int peer = 0; peer < world_size_; ++peer) {
-        if (peer == rank_) {
-          continue;
-        }
-        void* recv_ptr = static_cast<char*>(arena.data_ptr()) +
-            checked_offset_bytes(plan.offsets[peer], batch, local_fm.element_size());
-        const size_t recv_count = static_cast<size_t>(plan.widths[peer]) * static_cast<size_t>(batch);
-        const size_t send_count = static_cast<size_t>(plan.widths[rank_]) * static_cast<size_t>(batch);
-
-        const ncclResult_t recv_status =
-            ncclRecv(recv_ptr, recv_count, nccl_dtype, peer, comm_, stream);
-        if (first_error == ncclSuccess && recv_status != ncclSuccess) {
-          first_error = recv_status;
-        }
-        const ncclResult_t send_status =
-            ncclSend(own.data_ptr(), send_count, nccl_dtype, peer, comm_, stream);
-        if (first_error == ncclSuccess && send_status != ncclSuccess) {
-          first_error = send_status;
+      const bool uniform_width = std::all_of(
+          plan.widths.begin() + 1,
+          plan.widths.end(),
+          [&](int64_t width) { return width == plan.widths.front(); });
+      if (uniform_width) {
+        // NCCL explicitly supports in-place AllGather when sendbuff points at
+        // rank * sendcount inside recvbuff. Each source is already feature-major,
+        // so its native rank concatenation is exactly [sum(widths), batch].
+        const size_t count =
+            static_cast<size_t>(plan.widths.front()) * static_cast<size_t>(batch);
+        BASIS_NCCL_CHECK(ncclAllGather(
+            own.data_ptr(),
+            arena.data_ptr(),
+            count,
+            nccl_dtype,
+            comm_,
+            stream));
+      } else {
+        // Exact-width ring AllGather. Step one sends the local source to the
+        // right neighbor; later steps forward the source received previously.
+        // This avoids the all-peer broadcast bottleneck while retaining a
+        // compact arena for genuinely ragged source widths.
+        const int right = (rank_ + 1) % world_size_;
+        const int left = (rank_ - 1 + world_size_) % world_size_;
+        for (int step = 1; step < world_size_; ++step) {
+          const int send_source = (rank_ - step + 1 + world_size_) % world_size_;
+          const int recv_source = (rank_ - step + world_size_) % world_size_;
+          void* send_ptr = static_cast<char*>(arena.data_ptr()) +
+              checked_offset_bytes(
+                  plan.offsets[send_source], batch, local.element_size());
+          void* recv_ptr = static_cast<char*>(arena.data_ptr()) +
+              checked_offset_bytes(
+                  plan.offsets[recv_source], batch, local.element_size());
+          const size_t send_count =
+              static_cast<size_t>(plan.widths[send_source]) *
+              static_cast<size_t>(batch);
+          const size_t recv_count =
+              static_cast<size_t>(plan.widths[recv_source]) *
+              static_cast<size_t>(batch);
+          BASIS_NCCL_CHECK(ncclGroupStart());
+          const ncclResult_t recv_status = ncclRecv(
+              recv_ptr, recv_count, nccl_dtype, left, comm_, stream);
+          const ncclResult_t send_status = ncclSend(
+              send_ptr, send_count, nccl_dtype, right, comm_, stream);
+          const ncclResult_t group_status = ncclGroupEnd();
+          TORCH_CHECK(
+              recv_status == ncclSuccess,
+              "NCCL ragged-ring receive failed: ",
+              ncclGetErrorString(recv_status));
+          TORCH_CHECK(
+              send_status == ncclSuccess,
+              "NCCL ragged-ring send failed: ",
+              ncclGetErrorString(send_status));
+          TORCH_CHECK(
+              group_status == ncclSuccess,
+              "NCCL ragged-ring group failed: ",
+              ncclGetErrorString(group_status));
         }
       }
-      const ncclResult_t group_status = ncclGroupEnd();
-      TORCH_CHECK(
-          first_error == ncclSuccess,
-          "NCCL grouped feature-direct operation failed: ",
-          ncclGetErrorString(first_error));
-      TORCH_CHECK(
-          group_status == ncclSuccess,
-          "ncclGroupEnd failed: ",
-          ncclGetErrorString(group_status));
     }
 
     // arena is already the exact [sum(widths), batch] feature-major matrix.
