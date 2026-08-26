@@ -10,6 +10,12 @@ from basisserve.core.qwen35_postgate_topk import (
     Qwen35PostGateTopKRuntime,
     retained_count,
 )
+from basisserve.core.mlp_gram_srrqr import (
+    StaticMLPMaskRuntime,
+    contribution_gram,
+    gram_subset_reweighting,
+    gram_srrqr_coordinates,
+)
 from evaluation.eval_qwen35_postgate_topk_crossdomain import (
     _mcq_paired_metrics,
     _mixed_ratios,
@@ -34,9 +40,17 @@ class _GDNOwner(nn.Module):
         self.out_proj.weight.data.copy_(torch.eye(width))
 
 
+class _MLPOwner(nn.Module):
+    def __init__(self, width: int) -> None:
+        super().__init__()
+        self.down_proj = nn.Linear(width, width, bias=False)
+        self.down_proj.weight.data.copy_(torch.eye(width))
+
+
 class _Layer(nn.Module):
     def __init__(self, kind: str, width: int) -> None:
         super().__init__()
+        self.mlp = _MLPOwner(width)
         if kind == "full":
             self.self_attn = _FullOwner(width)
             self.linear_attn = None
@@ -140,6 +154,180 @@ def test_intervention_selects_full_gdn_or_both() -> None:
         assert len(runtime.records) == 2
         assert torch.count_nonzero(full(source)) == 4
         assert torch.count_nonzero(gdn(source)) == 4
+
+
+def test_mlp_intervention_targets_every_predown_wire() -> None:
+    model = _MockModel(["full", "gdn"])
+    source = torch.arange(1.0, 9.0).unsqueeze(0)
+    projections = [layer.mlp.down_proj for layer in model.model.language_model.layers]
+    with Qwen35PostGateTopKRuntime(
+        model,
+        intervention="mlp",
+        keep_ratio=0.5,
+        selection_scope="source_local",
+        tp_size=2,
+    ) as runtime:
+        assert len(runtime.records) == 2
+        assert {record.layer_kind for record in runtime.records} == {"mlp"}
+        for projection in projections:
+            assert torch.count_nonzero(projection(source)) == 4
+    for projection in projections:
+        torch.testing.assert_close(projection(source), source)
+
+
+def test_mlp_output_weighted_score_uses_down_weight_column_norm() -> None:
+    model = _MockModel(["full"], width=4)
+    projection = model.model.language_model.layers[0].mlp.down_proj
+    projection.weight.data.copy_(torch.diag(torch.tensor([100.0, 1.0, 1.0, 1.0])))
+    source = torch.tensor([[1.0, 4.0, 3.0, 2.0]])
+    with Qwen35PostGateTopKRuntime(
+        model,
+        intervention="mlp",
+        keep_ratio=0.5,
+        selection_scope="source_local",
+        score="output_weighted",
+        tp_size=2,
+    ) as runtime:
+        actual = projection(source)
+        assert runtime.records[0].score == "output_weighted"
+    torch.testing.assert_close(actual, torch.tensor([[100.0, 0.0, 3.0, 0.0]]))
+
+
+def test_contribution_gram_matches_explicit_channel_contributions() -> None:
+    activations = torch.tensor(
+        [
+            [1.0, 2.0, -1.0, 0.5],
+            [3.0, -2.0, 4.0, 1.5],
+            [-1.0, 0.25, 2.0, -3.0],
+        ]
+    )
+    weight = torch.tensor(
+        [
+            [2.0, 0.0, 1.0, -1.0],
+            [0.5, 3.0, -2.0, 4.0],
+        ]
+    )
+    moment = activations.T @ activations / len(activations)
+    actual = contribution_gram(moment, weight)
+    explicit = torch.stack(
+        [
+            torch.outer(activations[:, channel], weight[:, channel]).reshape(-1)
+            for channel in range(activations.shape[1])
+        ],
+        dim=1,
+    )
+    expected = explicit.T @ explicit / len(activations)
+    torch.testing.assert_close(actual, expected)
+    assert actual[0, 2] != 0.0
+
+
+def test_gram_srrqr_returns_unique_real_coordinates() -> None:
+    generator = torch.Generator().manual_seed(20260826)
+    feature = torch.randn(5, 8, generator=generator)
+    gram = feature.T @ feature
+    result = gram_srrqr_coordinates(
+        gram,
+        3,
+        pod_oversample=2,
+        bound=4.0,
+        max_swaps=16,
+    )
+    assert result.indices.shape == (3,)
+    assert torch.unique(result.indices).numel() == 3
+    assert int(result.indices.min()) >= 0
+    assert int(result.indices.max()) < 8
+    assert result.pod_dimension == 5
+    assert result.pod_energy_fraction == pytest.approx(1.0, abs=1e-5)
+    assert result.diagnostics.converged
+
+    scaled = gram_srrqr_coordinates(
+        gram * 1e-8,
+        3,
+        pod_oversample=2,
+        bound=4.0,
+        max_swaps=16,
+    )
+    torch.testing.assert_close(scaled.indices, result.indices)
+
+    spiked = torch.diag(torch.logspace(0, -7, 8))
+    spiked_result = gram_srrqr_coordinates(
+        spiked,
+        3,
+        pod_oversample=2,
+        bound=4.0,
+        max_swaps=16,
+    )
+    assert spiked_result.indices.numel() == 3
+    assert spiked_result.gram_positive_eigenvalue_count == 8
+
+
+def test_gram_subset_reweighting_matches_explicit_least_squares() -> None:
+    feature = torch.tensor(
+        [
+            [1.0, 0.5, -0.25, 2.0],
+            [0.0, 1.5, 0.75, -1.0],
+            [2.0, -0.5, 1.0, 0.25],
+            [-1.0, 0.25, 2.0, 1.5],
+            [0.5, 2.0, -1.5, 0.75],
+        ],
+        dtype=torch.float64,
+    )
+    gram = feature.T @ feature
+    indices = torch.tensor([0, 2])
+    result = gram_subset_reweighting(gram, indices)
+    target = feature.sum(dim=1)
+    expected = torch.linalg.lstsq(feature[:, indices], target).solution.float()
+    torch.testing.assert_close(result.coefficients, expected)
+
+    approximation = feature[:, indices] @ result.coefficients.double()
+    expected_residual = float((target - approximation).square().sum() / target.square().sum())
+    zero_fill = feature[:, indices].sum(dim=1)
+    zero_fill_residual = float((target - zero_fill).square().sum() / target.square().sum())
+    assert result.relative_residual == pytest.approx(expected_residual)
+    assert result.relative_residual < zero_fill_residual
+
+
+def test_static_mlp_mask_is_tp_balanced_and_restores() -> None:
+    model = _MockModel(["full", "gdn"], width=8)
+    masks = {
+        0: torch.tensor([1, 0, 1, 0, 0, 1, 0, 1], dtype=torch.bool),
+        1: torch.tensor([0, 1, 0, 1, 1, 0, 1, 0], dtype=torch.bool),
+    }
+    source = torch.arange(1.0, 9.0).unsqueeze(0)
+    projections = [layer.mlp.down_proj for layer in model.model.language_model.layers]
+    with StaticMLPMaskRuntime(model, masks, tp_size=2) as runtime:
+        assert runtime.kept_per_source == 2
+        torch.testing.assert_close(
+            projections[0](source),
+            source * masks[0],
+        )
+        torch.testing.assert_close(
+            projections[1](source),
+            source * masks[1],
+        )
+        assert all(row["retained_input_energy"] > 0.0 for row in runtime.profile_snapshot())
+    for projection in projections:
+        torch.testing.assert_close(projection(source), source)
+
+
+def test_static_mlp_mask_applies_fixed_selected_channel_scales() -> None:
+    model = _MockModel(["full"], width=8)
+    mask = torch.tensor([1, 0, 1, 0, 0, 1, 0, 1], dtype=torch.bool)
+    scale = torch.tensor([2.0, 0.0, 0.5, 0.0, 0.0, -1.0, 0.0, 1.5])
+    source = torch.arange(1.0, 9.0).unsqueeze(0)
+    projection = model.model.language_model.layers[0].mlp.down_proj
+    with StaticMLPMaskRuntime(
+        model,
+        {0: mask},
+        scales={0: scale},
+        tp_size=2,
+    ) as runtime:
+        torch.testing.assert_close(projection(source), source * scale)
+        profile = runtime.profile_snapshot()[0]
+        assert profile["transformed_input_energy"] == pytest.approx(
+            float((source * scale).square().sum() / source.square().sum())
+        )
+    torch.testing.assert_close(projection(source), source)
 
 
 def test_retained_count_and_variant_plan() -> None:

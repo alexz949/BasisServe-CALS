@@ -4,6 +4,7 @@ The adapter installs forward pre-hooks on the exact output-projection inputs:
 
 * full attention: ``self_attn.o_proj`` after the sigmoid output gate;
 * Gated DeltaNet: ``linear_attn.out_proj`` after gated RMSNorm/SiLU.
+* MLP: ``mlp.down_proj`` after the SwiGLU product.
 
 Only the transient post-gate wire is sparsified.  Checkpoint weights, attention
 states, and GDN recurrent states remain unchanged.  The implementation is a
@@ -22,9 +23,10 @@ from torch import Tensor, nn
 from basisserve.core.qwen35_gdn_runtime import qwen35_decoder_layers
 
 
-LayerKind = Literal["full_attention", "gdn"]
-Intervention = Literal["full", "gdn", "both"]
+LayerKind = Literal["full_attention", "gdn", "mlp"]
+Intervention = Literal["full", "gdn", "both", "mlp"]
 SelectionScope = Literal["global", "source_local"]
+TopKScore = Literal["magnitude", "output_weighted"]
 
 
 def retained_count(width: int, keep_ratio: float) -> int:
@@ -44,6 +46,7 @@ class PostGateTopKRecord:
     width: int
     keep_ratio: float
     selection_scope: SelectionScope
+    score: TopKScore
     tp_size: int
     kept_per_vector: int
     kept_per_source: int | None
@@ -72,13 +75,16 @@ class Qwen35PostGateTopKRuntime:
         intervention: Intervention,
         keep_ratio: float,
         selection_scope: SelectionScope = "source_local",
+        score: TopKScore = "magnitude",
         tp_size: int = 8,
         profile: bool = True,
     ) -> None:
-        if intervention not in {"full", "gdn", "both"}:
+        if intervention not in {"full", "gdn", "both", "mlp"}:
             raise ValueError(f"unsupported intervention {intervention!r}")
         if selection_scope not in {"global", "source_local"}:
             raise ValueError(f"unsupported selection scope {selection_scope!r}")
+        if score not in {"magnitude", "output_weighted"}:
+            raise ValueError(f"unsupported Top-K score {score!r}")
         if tp_size <= 0:
             raise ValueError("TP size must be positive")
         retained_count(1, keep_ratio)
@@ -86,11 +92,13 @@ class Qwen35PostGateTopKRuntime:
         self.intervention = intervention
         self.keep_ratio = float(keep_ratio)
         self.selection_scope = selection_scope
+        self.score = score
         self.tp_size = int(tp_size)
         self.profile_enabled = bool(profile)
         self._handles: dict[int, Any] = {}
         self._modules: dict[int, nn.Linear] = {}
         self._profiles: dict[int, _ProfileState] = {}
+        self._channel_weights: dict[int, Tensor] = {}
         self.records: tuple[PostGateTopKRecord, ...] = ()
 
     @property
@@ -98,7 +106,9 @@ class Qwen35PostGateTopKRuntime:
         return bool(self._handles)
 
     def _targeted(self, kind: LayerKind) -> bool:
-        return self.intervention == "both" or (
+        return (self.intervention == "mlp" and kind == "mlp") or (
+            self.intervention == "both" and kind != "mlp"
+        ) or (
             self.intervention == "full" and kind == "full_attention"
         ) or (self.intervention == "gdn" and kind == "gdn")
 
@@ -128,6 +138,7 @@ class Qwen35PostGateTopKRuntime:
             width=width,
             keep_ratio=self.keep_ratio,
             selection_scope=self.selection_scope,
+            score=self.score,
             tp_size=self.tp_size,
             kept_per_vector=kept_per_vector,
             kept_per_source=kept_per_source,
@@ -144,9 +155,12 @@ class Qwen35PostGateTopKRuntime:
                 f"{tuple(source.shape)}, expected final width {record.width}"
             )
         flat = source.reshape(-1, record.width)
+        scores = flat.float().abs()
+        if record.score == "output_weighted":
+            scores = scores * self._channel_weights[record.layer_index].unsqueeze(0)
         if self.selection_scope == "global":
             indices = torch.topk(
-                flat.float().abs(),
+                scores,
                 k=record.kept_per_vector,
                 dim=-1,
                 largest=True,
@@ -160,8 +174,9 @@ class Qwen35PostGateTopKRuntime:
             local_width = record.width // self.tp_size
             assert record.kept_per_source is not None
             by_source = flat.reshape(-1, self.tp_size, local_width)
+            scores_by_source = scores.reshape(-1, self.tp_size, local_width)
             local_indices = torch.topk(
-                by_source.float().abs(),
+                scores_by_source,
                 k=record.kept_per_source,
                 dim=-1,
                 largest=True,
@@ -209,16 +224,25 @@ class Qwen35PostGateTopKRuntime:
         records: list[PostGateTopKRecord] = []
         try:
             for layer_index, layer in enumerate(layers):
-                candidates: tuple[tuple[LayerKind, Any, str], ...] = (
-                    ("full_attention", getattr(layer, "self_attn", None), "o_proj"),
-                    ("gdn", getattr(layer, "linear_attn", None), "out_proj"),
-                )
-                present = [item for item in candidates if item[1] is not None]
-                if len(present) != 1:
-                    raise ValueError(
-                        f"decoder layer {layer_index} must expose exactly one full/GDN module"
+                if self.intervention == "mlp":
+                    layer_kind: LayerKind = "mlp"
+                    owner = getattr(layer, "mlp", None)
+                    projection_name = "down_proj"
+                    if owner is None:
+                        raise ValueError(
+                            f"decoder layer {layer_index} does not expose an MLP"
+                        )
+                else:
+                    candidates: tuple[tuple[LayerKind, Any, str], ...] = (
+                        ("full_attention", getattr(layer, "self_attn", None), "o_proj"),
+                        ("gdn", getattr(layer, "linear_attn", None), "out_proj"),
                     )
-                layer_kind, owner, projection_name = present[0]
+                    present = [item for item in candidates if item[1] is not None]
+                    if len(present) != 1:
+                        raise ValueError(
+                            f"decoder layer {layer_index} must expose exactly one full/GDN module"
+                        )
+                    layer_kind, owner, projection_name = present[0]
                 if not self._targeted(layer_kind):
                     continue
                 projection = getattr(owner, projection_name, None)
@@ -240,6 +264,13 @@ class Qwen35PostGateTopKRuntime:
                         input_energy=torch.zeros((), dtype=torch.float32, device=device),
                         retained_energy=torch.zeros((), dtype=torch.float32, device=device),
                     )
+                if self.score == "output_weighted":
+                    self._channel_weights[layer_index] = torch.linalg.vector_norm(
+                        projection.weight,
+                        ord=2,
+                        dim=0,
+                        dtype=torch.float32,
+                    ).contiguous()
                 handle = projection.register_forward_pre_hook(self._hook(record))
                 projection._basisserve_postgate_topk = True
                 self._handles[layer_index] = handle
@@ -289,6 +320,7 @@ class Qwen35PostGateTopKRuntime:
                     "kept_per_vector": record.kept_per_vector,
                     "kept_per_source": record.kept_per_source,
                     "realized_ratio": record.realized_ratio,
+                    "score": record.score,
                     "retained_input_energy": retained_energy / max(input_energy, 1e-30),
                     "mean_channel_selection_probability": float(probability.mean()),
                     "selection_probability_std": float(probability.std(unbiased=False)),
@@ -306,6 +338,7 @@ class Qwen35PostGateTopKRuntime:
         self._handles.clear()
         self._modules.clear()
         self._profiles.clear()
+        self._channel_weights.clear()
         self.records = ()
 
     def __enter__(self) -> "Qwen35PostGateTopKRuntime":
@@ -319,5 +352,6 @@ class Qwen35PostGateTopKRuntime:
 __all__ = [
     "PostGateTopKRecord",
     "Qwen35PostGateTopKRuntime",
+    "TopKScore",
     "retained_count",
 ]
