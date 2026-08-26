@@ -13,6 +13,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from basisserve.core.kq_svd import project_grouped_queries_and_keys
 from basisserve.kernels.sageattention import sage_attention_with_compressed_value
 
 
@@ -43,6 +44,8 @@ class GQATiedVOQwen3Attention(nn.Module):
         v_proj_compressed_bias: torch.Tensor | None = None,
         o_decoder_bias: torch.Tensor | None = None,
         attention_backend: str = "native",
+        key_projector: torch.Tensor | None = None,
+        query_projector: torch.Tensor | None = None,
     ) -> None:
         super().__init__()
         config = base_attention.config
@@ -121,7 +124,44 @@ class GQATiedVOQwen3Attention(nn.Module):
             self.v_proj.bias.data.copy_(v_proj_compressed_bias.to(device=device, dtype=dtype))
         if self.o_proj.bias is not None:
             self.o_proj.bias.data.copy_(o_decoder_bias.to(device=device, dtype=dtype))
+        self.register_buffer("key_projector", None, persistent=False)
+        self.register_buffer("query_projector", None, persistent=False)
+        self.set_qk_projectors(key_projector, query_projector)
         self.train(base_attention.training)
+
+    @torch.no_grad()
+    def set_qk_projectors(
+        self,
+        key_projector: torch.Tensor | None,
+        query_projector: torch.Tensor | None,
+    ) -> None:
+        """Select dense Q/K or one post-RoPE low-rank projector pair."""
+
+        if key_projector is None or query_projector is None:
+            if key_projector is not None or query_projector is not None:
+                raise ValueError("Key and Query projectors must be set together")
+            self.key_projector = None
+            self.query_projector = None
+            return
+        if self.attention_backend == "sage":
+            raise ValueError("SageAttention does not support compressed Q/K")
+        if (
+            key_projector.ndim != 3
+            or query_projector.ndim != 3
+            or tuple(key_projector.shape[:2])
+            != (self.num_key_value_heads, self.head_dim)
+            or tuple(query_projector.shape[:2])
+            != (self.num_key_value_heads, self.head_dim)
+            or key_projector.shape[-1] != query_projector.shape[-1]
+        ):
+            raise ValueError(
+                "post-RoPE K/Q projectors must both have shape "
+                "[physical_kv_heads, head_dim, rank]"
+            )
+        device = self.q_proj.weight.device
+        dtype = self.q_proj.weight.dtype
+        self.key_projector = key_projector.detach().to(device=device, dtype=dtype)
+        self.query_projector = query_projector.detach().to(device=device, dtype=dtype)
 
     def forward(
         self,
@@ -148,6 +188,13 @@ class GQATiedVOQwen3Attention(nn.Module):
 
         cos, sin = position_embeddings
         query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin)
+        if self.key_projector is not None:
+            query_states, key_states = project_grouped_queries_and_keys(
+                query_states,
+                key_states,
+                self.key_projector,
+                self.query_projector,
+            )
         if past_key_values is not None:
             cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
             key_states, value_states = past_key_values.update(
