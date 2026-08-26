@@ -25,15 +25,33 @@ from evaluation import allocate_qwen3_32b_c1_tp_source_global_kl as common  # no
 from evaluation import run_qwen3_32b_c1_tp_source_global_kl_sharded as runtime  # noqa: E402
 from evaluation.eval_qwen3_32b_c1_wikitext import (  # noqa: E402
     _decoder_layers,
+    _load_external_layer_schedule,
     _load_layer_allocation_results,
     _sha256,
+    activate_model_profile as activate_evaluator_profile,
     install_layer_allocation_schedule,
     load_layer_allocation_reconstruction_state,
 )
 
 
 FORMAT = "basisserve.qwen3_32b.gqa_c1.layer_schedules_c4_kl.v1"
-SCHEDULE_NAMES = ("uniform_anchor", "mean_dp", "ucb_dp")
+MODEL_LABEL = "Qwen3-32B"
+
+
+def activate_model_profile(name: str) -> None:
+    global FORMAT, MODEL_LABEL
+    common.activate_model_profile(name)
+    runtime.activate_model_profile(name)
+    activate_evaluator_profile(name)
+    if name == "qwen3_32b":
+        slug = "qwen3_32b"
+        MODEL_LABEL = "Qwen3-32B"
+    elif name == "qwen3_8b":
+        slug = "qwen3_8b"
+        MODEL_LABEL = "Qwen3-8B-Base"
+    else:
+        raise ValueError(f"unknown Qwen3 C1 model profile: {name}")
+    FORMAT = f"basisserve.{slug}.gqa_c1.layer_schedules_c4_kl.v1"
 
 
 def parse_args() -> argparse.Namespace:
@@ -42,6 +60,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--allocation-dir", type=Path, required=True)
     parser.add_argument("--windows", type=Path, required=True)
     parser.add_argument("--output-json", type=Path, required=True)
+    parser.add_argument(
+        "--schedule-names",
+        default="uniform_anchor,mean_dp,ucb_dp",
+        help="Comma-separated recorded schedules to compare.",
+    )
+    parser.add_argument(
+        "--schedule-file",
+        type=Path,
+        help="Authenticated external schedule to append to the comparison.",
+    )
     parser.add_argument("--window-start", type=int, default=320)
     parser.add_argument("--profile-windows", type=int, default=8)
     parser.add_argument("--confirmation-windows", type=int, default=8)
@@ -112,6 +140,25 @@ def evaluate(args: argparse.Namespace) -> None:
         raise FileExistsError(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     result = _load_layer_allocation_results(allocation_dir, model_path)
+    schedule_names = tuple(
+        name.strip() for name in args.schedule_names.split(",") if name.strip()
+    )
+    if not schedule_names or len(schedule_names) != len(set(schedule_names)):
+        raise ValueError("schedule names must be non-empty and unique")
+    if any(name not in result["schedules"] for name in schedule_names):
+        raise ValueError("requested recorded schedule does not exist")
+    external_schedule = None
+    if args.schedule_file is not None:
+        schedule_path = args.schedule_file.expanduser().resolve()
+        external_name, external_row, external_schedule = (
+            _load_external_layer_schedule(
+                schedule_path,
+                allocation_result_path=allocation_dir / "result.json",
+                result=result,
+            )
+        )
+        result["schedules"][external_name] = external_row
+        schedule_names = (*schedule_names, external_name)
     profile, confirmation, provenance = common._select_fresh_windows(
         args.windows,
         window_start=args.window_start,
@@ -140,7 +187,10 @@ def evaluate(args: argparse.Namespace) -> None:
     schedule_rows = {}
     profile_stop = args.profile_windows
     all_stop = args.profile_windows + args.confirmation_windows
-    for schedule_name in SCHEDULE_NAMES:
+    profile_label = f"profile_{args.profile_windows}"
+    confirmation_label = f"confirmation_{args.confirmation_windows}"
+    all_label = f"all_{len(sequences)}"
+    for schedule_name in schedule_names:
         schedule_started = time.perf_counter()
         installation = install_layer_allocation_schedule(
             model,
@@ -158,9 +208,9 @@ def evaluate(args: argparse.Namespace) -> None:
         schedule_rows[schedule_name] = {
             "accounting": result["schedules"][schedule_name]["accounting"],
             "metrics": {
-                "profile_8": _metric_subset(metrics, 0, profile_stop),
-                "confirmation_8": _metric_subset(metrics, profile_stop, all_stop),
-                "all_16": metrics,
+                profile_label: _metric_subset(metrics, 0, profile_stop),
+                confirmation_label: _metric_subset(metrics, profile_stop, all_stop),
+                all_label: metrics,
             },
             "installation": installation,
             "elapsed_seconds": time.perf_counter() - schedule_started,
@@ -170,7 +220,7 @@ def evaluate(args: argparse.Namespace) -> None:
         torch.cuda.empty_cache()
 
     rankings = {}
-    for split in ("profile_8", "confirmation_8", "all_16"):
+    for split in (profile_label, confirmation_label, all_label):
         rankings[split] = sorted(
             (
                 {
@@ -179,7 +229,7 @@ def evaluate(args: argparse.Namespace) -> None:
                         "terminal_kl"
                     ]["mean"],
                 }
-                for name in SCHEDULE_NAMES
+                for name in schedule_names
             ),
             key=lambda row: row["mean_terminal_kl"],
         )
@@ -236,6 +286,16 @@ def evaluate(args: argparse.Namespace) -> None:
             "torch_num_threads": torch.get_num_threads(),
         },
     }
+    payload["metric_protocol"]["teacher"] = (
+        f"uncompressed dense {MODEL_LABEL} BF16 SDPA"
+    )
+    if external_schedule is not None:
+        payload["allocation"]["external_schedule"] = {
+            "path": str(schedule_path),
+            "sha256": _sha256(schedule_path),
+            "format": external_schedule["format"],
+            "method": external_schedule["method"],
+        }
     common._atomic_json(output_path, payload)
     print(f"[C4 seq2048] wrote {output_path}", flush=True)
 

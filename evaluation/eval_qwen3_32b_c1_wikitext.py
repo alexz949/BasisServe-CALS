@@ -49,6 +49,7 @@ RAGGED_FACTOR_FORMAT = "basisserve.qwen3_32b.gqa_c1.ragged_schedule_als.v1"
 LAYER_ALLOCATION_FORMAT = (
     "basisserve.qwen3_32b.gqa_c1.layer_global_kl_allocation.v1"
 )
+EXTERNAL_SCHEDULE_FORMAT = "basisserve.c1.factorized_terminal_kl_schedule.v1"
 MODEL_LABEL = "Qwen3-32B"
 
 
@@ -247,6 +248,56 @@ def _load_layer_allocation_results(
     ):
         raise ValueError("selected per-layer schedule and candidate name disagree")
     return result
+
+
+def _load_external_layer_schedule(
+    path: Path,
+    *,
+    allocation_result_path: Path,
+    result: Mapping[str, Any],
+) -> tuple[str, dict[str, Any], dict[str, Any]]:
+    """Load and validate a schedule derived from an authenticated allocation."""
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if (
+        payload.get("format") != EXTERNAL_SCHEDULE_FORMAT
+        or payload.get("status") != "complete"
+    ):
+        raise ValueError("external layer schedule is incomplete or incompatible")
+    source = payload.get("source", {})
+    if source.get("allocation_result_sha256") != _sha256(allocation_result_path):
+        raise ValueError("external layer schedule belongs to another allocation")
+    name = str(payload.get("schedule_name", ""))
+    if not name or name in result["schedules"]:
+        raise ValueError("external layer schedule name is empty or collides")
+    schedule = payload.get("schedule", ())
+    if len(schedule) != NUM_LAYERS or any(
+        len(layer) != NUM_KV_HEADS for layer in schedule
+    ):
+        raise ValueError("external layer schedule has incompatible geometry")
+    if any(len(set(map(int, layer))) != 1 for layer in schedule):
+        raise ValueError("external layer schedule is not layer-uniform")
+    candidate_ranks = set(map(int, result["selection"]["candidate_ranks"]))
+    flat = [int(rank) for layer in schedule for rank in layer]
+    if any(rank not in candidate_ranks for rank in flat):
+        raise ValueError("external layer schedule uses an unknown rank")
+    target = int(result["selection"]["target_source_rank_sum"])
+    if sum(flat) != target:
+        raise ValueError("external layer schedule violates the allocation budget")
+    accounting = dict(payload.get("accounting", {}))
+    if int(accounting.get("source_rank_sum", -1)) != target:
+        raise ValueError("external layer schedule accounting violates the budget")
+    expected_histogram = {
+        str(rank): sum(value == rank for value in flat)
+        for rank in sorted(set(flat))
+    }
+    if accounting.get("source_rank_histogram") != expected_histogram:
+        raise ValueError("external layer schedule rank histogram is inconsistent")
+    row = {
+        "schedule": [[int(rank) for rank in layer] for layer in schedule],
+        "accounting": accounting,
+    }
+    return name, row, payload
 
 
 @dataclass(frozen=True)
@@ -618,6 +669,15 @@ def evaluate(args: argparse.Namespace) -> None:
     ragged = args.ragged_factor_dir is not None
     if args.allocation_schedule is not None and not allocation:
         raise ValueError("--allocation-schedule requires --allocation-dir")
+    if args.allocation_schedule_file is not None and not allocation:
+        raise ValueError("--allocation-schedule-file requires --allocation-dir")
+    if (
+        args.allocation_schedule is not None
+        and args.allocation_schedule_file is not None
+    ):
+        raise ValueError(
+            "--allocation-schedule and --allocation-schedule-file are mutually exclusive"
+        )
     factor_dir = Path(
         args.allocation_dir
         if allocation
@@ -631,6 +691,22 @@ def evaluate(args: argparse.Namespace) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     if allocation:
         result = _load_layer_allocation_results(factor_dir, model_path)
+        allocation_result_path = factor_dir / "result.json"
+        external_schedule_payload = None
+        if args.allocation_schedule_file is not None:
+            external_schedule_path = (
+                Path(args.allocation_schedule_file).expanduser().resolve()
+            )
+            (
+                external_schedule_name,
+                external_schedule_row,
+                external_schedule_payload,
+            ) = _load_external_layer_schedule(
+                external_schedule_path,
+                allocation_result_path=allocation_result_path,
+                result=result,
+            )
+            result["schedules"][external_schedule_name] = external_schedule_row
     elif ragged:
         result = _load_ragged_results(factor_dir, model_path)
     else:
@@ -656,7 +732,9 @@ def evaluate(args: argparse.Namespace) -> None:
     install_started = time.perf_counter()
     if allocation:
         schedule_name = (
-            args.allocation_schedule
+            external_schedule_name
+            if args.allocation_schedule_file is not None
+            else args.allocation_schedule
             if args.allocation_schedule is not None
             else result["selection"]["selected_candidate"]
         )
@@ -692,6 +770,13 @@ def evaluate(args: argparse.Namespace) -> None:
             "original_selected_candidate": selection["selected_candidate"],
             "factor_stage": stage,
         }
+        if args.allocation_schedule_file is not None:
+            factor_result_record["external_schedule"] = {
+                "path": str(external_schedule_path),
+                "sha256": _sha256(external_schedule_path),
+                "format": external_schedule_payload["format"],
+                "method": external_schedule_payload["method"],
+            }
         compression = {
             "target": "value_cache_only",
             "key_cache": "dense",
@@ -836,8 +921,11 @@ def parse_args() -> argparse.Namespace:
     factors.add_argument("--ragged-factor-dir")
     parser.add_argument(
         "--allocation-schedule",
-        choices=("uniform_anchor", "mean_dp", "ucb_dp"),
         help="Evaluate this recorded schedule; defaults to the selected candidate.",
+    )
+    parser.add_argument(
+        "--allocation-schedule-file",
+        help="Evaluate an authenticated external schedule derived from the allocation.",
     )
     parser.add_argument("--output-json", required=True)
     parser.add_argument("--dataset", default="wikitext2")
