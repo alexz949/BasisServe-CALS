@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "basisserve-cals"
+version = "0.1.0"
+description = "C1 serving and evaluation components for BasisServe-CALS"
+requires-python = ">=3.10"
+dependencies = [
+  "safetensors",
+  "torch",
+]
+
+[project.entry-points."vllm.general_plugins"]
+basisserve_c1 = "basisserve.vllm:register"
+
+[tool.setuptools.packages.find]
+include = ["basisserve*"]
