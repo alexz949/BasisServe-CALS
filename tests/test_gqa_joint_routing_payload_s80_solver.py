@@ -20,6 +20,11 @@ from basisserve.core.gqa_joint_routing_payload_s80 import (
     routing_loss,
     s80_objective_from_statistics,
 )
+from basisserve.core.gqa_joint_routing_payload_s80_fisher import (
+    pack_symmetric_fisher_grams,
+    prepare_compact_softmax_fisher_routing,
+    prepare_softmax_fisher_routing,
+)
 
 
 def _layout() -> S80Layout:
@@ -114,6 +119,37 @@ def _explicit_routing(layout, factors, routing_inputs):
             )
             result += (query[:, head] @ delta @ joint[:, group].mT).square().sum()
     return result
+
+
+def _compact_fisher(layout: S80Layout, direct: S80DirectResidualData):
+    raw = prepare_softmax_fisher_routing(
+        direct,
+        head_to_kv_group=layout.head_to_kv_group(),
+        value_dim=layout.value_dim,
+        key_dim=layout.key_dim,
+        device="cpu",
+        dtype=torch.float64,
+    )
+    rows = raw.joint_rows_by_group.index_select(0, raw.head_to_kv_group)
+    means = torch.einsum("hdt,hdti->hdi", raw.probabilities_by_head, rows)
+    centered = rows - means.unsqueeze(2)
+    grams = torch.einsum(
+        "hdt,hdti,hdtj->hdij",
+        raw.probabilities_by_head,
+        centered,
+        centered,
+    )
+    return prepare_compact_softmax_fisher_routing(
+        queries_by_head=raw.queries_by_head,
+        fisher_grams_packed_by_head=pack_symmetric_fisher_grams(grams),
+        head_to_kv_group=raw.head_to_kv_group,
+        value_dim=raw.value_dim,
+        key_dim=raw.key_dim,
+        scaling=raw.scaling,
+        teacher_fisher_energy=raw.teacher_fisher_energy,
+        device="cpu",
+        dtype=torch.float64,
+    )
 
 
 def test_covariance_root_system_preserves_gram_and_cross() -> None:
@@ -304,16 +340,17 @@ def test_fast_schedule_is_monotone_and_supports_all_u_modes() -> None:
         assert len(result.final_routing_query_steps) == expected_u_systems
 
 
-def test_softmax_fisher_schedule_is_monotone_with_adapter_u() -> None:
+def test_page_fisher_schedule_is_monotone_with_adapter_u() -> None:
     layout, objective, factors, *_, direct = _problem()
+    fisher = _compact_fisher(layout, direct)
     result = fit_s80_joint(
         layout=layout,
         objective=objective,
         validation_objective=objective,
-        direct_residuals=direct,
-        validation_direct_residuals=direct,
+        fisher_statistics=fisher,
+        validation_fisher_statistics=fisher,
         initial_factors=factors,
-        routing_metric="softmax_fisher",
+        routing_metric="page_fisher",
         outer_sweeps=3,
         u_mode="adapter_u",
         lsqr_max_iterations=100,
@@ -329,7 +366,7 @@ def test_softmax_fisher_schedule_is_monotone_with_adapter_u() -> None:
         )
     )
     assert all(right <= left + 1e-8 for left, right in zip(values, values[1:]))
-    assert result.routing_metric == "softmax_fisher"
+    assert result.routing_metric == "page_fisher"
     assert result.routing_normalizer > 0
     assert result.diagnostics.validation_after_routing_queries is not None
 

@@ -15,6 +15,7 @@ import sys
 import time
 from typing import Any, Mapping
 
+from safetensors.torch import load_file
 import torch
 import torch.distributed as dist
 import transformers
@@ -92,6 +93,69 @@ def _arm_names(
         f"dense_k_c1_v{value_rank}",
         f"kq_r{routing_rank}_b{exact_token_budget}_exact_k_c1_v{value_rank}",
     )
+
+
+def _conditional_arm_names(
+    value_rank: int,
+    base_rank: int,
+    residual_rank: int,
+    exact_token_budget: int,
+) -> tuple[str, str]:
+    return (
+        f"dense_k_c1_v{value_rank}",
+        f"vbase_b{base_rank}_residual_r{residual_rank}"
+        f"_b{exact_token_budget}_exact_k_c1_v{value_rank}",
+    )
+
+
+def _load_conditional_factors(
+    root: Path,
+    *,
+    layers: int,
+    base_rank: int,
+    residual_rank: int,
+) -> tuple[list[dict[str, torch.Tensor]], list[Path], list[Path]]:
+    """Load one complete all-layer conditional-router shard tree."""
+
+    layer_paths = {
+        int(path.stem.removeprefix("layer_")): path
+        for path in sorted(root.rglob("layer_*.safetensors"))
+    }
+    banks = []
+    ordered_paths = []
+    for layer in range(layers):
+        path = layer_paths[layer]
+        tensors = load_file(str(path), device="cpu")
+        banks.append(
+            {
+                "base_left": tensors[f"base_left_b{base_rank}"],
+                "base_right": tensors[f"base_right_b{base_rank}"],
+                "base_bias": tensors[f"base_bias_b{base_rank}"],
+                "residual_encoder": tensors[
+                    f"residual_encoder_b{base_rank}_r{residual_rank}"
+                ],
+                "residual_query": tensors[
+                    f"residual_query_b{base_rank}_r{residual_rank}"
+                ],
+            }
+        )
+        ordered_paths.append(path)
+    return banks, ordered_paths, sorted(root.rglob("result.json"))
+
+
+def _set_conditional_routing(
+    modules: list[GQATiedVOQwen3Attention],
+    factors: list[dict[str, torch.Tensor]],
+) -> None:
+    for module, layer_factors in zip(modules, factors, strict=True):
+        module.set_reverse_shadow_config(None)
+        module.set_conditional_routing_factors(
+            base_left=layer_factors["base_left"],
+            base_right=layer_factors["base_right"],
+            base_bias=layer_factors["base_bias"],
+            residual_encoder=layer_factors["residual_encoder"],
+            residual_query_projector=layer_factors["residual_query"],
+        )
 
 
 def _ratio_slug(value: float) -> str:
@@ -278,6 +342,27 @@ def _assigned_work(
     if not 0 <= rank_offset < world_size:
         raise ValueError("assignment rank offset must lie in [0, world size)")
     return [row for row in work if (int(row[0]) + rank_offset) % world_size == rank]
+
+
+def _select_sample_spec(
+    work: list[tuple[Any, ...]],
+    specification: str,
+) -> list[tuple[Any, ...]]:
+    """Select exact ``task:ordinal`` rows while preserving dataset order."""
+
+    if not specification.strip():
+        return work
+    requested = {
+        (task.strip(), int(ordinal))
+        for item in specification.split(",")
+        for task, ordinal in (item.rsplit(":", 1),)
+    }
+    selected = [
+        row
+        for row in work
+        if (str(row[1].name), int(row[2])) in requested
+    ]
+    return [(index, *row[1:]) for index, row in enumerate(selected)]
 
 
 def _set_backend(
@@ -510,15 +595,26 @@ def _markdown(payload: Mapping[str, Any]) -> str:
         if decode_queries
         else 0.0
     )
+    conditional = metadata.get("routing_mode") == "conditional_v_base_residual"
+    route_label = (
+        f"Base{int(metadata['conditional_base_rank'])}+R{routing_rank}"
+        if conditional
+        else f"R{routing_rank}"
+    )
+    route_description = (
+        "V-conditioned predictive-base plus residual routing"
+        if conditional
+        else "KQ routing"
+    )
     lines = [
-        f"# Qwen3-8B-Base C1 KQ-routing RULER-v1 {metadata['sequence_length'] // 1024}K",
+        f"# Qwen3-8B-Base C1 routing RULER-v1 {metadata['sequence_length'] // 1024}K",
         "",
         f"BF16 dense, C1-V{value_rank} exact-QK, and C1-V{value_rank} with "
-        f"R{routing_rank}/B{exact_token_budget} KQ routing use identical official "
+        f"{route_label}/B{exact_token_budget} {route_description} use identical official "
         "base-model prompts and greedy decoding.",
         "",
         f"| Task | Samples | BF16 dense | C1 exact-QK | "
-        f"R{routing_rank}/B{exact_token_budget} | Routing-C1 | Regressions | "
+        f"{route_label}/B{exact_token_budget} | Routing-C1 | Regressions | "
         "Improvements |",
         "|:---|---:|---:|---:|---:|---:|---:|---:|",
     ]
@@ -552,7 +648,7 @@ def _markdown(payload: Mapping[str, Any]) -> str:
             "",
             f"Prompt prefill uses chunked exact-QK C1-V{value_rank} SDPA. The first "
             "generated token "
-            "comes from dense C1 prefill; KQ routing is enabled for subsequent "
+            f"comes from dense C1 prefill; {route_description} is enabled for subsequent "
             "decode tokens. Exact K remains physically GPU-resident, so traffic is "
             "a logical CPU page-store read volume rather than measured PCIe latency.",
         ]
@@ -564,12 +660,19 @@ def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model-path", type=Path, required=True)
     parser.add_argument("--c1-export", type=Path, required=True)
-    parser.add_argument("--routing-factors", type=Path, required=True)
+    routing_group = parser.add_mutually_exclusive_group(required=True)
+    routing_group.add_argument("--routing-factors", type=Path)
+    routing_group.add_argument("--conditional-routing-factors", type=Path)
     parser.add_argument("--dense-baseline", type=Path, required=True)
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--sequence-length", type=int, default=32768)
     parser.add_argument("--tasks", default="all")
     parser.add_argument("--samples-per-task", type=int, default=8)
+    parser.add_argument(
+        "--sample-spec",
+        default="",
+        help="comma-separated exact task:ordinal rows from the loaded task prefix",
+    )
     parser.add_argument(
         "--assignment-rank-offset",
         type=int,
@@ -582,6 +685,7 @@ def _parser() -> argparse.ArgumentParser:
         help="static YaRN factor; required when sequence length exceeds native context",
     )
     parser.add_argument("--routing-rank", type=int, default=32)
+    parser.add_argument("--conditional-base-rank", type=int, default=32)
     parser.add_argument("--page-size", type=int, default=64)
     parser.add_argument("--exact-token-budget", type=int, default=1024)
     parser.add_argument("--adaptive-max-token-budget", type=int)
@@ -657,7 +761,12 @@ def main() -> None:
 
     model_path = args.model_path.expanduser().resolve()
     c1_export = args.c1_export.expanduser().resolve()
-    factor_dir = args.routing_factors.expanduser().resolve()
+    conditional_mode = args.conditional_routing_factors is not None
+    factor_dir = (
+        args.conditional_routing_factors
+        if conditional_mode
+        else args.routing_factors
+    ).expanduser().resolve()
     dense_baseline_path = args.dense_baseline.expanduser().resolve()
     data_dir = args.data_dir.expanduser().resolve()
     output_dir = args.output_dir.expanduser().resolve()
@@ -685,7 +794,10 @@ def main() -> None:
         task_names=task_names,
         rope_scaling=rope_scaling,
     )
-    work = _build_work(data_dir, tasks, args.samples_per_task)
+    work = _select_sample_spec(
+        _build_work(data_dir, tasks, args.samples_per_task),
+        args.sample_spec,
+    )
     assigned = _assigned_work(
         work,
         rank=rank,
@@ -705,47 +817,97 @@ def main() -> None:
     )
     if not 0 < value_rank <= head_dim:
         raise ValueError(f"C1 Value rank must lie in [1, {head_dim}], got {value_rank}")
-    c1_arm, routing_arm = _arm_names(
-        value_rank,
-        args.routing_rank,
-        args.exact_token_budget,
-    )
-    sparse_policies = _sparse_policies(
-        value_rank=value_rank,
-        routing_rank=args.routing_rank,
-        base_token_budget=args.exact_token_budget,
-        adaptive_max_token_budget=args.adaptive_max_token_budget,
-        adaptive_tail_mass_ratios=adaptive_tail_mass_ratios,
-    )
-    if sparse_policies[0].arm != routing_arm:
-        raise AssertionError("base sparse policy differs from routing arm")
-    arms = (BF16_ARM, c1_arm, *(policy.arm for policy in sparse_policies))
-    key_factors, query_factors, factor_result, factor_result_path, factor_path = (
-        _load_routing_factors(
-            factor_dir,
-            model_path=model_path,
-            layers=layers,
-            kv_heads=kv_heads,
-            query_heads=query_heads,
-            head_dim=head_dim,
+    if conditional_mode:
+        c1_arm, routing_arm = _conditional_arm_names(
+            value_rank,
+            args.conditional_base_rank,
+            args.routing_rank,
+            args.exact_token_budget,
         )
-    )
-    if args.routing_rank > int(key_factors.shape[-1]):
-        raise ValueError("routing rank exceeds calibrated factor rank")
+        sparse_policies = (
+            SparsePolicy(
+                arm=routing_arm,
+                token_budget=args.exact_token_budget,
+            ),
+        )
+    else:
+        c1_arm, routing_arm = _arm_names(
+            value_rank,
+            args.routing_rank,
+            args.exact_token_budget,
+        )
+        sparse_policies = _sparse_policies(
+            value_rank=value_rank,
+            routing_rank=args.routing_rank,
+            base_token_budget=args.exact_token_budget,
+            adaptive_max_token_budget=args.adaptive_max_token_budget,
+            adaptive_tail_mass_ratios=adaptive_tail_mass_ratios,
+        )
+        if sparse_policies[0].arm != routing_arm:
+            raise AssertionError("base sparse policy differs from routing arm")
+    arms = (BF16_ARM, c1_arm, *(policy.arm for policy in sparse_policies))
+    if conditional_mode:
+        conditional_factors, factor_paths, factor_result_paths = (
+            _load_conditional_factors(
+                factor_dir,
+                layers=layers,
+                base_rank=args.conditional_base_rank,
+                residual_rank=args.routing_rank,
+            )
+        )
+        factor_result = {
+            "format": "basisserve.qwen3_8b.v80_conditional_residual_router.v1"
+        }
+        factor_identity = {
+            "conditional_factor_tensor_sha256": [
+                _sha256(path) for path in factor_paths
+            ],
+            "conditional_factor_result_sha256": [
+                _sha256(path) for path in factor_result_paths
+            ],
+        }
+        routing_proxy_implementation = (
+            "v80_pre_rope_base32_plus_post_rope_residual8_"
+            + ROUTING_PROXY_IMPLEMENTATION
+        )
+    else:
+        key_factors, query_factors, factor_result, factor_result_path, factor_path = (
+            _load_routing_factors(
+                factor_dir,
+                model_path=model_path,
+                layers=layers,
+                kv_heads=kv_heads,
+                query_heads=query_heads,
+                head_dim=head_dim,
+            )
+        )
+        if args.routing_rank > int(key_factors.shape[-1]):
+            raise ValueError("routing rank exceeds calibrated factor rank")
+        factor_identity = {
+            "routing_factor_result_sha256": _sha256(factor_result_path),
+            "routing_factor_tensor_sha256": _sha256(factor_path),
+        }
+        routing_proxy_implementation = ROUTING_PROXY_IMPLEMENTATION
 
     protocol_identity = {
         "model_config_sha256": _sha256(model_path / "config.json"),
         "c1_result_sha256": _sha256(c1_result_path),
-        "routing_factor_result_sha256": _sha256(factor_result_path),
-        "routing_factor_tensor_sha256": _sha256(factor_path),
+        **factor_identity,
         "dense_baseline_sha256": _sha256(dense_baseline_path),
         "dataset_manifest_sha256": dataset_hash,
         "sequence_length": args.sequence_length,
         "tasks": task_names,
         "samples_per_task": args.samples_per_task,
+        "sample_spec": args.sample_spec,
         "arms": list(arms),
         "value_rank": value_rank,
         "routing_rank": args.routing_rank,
+        "routing_mode": (
+            "conditional_v_base_residual" if conditional_mode else "kq_svd"
+        ),
+        "conditional_base_rank": (
+            args.conditional_base_rank if conditional_mode else None
+        ),
         "page_size": args.page_size,
         "exact_token_budget": args.exact_token_budget,
         "adaptive_max_token_budget": args.adaptive_max_token_budget,
@@ -753,8 +915,10 @@ def main() -> None:
         "sparse_policies": [asdict(policy) for policy in sparse_policies],
         "prefill_chunk_size": args.prefill_chunk_size,
         "empty_cache_between_prefill_chunks": (args.empty_cache_between_prefill_chunks),
-        "incremental_routing_sidecar": args.incremental_routing_sidecar,
-        "routing_proxy_implementation": ROUTING_PROXY_IMPLEMENTATION,
+        "incremental_routing_sidecar": (
+            args.incremental_routing_sidecar or conditional_mode
+        ),
+        "routing_proxy_implementation": routing_proxy_implementation,
         "force_last_page": args.force_last_page,
         "dtype": args.dtype,
         "assignment_rank_offset": args.assignment_rank_offset,
@@ -805,12 +969,15 @@ def main() -> None:
         modules = _attention_modules(model)
         if len(replacements) != layers or len(modules) != layers:
             raise RuntimeError("C1 replacement count differs from model layers")
-        _set_routing_rank(
-            modules,
-            key_factors,
-            query_factors,
-            args.routing_rank,
-        )
+        if conditional_mode:
+            _set_conditional_routing(modules, conditional_factors)
+        else:
+            _set_routing_rank(
+                modules,
+                key_factors,
+                query_factors,
+                args.routing_rank,
+            )
         rank_state["runtime"] = {
             "cuda_device": torch.cuda.get_device_name(device),
             "torch_version": torch.__version__,
@@ -821,7 +988,10 @@ def main() -> None:
             "empty_cache_between_prefill_chunks": (
                 args.empty_cache_between_prefill_chunks
             ),
-            "incremental_routing_sidecar": args.incremental_routing_sidecar,
+            "incremental_routing_sidecar": (
+                args.incremental_routing_sidecar or conditional_mode
+            ),
+            "routing_mode": protocol_identity["routing_mode"],
             "rope_scaling": rope_scaling,
         }
         _atomic_json(rank_path, rank_state)
@@ -855,7 +1025,9 @@ def main() -> None:
                 empty_cuda_cache_between_chunks=(
                     args.empty_cache_between_prefill_chunks
                 ),
-                incremental_routing_sidecar=args.incremental_routing_sidecar,
+                incremental_routing_sidecar=(
+                    args.incremental_routing_sidecar or conditional_mode
+                ),
             )
             torch.cuda.synchronize(device)
             prefill_seconds = time.perf_counter() - prefill_started
@@ -986,7 +1158,9 @@ def main() -> None:
                 "empty_cache_between_prefill_chunks": (
                     args.empty_cache_between_prefill_chunks
                 ),
-                "incremental_routing_sidecar": args.incremental_routing_sidecar,
+                "incremental_routing_sidecar": (
+                    args.incremental_routing_sidecar or conditional_mode
+                ),
                 "first_generated_token_from_dense_c1_prefill": True,
                 "routing_enabled_during_decode": True,
                 "adaptive_budget_enabled": bool(adaptive_tail_mass_ratios),
@@ -1049,6 +1223,13 @@ def main() -> None:
                 "exact K remains GPU resident in this correctness oracle",
                 "logical exact-K traffic does not measure PCIe latency or page-cache hits",
                 "Python reference routing time is not serving throughput",
+                *(
+                    [
+                        "the conditional-router quality oracle materializes predicted post-RoPE K in its cached sidecar; deployable persistent storage remains V80 plus residual R8"
+                    ]
+                    if conditional_mode
+                    else []
+                ),
                 *(
                     [
                         "static YaRN changes RoPE at every position, including positions inside the native context",

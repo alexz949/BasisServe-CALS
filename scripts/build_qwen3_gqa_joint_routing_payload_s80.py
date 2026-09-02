@@ -47,8 +47,9 @@ from basisserve.core.gqa_joint_routing_payload_s80 import (  # noqa: E402
     s80_objective_from_statistics,
 )
 from basisserve.core.gqa_joint_routing_payload_s80_fisher import (  # noqa: E402
-    prepare_softmax_fisher_routing,
-    softmax_fisher_routing_diagnostics,
+    S80CompactSoftmaxFisherRouting,
+    compact_softmax_fisher_loss,
+    prepare_compact_softmax_fisher_routing,
 )
 
 
@@ -61,8 +62,9 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", required=True)
     parser.add_argument("--stats-dir", required=True)
-    parser.add_argument("--direct-capture-dir", required=True)
-    parser.add_argument("--validation-direct-capture-dir")
+    parser.add_argument("--direct-capture-dir")
+    parser.add_argument("--page-fisher-stats-dir")
+    parser.add_argument("--validation-page-fisher-stats-dir")
     parser.add_argument("--c1-v80-init", required=True)
     parser.add_argument("--kq-r32-init", required=True)
     parser.add_argument("--output-dir", required=True)
@@ -72,11 +74,9 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--routing-weight", type=float, default=1.0)
     parser.add_argument(
         "--routing-metric",
-        choices=("raw_qk", "softmax_fisher"),
+        choices=("raw_qk", "page_fisher"),
         default="raw_qk",
     )
-    parser.add_argument("--retrieval-page-size", type=int, default=64)
-    parser.add_argument("--retrieval-token-budget", type=int, default=1024)
     parser.add_argument("--outer-sweeps", type=int, default=1)
     parser.add_argument(
         "--u-mode",
@@ -236,6 +236,48 @@ def _load_direct_layer(
     return S80DirectResidualData(**tensors)
 
 
+def _load_compact_fisher_layer(
+    root: Path,
+    manifest: dict[str, Any],
+    layer_index: int,
+    *,
+    device: torch.device,
+    dtype: torch.dtype,
+) -> S80CompactSoftmaxFisherRouting:
+    artifact = manifest["artifacts"][str(layer_index)]
+    tensors = load_file(str(root / artifact["file"]), device="cpu")
+    return prepare_compact_softmax_fisher_routing(
+        queries_by_head=tensors["queries_by_head"],
+        fisher_grams_packed_by_head=tensors[
+            "fisher_grams_packed_by_head"
+        ],
+        head_to_kv_group=tensors["head_to_kv_group"],
+        value_dim=int(tensors["value_dim"]),
+        key_dim=int(tensors["key_dim"]),
+        scaling=float(tensors["scaling"]),
+        teacher_fisher_energy=float(tensors["teacher_fisher_energy"]),
+        device=device,
+        dtype=dtype,
+    )
+
+
+def _compact_fisher_diagnostics(
+    statistics: S80CompactSoftmaxFisherRouting,
+    factors: S80Factors,
+) -> dict[str, float | int]:
+    value = compact_softmax_fisher_loss(
+        statistics,
+        routing_payload_encoders=factors.routing_payload_encoders,
+        routing_query_factors=factors.routing_query_factors,
+    )
+    return {
+        "documents": statistics.documents,
+        "page_fisher_loss": value,
+        "page_fisher_nmse": value / statistics.teacher_fisher_energy,
+        "teacher_fisher_energy": statistics.teacher_fisher_energy,
+    }
+
+
 def _objective_on_device(
     objective: S80Objective,
     *,
@@ -349,11 +391,20 @@ def main() -> None:
     started = time.monotonic()
     model_root = Path(args.model).expanduser().resolve()
     stats_root = Path(args.stats_dir).expanduser().resolve()
-    direct_root = Path(args.direct_capture_dir).expanduser().resolve()
-    validation_direct_root = (
+    direct_root = (
         None
-        if args.validation_direct_capture_dir is None
-        else Path(args.validation_direct_capture_dir).expanduser().resolve()
+        if args.direct_capture_dir is None
+        else Path(args.direct_capture_dir).expanduser().resolve()
+    )
+    fisher_root = (
+        None
+        if args.page_fisher_stats_dir is None
+        else Path(args.page_fisher_stats_dir).expanduser().resolve()
+    )
+    validation_fisher_root = (
+        None
+        if args.validation_page_fisher_stats_dir is None
+        else Path(args.validation_page_fisher_stats_dir).expanduser().resolve()
     )
     c1_root = Path(args.c1_v80_init).expanduser().resolve()
     kq_root = Path(args.kq_r32_init).expanduser().resolve()
@@ -379,19 +430,34 @@ def main() -> None:
     stats_manifest_path = stats_root / "manifest.json"
     stats_manifest = _load_json(stats_manifest_path)
     config_sha = _sha256(model_config_path)
-    direct_manifest_path = direct_root / "manifest.json"
-    direct_manifest = _load_json(direct_manifest_path)
-    validation_direct_manifest_path = (
-        None
-        if validation_direct_root is None
-        else validation_direct_root / "manifest.json"
+    direct_manifest_path = (
+        None if direct_root is None else direct_root / "manifest.json"
     )
-    validation_direct_manifest = (
-        None
-        if validation_direct_manifest_path is None
-        else _load_json(validation_direct_manifest_path)
+    direct_manifest = (
+        None if direct_manifest_path is None else _load_json(direct_manifest_path)
     )
-    assert args.routing_metric == "raw_qk" or validation_direct_root is not None
+    fisher_manifest_path = (
+        None if fisher_root is None else fisher_root / "manifest.json"
+    )
+    fisher_manifest = (
+        None if fisher_manifest_path is None else _load_json(fisher_manifest_path)
+    )
+    validation_fisher_manifest_path = (
+        None
+        if validation_fisher_root is None
+        else validation_fisher_root / "manifest.json"
+    )
+    validation_fisher_manifest = (
+        None
+        if validation_fisher_manifest_path is None
+        else _load_json(validation_fisher_manifest_path)
+    )
+    assert args.routing_metric != "raw_qk" or direct_root is not None
+    assert args.routing_metric != "page_fisher" or fisher_root is not None
+    assert (
+        args.routing_metric != "page_fisher"
+        or validation_fisher_root is not None
+    )
     assert args.routing_metric == "raw_qk" or args.u_mode == "adapter_u"
     c1_manifest_path = c1_root / "results.json"
     c1_manifest = _load_json(c1_manifest_path)
@@ -462,19 +528,36 @@ def main() -> None:
             dense_o_proj_weight=dense_o.to(device=work_device, dtype=work_dtype),
             routing_weight=args.routing_weight,
         )
-        direct_residuals = _load_direct_layer(
-            direct_root,
-            direct_manifest,
-            layer_index,
-        )
-        validation_direct_residuals = (
+        direct_residuals = (
             None
-            if validation_direct_root is None
-            or validation_direct_manifest is None
+            if direct_root is None or direct_manifest is None
             else _load_direct_layer(
-                validation_direct_root,
-                validation_direct_manifest,
+                direct_root,
+                direct_manifest,
                 layer_index,
+            )
+        )
+        fisher_statistics = (
+            None
+            if fisher_root is None or fisher_manifest is None
+            else _load_compact_fisher_layer(
+                fisher_root,
+                fisher_manifest,
+                layer_index,
+                device=work_device,
+                dtype=work_dtype,
+            )
+        )
+        validation_fisher_statistics = (
+            None
+            if validation_fisher_root is None
+            or validation_fisher_manifest is None
+            else _load_compact_fisher_layer(
+                validation_fisher_root,
+                validation_fisher_manifest,
+                layer_index,
+                device=work_device,
+                dtype=work_dtype,
             )
         )
         validation_payload, validation_routing = _load_statistics(
@@ -526,7 +609,8 @@ def main() -> None:
             objective=fit_objective,
             validation_objective=validation_objective,
             direct_residuals=direct_residuals,
-            validation_direct_residuals=validation_direct_residuals,
+            fisher_statistics=fisher_statistics,
+            validation_fisher_statistics=validation_fisher_statistics,
             initial_factors=initial,
             routing_metric=args.routing_metric,
             outer_sweeps=args.outer_sweeps,
@@ -575,42 +659,15 @@ def main() -> None:
         )
         fisher_fit_diagnostics = None
         fisher_validation_diagnostics = None
-        if args.routing_metric == "softmax_fisher":
-            fit_fisher = prepare_softmax_fisher_routing(
-                direct_residuals,
-                head_to_kv_group=layout.head_to_kv_group(device=work_device),
-                value_dim=layout.value_dim,
-                key_dim=layout.key_dim,
-                device=work_device,
-                dtype=work_dtype,
+        if args.routing_metric == "page_fisher":
+            fisher_fit_diagnostics = _compact_fisher_diagnostics(
+                fisher_statistics,
+                deployed,
             )
-            validation_fisher = prepare_softmax_fisher_routing(
-                validation_direct_residuals,
-                head_to_kv_group=layout.head_to_kv_group(device=work_device),
-                value_dim=layout.value_dim,
-                key_dim=layout.key_dim,
-                device=work_device,
-                dtype=work_dtype,
+            fisher_validation_diagnostics = _compact_fisher_diagnostics(
+                validation_fisher_statistics,
+                deployed,
             )
-            fisher_fit_diagnostics = softmax_fisher_routing_diagnostics(
-                fit_fisher,
-                routing_payload_encoders=deployed.routing_payload_encoders,
-                payload_only_encoders=deployed.payload_only_encoders,
-                routing_query_factors=deployed.routing_query_factors,
-                payload_decoders=deployed.payload_decoders,
-                page_size=args.retrieval_page_size,
-                exact_token_budget=args.retrieval_token_budget,
-            )
-            fisher_validation_diagnostics = softmax_fisher_routing_diagnostics(
-                validation_fisher,
-                routing_payload_encoders=deployed.routing_payload_encoders,
-                payload_only_encoders=deployed.payload_only_encoders,
-                routing_query_factors=deployed.routing_query_factors,
-                payload_decoders=deployed.payload_decoders,
-                page_size=args.retrieval_page_size,
-                exact_token_budget=args.retrieval_token_budget,
-            )
-            del fit_fisher, validation_fisher
         folded = fold_s80_factors(
             layout=layout,
             factors=result.factors,
@@ -644,8 +701,8 @@ def main() -> None:
             },
             "fit_routing_diagnostics": fit_routing_diagnostics,
             "validation_routing_diagnostics": validation_routing_diagnostics,
-            "fit_softmax_fisher_diagnostics": fisher_fit_diagnostics,
-            "validation_softmax_fisher_diagnostics": (
+            "fit_page_fisher_diagnostics": fisher_fit_diagnostics,
+            "validation_page_fisher_diagnostics": (
                 fisher_validation_diagnostics
             ),
         }
@@ -667,7 +724,8 @@ def main() -> None:
             flush=True,
         )
         del fit_payload, validation_payload, fit_objective, validation_objective
-        del direct_residuals, validation_direct_residuals
+        del direct_residuals
+        del fisher_statistics, validation_fisher_statistics
         del initial, result, deployed
         if work_device.type == "cuda":
             torch.cuda.empty_cache()
@@ -679,12 +737,10 @@ def main() -> None:
         "u_mode": args.u_mode,
         "routing_metric": args.routing_metric,
         "routing_normalization": (
-            "teacher_softmax_fisher_energy"
-            if args.routing_metric == "softmax_fisher"
+            "teacher_page_fisher_energy"
+            if args.routing_metric == "page_fisher"
             else "teacher_raw_score_energy"
         ),
-        "retrieval_page_size": args.retrieval_page_size,
-        "retrieval_token_budget": args.retrieval_token_budget,
         "iterative_max_iterations": args.iterative_max_iterations,
         "iterative_tolerance": args.iterative_tolerance,
         "relative_damping": args.relative_damping,
@@ -724,19 +780,32 @@ def main() -> None:
                 "sha256": _sha256(stats_manifest_path),
                 "format": STATS_FORMAT,
             },
-            "direct_residuals": {
-                "manifest": str(direct_manifest_path),
-                "sha256": _sha256(direct_manifest_path),
-                "format": str(direct_manifest["format"]),
-            },
-            "validation_direct_residuals": (
+            "direct_residuals": (
                 None
-                if validation_direct_manifest_path is None
-                or validation_direct_manifest is None
+                if direct_manifest_path is None or direct_manifest is None
                 else {
-                    "manifest": str(validation_direct_manifest_path),
-                    "sha256": _sha256(validation_direct_manifest_path),
-                    "format": str(validation_direct_manifest["format"]),
+                    "manifest": str(direct_manifest_path),
+                    "sha256": _sha256(direct_manifest_path),
+                    "format": str(direct_manifest["format"]),
+                }
+            ),
+            "page_fisher_statistics": (
+                None
+                if fisher_manifest_path is None or fisher_manifest is None
+                else {
+                    "manifest": str(fisher_manifest_path),
+                    "sha256": _sha256(fisher_manifest_path),
+                    "format": str(fisher_manifest["format"]),
+                }
+            ),
+            "validation_page_fisher_statistics": (
+                None
+                if validation_fisher_manifest_path is None
+                or validation_fisher_manifest is None
+                else {
+                    "manifest": str(validation_fisher_manifest_path),
+                    "sha256": _sha256(validation_fisher_manifest_path),
+                    "format": str(validation_fisher_manifest["format"]),
                 }
             ),
         },

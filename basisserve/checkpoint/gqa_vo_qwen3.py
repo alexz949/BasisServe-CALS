@@ -18,6 +18,10 @@ from basisserve.core.c1_k_routing_sidecar import (
     RoutingDynamicCache,
     select_routing_pages,
 )
+from basisserve.core.c1_v_conditional_k_router import (
+    build_conditional_routing_sidecar,
+    conditional_routing_query_projector,
+)
 from basisserve.core.c1_k_reverse_shadow import (
     ReverseShadowConfig,
     c1_k_reverse_shadow_block_attention,
@@ -238,6 +242,10 @@ class GQATiedVOQwen3Attention(nn.Module):
         self.register_buffer("query_projector", None, persistent=False)
         self.register_buffer("routing_key_projector", None, persistent=False)
         self.register_buffer("routing_query_projector", None, persistent=False)
+        self.register_buffer("conditional_base_left", None, persistent=False)
+        self.register_buffer("conditional_base_right", None, persistent=False)
+        self.register_buffer("conditional_base_bias", None, persistent=False)
+        self.register_buffer("conditional_residual_encoder", None, persistent=False)
         self.register_buffer(
             "value_coordinate_encoder",
             (
@@ -277,8 +285,11 @@ class GQATiedVOQwen3Attention(nn.Module):
             if self.key_projector is not None:
                 raise ValueError("Reverse ShadowKV requires exact post-RoPE K")
             if config.selector == "kq_svd" and (
-                self.routing_key_projector is None
-                or self.routing_query_projector is None
+                self.routing_query_projector is None
+                or (
+                    self.routing_key_projector is None
+                    and self.conditional_base_left is None
+                )
             ):
                 raise ValueError("KQ-SVD Reverse ShadowKV requires routing factors")
         self.reverse_shadow_config = config
@@ -453,6 +464,37 @@ class GQATiedVOQwen3Attention(nn.Module):
         )
         self.routing_query_projector = query_projector.detach().to(
             device=device, dtype=dtype
+        )
+
+    @torch.no_grad()
+    def set_conditional_routing_factors(
+        self,
+        *,
+        base_left: torch.Tensor,
+        base_right: torch.Tensor,
+        base_bias: torch.Tensor,
+        residual_encoder: torch.Tensor,
+        residual_query_projector: torch.Tensor,
+    ) -> None:
+        """Install a V-conditioned predictive base plus residual-Key router."""
+
+        device = self.q_proj.weight.device
+        dtype = self.q_proj.weight.dtype
+        self.conditional_base_left = base_left.detach().to(
+            device=device, dtype=dtype
+        )
+        self.conditional_base_right = base_right.detach().to(
+            device=device, dtype=dtype
+        )
+        self.conditional_base_bias = base_bias.detach().to(
+            device=device, dtype=dtype
+        )
+        self.conditional_residual_encoder = residual_encoder.detach().to(
+            device=device, dtype=dtype
+        )
+        self.routing_key_projector = None
+        self.routing_query_projector = conditional_routing_query_projector(
+            residual_query_projector.detach().to(device=device, dtype=dtype)
         )
 
     def _cuda_sparse_attention(
@@ -716,6 +758,7 @@ class GQATiedVOQwen3Attention(nn.Module):
         cached_routing_sidecar = None
         if past_key_values is not None:
             new_key_states = key_states
+            new_value_states = value_states
             cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
             key_states, value_states = past_key_values.update(
                 key_states,
@@ -724,6 +767,26 @@ class GQATiedVOQwen3Attention(nn.Module):
                 cache_kwargs,
             )
             if (
+                isinstance(past_key_values, RoutingDynamicCache)
+                and self.conditional_base_left is not None
+            ):
+                sidecar_update = build_conditional_routing_sidecar(
+                    new_value_states,
+                    new_key_states,
+                    base_left=self.conditional_base_left,
+                    base_right=self.conditional_base_right,
+                    base_bias=self.conditional_base_bias,
+                    residual_encoder=self.conditional_residual_encoder,
+                    cos=cos,
+                    sin=sin,
+                )
+                cached_routing_sidecar = (
+                    past_key_values.update_precomputed_routing_sidecar(
+                        sidecar_update,
+                        self.layer_idx,
+                    )
+                )
+            elif (
                 isinstance(past_key_values, RoutingDynamicCache)
                 and self.routing_key_projector is not None
             ):

@@ -232,7 +232,8 @@ def main() -> None:
             for budget in token_budgets:
                 diagnostics = softmax_fisher_routing_diagnostics(
                     routing,
-                    routing_payload_encoders=recovered[0],
+                    selection_routing_encoders=recovered[0],
+                    payload_routing_encoders=recovered[0],
                     payload_only_encoders=recovered[1],
                     routing_query_factors=recovered[2],
                     payload_decoders=recovered[3],

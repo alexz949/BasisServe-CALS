@@ -29,10 +29,19 @@ from basisserve.calibration.gqa_joint_routing_payload_s80_stats import (  # noqa
     S80PayloadAccumulator,
     S80RoutingAccumulator,
 )
+from basisserve.core.gqa_joint_routing_payload_s80_fisher import (  # noqa: E402
+    pack_symmetric_fisher_grams,
+    page_softmax_fisher_gram,
+)
+from basisserve.core.gqa_page_output_pullback import (  # noqa: E402
+    page_output_pullback_grams,
+)
 
 
 FORMAT = "basisserve.qwen3.gqa_joint_routing_payload_s80_stats.v2"
 DIRECT_FORMAT = "basisserve.qwen3.gqa_joint_routing_payload_s80_direct.v2"
+FISHER_FORMAT = "basisserve.qwen3.s80_compact_page_fisher.v1"
+OUTPUT_PULLBACK_FORMAT = "basisserve.qwen3.s80_page_output_pullback.v1"
 
 
 def _parse_args() -> argparse.Namespace:
@@ -41,6 +50,9 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--windows", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--direct-output-dir")
+    parser.add_argument("--fisher-output-dir")
+    parser.add_argument("--output-pullback-output-dir")
+    parser.add_argument("--output-pullback-c1-v")
     parser.add_argument("--layers", default="all")
     parser.add_argument("--fit-start", type=int, default=0)
     parser.add_argument("--fit-windows", type=int, default=256)
@@ -56,6 +68,20 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--statistics-dtype", choices=("float32", "float64"), default="float32"
     )
+    parser.add_argument(
+        "--fisher-work-dtype",
+        choices=("float32", "float64"),
+        default="float64",
+    )
+    parser.add_argument(
+        "--fisher-storage-dtype",
+        choices=("float32", "float64"),
+        default="float32",
+    )
+    parser.add_argument("--fisher-queries-per-window", type=int, default=8)
+    parser.add_argument("--fisher-query-span", type=int, default=8192)
+    parser.add_argument("--fisher-page-size", type=int, default=64)
+    parser.add_argument("--compact-fisher-only", action="store_true")
     parser.add_argument("--device-map", default="auto")
     parser.add_argument("--max-memory-per-gpu-gib", type=int, default=42)
     parser.add_argument("--torch-num-threads", type=int, default=4)
@@ -76,6 +102,21 @@ def _parse_layers(spec: str, total: int) -> tuple[int, ...]:
         else:
             selected.add(int(item))
     return tuple(sorted(selected))
+
+
+def _terminal_block_endpoints(
+    sequence_length: int,
+    *,
+    queries: int,
+    span: int,
+) -> tuple[int, ...]:
+    query_count = min(max(int(queries), 1), int(sequence_length))
+    terminal_span = min(max(int(span), query_count), int(sequence_length))
+    start = int(sequence_length) - terminal_span
+    return tuple(
+        start + ((index + 1) * terminal_span) // query_count - 1
+        for index in range(query_count)
+    )
 
 
 def _sha256(path: Path) -> str:
@@ -99,6 +140,23 @@ def _atomic_safetensors(path: Path, tensors: dict[str, torch.Tensor]) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
     save_file(tensors, str(temporary))
     os.replace(temporary, path)
+
+
+def _load_output_pullback_factors(
+    root: Path,
+    layers: tuple[int, ...],
+) -> tuple[dict[int, tuple[torch.Tensor, torch.Tensor]], Path]:
+    manifest_path = root / "results.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    factors = {}
+    for layer in layers:
+        artifact = manifest["artifacts"][str(layer)]
+        tensors = load_file(str(root / artifact["file"]), device="cpu")
+        factors[layer] = (
+            tensors["value_coordinate_encoders"],
+            tensors["head_output_decoders"],
+        )
+    return factors, manifest_path
 
 
 def _allocate_bfloat16(path: Path, shape: tuple[int, ...]) -> torch.Tensor:
@@ -162,6 +220,232 @@ class _DirectLayerFiles:
         self.tensors.clear()
 
 
+class _CompactFisherLayer:
+    def __init__(
+        self,
+        *,
+        documents: int,
+        query_positions: tuple[int, ...],
+        query_heads: int,
+        kv_heads: int,
+        head_dim: int,
+        work_dtype: torch.dtype,
+        storage_dtype: torch.dtype,
+        page_size: int,
+    ) -> None:
+        self.documents = int(documents)
+        self.query_positions = tuple(int(position) for position in query_positions)
+        self.queries_per_document = len(self.query_positions)
+        self.observations = self.documents * self.queries_per_document
+        self.query_heads = int(query_heads)
+        self.kv_heads = int(kv_heads)
+        self.head_dim = int(head_dim)
+        self.joint_dim = 2 * self.head_dim
+        self.heads_per_group = self.query_heads // self.kv_heads
+        self.mapping = torch.arange(self.query_heads) // self.heads_per_group
+        self.scaling = self.head_dim**-0.5
+        self.work_dtype = work_dtype
+        self.storage_dtype = storage_dtype
+        self.page_size = int(page_size)
+        packed_width = self.joint_dim * (self.joint_dim + 1) // 2
+        self.queries = torch.empty(
+            self.query_heads,
+            self.observations,
+            self.head_dim,
+            dtype=storage_dtype,
+        )
+        self.grams = torch.empty(
+            self.query_heads,
+            self.observations,
+            packed_width,
+            dtype=storage_dtype,
+        )
+        self.teacher_energy = 0.0
+
+    @torch.inference_mode()
+    def update_document(
+        self,
+        *,
+        document_slot: int,
+        query: torch.Tensor,
+        value: torch.Tensor,
+        key: torch.Tensor,
+    ) -> None:
+        positions = torch.tensor(
+            self.query_positions,
+            dtype=torch.long,
+            device=query.device,
+        )
+        selected_queries = query.index_select(1, positions)
+        first_slot = document_slot * self.queries_per_document
+        stop_slot = first_slot + self.queries_per_document
+        self.queries[:, first_slot:stop_slot].copy_(
+            selected_queries.to(device="cpu", dtype=self.storage_dtype)
+        )
+        joint = torch.cat((value, key), dim=-1).to(self.work_dtype)
+        selected_queries = selected_queries.to(self.work_dtype)
+        for query_index, query_position in enumerate(self.query_positions):
+            slot = first_slot + query_index
+            for group in range(self.kv_heads):
+                first = group * self.heads_per_group
+                stop = first + self.heads_per_group
+                rows = joint[: query_position + 1, group]
+                grams, teacher_energy = page_softmax_fisher_gram(
+                    selected_queries[first:stop, query_index],
+                    rows,
+                    value_dim=self.head_dim,
+                    scaling=self.scaling,
+                    page_size=self.page_size,
+                )
+                self.grams[first:stop, slot].copy_(
+                    pack_symmetric_fisher_grams(grams).to(
+                        device="cpu",
+                        dtype=self.storage_dtype,
+                    )
+                )
+                self.teacher_energy += teacher_energy
+
+    def tensors(self) -> dict[str, torch.Tensor]:
+        return {
+            "queries_by_head": self.queries.contiguous(),
+            "fisher_grams_packed_by_head": self.grams.contiguous(),
+            "head_to_kv_group": self.mapping.long().contiguous(),
+            "value_dim": torch.tensor(self.head_dim, dtype=torch.int64),
+            "key_dim": torch.tensor(self.head_dim, dtype=torch.int64),
+            "scaling": torch.tensor(self.scaling, dtype=torch.float64),
+            "teacher_fisher_energy": torch.tensor(
+                self.teacher_energy,
+                dtype=torch.float64,
+            ),
+        }
+
+
+class _CompactOutputPullbackLayer:
+    def __init__(
+        self,
+        *,
+        documents: int,
+        query_positions: tuple[int, ...],
+        query_heads: int,
+        kv_heads: int,
+        head_dim: int,
+        value_encoder: torch.Tensor,
+        output_decoder: torch.Tensor,
+        work_dtype: torch.dtype,
+        storage_dtype: torch.dtype,
+        page_size: int,
+        device: torch.device,
+    ) -> None:
+        self.documents = int(documents)
+        self.query_positions = tuple(int(position) for position in query_positions)
+        self.queries_per_document = len(self.query_positions)
+        self.observations = self.documents * self.queries_per_document
+        self.query_heads = int(query_heads)
+        self.kv_heads = int(kv_heads)
+        self.head_dim = int(head_dim)
+        self.heads_per_group = self.query_heads // self.kv_heads
+        self.mapping = torch.arange(self.query_heads) // self.heads_per_group
+        self.scaling = self.head_dim**-0.5
+        self.work_dtype = work_dtype
+        self.storage_dtype = storage_dtype
+        self.page_size = int(page_size)
+        self.value_rank = int(value_encoder.shape[-1])
+        self.value_encoder = value_encoder.to(device=device, dtype=work_dtype)
+        decoder = output_decoder.to(device=device, dtype=work_dtype)
+        self.decoder_grams = decoder @ decoder.mT
+        packed_width = self.head_dim * (self.head_dim + 1) // 2
+        self.queries = torch.empty(
+            self.query_heads,
+            self.observations,
+            self.head_dim,
+            dtype=storage_dtype,
+        )
+        self.output_grams = torch.empty(
+            self.query_heads,
+            self.observations,
+            packed_width,
+            dtype=storage_dtype,
+        )
+        self.page_fisher_grams = torch.empty_like(self.output_grams)
+        self.teacher_output_energy = 0.0
+        self.teacher_page_fisher_energy = 0.0
+
+    @torch.inference_mode()
+    def update_document(
+        self,
+        *,
+        document_slot: int,
+        query: torch.Tensor,
+        value: torch.Tensor,
+        key: torch.Tensor,
+    ) -> None:
+        positions = torch.tensor(
+            self.query_positions,
+            dtype=torch.long,
+            device=query.device,
+        )
+        selected_queries = query.index_select(1, positions).to(self.work_dtype)
+        first_slot = document_slot * self.queries_per_document
+        stop_slot = first_slot + self.queries_per_document
+        self.queries[:, first_slot:stop_slot].copy_(
+            selected_queries.to(device="cpu", dtype=self.storage_dtype)
+        )
+        value = value.to(self.work_dtype)
+        key = key.to(self.work_dtype)
+        for group in range(self.kv_heads):
+            first = group * self.heads_per_group
+            stop = first + self.heads_per_group
+            payload_latents = value[:, group] @ self.value_encoder[group]
+            group_decoder_grams = self.decoder_grams[first:stop]
+            for query_index, query_position in enumerate(self.query_positions):
+                slot = first_slot + query_index
+                result = page_output_pullback_grams(
+                    selected_queries[first:stop, query_index],
+                    key[: query_position + 1, group],
+                    payload_latents[: query_position + 1],
+                    group_decoder_grams,
+                    scaling=self.scaling,
+                    page_size=self.page_size,
+                )
+                self.output_grams[first:stop, slot].copy_(
+                    pack_symmetric_fisher_grams(result.output_grams).to(
+                        device="cpu",
+                        dtype=self.storage_dtype,
+                    )
+                )
+                self.page_fisher_grams[first:stop, slot].copy_(
+                    pack_symmetric_fisher_grams(result.page_fisher_grams).to(
+                        device="cpu",
+                        dtype=self.storage_dtype,
+                    )
+                )
+                self.teacher_output_energy += result.teacher_output_energy
+                self.teacher_page_fisher_energy += (
+                    result.teacher_page_fisher_energy
+                )
+
+    def tensors(self) -> dict[str, torch.Tensor]:
+        return {
+            "queries_by_head": self.queries.contiguous(),
+            "output_grams_packed_by_head": self.output_grams.contiguous(),
+            "page_fisher_grams_packed_by_head": (
+                self.page_fisher_grams.contiguous()
+            ),
+            "head_to_kv_group": self.mapping.long().contiguous(),
+            "key_dim": torch.tensor(self.head_dim, dtype=torch.int64),
+            "value_rank": torch.tensor(self.value_rank, dtype=torch.int64),
+            "scaling": torch.tensor(self.scaling, dtype=torch.float64),
+            "teacher_output_energy": torch.tensor(
+                self.teacher_output_energy,
+                dtype=torch.float64,
+            ),
+            "teacher_page_fisher_energy": torch.tensor(
+                self.teacher_page_fisher_energy,
+                dtype=torch.float64,
+            ),
+        }
+
+
 class _S80Collector:
     def __init__(
         self,
@@ -170,11 +454,20 @@ class _S80Collector:
         statistics_dtype: torch.dtype,
         selected_layers: tuple[int, ...],
         direct_output_dir: Path | None,
+        fisher_output_dir: Path | None,
+        output_pullback_output_dir: Path | None,
+        output_pullback_factors: dict[int, tuple[torch.Tensor, torch.Tensor]],
+        fisher_work_dtype: torch.dtype,
+        fisher_storage_dtype: torch.dtype,
         fit_start: int,
         routing_fit_windows: int,
         validation_start: int,
         routing_validation_windows: int,
         sequence_length: int,
+        fisher_queries_per_window: int,
+        fisher_query_span: int,
+        fisher_page_size: int,
+        collect_statistics: bool,
     ) -> None:
         config = model.config
         self.layers = len(model.model.layers)
@@ -189,26 +482,28 @@ class _S80Collector:
         self.mapping = torch.arange(self.query_heads) // (
             self.query_heads // self.kv_heads
         )
+        self.collect_statistics = bool(collect_statistics)
         self.payload = {split: {} for split in ("fit", "validation")}
         self.routing = {split: {} for split in ("fit", "validation")}
-        for split in ("fit", "validation"):
-            for layer_index in self.layer_indices:
-                layer = model.model.layers[layer_index]
-                device = layer.self_attn.q_proj.weight.device
-                self.payload[split][layer_index] = S80PayloadAccumulator(
-                    num_query_heads=self.query_heads,
-                    value_dim=self.head_dim,
-                    key_dim=self.head_dim,
-                    accumulation_dtype=statistics_dtype,
-                    device=device,
-                )
-                self.routing[split][layer_index] = S80RoutingAccumulator(
-                    head_to_kv_group=self.mapping,
-                    value_dim=self.head_dim,
-                    key_dim=self.head_dim,
-                    storage_dtype=statistics_dtype,
-                    storage_device="cpu",
-                )
+        if self.collect_statistics:
+            for split in ("fit", "validation"):
+                for layer_index in self.layer_indices:
+                    layer = model.model.layers[layer_index]
+                    device = layer.self_attn.q_proj.weight.device
+                    self.payload[split][layer_index] = S80PayloadAccumulator(
+                        num_query_heads=self.query_heads,
+                        value_dim=self.head_dim,
+                        key_dim=self.head_dim,
+                        accumulation_dtype=statistics_dtype,
+                        device=device,
+                    )
+                    self.routing[split][layer_index] = S80RoutingAccumulator(
+                        head_to_kv_group=self.mapping,
+                        value_dim=self.head_dim,
+                        key_dim=self.head_dim,
+                        storage_dtype=statistics_dtype,
+                        storage_device="cpu",
+                    )
         self.active_split: str | None = None
         self.active_document_indices: tuple[int, ...] = ()
         self.active_routing_documents: set[int] = set()
@@ -221,11 +516,16 @@ class _S80Collector:
             "fit": int(routing_fit_windows),
             "validation": int(routing_validation_windows),
         }
+        self.fisher_query_positions = _terminal_block_endpoints(
+            sequence_length,
+            queries=fisher_queries_per_window,
+            span=fisher_query_span,
+        )
         self.direct: dict[str, dict[int, _DirectLayerFiles]] = {}
         if direct_output_dir is not None:
             for split in ("fit", "validation"):
                 split_root = direct_output_dir / split
-                split_root.mkdir(parents=True)
+                split_root.mkdir(parents=True, exist_ok=True)
                 self.direct[split] = {
                     layer_index: _DirectLayerFiles(
                         split_root,
@@ -238,6 +538,54 @@ class _S80Collector:
                     )
                     for layer_index in self.layer_indices
                 }
+        self.fisher: dict[str, dict[int, _CompactFisherLayer]] = {}
+        if fisher_output_dir is not None:
+            for split in ("fit", "validation"):
+                (fisher_output_dir / split).mkdir(parents=True, exist_ok=True)
+                self.fisher[split] = {
+                    layer_index: _CompactFisherLayer(
+                        documents=self.direct_counts[split],
+                        query_positions=self.fisher_query_positions,
+                        query_heads=self.query_heads,
+                        kv_heads=self.kv_heads,
+                        head_dim=self.head_dim,
+                        work_dtype=fisher_work_dtype,
+                        storage_dtype=fisher_storage_dtype,
+                        page_size=fisher_page_size,
+                    )
+                    for layer_index in self.layer_indices
+                }
+        self.output_pullback: dict[
+            str, dict[int, _CompactOutputPullbackLayer]
+        ] = {}
+        if output_pullback_output_dir is not None:
+            for split in ("fit", "validation"):
+                (output_pullback_output_dir / split).mkdir(
+                    parents=True,
+                    exist_ok=True,
+                )
+                self.output_pullback[split] = {}
+                for layer_index in self.layer_indices:
+                    layer = model.model.layers[layer_index]
+                    device = layer.self_attn.q_proj.weight.device
+                    value_encoder, output_decoder = output_pullback_factors[
+                        layer_index
+                    ]
+                    self.output_pullback[split][layer_index] = (
+                        _CompactOutputPullbackLayer(
+                            documents=self.direct_counts[split],
+                            query_positions=self.fisher_query_positions,
+                            query_heads=self.query_heads,
+                            kv_heads=self.kv_heads,
+                            head_dim=self.head_dim,
+                            value_encoder=value_encoder,
+                            output_decoder=output_decoder,
+                            work_dtype=fisher_work_dtype,
+                            storage_dtype=fisher_storage_dtype,
+                            page_size=fisher_page_size,
+                            device=device,
+                        )
+                    )
 
     def attention_pre_hook(self, layer_index: int):
         def collect(
@@ -269,28 +617,46 @@ class _S80Collector:
                 key,
                 *position_embeddings,
             )
-            attention_mask = kwargs.get("attention_mask")
-            routed_key = F.scaled_dot_product_attention(
-                query,
-                key,
-                key,
-                attn_mask=attention_mask,
-                dropout_p=0.0,
-                is_causal=bool(
-                    module.is_causal and attention_mask is None and sequence > 1
-                ),
-                scale=float(module.scaling),
-                enable_gqa=self.query_heads != self.kv_heads,
-            )
-            self.pending_routed_key[layer_index] = routed_key.detach()
-            routing_accumulator = self.routing[split][layer_index]
+            if self.collect_statistics:
+                attention_mask = kwargs.get("attention_mask")
+                routed_key = F.scaled_dot_product_attention(
+                    query,
+                    key,
+                    key,
+                    attn_mask=attention_mask,
+                    dropout_p=0.0,
+                    is_causal=bool(
+                        module.is_causal and attention_mask is None and sequence > 1
+                    ),
+                    scale=float(module.scaling),
+                    enable_gqa=self.query_heads != self.kv_heads,
+                )
+                self.pending_routed_key[layer_index] = routed_key.detach()
             for local_index, document_index in enumerate(self.active_document_indices):
                 if document_index not in self.active_routing_documents:
                     continue
-                query_row = query[local_index, :, -1]
                 value_rows = value[local_index].permute(1, 0, 2)
                 key_rows = key[local_index].permute(1, 0, 2)
-                routing_accumulator.update_shard(
+                if split in self.fisher:
+                    document_slot = document_index - self.direct_starts[split]
+                    self.fisher[split][layer_index].update_document(
+                        document_slot=document_slot,
+                        query=query[local_index],
+                        value=value_rows,
+                        key=key_rows,
+                    )
+                if split in self.output_pullback:
+                    document_slot = document_index - self.direct_starts[split]
+                    self.output_pullback[split][layer_index].update_document(
+                        document_slot=document_slot,
+                        query=query[local_index],
+                        value=value_rows,
+                        key=key_rows,
+                    )
+                if not self.collect_statistics:
+                    continue
+                query_row = query[local_index, :, -1]
+                self.routing[split][layer_index].update_shard(
                     query_row.unsqueeze(0),
                     value_rows,
                     key_rows,
@@ -548,6 +914,222 @@ def _write_direct_manifests(
         print(f"[S80 direct] wrote {split_root / 'manifest.json'}", flush=True)
 
 
+def _write_fisher_manifests(
+    fisher_output_dir: Path,
+    *,
+    model_path: Path,
+    windows_path: Path,
+    config: Any,
+    collector: _S80Collector,
+    args: argparse.Namespace,
+    elapsed_seconds: float,
+) -> None:
+    split_starts = {
+        "fit": args.fit_start,
+        "validation": args.validation_start,
+    }
+    for split, layers in collector.fisher.items():
+        split_root = fisher_output_dir / split
+        artifacts = {}
+        for layer_index, statistics in layers.items():
+            path = split_root / f"layer_{layer_index:03d}.safetensors"
+            _atomic_safetensors(path, statistics.tensors())
+            artifacts[str(layer_index)] = {
+                "file": path.name,
+                "sha256": _sha256(path),
+                "bytes": path.stat().st_size,
+                "documents": statistics.documents,
+                "queries_per_document": statistics.queries_per_document,
+                "observations_per_head": statistics.observations,
+                "query_heads": statistics.query_heads,
+                "kv_heads": statistics.kv_heads,
+                "value_dim": statistics.head_dim,
+                "key_dim": statistics.head_dim,
+                "joint_dim": statistics.joint_dim,
+                "packed_width": statistics.grams.shape[-1],
+                "teacher_fisher_energy": statistics.teacher_energy,
+                "page_size": statistics.page_size,
+            }
+        manifest = {
+            "format": FISHER_FORMAT,
+            "status": "complete",
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+            "command": shlex.join(sys.argv),
+            "elapsed_seconds": elapsed_seconds,
+            "source": {
+                "model": str(model_path),
+                "model_config_sha256": _sha256(model_path / "config.json"),
+                "windows": str(windows_path),
+                "windows_sha256": _sha256(windows_path),
+            },
+            "geometry": {
+                "layers": int(config.num_hidden_layers),
+                "layer_coverage": list(collector.layer_indices),
+                "query_heads": collector.query_heads,
+                "kv_heads": collector.kv_heads,
+                "head_dim": collector.head_dim,
+                "joint_feature_dim": 2 * collector.head_dim,
+                "key_convention": "post_rope",
+                "fisher_pairing": (
+                    "per_document_per_query_position_per_query_head"
+                ),
+                "fisher_unit": "physical_page",
+                "page_size": args.fisher_page_size,
+            },
+            "calibration": {
+                "start": split_starts[split],
+                "documents": collector.direct_counts[split],
+                "sequence_length": args.sequence_length,
+                "routing_query_policy": "terminal_block_endpoints_causal_prefix",
+                "queries_per_document": len(collector.fisher_query_positions),
+                "query_positions": list(collector.fisher_query_positions),
+                "observations_per_head": (
+                    collector.direct_counts[split]
+                    * len(collector.fisher_query_positions)
+                ),
+                "query_span": args.fisher_query_span,
+                "observation_layout": "document_major_query_position_minor",
+                "split": split,
+            },
+            "numerics": {
+                "work_dtype": args.fisher_work_dtype,
+                "storage_dtype": args.fisher_storage_dtype,
+                "gram": (
+                    "Xbar.T @ (Diag(page_mass) - page_mass page_mass.T) @ Xbar"
+                ),
+                "page_representative": (
+                    "teacher-attention conditional mean of [V,K_post] within page"
+                ),
+                "gram_scaling_included": False,
+                "symmetric_storage": "packed_upper_triangle",
+            },
+            "artifacts": artifacts,
+            "environment": {
+                "conda_environment": os.environ.get("CONDA_DEFAULT_ENV"),
+                "python": sys.version,
+                "torch": torch.__version__,
+                "cuda_devices": [
+                    torch.cuda.get_device_name(index)
+                    for index in range(torch.cuda.device_count())
+                ],
+            },
+        }
+        _atomic_json(split_root / "manifest.json", manifest)
+        print(
+            f"[S80 compact Fisher] wrote {split_root / 'manifest.json'}",
+            flush=True,
+        )
+
+
+def _write_output_pullback_manifests(
+    output_dir: Path,
+    *,
+    model_path: Path,
+    windows_path: Path,
+    c1_manifest_path: Path,
+    config: Any,
+    collector: _S80Collector,
+    args: argparse.Namespace,
+    elapsed_seconds: float,
+) -> None:
+    split_starts = {
+        "fit": args.fit_start,
+        "validation": args.validation_start,
+    }
+    for split, layers in collector.output_pullback.items():
+        split_root = output_dir / split
+        artifacts = {}
+        for layer_index, statistics in layers.items():
+            path = split_root / f"layer_{layer_index:03d}.safetensors"
+            _atomic_safetensors(path, statistics.tensors())
+            artifacts[str(layer_index)] = {
+                "file": path.name,
+                "sha256": _sha256(path),
+                "bytes": path.stat().st_size,
+                "documents": statistics.documents,
+                "queries_per_document": statistics.queries_per_document,
+                "observations_per_head": statistics.observations,
+                "query_heads": statistics.query_heads,
+                "kv_heads": statistics.kv_heads,
+                "key_dim": statistics.head_dim,
+                "value_rank": statistics.value_rank,
+                "packed_width": statistics.output_grams.shape[-1],
+                "teacher_output_energy": statistics.teacher_output_energy,
+                "teacher_page_fisher_energy": (
+                    statistics.teacher_page_fisher_energy
+                ),
+                "page_size": statistics.page_size,
+            }
+        manifest = {
+            "format": OUTPUT_PULLBACK_FORMAT,
+            "status": "complete",
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+            "command": shlex.join(sys.argv),
+            "elapsed_seconds": elapsed_seconds,
+            "source": {
+                "model": str(model_path),
+                "model_config_sha256": _sha256(model_path / "config.json"),
+                "windows": str(windows_path),
+                "windows_sha256": _sha256(windows_path),
+                "c1_v_checkpoint": str(c1_manifest_path.parent),
+                "c1_v_manifest": str(c1_manifest_path),
+                "c1_v_manifest_sha256": _sha256(c1_manifest_path),
+            },
+            "geometry": {
+                "layers": int(config.num_hidden_layers),
+                "layer_coverage": list(collector.layer_indices),
+                "query_heads": collector.query_heads,
+                "kv_heads": collector.kv_heads,
+                "key_dim": collector.head_dim,
+                "value_rank": next(iter(layers.values())).value_rank,
+                "key_convention": "post_rope",
+                "routing_cache_coordinates": "K_only",
+                "metric_payload": "C1_value_latent_and_head_output_decoder",
+                "unit": "physical_page",
+                "page_size": args.fisher_page_size,
+            },
+            "calibration": {
+                "start": split_starts[split],
+                "documents": collector.direct_counts[split],
+                "sequence_length": args.sequence_length,
+                "routing_query_policy": "terminal_block_endpoints_causal_prefix",
+                "queries_per_document": len(collector.fisher_query_positions),
+                "query_positions": list(collector.fisher_query_positions),
+                "observations_per_head": (
+                    collector.direct_counts[split]
+                    * len(collector.fisher_query_positions)
+                ),
+                "query_span": args.fisher_query_span,
+                "observation_layout": "document_major_query_position_minor",
+                "split": split,
+            },
+            "numerics": {
+                "work_dtype": args.fisher_work_dtype,
+                "storage_dtype": args.fisher_storage_dtype,
+                "output_gram": "Kbar.T J_rho Cbar (D D.T) Cbar.T J_rho Kbar",
+                "page_fisher_gram": "Kbar.T J_rho Kbar",
+                "gram_scaling_included": False,
+                "symmetric_storage": "packed_upper_triangle",
+                "hybrid_weight_applied_during_collection": False,
+            },
+            "artifacts": artifacts,
+            "environment": {
+                "conda_environment": os.environ.get("CONDA_DEFAULT_ENV"),
+                "python": sys.version,
+                "torch": torch.__version__,
+                "cuda_devices": [
+                    torch.cuda.get_device_name(index)
+                    for index in range(torch.cuda.device_count())
+                ],
+            },
+        }
+        _atomic_json(split_root / "manifest.json", manifest)
+        print(
+            f"[S80 output pullback] wrote {split_root / 'manifest.json'}",
+            flush=True,
+        )
+
+
 @torch.inference_mode()
 def main() -> None:
     args = _parse_args()
@@ -561,6 +1143,16 @@ def main() -> None:
         if args.direct_output_dir is None
         else Path(args.direct_output_dir).expanduser().resolve()
     )
+    fisher_output_dir = (
+        None
+        if args.fisher_output_dir is None
+        else Path(args.fisher_output_dir).expanduser().resolve()
+    )
+    output_pullback_output_dir = (
+        None
+        if args.output_pullback_output_dir is None
+        else Path(args.output_pullback_output_dir).expanduser().resolve()
+    )
     config = AutoConfig.from_pretrained(str(model_path), local_files_only=True)
     windows_manifest_path = windows_path.parent / "manifest.json"
     stored = load_file(str(windows_path), device="cpu")["input_ids"]
@@ -573,6 +1165,12 @@ def main() -> None:
     dtype = torch.bfloat16 if args.model_dtype == "bfloat16" else torch.float16
     statistics_dtype = (
         torch.float32 if args.statistics_dtype == "float32" else torch.float64
+    )
+    fisher_work_dtype = (
+        torch.float32 if args.fisher_work_dtype == "float32" else torch.float64
+    )
+    fisher_storage_dtype = (
+        torch.float32 if args.fisher_storage_dtype == "float32" else torch.float64
     )
     device_map: str | dict[str, int] = args.device_map
     if args.device_map == "single":
@@ -591,16 +1189,36 @@ def main() -> None:
     ).eval()
     model.config.use_cache = False
     selected_layers = _parse_layers(args.layers, int(config.num_hidden_layers))
+    output_pullback_factors: dict[
+        int, tuple[torch.Tensor, torch.Tensor]
+    ] = {}
+    output_pullback_manifest_path: Path | None = None
+    if output_pullback_output_dir is not None:
+        output_pullback_factors, output_pullback_manifest_path = (
+            _load_output_pullback_factors(
+                Path(args.output_pullback_c1_v).expanduser().resolve(),
+                selected_layers,
+            )
+        )
     collector = _S80Collector(
         model,
         statistics_dtype=statistics_dtype,
         selected_layers=selected_layers,
         direct_output_dir=direct_output_dir,
+        fisher_output_dir=fisher_output_dir,
+        output_pullback_output_dir=output_pullback_output_dir,
+        output_pullback_factors=output_pullback_factors,
+        fisher_work_dtype=fisher_work_dtype,
+        fisher_storage_dtype=fisher_storage_dtype,
         fit_start=args.fit_start,
         routing_fit_windows=args.routing_fit_windows,
         validation_start=args.validation_start,
         routing_validation_windows=args.routing_validation_windows,
         sequence_length=args.sequence_length,
+        fisher_queries_per_window=args.fisher_queries_per_window,
+        fisher_query_span=args.fisher_query_span,
+        fisher_page_size=args.fisher_page_size,
+        collect_statistics=not args.compact_fisher_only,
     )
     handles = []
     for layer_index in selected_layers:
@@ -611,11 +1229,12 @@ def main() -> None:
                 with_kwargs=True,
             )
         )
-        handles.append(
-            layer.self_attn.o_proj.register_forward_hook(
-                collector.o_proj_hook(layer_index)
+        if not args.compact_fisher_only:
+            handles.append(
+                layer.self_attn.o_proj.register_forward_hook(
+                    collector.o_proj_hook(layer_index)
+                )
             )
-        )
     _run_split(
         model,
         splits["fit"],
@@ -636,17 +1255,29 @@ def main() -> None:
     )
     for handle in handles:
         handle.remove()
-    output_dir.mkdir(parents=True)
-    artifacts = _write_statistics(
-        output_dir,
-        collector=collector,
-        output_dtype=statistics_dtype,
-    )
-    direct_records = collector.direct_records()
-    if direct_output_dir is not None:
-        _write_direct_manifests(
-            direct_output_dir,
-            records=direct_records,
+    if not args.compact_fisher_only:
+        output_dir.mkdir(parents=True)
+        artifacts = _write_statistics(
+            output_dir,
+            collector=collector,
+            output_dtype=statistics_dtype,
+        )
+        direct_records = collector.direct_records()
+        if direct_output_dir is not None:
+            _write_direct_manifests(
+                direct_output_dir,
+                records=direct_records,
+                model_path=model_path,
+                windows_path=windows_path,
+                config=config,
+                collector=collector,
+                args=args,
+                elapsed_seconds=time.monotonic() - started,
+            )
+            collector.close_direct()
+    if fisher_output_dir is not None:
+        _write_fisher_manifests(
+            fisher_output_dir,
             model_path=model_path,
             windows_path=windows_path,
             config=config,
@@ -654,7 +1285,19 @@ def main() -> None:
             args=args,
             elapsed_seconds=time.monotonic() - started,
         )
-        collector.close_direct()
+    if output_pullback_output_dir is not None:
+        _write_output_pullback_manifests(
+            output_pullback_output_dir,
+            model_path=model_path,
+            windows_path=windows_path,
+            c1_manifest_path=output_pullback_manifest_path,
+            config=config,
+            collector=collector,
+            args=args,
+            elapsed_seconds=time.monotonic() - started,
+        )
+    if args.compact_fisher_only:
+        return
     manifest = {
         "format": FORMAT,
         "status": "complete",
@@ -689,10 +1332,30 @@ def main() -> None:
             "routing_fit_windows": args.routing_fit_windows,
             "routing_validation_windows": args.routing_validation_windows,
             "routing_query_policy": "last token of each selected full document",
+            "compact_fisher_query_policy": (
+                "terminal block endpoints with individual causal prefixes"
+            ),
+            "compact_fisher_queries_per_document": len(
+                collector.fisher_query_positions
+            ),
+            "compact_fisher_query_positions": list(
+                collector.fisher_query_positions
+            ),
+            "compact_fisher_query_span": args.fisher_query_span,
+            "compact_fisher_unit": "physical_page",
+            "compact_fisher_page_size": args.fisher_page_size,
             "routing_shards_preserve_document_prefix_pairing": True,
             "payload_streaming_sufficient_statistics": True,
             "direct_routing_output": (
                 None if direct_output_dir is None else str(direct_output_dir)
+            ),
+            "compact_fisher_output": (
+                None if fisher_output_dir is None else str(fisher_output_dir)
+            ),
+            "output_pullback_output": (
+                None
+                if output_pullback_output_dir is None
+                else str(output_pullback_output_dir)
             ),
         },
         "numerics": {

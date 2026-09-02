@@ -4,11 +4,36 @@ import torch
 
 from basisserve.core.exact_qk_v_offload import (
     full_gqa_value_attention,
+    gqa_group_max_page_mass_mask,
     gqa_union_adaptive_page_mass_mask,
     gqa_union_page_mass_mask,
     gqa_union_token_topk_mask,
     sparse_gqa_value_attention,
 )
+
+
+def test_group_max_page_mass_uses_one_fixed_physical_budget() -> None:
+    scores = torch.tensor(
+        [
+            [8.0, 7.0, 0.0, 0.0],
+            [0.0, 0.0, 9.0, 8.0],
+            [6.0, 5.0, 0.0, 0.0],
+            [0.0, 0.0, 10.0, 9.0],
+        ]
+    )
+
+    token_mask, page_mask = gqa_group_max_page_mass_mask(
+        scores,
+        num_kv_heads=2,
+        page_size=2,
+        pages_per_kv_head=1,
+    )
+
+    assert page_mask.tolist() == [[False, True], [False, True]]
+    assert token_mask.tolist() == [
+        [False, False, True, True],
+        [False, False, True, True],
+    ]
 
 
 def test_adaptive_page_mass_refines_only_uncertain_query_heads() -> None:

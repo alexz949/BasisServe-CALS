@@ -701,7 +701,7 @@ def test_paper_faithful_quest_selects_pages_per_query_head_and_fetches_union() -
     assert all(math.isfinite(metric) for metric in quality.values())
 
 
-def test_kq_svd_routing_uses_query_head_page_union_for_exact_attention() -> None:
+def test_kq_svd_routing_uses_fixed_group_max_budget_for_exact_attention() -> None:
     query = torch.tensor(
         [[[[1.0, 0.0]], [[0.0, 1.0]]]], dtype=torch.float64
     )
@@ -727,8 +727,8 @@ def test_kq_svd_routing_uses_query_head_page_union_for_exact_attention() -> None
         routing_query_projector=projector,
         vectorized_reference=True,
     )
-    assert result.selected_page_mask.tolist() == [[[True, True]]]
-    assert result.statistics["selected_pages"] == 2
+    assert result.selected_page_mask.tolist() == [[[True, False]]]
+    assert result.statistics["selected_pages"] == 1
     assert result.statistics["resident_routing_sidecar_bytes"] == 64
     head_to_kv = torch.tensor([0, 0])
     scores = torch.einsum(
@@ -738,8 +738,8 @@ def test_kq_svd_routing_uses_query_head_page_union_for_exact_attention() -> None
     ) / math.sqrt(2)
     expected = torch.einsum(
         "bhs,bhsv->bhv",
-        torch.softmax(scores, dim=-1),
-        value.index_select(1, head_to_kv),
+        torch.softmax(scores[..., :2], dim=-1),
+        value.index_select(1, head_to_kv)[..., :2, :],
     )[:, :, None]
     torch.testing.assert_close(result.output, expected, rtol=1.0e-6, atol=1.0e-6)
 

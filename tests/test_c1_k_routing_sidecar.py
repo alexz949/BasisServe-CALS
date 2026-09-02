@@ -97,7 +97,7 @@ def test_asymmetric_query_head_factors_match_explicit_rank_operator() -> None:
     torch.testing.assert_close(observed, expected)
 
 
-def test_page_selection_unions_proxy_pages_within_gqa_group() -> None:
+def test_page_selection_uses_one_fixed_group_max_budget() -> None:
     query = torch.tensor(
         [
             [1.0, 0.0],
@@ -122,8 +122,11 @@ def test_page_selection_unions_proxy_pages_within_gqa_group() -> None:
         nominal_token_budget=2,
     )
 
-    assert selection.page_mask.tolist() == [[True, True], [True, True]]
-    assert selection.token_mask.all()
+    assert selection.page_mask.tolist() == [[False, True], [False, True]]
+    assert selection.token_mask.tolist() == [
+        [False, False, True, True],
+        [False, False, True, True],
+    ]
 
 
 def test_truncate_and_storage_accounting() -> None:

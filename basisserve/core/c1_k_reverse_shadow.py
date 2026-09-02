@@ -21,7 +21,10 @@ from basisserve.core.c1_k_routing_sidecar import (
     build_routing_sidecar,
     routing_proxy_scores,
 )
-from basisserve.core.exact_qk_v_offload import gqa_union_page_mass_mask
+from basisserve.core.exact_qk_v_offload import (
+    gqa_group_max_page_mass_mask,
+    gqa_union_page_mass_mask,
+)
 from basisserve.core.exact_qk_v_offload import (
     gqa_union_adaptive_page_mass_mask,
 )
@@ -1451,7 +1454,7 @@ def _kq_svd_page_selection(
     config: ReverseShadowConfig,
     forced_page_mask: Tensor | None,
 ) -> tuple[Tensor, Tensor, dict[str, float]]:
-    """Rank proxy page mass per Query head and fetch each GQA-group union."""
+    """Rank group-normalized proxy mass under a fixed physical page budget."""
 
     batch, query_heads, _, head_dim = map(int, query.shape)
     sidecar_batch, kv_heads, sequence, rank = map(int, routing_sidecar.shape)
@@ -1490,11 +1493,11 @@ def _kq_svd_page_selection(
             ~valid[batch_index], -torch.inf
         )
         if config.adaptive_max_page_budget is None:
-            _, selected_pages = gqa_union_page_mass_mask(
+            _, selected_pages = gqa_group_max_page_mass_mask(
                 token_scores,
                 num_kv_heads=kv_heads,
                 page_size=config.page_size,
-                pages_per_query_head=config.page_budget,
+                pages_per_kv_head=config.page_budget,
             )
         else:
             assert config.adaptive_tail_mass_ratio_threshold is not None
@@ -1537,7 +1540,7 @@ def _kq_svd_page_selection(
             dim=-1,
         )
         score_batches.append(
-            per_query_page_mass.reshape(
+            torch.softmax(per_query_page_mass.float(), dim=-1).reshape(
                 kv_heads, heads_per_group, page_count
             ).amax(dim=1)
         )

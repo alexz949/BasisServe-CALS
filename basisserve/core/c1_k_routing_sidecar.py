@@ -14,10 +14,10 @@ import torch
 from torch import Tensor
 from transformers import DynamicCache
 
-from basisserve.core.exact_qk_v_offload import gqa_union_page_mass_mask
+from basisserve.core.exact_qk_v_offload import gqa_group_max_page_mass_mask
 
 
-ROUTING_PROXY_IMPLEMENTATION = "grouped_gqa_matmul_v1"
+ROUTING_PROXY_IMPLEMENTATION = "group_normalized_max_fixed_budget_v1"
 
 
 @dataclass(frozen=True)
@@ -50,8 +50,17 @@ class RoutingDynamicCache(DynamicCache):
     ) -> Tensor:
         """Project and append only the newly committed post-RoPE Keys."""
 
-        self._ensure_routing_layer(layer_idx)
         update = build_routing_sidecar(new_exact_post_key, key_projector)
+        return self.update_precomputed_routing_sidecar(update, layer_idx)
+
+    def update_precomputed_routing_sidecar(
+        self,
+        update: Tensor,
+        layer_idx: int,
+    ) -> Tensor:
+        """Append routing coordinates already computed by an attention module."""
+
+        self._ensure_routing_layer(layer_idx)
         cached = self._routing_sidecars[layer_idx]
         if cached is None:
             sidecar = update
@@ -254,7 +263,7 @@ def select_routing_pages(
     page_size: int,
     nominal_token_budget: int,
 ) -> RoutingSidecarSelection:
-    """Select a per-GQA-group union of proxy log-sum-exp Top-pages."""
+    """Select a fixed physical page budget from group-normalized max scores."""
 
     if page_size <= 0 or nominal_token_budget <= 0:
         raise ValueError("page size and nominal token budget must be positive")
@@ -264,11 +273,11 @@ def select_routing_pages(
         query_projector,
         head_dim=head_dim,
     )
-    token_mask, page_mask = gqa_union_page_mass_mask(
+    token_mask, page_mask = gqa_group_max_page_mass_mask(
         scores,
         num_kv_heads=int(routing_sidecar.shape[0]),
         page_size=page_size,
-        pages_per_query_head=math.ceil(nominal_token_budget / page_size),
+        pages_per_kv_head=math.ceil(nominal_token_budget / page_size),
     )
     return RoutingSidecarSelection(
         proxy_scores=scores,

@@ -25,13 +25,11 @@ from basisserve.core.iterative_least_squares import (
     least_squares_matrix,
 )
 from basisserve.core.gqa_joint_routing_payload_s80_fisher import (
-    S80SoftmaxFisherRouting,
-    prepare_softmax_fisher_routing,
-    softmax_fisher_adapter_system,
-    softmax_fisher_adjoint,
-    softmax_fisher_encoder_diagonal,
-    softmax_fisher_routing_loss,
-    softmax_fisher_transform,
+    S80CompactSoftmaxFisherRouting,
+    compact_softmax_fisher_adapter_system,
+    compact_softmax_fisher_encoder_diagonal,
+    compact_softmax_fisher_loss,
+    compact_softmax_fisher_roots,
 )
 from basisserve.core.gqa_routed_ov_joint import (
     LinearSolveDiagnostics,
@@ -172,6 +170,7 @@ class FoldedS80Factors:
     o_decoder_weight: torch.Tensor
     o_decoder_bias: torch.Tensor | None
     head_to_kv_group: torch.Tensor
+    joint_encoder: torch.Tensor | None = None
 
 
 @dataclass(frozen=True)
@@ -1271,6 +1270,7 @@ def fold_s80_factors(
             else dense_o_proj_bias.detach().cpu().to(dtype)
         ),
         head_to_kv_group=layout.head_to_kv_group(),
+        joint_encoder=frontloaded_encoders.detach().cpu().to(dtype),
     )
 
 
@@ -1298,8 +1298,9 @@ def fit_s80_joint(
     layout: S80Layout,
     objective: S80Objective,
     validation_objective: S80Objective | None = None,
-    direct_residuals: S80DirectResidualData,
-    validation_direct_residuals: S80DirectResidualData | None = None,
+    direct_residuals: S80DirectResidualData | None = None,
+    fisher_statistics: S80CompactSoftmaxFisherRouting | None = None,
+    validation_fisher_statistics: S80CompactSoftmaxFisherRouting | None = None,
     initial_factors: S80Factors,
     routing_metric: str = "raw_qk",
     outer_sweeps: int = 1,
@@ -1313,15 +1314,16 @@ def fit_s80_joint(
     progress_callback: Callable[[S80SweepDiagnostics], None] | None = None,
 ) -> S80FitResult:
     """Fit one front-loaded BF update, close D, then solve U once."""
-    assert routing_metric in {"raw_qk", "softmax_fisher"}
+    assert routing_metric in {"raw_qk", "page_fisher"}
     assert routing_metric == "raw_qk" or u_mode in {"frozen_u", "adapter_u"}
     objective.validate(layout)
-    direct_residuals.validate(
-        num_query_heads=layout.num_attention_heads,
-        num_kv_heads=layout.num_key_value_heads,
-        key_dim=layout.key_dim,
-        joint_dim=layout.joint_dim,
-    )
+    if direct_residuals is not None:
+        direct_residuals.validate(
+            num_query_heads=layout.num_attention_heads,
+            num_kv_heads=layout.num_key_value_heads,
+            key_dim=layout.key_dim,
+            joint_dim=layout.joint_dim,
+        )
     initial_factors.validate(layout)
     device = (
         torch.device(work_device)
@@ -1329,32 +1331,11 @@ def fit_s80_joint(
         else initial_factors.joint_encoders.device
     )
     mapping = layout.head_to_kv_group(device=device)
-    fisher_fit: S80SoftmaxFisherRouting | None = None
-    fisher_validation: S80SoftmaxFisherRouting | None = None
-    if routing_metric == "softmax_fisher":
-        fisher_fit = prepare_softmax_fisher_routing(
-            direct_residuals,
-            head_to_kv_group=mapping,
-            value_dim=layout.value_dim,
-            key_dim=layout.key_dim,
-            device=device,
-            dtype=work_dtype,
-        )
-        assert validation_direct_residuals is not None
-        validation_direct_residuals.validate(
-            num_query_heads=layout.num_attention_heads,
-            num_kv_heads=layout.num_key_value_heads,
-            key_dim=layout.key_dim,
-            joint_dim=layout.joint_dim,
-        )
-        fisher_validation = prepare_softmax_fisher_routing(
-            validation_direct_residuals,
-            head_to_kv_group=mapping,
-            value_dim=layout.value_dim,
-            key_dim=layout.key_dim,
-            device=device,
-            dtype=work_dtype,
-        )
+    assert routing_metric != "raw_qk" or direct_residuals is not None
+    assert routing_metric != "page_fisher" or fisher_statistics is not None
+    assert routing_metric != "page_fisher" or validation_fisher_statistics is not None
+    fisher_fit = fisher_statistics
+    fisher_validation = validation_fisher_statistics
     routing_normalizer = (
         objective.routing_normalizer
         if fisher_fit is None
@@ -1445,27 +1426,34 @@ def fit_s80_joint(
         dtype=work_dtype,
     )
     routing_queries_by_head = (
-        fisher_fit.queries_by_head
+        fisher_fit.queries_by_head.to(device=device, dtype=work_dtype)
         if fisher_fit is not None
         else direct_residuals.routing_queries.permute(1, 0, 2)
         .contiguous()
         .to(device=device, dtype=work_dtype)
     )
     routing_rows_by_group = (
-        fisher_fit.joint_rows_by_group
+        None
         if fisher_fit is not None
         else direct_residuals.routing_joint_rows.permute(2, 0, 1, 3)
         .contiguous()
         .to(device=device, dtype=work_dtype)
     )
+    fisher_roots = (
+        None if fisher_fit is None else compact_softmax_fisher_roots(fisher_fit)
+    )
     routing_document_count = int(routing_queries_by_head.shape[1])
-    routing_token_count = int(routing_rows_by_group.shape[2])
+    routing_residual_width = (
+        int(routing_rows_by_group.shape[2])
+        if routing_rows_by_group is not None
+        else layout.joint_dim
+    )
 
     def metric_loss(
         current: S80Factors,
         selected_objective: S80Objective,
         selected_moments: _StackedRoutingMoments,
-        fisher: S80SoftmaxFisherRouting | None,
+        fisher: S80CompactSoftmaxFisherRouting | None,
     ) -> S80Loss:
         if fisher is None:
             return evaluate_s80_objective(
@@ -1480,7 +1468,7 @@ def fit_s80_joint(
             current.payload_decoders,
             mapping,
         )
-        routing_value = softmax_fisher_routing_loss(
+        routing_value = compact_softmax_fisher_loss(
             fisher,
             routing_payload_encoders=current.routing_payload_encoders,
             routing_query_factors=current.routing_query_factors,
@@ -1574,27 +1562,20 @@ def fit_s80_joint(
                 group_queries,
                 query_factors,
             )
-            joint_rows = routing_rows_by_group[group]
-            fisher_probabilities = (
+            joint_rows = (
                 None
-                if fisher_fit is None
-                else fisher_fit.probabilities_by_head.index_select(
-                    0,
-                    heads_tensor,
-                ).permute(1, 0, 2)
+                if routing_rows_by_group is None
+                else routing_rows_by_group[group]
             )
-            fisher_exact_scores = (
+            group_fisher_roots = (
                 None
-                if fisher_fit is None
-                else fisher_fit.exact_scores_by_head.index_select(
-                    0,
-                    heads_tensor,
-                ).permute(1, 0, 2)
+                if fisher_roots is None
+                else fisher_roots.index_select(0, heads_tensor).permute(1, 0, 2, 3)
             )
             routing_scale_root = routing_scale**0.5
             payload_count = payload_target.numel()
             routing_count = (
-                routing_document_count * len(heads) * routing_token_count
+                routing_document_count * len(heads) * routing_residual_width
                 if routing_scale
                 else 0
             )
@@ -1622,15 +1603,14 @@ def fit_s80_joint(
                 moments.joint_grams[:, group],
                 padded_projected_query,
             )
-            if fisher_probabilities is None:
+            if fisher_fit is None:
                 routing_diagonal = raw_routing_diagonal
                 preconditioner_routing_scale = routing_scale
             else:
-                fisher_route_diagonal = softmax_fisher_encoder_diagonal(
-                    joint_rows=joint_rows,
+                fisher_route_diagonal = compact_softmax_fisher_encoder_diagonal(
+                    fisher_fit,
+                    head_indices=heads_tensor,
                     projected_queries=projected_queries,
-                    probabilities=fisher_probabilities,
-                    scaling=fisher_fit.scaling,
                 )
                 routing_diagonal = raw_routing_diagonal.new_zeros(
                     layout.joint_dim,
@@ -1677,20 +1657,26 @@ def fit_s80_joint(
                         projected_queries,
                         value[:, : layout.routing_rank],
                     )
-                    scores = torch.stack(
-                        [
-                            _batched_routing_scores(left[:, local], joint_rows)
-                            for local in range(len(heads))
-                        ],
-                        dim=1,
-                    )
-                    if fisher_probabilities is not None:
-                        scores = softmax_fisher_transform(
-                            fisher_fit.scaling * scores,
-                            fisher_probabilities,
+                    if group_fisher_roots is None:
+                        routing_residual = torch.stack(
+                            [
+                                _batched_routing_scores(left[:, local], joint_rows)
+                                for local in range(len(heads))
+                            ],
+                            dim=1,
+                        )
+                    else:
+                        routing_residual = (
+                            (0.5**0.5)
+                            * fisher_fit.scaling
+                            * torch.einsum(
+                                "dhi,dhij->dhj",
+                                left,
+                                group_fisher_roots,
+                            )
                         )
                     result[payload_count:residual_count].copy_(
-                        (routing_scale_root * scores).reshape(-1)
+                        (routing_scale_root * routing_residual).reshape(-1)
                     )
                 result[residual_count:].copy_(damping_root * value.reshape(-1))
                 return result
@@ -1711,27 +1697,41 @@ def fit_s80_joint(
                     scores = value[payload_count:residual_count].reshape(
                         routing_document_count,
                         len(heads),
-                        routing_token_count,
+                        routing_residual_width,
                     )
-                    if fisher_probabilities is not None:
-                        scores = fisher_fit.scaling * softmax_fisher_adjoint(
-                            scores,
-                            fisher_probabilities,
+                    if group_fisher_roots is not None:
+                        scores = (
+                            (0.5**0.5)
+                            * fisher_fit.scaling
+                            * torch.einsum(
+                                "dhj,dhij->dhi",
+                                scores,
+                                group_fisher_roots,
+                            )
                         )
                     route_gradient = result.new_zeros(
                         layout.joint_dim,
                         layout.routing_rank,
                     )
-                    for local in range(len(heads)):
-                        weighted_joint = _batched_weighted_joint(
-                            scores[:, local],
-                            joint_rows,
-                        )
-                        route_gradient.add_(
+                    if group_fisher_roots is None:
+                        for local in range(len(heads)):
+                            weighted_joint = _batched_weighted_joint(
+                                scores[:, local],
+                                joint_rows,
+                            )
+                            route_gradient.add_(
+                                torch.einsum(
+                                    "di,dr->ir",
+                                    weighted_joint,
+                                    projected_queries[:, local],
+                                )
+                            )
+                    else:
+                        route_gradient.copy_(
                             torch.einsum(
-                                "di,dr->ir",
-                                weighted_joint,
-                                projected_queries[:, local],
+                                "dhi,dhr->ir",
+                                scores,
+                                projected_queries,
                             )
                         )
                     result[:, : layout.routing_rank].add_(
@@ -1745,7 +1745,7 @@ def fit_s80_joint(
             routing_rhs = []
             if routing_scale:
                 current_b = encoders[group, :, : layout.routing_rank]
-                if fisher_probabilities is None:
+                if fisher_fit is None:
                     for local in range(len(heads)):
                         residual_left = (
                             projected_queries[:, local] @ current_b.mT
@@ -1756,20 +1756,22 @@ def fit_s80_joint(
                             * _batched_routing_scores(residual_left, joint_rows)
                         )
                 else:
-                    proxy = torch.stack(
-                        [
-                            _batched_routing_scores(
-                                projected_queries[:, local] @ current_b.mT,
-                                joint_rows,
-                            )
-                            for local in range(len(heads))
-                        ],
-                        dim=1,
+                    current_error = torch.einsum(
+                        "dhr,ir->dhi",
+                        projected_queries,
+                        current_b,
                     )
-                    residual = fisher_fit.scaling * proxy - fisher_exact_scores
-                    transformed = softmax_fisher_transform(
-                        residual,
-                        fisher_probabilities,
+                    current_error.sub_(
+                        torch.einsum("dhk,ki->dhi", group_queries, selector)
+                    )
+                    transformed = (
+                        (0.5**0.5)
+                        * fisher_fit.scaling
+                        * torch.einsum(
+                            "dhi,dhij->dhj",
+                            current_error,
+                            group_fisher_roots,
+                        )
                     )
                     routing_rhs.extend(
                         -routing_scale_root * transformed[:, local]
@@ -1833,7 +1835,7 @@ def fit_s80_joint(
         if u_mode == "frozen_u":
             return current, ()
         if fisher_fit is not None:
-            left_factors, right_factors, rhs = softmax_fisher_adapter_system(
+            left_factors, right_factors, rhs = compact_softmax_fisher_adapter_system(
                 fisher_fit,
                 routing_payload_encoders=current.routing_payload_encoders,
                 routing_query_factors=current.routing_query_factors,

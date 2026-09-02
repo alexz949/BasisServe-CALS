@@ -100,6 +100,46 @@ def gqa_union_page_mass_mask(
     return token_mask, page_mask
 
 
+def gqa_group_max_page_mass_mask(
+    scores: Tensor,
+    *,
+    num_kv_heads: int,
+    page_size: int,
+    pages_per_kv_head: int,
+) -> tuple[Tensor, Tensor]:
+    """Select one fixed Top-page set shared by every Query head in a GQA group."""
+
+    heads_per_group = _validate_gqa_scores(scores, num_kv_heads=num_kv_heads)
+    query_heads, visible = map(int, scores.shape)
+    pages = math.ceil(visible / page_size)
+    padded = F.pad(
+        scores,
+        (0, pages * page_size - visible),
+        value=-torch.inf,
+    )
+    page_log_mass = torch.logsumexp(
+        padded.reshape(query_heads, pages, page_size),
+        dim=-1,
+    )
+    normalized_page_mass = torch.softmax(page_log_mass.float(), dim=-1)
+    group_scores = normalized_page_mass.reshape(
+        num_kv_heads,
+        heads_per_group,
+        pages,
+    ).amax(dim=1)
+    selected_pages = min(pages_per_kv_head, pages)
+    indices = group_scores.topk(selected_pages, dim=-1).indices
+    page_mask = torch.zeros(
+        num_kv_heads,
+        pages,
+        dtype=torch.bool,
+        device=scores.device,
+    )
+    page_mask.scatter_(1, indices, True)
+    token_mask = page_mask.repeat_interleave(page_size, dim=-1)[:, :visible]
+    return token_mask, page_mask
+
+
 def gqa_union_adaptive_page_mass_mask(
     scores: Tensor,
     *,

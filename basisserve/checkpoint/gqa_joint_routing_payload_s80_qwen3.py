@@ -160,6 +160,8 @@ def write_s80_factor_bank(
             )
         if layer.factors.o_decoder_bias is not None:
             tensors["o_decoder_bias"] = layer.factors.o_decoder_bias.contiguous()
+        if layer.factors.joint_encoder is not None:
+            tensors["joint_encoder"] = layer.factors.joint_encoder.contiguous()
         filename = f"layer_{layer.layer_index:03d}.safetensors"
         path = root / filename
         _atomic_safetensors(path, tensors)
@@ -223,6 +225,7 @@ def load_s80_factor_bank(
             o_decoder_weight=tensors["o_decoder_weight"],
             o_decoder_bias=tensors.get("o_decoder_bias"),
             head_to_kv_group=tensors["head_to_kv_group"],
+            joint_encoder=tensors.get("joint_encoder"),
         )
         scalars = {
             "routing_weight": float(tensors["routing_weight"]),
