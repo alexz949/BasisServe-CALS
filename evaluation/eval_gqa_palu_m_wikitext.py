@@ -49,6 +49,8 @@ def _cuda_device_indices() -> tuple[int, ...]:
         indices.append(index)
     return tuple(indices)
 SUPPORTED_CHECKPOINT_FORMATS = {
+    "basisserve.llama31_8b.iclr_v_factors.v1",
+    "basisserve.qwen3_8b.iclr_v_factors.v1",
     "basisserve.llama31_8b.palu_m_v_only.v1",
     "basisserve.llama31_8b.palu_m_v_only_fisher.v1",
     "basisserve.llama31_70b.palu_m_v_only.v1",
@@ -151,8 +153,9 @@ def _install_projection_factors(
             )
         writer = payload[f"layers.{layer_index}.{target}_writer.weight"]
         decoder = payload[f"layers.{layer_index}.{target}_decoder.weight"]
+        group_width = target_module.out_features // len(ranks)
         expected_writer = (rank_sum, target_module.in_features)
-        expected_decoder = (len(ranks), head_dim, ranks[0])
+        expected_decoder = (len(ranks), group_width, ranks[0])
         if tuple(writer.shape) != expected_writer:
             raise ValueError(f"invalid writer shape at layer {layer_index}: {writer.shape}")
         if len(set(ranks)) != 1 or tuple(decoder.shape) != expected_decoder:
@@ -192,9 +195,10 @@ def _install_projection_factors(
                 "decoder_shape": list(decoder.shape),
                 "projection": target,
                 "runtime": (
-                    f"latent {target.upper()} writer plus explicit per-KV-head "
+                    f"latent {target.upper()} writer plus explicit per-group "
                     "reconstruction"
                 ),
+                "heads_per_group": group_width // head_dim,
                 f"{other_target}_projection": "original dense module unchanged",
                 "elapsed_seconds": time.perf_counter() - started,
             }

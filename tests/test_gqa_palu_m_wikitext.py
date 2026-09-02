@@ -38,6 +38,8 @@ class _Model(nn.Module):
 
 def test_all_generated_gqa_checkpoint_formats_are_supported() -> None:
     assert SUPPORTED_CHECKPOINT_FORMATS == {
+        "basisserve.llama31_8b.iclr_v_factors.v1",
+        "basisserve.qwen3_8b.iclr_v_factors.v1",
         "basisserve.llama31_8b.palu_m_v_only.v1",
         "basisserve.llama31_8b.palu_m_v_only_fisher.v1",
         "basisserve.llama31_70b.palu_m_v_only.v1",
@@ -90,6 +92,35 @@ def test_install_palu_m_factors_preserves_dense_k_and_factor_function() -> None:
         torch.testing.assert_close(layer.self_attn.v_proj(inputs), expected)
         assert layer.self_attn.k_proj is dense_keys[layer_index]
     assert len(records) == 2
+
+
+def test_install_grouped_palu_factors_use_full_group_output_width() -> None:
+    torch.manual_seed(53)
+    model = _Model()
+    payload = {}
+    layer_ranks = [[3], [2]]
+    for layer_index, ranks in enumerate(layer_ranks):
+        payload[f"layers.{layer_index}.v_writer.weight"] = torch.randn(
+            sum(ranks), 7, dtype=torch.float64
+        )
+        payload[f"layers.{layer_index}.v_decoder.weight"] = torch.randn(
+            1, 8, ranks[0], dtype=torch.float64
+        )
+
+    records = install_palu_m_factors(
+        model,
+        payload,
+        layer_ranks=layer_ranks,
+        head_dim=4,
+    )
+
+    inputs = torch.randn(3, 5, 7, dtype=torch.float64)
+    for layer_index, layer in enumerate(model.model.layers):
+        writer = payload[f"layers.{layer_index}.v_writer.weight"]
+        decoder = payload[f"layers.{layer_index}.v_decoder.weight"]
+        expected = (inputs @ writer.T) @ decoder[0].T
+        torch.testing.assert_close(layer.self_attn.v_proj(inputs), expected)
+    assert [record["heads_per_group"] for record in records] == [2, 2]
 
 
 def test_install_palu_k_factors_preserves_dense_v_and_factor_function() -> None:
