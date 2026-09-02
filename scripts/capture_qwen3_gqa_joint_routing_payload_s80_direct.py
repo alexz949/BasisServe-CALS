@@ -38,6 +38,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--device-map", default="auto")
     parser.add_argument("--max-memory-per-gpu-gib", type=int, default=42)
     parser.add_argument("--torch-num-threads", type=int, default=4)
+    parser.add_argument("--yarn-factor", type=float)
+    parser.add_argument("--original-max-position-embeddings", type=int, default=32768)
     return parser.parse_args()
 
 
@@ -199,6 +201,17 @@ def main() -> None:
     output_dir = Path(args.output_dir).expanduser().resolve()
     partial_dir = output_dir.with_name(output_dir.name + ".partial")
     config = AutoConfig.from_pretrained(str(model_path), local_files_only=True)
+    if args.yarn_factor is not None:
+        rope_theta = float(config.rope_parameters["rope_theta"])
+        config.max_position_embeddings = round(
+            args.original_max_position_embeddings * args.yarn_factor
+        )
+        config.rope_parameters = {
+            "rope_type": "yarn",
+            "factor": args.yarn_factor,
+            "original_max_position_embeddings": args.original_max_position_embeddings,
+            "rope_theta": rope_theta,
+        }
     selected_layers = _parse_layers(args.layers)
     stored = load_file(str(windows_path), device="cpu")["input_ids"]
     stop = args.fit_start + args.routing_fit_windows
@@ -210,6 +223,7 @@ def main() -> None:
         device_map = {"": 0}
     model = AutoModelForCausalLM.from_pretrained(
         str(model_path),
+        config=config,
         dtype=dtype,
         low_cpu_mem_usage=True,
         local_files_only=True,
@@ -276,6 +290,8 @@ def main() -> None:
             "routing_fit_windows": args.routing_fit_windows,
             "sequence_length": args.sequence_length,
             "routing_query_policy": "last_token_full_prefix",
+            "rope_parameters": config.rope_parameters,
+            "max_position_embeddings": config.max_position_embeddings,
         },
         "storage": {
             "dtype": "bfloat16",

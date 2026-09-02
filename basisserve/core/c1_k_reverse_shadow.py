@@ -69,6 +69,7 @@ class ReverseShadowConfig:
     query_head_aggregation: QueryHeadAggregation = "max_head"
     adaptive_max_token_budget: int | None = None
     adaptive_tail_mass_ratio_threshold: float | None = None
+    pinned_prefix_pages: int = 0
 
     def validate(self, head_dim: int) -> None:
         if self.page_size <= 0:
@@ -77,6 +78,7 @@ class ReverseShadowConfig:
             raise ValueError("exact-token budget must be nonnegative")
         if self.recent_exact_window < 0:
             raise ValueError("recent exact window must be nonnegative")
+        assert 0 <= self.pinned_prefix_pages <= self.page_budget
         if not 1 <= self.landmarks_per_page <= self.page_size:
             raise ValueError("landmarks per page must be in [1, page size]")
         if self.selector not in (
@@ -1492,17 +1494,35 @@ def _kq_svd_page_selection(
         token_scores.add_(bias[batch_index]).masked_fill_(
             ~valid[batch_index], -torch.inf
         )
+        routed_scores = token_scores.clone()
+        prefix_tokens = min(
+            sequence,
+            config.pinned_prefix_pages * config.page_size,
+        )
+        routed_scores[:, :prefix_tokens] = -torch.inf
         if config.adaptive_max_page_budget is None:
-            _, selected_pages = gqa_group_max_page_mass_mask(
-                token_scores,
-                num_kv_heads=kv_heads,
-                page_size=config.page_size,
-                pages_per_kv_head=config.page_budget,
+            routed_page_budget = (
+                config.page_budget - config.pinned_prefix_pages
             )
+            if routed_page_budget:
+                _, selected_pages = gqa_group_max_page_mass_mask(
+                    routed_scores,
+                    num_kv_heads=kv_heads,
+                    page_size=config.page_size,
+                    pages_per_kv_head=routed_page_budget,
+                )
+            else:
+                selected_pages = torch.zeros(
+                    kv_heads,
+                    page_count,
+                    dtype=torch.bool,
+                    device=query.device,
+                )
         else:
+            assert config.pinned_prefix_pages == 0
             assert config.adaptive_tail_mass_ratio_threshold is not None
             adaptive = gqa_union_adaptive_page_mass_mask(
-                token_scores,
+                routed_scores,
                 num_kv_heads=kv_heads,
                 page_size=config.page_size,
                 base_pages_per_query_head=config.page_budget,
@@ -1520,18 +1540,18 @@ def _kq_svd_page_selection(
         padded_scores = (
             torch.cat(
                 (
-                    token_scores,
+                    routed_scores,
                     torch.full(
                         (query_heads, padding),
                         -torch.inf,
-                        dtype=token_scores.dtype,
-                        device=token_scores.device,
+                        dtype=routed_scores.dtype,
+                        device=routed_scores.device,
                     ),
                 ),
                 dim=-1,
             )
             if padding
-            else token_scores
+            else routed_scores
         )
         per_query_page_mass = torch.logsumexp(
             padded_scores.reshape(
@@ -1545,6 +1565,10 @@ def _kq_svd_page_selection(
             ).amax(dim=1)
         )
     selected = torch.stack(selected_batches) & page_valid
+    if config.pinned_prefix_pages:
+        selected[..., : config.pinned_prefix_pages] = page_valid[
+            ..., : config.pinned_prefix_pages
+        ]
     page_scores = torch.stack(score_batches).masked_fill(~page_valid, -torch.inf)
 
     if forced_page_mask is not None:

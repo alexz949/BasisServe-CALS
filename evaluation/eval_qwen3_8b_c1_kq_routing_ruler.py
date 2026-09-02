@@ -278,6 +278,7 @@ def _load_dense_baseline(
     samples_per_task: int,
     task_names: list[str],
     rope_scaling: dict[str, float | int | str] | None,
+    required_keys: set[str],
 ) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if payload.get("format") != DENSE_FORMAT or payload.get("status") != "complete":
@@ -303,10 +304,9 @@ def _load_dense_baseline(
     records = {
         record["key"]: record
         for record in payload["records"]
-        if record["task"] in task_names
-        and int(record["sample_ordinal"]) < samples_per_task
+        if record["key"] in required_keys
     }
-    expected_records = len(task_names) * samples_per_task
+    expected_records = len(required_keys)
     if len(records) != expected_records:
         raise ValueError(
             f"dense RULER baseline has {len(records)} rows, expected {expected_records}"
@@ -430,6 +430,7 @@ def _evaluate_decode(
     device: torch.device,
     adaptive_max_token_budget: int | None = None,
     adaptive_tail_mass_ratio: float | None = None,
+    pinned_prefix_pages: int = 0,
 ) -> dict[str, Any]:
     if sparse:
         _set_backend(modules, "native")
@@ -440,6 +441,7 @@ def _evaluate_decode(
             force_last_page=force_last_page,
             adaptive_max_budget=adaptive_max_token_budget,
             adaptive_tail_mass_ratio=adaptive_tail_mass_ratio,
+            pinned_prefix_pages=pinned_prefix_pages,
         )
     else:
         _set_sparse_policy(
@@ -709,6 +711,7 @@ def _parser() -> argparse.ArgumentParser:
         help="project each new post-RoPE K once and retain its routing code",
     )
     parser.add_argument("--force-last-page", action="store_true")
+    parser.add_argument("--pinned-prefix-pages", type=int, default=0)
     parser.add_argument(
         "--dtype",
         choices=("float16", "bfloat16", "float32"),
@@ -785,6 +788,11 @@ def main() -> None:
         tasks=tasks,
         tokenizer_path=model_path,
     )
+    work = _select_sample_spec(
+        _build_work(data_dir, tasks, args.samples_per_task),
+        args.sample_spec,
+    )
+    required_keys = {f"{row[1].name}:{row[2]}" for row in work}
     dense_baseline, dense_records = _load_dense_baseline(
         dense_baseline_path,
         model_path=model_path,
@@ -793,10 +801,7 @@ def main() -> None:
         samples_per_task=args.samples_per_task,
         task_names=task_names,
         rope_scaling=rope_scaling,
-    )
-    work = _select_sample_spec(
-        _build_work(data_dir, tasks, args.samples_per_task),
-        args.sample_spec,
+        required_keys=required_keys,
     )
     assigned = _assigned_work(
         work,
@@ -920,6 +925,7 @@ def main() -> None:
         ),
         "routing_proxy_implementation": routing_proxy_implementation,
         "force_last_page": args.force_last_page,
+        "pinned_prefix_pages": args.pinned_prefix_pages,
         "dtype": args.dtype,
         "assignment_rank_offset": args.assignment_rank_offset,
         "rope_scaling": rope_scaling,
@@ -1065,6 +1071,7 @@ def main() -> None:
                     device=device,
                     adaptive_max_token_budget=(policy.adaptive_max_token_budget),
                     adaptive_tail_mass_ratio=policy.adaptive_tail_mass_ratio,
+                    pinned_prefix_pages=args.pinned_prefix_pages,
                 )
                 _restore_prompt_cache(routing_cache, prompt_tokens)
             bf16_result_row = copy.deepcopy(dense_records[key]["arms"][BF16_ARM])
@@ -1108,6 +1115,9 @@ def main() -> None:
                 f"sparse_decode={sum(row['elapsed_seconds'] for row in sparse_result_rows.values()):.2f}s",
                 flush=True,
             )
+            del routing_cache, first_token, c1_result_row, sparse_result_rows
+            if args.empty_cache_between_prefill_chunks:
+                torch.cuda.empty_cache()
 
     if world_size > 1:
         dist.barrier()

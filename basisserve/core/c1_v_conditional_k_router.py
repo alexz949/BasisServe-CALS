@@ -151,15 +151,21 @@ def residual_page_fisher_gram(
     *,
     scaling: float,
     page_size: int,
+    excluded_prefix_pages: int,
 ) -> tuple[torch.Tensor, float]:
     """Build exact-teacher Page-Fisher Grams for residual-Key features.
 
-    Page masses and within-page conditional weights always come from the full
-    exact Key.  Only the page representative uses the residual feature.  The
-    returned energy is the Page-Fisher energy of the exact residual score, so
-    a zero-dimensional residual router has normalized loss one.
+    Page masses and within-page conditional weights always come from the exact
+    Key.  Prefix pages that are pinned in the physical cache are removed before
+    the non-sink distribution is normalized.  Only the page representative
+    uses the residual feature.  The returned energy is the Page-Fisher energy
+    of the exact residual score, so a zero-dimensional residual router has
+    normalized loss one.
     """
 
+    first_token = int(excluded_prefix_pages) * int(page_size)
+    exact_key_rows = exact_key_rows[first_token:]
+    residual_rows = residual_rows[first_token:]
     tokens = int(exact_key_rows.shape[0])
     pages = (tokens + int(page_size) - 1) // int(page_size)
     padded_tokens = pages * int(page_size)

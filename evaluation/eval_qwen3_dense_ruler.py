@@ -201,6 +201,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--sequence-length", type=int, default=4096)
     parser.add_argument("--tasks", default="all")
     parser.add_argument("--samples-per-task", type=int, default=100)
+    parser.add_argument("--sample-spec", default="")
     parser.add_argument("--prefill-chunk-size", type=int, default=2048)
     parser.add_argument(
         "--empty-cache-between-prefill-chunks",
@@ -257,6 +258,18 @@ def main() -> None:
         tokenizer_path=model_path,
     )
     work = _build_work(data_dir, tasks, args.samples_per_task)
+    if args.sample_spec.strip():
+        requested = {
+            (task.strip(), int(ordinal))
+            for item in args.sample_spec.split(",")
+            for task, ordinal in (item.rsplit(":", 1),)
+        }
+        work = [
+            row
+            for row in work
+            if (str(row[1].name), int(row[2])) in requested
+        ]
+        work = [(index, *row[1:]) for index, row in enumerate(work)]
     assigned = [row for row in work if row[0] % world_size == rank]
     protocol_identity = {
         "model_config_sha256": _sha256(model_path / "config.json"),
@@ -264,6 +277,7 @@ def main() -> None:
         "sequence_length": args.sequence_length,
         "tasks": [task.name for task in tasks],
         "samples_per_task": args.samples_per_task,
+        "sample_spec": args.sample_spec,
         "arm": ARM,
         "dtype": args.dtype,
         "rope_scaling": rope_scaling,

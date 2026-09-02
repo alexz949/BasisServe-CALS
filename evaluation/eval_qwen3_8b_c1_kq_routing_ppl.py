@@ -328,6 +328,7 @@ def _set_sparse_policy(
     force_last_page: bool,
     adaptive_max_budget: int | None = None,
     adaptive_tail_mass_ratio: float | None = None,
+    pinned_prefix_pages: int = 0,
 ) -> None:
     for module in modules:
         module.set_reverse_shadow_config(
@@ -341,6 +342,7 @@ def _set_sparse_policy(
                 landmark_dtype="bfloat16",
                 adaptive_max_token_budget=adaptive_max_budget,
                 adaptive_tail_mass_ratio_threshold=adaptive_tail_mass_ratio,
+                pinned_prefix_pages=pinned_prefix_pages,
             )
         )
 

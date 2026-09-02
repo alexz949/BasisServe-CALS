@@ -53,6 +53,7 @@ def test_residual_page_fisher_uses_exact_key_teacher() -> None:
         residual,
         scaling=scaling,
         page_size=2,
+        excluded_prefix_pages=0,
     )
 
     probabilities = torch.softmax(scaling * queries @ exact_key.mT, dim=-1)
@@ -93,9 +94,38 @@ def test_zero_residual_has_zero_page_fisher_energy() -> None:
         torch.zeros_like(exact_key),
         scaling=0.5,
         page_size=3,
+        excluded_prefix_pages=0,
     )
     assert torch.count_nonzero(grams) == 0
     assert energy == 0.0
+
+
+def test_residual_page_fisher_conditions_on_non_sink_pages() -> None:
+    generator = torch.Generator().manual_seed(19)
+    queries = torch.randn(3, 4, generator=generator, dtype=torch.float64)
+    exact_key = torch.randn(10, 4, generator=generator, dtype=torch.float64)
+    residual = torch.randn(10, 4, generator=generator, dtype=torch.float64)
+    conditioned = residual_page_fisher_gram(
+        queries,
+        exact_key,
+        residual,
+        scaling=0.5,
+        page_size=2,
+        excluded_prefix_pages=1,
+    )
+    sliced = residual_page_fisher_gram(
+        queries,
+        exact_key[2:],
+        residual[2:],
+        scaling=0.5,
+        page_size=2,
+        excluded_prefix_pages=0,
+    )
+    torch.testing.assert_close(conditioned[0], sliced[0])
+    torch.testing.assert_close(
+        torch.tensor(conditioned[1]),
+        torch.tensor(sliced[1]),
+    )
 
 
 def test_conditional_sidecar_reproduces_base_plus_residual_scores() -> None:

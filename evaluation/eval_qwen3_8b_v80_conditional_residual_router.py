@@ -256,6 +256,7 @@ def _build_residual_statistics(
     cos: torch.Tensor,
     sin: torch.Tensor,
     page_size: int,
+    excluded_prefix_pages: int,
     device: torch.device,
 ) -> tuple[dict[int, S80CompactSoftmaxFisherRouting], dict[int, dict[str, float]]]:
     documents, query_heads, head_dim = map(int, queries_raw.shape)
@@ -307,6 +308,7 @@ def _build_residual_statistics(
                     residual[:, group],
                     scaling=scaling,
                     page_size=page_size,
+                    excluded_prefix_pages=excluded_prefix_pages,
                 )
                 grams[rank][first:stop, document].copy_(
                     group_grams.float().cpu()
@@ -788,6 +790,7 @@ def main() -> None:
             cos=cos,
             sin=sin,
             page_size=args.page_size,
+            excluded_prefix_pages=0,
             device=device,
         )
         validation_statistics, validation_reconstruction = _build_residual_statistics(
@@ -798,6 +801,7 @@ def main() -> None:
             cos=cos,
             sin=sin,
             page_size=args.page_size,
+            excluded_prefix_pages=0,
             device=device,
         )
         factor_bank, router_diagnostics = _fit_residual_grid(
