@@ -1,0 +1,35 @@
+{
+  "command": "evaluation/validate_conditional_router_page32_lse.py --sequence-length 65536 --correctness-length 4097 --warmup 5 --repeat 50 --reference-repeat 3 --output-json results/evaluation/qwen3_8b_conditional_router_page32/fused_cuda_l40s.json",
+  "correctness": {
+    "maximum_absolute_page_lse_error": 4.76837158203125e-07,
+    "mean_absolute_page_lse_error": 8.894491543287586e-08,
+    "selected_page_id_agreement": 1.0
+  },
+  "environment": {
+    "conda_environment": "basis",
+    "cuda": "12.4",
+    "gpu": "NVIDIA L40S",
+    "torch": "2.6.0+cu124"
+  },
+  "format": "basisserve.conditional_router_page32_lse_validation.v1",
+  "geometry": {
+    "base_rank": 16,
+    "correctness_length": 4097,
+    "page_size": 32,
+    "query_key_dim": 128,
+    "residual_rank": 8,
+    "sequence_length": 65536,
+    "value_rank": 80
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-02T23:55:13.482251+00:00",
+  "timing": {
+    "fused_cuda_ms": 0.07002111911773681,
+    "fused_repeat": 50,
+    "pytorch_ms": 8.173909505208334,
+    "reference_repeat": 3,
+    "speedup": 116.73491666798894,
+    "warmup": 5
+  },
+  "wall_seconds": 20.332506358623505
+}

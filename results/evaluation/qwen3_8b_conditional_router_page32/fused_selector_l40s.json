@@ -1,0 +1,47 @@
+{
+  "command": "evaluation/validate_conditional_router_page32_lse.py --sequence-length 65536 --correctness-length 4097 --warmup 5 --repeat 50 --reference-repeat 3 --append-repeat 1000 --selection-repeat 1000 --output-json results/evaluation/qwen3_8b_conditional_router_page32/fused_selector_l40s.json",
+  "correctness": {
+    "fused_selector_64k_page_id_agreement": 1.0,
+    "fused_selector_page_id_agreement": 1.0,
+    "maximum_absolute_append_base_error": 0.0,
+    "maximum_absolute_append_residual_error": 0.0,
+    "maximum_absolute_page_lse_error": 4.76837158203125e-07,
+    "mean_absolute_page_lse_error": 9.425851033029176e-08,
+    "selected_page_id_agreement": 1.0
+  },
+  "environment": {
+    "conda_environment": "basis",
+    "cuda": "12.4",
+    "gpu": "NVIDIA L40S",
+    "torch": "2.6.0+cu124"
+  },
+  "format": "basisserve.conditional_router_page32_lse_validation.v2",
+  "geometry": {
+    "base_rank": 16,
+    "correctness_length": 4097,
+    "page_size": 32,
+    "query_key_dim": 128,
+    "residual_rank": 8,
+    "sequence_length": 65536,
+    "value_rank": 80
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-03T01:01:21.639901+00:00",
+  "timing": {
+    "append_repeat": 1000,
+    "append_speedup": 11.750647291574113,
+    "fused_append_ms": 0.013839360237121581,
+    "fused_cuda_ms": 0.05754879951477051,
+    "fused_repeat": 50,
+    "fused_selection_ms": 0.015015935897827149,
+    "pytorch_append_ms": 0.16262144088745117,
+    "pytorch_ms": 8.11622428894043,
+    "pytorch_selection_ms": 0.13234175682067872,
+    "reference_repeat": 3,
+    "selection_repeat": 1000,
+    "selection_speedup": 8.81342047017056,
+    "speedup": 141.03203467966895,
+    "warmup": 5
+  },
+  "wall_seconds": 21.380224756896496
+}

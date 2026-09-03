@@ -347,7 +347,13 @@ class _Qwen3TP4StaticDecodeAttention(nn.Module):
             if tensor is not None
         )
 
-    def _append_cache(self, key: Tensor, value: Tensor) -> tuple[Tensor, Tensor]:
+    def _append_cache(
+        self,
+        key: Tensor,
+        value: Tensor,
+        *,
+        position_embeddings: tuple[Tensor, Tensor] | None = None,
+    ) -> tuple[Tensor, Tensor]:
         if self.key_cache is None or self.value_cache is None:
             raise RuntimeError("configure_cache must be called before inference")
         tokens = int(key.shape[2])
@@ -411,7 +417,11 @@ class _Qwen3TP4StaticDecodeAttention(nn.Module):
         ).transpose(1, 2)
         cos, sin = position_embeddings
         query, key = apply_rotary_pos_emb(query, key, cos, sin)
-        cached_key, cached_value = self._append_cache(key, value)
+        cached_key, cached_value = self._append_cache(
+            key,
+            value,
+            position_embeddings=(cos, sin),
+        )
         local_output = self._attention(
             query,
             cached_key,
