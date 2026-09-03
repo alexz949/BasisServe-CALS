@@ -220,8 +220,6 @@ def _load_layer_allocation_results(
     ):
         raise ValueError("per-layer allocation violates its recorded V-cache budget")
     schedules = result.get("schedules", {})
-    if set(schedules) != {"uniform_anchor", "mean_dp", "ucb_dp"}:
-        raise ValueError("per-layer allocation does not contain the three schedules")
     candidate_ranks = set(map(int, selection.get("candidate_ranks", ())))
     for name, row in schedules.items():
         candidate_schedule = row.get("schedule", ())

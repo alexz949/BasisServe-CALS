@@ -37,6 +37,7 @@ from evaluation.allocate_qwen3_32b_c1_tp_source_global_kl import (  # noqa: E402
     _fold_ragged_to_padded_weights,
     _sha256,
 )
+from evaluation import eval_qwen3_32b_c1_wikitext as c1_quality  # noqa: E402
 from evaluation.eval_qwen3_32b_c1_wikitext import (  # noqa: E402
     _load_ragged_results,
     _load_results as _load_uniform_results,
@@ -53,6 +54,27 @@ from evaluation.hf_legacy_dataset_compat import (  # noqa: E402
 
 FORMAT = "basisserve.qwen3_32b.gqa_c1_lm_eval_mcq.v1"
 ALLOCATION_FORMAT = "basisserve.qwen3_32b.gqa_c1.tp_source_global_kl_allocation.v2"
+MODEL_LABEL = "Qwen3-32B"
+
+
+def activate_model_profile(name: str) -> None:
+    global FORMAT, ALLOCATION_FORMAT, MODEL_LABEL
+    global HEAD_DIM, HIDDEN_SIZE, NUM_KV_HEADS, NUM_LAYERS, NUM_QUERY_HEADS
+    c1_quality.activate_model_profile(name)
+    if name == "qwen3_32b":
+        slug = "qwen3_32b"
+        MODEL_LABEL = "Qwen3-32B"
+    else:
+        assert name == "qwen3_8b"
+        slug = "qwen3_8b"
+        MODEL_LABEL = "Qwen3-8B-Base"
+    HEAD_DIM = c1_quality.HEAD_DIM
+    HIDDEN_SIZE = c1_quality.HIDDEN_SIZE
+    NUM_KV_HEADS = c1_quality.NUM_KV_HEADS
+    NUM_LAYERS = c1_quality.NUM_LAYERS
+    NUM_QUERY_HEADS = c1_quality.NUM_QUERY_HEADS
+    FORMAT = f"basisserve.{slug}.gqa_c1_lm_eval_mcq.v1"
+    ALLOCATION_FORMAT = c1_quality.LAYER_ALLOCATION_FORMAT
 
 
 def _dtype(name: str) -> torch.dtype:
@@ -96,8 +118,7 @@ def _validate_model_geometry(model: nn.Module) -> None:
         NUM_KV_HEADS,
         HEAD_DIM,
     )
-    if observed != expected:
-        raise ValueError(f"unexpected Qwen3-32B geometry: {observed}")
+    assert observed == expected, f"unexpected {MODEL_LABEL} geometry: {observed}"
 
 
 def _load_allocation(allocation_dir: Path, model_path: Path) -> dict[str, Any]:
@@ -110,8 +131,9 @@ def _load_allocation(allocation_dir: Path, model_path: Path) -> dict[str, Any]:
     if result.get("model_config_sha256") != _sha256(model_path / "config.json"):
         raise ValueError("C1 allocation belongs to another model config")
     artifacts = result.get("selected_artifacts", {})
-    if set(map(int, artifacts)) != set(range(NUM_LAYERS)):
-        raise ValueError("C1 allocation does not contain all 64 selected layers")
+    assert set(map(int, artifacts)) == set(range(NUM_LAYERS)), (
+        f"C1 allocation does not contain all {NUM_LAYERS} selected layers"
+    )
     schedule = result.get("selection", {}).get("selected_schedule", ())
     if len(schedule) != NUM_LAYERS or any(len(ranks) != NUM_KV_HEADS for ranks in schedule):
         raise ValueError("C1 allocation has an incompatible selected rank schedule")
@@ -332,7 +354,7 @@ def evaluate(args: argparse.Namespace) -> None:
         assert allocation_dir is not None
         result_path = allocation_dir / "result.json"
         selection = allocation_result["selection"]
-        arm = "c1_tp8_global_kl_mean_dp"
+        arm = f"c1_layer_global_kl_{selection['selected_candidate']}"
         checkpoint_record = {
             "directory": str(allocation_dir),
             "result_sha256": _sha256(result_path),

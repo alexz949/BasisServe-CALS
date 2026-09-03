@@ -1,0 +1,88 @@
+{
+  "format": "basisserve.qwen3_8b.c1_factorized_alpha1_vs_uniform_v64_mcq.v1",
+  "status": "complete",
+  "protocol": {
+    "benchmark": "lm-eval",
+    "num_fewshot": 0,
+    "maximum_examples_per_task": 500,
+    "effective_examples_per_task": 500,
+    "total_effective_examples_per_arm": 3500,
+    "batch_size": 8,
+    "max_length": 4096,
+    "model_dtype": "bfloat16",
+    "attention_implementation": "sdpa",
+    "metric_selection": "acc_norm when present, otherwise acc",
+    "macro_aggregation": "equal weight over seven tasks",
+    "tasks": [
+      "arc_easy",
+      "arc_challenge",
+      "hellaswag",
+      "piqa",
+      "winogrande",
+      "boolq",
+      "openbookqa"
+    ]
+  },
+  "arms": {
+    "uniform_v64": {
+      "checkpoint": "results/checkpoints/qwen3_8b_c1_v64_als5",
+      "macro_accuracy": 0.646,
+      "tasks": {
+        "arc_easy": {"metric": "acc_norm", "accuracy": 0.726},
+        "arc_challenge": {"metric": "acc_norm", "accuracy": 0.49},
+        "hellaswag": {"metric": "acc_norm", "accuracy": 0.61},
+        "piqa": {"metric": "acc_norm", "accuracy": 0.814},
+        "winogrande": {"metric": "acc", "accuracy": 0.708},
+        "boolq": {"metric": "acc", "accuracy": 0.78},
+        "openbookqa": {"metric": "acc_norm", "accuracy": 0.394}
+      }
+    },
+    "factorized_two_sided_alpha1": {
+      "checkpoint": "results/checkpoints/qwen3_8b_c1_factorized_c4_128measure_twosided_sampled1024_avg64_a1p0",
+      "macro_accuracy": 0.6537142857142858,
+      "tasks": {
+        "arc_easy": {"metric": "acc_norm", "accuracy": 0.748},
+        "arc_challenge": {"metric": "acc_norm", "accuracy": 0.502},
+        "hellaswag": {"metric": "acc_norm", "accuracy": 0.626},
+        "piqa": {"metric": "acc_norm", "accuracy": 0.808},
+        "winogrande": {"metric": "acc", "accuracy": 0.712},
+        "boolq": {"metric": "acc", "accuracy": 0.78},
+        "openbookqa": {"metric": "acc_norm", "accuracy": 0.4}
+      }
+    }
+  },
+  "comparison": {
+    "factorized_minus_uniform_macro_accuracy": 0.007714285714285785,
+    "factorized_minus_uniform_macro_percentage_points": 0.7714285714285785,
+    "relative_macro_accuracy_change_percent": 1.1941618752764338,
+    "selected_metric_net_correct_predictions": 27,
+    "task_wins": 5,
+    "task_ties": 1,
+    "task_losses": 1,
+    "task_deltas_percentage_points": {
+      "arc_easy": 2.2,
+      "arc_challenge": 1.2,
+      "hellaswag": 1.6,
+      "piqa": -0.6,
+      "winogrande": 0.4,
+      "boolq": 0.0,
+      "openbookqa": 0.6
+    }
+  },
+  "execution": {
+    "conda_environment": "basis",
+    "torch": "2.6.0+cu124",
+    "lm_eval": "0.4.11",
+    "slurm_job": "8298759",
+    "array_tasks": 4,
+    "gpus": "4 x NVIDIA L40S",
+    "array_elapsed_seconds": [80, 82, 81, 82],
+    "warnings": []
+  },
+  "source_results": [
+    "results/evaluation/qwen3_8b_c1_uniform_v64_mcq7_limit500_shard0.json",
+    "results/evaluation/qwen3_8b_c1_uniform_v64_mcq7_limit500_shard1.json",
+    "results/evaluation/qwen3_8b_c1_factorized_alpha1_mcq7_limit500_shard0.json",
+    "results/evaluation/qwen3_8b_c1_factorized_alpha1_mcq7_limit500_shard1.json"
+  ]
+}

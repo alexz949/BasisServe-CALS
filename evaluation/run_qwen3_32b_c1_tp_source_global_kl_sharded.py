@@ -173,18 +173,11 @@ def _validate_shared(
     )
     if min(positive) <= 0:
         raise ValueError("sample and compute arguments must be positive")
-    if args.batch_size < max(args.profile_windows, args.confirmation_windows):
-        raise ValueError(
-            "sharded Global-KL requires one forward per 8-document split; "
-            "set batch size to at least the split size"
-        )
     if args.covariance_damping < 0 or args.decoder_relative_jitter < 0:
         raise ValueError("damping and jitter must be non-negative")
     candidate_ranks = common._parse_ranks(args.candidate_ranks)
     if args.anchor_rank not in candidate_ranks:
         raise ValueError("anchor rank must be one of the candidate ranks")
-    if common.HEAD_DIM not in candidate_ranks:
-        raise ValueError("candidate ranks must include the exact rank-128 endpoint")
     factor_dirs = common._parse_factor_dirs(args.factor_dir)
     if set(factor_dirs) != set(candidate_ranks) - {common.HEAD_DIM}:
         raise ValueError(

@@ -1,0 +1,1087 @@
+{
+  "arm": "c1_layer_global_kl_factorized_two_sided_dp",
+  "checkpoint": {
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/checkpoints/qwen3_8b_c1_factorized_c4_128measure_twosided_sampled1024_avg64_a1p0",
+    "format": "basisserve.qwen3_8b.gqa_c1.layer_global_kl_allocation.v1",
+    "result_sha256": "4a4fbd1a7bad91f31d6b4fd01dfb8195c24662bc1316939afcd9877d058b9aa5",
+    "selected_candidate": "factorized_two_sided_dp"
+  },
+  "command": "evaluation/eval_qwen3_8b_c1_lm_eval.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --allocation-dir results/checkpoints/qwen3_8b_c1_factorized_c4_128measure_twosided_sampled1024_avg64_a1p0 --tasks arc_easy,arc_challenge,piqa,winogrande --batch-size 8 --max-length 4096 --limit 500 --output-json results/evaluation/qwen3_8b_c1_factorized_alpha1_mcq7_limit500_shard1.json --model-dtype bfloat16 --attn-implementation sdpa --device cuda:0 --device-map balanced --max-memory-per-gpu-gib 44 --local-files-only --torch-num-threads 4",
+  "compression": {
+    "anchor_rank": 64,
+    "changed_layers_from_anchor": 21,
+    "changed_sources_from_anchor": 168,
+    "dense_reduction": 2.0,
+    "dense_value_total_width": 36864,
+    "layer_rank_histogram": {
+      "112": 1,
+      "32": 4,
+      "48": 7,
+      "64": 15,
+      "80": 6,
+      "96": 3
+    },
+    "layer_rank_sum": 2304,
+    "layer_ranks": [
+      80,
+      64,
+      32,
+      48,
+      48,
+      32,
+      64,
+      64,
+      80,
+      80,
+      80,
+      64,
+      48,
+      48,
+      64,
+      64,
+      64,
+      64,
+      64,
+      80,
+      64,
+      64,
+      96,
+      112,
+      96,
+      48,
+      64,
+      48,
+      32,
+      64,
+      64,
+      48,
+      64,
+      96,
+      80,
+      32
+    ],
+    "ragged_padding_overhead": 0.0,
+    "rectangular_collective_total_width": 18432,
+    "rectangular_collective_width_by_layer": [
+      640,
+      512,
+      256,
+      384,
+      384,
+      256,
+      512,
+      512,
+      640,
+      640,
+      640,
+      512,
+      384,
+      384,
+      512,
+      512,
+      512,
+      512,
+      512,
+      640,
+      512,
+      512,
+      768,
+      896,
+      768,
+      384,
+      512,
+      384,
+      256,
+      512,
+      512,
+      384,
+      512,
+      768,
+      640,
+      256
+    ],
+    "source_rank_histogram": {
+      "112": 8,
+      "32": 32,
+      "48": 56,
+      "64": 120,
+      "80": 48,
+      "96": 24
+    },
+    "source_rank_sum": 18432,
+    "uniform_anchor_total_width": 18432
+  },
+  "elapsed_seconds": 71.02576619386673,
+  "environment": {
+    "conda_environment": null,
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ],
+    "datasets": "5.0.0",
+    "huggingface_hub": "1.28.0",
+    "lm_eval": "0.4.11",
+    "peak_cuda_allocated_bytes": {
+      "0": 17812827648
+    },
+    "python": "3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0]",
+    "torch": "2.6.0+cu124",
+    "torch_num_threads": 4,
+    "transformers": "5.15.1"
+  },
+  "evaluation": {
+    "config": {
+      "batch_size": null,
+      "batch_sizes": [],
+      "bootstrap_iters": 100000,
+      "device": null,
+      "fewshot_seed": 1234,
+      "gen_kwargs": null,
+      "limit": 500.0,
+      "model": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+      "model_args": null,
+      "model_dtype": "torch.bfloat16",
+      "model_num_parameters": 8190735360,
+      "model_revision": "main",
+      "model_sha": "",
+      "numpy_seed": 1234,
+      "random_seed": 0,
+      "torch_seed": 1234,
+      "use_cache": null
+    },
+    "configs": {
+      "arc_challenge": {
+        "dataset_name": "ARC-Challenge",
+        "dataset_path": "allenai/ai2_arc",
+        "description": "",
+        "doc_to_choice": "{{choices.text}}",
+        "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+        "doc_to_target": "{{choices.label.index(answerKey)}}",
+        "doc_to_text": "Question: {{question}}\nAnswer:",
+        "fewshot_config": {
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "tag": [
+          "ai2_arc"
+        ],
+        "target_delimiter": " ",
+        "task": "arc_challenge",
+        "test_split": "test",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "arc_easy": {
+        "dataset_name": "ARC-Easy",
+        "dataset_path": "allenai/ai2_arc",
+        "description": "",
+        "doc_to_choice": "{{choices.text}}",
+        "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+        "doc_to_target": "{{choices.label.index(answerKey)}}",
+        "doc_to_text": "Question: {{question}}\nAnswer:",
+        "fewshot_config": {
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "tag": [
+          "ai2_arc"
+        ],
+        "target_delimiter": " ",
+        "task": "arc_easy",
+        "test_split": "test",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "piqa": {
+        "dataset_path": "baber/piqa",
+        "description": "",
+        "doc_to_choice": "{{[sol1, sol2]}}",
+        "doc_to_decontamination_query": "goal",
+        "doc_to_target": "label",
+        "doc_to_text": "Question: {{goal}}\nAnswer:",
+        "fewshot_config": {
+          "doc_to_choice": "{{[sol1, sol2]}}",
+          "doc_to_target": "label",
+          "doc_to_text": "Question: {{goal}}\nAnswer:",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "target_delimiter": " ",
+        "task": "piqa",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "winogrande": {
+        "dataset_name": "winogrande_xl",
+        "dataset_path": "allenai/winogrande",
+        "description": "",
+        "doc_to_choice": "def doc_to_choice(doc):\n    idx = doc[\"sentence\"].index(\"_\")\n    options = [doc[\"option1\"], doc[\"option2\"]]\n    return [doc[\"sentence\"][:idx] + opt for opt in options]\n",
+        "doc_to_decontamination_query": "sentence",
+        "doc_to_target": "def doc_to_target(doc):\n    idx = doc[\"sentence\"].index(\"_\") + 1\n    return doc[\"sentence\"][idx:].strip()\n",
+        "doc_to_text": "def doc_to_text(doc):\n    answer_to_num = {\"1\": 0, \"2\": 1}\n    return answer_to_num[doc[\"answer\"]]\n",
+        "fewshot_config": {
+          "doc_to_choice": "<function doc_to_choice at 0x7f582c894e00>",
+          "doc_to_target": "<function doc_to_target at 0x7f582c894a40>",
+          "doc_to_text": "<function doc_to_text at 0x7f582c894680>",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "target_delimiter": " ",
+        "task": "winogrande",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      }
+    },
+    "date": 1788418324.7018127,
+    "eot_token_id": 151643,
+    "git_hash": "e511d8f",
+    "group_subtasks": {
+      "arc_challenge": [],
+      "arc_easy": [],
+      "piqa": [],
+      "winogrande": []
+    },
+    "higher_is_better": {
+      "arc_challenge": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "arc_easy": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "piqa": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "winogrande": {
+        "acc": true
+      }
+    },
+    "lm_eval_version": "0.4.11",
+    "max_length": 4096,
+    "n-samples": {
+      "arc_challenge": {
+        "effective": 500,
+        "original": 1172
+      },
+      "arc_easy": {
+        "effective": 500,
+        "original": 2376
+      },
+      "piqa": {
+        "effective": 500,
+        "original": 1838
+      },
+      "winogrande": {
+        "effective": 500,
+        "original": 1267
+      }
+    },
+    "n-shot": {
+      "arc_challenge": 0,
+      "arc_easy": 0,
+      "piqa": 0,
+      "winogrande": 0
+    },
+    "pretty_env_info": "PyTorch version: 2.6.0+cu124\nIs debug build: False\nCUDA used to build PyTorch: 12.4\nROCM used to build PyTorch: N/A\n\nOS: Rocky Linux 9.4 (Blue Onyx) (x86_64)\nGCC version: (GCC) 11.4.1 20231218 (Red Hat 11.4.1-3)\nClang version: Could not collect\nCMake version: version 3.26.5\nLibc version: glibc-2.34\n\nPython version: 3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0] (64-bit runtime)\nPython platform: Linux-5.14.0-427.33.1.el9_4.x86_64-x86_64-with-glibc2.34\nIs CUDA available: True\nCUDA runtime version: Could not collect\nCUDA_MODULE_LOADING set to: LAZY\nGPU models and configuration: \nGPU 0: NVIDIA L40S\nGPU 1: NVIDIA L40S\nGPU 2: NVIDIA L40S\nGPU 3: NVIDIA L40S\n\nNvidia driver version: 550.54.15\ncuDNN version: Could not collect\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: True\n\nCPU:\nArchitecture:                       x86_64\nCPU op-mode(s):                     32-bit, 64-bit\nAddress sizes:                      52 bits physical, 57 bits virtual\nByte Order:                         Little Endian\nCPU(s):                             64\nOn-line CPU(s) list:                0-63\nVendor ID:                          AuthenticAMD\nModel name:                         AMD EPYC 9334 32-Core Processor\nCPU family:                         25\nModel:                              17\nThread(s) per core:                 1\nCore(s) per socket:                 32\nSocket(s):                          2\nStepping:                           1\nFrequency boost:                    enabled\nCPU(s) scaling MHz:                 72%\nCPU max MHz:                        3910.2529\nCPU min MHz:                        1500.0000\nBogoMIPS:                           5400.61\nFlags:                              fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid overflow_recov succor smca fsrm flush_l1d debug_swap\nVirtualization:                     AMD-V\nL1d cache:                          2 MiB (64 instances)\nL1i cache:                          2 MiB (64 instances)\nL2 cache:                           64 MiB (64 instances)\nL3 cache:                           256 MiB (8 instances)\nNUMA node(s):                       2\nNUMA node0 CPU(s):                  0-31\nNUMA node1 CPU(s):                  32-63\nVulnerability Gather data sampling: Not affected\nVulnerability Itlb multihit:        Not affected\nVulnerability L1tf:                 Not affected\nVulnerability Mds:                  Not affected\nVulnerability Meltdown:             Not affected\nVulnerability Mmio stale data:      Not affected\nVulnerability Retbleed:             Not affected\nVulnerability Spec rstack overflow: Mitigation; Safe RET\nVulnerability Spec store bypass:    Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:           Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:           Mitigation; Enhanced / Automatic IBRS, IBPB conditional, STIBP disabled, RSB filling, PBRSB-eIBRS Not affected\nVulnerability Srbds:                Not affected\nVulnerability Tsx async abort:      Not affected\n\nVersions of relevant libraries:\n[pip3] numpy==2.4.6\n[pip3] nvidia-cublas-cu12==12.4.5.8\n[pip3] nvidia-cuda-cupti-cu12==12.4.127\n[pip3] nvidia-cuda-nvrtc-cu12==12.4.127\n[pip3] nvidia-cuda-runtime-cu12==12.4.127\n[pip3] nvidia-cudnn-cu12==9.1.0.70\n[pip3] nvidia-cufft-cu12==11.2.1.3\n[pip3] nvidia-curand-cu12==10.3.5.147\n[pip3] nvidia-cusolver-cu12==11.6.1.9\n[pip3] nvidia-cusparse-cu12==12.3.1.170\n[pip3] nvidia-cusparselt-cu12==0.6.2\n[pip3] nvidia-nccl-cu12==2.21.5\n[pip3] nvidia-nvjitlink-cu12==12.4.127\n[pip3] nvidia-nvtx-cu12==12.4.127\n[pip3] torch==2.6.0+cu124\n[pip3] triton==3.2.0\n[conda] Could not collect",
+    "results": {
+      "arc_challenge": {
+        "acc,none": 0.466,
+        "acc_norm,none": 0.502,
+        "acc_norm_stderr,none": 0.022382894986483524,
+        "acc_stderr,none": 0.022331264423258383,
+        "alias": "arc_challenge"
+      },
+      "arc_easy": {
+        "acc,none": 0.768,
+        "acc_norm,none": 0.748,
+        "acc_norm_stderr,none": 0.01943572728224952,
+        "acc_stderr,none": 0.01889619359195207,
+        "alias": "arc_easy"
+      },
+      "piqa": {
+        "acc,none": 0.782,
+        "acc_norm,none": 0.808,
+        "acc_norm_stderr,none": 0.017632180454360987,
+        "acc_stderr,none": 0.018483378223178845,
+        "alias": "piqa"
+      },
+      "winogrande": {
+        "acc,none": 0.712,
+        "acc_stderr,none": 0.02027150383507522,
+        "alias": "winogrande"
+      }
+    },
+    "tokenizer_bos_token": [
+      null,
+      "None"
+    ],
+    "tokenizer_eos_token": [
+      "<|endoftext|>",
+      "151643"
+    ],
+    "tokenizer_pad_token": [
+      "<|endoftext|>",
+      "151643"
+    ],
+    "transformers_version": "5.15.1",
+    "upper_git_hash": null,
+    "versions": {
+      "arc_challenge": 1.0,
+      "arc_easy": 1.0,
+      "piqa": 1.0,
+      "winogrande": 1.0
+    }
+  },
+  "format": "basisserve.qwen3_8b.gqa_c1_lm_eval_mcq.v1",
+  "model": {
+    "config_sha256": "3bd01d7ad7a2e203ecbbe84e24087a51c6d2a108ee4bcc42d0016bf49564983a",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4"
+  },
+  "protocol": {
+    "attention_implementation": "sdpa",
+    "batch_size": "8",
+    "dataset_loader_compatibility": null,
+    "device_map": "balanced",
+    "limit": 500.0,
+    "log_samples": false,
+    "max_length": 4096,
+    "model_dtype": "bfloat16",
+    "num_fewshot": 0,
+    "tasks": [
+      "arc_easy",
+      "arc_challenge",
+      "piqa",
+      "winogrande"
+    ]
+  },
+  "quality_reference_runtime": {
+    "description": "ragged C1 coordinates zero-padded into native Qwen V/O slots; function-equivalent quality path, not a cache-performance benchmark",
+    "installation_seconds": 0.8980159983038902,
+    "layers": [
+      {
+        "elapsed_seconds": 0.10850469768047333,
+        "factor_file": "selected_factors/layer_000.safetensors",
+        "factor_sha256": "a71184e636389a6b1060601c324f662f7caad9d973ba0937853ca95a08d47b4e",
+        "layer": 0,
+        "maximum_padded_rank": 80,
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.020659402012825012,
+        "factor_file": "selected_factors/layer_001.safetensors",
+        "factor_sha256": "2b1d5b248e248c65869cc734ff4ba86860a84ed989e95d23e59f6fadaee1a7ea",
+        "layer": 1,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.011199995875358582,
+        "factor_file": "selected_factors/layer_002.safetensors",
+        "factor_sha256": "52107d8ae7eba682282d2d2594cfb9adcb0908c39bd38749c7695bb6b641ecd5",
+        "layer": 2,
+        "maximum_padded_rank": 32,
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.015313990414142609,
+        "factor_file": "selected_factors/layer_003.safetensors",
+        "factor_sha256": "f644a31eb3cd5994103d14661513454d3106e22e841777871478796777c7a33d",
+        "layer": 3,
+        "maximum_padded_rank": 48,
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.013725318014621735,
+        "factor_file": "selected_factors/layer_004.safetensors",
+        "factor_sha256": "3cece32a76fb413a1900887f7bee7eea0e836bf5278767e55470b325941bdc02",
+        "layer": 4,
+        "maximum_padded_rank": 48,
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01200796663761139,
+        "factor_file": "selected_factors/layer_005.safetensors",
+        "factor_sha256": "6504fbc5af23436a4d39f4a3124eb86819eae9ed01f9d654e2c984dc80bcd8ce",
+        "layer": 5,
+        "maximum_padded_rank": 32,
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.017484962940216064,
+        "factor_file": "selected_factors/layer_006.safetensors",
+        "factor_sha256": "566ed07267ecbbb9a8c4e98498263470a0324be162a64f03877d6e4b7d7d8bc9",
+        "layer": 6,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01744215190410614,
+        "factor_file": "selected_factors/layer_007.safetensors",
+        "factor_sha256": "a28428a5eabddd4530707bf3eae4a166322c7868bcd9aa667e595d9c4380af03",
+        "layer": 7,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.020539194345474243,
+        "factor_file": "selected_factors/layer_008.safetensors",
+        "factor_sha256": "f5364cbf39c4de6cda89ac602f7eb2b6798413b55ae2eb3df81316152fd02ff0",
+        "layer": 8,
+        "maximum_padded_rank": 80,
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.022209234535694122,
+        "factor_file": "selected_factors/layer_009.safetensors",
+        "factor_sha256": "5315aaf1c1020f0f53b14e4e1ed3931dea5f2594977a2c14a995ac00612f7f17",
+        "layer": 9,
+        "maximum_padded_rank": 80,
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.022056080400943756,
+        "factor_file": "selected_factors/layer_010.safetensors",
+        "factor_sha256": "020838719fecc47426fa2a629479ffa740df14fa1142c318088b3af308fc882a",
+        "layer": 10,
+        "maximum_padded_rank": 80,
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.016997121274471283,
+        "factor_file": "selected_factors/layer_011.safetensors",
+        "factor_sha256": "0b7ac940a46ac8a5ab4810e1fd2a9ecde600a011f4f91b836c32f9ccb713e819",
+        "layer": 11,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.013972431421279907,
+        "factor_file": "selected_factors/layer_012.safetensors",
+        "factor_sha256": "17b238ba199dbd512d63b5fbb01e895f8eda1fc059830ba1dcc51cb83749c3d1",
+        "layer": 12,
+        "maximum_padded_rank": 48,
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02049386501312256,
+        "factor_file": "selected_factors/layer_013.safetensors",
+        "factor_sha256": "3d309cb58e44060e257d8469feef443bce29cfa8594f2414f827f2a65f05fb5a",
+        "layer": 13,
+        "maximum_padded_rank": 48,
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.018589995801448822,
+        "factor_file": "selected_factors/layer_014.safetensors",
+        "factor_sha256": "0e1430ac12b86bed7437498b673cbef420fcfc45569e9a332da49ec3d76ca1b2",
+        "layer": 14,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01787634938955307,
+        "factor_file": "selected_factors/layer_015.safetensors",
+        "factor_sha256": "efda302d3e8d894de21096a122e4d7c0e13ad960ef8ee200f31ab1c86c8fd63d",
+        "layer": 15,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02212086319923401,
+        "factor_file": "selected_factors/layer_016.safetensors",
+        "factor_sha256": "38f38e42c8fe6b17e1fc2ef287729c2a372526fb27beecc7ad5be3525406c4a4",
+        "layer": 16,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.017773211002349854,
+        "factor_file": "selected_factors/layer_017.safetensors",
+        "factor_sha256": "e694f537d48000aa6467770696afecc5787295f86c4ef2832065884430777df9",
+        "layer": 17,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.019090749323368073,
+        "factor_file": "selected_factors/layer_018.safetensors",
+        "factor_sha256": "79226602efcd0be0639044473c3b271100978949cdf2c8ee8f81191f2f6a93c4",
+        "layer": 18,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02297542244195938,
+        "factor_file": "selected_factors/layer_019.safetensors",
+        "factor_sha256": "0386dd0f584678d8231f6fe7ea2c71cd8f7f24adecc6c565ff37be2e3eca3403",
+        "layer": 19,
+        "maximum_padded_rank": 80,
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01946483552455902,
+        "factor_file": "selected_factors/layer_020.safetensors",
+        "factor_sha256": "8153f8420758cc0780383dec59da0d71593d8c69e70dcc0b653a5d6484143d16",
+        "layer": 20,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01713566482067108,
+        "factor_file": "selected_factors/layer_021.safetensors",
+        "factor_sha256": "058445d55897ffe90074da2d2c4be8ee2a31a00267f009e09096cde6b0cb2811",
+        "layer": 21,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02601100504398346,
+        "factor_file": "selected_factors/layer_022.safetensors",
+        "factor_sha256": "32920c11c5b1d6575cfab6fc05a1f39baf36fb412e0a2a6f931e08d60079bd31",
+        "layer": 22,
+        "maximum_padded_rank": 96,
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.0294673889875412,
+        "factor_file": "selected_factors/layer_023.safetensors",
+        "factor_sha256": "ee55e171ef615dfad14a4324d510303505cdff2979a1394bac91d3451a61c45c",
+        "layer": 23,
+        "maximum_padded_rank": 112,
+        "source_ranks": [
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02662825584411621,
+        "factor_file": "selected_factors/layer_024.safetensors",
+        "factor_sha256": "c058cb4d2413e0795d6da289a1ba8e4a6807b6dfa541f15ae235fda4b65de226",
+        "layer": 24,
+        "maximum_padded_rank": 96,
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.014275267720222473,
+        "factor_file": "selected_factors/layer_025.safetensors",
+        "factor_sha256": "88053cdf92099ae2d0d6364f0715f83a3f48c00a56345f8b8e7113ca16261445",
+        "layer": 25,
+        "maximum_padded_rank": 48,
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.021045640110969543,
+        "factor_file": "selected_factors/layer_026.safetensors",
+        "factor_sha256": "937195f07b49da18d9cc68f272632398760afcda8e9580ed1ef4b1c7435f6991",
+        "layer": 26,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.016792334616184235,
+        "factor_file": "selected_factors/layer_027.safetensors",
+        "factor_sha256": "e4f183892d7ef5e34a54d98968936e1cd69303f291ab3e5d1a762c2a58563bcb",
+        "layer": 27,
+        "maximum_padded_rank": 48,
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.012772999703884125,
+        "factor_file": "selected_factors/layer_028.safetensors",
+        "factor_sha256": "9dc585c1ec20fb834d3c11c07edf6075d0c2df9abba448b1a2a56b208b2494a9",
+        "layer": 28,
+        "maximum_padded_rank": 32,
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.017950259149074554,
+        "factor_file": "selected_factors/layer_029.safetensors",
+        "factor_sha256": "13583d76700645fc202ecb79a9c8530b225ac98b0f69c848ebcdd42e8459c74d",
+        "layer": 29,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03362283110618591,
+        "factor_file": "selected_factors/layer_030.safetensors",
+        "factor_sha256": "abf00e4a1d0a99ab62b77708ffb6cd029310e956244096efdc9f85157eca0e0b",
+        "layer": 30,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01651477813720703,
+        "factor_file": "selected_factors/layer_031.safetensors",
+        "factor_sha256": "b9a1bf1e55bbf5064edc07922e521cf7e71b3ca6803cca50823fef78318d7326",
+        "layer": 31,
+        "maximum_padded_rank": 48,
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.019811570644378662,
+        "factor_file": "selected_factors/layer_032.safetensors",
+        "factor_sha256": "ed3674fba6703fdb6ea2c4fdc03c7908e6548971ee0acaf577398da417c97e74",
+        "layer": 32,
+        "maximum_padded_rank": 64,
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02831541746854782,
+        "factor_file": "selected_factors/layer_033.safetensors",
+        "factor_sha256": "e263dffc4de41326f2fd9993c708d3822eb2d49bb1f228f3e9d988e0e3e9cf00",
+        "layer": 33,
+        "maximum_padded_rank": 96,
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.041621819138526917,
+        "factor_file": "selected_factors/layer_034.safetensors",
+        "factor_sha256": "381066a7a26a83a8e375b0f52106f954b68da8abcca8a2a772cd15457ed9cc27",
+        "layer": 34,
+        "maximum_padded_rank": 80,
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.012997925281524658,
+        "factor_file": "selected_factors/layer_035.safetensors",
+        "factor_sha256": "d704cb417f32d6244924b86620cc7fa3e997001fd2c52889d436c82210a86e0c",
+        "layer": 35,
+        "maximum_padded_rank": 32,
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    ]
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-03T06:52:40.535065+00:00"
+}

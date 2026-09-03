@@ -314,6 +314,13 @@ def _input_device(model: nn.Module) -> torch.device:
     return model.get_input_embeddings().weight.device
 
 
+def _copy_batched_logits_to_cpu(logits: Tensor) -> Tensor:
+    cpu_logits = torch.empty(logits.shape, dtype=logits.dtype, device="cpu")
+    for index in range(logits.shape[0]):
+        cpu_logits[index].copy_(logits[index])
+    return cpu_logits
+
+
 @torch.inference_mode()
 def _capture_teacher(
     model: nn.Module,
@@ -328,13 +335,15 @@ def _capture_teacher(
     for start in range(0, len(sequences), batch_size):
         input_ids = sequences[start : start + batch_size].to(input_device)
         logits = model(input_ids=input_ids, use_cache=False).logits[:, :-1].detach()
+        teacher_logsumexp = logits_logsumexp(
+            logits, vocab_chunk_size=vocab_chunk_size
+        ).cpu()
+        teacher_logits = _copy_batched_logits_to_cpu(logits)
         result.append(
             TeacherBatch(
                 input_ids=input_ids.cpu(),
-                logits=logits.cpu(),
-                logsumexp=logits_logsumexp(
-                    logits, vocab_chunk_size=vocab_chunk_size
-                ).cpu(),
+                logits=teacher_logits,
+                logsumexp=teacher_logsumexp,
             )
         )
         _log(

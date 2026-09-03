@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Allocate Qwen3-8B C1 ranks with post-ALS whole-layer Global-KL."""
+"""Allocate Qwen3-8B C1 ranks with two-sided factorized terminal KL."""
 
 from pathlib import Path
 import sys

@@ -1,0 +1,722 @@
+{
+  "arm": "c1_layer_global_kl_factorized_two_sided_dp_postals_s5",
+  "command": "evaluation/eval_qwen3_8b_c1_wikitext.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --allocation-dir results/checkpoints/qwen3_8b_c1_factorized_c4_128measure_twosided_sampled1024_avg64_a1p25 --allocation-schedule factorized_two_sided_dp --output-json results/evaluation/qwen3_8b_c1_factorized_c4_128measure_twosided_sampled1024_full_wikitext_ppl.json --dataset wikitext2 --split test --seqlen 2048 --batch-size 1 --model-dtype bfloat16 --attn-implementation sdpa --device cuda:0 --device-map balanced --max-memory-per-gpu-gib 44 --torch-num-threads 4",
+  "compression": {
+    "dense_source_rank_sum": 36864,
+    "head_dim": 128,
+    "key_cache": "dense",
+    "layer_rank_histogram": {
+      "32": 3,
+      "48": 10,
+      "64": 11,
+      "80": 8,
+      "96": 4
+    },
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "retained_v_ratio": 0.5,
+    "source_rank_sum": 18432,
+    "target": "value_cache_only",
+    "v_cache_compression_ratio": 0.5
+  },
+  "elapsed_seconds": 33.24353550374508,
+  "environment": {
+    "conda_environment": null,
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ],
+    "peak_cuda_allocated_bytes": {
+      "0": 19501001216
+    },
+    "python": "3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0]",
+    "torch": "2.6.0+cu124",
+    "torch_num_threads": 4,
+    "transformers": "5.15.1"
+  },
+  "factor_result": {
+    "allocation_schedule": "factorized_two_sided_dp",
+    "factor_stage": {
+      "decoder_objective": "full_layer",
+      "encoder_initialization": "activation-weighted-svd",
+      "encoder_sweeps": 5,
+      "minimum_encoder_sweeps": 5,
+      "selection_boundaries": "decoder-closed"
+    },
+    "format": "basisserve.qwen3_8b.gqa_c1.layer_global_kl_allocation.v1",
+    "original_selected_candidate": "factorized_two_sided_dp",
+    "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/checkpoints/qwen3_8b_c1_factorized_c4_128measure_twosided_sampled1024_avg64_a1p25/result.json",
+    "sha256": "fa9d3feefe36c4c488fbb346323519f6754c6f2aa6ae07fb4117cdab31a25cf1"
+  },
+  "format": "basisserve.qwen3_8b.gqa_c1_wikitext2_ppl.v1",
+  "model": {
+    "config_sha256": "3bd01d7ad7a2e203ecbbe84e24087a51c6d2a108ee4bcc42d0016bf49564983a",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4"
+  },
+  "ppl": {
+    "batch_size": 1,
+    "chunks": 146,
+    "dataset": "wikitext2",
+    "loss_dtype": "float32",
+    "nll_sum": 629913.1889648438,
+    "ppl": 8.22934035977716,
+    "seqlen": 2048,
+    "split": "test",
+    "tokens": 298862
+  },
+  "quality_reference_runtime": {
+    "description": "per-layer-uniform C1 coordinates zero-padded into Hugging Face V/O slots; function-equivalent quality path, not a cache-performance benchmark",
+    "installation_seconds": 1.0851544812321663,
+    "layers": [
+      {
+        "elapsed_seconds": 0.09908045828342438,
+        "factor_file": "selected_factors/layer_000.safetensors",
+        "factor_sha256": "a71184e636389a6b1060601c324f662f7caad9d973ba0937853ca95a08d47b4e",
+        "layer": 0,
+        "maximum_padded_rank": 80,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.021524973213672638,
+        "factor_file": "selected_factors/layer_001.safetensors",
+        "factor_sha256": "2b1d5b248e248c65869cc734ff4ba86860a84ed989e95d23e59f6fadaee1a7ea",
+        "layer": 1,
+        "maximum_padded_rank": 64,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.011559896171092987,
+        "factor_file": "selected_factors/layer_002.safetensors",
+        "factor_sha256": "52107d8ae7eba682282d2d2594cfb9adcb0908c39bd38749c7695bb6b641ecd5",
+        "layer": 2,
+        "maximum_padded_rank": 32,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.015387006103992462,
+        "factor_file": "selected_factors/layer_003.safetensors",
+        "factor_sha256": "f644a31eb3cd5994103d14661513454d3106e22e841777871478796777c7a33d",
+        "layer": 3,
+        "maximum_padded_rank": 48,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01604297012090683,
+        "factor_file": "selected_factors/layer_004.safetensors",
+        "factor_sha256": "3cece32a76fb413a1900887f7bee7eea0e836bf5278767e55470b325941bdc02",
+        "layer": 4,
+        "maximum_padded_rank": 48,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.030611373484134674,
+        "factor_file": "selected_factors/layer_005.safetensors",
+        "factor_sha256": "1edf8445c07c287fbcf13fa37a981825d6ca32b8e748293db7604d2aec2d8679",
+        "layer": 5,
+        "maximum_padded_rank": 48,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03506867587566376,
+        "factor_file": "selected_factors/layer_006.safetensors",
+        "factor_sha256": "566ed07267ecbbb9a8c4e98498263470a0324be162a64f03877d6e4b7d7d8bc9",
+        "layer": 6,
+        "maximum_padded_rank": 64,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03235442936420441,
+        "factor_file": "selected_factors/layer_007.safetensors",
+        "factor_sha256": "95a2c1d07947d58f6c542f1a93af33d6d232cadb2edfa7e28ce6828a8d278cd0",
+        "layer": 7,
+        "maximum_padded_rank": 48,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.022926561534404755,
+        "factor_file": "selected_factors/layer_008.safetensors",
+        "factor_sha256": "f5364cbf39c4de6cda89ac602f7eb2b6798413b55ae2eb3df81316152fd02ff0",
+        "layer": 8,
+        "maximum_padded_rank": 80,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02358972281217575,
+        "factor_file": "selected_factors/layer_009.safetensors",
+        "factor_sha256": "5315aaf1c1020f0f53b14e4e1ed3931dea5f2594977a2c14a995ac00612f7f17",
+        "layer": 9,
+        "maximum_padded_rank": 80,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.022022917866706848,
+        "factor_file": "selected_factors/layer_010.safetensors",
+        "factor_sha256": "020838719fecc47426fa2a629479ffa740df14fa1142c318088b3af308fc882a",
+        "layer": 10,
+        "maximum_padded_rank": 80,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02723020315170288,
+        "factor_file": "selected_factors/layer_011.safetensors",
+        "factor_sha256": "64b2f71e44ca305a71e2e3781728f334311cb7665b00e130d71c2a5031aa7df9",
+        "layer": 11,
+        "maximum_padded_rank": 80,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01787344366312027,
+        "factor_file": "selected_factors/layer_012.safetensors",
+        "factor_sha256": "17b238ba199dbd512d63b5fbb01e895f8eda1fc059830ba1dcc51cb83749c3d1",
+        "layer": 12,
+        "maximum_padded_rank": 48,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01516665518283844,
+        "factor_file": "selected_factors/layer_013.safetensors",
+        "factor_sha256": "3d309cb58e44060e257d8469feef443bce29cfa8594f2414f827f2a65f05fb5a",
+        "layer": 13,
+        "maximum_padded_rank": 48,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01757504791021347,
+        "factor_file": "selected_factors/layer_014.safetensors",
+        "factor_sha256": "0e1430ac12b86bed7437498b673cbef420fcfc45569e9a332da49ec3d76ca1b2",
+        "layer": 14,
+        "maximum_padded_rank": 64,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.019586779177188873,
+        "factor_file": "selected_factors/layer_015.safetensors",
+        "factor_sha256": "efda302d3e8d894de21096a122e4d7c0e13ad960ef8ee200f31ab1c86c8fd63d",
+        "layer": 15,
+        "maximum_padded_rank": 64,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.019249796867370605,
+        "factor_file": "selected_factors/layer_016.safetensors",
+        "factor_sha256": "38f38e42c8fe6b17e1fc2ef287729c2a372526fb27beecc7ad5be3525406c4a4",
+        "layer": 16,
+        "maximum_padded_rank": 64,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.019029460847377777,
+        "factor_file": "selected_factors/layer_017.safetensors",
+        "factor_sha256": "e694f537d48000aa6467770696afecc5787295f86c4ef2832065884430777df9",
+        "layer": 17,
+        "maximum_padded_rank": 64,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.019248023629188538,
+        "factor_file": "selected_factors/layer_018.safetensors",
+        "factor_sha256": "79226602efcd0be0639044473c3b271100978949cdf2c8ee8f81191f2f6a93c4",
+        "layer": 18,
+        "maximum_padded_rank": 64,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.0239969864487648,
+        "factor_file": "selected_factors/layer_019.safetensors",
+        "factor_sha256": "0386dd0f584678d8231f6fe7ea2c71cd8f7f24adecc6c565ff37be2e3eca3403",
+        "layer": 19,
+        "maximum_padded_rank": 80,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.019661642611026764,
+        "factor_file": "selected_factors/layer_020.safetensors",
+        "factor_sha256": "8153f8420758cc0780383dec59da0d71593d8c69e70dcc0b653a5d6484143d16",
+        "layer": 20,
+        "maximum_padded_rank": 64,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01906868815422058,
+        "factor_file": "selected_factors/layer_021.safetensors",
+        "factor_sha256": "058445d55897ffe90074da2d2c4be8ee2a31a00267f009e09096cde6b0cb2811",
+        "layer": 21,
+        "maximum_padded_rank": 64,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02530302107334137,
+        "factor_file": "selected_factors/layer_022.safetensors",
+        "factor_sha256": "32920c11c5b1d6575cfab6fc05a1f39baf36fb412e0a2a6f931e08d60079bd31",
+        "layer": 22,
+        "maximum_padded_rank": 96,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.025353647768497467,
+        "factor_file": "selected_factors/layer_023.safetensors",
+        "factor_sha256": "f1d60b0eceb6f7edbf27473c90c969fc233cd0f1542c0299b7aaaaf5691a27d6",
+        "layer": 23,
+        "maximum_padded_rank": 96,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.026018664240837097,
+        "factor_file": "selected_factors/layer_024.safetensors",
+        "factor_sha256": "c058cb4d2413e0795d6da289a1ba8e4a6807b6dfa541f15ae235fda4b65de226",
+        "layer": 24,
+        "maximum_padded_rank": 96,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01385875791311264,
+        "factor_file": "selected_factors/layer_025.safetensors",
+        "factor_sha256": "88053cdf92099ae2d0d6364f0715f83a3f48c00a56345f8b8e7113ca16261445",
+        "layer": 25,
+        "maximum_padded_rank": 48,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.017705105245113373,
+        "factor_file": "selected_factors/layer_026.safetensors",
+        "factor_sha256": "937195f07b49da18d9cc68f272632398760afcda8e9580ed1ef4b1c7435f6991",
+        "layer": 26,
+        "maximum_padded_rank": 64,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.015370368957519531,
+        "factor_file": "selected_factors/layer_027.safetensors",
+        "factor_sha256": "e4f183892d7ef5e34a54d98968936e1cd69303f291ab3e5d1a762c2a58563bcb",
+        "layer": 27,
+        "maximum_padded_rank": 48,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01160094141960144,
+        "factor_file": "selected_factors/layer_028.safetensors",
+        "factor_sha256": "9dc585c1ec20fb834d3c11c07edf6075d0c2df9abba448b1a2a56b208b2494a9",
+        "layer": 28,
+        "maximum_padded_rank": 32,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.020330384373664856,
+        "factor_file": "selected_factors/layer_029.safetensors",
+        "factor_sha256": "13583d76700645fc202ecb79a9c8530b225ac98b0f69c848ebcdd42e8459c74d",
+        "layer": 29,
+        "maximum_padded_rank": 64,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.024550504982471466,
+        "factor_file": "selected_factors/layer_030.safetensors",
+        "factor_sha256": "3b2b7a37279365309f2fe5326ffa1a56e98be9f715f963bf5cce654d2e784518",
+        "layer": 30,
+        "maximum_padded_rank": 80,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.016196496784687042,
+        "factor_file": "selected_factors/layer_031.safetensors",
+        "factor_sha256": "b9a1bf1e55bbf5064edc07922e521cf7e71b3ca6803cca50823fef78318d7326",
+        "layer": 31,
+        "maximum_padded_rank": 48,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.019069671630859375,
+        "factor_file": "selected_factors/layer_032.safetensors",
+        "factor_sha256": "28f0be1d74bce7612ffba271669801b2063cb55da46b652e597552dc4b622091",
+        "layer": 32,
+        "maximum_padded_rank": 48,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.024956993758678436,
+        "factor_file": "selected_factors/layer_033.safetensors",
+        "factor_sha256": "e263dffc4de41326f2fd9993c708d3822eb2d49bb1f228f3e9d988e0e3e9cf00",
+        "layer": 33,
+        "maximum_padded_rank": 96,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.022613510489463806,
+        "factor_file": "selected_factors/layer_034.safetensors",
+        "factor_sha256": "381066a7a26a83a8e375b0f52106f954b68da8abcca8a2a772cd15457ed9cc27",
+        "layer": 34,
+        "maximum_padded_rank": 80,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.010627537965774536,
+        "factor_file": "selected_factors/layer_035.safetensors",
+        "factor_sha256": "d704cb417f32d6244924b86620cc7fa3e997001fd2c52889d436c82210a86e0c",
+        "layer": 35,
+        "maximum_padded_rank": 32,
+        "runtime": "per-layer Global-KL C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    ]
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-03T06:08:35.625055+00:00"
+}

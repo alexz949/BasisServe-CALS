@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a one-terminal-probe C1 layer-rank schedule for Qwen3-8B.
+"""Build a two-sided factorized terminal-KL rank schedule for Qwen3-8B.
 
 The local post-ALS reconstruction curves are read from the existing rank
 banks.  One measured terminal-KL intervention per layer calibrates a scalar
@@ -100,9 +100,10 @@ def predict_factorized_costs(
         denominator = transformed[probe_rank] - transformed[anchor_rank]
         if denominator == 0:
             raise ValueError(f"layer {layer} probe has zero local-error separation")
-        sensitivity = delta / denominator
-        if not math.isfinite(sensitivity) or sensitivity <= 0:
-            raise ValueError(f"layer {layer} downstream sensitivity is not positive")
+        raw_sensitivity = delta / denominator
+        if not math.isfinite(raw_sensitivity):
+            raise ValueError(f"layer {layer} downstream sensitivity is non-finite")
+        sensitivity = max(0.0, raw_sensitivity)
         sensitivities.append(sensitivity)
         predicted.append(
             {
@@ -112,6 +113,89 @@ def predict_factorized_costs(
             }
         )
     return tuple(predicted), tuple(sensitivities)
+
+
+def predict_two_sided_factorized_costs(
+    local_errors: Sequence[Mapping[int, float]],
+    compression_probe_deltas: Sequence[float],
+    expansion_probe_deltas: Sequence[float],
+    *,
+    candidate_ranks: Sequence[int],
+    anchor_rank: int,
+    compression_probe_rank: int,
+    expansion_probe_rank: int,
+    exponent: float = 1.0,
+) -> tuple[
+    tuple[dict[int, float], ...],
+    tuple[float, ...],
+    tuple[float, ...],
+]:
+    """Predict rank costs with separately measured compression/expansion slopes."""
+
+    ranks = tuple(sorted(map(int, candidate_ranks)))
+    assert ranks and len(ranks) == len(set(ranks))
+    assert compression_probe_rank < anchor_rank < expansion_probe_rank
+    assert {
+        compression_probe_rank,
+        anchor_rank,
+        expansion_probe_rank,
+    }.issubset(ranks)
+    assert math.isfinite(exponent) and exponent > 0
+    assert len(local_errors) == len(compression_probe_deltas)
+    assert len(local_errors) == len(expansion_probe_deltas)
+
+    predicted: list[dict[int, float]] = []
+    compression_sensitivities: list[float] = []
+    expansion_sensitivities: list[float] = []
+    for curve, compression_delta, expansion_delta in zip(
+        local_errors,
+        compression_probe_deltas,
+        expansion_probe_deltas,
+        strict=True,
+    ):
+        checked = {int(rank): float(value) for rank, value in curve.items()}
+        assert set(checked) == set(ranks)
+        assert all(
+            math.isfinite(value) and value >= 0 for value in checked.values()
+        )
+        assert math.isfinite(float(compression_delta))
+        assert math.isfinite(float(expansion_delta))
+        transformed = {rank: checked[rank] ** exponent for rank in ranks}
+        anchor_error = transformed[anchor_rank]
+        compression_denominator = (
+            transformed[compression_probe_rank] - anchor_error
+        )
+        expansion_denominator = transformed[expansion_probe_rank] - anchor_error
+        assert compression_denominator > 0
+        assert expansion_denominator < 0
+        compression_sensitivity = max(
+            0.0,
+            float(compression_delta) / compression_denominator,
+        )
+        expansion_sensitivity = max(
+            0.0,
+            float(expansion_delta) / expansion_denominator,
+        )
+        compression_sensitivities.append(compression_sensitivity)
+        expansion_sensitivities.append(expansion_sensitivity)
+        predicted.append(
+            {
+                rank: (
+                    compression_sensitivity
+                    if rank < anchor_rank
+                    else expansion_sensitivity
+                    if rank > anchor_rank
+                    else 0.0
+                )
+                * (transformed[rank] - anchor_error)
+                for rank in ranks
+            }
+        )
+    return (
+        tuple(predicted),
+        tuple(compression_sensitivities),
+        tuple(expansion_sensitivities),
+    )
 
 
 def allocate_layer_schedule(
@@ -148,17 +232,46 @@ def allocate_layer_schedule(
     )
 
 
+def local_error_curves_from_factor_results(
+    factor_results: Mapping[int, Mapping[str, Any]],
+    *,
+    candidate_ranks: Sequence[int],
+    error_split: str = "heldout",
+    num_layers: int = NUM_LAYERS,
+    head_dim: int = HEAD_DIM,
+) -> tuple[dict[int, float], ...]:
+    """Read one post-ALS reconstruction-error curve per decoder layer."""
+
+    assert error_split in {"fit", "heldout"}
+    curves = [dict() for _ in range(num_layers)]
+    for rank in candidate_ranks:
+        if rank == head_dim:
+            for curve in curves:
+                curve[rank] = 0.0
+            continue
+        payload = factor_results.get(rank)
+        assert payload is not None
+        rows = payload.get("records", ())
+        assert len(rows) == num_layers
+        for layer, row in enumerate(rows):
+            configured_rank = int(row["fit_config"]["cache_rank_per_head"])
+            assert configured_rank == rank
+            metrics = row.get(error_split)
+            assert isinstance(metrics, Mapping)
+            curves[layer][rank] = float(metrics["factor_dtype_relative_mse"])
+    return tuple(curves)
+
+
 def _local_error_curves(
     source: Mapping[str, Any],
     *,
     candidate_ranks: Sequence[int],
+    error_split: str,
 ) -> tuple[dict[int, float], ...]:
     factor_sources = source["factor_sources"]
-    curves = [dict() for _ in range(NUM_LAYERS)]
+    factor_results = {}
     for rank in candidate_ranks:
         if rank == HEAD_DIM:
-            for curve in curves:
-                curve[rank] = 0.0
             continue
         record = factor_sources.get(str(rank))
         if record is None:
@@ -167,16 +280,12 @@ def _local_error_curves(
         result_path = directory / "results.json"
         if _sha256(result_path) != record["results_sha256"]:
             raise ValueError(f"local factor result hash mismatch for rank {rank}")
-        payload = json.loads(result_path.read_text(encoding="utf-8"))
-        rows = payload.get("records", ())
-        if len(rows) != NUM_LAYERS:
-            raise ValueError(f"rank {rank} local factor result is incomplete")
-        for layer, row in enumerate(rows):
-            configured_rank = int(row["fit_config"]["cache_rank_per_head"])
-            if configured_rank != rank:
-                raise ValueError(f"rank {rank} local factor result is inconsistent")
-            curves[layer][rank] = float(row["fit"]["factor_dtype_relative_mse"])
-    return tuple(curves)
+        factor_results[rank] = json.loads(result_path.read_text(encoding="utf-8"))
+    return local_error_curves_from_factor_results(
+        factor_results,
+        candidate_ranks=candidate_ranks,
+        error_split=error_split,
+    )
 
 
 def _probe_deltas(
@@ -240,7 +349,11 @@ def build(args: argparse.Namespace) -> None:
     anchor_rank = int(source["profile"]["records"][0]["anchor_rank"])
     if int(source["selection"]["target_layer_rank_sum"]) != NUM_LAYERS * anchor_rank:
         raise ValueError("source Global-KL allocation has an unexpected rank budget")
-    local_errors = _local_error_curves(source, candidate_ranks=candidate_ranks)
+    local_errors = _local_error_curves(
+        source,
+        candidate_ranks=candidate_ranks,
+        error_split=args.local_error_split,
+    )
     terminal_deltas = _probe_deltas(source, probe_rank=args.probe_rank)
     costs, sensitivities = predict_factorized_costs(
         local_errors,
@@ -272,7 +385,10 @@ def build(args: argparse.Namespace) -> None:
             "formula": (
                 "delta_K_lr = s_l * (e_lr^alpha - e_l_anchor^alpha)"
             ),
-            "local_error": "post-ALS factor-dtype fit relative MSE",
+            "local_error": (
+                f"post-ALS factor-dtype {args.local_error_split} relative MSE"
+            ),
+            "local_error_split": args.local_error_split,
             "anchor_rank": anchor_rank,
             "probe_rank": args.probe_rank,
             "terminal_interventions_per_layer": 1,
@@ -308,7 +424,7 @@ def build(args: argparse.Namespace) -> None:
     }
     _atomic_json(output_path, payload)
     print(
-        f"[Factorized Global-KL] schedule={schedule_name} "
+        f"[Two-Sided Factorized-KL] schedule={schedule_name} "
         f"matches={payload['diagnostics']['full_mean_dp_exact_layer_matches']}/"
         f"{NUM_LAYERS} output={output_path}",
         flush=True,
@@ -320,6 +436,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--allocation-result", type=Path, required=True)
     parser.add_argument("--probe-rank", type=int, default=96)
     parser.add_argument("--exponent", type=float, default=1.0)
+    parser.add_argument(
+        "--local-error-split",
+        choices=("heldout", "fit"),
+        default="heldout",
+    )
     parser.add_argument("--output-json", type=Path, required=True)
     return parser.parse_args()
 
