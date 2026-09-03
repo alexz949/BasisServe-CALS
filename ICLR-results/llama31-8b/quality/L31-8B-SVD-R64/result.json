@@ -1,0 +1,447 @@
+{
+  "checkpoint": {
+    "artifact_sha256": "45b590e139fa610b9348e659fb74e69168f1d3db9765c52532a0ac525fef09b9",
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/checkpoints/L31-8B-SVD-R64",
+    "format": "basisserve.llama31_8b.iclr_v_factors.v1",
+    "manifest_sha256": "e2107aacb7cc4aa8dab42f5b1a821c95990ced6340bb3a9ef9fd27344625ddf1"
+  },
+  "command": "evaluation/eval_llama31_8b_iclr_quality.py --run-id L31-8B-SVD-R64 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --checkpoint-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/checkpoints/L31-8B-SVD-R64 --c4-windows /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/calibration/c4_validation_128x2048/windows.safetensors --output-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/quality/L31-8B-SVD-R64 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+  "compression": {
+    "allocation": "uniform_per_physical_head",
+    "dense_rank_sum_across_layers": 32768,
+    "equivalent_rank_target": 64,
+    "factorization_work_device": "cpu",
+    "factorization_work_dtype": "torch.float32",
+    "group_width": 128,
+    "groups": 8,
+    "head_dim": 128,
+    "head_group_size": 1,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ]
+    ],
+    "method": "weight-svd",
+    "method_label": "Weight-SVD",
+    "nominal_group_rank": 64,
+    "nominal_retained_v_ratio": 0.5,
+    "nominal_v_cache_compression_ratio": 0.5,
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "projection": "v",
+    "rank_block_size": null,
+    "rank_sum_across_layers": 16384,
+    "realized_retained_v_ratio": 0.5,
+    "realized_v_cache_compression_ratio": 0.5,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds_this_attempt": 590.5810358449817,
+  "environment": {
+    "conda_environment": "basis",
+    "cuda_devices": [
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S"
+    ],
+    "datasets": "5.0.0",
+    "lm_eval": "0.4.11",
+    "peak_cuda_allocated_bytes": {
+      "0": 8515387904,
+      "1": 5740772864,
+      "2": 5741428224,
+      "3": 6813897728
+    },
+    "python": "3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0]",
+    "torch": "2.6.0+cu124",
+    "torch_num_threads": 8,
+    "transformers": "5.15.1"
+  },
+  "format": "basisserve.llama31_8b.iclr_quality.v1",
+  "metrics": {
+    "average_accuracy": 0.3739583551218864,
+    "c4_validation_128_ppl": 397.6873362545857,
+    "task_accuracy": [
+      {
+        "metric": "acc_norm",
+        "task": "arc_easy",
+        "value": 0.33754208754208753
+      },
+      {
+        "metric": "acc_norm",
+        "task": "arc_challenge",
+        "value": 0.23378839590443687
+      },
+      {
+        "metric": "acc_norm",
+        "task": "hellaswag",
+        "value": 0.3037243576976698
+      },
+      {
+        "metric": "acc_norm",
+        "task": "piqa",
+        "value": 0.5544069640914037
+      },
+      {
+        "metric": "acc",
+        "task": "winogrande",
+        "value": 0.5146014206787688
+      },
+      {
+        "metric": "acc",
+        "task": "boolq",
+        "value": 0.40764525993883793
+      },
+      {
+        "metric": "acc_norm",
+        "task": "openbookqa",
+        "value": 0.266
+      }
+    ],
+    "wikitext2_ppl": 470.4683022414167
+  },
+  "model": {
+    "config_sha256": "54acfad3cffe057640904ca8a1e83525e6551c70c7a04c641f5a9eda0bbf64bd",
+    "huggingface_repo": "meta-llama/Llama-3.1-8B",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "revision": "d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "safetensors_index_sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+  },
+  "run_id": "L31-8B-SVD-R64",
+  "stages": {
+    "c4": {
+      "file": "c4.json",
+      "sha256": "484b506ac1c189b510c02994858adf036ca7f8fa8977e20a1089d67ea49d04ca"
+    },
+    "commonsense": {
+      "file": "commonsense.json",
+      "sha256": "273fd8de1762aa501bb475e10c634135a85938ce67a3e6967f38859f08d16f7e"
+    },
+    "wikitext2": {
+      "file": "wikitext2.json",
+      "sha256": "4e0617c99b4294d23f1b3ad55a589c86a41304fbcb567a1ab16f59886b464820"
+    }
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-02T13:31:37.815750+00:00"
+}

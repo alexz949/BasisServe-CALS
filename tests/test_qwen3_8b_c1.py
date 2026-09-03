@@ -68,6 +68,7 @@ def test_qwen3_8b_layer_dp_preserves_exact_average_rank64() -> None:
             records,
             candidate_ranks=(32, 48, 64, 80, 96, 112, 128),
             anchor_rank=64,
+            target_average_rank=64,
             cost_key="mean",
         )
         assert schedule == [[64] * 8 for _ in range(36)]
@@ -78,5 +79,28 @@ def test_qwen3_8b_layer_dp_preserves_exact_average_rank64() -> None:
         assert accounting["layer_rank_sum"] == 36 * 64
         assert accounting["source_rank_sum"] == 36 * 8 * 64
         assert accounting["dense_reduction"] == 2.0
+    finally:
+        layer_global.activate_model_profile("qwen3_32b")
+
+
+def test_llama_profiles_share_the_fixed_c1_allocation_geometry() -> None:
+    try:
+        layer_global.activate_model_profile("llama31_8b")
+        assert common.MODEL_TYPE == "llama"
+        assert common.ATTENTION_TYPE == "gqa"
+        assert common.NUM_LAYERS == 32
+        assert common.NUM_KV_HEADS == 8
+        assert layer_global.FORMAT == (
+            "basisserve.llama31_8b.gqa_c1.layer_global_kl_allocation.v1"
+        )
+
+        layer_global.activate_model_profile("llama2_7b")
+        assert common.MODEL_TYPE == "llama"
+        assert common.ATTENTION_TYPE == "mha"
+        assert common.NUM_LAYERS == 32
+        assert common.NUM_KV_HEADS == 32
+        assert layer_global.FORMAT == (
+            "basisserve.llama2_7b.mha_c1.layer_global_kl_allocation.v1"
+        )
     finally:
         layer_global.activate_model_profile("qwen3_32b")

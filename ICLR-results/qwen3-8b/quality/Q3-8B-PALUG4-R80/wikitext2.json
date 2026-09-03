@@ -1,0 +1,984 @@
+{
+  "checkpoint": {
+    "artifact_sha256": "b9f9939c5d5b4f7e9b359d3474542e2dc7ab850c2b05b4f3d83058a9b275c6aa",
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/checkpoints/Q3-8B-PALUG4-R80",
+    "format": "basisserve.qwen3_8b.iclr_v_factors.v1",
+    "manifest_sha256": "6de53fd1ad66aa7784deda414e953bda6737fd52541bd5e78487da94fbfba8a3"
+  },
+  "command": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/eval_qwen3_8b_iclr_quality.py --run-id Q3-8B-PALUG4-R80 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --checkpoint-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/checkpoints/Q3-8B-PALUG4-R80 --c4-windows /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/calibration/qwen3_8b_c4_validation_128x2048/windows.safetensors --output-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/quality/Q3-8B-PALUG4-R80 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+  "compression": {
+    "allocation": "official_palu_fisher_uniform",
+    "dense_rank_sum_across_layers": 36864,
+    "equivalent_rank_target": 80,
+    "factorization_work_device": "cpu",
+    "factorization_work_dtype": "torch.float64",
+    "group_width": 512,
+    "groups": 2,
+    "head_dim": 128,
+    "head_group_size": 4,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        320,
+        320
+      ],
+      [
+        192,
+        192
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        384,
+        384
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        384,
+        384
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        480,
+        480
+      ],
+      [
+        384,
+        384
+      ],
+      [
+        416,
+        416
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        480,
+        480
+      ]
+    ],
+    "method": "palu-fisher",
+    "method_label": "PaLU G-LRD4",
+    "nominal_group_rank": 320,
+    "nominal_retained_v_ratio": 0.625,
+    "nominal_v_cache_compression_ratio": 0.375,
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "projection": "v",
+    "rank_block_size": 32,
+    "rank_sum_across_layers": 23040,
+    "realized_retained_v_ratio": 0.625,
+    "realized_v_cache_compression_ratio": 0.375,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds": 32.99774833023548,
+  "format": "basisserve.qwen3_8b.iclr_quality.wikitext2.v1",
+  "metrics": {
+    "batch_size": 2,
+    "chunks": 146,
+    "dataset": "wikitext2",
+    "loss_dtype": "float32",
+    "nll_sum": 674940.185546875,
+    "ppl": 9.567456184322094,
+    "seqlen": 2048,
+    "split": "test",
+    "tokens": 298862
+  },
+  "model": {
+    "config_sha256": "3bd01d7ad7a2e203ecbbe84e24087a51c6d2a108ee4bcc42d0016bf49564983a",
+    "huggingface_repo": "Qwen/Qwen3-8B-Base",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "revision": "49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "safetensors_index_sha256": "cd39d5e44c5aadfd1954b598883aea1c4a98822a2f7723d214ef2278b7fec2e4"
+  },
+  "protocol": {
+    "full_test_corpus": true,
+    "loss_dtype": "float32"
+  },
+  "run_id": "Q3-8B-PALUG4-R80",
+  "runtime": {
+    "attention_implementation": "sdpa",
+    "cuda_device_names": [
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S"
+    ],
+    "cuda_devices_used": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "device_map": "balanced",
+    "installation": [
+      {
+        "decoder_shape": [
+          2,
+          512,
+          320
+        ],
+        "elapsed_seconds": 0.012532688677310944,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 0,
+        "projection": "v",
+        "ranks": [
+          320,
+          320
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          640,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          192
+        ],
+        "elapsed_seconds": 0.013050317764282227,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 1,
+        "projection": "v",
+        "ranks": [
+          192,
+          192
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          384,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          224
+        ],
+        "elapsed_seconds": 0.011809445917606354,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 2,
+        "projection": "v",
+        "ranks": [
+          224,
+          224
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          448,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          224
+        ],
+        "elapsed_seconds": 0.009814292192459106,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 3,
+        "projection": "v",
+        "ranks": [
+          224,
+          224
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          448,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          224
+        ],
+        "elapsed_seconds": 0.014197558164596558,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 4,
+        "projection": "v",
+        "ranks": [
+          224,
+          224
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          448,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          224
+        ],
+        "elapsed_seconds": 0.0107274129986763,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 5,
+        "projection": "v",
+        "ranks": [
+          224,
+          224
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          448,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.010878518223762512,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 6,
+        "projection": "v",
+        "ranks": [
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.010661818087100983,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 7,
+        "projection": "v",
+        "ranks": [
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.011285804212093353,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 8,
+        "projection": "v",
+        "ranks": [
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          288
+        ],
+        "elapsed_seconds": 0.011876843869686127,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 9,
+        "projection": "v",
+        "ranks": [
+          288,
+          288
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          576,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          320
+        ],
+        "elapsed_seconds": 0.012710168957710266,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 10,
+        "projection": "v",
+        "ranks": [
+          320,
+          320
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          640,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.017073042690753937,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 11,
+        "projection": "v",
+        "ranks": [
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          320
+        ],
+        "elapsed_seconds": 0.013833664357662201,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 12,
+        "projection": "v",
+        "ranks": [
+          320,
+          320
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          640,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.020407289266586304,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 13,
+        "projection": "v",
+        "ranks": [
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          384
+        ],
+        "elapsed_seconds": 0.01794736087322235,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 14,
+        "projection": "v",
+        "ranks": [
+          384,
+          384
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          352
+        ],
+        "elapsed_seconds": 0.018698185682296753,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 15,
+        "projection": "v",
+        "ranks": [
+          352,
+          352
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          704,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          384
+        ],
+        "elapsed_seconds": 0.01591799408197403,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 16,
+        "projection": "v",
+        "ranks": [
+          384,
+          384
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          448
+        ],
+        "elapsed_seconds": 0.01833856850862503,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 17,
+        "projection": "v",
+        "ranks": [
+          448,
+          448
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          896,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          320
+        ],
+        "elapsed_seconds": 0.021594084799289703,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 18,
+        "projection": "v",
+        "ranks": [
+          320,
+          320
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          640,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          480
+        ],
+        "elapsed_seconds": 0.05354133993387222,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 19,
+        "projection": "v",
+        "ranks": [
+          480,
+          480
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          960,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          384
+        ],
+        "elapsed_seconds": 0.04266441613435745,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 20,
+        "projection": "v",
+        "ranks": [
+          384,
+          384
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          416
+        ],
+        "elapsed_seconds": 0.031642623245716095,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 21,
+        "projection": "v",
+        "ranks": [
+          416,
+          416
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          832,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          512
+        ],
+        "elapsed_seconds": 0.020946241915225983,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 22,
+        "projection": "v",
+        "ranks": [
+          512,
+          512
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          352
+        ],
+        "elapsed_seconds": 0.020993046462535858,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 23,
+        "projection": "v",
+        "ranks": [
+          352,
+          352
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          704,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          352
+        ],
+        "elapsed_seconds": 0.017382577061653137,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 24,
+        "projection": "v",
+        "ranks": [
+          352,
+          352
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          704,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          352
+        ],
+        "elapsed_seconds": 0.014383770525455475,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 25,
+        "projection": "v",
+        "ranks": [
+          352,
+          352
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          704,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.017629720270633698,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 26,
+        "projection": "v",
+        "ranks": [
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          320
+        ],
+        "elapsed_seconds": 0.022790513932704926,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 27,
+        "projection": "v",
+        "ranks": [
+          320,
+          320
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          640,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.018885955214500427,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 28,
+        "projection": "v",
+        "ranks": [
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          224
+        ],
+        "elapsed_seconds": 0.018577203154563904,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 29,
+        "projection": "v",
+        "ranks": [
+          224,
+          224
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          448,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          352
+        ],
+        "elapsed_seconds": 0.016003422439098358,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 30,
+        "projection": "v",
+        "ranks": [
+          352,
+          352
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          704,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          224
+        ],
+        "elapsed_seconds": 0.008643649518489838,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 31,
+        "projection": "v",
+        "ranks": [
+          224,
+          224
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          448,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          352
+        ],
+        "elapsed_seconds": 0.014690972864627838,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 32,
+        "projection": "v",
+        "ranks": [
+          352,
+          352
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          704,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.019163161516189575,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 33,
+        "projection": "v",
+        "ranks": [
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          448
+        ],
+        "elapsed_seconds": 0.017652884125709534,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 34,
+        "projection": "v",
+        "ranks": [
+          448,
+          448
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          896,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          2,
+          512,
+          480
+        ],
+        "elapsed_seconds": 0.021792173385620117,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 35,
+        "projection": "v",
+        "ranks": [
+          480,
+          480
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          960,
+          4096
+        ]
+      }
+    ],
+    "model_dtype": "torch.bfloat16"
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-02T12:09:04.697441+00:00"
+}

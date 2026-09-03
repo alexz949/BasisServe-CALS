@@ -1,0 +1,985 @@
+{
+  "checkpoint": {
+    "artifact_sha256": "4e8eb394b4f459e61960f405eeb4ffde08e5550a6fcf1fa9ad78c02f1e252917",
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/checkpoints/L31-8B-C1-R96",
+    "format": "basisserve.llama31_8b.iclr_v_factors.v1",
+    "manifest_sha256": "6cb355a34e86147536b2388a3262a659337b7e21fd4c256ed40d1745936b6155"
+  },
+  "command": "evaluation/eval_llama31_8b_iclr_quality.py --run-id L31-8B-C1-R96 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --checkpoint-dir ICLR-results/llama31-8b/checkpoints/L31-8B-C1-R96 --c4-windows ICLR-results/llama31-8b/calibration/c4_validation_128x2048/windows.safetensors --output-dir ICLR-results/llama31-8b/quality/L31-8B-C1-R96 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+  "compression": {
+    "allocation": "two_sided_factorized_terminal_kl_alpha1",
+    "candidate_ranks": [
+      32,
+      48,
+      64,
+      80,
+      96,
+      112,
+      128
+    ],
+    "checkpoint_policy": "fixed decoder-refitted endpoint after encoder sweep 6",
+    "decoder_objective": "full_layer",
+    "dense_rank_sum_across_layers": 32768,
+    "encoder_initialization": "activation-weighted-svd",
+    "encoder_sweeps": 6,
+    "equivalent_rank_target": 96,
+    "head_dim": 128,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ]
+    ],
+    "method": "c1-two-sided-kl",
+    "method_label": "C1 + Two-Sided KL",
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "profiling_anchor_rank": 64,
+    "projection": "joint_v_o",
+    "rank_sum_across_layers": 24576,
+    "realized_retained_v_ratio": 0.75,
+    "realized_v_cache_compression_ratio": 0.25,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds": 29.059687450528145,
+  "format": "basisserve.llama31_8b.iclr_quality.wikitext2.v1",
+  "metrics": {
+    "batch_size": 2,
+    "chunks": 141,
+    "dataset": "wikitext2",
+    "loss_dtype": "float32",
+    "nll_sum": 575393.443359375,
+    "ppl": 7.341577720836961,
+    "seqlen": 2048,
+    "split": "test",
+    "tokens": 288627
+  },
+  "model": {
+    "config_sha256": "54acfad3cffe057640904ca8a1e83525e6551c70c7a04c641f5a9eda0bbf64bd",
+    "huggingface_repo": "meta-llama/Llama-3.1-8B",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "revision": "d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "safetensors_index_sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+  },
+  "protocol": {
+    "full_test_corpus": true,
+    "loss_dtype": "float32"
+  },
+  "run_id": "L31-8B-C1-R96",
+  "runtime": {
+    "attention_implementation": "sdpa",
+    "cuda_device_names": [
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S"
+    ],
+    "cuda_devices_used": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "device_map": "balanced",
+    "installation": [
+      {
+        "elapsed_seconds": 0.09513475000858307,
+        "factor_file": "selected_factors/layer_000.safetensors",
+        "factor_sha256": "e496a35d6982fea4168785599c004d40a504dbaafc1386e77f5145c53b6b492b",
+        "layer": 0,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.052491843700408936,
+        "factor_file": "selected_factors/layer_001.safetensors",
+        "factor_sha256": "e0b76b070065c2cbd3f12fa08682a6b3ee9237854e10563bbcc15fcb1e8df4de",
+        "layer": 1,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.029091157019138336,
+        "factor_file": "selected_factors/layer_002.safetensors",
+        "factor_sha256": "9b3928e6dbdd6e7c29e7e6ab6c457d87d978002bf8dad5cc5dc41247b75da931",
+        "layer": 2,
+        "maximum_padded_rank": 96,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03712836652994156,
+        "factor_file": "selected_factors/layer_003.safetensors",
+        "factor_sha256": "0e57d73f9cd0d6d050c420530aa404eccf63d6d84c3f4f46595d399f0e433c4d",
+        "layer": 3,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03640725463628769,
+        "factor_file": "selected_factors/layer_004.safetensors",
+        "factor_sha256": "d97fe453c5bab41c3fc64cc3a683a040f7f9cc79b15c50a41a6c97df5ac34106",
+        "layer": 4,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.05064667761325836,
+        "factor_file": "selected_factors/layer_005.safetensors",
+        "factor_sha256": "2d59d3126ee335ad6ab55fc25ae805323628a1ee28cbfa7528d6d62044f49601",
+        "layer": 5,
+        "maximum_padded_rank": 112,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112
+        ]
+      },
+      {
+        "elapsed_seconds": 0.038092903792858124,
+        "factor_file": "selected_factors/layer_006.safetensors",
+        "factor_sha256": "a1b45eadbc3cda1a7b68dafa4b1225101ee921a03c17dca00c171ab38ebaef58",
+        "layer": 6,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.035061225295066833,
+        "factor_file": "selected_factors/layer_007.safetensors",
+        "factor_sha256": "e456d9fa740a6e9724e6a6c28090088db48e6423e3eab8bcc4722b49775e0190",
+        "layer": 7,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03433927893638611,
+        "factor_file": "selected_factors/layer_008.safetensors",
+        "factor_sha256": "f9fd744f78d53c67a3d73e4f00b17c16bc7b90e6ecdbb5a166bc2d45554fd571",
+        "layer": 8,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.034658655524253845,
+        "factor_file": "selected_factors/layer_009.safetensors",
+        "factor_sha256": "ab585b636ab73f7c1e4cf506750790ce247bcf88f2a5e1169fbadf0e6f7bc27a",
+        "layer": 9,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03469330817461014,
+        "factor_file": "selected_factors/layer_010.safetensors",
+        "factor_sha256": "2ba8b34c60bffa1f9533b29cd17b708c6ff9e0775e99fc0b59e3176d64fae22d",
+        "layer": 10,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03089676797389984,
+        "factor_file": "selected_factors/layer_011.safetensors",
+        "factor_sha256": "3b61d536c510712edda10188be398f7269c80d61b8c2c55fadd859a62217b379",
+        "layer": 11,
+        "maximum_padded_rank": 112,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03454303741455078,
+        "factor_file": "selected_factors/layer_012.safetensors",
+        "factor_sha256": "13afb381918fda2815d8e5cd0952b664bf2322a417a325d328d20f2e6d19e6cd",
+        "layer": 12,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03480316698551178,
+        "factor_file": "selected_factors/layer_013.safetensors",
+        "factor_sha256": "eea8ee7a960ae0e14bf6f41446f38e62766e0b53edecee17586823023d8354f9",
+        "layer": 13,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03455430269241333,
+        "factor_file": "selected_factors/layer_014.safetensors",
+        "factor_sha256": "582557218a9f831be5e847cade9b4dd8878657fda5ec7ee5aec4e9d9f3ab0c47",
+        "layer": 14,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.052006594836711884,
+        "factor_file": "selected_factors/layer_015.safetensors",
+        "factor_sha256": "5a92ff2b3b421d12aec9719b29014b8f8113669d0d663aefed850b0bf7f92498",
+        "layer": 15,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03686709702014923,
+        "factor_file": "selected_factors/layer_016.safetensors",
+        "factor_sha256": "087532bafeb96118414252c2a2081e010bb20e89b263744c062d488ad9099cb3",
+        "layer": 16,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03454834222793579,
+        "factor_file": "selected_factors/layer_017.safetensors",
+        "factor_sha256": "2fd6f144eb2e5626caa6a1c3a1f94bc463c7ec04c87307291fc80495522cdb7b",
+        "layer": 17,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03438108414411545,
+        "factor_file": "selected_factors/layer_018.safetensors",
+        "factor_sha256": "0371ff9343ea2a0801670fb22c83aa68c2e1f5e93eb07547018872b1c6340399",
+        "layer": 18,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.020156122744083405,
+        "factor_file": "selected_factors/layer_019.safetensors",
+        "factor_sha256": "b2597247ba36eaf80b9095acf50fe3140757e1d77df6c5f74ba967f889c13490",
+        "layer": 19,
+        "maximum_padded_rank": 64,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.011893756687641144,
+        "factor_file": "selected_factors/layer_020.safetensors",
+        "factor_sha256": "820b35a6b7292159badd3a2d89eff5f4fa752d2a4b7d7eebbe1ffcea79d76baa",
+        "layer": 20,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.028430424630641937,
+        "factor_file": "selected_factors/layer_021.safetensors",
+        "factor_sha256": "add339c05b7f7c0fc4c1760f3983801cd956b1a09433c8045b4874cd9c599bac",
+        "layer": 21,
+        "maximum_padded_rank": 96,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.016083069145679474,
+        "factor_file": "selected_factors/layer_022.safetensors",
+        "factor_sha256": "15aadf9279b8604860030a6a32befb919c3205ecdb49b05b4a515d2472518a83",
+        "layer": 22,
+        "maximum_padded_rank": 48,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.021590247750282288,
+        "factor_file": "selected_factors/layer_023.safetensors",
+        "factor_sha256": "ef1a584c8cc82358ec563b2317648abf0085a37b6684abc6990ffa48e6371b97",
+        "layer": 23,
+        "maximum_padded_rank": 64,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01587866246700287,
+        "factor_file": "selected_factors/layer_024.safetensors",
+        "factor_sha256": "d99cbe88a44aa4942008cf392a9027a782aa65984b7464211f99caf486318369",
+        "layer": 24,
+        "maximum_padded_rank": 48,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03221345692873001,
+        "factor_file": "selected_factors/layer_025.safetensors",
+        "factor_sha256": "644e91d62557271ffc6fa855d098f8ae900b44dedf5df6ca3aef5d0604cb319a",
+        "layer": 25,
+        "maximum_padded_rank": 48,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.012010887265205383,
+        "factor_file": "selected_factors/layer_026.safetensors",
+        "factor_sha256": "6497cee0387c1a19d48784df1733cb6ca8e1434a102aa94b0a5574463e38ad4d",
+        "layer": 26,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.020733483135700226,
+        "factor_file": "selected_factors/layer_027.safetensors",
+        "factor_sha256": "aa4431aabcd4212ff3a06cf92ec61db52f536e8318f67248734a767aa4554bd1",
+        "layer": 27,
+        "maximum_padded_rank": 64,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.013156205415725708,
+        "factor_file": "selected_factors/layer_028.safetensors",
+        "factor_sha256": "aba2d71088c01ffa2134647deb78e98c9c3a9ec9b8c9f9357b3dede1e3996218",
+        "layer": 28,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01588524878025055,
+        "factor_file": "selected_factors/layer_029.safetensors",
+        "factor_sha256": "1138ff5e8ea8e6967ece4c2b8a5d9e2837aae11c4e300416a69f42b6f489e93c",
+        "layer": 29,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02058689296245575,
+        "factor_file": "selected_factors/layer_030.safetensors",
+        "factor_sha256": "6d80d39caeacf9ce07a8a5a65fdc3988c535c7054b7e75ecf7e5cb9b60b168e2",
+        "layer": 30,
+        "maximum_padded_rank": 64,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.023745447397232056,
+        "factor_file": "selected_factors/layer_031.safetensors",
+        "factor_sha256": "a728223ddda155eed71b664df1be5919eb33e23c011dab1e5ca0032a26f9ed57",
+        "layer": 31,
+        "maximum_padded_rank": 80,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      }
+    ],
+    "model_dtype": "torch.bfloat16"
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-03T09:31:52.626032+00:00"
+}

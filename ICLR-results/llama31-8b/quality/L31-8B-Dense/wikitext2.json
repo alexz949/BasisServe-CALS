@@ -1,0 +1,69 @@
+{
+  "checkpoint": {
+    "artifact_sha256": null,
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/checkpoints/L31-8B-Dense",
+    "format": "basisserve.llama31_8b.iclr_v_factors.v1",
+    "manifest_sha256": "2f8824ce8fd48766eb538fab770fe551c2e712c9a7238335b9682cdae8e72a72"
+  },
+  "command": "evaluation/eval_llama31_8b_iclr_quality.py --run-id L31-8B-Dense --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --checkpoint-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/checkpoints/L31-8B-Dense --c4-windows /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/calibration/c4_validation_128x2048/windows.safetensors --output-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/quality/L31-8B-Dense --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+  "compression": {
+    "dense_rank_sum_across_layers": 32768,
+    "head_dim": 128,
+    "key_cache": "dense",
+    "method": "dense",
+    "method_label": "Dense",
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "projection": null,
+    "rank_sum_across_layers": 32768,
+    "realized_retained_v_ratio": 1.0,
+    "realized_v_cache_compression_ratio": 0.0,
+    "target": "dense_kv_cache",
+    "value_cache": "dense"
+  },
+  "elapsed_seconds": 28.419358424842358,
+  "format": "basisserve.llama31_8b.iclr_quality.wikitext2.v1",
+  "metrics": {
+    "batch_size": 2,
+    "chunks": 141,
+    "dataset": "wikitext2",
+    "loss_dtype": "float32",
+    "nll_sum": 528460.4794921875,
+    "ppl": 6.2397873184847015,
+    "seqlen": 2048,
+    "split": "test",
+    "tokens": 288627
+  },
+  "model": {
+    "config_sha256": "54acfad3cffe057640904ca8a1e83525e6551c70c7a04c641f5a9eda0bbf64bd",
+    "huggingface_repo": "meta-llama/Llama-3.1-8B",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "revision": "d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "safetensors_index_sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+  },
+  "protocol": {
+    "full_test_corpus": true,
+    "loss_dtype": "float32"
+  },
+  "run_id": "L31-8B-Dense",
+  "runtime": {
+    "attention_implementation": "sdpa",
+    "cuda_device_names": [
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S"
+    ],
+    "cuda_devices_used": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "device_map": "balanced",
+    "installation": [],
+    "model_dtype": "torch.bfloat16"
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-02T12:51:48.992953+00:00"
+}

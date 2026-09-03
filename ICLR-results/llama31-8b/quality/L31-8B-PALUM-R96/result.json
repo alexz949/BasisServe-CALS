@@ -1,0 +1,447 @@
+{
+  "checkpoint": {
+    "artifact_sha256": "1e5527e114239ea54d648df864dc89503ba2f46fc7fa6f4840c592f1ab58b0d4",
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/checkpoints/L31-8B-PALUM-R96",
+    "format": "basisserve.llama31_8b.iclr_v_factors.v1",
+    "manifest_sha256": "e2d549790b9690ae0eeb94b3bcb8d9e88db8e0b9626eeefc37fa2dc5b0c47080"
+  },
+  "command": "evaluation/eval_llama31_8b_iclr_quality.py --run-id L31-8B-PALUM-R96 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --checkpoint-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/checkpoints/L31-8B-PALUM-R96 --c4-windows /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/calibration/c4_validation_128x2048/windows.safetensors --output-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/quality/L31-8B-PALUM-R96 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+  "compression": {
+    "allocation": "official_palu_fisher_uniform",
+    "dense_rank_sum_across_layers": 32768,
+    "equivalent_rank_target": 96,
+    "factorization_work_device": "cpu",
+    "factorization_work_dtype": "torch.float64",
+    "group_width": 128,
+    "groups": 8,
+    "head_dim": 128,
+    "head_group_size": 1,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ]
+    ],
+    "method": "palu-fisher",
+    "method_label": "PaLU M-LRD",
+    "nominal_group_rank": 96,
+    "nominal_retained_v_ratio": 0.75,
+    "nominal_v_cache_compression_ratio": 0.25,
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "projection": "v",
+    "rank_block_size": 32,
+    "rank_sum_across_layers": 24320,
+    "realized_retained_v_ratio": 0.7421875,
+    "realized_v_cache_compression_ratio": 0.2578125,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds_this_attempt": 593.3235734030604,
+  "environment": {
+    "conda_environment": "basis",
+    "cuda_devices": [
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S"
+    ],
+    "datasets": "5.0.0",
+    "lm_eval": "0.4.11",
+    "peak_cuda_allocated_bytes": {
+      "0": 8537014784,
+      "1": 5765217792,
+      "2": 5760892416,
+      "3": 6816060416
+    },
+    "python": "3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0]",
+    "torch": "2.6.0+cu124",
+    "torch_num_threads": 8,
+    "transformers": "5.15.1"
+  },
+  "format": "basisserve.llama31_8b.iclr_quality.v1",
+  "metrics": {
+    "average_accuracy": 0.6886536612951175,
+    "c4_validation_128_ppl": 9.537922557459313,
+    "task_accuracy": [
+      {
+        "metric": "acc_norm",
+        "task": "arc_easy",
+        "value": 0.7811447811447811
+      },
+      {
+        "metric": "acc_norm",
+        "task": "arc_challenge",
+        "value": 0.5162116040955631
+      },
+      {
+        "metric": "acc_norm",
+        "task": "hellaswag",
+        "value": 0.7708623780123481
+      },
+      {
+        "metric": "acc_norm",
+        "task": "piqa",
+        "value": 0.8008705114254625
+      },
+      {
+        "metric": "acc",
+        "task": "winogrande",
+        "value": 0.7371744277821626
+      },
+      {
+        "metric": "acc",
+        "task": "boolq",
+        "value": 0.7743119266055046
+      },
+      {
+        "metric": "acc_norm",
+        "task": "openbookqa",
+        "value": 0.44
+      }
+    ],
+    "wikitext2_ppl": 7.345675398288114
+  },
+  "model": {
+    "config_sha256": "54acfad3cffe057640904ca8a1e83525e6551c70c7a04c641f5a9eda0bbf64bd",
+    "huggingface_repo": "meta-llama/Llama-3.1-8B",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "revision": "d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "safetensors_index_sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+  },
+  "run_id": "L31-8B-PALUM-R96",
+  "stages": {
+    "c4": {
+      "file": "c4.json",
+      "sha256": "df511abd0e1cbec19384c9744937a39309be4878f74e326b0dde993365df5281"
+    },
+    "commonsense": {
+      "file": "commonsense.json",
+      "sha256": "6a6f5d9d786d39e9f29aa304b01ef64c16bf70341e8c500653bc51aa3a0bf78a"
+    },
+    "wikitext2": {
+      "file": "wikitext2.json",
+      "sha256": "f066908096e80d6a0e254c7a3244a143619c7fca0157d989a0e2455a12e31fe5"
+    }
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-02T13:42:10.867811+00:00"
+}

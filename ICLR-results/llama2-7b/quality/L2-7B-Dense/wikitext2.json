@@ -1,0 +1,69 @@
+{
+  "checkpoint": {
+    "artifact_sha256": null,
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama2-7b/checkpoints/L2-7B-Dense",
+    "format": "basisserve.llama2_7b.iclr_v_factors.v1",
+    "manifest_sha256": "630fe1f918b58c95747140e9b17d73f1c2a3cddc7aaf68a52c47317dea2bb502"
+  },
+  "command": "evaluation/eval_llama2_7b_iclr_quality.py --run-id L2-7B-Dense --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-2-7b-hf/snapshots/01c7f73d771dfac7d292323805ebc428287df4f9 --checkpoint-dir ICLR-results/llama2-7b/checkpoints/L2-7B-Dense --c4-windows ICLR-results/llama2-7b/calibration/c4_validation_128x2048/windows.safetensors --output-dir ICLR-results/llama2-7b/quality/L2-7B-Dense --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+  "compression": {
+    "dense_rank_sum_across_layers": 131072,
+    "head_dim": 128,
+    "key_cache": "dense",
+    "method": "dense",
+    "method_label": "Dense",
+    "num_physical_kv_heads": 32,
+    "num_query_heads": 32,
+    "projection": null,
+    "rank_sum_across_layers": 131072,
+    "realized_retained_v_ratio": 1.0,
+    "realized_v_cache_compression_ratio": 0.0,
+    "target": "dense_kv_cache",
+    "value_cache": "dense"
+  },
+  "elapsed_seconds": 28.49934307485819,
+  "format": "basisserve.llama2_7b.iclr_quality.wikitext2.v1",
+  "metrics": {
+    "batch_size": 2,
+    "chunks": 166,
+    "dataset": "wikitext2",
+    "loss_dtype": "float32",
+    "nll_sum": 577646.2045898438,
+    "ppl": 5.473670393978483,
+    "seqlen": 2048,
+    "split": "test",
+    "tokens": 339802
+  },
+  "model": {
+    "config_sha256": "9242e7db1bc2a17873e66084c3b1c6ed10883076e156b338fd6a7775748e2e3c",
+    "huggingface_repo": "meta-llama/Llama-2-7b-hf",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-2-7b-hf/snapshots/01c7f73d771dfac7d292323805ebc428287df4f9",
+    "revision": "01c7f73d771dfac7d292323805ebc428287df4f9",
+    "safetensors_index_sha256": "217d527037a95cd5cd30384afb425987824373b94cc7206beb48ec0c9499c98f"
+  },
+  "protocol": {
+    "full_test_corpus": true,
+    "loss_dtype": "float32"
+  },
+  "run_id": "L2-7B-Dense",
+  "runtime": {
+    "attention_implementation": "sdpa",
+    "cuda_device_names": [
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S"
+    ],
+    "cuda_devices_used": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "device_map": "balanced",
+    "installation": [],
+    "model_dtype": "torch.bfloat16"
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-03T10:01:52.177394+00:00"
+}

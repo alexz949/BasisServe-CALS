@@ -203,8 +203,9 @@ def allocate_layer_schedule(
     *,
     candidate_ranks: Sequence[int],
     anchor_rank: int,
+    target_average_rank: int,
 ) -> tuple[tuple[int, ...], float]:
-    """Allocate one rank per layer at the exact uniform-anchor rank budget."""
+    """Allocate one rank per layer at an exact average-rank budget."""
 
     ranks = tuple(sorted(map(int, candidate_ranks)))
     options = []
@@ -223,7 +224,7 @@ def allocate_layer_schedule(
         )
     allocation = allocate_metric_rank_exact(
         options,
-        total_rank_budget=len(options) * anchor_rank,
+        total_rank_budget=len(options) * target_average_rank,
         anchor_rank=anchor_rank,
     )
     return (
@@ -367,6 +368,7 @@ def build(args: argparse.Namespace) -> None:
         costs,
         candidate_ranks=candidate_ranks,
         anchor_rank=anchor_rank,
+        target_average_rank=args.target_average_rank,
     )
     schedule = [[rank] * NUM_KV_HEADS for rank in layer_ranks]
     exponent_label = str(args.exponent).replace(".", "p")
@@ -436,6 +438,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--allocation-result", type=Path, required=True)
     parser.add_argument("--probe-rank", type=int, default=96)
     parser.add_argument("--exponent", type=float, default=1.0)
+    parser.add_argument("--target-average-rank", type=int, required=True)
     parser.add_argument(
         "--local-error-split",
         choices=("heldout", "fit"),

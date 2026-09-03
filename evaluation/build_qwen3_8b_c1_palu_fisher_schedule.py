@@ -142,6 +142,7 @@ def build(args: argparse.Namespace) -> None:
         costs,
         candidate_ranks=candidate_ranks,
         anchor_rank=anchor_rank,
+        target_average_rank=anchor_rank,
     )
     schedule_name = f"palu_fisher_c1_a{format(args.exponent, 'g').replace('.', 'p')}"
     schedule = [[rank] * NUM_KV_HEADS for rank in layer_ranks]

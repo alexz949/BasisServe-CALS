@@ -1,0 +1,1668 @@
+{
+  "checkpoint": {
+    "artifact_sha256": "8f84b6d7da016284fb5b975c1165fb7837923f7010b9a695a41ab1707f555290",
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/checkpoints/Q3-8B-PALUM-R96",
+    "format": "basisserve.qwen3_8b.iclr_v_factors.v1",
+    "manifest_sha256": "8427ca6a668d19ba2a26e6393edeb074682c79523f48b19b1e79234993513639"
+  },
+  "command": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/eval_qwen3_8b_iclr_quality.py --run-id Q3-8B-PALUM-R96 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --checkpoint-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/checkpoints/Q3-8B-PALUM-R96 --c4-windows /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/calibration/qwen3_8b_c4_validation_128x2048/windows.safetensors --output-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/quality/Q3-8B-PALUM-R96 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+  "compression": {
+    "allocation": "official_palu_fisher_uniform",
+    "dense_rank_sum_across_layers": 36864,
+    "equivalent_rank_target": 96,
+    "factorization_work_device": "cpu",
+    "factorization_work_dtype": "torch.float64",
+    "group_width": 128,
+    "groups": 8,
+    "head_dim": 128,
+    "head_group_size": 1,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ]
+    ],
+    "method": "palu-fisher",
+    "method_label": "PaLU M-LRD",
+    "nominal_group_rank": 96,
+    "nominal_retained_v_ratio": 0.75,
+    "nominal_v_cache_compression_ratio": 0.25,
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "projection": "v",
+    "rank_block_size": 32,
+    "rank_sum_across_layers": 26368,
+    "realized_retained_v_ratio": 0.7152777777777778,
+    "realized_v_cache_compression_ratio": 0.2847222222222222,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds": 28.04117353260517,
+  "format": "basisserve.qwen3_8b.iclr_quality.c4_validation.v1",
+  "metrics": {
+    "document_nll": {
+      "mean": 2.375042844330892,
+      "one_standard_error_ucb": 2.4276143791678075,
+      "paired_standard_error": 0.05257153483691552,
+      "values": [
+        1.3147778511047363,
+        2.6691837310791016,
+        2.2651679515838623,
+        2.2065694332122803,
+        2.707858085632324,
+        1.8480644226074219,
+        2.361863851547241,
+        2.533076286315918,
+        2.046238899230957,
+        2.339606523513794,
+        1.884530782699585,
+        2.775144577026367,
+        2.415695905685425,
+        2.2576794624328613,
+        1.0742101669311523,
+        3.161252021789551,
+        2.372852325439453,
+        2.174649715423584,
+        2.8683643341064453,
+        2.8539650440216064,
+        2.308872938156128,
+        1.6158982515335083,
+        2.8854892253875732,
+        2.0710766315460205,
+        2.7750675678253174,
+        2.142446756362915,
+        1.2009698152542114,
+        0.9512833952903748,
+        2.4325952529907227,
+        2.553081750869751,
+        2.3820652961730957,
+        2.6248068809509277,
+        1.3656376600265503,
+        2.855241537094116,
+        2.358187437057495,
+        1.689634919166565,
+        2.427220582962036,
+        3.3635129928588867,
+        2.5464298725128174,
+        3.4171249866485596,
+        1.1201425790786743,
+        2.2608718872070312,
+        2.684774875640869,
+        3.7344064712524414,
+        1.4423174858093262,
+        2.3400537967681885,
+        2.9660990238189697,
+        1.9286930561065674,
+        2.783562421798706,
+        1.6913803815841675,
+        1.9574624300003052,
+        4.223739147186279,
+        2.349468231201172,
+        1.3613641262054443,
+        2.367236614227295,
+        2.2617249488830566,
+        2.446709394454956,
+        2.1455001831054688,
+        2.314842462539673,
+        2.4778664112091064,
+        2.5834949016571045,
+        1.5342965126037598,
+        3.2763566970825195,
+        2.7874200344085693,
+        2.590867757797241,
+        3.076733112335205,
+        1.8705036640167236,
+        2.2208759784698486,
+        3.0003650188446045,
+        2.972168207168579,
+        2.627981662750244,
+        2.3143413066864014,
+        2.286112070083618,
+        2.5039751529693604,
+        3.177556037902832,
+        3.0228002071380615,
+        2.2535181045532227,
+        2.929771900177002,
+        2.5890986919403076,
+        2.137242078781128,
+        1.65339994430542,
+        2.507511615753174,
+        1.5710457563400269,
+        1.8319166898727417,
+        2.4506266117095947,
+        2.6261796951293945,
+        2.763173818588257,
+        2.7941360473632812,
+        2.382505178451538,
+        2.947253465652466,
+        2.7095892429351807,
+        2.321026086807251,
+        1.4627121686935425,
+        3.0264203548431396,
+        1.7264745235443115,
+        2.4988789558410645,
+        2.3259572982788086,
+        0.3553633987903595,
+        2.6301867961883545,
+        3.4110307693481445,
+        2.0491249561309814,
+        2.5779805183410645,
+        2.754354238510132,
+        2.3686068058013916,
+        3.3129942417144775,
+        2.166234016418457,
+        2.515714645385742,
+        2.3294730186462402,
+        2.3666977882385254,
+        2.6213834285736084,
+        1.8094158172607422,
+        2.6766767501831055,
+        3.558732509613037,
+        1.6915472745895386,
+        1.9054826498031616,
+        2.3940296173095703,
+        1.74248468875885,
+        2.7974326610565186,
+        1.9522897005081177,
+        2.26284122467041,
+        2.898010015487671,
+        2.5358660221099854,
+        2.8728647232055664,
+        2.4707045555114746,
+        1.639211893081665,
+        2.248520612716675,
+        1.5628783702850342,
+        3.2174527645111084
+      ]
+    },
+    "documents": 128,
+    "loss_dtype": "float32",
+    "mean_nll": 2.375042844330892,
+    "nll_sum": 622299.225900203,
+    "ppl": 10.751473815910341,
+    "tokens": 262016
+  },
+  "model": {
+    "config_sha256": "3bd01d7ad7a2e203ecbbe84e24087a51c6d2a108ee4bcc42d0016bf49564983a",
+    "huggingface_repo": "Qwen/Qwen3-8B-Base",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "revision": "49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "safetensors_index_sha256": "cd39d5e44c5aadfd1954b598883aea1c4a98822a2f7723d214ef2278b7fec2e4"
+  },
+  "protocol": {
+    "cross_document_transitions": false,
+    "documents": 128,
+    "loss_dtype": "float32",
+    "sequence_length": 2048,
+    "split": "validation"
+  },
+  "run_id": "Q3-8B-PALUM-R96",
+  "runtime": {
+    "attention_implementation": "sdpa",
+    "cuda_device_names": [
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S"
+    ],
+    "cuda_devices_used": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "device_map": "balanced",
+    "installation": [
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.01375194638967514,
+        "k_projection": "original dense module unchanged",
+        "layer": 0,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009201057255268097,
+        "k_projection": "original dense module unchanged",
+        "layer": 1,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009692355990409851,
+        "k_projection": "original dense module unchanged",
+        "layer": 2,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.00992913544178009,
+        "k_projection": "original dense module unchanged",
+        "layer": 3,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.00968652218580246,
+        "k_projection": "original dense module unchanged",
+        "layer": 4,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.010079167783260345,
+        "k_projection": "original dense module unchanged",
+        "layer": 5,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009696327149868011,
+        "k_projection": "original dense module unchanged",
+        "layer": 6,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009653858840465546,
+        "k_projection": "original dense module unchanged",
+        "layer": 7,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009668335318565369,
+        "k_projection": "original dense module unchanged",
+        "layer": 8,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014411509037017822,
+        "k_projection": "original dense module unchanged",
+        "layer": 9,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.013986296951770782,
+        "k_projection": "original dense module unchanged",
+        "layer": 10,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009176261723041534,
+        "k_projection": "original dense module unchanged",
+        "layer": 11,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014006100594997406,
+        "k_projection": "original dense module unchanged",
+        "layer": 12,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009229756891727448,
+        "k_projection": "original dense module unchanged",
+        "layer": 13,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.01900298148393631,
+        "k_projection": "original dense module unchanged",
+        "layer": 14,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.013809949159622192,
+        "k_projection": "original dense module unchanged",
+        "layer": 15,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.018421918153762817,
+        "k_projection": "original dense module unchanged",
+        "layer": 16,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.01837913691997528,
+        "k_projection": "original dense module unchanged",
+        "layer": 17,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.01303807646036148,
+        "k_projection": "original dense module unchanged",
+        "layer": 18,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.01844339817762375,
+        "k_projection": "original dense module unchanged",
+        "layer": 19,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.018131032586097717,
+        "k_projection": "original dense module unchanged",
+        "layer": 20,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.01842387765645981,
+        "k_projection": "original dense module unchanged",
+        "layer": 21,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.018195711076259613,
+        "k_projection": "original dense module unchanged",
+        "layer": 22,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.013283602893352509,
+        "k_projection": "original dense module unchanged",
+        "layer": 23,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.013886451721191406,
+        "k_projection": "original dense module unchanged",
+        "layer": 24,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014178946614265442,
+        "k_projection": "original dense module unchanged",
+        "layer": 25,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009168855845928192,
+        "k_projection": "original dense module unchanged",
+        "layer": 26,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014116361737251282,
+        "k_projection": "original dense module unchanged",
+        "layer": 27,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.013823188841342926,
+        "k_projection": "original dense module unchanged",
+        "layer": 28,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009202428162097931,
+        "k_projection": "original dense module unchanged",
+        "layer": 29,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.01476878672838211,
+        "k_projection": "original dense module unchanged",
+        "layer": 30,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009058095514774323,
+        "k_projection": "original dense module unchanged",
+        "layer": 31,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014729820191860199,
+        "k_projection": "original dense module unchanged",
+        "layer": 32,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009258970618247986,
+        "k_projection": "original dense module unchanged",
+        "layer": 33,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.018379710614681244,
+        "k_projection": "original dense module unchanged",
+        "layer": 34,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.018460407853126526,
+        "k_projection": "original dense module unchanged",
+        "layer": 35,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-KV-head reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      }
+    ],
+    "model_dtype": "torch.bfloat16"
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-02T10:43:46.457180+00:00",
+  "windows": {
+    "dataset": {
+      "config": "en",
+      "repo": "allenai/c4",
+      "requested_revision": "1588ec454efa1a09f29cd18ddd04fe05fc8653a2",
+      "resolved_revision": "1588ec454efa1a09f29cd18ddd04fe05fc8653a2",
+      "shuffle_buffer": 10000,
+      "split": "validation",
+      "streaming": true
+    },
+    "document_ids": [
+      "url:http://iagenweb.org/benton/1878_bios/polk.htm",
+      "url:https://www.scribd.com/document/159760943/Why-Invest-in-Singapore",
+      "url:https://www.marketreview.com/taxation/",
+      "url:https://theintercept.com/2016/11/12/surveillance-self-defense-against-the-trump-administration/",
+      "url:http://www.insidemacgames.com/forum/index.php?s=12190cf6cb34dc243ace1a0501757701&showtopic=30935&hl=",
+      "url:http://en.cha.ac.kr/thechalegacy/thechalegacy_2ph_4his.cha",
+      "url:https://greatersurbiton.wordpress.com/category/nato/",
+      "url:http://carletonbusinessfinance.com/blog/?m=201001",
+      "url:https://www.etzion.org.il/en/great-stones-and-whole-stones",
+      "url:https://f3magazine.unicri.it/?p=1101",
+      "url:http://govcon.mofo.com/post-award-protest-primer-series/substantively-non-protestable-issues-post-award-protest-primer-8/",
+      "url:http://onlineguitarlesson.info/gihi/michael-hagan-obituary-832.php",
+      "url:https://vinzideas.com/4-day-vacation-trip-to-boracay-island/",
+      "url:https://vuustad.com/7-latest-tips-you-can-learn-when-attending-st-louis-cards-tickets-st-louis-cards-tickets/69986/",
+      "url:http://library.kiwix.org/wikipedia_en_computer_novid_2018-10/A/Milky_Way.html",
+      "url:https://acuriousgal.com/progressive-fundamentalism-break-point/",
+      "url:https://www.businessinsider.com/brides-budget-for-wedding-breakdown-2018-7",
+      "url:https://www.hvacclasses.org/careers/wind-turbine-technician",
+      "url:http://hyipfamily.com/?p=7",
+      "url:http://eu-topjob.info/?newsid=12798",
+      "url:https://lermagazine.com/article/rockers-and-rollovers-implications-for-afos",
+      "url:https://www.pubfacts.com/search/Vitamin+E+Toxicity",
+      "url:https://eduvel.wordpress.com/tag/powerpoint/",
+      "url:https://www.ict.org.il/Article.aspx?ID=1863",
+      "url:http://castboolits.gunloads.com/showthread.php?373240-Lee-breechlock-pro-or-loadmaster&s=3869ee649f37a5d1b4d9c19d097d3efd&p=4562759",
+      "url:https://www.win.tue.nl/~rscheepe/",
+      "url:https://www.law.cornell.edu/uscode/text/35/102",
+      "url:https://patents.google.com/patent/US20100151834A1/en",
+      "url:https://xtremeinternetmarketing.com/location/Michigan/Matteson-website-expert-internet-powerlistings-hosting-social-local-seo-design-marketing-specialist-first-google-media-search-maps-engine-web-page-optimization/",
+      "url:https://wdwprepschool.com/how-to-add-edit-and-copy-fastpass-reservations-in-my-disney-experience/?replytocom=8186",
+      "url:https://www.dividendgangster.com/category/performance/",
+      "url:http://gapersblock.com/ac/2011/02/23/the-return-of-the-patio-theater/",
+      "url:http://www.legislation.gov.uk/uksi/2017/571/part/8/made",
+      "url:http://www.factbites.com/topics/Being-in-itself",
+      "url:https://culturedvultures.com/best-fallout-games/",
+      "url:https://the-journal.com/articles/102368",
+      "url:https://imperfectlyperfect.live/2016/06/",
+      "url:https://www.forcedexposure.com/Labels/RECITAL.html",
+      "url:https://www.chicagotribune.com/about/ct-chicago-tribune-print-books-20170725-htmlstory.html",
+      "url:http://www.dsquaredphotovideo.com/category/shopping/page/3",
+      "url:http://patents.com/us-20160322021.html",
+      "url:https://denverite.com/2017/11/09/things-denver-weekend-nov-9-12/",
+      "url:http://www.watcherofweasels.org/confederate-hbo-racial-canards/",
+      "url:http://funnygifs.co/category-Loveseats/468-Requiring-robertsville-loveseat-by-darby-home-co.jsp?pid=3Z8UA8CMZR",
+      "url:http://curia.europa.eu/juris/document/document.jsf?text=&docid=163945&pageIndex=0&doclang=en&mode=lst&dir=&occ=first&part=1&cid=462162",
+      "url:http://www.beatlesnumber9.com/badfinger.html",
+      "url:http://www.faqs.org/rfcs/rfc5272.html",
+      "url:https://harvardhrj.com/2019/03/attacks-on-the-international-criminal-court-are-attacks-on-war-crimes-victims/",
+      "url:http://eastofthesun-asia.com/20-big-nintendo-switch-games-in-2019-ign/",
+      "url:http://holcombegenealogy.com/g0/p798.htm",
+      "url:http://www.chestercounty.com/2017/05/16/142429/obituaries-for-the-week-of-may-15",
+      "url:http://serviceschnauzer.de/media/freebooks/download-a-history-of-the-classical-greek-world-478-323-bc.php",
+      "url:http://www.mrm.org/joseph-smith-manual-5",
+      "url:http://www.offeritem.com/suvarnadvipa-ancient-indian-colonies-in-the-far-east-cultural-description-138569.html",
+      "url:http://www.wellness-decisions.com/wellness-revolution.html",
+      "url:https://www.forbes.com/sites/knowledgewharton/2016/02/05/originals-how-anyone-can-become-a-trailblazer/",
+      "url:https://www.forbes.com/sites/darrenheitner/2016/05/08/the-state-of-the-golf-industry-in-2016/",
+      "url:https://www.hcg1.com/hcg-virginia/",
+      "url:https://codingcompiler.com/2018/04/",
+      "url:https://www.dandwiki.com/wiki/3.5e_ECL_3_Races",
+      "url:http://usakochan.net/download/music-in-the-world-of-islam/",
+      "url:http://www.generalmichaelcollins.com/life-times/finance/dail-eireann/",
+      "url:http://itomer.tk/juve-poker-scudetti.html",
+      "url:https://www.finlandforum.org/viewtopic.php?f=19&t=93732",
+      "url:https://www.rawforestfoods.com/taproot-deep-jing-formula/",
+      "url:http://teenpregnancy-ct.org/16-bewerbung-frur-aushilfe/",
+      "url:https://www.auanet.org/guidelines/optimizing-outcomes-in-urological-surgery-pre-operative-care-for-the-patient-undergoing-urologic-surgery-or-procedure",
+      "url:https://ruffacademy.wordpress.com/2017/02/",
+      "url:http://paulastrange.com/listings/my-sold-listings?page=12",
+      "url:http://cadoresto.com/airport-manager-cover-letter.php",
+      "url:http://bnbgs.weebly.com/board-games/stalingrad",
+      "url:https://www.plannerone.com/es/faq/",
+      "url:https://youngchoppers.com/9-best-atv-batteries-reviews-guide/",
+      "url:http://www.englers.org/archives/2006/10/",
+      "url:https://www.geek.com/games/hands-on-nintendo-labo-is-fun-cardboard-stem-1729827/",
+      "url:https://www.indrastra.com/2015/12/PAPER-Research-on-6R-Military-Logistics-Network-0518.html",
+      "url:https://acscareers.wordpress.com/2012/07/",
+      "url:http://www.letshaveacocktail.com/2010/01/so-jimmy-buffett-walks-into-bar.html",
+      "url:http://tyglobalist.org/in-the-magazine/qa/a-conversation-with-ivo-banac/",
+      "url:http://doncaster.gov.uk/services/business-investment/gambling-premises-licence",
+      "url:http://paintandpattern.com/diy-office-stenciled-accessories/",
+      "url:https://thethunderandtheroar.wordpress.com/category/therapy/",
+      "url:https://discoverbrew.com/pages/terms-conditions",
+      "url:http://british-israel.us/277.html",
+      "url:http://www.bushwakker.com/wakker-weekly-1/issue-1392",
+      "url:http://lakelandmanor.net/customer-reviews/",
+      "url:https://www.eyeofthepsychic.com/nexus07_2/",
+      "url:https://hayefield.com/2017/09/15/garden-bloggers-bloom-day-september-2017/",
+      "url:https://www.jci.org/articles/view/83335",
+      "url:http://www.homevideos.com/revclas/43.htm",
+      "url:https://www.history.org.uk/branches/categories/511/resource/3905/nuneaton-branch-history",
+      "url:https://www.forentrepreneurs.com/opportunity-slide/",
+      "url:http://www.privatewealthcfos.com/blog/2014/6/13/business-owner-series-should-you-set-up-a-profit-sharing-plan",
+      "url:https://greatbusinessideas.wordpress.com/2007/07/",
+      "url:https://tournaments.qantasgolfclub.com/terms-and-conditions-2018-auckland/",
+      "url:http://fernieadventure.com/2013/05/",
+      "url:https://falling-walls.com/videos/Dani%C3%ABl-Vanmaekelbergh--1208",
+      "url:https://statisticsports.com/en/ad-confianca-vs-lagarto-at-2019-02-27",
+      "url:https://bobanddenisewanderlust.com/2016/11/02/sat-oct-22-sebastian-fl-to-fri-oct-28-miami-fl/",
+      "url:https://dumpsterratings.com/texas/rent-a-10-yard-dumpster-driscoll-tx/",
+      "url:http://srv.datagutt1.com/index.php?date=2017-02-25",
+      "url:http://wirednewyork.com/forum/showthread.php?t=21249&amp;page=5",
+      "url:http://bwarhammerquest.runboard.com/t90389",
+      "url:http://echters.com/wordpress/?paged=2",
+      "url:http://www.astonvillafpa.org/",
+      "url:https://freedetroit.org/two-bedroom-apartments-available-near-me/",
+      "url:http://www.handmadebykatherine.co.uk/tag/biscuits/",
+      "url:https://rangermade.net/rv-camping/de-winterizing-your-rv-sure-no-problem",
+      "url:https://www.trumanlibrary.org/whistlestop/BERLIN_A/PAGE_11.HTM",
+      "url:http://umkahlil.blogspot.com/2008/06/",
+      "url:https://smartasset.com/student-loans/student-loan-calculator?utm_source=captivate&utm_medium=cpc&utm_campaign=cap__studentloancalculatorc",
+      "url:https://popgeeks.com/prison-break-the-complete-third-season-blu-ray-review/",
+      "url:https://www.nucleodoconhecimento.com.br/agricultural-engineering/income-and-tradition",
+      "url:http://israelect.com/reference/JackMohr/col%20mohr%201_21.htm",
+      "url:https://natureherbalmedicine.blogspot.com/2012/07/chinese-herbs-for-gray-hair-how-to-get.html",
+      "url:https://www.encyclopedia.com/history/biographies/french-history-biographies/environmental-economics",
+      "url:https://www.seglawyersvermont.com/susan-tanner-v-town-of-dorset-march-24-2009/",
+      "url:https://clinicsoftware.com/features/1/marketing-features",
+      "url:http://autoreviewhub.com/jeep-grand-cherokee-trim-comparison/",
+      "url:http://www.acb.org/resolutions2017",
+      "url:https://thoughtexplosion.blog/blog/",
+      "url:http://northdenvertribune.net/category/news/page/22/",
+      "url:http://www.classicreader.com/book/439/29/",
+      "url:http://www.zenker.se/En/web_stuff.shtml",
+      "url:https://get.askmethod.com/terms-conditions/",
+      "url:http://www.hpiracing.com/de/faq",
+      "url:https://patents.google.com/patent/EP1545674B1/en",
+      "url:https://rcbullock.blogspot.com/2008_04_27_archive.html"
+    ],
+    "manifest": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/calibration/qwen3_8b_c4_validation_128x2048/manifest.json",
+    "manifest_sha256": "7f2479f9246f5c71d2b69c032b75a16f27cf18add880655fc80f00f47c6379ed",
+    "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/calibration/qwen3_8b_c4_validation_128x2048/windows.safetensors",
+    "sampling": {
+      "add_special_tokens": false,
+      "document_disjoint": true,
+      "samples": 128,
+      "seed": 20260828,
+      "sequence_length": 2048,
+      "within_document_start": "uniform integer"
+    },
+    "sha256": "31df55d60934a3599e2cc7b9c1960e69a4e782a6b0944cd44704aeef7e8c3516"
+  }
+}

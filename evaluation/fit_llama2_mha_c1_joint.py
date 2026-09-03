@@ -7,9 +7,10 @@ solved jointly against the complete attention-output MSE, including
 cross-head error cancellation.  Encoders and decoders alternate under the
 same deterministic routed-OV solver used by the Qwen3 C1 experiment.
 
-The existing 64-document C4 snapshot is split by document: the first 48
-windows fit factors and the final 16 windows select the earliest minimum-MSE
-solver checkpoint.  The final WikiText-2 test set is never touched here.
+The fit and held-out C4 windows are document-disjoint. Held-out loss is recorded
+only as a diagnostic; every checkpoint exports the decoder-refitted endpoint
+after exactly six FP32 encoder sweeps. The final WikiText-2 test set is never
+touched here.
 """
 
 from __future__ import annotations
@@ -58,6 +59,8 @@ NUM_HEADS = 32
 NUM_KV_HEADS = 32
 HEAD_DIM = 128
 HIDDEN_SIZE = 4096
+FORMAL_ENCODER_SWEEPS = 6
+FORMAL_ENCODER_CG_ITERATIONS = 16
 
 
 def activate_model_profile(name: str) -> None:
@@ -86,6 +89,18 @@ def activate_model_profile(name: str) -> None:
         MODEL_TYPE = "qwen3"
         ATTENTION_TYPE = "gqa"
         NUM_LAYERS = 36
+        NUM_HEADS = 32
+        NUM_KV_HEADS = 8
+        HEAD_DIM = 128
+        HIDDEN_SIZE = 4096
+        return
+    if name == "llama31_8b":
+        FORMAT = "basisserve.llama31_8b.gqa_c1_joint.v1"
+        LAYER_FORMAT = "basisserve.llama31_8b.gqa_c1_joint.layer.v1"
+        MODEL_LABEL = "Llama-3.1-8B"
+        MODEL_TYPE = "llama"
+        ATTENTION_TYPE = "gqa"
+        NUM_LAYERS = 32
         NUM_HEADS = 32
         NUM_KV_HEADS = 8
         HEAD_DIM = 128
@@ -508,24 +523,19 @@ def _fit_config(
         "factor_dtype": args.factor_dtype,
         "encoder_initialization": args.encoder_initialization,
         "encoder_initialization_seed": args.encoder_initialization_seed,
-        "selection_boundaries": args.selection_boundaries,
         "covariance_damping": args.covariance_damping,
-        "encoder_sweeps": args.encoder_sweeps,
-        "minimum_encoder_sweeps": args.minimum_encoder_sweeps,
-        "encoder_relative_tolerance": args.encoder_relative_tolerance,
-        "encoder_patience": args.encoder_patience,
-        "decoder_relative_jitter": args.decoder_relative_jitter,
-        "encoder_relative_damping": args.encoder_relative_damping,
+        "encoder_sweeps": FORMAL_ENCODER_SWEEPS,
         "encoder_cg_mode": args.encoder_cg_mode,
         "encoder_cg_relative_tolerance": args.encoder_cg_relative_tolerance,
         "encoder_cg_max_iterations": cg_max_iterations,
         "encoder_cg_fixed_iterations": (
             cg_max_iterations if args.encoder_cg_mode == "fixed" else None
         ),
-        "maximum_backtracks": args.maximum_backtracks,
         "covariance_row_chunk_size": args.covariance_row_chunk_size,
         "decoder_objective": args.decoder_objective,
-        "selection": _selection_criterion(args.selection_boundaries),
+        "checkpoint_policy": (
+            "fixed decoder-refitted endpoint after encoder sweep 6"
+        ),
         "objective": (
             "full-layer attention-output MSE with cross-head covariance"
             if args.decoder_objective == "full_layer"
@@ -684,45 +694,15 @@ def _relative_loss(loss: float, constant: Tensor) -> float:
     return float(loss) / max(abs(float(constant)), 1.0e-300)
 
 
-DECODER_CLOSED_BOUNDARIES = frozenset(("decoder_only", "after_redecoder"))
-
-
-def _selection_criterion(selection_boundaries: str) -> str:
-    if selection_boundaries == "all":
-        return "earliest minimum heldout-context aggregate-output MSE checkpoint"
-    if selection_boundaries == "decoder-closed":
-        return (
-            "earliest minimum heldout-context aggregate-output MSE among "
-            "decoder-closed checkpoints"
-        )
-    raise ValueError(f"unsupported selection boundary policy: {selection_boundaries}")
-
-
-class _HeldoutSelector:
+class _CheckpointRecorder:
     def __init__(
         self,
         validation_objective: Any,
         mapping: Tensor,
-        *,
-        selection_boundaries: str,
     ) -> None:
         self.validation_objective = validation_objective
         self.mapping = mapping
-        self.selection_boundaries = selection_boundaries
-        if selection_boundaries == "all":
-            self.allowed_boundaries: frozenset[str] | None = None
-        elif selection_boundaries == "decoder-closed":
-            self.allowed_boundaries = DECODER_CLOSED_BOUNDARIES
-        else:
-            raise ValueError(
-                f"unsupported selection boundary policy: {selection_boundaries}"
-            )
         self.records: list[dict[str, Any]] = []
-        self.best_loss = float("inf")
-        self.best_A: Tensor | None = None
-        self.best_D: Tensor | None = None
-        self.best_boundary: str | None = None
-        self.best_sweep: int | None = None
 
     def __call__(self, checkpoint: Any, A: Tensor, D: Tensor) -> None:
         heldout = evaluate_quadratic(
@@ -730,10 +710,6 @@ class _HeldoutSelector:
             A,
             D,
             self.mapping,
-        )
-        eligible = (
-            self.allowed_boundaries is None
-            or str(checkpoint.boundary) in self.allowed_boundaries
         )
         row = {
             "boundary": checkpoint.boundary,
@@ -743,22 +719,8 @@ class _HeldoutSelector:
             "validation_relative_mse": _relative_loss(
                 heldout, self.validation_objective.constant
             ),
-            "selection_eligible": eligible,
         }
         self.records.append(row)
-        if eligible and float(heldout) < self.best_loss:
-            self.best_loss = float(heldout)
-            self.best_A = A.detach().clone()
-            self.best_D = D.detach().clone()
-            self.best_boundary = str(checkpoint.boundary)
-            self.best_sweep = int(checkpoint.sweep)
-
-    def selected(self) -> tuple[Tensor, Tensor]:
-        if self.best_A is None or self.best_D is None:
-            raise RuntimeError(
-                "held-out selector observed no eligible solver checkpoints"
-            )
-        return self.best_A, self.best_D
 
 
 def _verified_prior(path: Path, artifact: Path, layer: int, fit_config: Mapping[str, Any]) -> dict[str, Any] | None:
@@ -809,12 +771,11 @@ def _write_exact_full_rank_layer(
     }
     _atomic_safetensors(artifact_path, artifact_tensors)
     checkpoint = {
-        "boundary": "decoder_only",
+        "boundary": "exact_dense_endpoint",
         "sweep": 0,
         "fit_loss": 0.0,
         "validation_loss": 0.0,
         "validation_relative_mse": 0.0,
-        "selection_eligible": True,
     }
     group_heads = NUM_HEADS // NUM_KV_HEADS
     empty_cg = {
@@ -851,10 +812,9 @@ def _write_exact_full_rank_layer(
                 for key, value in artifact_tensors.items()
             },
         },
-        "selection": {
-            "criterion": _selection_criterion(args.selection_boundaries),
-            "boundary_policy": args.selection_boundaries,
-            "boundary": "decoder_only",
+        "checkpoint": {
+            "policy": "exact dense endpoint",
+            "boundary": "exact_dense_endpoint",
             "sweep": 0,
             "checkpoints": [checkpoint],
         },
@@ -1119,10 +1079,9 @@ def _fit_layer(
         device=device,
         dtype=work_dtype,
     )
-    selector = _HeldoutSelector(
+    recorder = _CheckpointRecorder(
         validation_objective,
         mapping,
-        selection_boundaries=args.selection_boundaries,
     )
     print(
         f"[{MODEL_LABEL} C1] layer={layer} "
@@ -1136,27 +1095,31 @@ def _fit_layer(
         initial_D=initial_D,
         head_to_kv_group=mapping,
         coupling_mode=decoder_coupling_mode,
-        maximum_sweeps=args.encoder_sweeps,
-        minimum_sweeps=args.minimum_encoder_sweeps,
-        relative_objective_tolerance=args.encoder_relative_tolerance,
-        patience=args.encoder_patience,
-        decoder_relative_jitter=args.decoder_relative_jitter,
-        encoder_relative_damping=args.encoder_relative_damping,
+        maximum_sweeps=FORMAL_ENCODER_SWEEPS,
+        minimum_sweeps=FORMAL_ENCODER_SWEEPS,
+        relative_objective_tolerance=0.0,
+        patience=1,
+        decoder_relative_jitter=0.0,
+        encoder_relative_damping=0.0,
         cg_relative_tolerance=float(
             fit_config["encoder_cg_relative_tolerance"]
         ),
         cg_max_iterations=int(fit_config["encoder_cg_max_iterations"]),
         cg_fixed_iterations=fit_config["encoder_cg_mode"] == "fixed",
-        maximum_backtracks=args.maximum_backtracks,
+        maximum_backtracks=0,
         final_decoder_solve=True,
         verify_encoder_step_objective=work_dtype == torch.float64,
         group_ranks=solver_group_ranks,
-        checkpoint_callback=selector,
+        checkpoint_callback=recorder,
         decoder_stationarity_override=lambda *_: 0.0,
         work_dtype=work_dtype,
         work_device=device,
     )
-    selected_A, selected_D = selector.selected()
+    selected_A = result.A_unique.to(device=device, dtype=work_dtype)
+    selected_D = result.D_heads.to(device=device, dtype=work_dtype)
+    endpoint = result.checkpoints[-1]
+    assert endpoint.boundary == "after_redecoder"
+    assert endpoint.sweep == FORMAL_ENCODER_SWEEPS
     fit_loss = evaluate_quadratic(
         fit_objective, selected_A, selected_D, mapping
     )
@@ -1198,12 +1161,11 @@ def _fit_layer(
                 for key, value in artifact_tensors.items()
             },
         },
-        "selection": {
-            "criterion": _selection_criterion(args.selection_boundaries),
-            "boundary_policy": args.selection_boundaries,
-            "boundary": selector.best_boundary,
-            "sweep": selector.best_sweep,
-            "checkpoints": selector.records,
+        "checkpoint": {
+            "policy": "fixed decoder-refitted endpoint after encoder sweep 6",
+            "boundary": endpoint.boundary,
+            "sweep": endpoint.sweep,
+            "checkpoints": recorder.records,
         },
         "fit": {
             "relative_mse": _relative_loss(fit_loss, fit_objective.constant),
@@ -1385,7 +1347,7 @@ def _summary(records: Sequence[Mapping[str, Any]], config: Mapping[str, Any]) ->
             f"({100 * (1 - total_retention):.6g}% reduction)."
         ),
         f"- Encoder initialization: `{config.get('encoder_initialization', 'activation-weighted-svd')}`.",
-        f"- Held-out selection boundaries: `{config.get('selection_boundaries', 'all')}`.",
+        f"- Checkpoint policy: `{config['checkpoint_policy']}`.",
         (
             "- V encoders and head output decoders use a full-layer joint solve "
             "with cross-head covariance."
@@ -1393,16 +1355,16 @@ def _summary(records: Sequence[Mapping[str, Any]], config: Mapping[str, Any]) ->
             else "- V encoders use the same attention-output-aware initialization; "
             "each head decoder is then solved independently without cross-head covariance."
         ),
-        f"- Fit contexts: {config['fit_windows']}; held-out selection contexts: {config['validation_windows']}.",
+        f"- Fit contexts: {config['fit_windows']}; held-out diagnostic contexts: {config['validation_windows']}.",
         f"- Mean held-out factor-dtype relative MSE: `{sum(heldout) / len(heldout):.9g}`.",
         "",
-        "| Layer | Selected boundary | Sweep | Held-out relative MSE |",
+        "| Layer | Exported boundary | Sweep | Held-out relative MSE |",
         "|---:|:---|---:|---:|",
     ]
     for row in records:
         lines.append(
-            f"| {row['layer']} | {row['selection']['boundary']} | "
-            f"{row['selection']['sweep']} | "
+            f"| {row['layer']} | {row['checkpoint']['boundary']} | "
+            f"{row['checkpoint']['sweep']} | "
             f"{row['heldout']['factor_dtype_relative_mse']:.9g} |"
         )
     lines.append("")
@@ -1509,27 +1471,12 @@ def _add_common(parser: argparse.ArgumentParser) -> None:
             "seed is deterministically offset by layer"
         ),
     )
-    parser.add_argument(
-        "--selection-boundaries",
-        choices=("all", "decoder-closed"),
-        default="all",
-        help=(
-            "Checkpoints eligible for held-out selection. decoder-closed "
-            "permits only decoder_only and after_redecoder checkpoints while "
-            "retaining the complete trajectory for diagnostics."
-        ),
-    )
     parser.add_argument("--covariance-damping", type=float, default=1.0e-7)
     parser.add_argument(
         "--covariance-row-chunk-size",
         type=int,
         help="CPU-offloaded activation rows transferred per covariance update",
     )
-    parser.add_argument("--encoder-sweeps", type=int, default=5)
-    parser.add_argument("--minimum-encoder-sweeps", type=int, default=2)
-    parser.add_argument("--encoder-relative-tolerance", type=float, default=1.0e-6)
-    parser.add_argument("--encoder-patience", type=int, default=2)
-    parser.add_argument("--decoder-relative-jitter", type=float, default=0.0)
     parser.add_argument(
         "--decoder-objective",
         choices=("full_layer", "per_head"),
@@ -1539,7 +1486,6 @@ def _add_common(parser: argparse.ArgumentParser) -> None:
             "per_head reproduces the A3-style sum of independent head-output losses"
         ),
     )
-    parser.add_argument("--encoder-relative-damping", type=float, default=1.0e-8)
     parser.add_argument(
         "--encoder-cg-mode",
         choices=("fixed", "tolerance"),
@@ -1556,10 +1502,9 @@ def _add_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--encoder-cg-fixed-iterations",
         type=int,
-        default=16,
+        default=FORMAL_ENCODER_CG_ITERATIONS,
         help="Legacy fixed CG budget and fallback maximum iteration count",
     )
-    parser.add_argument("--maximum-backtracks", type=int, default=10)
 
 
 def parse_args() -> argparse.Namespace:
@@ -1581,13 +1526,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     if args.command_name == "fit-shard":
-        if args.decoder_objective == "per_head" and (
-            args.encoder_sweeps != 0 or args.minimum_encoder_sweeps != 0
-        ):
-            raise ValueError(
-                "--decoder-objective per_head requires zero encoder sweeps for the "
-                "strict A3 decoder ablation"
-            )
+        assert args.decoder_objective == "full_layer"
         _fit_shard(args)
     else:
         _merge(args)

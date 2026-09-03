@@ -1,0 +1,1817 @@
+{
+  "average_accuracy": 0.6129009802163282,
+  "checkpoint": {
+    "artifact_sha256": "aa041aced9342af681a045fd482d26ee9ccc3fe0aa1ad805c9e6f50d9369dfa8",
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama2-7b/checkpoints/L2-7B-PALUG4-R80",
+    "format": "basisserve.llama2_7b.iclr_v_factors.v1",
+    "manifest_sha256": "047fcb39853d6e630c97520d7b1e26eb8a09e2be28b273e51c3866f4e42436b2"
+  },
+  "command": "evaluation/eval_llama2_7b_iclr_quality.py --run-id L2-7B-PALUG4-R80 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-2-7b-hf/snapshots/01c7f73d771dfac7d292323805ebc428287df4f9 --checkpoint-dir ICLR-results/llama2-7b/checkpoints/L2-7B-PALUG4-R80 --c4-windows ICLR-results/llama2-7b/calibration/c4_validation_128x2048/windows.safetensors --output-dir ICLR-results/llama2-7b/quality/L2-7B-PALUG4-R80 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+  "compression": {
+    "allocation": "official_palu_fisher_uniform",
+    "dense_rank_sum_across_layers": 131072,
+    "equivalent_rank_target": 80,
+    "factorization_work_device": "cpu",
+    "factorization_work_dtype": "torch.float64",
+    "group_width": 512,
+    "groups": 8,
+    "head_dim": 128,
+    "head_group_size": 4,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256
+      ],
+      [
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288
+      ],
+      [
+        320,
+        320,
+        320,
+        320,
+        320,
+        320,
+        320,
+        320
+      ],
+      [
+        352,
+        352,
+        352,
+        352,
+        352,
+        352,
+        352,
+        352
+      ],
+      [
+        384,
+        384,
+        384,
+        384,
+        384,
+        384,
+        384,
+        384
+      ],
+      [
+        384,
+        384,
+        384,
+        384,
+        384,
+        384,
+        384,
+        384
+      ],
+      [
+        384,
+        384,
+        384,
+        384,
+        384,
+        384,
+        384,
+        384
+      ],
+      [
+        480,
+        480,
+        480,
+        480,
+        480,
+        480,
+        480,
+        480
+      ],
+      [
+        416,
+        416,
+        416,
+        416,
+        416,
+        416,
+        416,
+        416
+      ],
+      [
+        416,
+        416,
+        416,
+        416,
+        416,
+        416,
+        416,
+        416
+      ],
+      [
+        480,
+        480,
+        480,
+        480,
+        480,
+        480,
+        480,
+        480
+      ],
+      [
+        416,
+        416,
+        416,
+        416,
+        416,
+        416,
+        416,
+        416
+      ],
+      [
+        448,
+        448,
+        448,
+        448,
+        448,
+        448,
+        448,
+        448
+      ],
+      [
+        384,
+        384,
+        384,
+        384,
+        384,
+        384,
+        384,
+        384
+      ],
+      [
+        352,
+        352,
+        352,
+        352,
+        352,
+        352,
+        352,
+        352
+      ],
+      [
+        320,
+        320,
+        320,
+        320,
+        320,
+        320,
+        320,
+        320
+      ],
+      [
+        320,
+        320,
+        320,
+        320,
+        320,
+        320,
+        320,
+        320
+      ],
+      [
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256
+      ],
+      [
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256
+      ],
+      [
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256
+      ],
+      [
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288
+      ],
+      [
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256
+      ],
+      [
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288
+      ],
+      [
+        320,
+        320,
+        320,
+        320,
+        320,
+        320,
+        320,
+        320
+      ],
+      [
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288
+      ],
+      [
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288
+      ],
+      [
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288
+      ],
+      [
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288
+      ],
+      [
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288,
+        288
+      ],
+      [
+        192,
+        192,
+        192,
+        192,
+        192,
+        192,
+        192,
+        192
+      ],
+      [
+        224,
+        224,
+        224,
+        224,
+        224,
+        224,
+        224,
+        224
+      ]
+    ],
+    "method": "palu-fisher",
+    "method_label": "PaLU G-LRD4",
+    "nominal_group_rank": 320,
+    "nominal_retained_v_ratio": 0.625,
+    "nominal_v_cache_compression_ratio": 0.375,
+    "num_physical_kv_heads": 32,
+    "num_query_heads": 32,
+    "projection": "v",
+    "rank_block_size": 32,
+    "rank_sum_across_layers": 82176,
+    "realized_retained_v_ratio": 0.626953125,
+    "realized_v_cache_compression_ratio": 0.373046875,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds": 511.55071449279785,
+  "evaluation": {
+    "config": {
+      "batch_size": null,
+      "batch_sizes": [],
+      "bootstrap_iters": 100000,
+      "device": null,
+      "fewshot_seed": 1234,
+      "gen_kwargs": null,
+      "limit": null,
+      "model": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-2-7b-hf/snapshots/01c7f73d771dfac7d292323805ebc428287df4f9",
+      "model_args": null,
+      "model_dtype": "torch.bfloat16",
+      "model_num_parameters": 6580211712,
+      "model_revision": "main",
+      "model_sha": "",
+      "numpy_seed": 1234,
+      "random_seed": 0,
+      "torch_seed": 1234,
+      "use_cache": null
+    },
+    "configs": {
+      "arc_challenge": {
+        "dataset_name": "ARC-Challenge",
+        "dataset_path": "allenai/ai2_arc",
+        "description": "",
+        "doc_to_choice": "{{choices.text}}",
+        "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+        "doc_to_target": "{{choices.label.index(answerKey)}}",
+        "doc_to_text": "Question: {{question}}\nAnswer:",
+        "fewshot_config": {
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "tag": [
+          "ai2_arc"
+        ],
+        "target_delimiter": " ",
+        "task": "arc_challenge",
+        "test_split": "test",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "arc_easy": {
+        "dataset_name": "ARC-Easy",
+        "dataset_path": "allenai/ai2_arc",
+        "description": "",
+        "doc_to_choice": "{{choices.text}}",
+        "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+        "doc_to_target": "{{choices.label.index(answerKey)}}",
+        "doc_to_text": "Question: {{question}}\nAnswer:",
+        "fewshot_config": {
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "tag": [
+          "ai2_arc"
+        ],
+        "target_delimiter": " ",
+        "task": "arc_easy",
+        "test_split": "test",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "boolq": {
+        "dataset_name": "boolq",
+        "dataset_path": "aps/super_glue",
+        "description": "",
+        "doc_to_choice": [
+          "no",
+          "yes"
+        ],
+        "doc_to_decontamination_query": "passage",
+        "doc_to_target": "label",
+        "doc_to_text": "{{passage}}\nQuestion: {{question}}?\nAnswer:",
+        "fewshot_config": {
+          "doc_to_choice": [
+            "no",
+            "yes"
+          ],
+          "doc_to_target": "label",
+          "doc_to_text": "{{passage}}\nQuestion: {{question}}?\nAnswer:",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 2.0
+        },
+        "metric_list": [
+          {
+            "metric": "acc"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "tag": [
+          "super-glue-lm-eval-v1"
+        ],
+        "target_delimiter": " ",
+        "task": "boolq",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "hellaswag": {
+        "dataset_path": "Rowan/hellaswag",
+        "description": "",
+        "doc_to_choice": "choices",
+        "doc_to_target": "{{label}}",
+        "doc_to_text": "{{query}}",
+        "fewshot_config": {
+          "doc_to_choice": "choices",
+          "doc_to_target": "{{label}}",
+          "doc_to_text": "{{query}}",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": "<function process_docs at 0x7efd453ad580>",
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc):\n        ctx = doc[\"ctx_a\"] + \" \" + doc[\"ctx_b\"].capitalize()\n        out_doc = {\n            \"query\": preprocess(doc[\"activity_label\"] + \": \" + ctx),\n            \"choices\": [preprocess(ending) for ending in doc[\"endings\"]],\n            \"gold\": int(doc[\"label\"]),\n        }\n        return out_doc\n\n    return dataset.map(_process_doc)\n",
+        "repeats": 1,
+        "should_decontaminate": false,
+        "tag": [
+          "multiple_choice"
+        ],
+        "target_delimiter": " ",
+        "task": "hellaswag",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "openbookqa": {
+        "dataset_name": "main",
+        "dataset_path": "allenai/openbookqa",
+        "description": "",
+        "doc_to_choice": "{{choices.text}}",
+        "doc_to_decontamination_query": "question_stem",
+        "doc_to_target": "{{choices.label.index(answerKey.lstrip())}}",
+        "doc_to_text": "question_stem",
+        "fewshot_config": {
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_target": "{{choices.label.index(answerKey.lstrip())}}",
+          "doc_to_text": "question_stem",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "target_delimiter": " ",
+        "task": "openbookqa",
+        "test_split": "test",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "piqa": {
+        "dataset_path": "baber/piqa",
+        "description": "",
+        "doc_to_choice": "{{[sol1, sol2]}}",
+        "doc_to_decontamination_query": "goal",
+        "doc_to_target": "label",
+        "doc_to_text": "Question: {{goal}}\nAnswer:",
+        "fewshot_config": {
+          "doc_to_choice": "{{[sol1, sol2]}}",
+          "doc_to_target": "label",
+          "doc_to_text": "Question: {{goal}}\nAnswer:",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "target_delimiter": " ",
+        "task": "piqa",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "winogrande": {
+        "dataset_name": "winogrande_xl",
+        "dataset_path": "allenai/winogrande",
+        "description": "",
+        "doc_to_choice": "def doc_to_choice(doc):\n    idx = doc[\"sentence\"].index(\"_\")\n    options = [doc[\"option1\"], doc[\"option2\"]]\n    return [doc[\"sentence\"][:idx] + opt for opt in options]\n",
+        "doc_to_decontamination_query": "sentence",
+        "doc_to_target": "def doc_to_target(doc):\n    idx = doc[\"sentence\"].index(\"_\") + 1\n    return doc[\"sentence\"][idx:].strip()\n",
+        "doc_to_text": "def doc_to_text(doc):\n    answer_to_num = {\"1\": 0, \"2\": 1}\n    return answer_to_num[doc[\"answer\"]]\n",
+        "fewshot_config": {
+          "doc_to_choice": "<function doc_to_choice at 0x7ef95282c040>",
+          "doc_to_target": "<function doc_to_target at 0x7ef9527cfc40>",
+          "doc_to_text": "<function doc_to_text at 0x7ef9527cf740>",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "target_delimiter": " ",
+        "task": "winogrande",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      }
+    },
+    "date": 1788436720.1246123,
+    "eot_token_id": 2,
+    "git_hash": "09080a4",
+    "group_subtasks": {
+      "arc_challenge": [],
+      "arc_easy": [],
+      "boolq": [],
+      "hellaswag": [],
+      "openbookqa": [],
+      "piqa": [],
+      "winogrande": []
+    },
+    "higher_is_better": {
+      "arc_challenge": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "arc_easy": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "boolq": {
+        "acc": true
+      },
+      "hellaswag": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "openbookqa": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "piqa": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "winogrande": {
+        "acc": true
+      }
+    },
+    "lm_eval_version": "0.4.11",
+    "max_length": 4096,
+    "n-samples": {
+      "arc_challenge": {
+        "effective": 1172,
+        "original": 1172
+      },
+      "arc_easy": {
+        "effective": 2376,
+        "original": 2376
+      },
+      "boolq": {
+        "effective": 3270,
+        "original": 3270
+      },
+      "hellaswag": {
+        "effective": 10042,
+        "original": 10042
+      },
+      "openbookqa": {
+        "effective": 500,
+        "original": 500
+      },
+      "piqa": {
+        "effective": 1838,
+        "original": 1838
+      },
+      "winogrande": {
+        "effective": 1267,
+        "original": 1267
+      }
+    },
+    "n-shot": {
+      "arc_challenge": 0,
+      "arc_easy": 0,
+      "boolq": 0,
+      "hellaswag": 0,
+      "openbookqa": 0,
+      "piqa": 0,
+      "winogrande": 0
+    },
+    "pretty_env_info": "PyTorch version: 2.6.0+cu124\nIs debug build: False\nCUDA used to build PyTorch: 12.4\nROCM used to build PyTorch: N/A\n\nOS: Rocky Linux 9.4 (Blue Onyx) (x86_64)\nGCC version: (GCC) 11.4.1 20231218 (Red Hat 11.4.1-3)\nClang version: Could not collect\nCMake version: version 3.26.5\nLibc version: glibc-2.34\n\nPython version: 3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0] (64-bit runtime)\nPython platform: Linux-5.14.0-427.33.1.el9_4.x86_64-x86_64-with-glibc2.34\nIs CUDA available: True\nCUDA runtime version: Could not collect\nCUDA_MODULE_LOADING set to: LAZY\nGPU models and configuration: \nGPU 0: NVIDIA L40S\nGPU 1: NVIDIA L40S\nGPU 2: NVIDIA L40S\nGPU 3: NVIDIA L40S\n\nNvidia driver version: 550.54.15\ncuDNN version: Could not collect\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: True\n\nCPU:\nArchitecture:                       x86_64\nCPU op-mode(s):                     32-bit, 64-bit\nAddress sizes:                      52 bits physical, 57 bits virtual\nByte Order:                         Little Endian\nCPU(s):                             64\nOn-line CPU(s) list:                0-63\nVendor ID:                          AuthenticAMD\nModel name:                         AMD EPYC 9334 32-Core Processor\nCPU family:                         25\nModel:                              17\nThread(s) per core:                 1\nCore(s) per socket:                 32\nSocket(s):                          2\nStepping:                           1\nFrequency boost:                    enabled\nCPU(s) scaling MHz:                 71%\nCPU max MHz:                        3910.2529\nCPU min MHz:                        1500.0000\nBogoMIPS:                           5400.61\nFlags:                              fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid overflow_recov succor smca fsrm flush_l1d debug_swap\nVirtualization:                     AMD-V\nL1d cache:                          2 MiB (64 instances)\nL1i cache:                          2 MiB (64 instances)\nL2 cache:                           64 MiB (64 instances)\nL3 cache:                           256 MiB (8 instances)\nNUMA node(s):                       2\nNUMA node0 CPU(s):                  0-31\nNUMA node1 CPU(s):                  32-63\nVulnerability Gather data sampling: Not affected\nVulnerability Itlb multihit:        Not affected\nVulnerability L1tf:                 Not affected\nVulnerability Mds:                  Not affected\nVulnerability Meltdown:             Not affected\nVulnerability Mmio stale data:      Not affected\nVulnerability Retbleed:             Not affected\nVulnerability Spec rstack overflow: Mitigation; Safe RET\nVulnerability Spec store bypass:    Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:           Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:           Mitigation; Enhanced / Automatic IBRS, IBPB conditional, STIBP disabled, RSB filling, PBRSB-eIBRS Not affected\nVulnerability Srbds:                Not affected\nVulnerability Tsx async abort:      Not affected\n\nVersions of relevant libraries:\n[pip3] numpy==2.4.6\n[pip3] nvidia-cublas-cu12==12.4.5.8\n[pip3] nvidia-cuda-cupti-cu12==12.4.127\n[pip3] nvidia-cuda-nvrtc-cu12==12.4.127\n[pip3] nvidia-cuda-runtime-cu12==12.4.127\n[pip3] nvidia-cudnn-cu12==9.1.0.70\n[pip3] nvidia-cufft-cu12==11.2.1.3\n[pip3] nvidia-curand-cu12==10.3.5.147\n[pip3] nvidia-cusolver-cu12==11.6.1.9\n[pip3] nvidia-cusparse-cu12==12.3.1.170\n[pip3] nvidia-cusparselt-cu12==0.6.2\n[pip3] nvidia-nccl-cu12==2.21.5\n[pip3] nvidia-nvjitlink-cu12==12.4.127\n[pip3] nvidia-nvtx-cu12==12.4.127\n[pip3] torch==2.6.0+cu124\n[pip3] triton==3.2.0\n[conda] Could not collect",
+    "results": {
+      "arc_challenge": {
+        "acc,none": 0.38993174061433444,
+        "acc_norm,none": 0.4035836177474403,
+        "acc_norm_stderr,none": 0.014337158914268445,
+        "acc_stderr,none": 0.01425295984889289,
+        "alias": "arc_challenge"
+      },
+      "arc_easy": {
+        "acc,none": 0.7074915824915825,
+        "acc_norm,none": 0.6531986531986532,
+        "acc_norm_stderr,none": 0.009766326091716005,
+        "acc_stderr,none": 0.009334649503078418,
+        "alias": "arc_easy"
+      },
+      "boolq": {
+        "acc,none": 0.710703363914373,
+        "acc_stderr,none": 0.00793064330447101,
+        "alias": "boolq"
+      },
+      "hellaswag": {
+        "acc,none": 0.5198167695678152,
+        "acc_norm,none": 0.7110137422824139,
+        "acc_norm_stderr,none": 0.004523651184016192,
+        "acc_stderr,none": 0.0049858608534276375,
+        "alias": "hellaswag"
+      },
+      "openbookqa": {
+        "acc,none": 0.28,
+        "acc_norm,none": 0.392,
+        "acc_norm_stderr,none": 0.021854684955611273,
+        "acc_stderr,none": 0.020099950647503233,
+        "alias": "openbookqa"
+      },
+      "piqa": {
+        "acc,none": 0.7535364526659413,
+        "acc_norm,none": 0.76550598476605,
+        "acc_norm_stderr,none": 0.00988520314324055,
+        "acc_stderr,none": 0.01005481078967182,
+        "alias": "piqa"
+      },
+      "winogrande": {
+        "acc,none": 0.654301499605367,
+        "acc_stderr,none": 0.01336659695193438,
+        "alias": "winogrande"
+      }
+    },
+    "tokenizer_bos_token": [
+      "<s>",
+      "1"
+    ],
+    "tokenizer_eos_token": [
+      "</s>",
+      "2"
+    ],
+    "tokenizer_pad_token": [
+      "<unk>",
+      "0"
+    ],
+    "transformers_version": "5.15.1",
+    "upper_git_hash": null,
+    "versions": {
+      "arc_challenge": 1.0,
+      "arc_easy": 1.0,
+      "boolq": 2.0,
+      "hellaswag": 1.0,
+      "openbookqa": 1.0,
+      "piqa": 1.0,
+      "winogrande": 1.0
+    }
+  },
+  "format": "basisserve.llama2_7b.iclr_quality.commonsense.v1",
+  "model": {
+    "config_sha256": "9242e7db1bc2a17873e66084c3b1c6ed10883076e156b338fd6a7775748e2e3c",
+    "huggingface_repo": "meta-llama/Llama-2-7b-hf",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-2-7b-hf/snapshots/01c7f73d771dfac7d292323805ebc428287df4f9",
+    "revision": "01c7f73d771dfac7d292323805ebc428287df4f9",
+    "safetensors_index_sha256": "217d527037a95cd5cd30384afb425987824373b94cc7206beb48ec0c9499c98f"
+  },
+  "protocol": {
+    "batch_size": 8,
+    "max_length": 4096,
+    "metric_selection": "acc_norm when present, otherwise acc",
+    "num_fewshot": 0,
+    "tasks": [
+      "arc_easy",
+      "arc_challenge",
+      "hellaswag",
+      "piqa",
+      "winogrande",
+      "boolq",
+      "openbookqa"
+    ]
+  },
+  "run_id": "L2-7B-PALUG4-R80",
+  "runtime": {
+    "attention_implementation": "sdpa",
+    "cuda_device_names": [
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S"
+    ],
+    "cuda_devices_used": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "device_map": "balanced",
+    "installation": [
+      {
+        "decoder_shape": [
+          8,
+          512,
+          96
+        ],
+        "elapsed_seconds": 0.01594085991382599,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 0,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.0402362197637558,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 1,
+        "projection": "v",
+        "ranks": [
+          256,
+          256,
+          256,
+          256,
+          256,
+          256,
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2048,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          288
+        ],
+        "elapsed_seconds": 0.044343940913677216,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 2,
+        "projection": "v",
+        "ranks": [
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2304,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          320
+        ],
+        "elapsed_seconds": 0.04899241775274277,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 3,
+        "projection": "v",
+        "ranks": [
+          320,
+          320,
+          320,
+          320,
+          320,
+          320,
+          320,
+          320
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2560,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          352
+        ],
+        "elapsed_seconds": 0.053489409387111664,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 4,
+        "projection": "v",
+        "ranks": [
+          352,
+          352,
+          352,
+          352,
+          352,
+          352,
+          352,
+          352
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2816,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          384
+        ],
+        "elapsed_seconds": 0.05823051184415817,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 5,
+        "projection": "v",
+        "ranks": [
+          384,
+          384,
+          384,
+          384,
+          384,
+          384,
+          384,
+          384
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          3072,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          384
+        ],
+        "elapsed_seconds": 0.058924607932567596,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 6,
+        "projection": "v",
+        "ranks": [
+          384,
+          384,
+          384,
+          384,
+          384,
+          384,
+          384,
+          384
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          3072,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          384
+        ],
+        "elapsed_seconds": 0.05843566358089447,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 7,
+        "projection": "v",
+        "ranks": [
+          384,
+          384,
+          384,
+          384,
+          384,
+          384,
+          384,
+          384
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          3072,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          480
+        ],
+        "elapsed_seconds": 0.07325418293476105,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 8,
+        "projection": "v",
+        "ranks": [
+          480,
+          480,
+          480,
+          480,
+          480,
+          480,
+          480,
+          480
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          3840,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          416
+        ],
+        "elapsed_seconds": 0.062008634209632874,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 9,
+        "projection": "v",
+        "ranks": [
+          416,
+          416,
+          416,
+          416,
+          416,
+          416,
+          416,
+          416
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          3328,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          416
+        ],
+        "elapsed_seconds": 0.0634864792227745,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 10,
+        "projection": "v",
+        "ranks": [
+          416,
+          416,
+          416,
+          416,
+          416,
+          416,
+          416,
+          416
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          3328,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          480
+        ],
+        "elapsed_seconds": 0.07265569269657135,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 11,
+        "projection": "v",
+        "ranks": [
+          480,
+          480,
+          480,
+          480,
+          480,
+          480,
+          480,
+          480
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          3840,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          416
+        ],
+        "elapsed_seconds": 0.06250057369470596,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 12,
+        "projection": "v",
+        "ranks": [
+          416,
+          416,
+          416,
+          416,
+          416,
+          416,
+          416,
+          416
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          3328,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          448
+        ],
+        "elapsed_seconds": 0.06724730134010315,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 13,
+        "projection": "v",
+        "ranks": [
+          448,
+          448,
+          448,
+          448,
+          448,
+          448,
+          448,
+          448
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          3584,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          384
+        ],
+        "elapsed_seconds": 0.05735515058040619,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 14,
+        "projection": "v",
+        "ranks": [
+          384,
+          384,
+          384,
+          384,
+          384,
+          384,
+          384,
+          384
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          3072,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          352
+        ],
+        "elapsed_seconds": 0.05399009585380554,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 15,
+        "projection": "v",
+        "ranks": [
+          352,
+          352,
+          352,
+          352,
+          352,
+          352,
+          352,
+          352
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2816,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          320
+        ],
+        "elapsed_seconds": 0.04832782596349716,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 16,
+        "projection": "v",
+        "ranks": [
+          320,
+          320,
+          320,
+          320,
+          320,
+          320,
+          320,
+          320
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2560,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          320
+        ],
+        "elapsed_seconds": 0.04890351742506027,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 17,
+        "projection": "v",
+        "ranks": [
+          320,
+          320,
+          320,
+          320,
+          320,
+          320,
+          320,
+          320
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2560,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.03876093029975891,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 18,
+        "projection": "v",
+        "ranks": [
+          256,
+          256,
+          256,
+          256,
+          256,
+          256,
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2048,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.03902705758810043,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 19,
+        "projection": "v",
+        "ranks": [
+          256,
+          256,
+          256,
+          256,
+          256,
+          256,
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2048,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.03907601535320282,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 20,
+        "projection": "v",
+        "ranks": [
+          256,
+          256,
+          256,
+          256,
+          256,
+          256,
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2048,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          288
+        ],
+        "elapsed_seconds": 0.04387549310922623,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 21,
+        "projection": "v",
+        "ranks": [
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2304,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          256
+        ],
+        "elapsed_seconds": 0.03821636736392975,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 22,
+        "projection": "v",
+        "ranks": [
+          256,
+          256,
+          256,
+          256,
+          256,
+          256,
+          256,
+          256
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2048,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          288
+        ],
+        "elapsed_seconds": 0.04314080625772476,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 23,
+        "projection": "v",
+        "ranks": [
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2304,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          320
+        ],
+        "elapsed_seconds": 0.04822113364934921,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 24,
+        "projection": "v",
+        "ranks": [
+          320,
+          320,
+          320,
+          320,
+          320,
+          320,
+          320,
+          320
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2560,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          288
+        ],
+        "elapsed_seconds": 0.043348342180252075,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 25,
+        "projection": "v",
+        "ranks": [
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2304,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          288
+        ],
+        "elapsed_seconds": 0.04317088425159454,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 26,
+        "projection": "v",
+        "ranks": [
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2304,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          288
+        ],
+        "elapsed_seconds": 0.04307052493095398,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 27,
+        "projection": "v",
+        "ranks": [
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2304,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          288
+        ],
+        "elapsed_seconds": 0.04312571883201599,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 28,
+        "projection": "v",
+        "ranks": [
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2304,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          288
+        ],
+        "elapsed_seconds": 0.043745554983615875,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 29,
+        "projection": "v",
+        "ranks": [
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288,
+          288
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          2304,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          192
+        ],
+        "elapsed_seconds": 0.027406200766563416,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 30,
+        "projection": "v",
+        "ranks": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          1536,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          512,
+          224
+        ],
+        "elapsed_seconds": 0.03391406685113907,
+        "heads_per_group": 4,
+        "k_projection": "original dense module unchanged",
+        "layer": 31,
+        "projection": "v",
+        "ranks": [
+          224,
+          224,
+          224,
+          224,
+          224,
+          224,
+          224,
+          224
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          1792,
+          4096
+        ]
+      }
+    ],
+    "model_dtype": "torch.bfloat16"
+  },
+  "status": "complete",
+  "task_accuracy": [
+    {
+      "metric": "acc_norm",
+      "task": "arc_easy",
+      "value": 0.6531986531986532
+    },
+    {
+      "metric": "acc_norm",
+      "task": "arc_challenge",
+      "value": 0.4035836177474403
+    },
+    {
+      "metric": "acc_norm",
+      "task": "hellaswag",
+      "value": 0.7110137422824139
+    },
+    {
+      "metric": "acc_norm",
+      "task": "piqa",
+      "value": 0.76550598476605
+    },
+    {
+      "metric": "acc",
+      "task": "winogrande",
+      "value": 0.654301499605367
+    },
+    {
+      "metric": "acc",
+      "task": "boolq",
+      "value": 0.710703363914373
+    },
+    {
+      "metric": "acc_norm",
+      "task": "openbookqa",
+      "value": 0.392
+    }
+  ],
+  "timestamp_utc": "2026-09-03T12:06:53.922062+00:00"
+}

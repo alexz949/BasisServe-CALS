@@ -1,0 +1,487 @@
+{
+  "checkpoint": {
+    "artifact_sha256": "6514f8d9796071a54636e3b8ffe3bb67ec42b3b458cdf7b985a0150f3cd614c5",
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/checkpoints/Q3-8B-SVD-R96",
+    "format": "basisserve.qwen3_8b.iclr_v_factors.v1",
+    "manifest_sha256": "1a7c3c99165c44a24f15470d2b4953407ce04f840bfafff2a133685cf1d78d52"
+  },
+  "command": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/eval_qwen3_8b_iclr_quality.py --run-id Q3-8B-SVD-R96 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --checkpoint-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/checkpoints/Q3-8B-SVD-R96 --c4-windows /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/calibration/qwen3_8b_c4_validation_128x2048/windows.safetensors --output-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/quality/Q3-8B-SVD-R96 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+  "compression": {
+    "allocation": "uniform_per_physical_head",
+    "dense_rank_sum_across_layers": 36864,
+    "equivalent_rank_target": 96,
+    "factorization_work_device": "cpu",
+    "factorization_work_dtype": "torch.float32",
+    "group_width": 128,
+    "groups": 8,
+    "head_dim": 128,
+    "head_group_size": 1,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ]
+    ],
+    "method": "weight-svd",
+    "method_label": "Weight-SVD",
+    "nominal_group_rank": 96,
+    "nominal_retained_v_ratio": 0.75,
+    "nominal_v_cache_compression_ratio": 0.25,
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "projection": "v",
+    "rank_block_size": null,
+    "rank_sum_across_layers": 27648,
+    "realized_retained_v_ratio": 0.75,
+    "realized_v_cache_compression_ratio": 0.25,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds_this_attempt": 666.7470505461097,
+  "environment": {
+    "conda_environment": null,
+    "cuda_devices": [
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S"
+    ],
+    "datasets": "5.0.0",
+    "lm_eval": "0.4.11",
+    "peak_cuda_allocated_bytes": {
+      "0": 9438133760,
+      "1": 5689638912,
+      "2": 5689638912,
+      "3": 8254232576
+    },
+    "python": "3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0]",
+    "torch": "2.6.0+cu124",
+    "torch_num_threads": 8,
+    "transformers": "5.15.1"
+  },
+  "format": "basisserve.qwen3_8b.iclr_quality.v1",
+  "metrics": {
+    "average_accuracy": 0.4194677944730598,
+    "c4_validation_128_ppl": 847.9133668818222,
+    "task_accuracy": [
+      {
+        "metric": "acc_norm",
+        "task": "arc_easy",
+        "value": 0.33796296296296297
+      },
+      {
+        "metric": "acc_norm",
+        "task": "arc_challenge",
+        "value": 0.26109215017064846
+      },
+      {
+        "metric": "acc_norm",
+        "task": "hellaswag",
+        "value": 0.38129854610635333
+      },
+      {
+        "metric": "acc_norm",
+        "task": "piqa",
+        "value": 0.5636561479869423
+      },
+      {
+        "metric": "acc",
+        "task": "winogrande",
+        "value": 0.5138121546961326
+      },
+      {
+        "metric": "acc",
+        "task": "boolq",
+        "value": 0.5764525993883792
+      },
+      {
+        "metric": "acc_norm",
+        "task": "openbookqa",
+        "value": 0.302
+      }
+    ],
+    "wikitext2_ppl": 4530.954327264665
+  },
+  "model": {
+    "config_sha256": "3bd01d7ad7a2e203ecbbe84e24087a51c6d2a108ee4bcc42d0016bf49564983a",
+    "huggingface_repo": "Qwen/Qwen3-8B-Base",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "revision": "49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "safetensors_index_sha256": "cd39d5e44c5aadfd1954b598883aea1c4a98822a2f7723d214ef2278b7fec2e4"
+  },
+  "run_id": "Q3-8B-SVD-R96",
+  "stages": {
+    "c4": {
+      "file": "c4.json",
+      "sha256": "64bd9a5174660186cadcef19ecb3c0f1a27ed85798ef37ab4463524607c7e52d"
+    },
+    "commonsense": {
+      "file": "commonsense.json",
+      "sha256": "6b0ceb78b71e0fa84e01c6c31d9a8761afba8f9f879f18685fa36a98b13848cd"
+    },
+    "wikitext2": {
+      "file": "wikitext2.json",
+      "sha256": "8628a1c6495446c5c25dbd4452880dbba3b36d8ef553961cfdcf62c10747e17a"
+    }
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-02T10:19:15.072863+00:00"
+}

@@ -49,6 +49,7 @@ def _cuda_device_indices() -> tuple[int, ...]:
         indices.append(index)
     return tuple(indices)
 SUPPORTED_CHECKPOINT_FORMATS = {
+    "basisserve.llama2_7b.iclr_v_factors.v1",
     "basisserve.llama31_8b.iclr_v_factors.v1",
     "basisserve.qwen3_8b.iclr_v_factors.v1",
     "basisserve.llama31_8b.palu_m_v_only.v1",

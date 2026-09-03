@@ -36,6 +36,7 @@ def test_one_probe_factorization_recovers_sensitivity_and_exact_budget() -> None
         costs,
         candidate_ranks=ranks,
         anchor_rank=64,
+        target_average_rank=64,
     )
     assert schedule == (96, 32)
     assert sum(schedule) == 2 * 64
@@ -53,6 +54,30 @@ def test_one_probe_factorization_clips_nonpositive_gain_to_zero() -> None:
 
     assert sensitivities == (0.0,)
     assert costs == ({32: 0.0, 64: 0.0, 96: -0.0, 128: -0.0},)
+
+
+def test_allocator_separates_anchor_from_target_average_rank() -> None:
+    ranks = (32, 48, 64, 80, 96, 112, 128)
+    costs = tuple(
+        {rank: float(128 - rank) for rank in ranks}
+        for _ in range(4)
+    )
+
+    schedule80, _ = allocate_layer_schedule(
+        costs,
+        candidate_ranks=ranks,
+        anchor_rank=64,
+        target_average_rank=80,
+    )
+    schedule96, _ = allocate_layer_schedule(
+        costs,
+        candidate_ranks=ranks,
+        anchor_rank=64,
+        target_average_rank=96,
+    )
+
+    assert sum(schedule80) == 4 * 80
+    assert sum(schedule96) == 4 * 96
 
 
 def test_two_sided_factorization_uses_distinct_compression_and_expansion_slopes() -> None:

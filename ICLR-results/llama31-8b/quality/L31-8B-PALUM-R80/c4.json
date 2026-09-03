@@ -1,0 +1,1556 @@
+{
+  "checkpoint": {
+    "artifact_sha256": "d2ebbef1c8f0e07ad7ab4dea62c1bd9fe9763527cadd6b4ed2e482a276ff4c9b",
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/checkpoints/L31-8B-PALUM-R80",
+    "format": "basisserve.llama31_8b.iclr_v_factors.v1",
+    "manifest_sha256": "07a4535ddedef2fd0ee95699e3f94709c14de09700b702ba04bc048460bec334"
+  },
+  "command": "evaluation/eval_llama31_8b_iclr_quality.py --run-id L31-8B-PALUM-R80 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --checkpoint-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/checkpoints/L31-8B-PALUM-R80 --c4-windows /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/calibration/c4_validation_128x2048/windows.safetensors --output-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/quality/L31-8B-PALUM-R80 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+  "compression": {
+    "allocation": "official_palu_fisher_uniform",
+    "dense_rank_sum_across_layers": 32768,
+    "equivalent_rank_target": 80,
+    "factorization_work_device": "cpu",
+    "factorization_work_dtype": "torch.float64",
+    "group_width": 128,
+    "groups": 8,
+    "head_dim": 128,
+    "head_group_size": 1,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ]
+    ],
+    "method": "palu-fisher",
+    "method_label": "PaLU M-LRD",
+    "nominal_group_rank": 80,
+    "nominal_retained_v_ratio": 0.625,
+    "nominal_v_cache_compression_ratio": 0.375,
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "projection": "v",
+    "rank_block_size": 32,
+    "rank_sum_across_layers": 21504,
+    "realized_retained_v_ratio": 0.65625,
+    "realized_v_cache_compression_ratio": 0.34375,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds": 25.37148231267929,
+  "format": "basisserve.llama31_8b.iclr_quality.c4_validation.v1",
+  "metrics": {
+    "document_nll": {
+      "mean": 2.3607523280661553,
+      "one_standard_error_ucb": 2.407564959150514,
+      "paired_standard_error": 0.04681263108435848,
+      "values": [
+        2.5678837299346924,
+        2.601036310195923,
+        2.231926679611206,
+        2.3832457065582275,
+        2.2411069869995117,
+        2.431337833404541,
+        2.752547025680542,
+        2.3695566654205322,
+        2.5783071517944336,
+        2.394104242324829,
+        1.9631685018539429,
+        2.2792210578918457,
+        2.325364589691162,
+        2.361769437789917,
+        2.1821024417877197,
+        2.4292728900909424,
+        2.3265130519866943,
+        2.8791606426239014,
+        2.100539207458496,
+        2.909282684326172,
+        2.626908540725708,
+        2.469120740890503,
+        2.0138602256774902,
+        2.6114699840545654,
+        2.2441227436065674,
+        2.8275675773620605,
+        1.3439280986785889,
+        3.2112810611724854,
+        2.9020087718963623,
+        2.8842642307281494,
+        1.9412693977355957,
+        1.632010579109192,
+        2.3533473014831543,
+        2.221095561981201,
+        2.4064552783966064,
+        2.9344871044158936,
+        1.7424966096878052,
+        2.9890928268432617,
+        1.8360639810562134,
+        2.584061861038208,
+        2.4218969345092773,
+        3.026676893234253,
+        2.8753769397735596,
+        2.19392991065979,
+        2.3717124462127686,
+        2.262227773666382,
+        1.761214017868042,
+        2.671628713607788,
+        2.6064560413360596,
+        2.3543500900268555,
+        2.9012370109558105,
+        2.588325262069702,
+        2.2635085582733154,
+        2.30000638961792,
+        2.353058099746704,
+        2.0326244831085205,
+        2.477391242980957,
+        2.627686023712158,
+        4.611464500427246,
+        2.4563467502593994,
+        2.1652231216430664,
+        0.9100022315979004,
+        2.4229745864868164,
+        2.768275022506714,
+        2.011845111846924,
+        2.822193145751953,
+        1.5880197286605835,
+        2.0668752193450928,
+        1.3496792316436768,
+        2.5662806034088135,
+        2.1645255088806152,
+        2.3005566596984863,
+        2.3897857666015625,
+        2.109013795852661,
+        1.3939632177352905,
+        2.8382513523101807,
+        2.201247215270996,
+        2.9238569736480713,
+        2.6676764488220215,
+        2.795808792114258,
+        1.4683244228363037,
+        1.2041230201721191,
+        2.3019022941589355,
+        2.7056164741516113,
+        2.3942456245422363,
+        2.3886921405792236,
+        2.842578411102295,
+        1.870103359222412,
+        0.3120436370372772,
+        2.5138468742370605,
+        1.869111180305481,
+        1.945212721824646,
+        2.096141815185547,
+        2.7514376640319824,
+        2.511500358581543,
+        0.7935409545898438,
+        3.017455816268921,
+        2.8872697353363037,
+        2.410686731338501,
+        2.7974255084991455,
+        2.488436698913574,
+        2.7143020629882812,
+        2.5774877071380615,
+        2.673675298690796,
+        2.7646842002868652,
+        1.9533790349960327,
+        2.555673599243164,
+        1.9678065776824951,
+        2.2449259757995605,
+        2.5336623191833496,
+        2.715958595275879,
+        3.2441153526306152,
+        2.8151700496673584,
+        2.3599820137023926,
+        2.2702524662017822,
+        2.6083273887634277,
+        2.211967945098877,
+        1.8980445861816406,
+        2.52789044380188,
+        1.0722997188568115,
+        2.485750913619995,
+        2.393519878387451,
+        2.796229124069214,
+        2.548832416534424,
+        2.510162591934204,
+        2.409062385559082,
+        2.6872479915618896,
+        1.3706607818603516
+      ]
+    },
+    "documents": 128,
+    "loss_dtype": "float32",
+    "mean_nll": 2.3607523280661553,
+    "nll_sum": 618554.8819905818,
+    "ppl": 10.598922320436632,
+    "tokens": 262016
+  },
+  "model": {
+    "config_sha256": "54acfad3cffe057640904ca8a1e83525e6551c70c7a04c641f5a9eda0bbf64bd",
+    "huggingface_repo": "meta-llama/Llama-3.1-8B",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "revision": "d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "safetensors_index_sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+  },
+  "protocol": {
+    "cross_document_transitions": false,
+    "documents": 128,
+    "loss_dtype": "float32",
+    "sequence_length": 2048,
+    "split": "validation"
+  },
+  "run_id": "L31-8B-PALUM-R80",
+  "runtime": {
+    "attention_implementation": "sdpa",
+    "cuda_device_names": [
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S"
+    ],
+    "cuda_devices_used": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "device_map": "balanced",
+    "installation": [
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.01951374113559723,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 0,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.022606484591960907,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 1,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "elapsed_seconds": 0.019918575882911682,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 2,
+        "projection": "v",
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.029529370367527008,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 3,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.016342125833034515,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 4,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.016243308782577515,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 5,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.021698422729969025,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 6,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.03163352608680725,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 7,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014749102294445038,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 8,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.01469612866640091,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 9,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014406315982341766,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 10,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014457747340202332,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 11,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.01519671082496643,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 12,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.016118191182613373,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 13,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014977991580963135,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 14,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014721907675266266,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 15,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014190196990966797,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 16,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "elapsed_seconds": 0.014603406190872192,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 17,
+        "projection": "v",
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.023115411400794983,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 18,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009130820631980896,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 19,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.008942358195781708,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 20,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009010791778564453,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 21,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          32
+        ],
+        "elapsed_seconds": 0.005103833973407745,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 22,
+        "projection": "v",
+        "ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          256,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009243004024028778,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 23,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.008966468274593353,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 24,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009680517017841339,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 25,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.008713290095329285,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 26,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.008647963404655457,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 27,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.008670233190059662,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 28,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.010095074772834778,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 29,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.009769029915332794,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 30,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "elapsed_seconds": 0.00979883223772049,
+        "heads_per_group": 1,
+        "k_projection": "original dense module unchanged",
+        "layer": 31,
+        "projection": "v",
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "runtime": "latent V writer plus explicit per-group reconstruction",
+        "writer_shape": [
+          512,
+          4096
+        ]
+      }
+    ],
+    "model_dtype": "torch.bfloat16"
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-02T13:43:26.118463+00:00",
+  "windows": {
+    "dataset": {
+      "config": "en",
+      "repo": "allenai/c4",
+      "requested_revision": "1588ec454efa1a09f29cd18ddd04fe05fc8653a2",
+      "resolved_revision": "1588ec454efa1a09f29cd18ddd04fe05fc8653a2",
+      "shuffle_buffer": 10000,
+      "split": "validation",
+      "streaming": true
+    },
+    "document_ids": [
+      "url:http://crossfields.blogspot.com/2014/03/",
+      "url:http://web.archive.org/web/20070701194049/http:/www.wiringfordcc.com/parts.htm",
+      "url:https://www.mdpi.com/2071-1050/10/5/1611/htm",
+      "url:http://www.spiralseatarot.com/blog/tag/tarot+cards",
+      "url:http://economiademexico.blogspot.com/2007/07/marco-historico.html",
+      "url:http://www.crazywisdomjournal.com/featuredstories/2014/8/22/the-crazy-wisdom-interview-with-jim-robert-of-pioneer-high-school",
+      "url:http://tvbokep.info/?newsid=29837",
+      "url:https://9to5mac.com/2017/02/12/logic-pros-101-recording-basics-creating-tracks-editing/",
+      "url:http://www.jenmagazine.com/myths-about-weight/?replytocom=140",
+      "url:https://www.nlpfamily.com/blog/category/training",
+      "url:http://homeenergyresource.com/page/2/",
+      "url:https://www.disruptiveadvertising.com/ppc/ecommerce/ecommerce-marketing-strategies/",
+      "url:https://www.tdsandiego.org/blog?pg=4",
+      "url:https://realestatecowboysdfw.com/episodes/real-estate-versus-the-stock-market/",
+      "url:http://www.atkinsoncpa.com/atco-tax-blog.aspx",
+      "url:https://convivium.ca/articles/the-light-of-faith-lighting-the-realism-of-faith",
+      "url:https://newatlas.com/review-moto-x-android-google-motorola/28623/",
+      "url:http://lostskies.blogspot.com/2017/",
+      "url:https://www.deutschmannlaw.com/blog/post/is-the-sabs-unconstitutional-sovereign-general-insurance-company-and-abdirahman-abyan-and-insurance-bureau-of-canada-ontario-trial-lawyers-association-and-attorney-general-of-ontario",
+      "url:https://digwithin.net/2015/12/20/propaganda-and-steel/",
+      "url:https://communities.bmc.com/docs/DOC-72805",
+      "url:https://www.mappingmegan.com/how-to-be-socially-conscious-traveler-iceland-ecotourism/",
+      "url:https://advances.sciencemag.org/content/3/8/e1602047",
+      "url:https://datingwithjesus.com/2017/05/29/miss-independent-miss-self-sufficient-what-us-single-and-dating-girls-can-learn-from-a-wifes-secret-to-happiness/",
+      "url:https://corporate.siretskiy.com/faq/",
+      "url:https://topdocumentaryfilms.com/haitian-revolution-toussaint-louverture/?replytocom=565844",
+      "url:https://patents.google.com/patent/US20070005147A1/en",
+      "url:http://www.body-pixel.com/2010/01/28/interview-with-thomas-dumke-on-cynetart-and-new-media-performance/",
+      "url:http://c2withoutprescription.com/category/computers-and-technology/page/2/",
+      "url:https://blastmagazine.com/2013/09/27/elementary-step-nine-episode-review/",
+      "url:http://southtyneweather.co.uk/articles/article.php?id=00037",
+      "url:http://www.marketwired.com/press-release/teck-reports-unaudited-results-for-2011-tsx-tck.a-1617583.htm",
+      "url:https://ubcmj.med.ubc.ca/a-clinical-review-of-diagnosis-treatment-and-prevention-of-opioid-related-harms/",
+      "url:http://footballguys.com/updates/17update90.php",
+      "url:https://www.fdli.org/2018/10/medical-device-crowdfunding-and-pre-approval-promotion-where-does-fda-draw-the-line/",
+      "url:http://www.robelle.com/tips/frontline.html",
+      "url:http://www.csiss.org/aboutus/personnel/executive.htm",
+      "url:https://japantoday.com/member/droll-quarry",
+      "url:https://www.lds.org/scriptures/bofm/alma/5.27-29?lang=eng",
+      "url:https://motherboard.vice.com/en_us/article/pa5gxn/the-internet-doesnt-need-civility-it-needs-ethics",
+      "url:https://www.pcgamesn.com/monster-hunter-world/monster-hunter-world-weapons-guide",
+      "url:http://americanarchive.org/catalog/cpb-aacip_394-89280rhk",
+      "url:https://www.partnersincarealliance.org/",
+      "url:https://www.therecoveryvillage.com/drug-addiction/stigma/",
+      "url:https://www.bostonmamas.com/blog/2008/10/28/featured-mamas-susan-dorson-amy-weitzman.html",
+      "url:https://forums.nexusmods.com/index.php?/topic/5106815-recorders-unofficial-guide-and-bug-fix/",
+      "url:https://dermotcasey.com/terms-and-conditions",
+      "url:https://www.concisenews.global/2018/12/08/47-anniversary-of-ogundipe-and-why-history-calls-him-a-coward-3ai/",
+      "url:https://mysticpost.com/2018/05/5-powerful-supplications-to-saint-rita-that-can-solve-really-complicated-situations-also-the-miracle-of-the-thorn/",
+      "url:https://docs.google.com/document/d/e/2PACX-1vQOuDuT81bWr2mLwdeD00ShCpGJb2dbfJqxvW3dQsPMNyXxKK3X92NASwZ6vGHghfjB1YOgfLH9gnnY/pub",
+      "url:http://self-willed-land.org.uk/articles/tips_copse.htm",
+      "url:http://www.duvallhomes.org/category/news-events/",
+      "url:https://romania-holiday.ro/products/category/transilvania-regiune/",
+      "url:https://bmcmededuc.biomedcentral.com/articles/10.1186/1472-6920-13-27",
+      "url:https://www.joshhayeswriter.com/indie-spotlight/archives/09-2014",
+      "url:https://www.alzforum.org/news/research-news/does-daytime-drowsiness-foreshadow-av-accumulation",
+      "url:https://illinoisalumni.org/2018/07/17/small-wonders/",
+      "url:https://www.newtimesslo.com/sanluisobispo/phoebes-side/Content?oid=2936571",
+      "url:http://forexrobotsforum.com/dollar-trading-live.html",
+      "url:http://carletonbusinessfinance.com/blog/?m=201001",
+      "url:https://www.nailfunguscentral.com/treatments/laser-nail-fungus-treatment/",
+      "url:https://cs.billiongraves.com/grave/%D7%93%D7%95%D7%93-%D7%9C%D7%99%D7%91%D7%A8%D7%9E%D7%9F/20029061",
+      "url:http://www.ptownyearround.com/2013/05/",
+      "url:http://jocelyncs.blogspot.com/",
+      "url:https://aaom.org/home-gym/body-solid-sbl460p4-freeweight-leverage-gym-review/",
+      "url:http://www.qcfdesign.com/wiki/DesktopDungeons/index.php?title=Knockback",
+      "url:http://www.aginganddisease.org/EN/abstract/abstract147445.shtml",
+      "url:https://ipfs.io/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/wiki/University_of_New_Hampshire.html",
+      "url:https://dumpsterwire.com/kansas/10-yard-dumpster-norcatur-ks/",
+      "url:https://sherryphillipsswatek.com/",
+      "url:http://thewoodandspoon.com/strawberry-fig-pop-tarts/",
+      "url:http://embeddedblog.blogspot.com/2019/02/",
+      "url:http://www.lisasomerville.com/2007/10/blog-candy-tjnl-cd-5.html",
+      "url:http://www.breatheyourpassion.com/blog/2015/12/10/living-my-dream",
+      "url:https://www.boxinvestorrelations.com/news-and-media/news/press-release-details/2018/Box-Reports-Record-Revenue-of-506-Million-for-Fiscal-Year-2018-Up-27-Year-Over-Year-and-Delivers-Positive-Cash-Flow-From-Operations/default.aspx",
+      "url:http://ajaygour.com/new-android-app-better-open-with-download-apk-complete-review-user-reviews-latest-version-app-by-giorgi-dalakishvili/",
+      "url:http://www.mvc.edu/academicprograms/honors/faq.cfm",
+      "url:https://forums.hextcg.com/index.php?thread/3626-card-design-contest-2018-03-27-2018-04-06/",
+      "url:http://www.serendipity.li/dmt/walter_benjamin.htm",
+      "url:http://nofearofthefuture.blogspot.com/2010/12/memory-42.html",
+      "url:https://dumpsterinfinite.com/georgia/15-yard-dumpster-montezuma-ga/",
+      "url:http://quanex.co/Chaise-Lounge-Chairs/coupon-7/%5Bluxury-brands%5D-cordella-chaise-lounge-by-willa-arlo-interiors-online-order.jhtml?SKU=23A2W8ZJ7N&item=ZCPJO",
+      "url:https://interlinetravel.com/how-to-get-the-best-hotel-prices/",
+      "url:http://www.a-4-d.com/t3485-2009-05-dd-modern-drummer-brain-interpreting-chinese-democracy-brain",
+      "url:https://geeks.media/13-expensive-things-owned-by-ksi-vs-logan-paul-vs-deji-vs-jake-paul",
+      "url:http://cornishstannaryparliament.co.uk/resources/article.php?story=20070123213806137",
+      "url:https://asgjesikurdielli.info/viewtopic.php?t=13406",
+      "url:https://www.encyclopediaofmath.org/index.php?title=Encyclopedia_of_Mathematics:License_Notice&action=edit",
+      "url:https://www.besttravelmonths.com/spain/",
+      "url:http://www.ukpol.co.uk/tag/caroline-spelman/",
+      "url:https://www.cbr.ru/eng/DKP/exchange_rate/fx_policy_hist/",
+      "url:http://doncaster.gov.uk/services/business-investment/gambling-premises-licence",
+      "url:http://toll-charge.hu/articles/article/excess-charge",
+      "url:https://blog.amnestyusa.org/waronterror/inhumane-treatment-of-wikileaks-soldier-bradley-manning/",
+      "url:https://www.departures.com/travel/black-book/under-radar-central-american-destinations",
+      "url:https://oldjewstellingjokesonstage.com/clickfunnels-best-deals/",
+      "url:https://statsbomb.com/2016/06/the-big-bundesliga-review-part-1-teams/",
+      "url:http://gegdelity.gq/biographies/e13fdb92e392d08516c930dc0b6dc401",
+      "url:https://www.cib.com.cn/en/aboutCIB/social/welfare.html",
+      "url:https://www.alexinwanderland.com/great-escape-months-62-63-roundup/",
+      "url:http://csetest.tk/glitter-slots.html",
+      "url:http://www.ferrouslands.com/2008/",
+      "url:https://www.damhus.de/en/barbecue-tips/",
+      "url:http://www.tpkmedia.com/tv-and-movies/westworld-review-the-well-tempered-clavier/",
+      "url:https://stormcraft.ca/",
+      "url:http://vallexacapital.com/merchant-cash-advance/?shared=email&msg=fail",
+      "url:http://dallp.net/download/epistemic-communities-constructivism-and-international-environmental-politics/",
+      "url:http://dslab.naist.jp/en/publication-e.html",
+      "url:https://www.spirare.name/life-after-death-3/",
+      "url:https://www.priyakanwar.com/2010/11/",
+      "url:http://www.mandarinfilm.com/en/blog/documentary",
+      "url:http://alstarmecon.tk/writing/essay-about-the-internet-is-mostly-a-good-thing",
+      "url:https://geoffgilson.wordpress.com/2017/07/",
+      "url:https://intensiveactivity.wordpress.com/category/esther-mcvey/",
+      "url:http://zeekskitchens.com/prices.php",
+      "url:https://nsmb.com/articles/ohlins-rxf-34-long-term-review/",
+      "url:https://devotedlife.net/tag/love-your-neighbor/",
+      "url:https://jhoonline.biomedcentral.com/articles/10.1186/s13045-014-0092-2",
+      "url:http://fortune-group.com/blog/march-2011",
+      "url:https://graniteservices.co.uk/terms-and-conditions/",
+      "url:https://evercleantx.com/testimonials/",
+      "url:https://cheatguide.eu/dumoulin-giro.html",
+      "url:https://www.greenbuildingadvisor.com/article/production-home-builder-aims-net-zero",
+      "url:http://www.factbites.com/topics/Being-in-itself",
+      "url:https://www.jewishgen.org/Yizkor/Stropkov/str002.html",
+      "url:https://blog.infinitemlmsoftware.com/new-mlm-companies-look-out-for-2019/",
+      "url:http://lunastationquarterly.com/story/baugs-hollow/",
+      "url:https://dumpsterbook.com/new-york/15-yard-roll-off-clockville-ny/"
+    ],
+    "manifest": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/calibration/c4_validation_128x2048/manifest.json",
+    "manifest_sha256": "06dd199025d0c729a7290e219ab5c8a9862b8c9eafd5911e74656f794050b9b9",
+    "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/calibration/c4_validation_128x2048/windows.safetensors",
+    "sampling": {
+      "add_special_tokens": false,
+      "document_disjoint": true,
+      "samples": 128,
+      "seed": 20260828,
+      "sequence_length": 2048,
+      "within_document_start": "uniform integer"
+    },
+    "sha256": "3fe79cbd6d87346ad028052c5c69d583ea9279d35b528614906b9c3e57e56d9c"
+  }
+}

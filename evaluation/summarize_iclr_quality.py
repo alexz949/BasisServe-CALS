@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit one 8B ICLR quality matrix and render its result table."""
+"""Audit one complete ICLR quality matrix and render its result table."""
 
 from __future__ import annotations
 
@@ -36,6 +36,12 @@ PROFILES = {
         "checkpoint_format": "basisserve.llama31_8b.iclr_v_factors.v1",
         "quality_format": "basisserve.llama31_8b.iclr_quality.v1",
     },
+    "llama2-7b": {
+        "label": "Llama-2-7B",
+        "prefix": "L2-7B",
+        "checkpoint_format": "basisserve.llama2_7b.iclr_v_factors.v1",
+        "quality_format": "basisserve.llama2_7b.iclr_quality.v1",
+    },
 }
 
 
@@ -58,6 +64,7 @@ def _run_ids(prefix: str) -> list[str]:
     run_ids.extend(f"{prefix}-SVD-R{rank}" for rank in (96, 80, 64))
     for geometry in ("PALUM", "PALUG2", "PALUG4"):
         run_ids.extend(f"{prefix}-{geometry}-R{rank}" for rank in (96, 80, 64))
+    run_ids.extend(f"{prefix}-C1-R{rank}" for rank in (96, 80, 64))
     return run_ids
 
 

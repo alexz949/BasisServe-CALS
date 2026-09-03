@@ -45,6 +45,11 @@ EXPERIMENT_PROFILES = {
         "fisher_format": "basisserve.gqa.palu_projection_fisher_stats.v1",
         "run_id_prefix": "L31-8B",
     },
+    "llama2_7b": {
+        "format": "basisserve.llama2_7b.iclr_v_factors.v1",
+        "fisher_format": "basisserve.gqa.palu_projection_fisher_stats.v1",
+        "run_id_prefix": "L2-7B",
+    },
 }
 FORMAT = str(EXPERIMENT_PROFILES["qwen3_8b"]["format"])
 PINNED_FISHER_FORMAT = str(EXPERIMENT_PROFILES["qwen3_8b"]["fisher_format"])

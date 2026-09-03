@@ -17,7 +17,9 @@ from typing import Any, Mapping
 import lm_eval
 from lm_eval.models.huggingface import HFLM
 from lm_eval.tasks import TaskManager
+from safetensors.torch import load_file
 import torch
+from torch import nn
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
@@ -56,6 +58,12 @@ QUALITY_PROFILES = {
         "checkpoint": "basisserve.llama31_8b.iclr_v_factors.v1",
         "quality": "basisserve.llama31_8b.iclr_quality.v1",
         "slug": "llama31_8b",
+    },
+    "llama2_7b": {
+        "label": "Llama-2-7B",
+        "checkpoint": "basisserve.llama2_7b.iclr_v_factors.v1",
+        "quality": "basisserve.llama2_7b.iclr_quality.v1",
+        "slug": "llama2_7b",
     },
 }
 FORMAT = ""
@@ -132,6 +140,137 @@ def _model_cuda_devices(model: torch.nn.Module) -> list[int]:
         if (device := _cuda_device(value)) is not None
     }
     return sorted(devices)
+
+
+@torch.no_grad()
+def install_c1_allocation(
+    model: nn.Module,
+    checkpoint_dir: Path,
+    manifest: Mapping[str, Any],
+) -> list[dict[str, Any]] | None:
+    """Fold an authenticated layer-rank C1 allocation into dense HF V/O slots."""
+
+    artifact = manifest.get("artifact", {})
+    result_path = checkpoint_dir / str(artifact.get("file", ""))
+    if not _check(result_path.is_file(), f"missing C1 allocation: {result_path}"):
+        return None
+    if not _check(_sha256(result_path) == artifact.get("sha256"), "C1 allocation hash mismatch"):
+        return None
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    selection = result.get("selection", {})
+    schedule = selection.get("selected_schedule", ())
+    artifacts = result.get("selected_artifacts", {})
+    layers = _decoder_layers(model)
+    config = model.config
+    num_layers = int(config.num_hidden_layers)
+    num_query_heads = int(config.num_attention_heads)
+    num_kv_heads = int(config.num_key_value_heads)
+    hidden_size = int(config.hidden_size)
+    head_dim = int(getattr(config, "head_dim", 0) or hidden_size // num_query_heads)
+    valid = all(
+        (
+            _check(result.get("status") == "complete", "C1 allocation is incomplete"),
+            _check(
+                result.get("model_config_sha256")
+                == manifest.get("model", {}).get("config_sha256"),
+                "C1 allocation model hash mismatch",
+            ),
+            _check(len(layers) == num_layers, "decoder layer count mismatch"),
+            _check(len(schedule) == num_layers, "C1 schedule layer count mismatch"),
+            _check(set(map(int, artifacts)) == set(range(num_layers)), "C1 artifacts are incomplete"),
+            _check(num_query_heads % num_kv_heads == 0, "invalid GQA/MHA geometry"),
+        )
+    )
+    if not valid:
+        return None
+
+    installation: list[dict[str, Any]] = []
+    heads_per_source = num_query_heads // num_kv_heads
+    for layer_index, layer in enumerate(layers):
+        started = time.perf_counter()
+        ranks = tuple(map(int, schedule[layer_index]))
+        if not _check(
+            len(ranks) == num_kv_heads and all(0 < rank <= head_dim for rank in ranks),
+            f"invalid C1 ranks at layer {layer_index}",
+        ):
+            return None
+        record = artifacts[str(layer_index)]
+        factor_path = checkpoint_dir / str(record["file"])
+        if not _check(
+            factor_path.is_file() and _sha256(factor_path) == record.get("sha256"),
+            f"C1 factor hash mismatch at layer {layer_index}",
+        ):
+            return None
+        payload = load_file(str(factor_path), device="cpu")
+        expected_keys = {
+            "value_coordinate_encoders",
+            "head_output_decoders",
+            "source_ranks",
+        }
+        if not _check(set(payload) == expected_keys, f"unexpected C1 tensors at layer {layer_index}"):
+            return None
+        stored_ranks = tuple(map(int, payload["source_ranks"].tolist()))
+        maximum_rank = max(ranks)
+        encoders = payload["value_coordinate_encoders"]
+        decoders = payload["head_output_decoders"]
+        shapes_match = all(
+            (
+                stored_ranks == ranks,
+                tuple(encoders.shape) == (num_kv_heads, head_dim, maximum_rank),
+                tuple(decoders.shape) == (num_query_heads, maximum_rank, hidden_size),
+            )
+        )
+        if not _check(shapes_match, f"C1 tensor geometry mismatch at layer {layer_index}"):
+            return None
+        v_proj = layer.self_attn.v_proj
+        o_proj = layer.self_attn.o_proj
+        projections_match = all(
+            (
+                isinstance(v_proj, nn.Linear),
+                isinstance(o_proj, nn.Linear),
+                v_proj.bias is None,
+                o_proj.bias is None,
+                tuple(v_proj.weight.shape) == (num_kv_heads * head_dim, hidden_size),
+                tuple(o_proj.weight.shape) == (hidden_size, num_query_heads * head_dim),
+                v_proj.weight.device.type == "cuda",
+                o_proj.weight.device == v_proj.weight.device,
+            )
+        )
+        if not _check(projections_match, f"unsupported C1 projections at layer {layer_index}"):
+            return None
+
+        device = v_proj.weight.device
+        dense_v = v_proj.weight.detach().float()
+        work_a = encoders.to(device=device, dtype=torch.float32)
+        work_d = decoders.to(device=device, dtype=torch.float32)
+        padded_v = torch.zeros_like(dense_v)
+        padded_o = torch.zeros_like(o_proj.weight, dtype=torch.float32)
+        for source, rank in enumerate(ranks):
+            dense_rows = slice(source * head_dim, (source + 1) * head_dim)
+            latent_rows = slice(source * head_dim, source * head_dim + rank)
+            padded_v[latent_rows].copy_(
+                work_a[source, :, :rank].T @ dense_v[dense_rows]
+            )
+            first_head = source * heads_per_source
+            for head in range(first_head, first_head + heads_per_source):
+                latent_columns = slice(head * head_dim, head * head_dim + rank)
+                padded_o[:, latent_columns].copy_(work_d[head, :rank].T)
+        v_proj.weight.copy_(padded_v.to(dtype=v_proj.weight.dtype))
+        o_proj.weight.copy_(padded_o.to(dtype=o_proj.weight.dtype))
+        installation.append(
+            {
+                "layer": layer_index,
+                "factor_file": str(factor_path.relative_to(checkpoint_dir)),
+                "factor_sha256": record["sha256"],
+                "source_ranks": list(ranks),
+                "maximum_padded_rank": maximum_rank,
+                "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+                "elapsed_seconds": time.perf_counter() - started,
+            }
+        )
+        del payload, encoders, decoders, dense_v, work_a, work_d, padded_v, padded_o
+        torch.cuda.empty_cache()
+    return installation
 
 
 def _accuracy_metric(metrics: Mapping[str, Any]) -> tuple[str, float] | None:
@@ -252,6 +391,7 @@ def evaluate(args: argparse.Namespace) -> int:
         return 2
     compression = manifest["compression"]
     dense = compression["method"] == "dense"
+    c1 = compression["method"] == "c1-two-sided-kl"
     artifact_sha256 = None if dense else str(manifest["artifact"]["sha256"])
 
     stage_paths = {
@@ -292,7 +432,12 @@ def evaluate(args: argparse.Namespace) -> int:
         return 2
 
     installation: list[dict[str, Any]] = []
-    if not dense:
+    if c1:
+        installed = install_c1_allocation(model, checkpoint_dir, manifest)
+        if installed is None:
+            return 2
+        installation = installed
+    elif not dense:
         loaded_manifest, factors = _load_checkpoint(checkpoint_dir, model_path)
         layer_ranks = [
             [int(rank) for rank in ranks]

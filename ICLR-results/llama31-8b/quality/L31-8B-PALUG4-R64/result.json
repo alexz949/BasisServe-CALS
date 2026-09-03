@@ -1,0 +1,255 @@
+{
+  "checkpoint": {
+    "artifact_sha256": "e5db3a4e0e5364c6a92bd8001e2a700948846113ce06eb5f04a66b6baa7ee3b8",
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/checkpoints/L31-8B-PALUG4-R64",
+    "format": "basisserve.llama31_8b.iclr_v_factors.v1",
+    "manifest_sha256": "7b79e7955996caa03e9ce69b2e224a8cec523169f78f8282288584744e43d55d"
+  },
+  "command": "evaluation/eval_llama31_8b_iclr_quality.py --run-id L31-8B-PALUG4-R64 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --checkpoint-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/checkpoints/L31-8B-PALUG4-R64 --c4-windows /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/calibration/c4_validation_128x2048/windows.safetensors --output-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-8b/quality/L31-8B-PALUG4-R64 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+  "compression": {
+    "allocation": "official_palu_fisher_uniform",
+    "dense_rank_sum_across_layers": 32768,
+    "equivalent_rank_target": 64,
+    "factorization_work_device": "cpu",
+    "factorization_work_dtype": "torch.float64",
+    "group_width": 512,
+    "groups": 2,
+    "head_dim": 128,
+    "head_group_size": 4,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        512,
+        512
+      ],
+      [
+        384,
+        384
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        192,
+        192
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        192,
+        192
+      ],
+      [
+        192,
+        192
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        160,
+        160
+      ]
+    ],
+    "method": "palu-fisher",
+    "method_label": "PaLU G-LRD4",
+    "nominal_group_rank": 256,
+    "nominal_retained_v_ratio": 0.5,
+    "nominal_v_cache_compression_ratio": 0.5,
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "projection": "v",
+    "rank_block_size": 32,
+    "rank_sum_across_layers": 16320,
+    "realized_retained_v_ratio": 0.498046875,
+    "realized_v_cache_compression_ratio": 0.501953125,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds_this_attempt": 586.9025489911437,
+  "environment": {
+    "conda_environment": "basis",
+    "cuda_devices": [
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S",
+      "NVIDIA L40S"
+    ],
+    "datasets": "5.0.0",
+    "lm_eval": "0.4.11",
+    "peak_cuda_allocated_bytes": {
+      "0": 8528495104,
+      "1": 5748899328,
+      "2": 5739396608,
+      "3": 6807213056
+    },
+    "python": "3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0]",
+    "torch": "2.6.0+cu124",
+    "torch_num_threads": 8,
+    "transformers": "5.15.1"
+  },
+  "format": "basisserve.llama31_8b.iclr_quality.v1",
+  "metrics": {
+    "average_accuracy": 0.6438979705857203,
+    "c4_validation_128_ppl": 11.124858099278736,
+    "task_accuracy": [
+      {
+        "metric": "acc_norm",
+        "task": "arc_easy",
+        "value": 0.6872895622895623
+      },
+      {
+        "metric": "acc_norm",
+        "task": "arc_challenge",
+        "value": 0.4453924914675768
+      },
+      {
+        "metric": "acc_norm",
+        "task": "hellaswag",
+        "value": 0.7305317665803625
+      },
+      {
+        "metric": "acc_norm",
+        "task": "piqa",
+        "value": 0.7725788900979326
+      },
+      {
+        "metric": "acc",
+        "task": "winogrande",
+        "value": 0.7213891081294396
+      },
+      {
+        "metric": "acc",
+        "task": "boolq",
+        "value": 0.7581039755351682
+      },
+      {
+        "metric": "acc_norm",
+        "task": "openbookqa",
+        "value": 0.392
+      }
+    ],
+    "wikitext2_ppl": 9.364652803810863
+  },
+  "model": {
+    "config_sha256": "54acfad3cffe057640904ca8a1e83525e6551c70c7a04c641f5a9eda0bbf64bd",
+    "huggingface_repo": "meta-llama/Llama-3.1-8B",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "revision": "d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+    "safetensors_index_sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+  },
+  "run_id": "L31-8B-PALUG4-R64",
+  "stages": {
+    "c4": {
+      "file": "c4.json",
+      "sha256": "128e735755695ca608e6b65e12feafc640c636e63e16fbab98187832419ea771"
+    },
+    "commonsense": {
+      "file": "commonsense.json",
+      "sha256": "8eae2c43937849cb2e452601c3bc244d2754e40b363aca253485b17d25005745"
+    },
+    "wikitext2": {
+      "file": "wikitext2.json",
+      "sha256": "9d3cefc4184a98a2ab9b0acc3f50cc7aa72c67fee31f0498b614ed0f731adeb6"
+    }
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-02T15:04:38.126750+00:00"
+}

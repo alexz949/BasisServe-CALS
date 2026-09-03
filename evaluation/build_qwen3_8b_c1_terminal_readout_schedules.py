@@ -196,6 +196,7 @@ def build(args: argparse.Namespace) -> None:
             costs,
             candidate_ranks=candidate_ranks,
             anchor_rank=anchor_rank,
+            target_average_rank=anchor_rank,
         )
         full_schedules[readout] = (layer_ranks, costs)
         if readout != "nll":
@@ -234,6 +235,7 @@ def build(args: argparse.Namespace) -> None:
             costs,
             candidate_ranks=candidate_ranks,
             anchor_rank=anchor_rank,
+            target_average_rank=anchor_rank,
         )
         label = _readout_label(readout)
         schedule_name = (
