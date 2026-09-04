@@ -14,4 +14,6 @@ from evaluation import build_llama31_8b_palu_m_checkpoint as builder
 
 if __name__ == "__main__":
     builder.activate_model_profile("qwen3_8b")
+    builder.CALIBRATION_SAMPLES = 32
+    builder.SEQUENCE_LENGTH = 32768
     builder.main()

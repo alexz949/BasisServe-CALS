@@ -121,6 +121,7 @@ def test_layer_dp_preserves_v64_budget_and_uniform_tp_width() -> None:
         records,
         candidate_ranks=ranks,
         anchor_rank=64,
+        target_average_rank=64,
         cost_key="mean",
     )
 
@@ -317,6 +318,7 @@ def test_factorized_allocation_uses_heldout_local_error_curve() -> None:
         factor_results,
         candidate_ranks=ranks,
         anchor_rank=64,
+        target_average_rank=64,
         probe_rank=32,
         local_error_split="heldout",
         exponent=1.0,

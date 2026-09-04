@@ -67,7 +67,7 @@ def test_qwen_layer_allocation_wikitext_loader_requires_exact_v_budget(
                 "schedule": schedule,
                 "accounting": {"source_rank_sum": source_rank_sum},
             }
-            for name in ("uniform_anchor", "mean_dp", "ucb_dp")
+            for name in ("uniform_anchor", "factorized_mean_dp")
         },
         "selected_artifacts": {str(layer): {} for layer in range(64)},
     }
@@ -201,7 +201,6 @@ def test_full_rank_bank_uses_exact_identity_endpoint(tmp_path, monkeypatch) -> N
     record_path = tmp_path / "layer_000.json"
     args = SimpleNamespace(
         cache_rank=3,
-        selection_boundaries="decoder-closed",
         encoder_initialization="activation-weighted-svd",
         encoder_initialization_seed=0,
         decoder_objective="full_layer",

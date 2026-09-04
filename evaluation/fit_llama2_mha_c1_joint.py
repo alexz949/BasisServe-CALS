@@ -106,6 +106,18 @@ def activate_model_profile(name: str) -> None:
         HEAD_DIM = 128
         HIDDEN_SIZE = 4096
         return
+    if name == "llama31_70b":
+        FORMAT = "basisserve.llama31_70b.gqa_c1_joint.v1"
+        LAYER_FORMAT = "basisserve.llama31_70b.gqa_c1_joint.layer.v1"
+        MODEL_LABEL = "Llama-3.1-70B"
+        MODEL_TYPE = "llama"
+        ATTENTION_TYPE = "gqa"
+        NUM_LAYERS = 80
+        NUM_HEADS = 64
+        NUM_KV_HEADS = 8
+        HEAD_DIM = 128
+        HIDDEN_SIZE = 8192
+        return
     raise ValueError(f"unknown C1 model profile: {name}")
 
 

@@ -2,8 +2,8 @@
 """Build 8B-model V-side checkpoints for the ICLR experiment matrix.
 
 The entry point covers the dense reference, per-physical-head Weight-SVD, and
-Fisher-allocated activation-aware PaLU M/G2/G4 checkpoints.  It intentionally
-does not contain a C1 path.
+uniform or Fisher-allocated activation-aware PaLU M/G2/G4 checkpoints.  It
+intentionally does not contain a C1 path.
 """
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ from palu.model.modules.svd_linear import HeadwiseLowRankModule  # noqa: E402
 EXPERIMENT_PROFILES = {
     "qwen3_8b": {
         "format": "basisserve.qwen3_8b.iclr_v_factors.v1",
-        "fisher_format": "basisserve.gqa.palu_m_v_only_fisher_stats.v1",
+        "fisher_format": "basisserve.gqa.palu_projection_fisher_stats.v1",
         "run_id_prefix": "Q3-8B",
     },
     "llama31_8b": {
@@ -49,6 +49,16 @@ EXPERIMENT_PROFILES = {
         "format": "basisserve.llama2_7b.iclr_v_factors.v1",
         "fisher_format": "basisserve.gqa.palu_projection_fisher_stats.v1",
         "run_id_prefix": "L2-7B",
+    },
+    "qwen3_32b": {
+        "format": "basisserve.qwen3_32b.iclr_v_factors.v1",
+        "fisher_format": "basisserve.gqa.palu_projection_fisher_stats.v1",
+        "run_id_prefix": "Q3-32B",
+    },
+    "llama31_70b": {
+        "format": "basisserve.llama31_70b.iclr_v_factors.v1",
+        "fisher_format": "basisserve.gqa.palu_projection_fisher_stats.v1",
+        "run_id_prefix": "L31-70B",
     },
 }
 FORMAT = str(EXPERIMENT_PROFILES["qwen3_8b"]["format"])
@@ -95,6 +105,8 @@ def run_id(method: str, equivalent_rank: int | None, head_group_size: int) -> st
     if method == "weight-svd":
         return f"{RUN_ID_PREFIX}-SVD-R{equivalent_rank}"
     geometry = "PALUM" if head_group_size == 1 else f"PALUG{head_group_size}"
+    if method == "palu-uniform":
+        return f"{RUN_ID_PREFIX}-{geometry}-U-R{equivalent_rank}"
     return f"{RUN_ID_PREFIX}-{geometry}-R{equivalent_rank}"
 
 
@@ -271,14 +283,6 @@ def _load_palu_inputs(
                 fisher.get("fisher", {}).get("target") == "v_proj_only",
                 "Fisher result is not V-only",
             ),
-            _check(
-                int(fisher.get("fisher", {}).get("samples", 0)) == 256,
-                "ICLR PaLU Fisher must use 256 samples",
-            ),
-            _check(
-                int(fisher.get("fisher", {}).get("sequence_length", 0)) == 2048,
-                "ICLR PaLU Fisher must use sequence length 2048",
-            ),
         )
     )
     if not valid:
@@ -286,6 +290,14 @@ def _load_palu_inputs(
     whitening, whitening_manifest = palu_builder._load_whitening(
         whitening_dir, model_metadata
     )
+    same_shape = (
+        int(whitening_manifest["samples"])
+        == int(fisher["fisher"]["samples"])
+        and int(whitening_manifest["sequence_length"])
+        == int(fisher["fisher"]["sequence_length"])
+    )
+    if not _check(same_shape, "Fisher and whitening calibration shapes differ"):
+        return None
     same_windows = (
         whitening_manifest["windows"]["sha256"]
         == fisher["calibration_windows"]["sha256"]
@@ -407,6 +419,28 @@ def build(args: argparse.Namespace) -> int:
             * palu_builder.NUM_KV_HEADS
             * palu_builder.HEAD_DIM
         )
+    elif args.method == "palu-uniform":
+        if not _check(
+            args.whitening_dir is not None,
+            "uniform PaLU requires --whitening-dir",
+        ):
+            return 2
+        whitening_dir = Path(args.whitening_dir).expanduser().resolve()
+        whitening, whitening_manifest = palu_builder._load_whitening(
+            whitening_dir,
+            model_metadata,
+        )
+        group_count = palu_builder.NUM_KV_HEADS // args.head_group_size
+        group_rank = args.head_group_size * equivalent_rank
+        layer_ranks = [
+            [group_rank] * group_count for _ in range(palu_builder.NUM_LAYERS)
+        ]
+        rank_sum = sum(sum(ranks) for ranks in layer_ranks)
+        total_rank = (
+            palu_builder.NUM_LAYERS
+            * palu_builder.NUM_KV_HEADS
+            * palu_builder.HEAD_DIM
+        )
     else:
         if not _check(
             args.fisher_result is not None and args.whitening_dir is not None,
@@ -479,9 +513,9 @@ def build(args: argparse.Namespace) -> int:
             }
         )
         metric = (
-            diagnostics["relative_activation_weighted_error"]
-            if args.method == "palu-fisher"
-            else diagnostics["relative_frobenius_error"]
+            diagnostics["relative_frobenius_error"]
+            if args.method == "weight-svd"
+            else diagnostics["relative_activation_weighted_error"]
         )
         print(
             f"[{args.method}] layer={layer_index}/{palu_builder.NUM_LAYERS - 1} "
@@ -513,7 +547,11 @@ def build(args: argparse.Namespace) -> int:
         "allocation": (
             "uniform_per_physical_head"
             if args.method == "weight-svd"
-            else "official_palu_fisher_uniform"
+            else (
+                "uniform_per_group"
+                if args.method == "palu-uniform"
+                else "official_palu_fisher_uniform"
+            )
         ),
         "equivalent_rank_target": equivalent_rank,
         "nominal_retained_v_ratio": equivalent_rank / palu_builder.HEAD_DIM,
@@ -521,7 +559,7 @@ def build(args: argparse.Namespace) -> int:
             1.0 - equivalent_rank / palu_builder.HEAD_DIM
         ),
         "rank_block_size": (
-            None if args.method == "weight-svd" else FISHER_RANK_BLOCK_SIZE
+            FISHER_RANK_BLOCK_SIZE if args.method == "palu-fisher" else None
         ),
         "num_query_heads": palu_builder.NUM_QUERY_HEADS,
         "num_physical_kv_heads": palu_builder.NUM_KV_HEADS,
@@ -564,11 +602,23 @@ def build(args: argparse.Namespace) -> int:
             "torch_num_threads": torch.get_num_threads(),
         },
     }
+    if args.method in ("palu-uniform", "palu-fisher"):
+        whitening_dir = cast(Path, whitening_dir)
+        whitening_manifest = cast(dict[str, Any], whitening_manifest)
+        manifest["calibration"] = {
+            "dataset": "allenai/c4",
+            "samples": int(whitening_manifest["samples"]),
+            "sequence_length": int(whitening_manifest["sequence_length"]),
+            "whitening_manifest": str(whitening_dir / "manifest.json"),
+            "whitening_manifest_sha256": palu_builder._sha256(
+                whitening_dir / "manifest.json"
+            ),
+            "whitening_artifact_sha256": whitening_manifest["artifact"]["sha256"],
+            "windows": whitening_manifest["windows"],
+        }
     if args.method == "palu-fisher":
         fisher = cast(dict[str, Any], fisher)
         fisher_path = cast(Path, fisher_path)
-        whitening_dir = cast(Path, whitening_dir)
-        whitening_manifest = cast(dict[str, Any], whitening_manifest)
         manifest["fisher"] = {
             "result": str(fisher_path),
             "result_sha256": palu_builder._sha256(fisher_path),
@@ -576,17 +626,6 @@ def build(args: argparse.Namespace) -> int:
             "official_palu_commit": fisher["official_palu_commit"],
             "calibration": fisher["fisher"],
             "source_allocation_ignored": True,
-        }
-        manifest["calibration"] = {
-            "dataset": "allenai/c4",
-            "samples": 256,
-            "sequence_length": 2048,
-            "whitening_manifest": str(whitening_dir / "manifest.json"),
-            "whitening_manifest_sha256": palu_builder._sha256(
-                whitening_dir / "manifest.json"
-            ),
-            "whitening_artifact_sha256": whitening_manifest["artifact"]["sha256"],
-            "windows": whitening_manifest["windows"],
         }
     palu_builder._atomic_json(output_dir / "manifest.json", manifest)
     print(
@@ -601,7 +640,9 @@ def build(args: argparse.Namespace) -> int:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--method", choices=("dense", "weight-svd", "palu-fisher"), required=True
+        "--method",
+        choices=("dense", "weight-svd", "palu-uniform", "palu-fisher"),
+        required=True,
     )
     parser.add_argument("--model", required=True)
     parser.add_argument("--output-dir", required=True)

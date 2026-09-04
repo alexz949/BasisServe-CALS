@@ -26,11 +26,16 @@ from basisserve.core.c1_k_reverse_shadow import (
     ReverseShadowConfig,
     c1_k_reverse_shadow_block_attention,
 )
+from basisserve.core.c1_conditional_page_attention import (
+    c1_conditional_page_topk_attention,
+)
+from basisserve.core.c1_loki_attention import c1_loki_pca_topk_attention
 from basisserve.kernels.compressed_v_decode_attention import (
     c1_dense_gqa_v96_decode_attention_cuda,
     c1_pack_exact_key_pages_cuda,
     c1_paged_sparse_decode_attention_cuda,
     compressed_v_decode_attention_triton,
+    compressed_v_prefill_attention,
 )
 from basisserve.kernels.c1_r32_routing import (
     c1_r32_page_lse_cuda,
@@ -269,6 +274,10 @@ class GQATiedVOQwen3Attention(nn.Module):
             persistent=False,
         )
         self.cuda_sparse_splits = 32
+        self.conditional_page_query_block_size: int | None = None
+        self.conditional_page_collect_statistics = True
+        self.loki_query_block_size: int | None = None
+        self.loki_collect_statistics = True
         self.use_cached_routing_sidecar = True
         self.reverse_shadow_config: ReverseShadowConfig | None = None
         self._reverse_shadow_totals: dict[str, float] = {}
@@ -345,6 +354,32 @@ class GQATiedVOQwen3Attention(nn.Module):
 
         self.use_cached_routing_sidecar = bool(enabled)
 
+    def set_loki_query_block_size(
+        self,
+        query_block_size: int | None,
+        *,
+        collect_statistics: bool = True,
+    ) -> None:
+        """Enable the memory-tiled full-query Loki quality path."""
+
+        self.loki_query_block_size = (
+            None if query_block_size is None else int(query_block_size)
+        )
+        self.loki_collect_statistics = bool(collect_statistics)
+
+    def set_conditional_page_query_block_size(
+        self,
+        query_block_size: int | None,
+        *,
+        collect_statistics: bool = True,
+    ) -> None:
+        """Enable memory-tiled full-query conditional Page attention."""
+
+        self.conditional_page_query_block_size = (
+            None if query_block_size is None else int(query_block_size)
+        )
+        self.conditional_page_collect_statistics = bool(collect_statistics)
+
     def reverse_shadow_statistics(self) -> dict[str, float]:
         totals = dict(self._reverse_shadow_totals)
         valid = totals["physical_valid_tokens"]
@@ -387,6 +422,35 @@ class GQATiedVOQwen3Attention(nn.Module):
                     float(statistics["resident_selector_metadata_bytes"]),
                 )
             )
+
+    def _record_loki_statistics(self, statistics: dict[str, float]) -> None:
+        self._reverse_shadow_totals["queries"] += statistics["queries"]
+        for name in (
+            "physical_valid_tokens",
+            "query_valid_tokens",
+            "selected_tokens",
+            "query_selected_tokens",
+            "selected_pages",
+            "logical_selected_pages",
+            "selection_qk_flops",
+            "sparse_exact_qk_flops",
+            "sparse_c1_value_flops",
+            "adaptive_eligible_query_heads",
+            "adaptive_refined_query_heads",
+            "adaptive_tail_mass_ratio_sum",
+        ):
+            self._reverse_shadow_totals[name] += statistics[name]
+        self._reverse_shadow_totals["cpu_exact_key_bytes_fetched"] += statistics[
+            "oracle_page_store_key_bytes_read"
+        ]
+        self._reverse_shadow_totals["maximum_resident_selector_metadata_bytes"] = (
+            max(
+                self._reverse_shadow_totals[
+                    "maximum_resident_selector_metadata_bytes"
+                ],
+                statistics["resident_selector_metadata_bytes"],
+            )
+        )
 
     @torch.no_grad()
     def set_qk_projectors(
@@ -801,7 +865,70 @@ class GQATiedVOQwen3Attention(nn.Module):
                 raise NotImplementedError(
                     "Reverse ShadowKV does not return attention weights"
                 )
-            if self.attention_backend == "cuda_sparse":
+            if (
+                self.conditional_page_query_block_size is not None
+                and self.conditional_base_left is not None
+                and self.reverse_shadow_config.selector == "kq_svd"
+                and self.reverse_shadow_config.quest_support == "physical_shared"
+            ):
+                if cached_routing_sidecar is None:
+                    assert past_key_values is None
+                    cached_routing_sidecar = build_conditional_routing_sidecar(
+                        value_states,
+                        key_states,
+                        base_left=self.conditional_base_left,
+                        base_right=self.conditional_base_right,
+                        base_bias=self.conditional_base_bias,
+                        residual_encoder=self.conditional_residual_encoder,
+                        cos=cos,
+                        sin=sin,
+                    )
+                conditional = c1_conditional_page_topk_attention(
+                    query_states,
+                    key_states,
+                    value_states,
+                    cached_routing_sidecar,
+                    self.routing_query_projector,
+                    page_size=self.reverse_shadow_config.page_size,
+                    exact_token_budget=(
+                        self.reverse_shadow_config.exact_token_budget
+                    ),
+                    pinned_prefix_pages=(
+                        self.reverse_shadow_config.pinned_prefix_pages
+                    ),
+                    scale=self.scaling,
+                    query_block_size=self.conditional_page_query_block_size,
+                    attention_mask=attention_mask,
+                    collect_statistics=(
+                        self.conditional_page_collect_statistics
+                    ),
+                )
+                head_major_output = conditional.output
+                if self.conditional_page_collect_statistics:
+                    self._record_loki_statistics(conditional.statistics)
+            elif (
+                self.loki_query_block_size is not None
+                and self.reverse_shadow_config.selector == "kq_svd"
+                and self.reverse_shadow_config.quest_support == "per_query_head"
+                and self.reverse_shadow_config.page_size == 1
+            ):
+                loki = c1_loki_pca_topk_attention(
+                    query_states,
+                    key_states,
+                    value_states,
+                    self.routing_key_projector,
+                    self.routing_query_projector,
+                    top_k=self.reverse_shadow_config.exact_token_budget,
+                    scale=self.scaling,
+                    query_block_size=self.loki_query_block_size,
+                    attention_mask=attention_mask,
+                    routing_sidecar=cached_routing_sidecar,
+                    collect_statistics=self.loki_collect_statistics,
+                )
+                head_major_output = loki.output
+                if self.loki_collect_statistics:
+                    self._record_loki_statistics(loki.statistics)
+            elif self.attention_backend == "cuda_sparse":
                 head_major_output = self._cuda_sparse_attention(
                     query_states,
                     key_states,
@@ -952,31 +1079,33 @@ class GQATiedVOQwen3Attention(nn.Module):
                 raise NotImplementedError(
                     "Triton compressed decode does not return attention weights"
                 )
-            if int(query_states.shape[-2]) != 1:
-                raise ValueError(
-                    "Triton compressed decode requires exactly one query token; "
-                    "run prefill with the SDPA backend"
-                )
-            valid_sequence_length = None
-            if past_key_values is not None:
-                cache_layer = past_key_values.layers[self.layer_idx]
-                if hasattr(cache_layer, "max_cache_len"):
-                    valid_sequence_length = cache_layer.cumulative_length
-            if attention_mask is not None and valid_sequence_length is None:
-                raise ValueError(
-                    "Triton compressed decode requires an unpadded full-prefix cache"
-                )
-            attn_output = (
-                compressed_v_decode_attention_triton(
+            if int(query_states.shape[-2]) > 1:
+                assert int(query_states.shape[-2]) == int(key_states.shape[-2])
+                attn_output = compressed_v_prefill_attention(
                     query_states,
                     key_states,
                     value_states,
                     scale=self.scaling,
-                    valid_sequence_length=valid_sequence_length,
+                ).transpose(1, 2).contiguous()
+            else:
+                valid_sequence_length = None
+                if past_key_values is not None:
+                    cache_layer = past_key_values.layers[self.layer_idx]
+                    if hasattr(cache_layer, "max_cache_len"):
+                        valid_sequence_length = cache_layer.cumulative_length
+                if attention_mask is not None:
+                    assert valid_sequence_length is not None
+                attn_output = (
+                    compressed_v_decode_attention_triton(
+                        query_states,
+                        key_states,
+                        value_states,
+                        scale=self.scaling,
+                        valid_sequence_length=valid_sequence_length,
+                    )
+                    .transpose(1, 2)
+                    .contiguous()
                 )
-                .transpose(1, 2)
-                .contiguous()
-            )
             attn_weights = None
         elif self.attention_backend == "sdpa":
             if kwargs.get("output_attentions"):

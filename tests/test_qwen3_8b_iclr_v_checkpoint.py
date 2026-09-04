@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import argparse
+import json
+
 import pytest
 import torch
 
@@ -17,6 +20,7 @@ from evaluation.eval_qwen3_8b_iclr_quality import (
     _cuda_device,
     summarize_commonsense,
 )
+from evaluation.merge_iclr_quality_shards import merge as merge_quality_shards
 from evaluation.summarize_iclr_quality import _run_ids, _trend_checks
 
 
@@ -30,6 +34,11 @@ def test_iclr_run_ids_match_the_experiment_matrix() -> None:
         activate_experiment_profile("llama31_8b")
         assert run_id("dense", None, 1) == "L31-8B-Dense"
         assert run_id("palu-fisher", 80, 2) == "L31-8B-PALUG2-R80"
+        activate_experiment_profile("qwen3_32b")
+        assert run_id("dense", None, 1) == "Q3-32B-Dense"
+        assert run_id("weight-svd", 64, 1) == "Q3-32B-SVD-R64"
+        activate_experiment_profile("llama31_70b")
+        assert run_id("palu-fisher", 96, 4) == "L31-70B-PALUG4-R96"
     finally:
         activate_experiment_profile("qwen3_8b")
 
@@ -136,6 +145,124 @@ def test_commonsense_summary_prefers_acc_norm_then_acc() -> None:
     assert average == pytest.approx(sum(expected) / len(expected))
 
 
+def test_commonsense_summary_accepts_a_task_shard() -> None:
+    tasks = ("hellaswag", "piqa")
+    summarized = summarize_commonsense(
+        {
+            "results": {
+                "hellaswag": {"acc_norm,none": 0.6},
+                "piqa": {"acc,none": 0.7},
+            }
+        },
+        tasks,
+    )
+    assert summarized is not None
+    rows, average = summarized
+    assert [row["task"] for row in rows] == list(tasks)
+    assert average == pytest.approx(0.65)
+
+
+def test_parallel_quality_shards_merge_into_the_canonical_result(tmp_path) -> None:
+    from evaluation import eval_qwen3_8b_iclr_quality as quality
+
+    model_dir = tmp_path / "model"
+    checkpoint_dir = tmp_path / "checkpoint"
+    output_dir = tmp_path / "quality"
+    model_dir.mkdir()
+    checkpoint_dir.mkdir()
+    output_dir.mkdir()
+    (model_dir / "config.json").write_text("{}\n", encoding="utf-8")
+    run_id = "Q3-32B-Dense"
+    try:
+        activate_quality_profile("qwen3_32b")
+        manifest = {
+            "format": quality.CHECKPOINT_FORMAT,
+            "status": "complete",
+            "run_id": run_id,
+            "model": {
+                "config_sha256": quality._sha256(model_dir / "config.json"),
+            },
+            "compression": {
+                "method": "dense",
+                "method_label": "Dense",
+                "realized_retained_v_ratio": 1.0,
+            },
+        }
+        manifest_path = checkpoint_dir / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        manifest_sha256 = quality._sha256(manifest_path)
+        checkpoint = {
+            "directory": str(checkpoint_dir),
+            "manifest_sha256": manifest_sha256,
+            "artifact_sha256": None,
+            "format": quality.CHECKPOINT_FORMAT,
+        }
+        base = {
+            "status": "complete",
+            "run_id": run_id,
+            "checkpoint": checkpoint,
+            "compression": manifest["compression"],
+        }
+        for stage, ppl in (("wikitext2", 7.0), ("c4", 9.0)):
+            payload = {
+                **base,
+                "format": quality.STAGE_FORMATS[stage],
+                "metrics": {"ppl": ppl},
+            }
+            (output_dir / f"{stage}.json").write_text(
+                json.dumps(payload), encoding="utf-8"
+            )
+        task_shards = ((TASKS[0],), TASKS[1:])
+        for index, tasks in enumerate(task_shards):
+            rows = [
+                {"task": task, "metric": "acc", "value": 0.5 + offset / 100}
+                for offset, task in enumerate(tasks)
+            ]
+            payload = {
+                **base,
+                "format": quality.STAGE_FORMATS["commonsense"],
+                "protocol": {
+                    "tasks": list(tasks),
+                    "quality_shard_index": index,
+                    "quality_shard_count": 2,
+                },
+                "task_accuracy": rows,
+                "evaluation": {
+                    "results": {task: {"acc,none": 0.5} for task in tasks}
+                },
+                "runtime": {"quality_shard_index": index},
+                "environment": {
+                    "cuda_devices": ["NVIDIA L40S", "NVIDIA L40S"],
+                    "slurm_job_id": str(index),
+                },
+                "elapsed_seconds": float(index + 1),
+            }
+            (output_dir / f"commonsense-shard-{index:02d}.json").write_text(
+                json.dumps(payload), encoding="utf-8"
+            )
+        args = argparse.Namespace(
+            profile="qwen3_32b",
+            run_id=run_id,
+            model=str(model_dir),
+            checkpoint_dir=str(checkpoint_dir),
+            output_dir=str(output_dir),
+            shard_count=2,
+            gpus_per_shard=2,
+            lm_eval_batch_size=8,
+        )
+        assert merge_quality_shards(args) == 0
+        result = json.loads((output_dir / "result.json").read_text(encoding="utf-8"))
+        assert result["status"] == "complete"
+        assert result["environment"]["evaluation_layout"] == (
+            "parallel_quality_shards"
+        )
+        assert [row["task"] for row in result["metrics"]["task_accuracy"]] == list(
+            TASKS
+        )
+    finally:
+        activate_quality_profile("qwen3_8b")
+
+
 def test_quality_profiles_pin_model_specific_formats() -> None:
     from evaluation import eval_qwen3_8b_iclr_quality as quality
 
@@ -146,6 +273,12 @@ def test_quality_profiles_pin_model_specific_formats() -> None:
         assert quality.STAGE_FORMATS["c4"] == (
             "basisserve.llama31_8b.iclr_quality.c4_validation.v1"
         )
+        activate_quality_profile("qwen3_32b")
+        assert quality.CHECKPOINT_FORMAT == "basisserve.qwen3_32b.iclr_v_factors.v1"
+        assert quality.FORMAT == "basisserve.qwen3_32b.iclr_quality.v1"
+        activate_quality_profile("llama31_70b")
+        assert quality.CHECKPOINT_FORMAT == "basisserve.llama31_70b.iclr_v_factors.v1"
+        assert quality.FORMAT == "basisserve.llama31_70b.iclr_quality.v1"
     finally:
         activate_quality_profile("qwen3_8b")
 
@@ -161,18 +294,18 @@ def test_cuda_device_map_values_are_normalized(value: object, expected: int | No
 def test_matrix_trend_audit_checks_dense_svd_and_palu_geometry() -> None:
     prefix = "Q3-8B"
     results = {}
-    for run_id in _run_ids(prefix):
-        if run_id.endswith("-Dense"):
+    for matrix_run_id in _run_ids(prefix):
+        if matrix_run_id.endswith("-Dense"):
             metrics = (7.0, 9.0, 0.70)
-        elif "-SVD-" in run_id:
+        elif "-SVD-" in matrix_run_id:
             metrics = (100.0, 120.0, 0.40)
-        elif "-PALUM-" in run_id:
+        elif "-PALUM-" in matrix_run_id:
             metrics = (12.0, 14.0, 0.60)
-        elif "-PALUG2-" in run_id:
+        elif "-PALUG2-" in matrix_run_id:
             metrics = (10.0, 12.0, 0.63)
         else:
             metrics = (8.0, 10.0, 0.67)
-        results[run_id] = {
+        results[matrix_run_id] = {
             "metrics": {
                 "wikitext2_ppl": metrics[0],
                 "c4_validation_128_ppl": metrics[1],

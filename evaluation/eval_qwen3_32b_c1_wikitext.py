@@ -304,7 +304,6 @@ class LayerAllocationReconstructionState:
     factor_cache: Sequence[Mapping[int, Any]]
     anchor_rank: int
     covariance_damping: float
-    decoder_relative_jitter: float
 
 
 def _layer_allocation_profile_configuration(
@@ -374,7 +373,6 @@ def load_layer_allocation_reconstruction_state(
         factor_cache=factor_cache,
         anchor_rank=int(configuration["anchor_rank"]),
         covariance_damping=float(configuration["covariance_damping"]),
-        decoder_relative_jitter=float(configuration["decoder_relative_jitter"]),
     )
 
 
@@ -646,7 +644,7 @@ def install_layer_allocation_schedule(
         snapshot_cache=state.snapshot_cache,
         anchor_rank=state.anchor_rank,
         covariance_damping=state.covariance_damping,
-        decoder_relative_jitter=state.decoder_relative_jitter,
+        decoder_relative_jitter=0.0,
         keep_factors=False,
     )
     return diagnostics

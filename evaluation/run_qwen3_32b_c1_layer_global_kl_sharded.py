@@ -71,14 +71,28 @@ def activate_model_profile(name: str) -> None:
     if name == "qwen3_32b":
         slug = "qwen3_32b"
         MODEL_LABEL = "Qwen3-32B"
+        attention = "gqa"
     elif name == "qwen3_8b":
         slug = "qwen3_8b"
         MODEL_LABEL = "Qwen3-8B-Base"
+        attention = "gqa"
+    elif name == "llama31_8b":
+        slug = "llama31_8b"
+        MODEL_LABEL = "Llama-3.1-8B"
+        attention = "gqa"
+    elif name == "llama31_70b":
+        slug = "llama31_70b"
+        MODEL_LABEL = "Llama-3.1-70B"
+        attention = "gqa"
+    elif name == "llama2_7b":
+        slug = "llama2_7b"
+        MODEL_LABEL = "Llama-2-7B"
+        attention = "mha"
     else:
         raise ValueError(f"unknown Qwen3 C1 model profile: {name}")
-    FORMAT = f"basisserve.{slug}.gqa_c1.layer_global_kl_allocation.v1"
+    FORMAT = f"basisserve.{slug}.{attention}_c1.layer_global_kl_allocation.v1"
     PROFILE_FORMAT = (
-        f"basisserve.{slug}.gqa_c1.layer_global_kl_profile_shard.v1"
+        f"basisserve.{slug}.{attention}_c1.layer_global_kl_profile_shard.v1"
     )
 
 
@@ -95,6 +109,7 @@ def parse_args() -> argparse.Namespace:
     runtime._add_shared_args(finalize)
     finalize.add_argument("--profile-shard-count", type=int, default=2)
     finalize.add_argument("--output-dir", type=Path, required=True)
+    finalize.add_argument("--target-average-rank", type=int, required=True)
     finalize.add_argument(
         "--force-selected-candidate",
         choices=(
@@ -544,7 +559,7 @@ def _capture_sampled_teacher_batches(
     start_window: int,
     batch_size: int,
     vocab_chunk_size: int,
-    shard: int,
+    shard: int | None,
 ) -> list[_SampledTeacherBatch]:
     input_device = common._input_device(model)
     batches = []
@@ -590,6 +605,67 @@ def _statistics_to_device(
         expected_output_weight=statistics.expected_output_weight.to(device),
         expected_log_probability=statistics.expected_log_probability.to(device),
     )
+
+
+@torch.inference_mode()
+def _evaluate_sampled_teacher_metrics(
+    model: torch.nn.Module,
+    teacher: Sequence[_SampledTeacherBatch],
+    sequences: torch.Tensor,
+    positions: torch.Tensor,
+    *,
+    output_weight: torch.Tensor,
+    position_counts: Sequence[int],
+    selection_count: int,
+    vocab_chunk_size: int,
+) -> dict[str, Any]:
+    """Evaluate exact-vocabulary KL on fixed sampled prediction positions."""
+
+    raw = {
+        str(count): {"terminal_kl": [], "nll": []}
+        for count in position_counts
+    }
+    input_device = common._input_device(model)
+    for batch in teacher:
+        input_ids = sequences[batch.start : batch.stop].to(input_device)
+        hidden = model.model(input_ids=input_ids, use_cache=False).last_hidden_state
+        batch_positions = positions[batch.start : batch.stop]
+        selected = gather_prediction_hidden(hidden, batch_positions)
+        logsumexp = streaming_output_logsumexp(
+            selected,
+            output_weight,
+            vocab_chunk_size=vocab_chunk_size,
+        )
+        statistics = _statistics_to_device(batch.statistics, selected.device)
+        terminal_kl = terminal_kl_from_statistics(
+            statistics,
+            selected,
+            logsumexp,
+        ).clamp_min(0.0)
+        labels = input_ids[:, 1:].gather(
+            1,
+            batch_positions.to(input_ids.device),
+        )
+        nll = selected_token_nll(
+            selected,
+            logsumexp,
+            output_weight,
+            labels,
+        )
+        _append_nested_window_means(
+            raw,
+            terminal_kl=terminal_kl,
+            nll=nll,
+            position_counts=position_counts,
+        )
+        del input_ids, hidden, selected, logsumexp, statistics
+        del terminal_kl, labels, nll
+        torch.cuda.empty_cache()
+    sweep = _sampled_metric_sweep(raw, position_counts=position_counts)
+    return {
+        **sweep[str(selection_count)],
+        "position_count_sweep": sweep,
+    }
 
 
 def _completed_sampled_profile(
@@ -725,13 +801,6 @@ def _profile_sampled_suffix(args: argparse.Namespace) -> None:
 
     started = time.perf_counter()
     model = runtime._load_model(args, model_path)
-    devices = {
-        parameter.device
-        for layer in common._decoder_layers(model)
-        for parameter in layer.parameters()
-    }
-    devices.add(model.lm_head.weight.device)
-    assert len(devices) == 1
     output_weight = model.lm_head.weight.detach().float()
     teacher_batches = _capture_sampled_teacher_batches(
         model,
@@ -764,7 +833,7 @@ def _profile_sampled_suffix(args: argparse.Namespace) -> None:
         snapshot_cache=snapshot_cache,
         anchor_rank=args.anchor_rank,
         covariance_damping=args.covariance_damping,
-        decoder_relative_jitter=args.decoder_relative_jitter,
+        decoder_relative_jitter=0.0,
         keep_factors=False,
     )
 
@@ -787,7 +856,7 @@ def _profile_sampled_suffix(args: argparse.Namespace) -> None:
                 objective=objective,
                 source_ranks=[rank] * common.NUM_KV_HEADS,
                 anchor_rank=args.anchor_rank,
-                decoder_relative_jitter=args.decoder_relative_jitter,
+                decoder_relative_jitter=0.0,
                 device=layer.self_attn.v_proj.weight.device,
             )
             interventions[(layer_index, rank)] = factors
@@ -800,14 +869,14 @@ def _profile_sampled_suffix(args: argparse.Namespace) -> None:
         start, stop = teacher_batch.start, teacher_batch.stop
         input_ids = profile_sequences[start:stop].to(input_device)
         batch_positions = positions[start:stop]
-        statistics = _statistics_to_device(
-            teacher_batch.statistics,
-            output_weight.device,
-        )
         anchor_replay = capture_qwen_anchor_replay(model, input_ids=input_ids)
         anchor_hidden = gather_prediction_hidden(
             anchor_replay.final_hidden,
             batch_positions,
+        )
+        statistics = _statistics_to_device(
+            teacher_batch.statistics,
+            anchor_hidden.device,
         )
         anchor_lse = streaming_output_logsumexp(
             anchor_hidden,
@@ -1038,7 +1107,7 @@ def _profile(args: argparse.Namespace) -> None:
         snapshot_cache=snapshot_cache,
         anchor_rank=args.anchor_rank,
         covariance_damping=args.covariance_damping,
-        decoder_relative_jitter=args.decoder_relative_jitter,
+        decoder_relative_jitter=0.0,
         keep_factors=False,
     )
     anchor_metrics = common._evaluate_teacher_metrics(
@@ -1083,7 +1152,7 @@ def _profile(args: argparse.Namespace) -> None:
                 objective=objective,
                 source_ranks=source_ranks,
                 anchor_rank=args.anchor_rank,
-                decoder_relative_jitter=args.decoder_relative_jitter,
+                decoder_relative_jitter=0.0,
                 device=device,
             )
             common._install_factors(
@@ -1254,6 +1323,7 @@ def _allocate_layer_ranks(
     *,
     candidate_ranks: Sequence[int],
     anchor_rank: int,
+    target_average_rank: int,
     cost_key: str,
 ) -> tuple[list[list[int]], float, list[dict[str, Any]]]:
     indexed = {
@@ -1281,7 +1351,7 @@ def _allocate_layer_ranks(
         options.append(tuple(coordinate))
     allocation = allocate_metric_rank_exact(
         options,
-        total_rank_budget=common.NUM_LAYERS * anchor_rank,
+        total_rank_budget=common.NUM_LAYERS * target_average_rank,
         anchor_rank=anchor_rank,
     )
     schedule = []
@@ -1305,6 +1375,7 @@ def _allocate_factorized_layer_ranks(
     *,
     candidate_ranks: Sequence[int],
     anchor_rank: int,
+    target_average_rank: int,
     probe_rank: int,
     local_error_split: str,
     exponent: float,
@@ -1337,6 +1408,7 @@ def _allocate_factorized_layer_ranks(
         costs,
         candidate_ranks=candidate_ranks,
         anchor_rank=anchor_rank,
+        target_average_rank=target_average_rank,
     )
     schedule = [[rank] * common.NUM_KV_HEADS for rank in layer_ranks]
     contributions = [
@@ -1377,6 +1449,7 @@ def _allocate_two_sided_factorized_layer_ranks(
     *,
     candidate_ranks: Sequence[int],
     anchor_rank: int,
+    target_average_rank: int,
     compression_probe_rank: int,
     expansion_probe_rank: int,
     local_error_split: str,
@@ -1425,6 +1498,7 @@ def _allocate_two_sided_factorized_layer_ranks(
         costs,
         candidate_ranks=candidate_ranks,
         anchor_rank=anchor_rank,
+        target_average_rank=target_average_rank,
     )
     schedule = [[rank] * common.NUM_KV_HEADS for rank in layer_ranks]
     contributions = [
@@ -1499,6 +1573,7 @@ def _two_sided_position_count_sweep(
     reference_schedule: Sequence[Sequence[int]],
     candidate_ranks: Sequence[int],
     anchor_rank: int,
+    target_average_rank: int,
     compression_probe_rank: int,
     expansion_probe_rank: int,
     local_error_split: str,
@@ -1512,6 +1587,7 @@ def _two_sided_position_count_sweep(
             factor_results,
             candidate_ranks=candidate_ranks,
             anchor_rank=anchor_rank,
+            target_average_rank=target_average_rank,
             compression_probe_rank=compression_probe_rank,
             expansion_probe_rank=expansion_probe_rank,
             local_error_split=local_error_split,
@@ -1672,13 +1748,36 @@ def _finalize(args: argparse.Namespace) -> None:
         raise FileExistsError(output_dir)
 
     model = runtime._load_model(args, model_path)
-    teacher = common._capture_teacher(
-        model,
-        confirmation_sequences,
-        batch_size=args.batch_size,
-        vocab_chunk_size=args.vocab_chunk_size,
-        label="layer confirmation",
-    )
+    sampled_confirmation = args.profile_backend == "sampled_suffix"
+    confirmation_positions: torch.Tensor | None = None
+    output_weight: torch.Tensor | None = None
+    if sampled_confirmation:
+        position_counts, selection_count = _terminal_position_configuration(args)
+        confirmation_positions = nested_prediction_positions(
+            num_windows=len(confirmation_sequences),
+            sequence_length=args.sequence_length,
+            position_counts=position_counts,
+            seed=args.terminal_position_seed + 1,
+        )
+        output_weight = model.lm_head.weight.detach().float()
+        teacher = _capture_sampled_teacher_batches(
+            model,
+            confirmation_sequences,
+            confirmation_positions,
+            output_weight=output_weight,
+            start_window=0,
+            batch_size=args.batch_size,
+            vocab_chunk_size=args.vocab_chunk_size,
+            shard=None,
+        )
+    else:
+        teacher = common._capture_teacher(
+            model,
+            confirmation_sequences,
+            batch_size=args.batch_size,
+            vocab_chunk_size=args.vocab_chunk_size,
+            label="layer confirmation",
+        )
     snapshot_cache, snapshot_manifest = common._load_snapshot_cache(
         snapshot_dir,
         model_path=model_path,
@@ -1700,7 +1799,7 @@ def _finalize(args: argparse.Namespace) -> None:
         snapshot_cache=snapshot_cache,
         anchor_rank=args.anchor_rank,
         covariance_damping=args.covariance_damping,
-        decoder_relative_jitter=args.decoder_relative_jitter,
+        decoder_relative_jitter=0.0,
         keep_factors=False,
     )
 
@@ -1718,6 +1817,7 @@ def _finalize(args: argparse.Namespace) -> None:
                 merged["records"],
                 candidate_ranks=candidate_ranks,
                 anchor_rank=args.anchor_rank,
+                target_average_rank=args.target_average_rank,
                 cost_key=cost_key,
             )
             candidates[label] = schedule
@@ -1731,6 +1831,7 @@ def _finalize(args: argparse.Namespace) -> None:
                 factor_results,
                 candidate_ranks=candidate_ranks,
                 anchor_rank=args.anchor_rank,
+                target_average_rank=args.target_average_rank,
                 probe_rank=args.factorized_probe_rank,
                 local_error_split=args.local_error_split,
                 exponent=allocation_exponent,
@@ -1743,6 +1844,7 @@ def _finalize(args: argparse.Namespace) -> None:
                     factor_results,
                     candidate_ranks=candidate_ranks,
                     anchor_rank=args.anchor_rank,
+                    target_average_rank=args.target_average_rank,
                     compression_probe_rank=compression_probe_rank,
                     expansion_probe_rank=args.factorized_probe_rank,
                     local_error_split=args.local_error_split,
@@ -1767,6 +1869,7 @@ def _finalize(args: argparse.Namespace) -> None:
                     reference_schedule=schedule,
                     candidate_ranks=candidate_ranks,
                     anchor_rank=args.anchor_rank,
+                    target_average_rank=args.target_average_rank,
                     compression_probe_rank=compression_probe_rank,
                     expansion_probe_rank=args.factorized_probe_rank,
                     local_error_split=args.local_error_split,
@@ -1788,29 +1891,45 @@ def _finalize(args: argparse.Namespace) -> None:
                 snapshot_cache=snapshot_cache,
                 anchor_rank=args.anchor_rank,
                 covariance_damping=args.covariance_damping,
-                decoder_relative_jitter=args.decoder_relative_jitter,
+                decoder_relative_jitter=0.0,
                 keep_factors=False,
             )
             closure_diagnostics[label] = diagnostics
-        confirmation[label] = common._evaluate_teacher_metrics(
-            model,
-            teacher,
-            vocab_chunk_size=args.vocab_chunk_size,
-        )
+        if sampled_confirmation:
+            assert confirmation_positions is not None and output_weight is not None
+            confirmation[label] = _evaluate_sampled_teacher_metrics(
+                model,
+                teacher,
+                confirmation_sequences,
+                confirmation_positions,
+                output_weight=output_weight,
+                position_counts=position_counts,
+                selection_count=selection_count,
+                vocab_chunk_size=args.vocab_chunk_size,
+            )
+        else:
+            confirmation[label] = common._evaluate_teacher_metrics(
+                model,
+                teacher,
+                vocab_chunk_size=args.vocab_chunk_size,
+            )
         _log(
             f"confirmation {label}: "
             f"KL={confirmation[label]['terminal_kl']['mean']:.9g}"
         )
 
+    eligible_candidates = set(candidates)
+    if args.target_average_rank == args.anchor_rank:
+        eligible_candidates.add("uniform_anchor")
     if args.force_selected_candidate is None:
         selected_name = min(
-            schedules,
+            eligible_candidates,
             key=lambda label: (confirmation[label]["terminal_kl"]["mean"], label),
         )
         selection_metric = "lowest disjoint-confirmation mean terminal KL"
     else:
         selected_name = args.force_selected_candidate
-        assert selected_name in schedules
+        assert selected_name in eligible_candidates
         selection_metric = (
             "explicit forced export after disjoint-confirmation evaluation"
         )
@@ -1823,7 +1942,7 @@ def _finalize(args: argparse.Namespace) -> None:
         snapshot_cache=snapshot_cache,
         anchor_rank=args.anchor_rank,
         covariance_damping=args.covariance_damping,
-        decoder_relative_jitter=args.decoder_relative_jitter,
+        decoder_relative_jitter=0.0,
         keep_factors=True,
     )
     assert selected_factors is not None
@@ -1914,6 +2033,15 @@ def _finalize(args: argparse.Namespace) -> None:
         },
         "confirmation": {
             "dataset": _profile_dataset_name(args),
+            "backend": args.profile_backend,
+            "sampled_terminal_kl": (
+                {
+                    **configuration["sampled_terminal_kl"],
+                    "position_seed": args.terminal_position_seed + 1,
+                }
+                if sampled_confirmation
+                else None
+            ),
             "windows": (
                 args.confirmation_windows * _domain_window_multiplier(args)
             ),
@@ -1932,9 +2060,15 @@ def _finalize(args: argparse.Namespace) -> None:
         },
         "selection": {
             "constraint": "exact per-layer rank budget with one rank per layer",
-            "target_layer_rank_sum": common.NUM_LAYERS * args.anchor_rank,
+            "profiling_anchor_rank": args.anchor_rank,
+            "target_average_rank": args.target_average_rank,
+            "target_layer_rank_sum": (
+                common.NUM_LAYERS * args.target_average_rank
+            ),
             "target_source_rank_sum": (
-                common.NUM_LAYERS * common.NUM_KV_HEADS * args.anchor_rank
+                common.NUM_LAYERS
+                * common.NUM_KV_HEADS
+                * args.target_average_rank
             ),
             "candidate_ranks": list(candidate_ranks),
             "rank_128_endpoint": configuration["rank_128_endpoint"],
@@ -1944,7 +2078,7 @@ def _finalize(args: argparse.Namespace) -> None:
             "selected_candidate": selected_name,
             "selected_schedule": selected_schedule,
             "selected_accounting": selected_accounting,
-            "uniform_is_eligible": True,
+            "uniform_is_eligible": args.target_average_rank == args.anchor_rank,
             "selection_metric": selection_metric,
             "forced_selected_candidate": args.force_selected_candidate,
         },

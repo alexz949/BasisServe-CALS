@@ -42,6 +42,18 @@ PROFILES = {
         "checkpoint_format": "basisserve.llama2_7b.iclr_v_factors.v1",
         "quality_format": "basisserve.llama2_7b.iclr_quality.v1",
     },
+    "qwen3-32b": {
+        "label": "Qwen3-32B-Base",
+        "prefix": "Q3-32B",
+        "checkpoint_format": "basisserve.qwen3_32b.iclr_v_factors.v1",
+        "quality_format": "basisserve.qwen3_32b.iclr_quality.v1",
+    },
+    "llama31-70b": {
+        "label": "Llama-3.1-70B",
+        "prefix": "L31-70B",
+        "checkpoint_format": "basisserve.llama31_70b.iclr_v_factors.v1",
+        "quality_format": "basisserve.llama31_70b.iclr_quality.v1",
+    },
 }
 
 

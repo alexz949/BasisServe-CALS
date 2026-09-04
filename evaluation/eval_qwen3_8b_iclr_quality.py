@@ -65,6 +65,18 @@ QUALITY_PROFILES = {
         "quality": "basisserve.llama2_7b.iclr_quality.v1",
         "slug": "llama2_7b",
     },
+    "qwen3_32b": {
+        "label": "Qwen3-32B-Base",
+        "checkpoint": "basisserve.qwen3_32b.iclr_v_factors.v1",
+        "quality": "basisserve.qwen3_32b.iclr_quality.v1",
+        "slug": "qwen3_32b",
+    },
+    "llama31_70b": {
+        "label": "Llama-3.1-70B",
+        "checkpoint": "basisserve.llama31_70b.iclr_v_factors.v1",
+        "quality": "basisserve.llama31_70b.iclr_quality.v1",
+        "slug": "llama31_70b",
+    },
 }
 FORMAT = ""
 DESCRIPTION = ""
@@ -273,6 +285,142 @@ def install_c1_allocation(
     return installation
 
 
+@torch.no_grad()
+def install_c1_uniform_factor_bank(
+    model: nn.Module,
+    checkpoint_dir: Path,
+    manifest: Mapping[str, Any],
+) -> list[dict[str, Any]] | None:
+    """Fold a uniform-rank sweep-6 C1 factor bank into dense HF V/O slots."""
+
+    artifact = manifest.get("artifact", {})
+    result_path = (checkpoint_dir / str(artifact.get("file", ""))).resolve()
+    if not _check(result_path.is_file(), f"missing C1 factor bank: {result_path}"):
+        return None
+    if not _check(_sha256(result_path) == artifact.get("sha256"), "C1 factor-bank hash mismatch"):
+        return None
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    fit_config = result.get("fit_config", {})
+    records = result.get("records", ())
+    layers = _decoder_layers(model)
+    config = model.config
+    num_layers = int(config.num_hidden_layers)
+    num_query_heads = int(config.num_attention_heads)
+    num_kv_heads = int(config.num_key_value_heads)
+    hidden_size = int(config.hidden_size)
+    head_dim = int(getattr(config, "head_dim", 0) or hidden_size // num_query_heads)
+    rank = int(manifest.get("compression", {}).get("equivalent_rank_target", 0))
+    valid = all(
+        (
+            _check(result.get("status") == "complete", "C1 factor bank is incomplete"),
+            _check(
+                fit_config.get("model_config_sha256")
+                == manifest.get("model", {}).get("config_sha256"),
+                "C1 factor-bank model hash mismatch",
+            ),
+            _check(len(layers) == num_layers, "decoder layer count mismatch"),
+            _check(len(records) == num_layers, "C1 factor-bank layer count mismatch"),
+            _check(num_query_heads % num_kv_heads == 0, "invalid GQA/MHA geometry"),
+            _check(int(fit_config.get("cache_rank_per_head", 0)) == rank, "uniform C1 rank mismatch"),
+            _check(int(fit_config.get("encoder_sweeps", 0)) == 6, "uniform C1 bank is not sweep 6"),
+            _check(
+                fit_config.get("checkpoint_policy")
+                == "fixed decoder-refitted endpoint after encoder sweep 6",
+                "uniform C1 checkpoint policy mismatch",
+            ),
+            _check(fit_config.get("decoder_objective") == "full_layer", "uniform C1 decoder objective mismatch"),
+        )
+    )
+    if not valid:
+        return None
+
+    installation: list[dict[str, Any]] = []
+    heads_per_source = num_query_heads // num_kv_heads
+    factor_bank_dir = result_path.parent
+    for layer_index, layer in enumerate(layers):
+        started = time.perf_counter()
+        record = records[layer_index]
+        factor_record = record.get("artifact", {})
+        factor_path = factor_bank_dir / str(factor_record.get("file", ""))
+        record_matches = all(
+            (
+                _check(int(record.get("layer", -1)) == layer_index, f"uniform C1 layer order mismatch at {layer_index}"),
+                _check(
+                    factor_path.is_file()
+                    and _sha256(factor_path) == factor_record.get("sha256"),
+                    f"uniform C1 factor hash mismatch at layer {layer_index}",
+                ),
+                _check(
+                    int(record.get("checkpoint", {}).get("sweep", -1)) == 6,
+                    f"uniform C1 factor is not sweep 6 at layer {layer_index}",
+                ),
+            )
+        )
+        if not record_matches:
+            return None
+        payload = load_file(str(factor_path), device="cpu")
+        expected_keys = {"value_coordinate_encoders", "head_output_decoders"}
+        if not _check(set(payload) == expected_keys, f"unexpected uniform C1 tensors at layer {layer_index}"):
+            return None
+        encoders = payload["value_coordinate_encoders"]
+        decoders = payload["head_output_decoders"]
+        shapes_match = all(
+            (
+                tuple(encoders.shape) == (num_kv_heads, head_dim, rank),
+                tuple(decoders.shape) == (num_query_heads, rank, hidden_size),
+            )
+        )
+        if not _check(shapes_match, f"uniform C1 tensor geometry mismatch at layer {layer_index}"):
+            return None
+        v_proj = layer.self_attn.v_proj
+        o_proj = layer.self_attn.o_proj
+        projections_match = all(
+            (
+                isinstance(v_proj, nn.Linear),
+                isinstance(o_proj, nn.Linear),
+                v_proj.bias is None,
+                o_proj.bias is None,
+                tuple(v_proj.weight.shape) == (num_kv_heads * head_dim, hidden_size),
+                tuple(o_proj.weight.shape) == (hidden_size, num_query_heads * head_dim),
+                v_proj.weight.device.type == "cuda",
+                o_proj.weight.device == v_proj.weight.device,
+            )
+        )
+        if not _check(projections_match, f"unsupported uniform C1 projections at layer {layer_index}"):
+            return None
+
+        device = v_proj.weight.device
+        dense_v = v_proj.weight.detach().float()
+        work_a = encoders.to(device=device, dtype=torch.float32)
+        work_d = decoders.to(device=device, dtype=torch.float32)
+        padded_v = torch.zeros_like(dense_v)
+        padded_o = torch.zeros_like(o_proj.weight, dtype=torch.float32)
+        for source in range(num_kv_heads):
+            dense_rows = slice(source * head_dim, (source + 1) * head_dim)
+            latent_rows = slice(source * head_dim, source * head_dim + rank)
+            padded_v[latent_rows].copy_(work_a[source].T @ dense_v[dense_rows])
+            first_head = source * heads_per_source
+            for head in range(first_head, first_head + heads_per_source):
+                latent_columns = slice(head * head_dim, head * head_dim + rank)
+                padded_o[:, latent_columns].copy_(work_d[head].T)
+        v_proj.weight.copy_(padded_v.to(dtype=v_proj.weight.dtype))
+        o_proj.weight.copy_(padded_o.to(dtype=o_proj.weight.dtype))
+        installation.append(
+            {
+                "layer": layer_index,
+                "factor_file": str(factor_path),
+                "factor_sha256": factor_record["sha256"],
+                "source_ranks": [rank] * num_kv_heads,
+                "maximum_padded_rank": rank,
+                "runtime": "uniform C1 coordinates zero-padded into dense HF V/O slots",
+                "elapsed_seconds": time.perf_counter() - started,
+            }
+        )
+        del payload, encoders, decoders, dense_v, work_a, work_d, padded_v, padded_o
+        torch.cuda.empty_cache()
+    return installation
+
+
 def _accuracy_metric(metrics: Mapping[str, Any]) -> tuple[str, float] | None:
     for metric in ("acc_norm", "acc"):
         for key, value in metrics.items():
@@ -283,16 +431,31 @@ def _accuracy_metric(metrics: Mapping[str, Any]) -> tuple[str, float] | None:
 
 def summarize_commonsense(
     evaluation: Mapping[str, Any],
+    tasks: tuple[str, ...] = TASKS,
 ) -> tuple[list[dict[str, Any]], float] | None:
     results = evaluation.get("results", {})
     rows: list[dict[str, Any]] = []
-    for task in TASKS:
+    for task in tasks:
         selected = _accuracy_metric(results.get(task, {}))
         if not _check(selected is not None, f"no acc_norm or acc metric for {task}"):
             return None
         metric, value = selected
         rows.append({"task": task, "metric": metric, "value": value})
     return rows, sum(row["value"] for row in rows) / len(rows)
+
+
+def _csv_selection(
+    value: str,
+    *,
+    allowed: tuple[str, ...],
+    label: str,
+) -> tuple[str, ...] | None:
+    selected = tuple(part.strip() for part in value.split(",") if part.strip())
+    valid = bool(selected) and len(set(selected)) == len(selected)
+    valid = valid and not (set(selected) - set(allowed))
+    if not _check(valid, f"invalid {label}: {value}"):
+        return None
+    return selected
 
 
 def _load_stage(
@@ -346,21 +509,60 @@ def _stage_base(
 
 @torch.inference_mode()
 def evaluate(args: argparse.Namespace) -> int:
+    selected_stages = _csv_selection(
+        args.stages,
+        allowed=tuple(STAGE_FORMATS),
+        label="quality stages",
+    )
+    selected_tasks = _csv_selection(
+        args.tasks,
+        allowed=TASKS,
+        label="commonsense tasks",
+    )
     valid = all(
         (
+            selected_stages is not None,
+            selected_tasks is not None,
             _check(torch.cuda.is_available(), "CUDA is required"),
-            _check(torch.cuda.device_count() == 4, "exactly four L40S GPUs must be visible"),
+            _check(
+                torch.cuda.device_count() == args.expected_gpu_count,
+                f"exactly {args.expected_gpu_count} L40S GPUs must be visible",
+            ),
             _check(args.batch_size > 0, "batch size must be positive"),
             _check(args.lm_eval_batch_size > 0, "lm-eval batch size must be positive"),
+            _check(args.expected_gpu_count > 0, "expected GPU count must be positive"),
+            _check(args.quality_shard_count > 0, "quality shard count must be positive"),
+            _check(
+                0 <= args.quality_shard_index < args.quality_shard_count,
+                "quality shard index/count are invalid",
+            ),
         )
     )
     if not valid:
         return 2
-    gpu_names = [torch.cuda.get_device_name(index) for index in range(4)]
+    selected_stages = tuple(selected_stages or ())
+    selected_tasks = tuple(selected_tasks or ())
+    if args.quality_shard_count == 1:
+        complete_protocol = (
+            selected_stages == tuple(STAGE_FORMATS) and selected_tasks == TASKS
+        )
+        if not _check(
+            complete_protocol,
+            "an unsharded run must execute every quality stage and task",
+        ):
+            return 2
+    elif not _check(
+        "commonsense" in selected_stages,
+        "each sharded run must execute its commonsense task subset",
+    ):
+        return 2
+    gpu_names = [
+        torch.cuda.get_device_name(index) for index in range(args.expected_gpu_count)
+    ]
     if not _check(all(name == "NVIDIA L40S" for name in gpu_names), f"unexpected GPUs: {gpu_names}"):
         return 2
     torch.set_num_threads(args.torch_num_threads)
-    for index in range(4):
+    for index in range(args.expected_gpu_count):
         torch.cuda.reset_peak_memory_stats(index)
 
     model_path = Path(args.model).expanduser().resolve()
@@ -394,24 +596,38 @@ def evaluate(args: argparse.Namespace) -> int:
     c1 = compression["method"] == "c1-two-sided-kl"
     artifact_sha256 = None if dense else str(manifest["artifact"]["sha256"])
 
+    commonsense_name = (
+        "commonsense.json"
+        if args.quality_shard_count == 1
+        else f"commonsense-shard-{args.quality_shard_index:02d}.json"
+    )
     stage_paths = {
-        stage: output_dir / f"{stage}.json" for stage in STAGE_FORMATS
+        "wikitext2": output_dir / "wikitext2.json",
+        "c4": output_dir / "c4.json",
+        "commonsense": output_dir / commonsense_name,
     }
     stages = {
-        stage: _load_stage(
-            path,
-            stage=stage,
-            run_id=run_id,
-            checkpoint_manifest_sha256=checkpoint_manifest_sha256,
+        stage: (
+            _load_stage(
+                path,
+                stage=stage,
+                run_id=run_id,
+                checkpoint_manifest_sha256=checkpoint_manifest_sha256,
+            )
+            if stage in selected_stages
+            else None
         )
         for stage, path in stage_paths.items()
     }
     if any(stage is not None and stage.get("status") == "mismatch" for stage in stages.values()):
         return 2
 
-    c4_sequences, c4_provenance = _load_windows(
-        Path(args.c4_windows), model_path=model_path
-    )
+    c4_sequences = None
+    c4_provenance = None
+    if "c4" in selected_stages:
+        c4_sequences, c4_provenance = _load_windows(
+            Path(args.c4_windows), model_path=model_path
+        )
     tokenizer = AutoTokenizer.from_pretrained(
         str(model_path), local_files_only=True, use_fast=True
     )
@@ -424,11 +640,15 @@ def evaluate(args: argparse.Namespace) -> int:
         local_files_only=True,
         attn_implementation="sdpa",
         device_map="balanced",
-        max_memory={index: f"{args.max_memory_per_gpu_gib}GiB" for index in range(4)},
+        max_memory={
+            index: f"{args.max_memory_per_gpu_gib}GiB"
+            for index in range(args.expected_gpu_count)
+        },
     ).eval()
     model.config.use_cache = False
     used_devices = _model_cuda_devices(model)
-    if not _check(used_devices == [0, 1, 2, 3], f"model uses CUDA devices {used_devices}"):
+    expected_devices = list(range(args.expected_gpu_count))
+    if not _check(used_devices == expected_devices, f"model uses CUDA devices {used_devices}"):
         return 2
 
     installation: list[dict[str, Any]] = []
@@ -462,10 +682,24 @@ def evaluate(args: argparse.Namespace) -> int:
             "cuda_devices_used": used_devices,
             "cuda_device_names": gpu_names,
             "installation": installation,
+            "quality_shard_index": args.quality_shard_index,
+            "quality_shard_count": args.quality_shard_count,
+        },
+        "environment": {
+            "conda_environment": os.environ.get("CONDA_DEFAULT_ENV"),
+            "python": sys.version,
+            "torch": torch.__version__,
+            "transformers": importlib.metadata.version("transformers"),
+            "datasets": importlib.metadata.version("datasets"),
+            "lm_eval": importlib.metadata.version("lm-eval"),
+            "cuda_devices": gpu_names,
+            "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+            "slurm_array_task_id": os.environ.get("SLURM_ARRAY_TASK_ID"),
+            "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
         },
     }
 
-    if stages["wikitext2"] is None:
+    if "wikitext2" in selected_stages and stages["wikitext2"] is None:
         wiki_started = time.perf_counter()
         wiki_metrics = _eval_ppl_fp32_loss(
             model,
@@ -494,7 +728,9 @@ def evaluate(args: argparse.Namespace) -> int:
         _atomic_json(stage_paths["wikitext2"], stages["wikitext2"])
         print(f"[WikiText-2] ppl={wiki_metrics['ppl']:.9f}", flush=True)
 
-    if stages["c4"] is None:
+    if "c4" in selected_stages and stages["c4"] is None:
+        if not _check(c4_sequences is not None, "C4 windows were not loaded"):
+            return 2
         c4_started = time.perf_counter()
         c4_metrics = _evaluate_document_ppl(
             model,
@@ -526,7 +762,7 @@ def evaluate(args: argparse.Namespace) -> int:
         _atomic_json(stage_paths["c4"], stages["c4"])
         print(f"[C4] ppl={c4_metrics['ppl']:.9f}", flush=True)
 
-    if stages["commonsense"] is None:
+    if "commonsense" in selected_stages and stages["commonsense"] is None:
         commonsense_started = time.perf_counter()
         model.config.use_cache = True
         lm = HFLM(
@@ -538,14 +774,14 @@ def evaluate(args: argparse.Namespace) -> int:
         )
         evaluation = lm_eval.simple_evaluate(
             model=lm,
-            tasks=list(TASKS),
+            tasks=list(selected_tasks),
             num_fewshot=0,
             task_manager=TaskManager(),
             log_samples=False,
         )
         if not _check(evaluation is not None, "lm-eval returned no results"):
             return 2
-        summarized = summarize_commonsense(evaluation)
+        summarized = summarize_commonsense(evaluation, selected_tasks)
         if summarized is None:
             return 2
         task_rows, average_accuracy = summarized
@@ -560,11 +796,13 @@ def evaluate(args: argparse.Namespace) -> int:
             ),
             **common,
             "protocol": {
-                "tasks": list(TASKS),
+                "tasks": list(selected_tasks),
                 "num_fewshot": 0,
                 "batch_size": args.lm_eval_batch_size,
                 "max_length": 4096,
                 "metric_selection": "acc_norm when present, otherwise acc",
+                "quality_shard_index": args.quality_shard_index,
+                "quality_shard_count": args.quality_shard_count,
             },
             "task_accuracy": task_rows,
             "average_accuracy": average_accuracy,
@@ -573,6 +811,17 @@ def evaluate(args: argparse.Namespace) -> int:
         }
         _write_json(stage_paths["commonsense"], stages["commonsense"])
         print(f"[Commonsense] average_accuracy={average_accuracy:.9f}", flush=True)
+
+    if args.quality_shard_count > 1:
+        complete = all(stages[stage] is not None for stage in selected_stages)
+        if not _check(complete, "one or more requested quality stages are incomplete"):
+            return 2
+        print(
+            f"[Quality shard] complete index={args.quality_shard_index}/"
+            f"{args.quality_shard_count - 1} tasks={','.join(selected_tasks)}",
+            flush=True,
+        )
+        return 0
 
     wiki = stages["wikitext2"]
     c4 = stages["c4"]
@@ -620,7 +869,7 @@ def evaluate(args: argparse.Namespace) -> int:
             "cuda_devices": gpu_names,
             "peak_cuda_allocated_bytes": {
                 str(index): int(torch.cuda.max_memory_allocated(index))
-                for index in range(4)
+                for index in range(args.expected_gpu_count)
             },
             "torch_num_threads": torch.get_num_threads(),
         },
@@ -646,6 +895,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--lm-eval-batch-size", type=int, default=8)
     parser.add_argument("--max-memory-per-gpu-gib", type=int, default=44)
     parser.add_argument("--torch-num-threads", type=int, default=8)
+    parser.add_argument(
+        "--stages",
+        default=",".join(STAGE_FORMATS),
+        help="Comma-separated quality stages assigned to this process",
+    )
+    parser.add_argument(
+        "--tasks",
+        default=",".join(TASKS),
+        help="Comma-separated commonsense tasks assigned to this process",
+    )
+    parser.add_argument("--quality-shard-index", type=int, default=0)
+    parser.add_argument("--quality-shard-count", type=int, default=1)
+    parser.add_argument("--expected-gpu-count", type=int, default=4)
     return parser.parse_args()
 
 

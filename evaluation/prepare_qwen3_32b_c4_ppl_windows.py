@@ -17,10 +17,12 @@ from evaluation import build_llama31_8b_palu_m_checkpoint as windows_builder  # 
 
 
 DATASET_REVISION = "1588ec454efa1a09f29cd18ddd04fe05fc8653a2"
+MODEL_PROFILE = "qwen3_32b"
+DESCRIPTION = __doc__
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.add_argument("--model", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--samples", type=int, default=128)
@@ -38,7 +40,7 @@ def main() -> None:
         raise ValueError("the controlled C4-PPL protocol requires 128 x 2048 tokens")
     if args.shuffle_buffer < args.samples:
         raise ValueError("shuffle buffer must cover the requested sample count")
-    windows_builder.activate_model_profile("qwen3_32b")
+    windows_builder.activate_model_profile(MODEL_PROFILE)
     builder_args = argparse.Namespace(
         model=args.model,
         output_dir=args.output_dir,

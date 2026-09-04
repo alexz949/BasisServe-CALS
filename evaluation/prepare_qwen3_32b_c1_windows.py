@@ -26,8 +26,14 @@ MODEL_PROFILE = "qwen3_32b"
 
 def activate_model_profile(name: str) -> None:
     global MODEL_PROFILE
-    if name not in {"qwen3_8b", "qwen3_32b"}:
-        raise ValueError(f"unsupported Qwen3 C1 window profile: {name}")
+    if name not in {
+        "qwen3_8b",
+        "qwen3_32b",
+        "llama31_8b",
+        "llama31_70b",
+        "llama2_7b",
+    }:
+        raise ValueError(f"unsupported C1 window profile: {name}")
     MODEL_PROFILE = name
 
 

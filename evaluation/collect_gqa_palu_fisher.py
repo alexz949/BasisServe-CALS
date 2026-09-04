@@ -66,7 +66,10 @@ def _load_windows(
     if not path.is_file() or not manifest_path.is_file():
         raise FileNotFoundError(f"missing windows artifact or manifest under {path.parent}")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("format") != builder.WINDOWS_FORMAT:
+    if manifest.get("format") not in (
+        builder.WINDOWS_FORMAT,
+        builder.PACKED_WINDOWS_FORMAT,
+    ):
         raise ValueError("incompatible calibration-window format")
     if manifest["model"]["config_sha256"] != model_metadata["config_sha256"]:
         raise ValueError("calibration windows belong to another model config")
@@ -162,7 +165,10 @@ def _selective_activation_offload(enabled: bool):
 
 
 def _chunked_official_palu_loss_and_backward(
-    model: nn.Module, batch: Tensor, chunk_size: int = 64
+    model: nn.Module,
+    batch: Tensor,
+    *,
+    chunk_size: int,
 ) -> Tensor:
     """Compute PaLU's CE in chunks, then backprop one assembled hidden gradient."""
     # PaLU calls the causal LM with input=batch[:, :-1], labels=batch[:, 1:].
@@ -202,6 +208,7 @@ def collect(args: argparse.Namespace) -> None:
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is required")
     builder.activate_model_profile(args.profile)
+    builder.SEQUENCE_LENGTH = args.sequence_length
     torch.set_num_threads(args.torch_num_threads)
     tensor_parallel = args.tensor_parallel_size > 1
     local_rank = 0
@@ -295,7 +302,11 @@ def collect(args: argparse.Namespace) -> None:
         outputs = None
         with _selective_activation_offload(activation_offload):
             if tensor_parallel:
-                loss = _chunked_official_palu_loss_and_backward(model, batch)
+                loss = _chunked_official_palu_loss_and_backward(
+                    model,
+                    batch,
+                    chunk_size=args.loss_chunk_size,
+                )
             else:
                 outputs = model(
                     input_ids=batch[:, :-1],
@@ -365,6 +376,7 @@ def collect(args: argparse.Namespace) -> None:
             "samples": args.samples,
             "sequence_length": builder.SEQUENCE_LENGTH,
             "loss_semantics": "official PaLU shifted-input/shifted-label HF causal-LM loss",
+            "loss_chunk_size": args.loss_chunk_size,
             "aggregation": "sqrt(mean(per-sample gradient squared)), then matrix mean",
             "scalars": fisher_scalars,
             "mean_loss": sum(losses) / len(losses),
@@ -386,7 +398,10 @@ def collect(args: argparse.Namespace) -> None:
             "path": str(windows_path),
             "sha256": builder._sha256(windows_path),
             "manifest_sha256": builder._sha256(windows_path.parent / "manifest.json"),
-            "sampling": windows_manifest["sampling"],
+            "sampling": windows_manifest.get(
+                "sampling",
+                windows_manifest.get("packing"),
+            ),
         },
         "elapsed_seconds": time.perf_counter() - started,
         "environment": {
@@ -429,6 +444,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--windows", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--samples", type=int, default=builder.CALIBRATION_SAMPLES)
+    parser.add_argument("--sequence-length", type=int, default=builder.SEQUENCE_LENGTH)
     parser.add_argument("--retained-ratio", type=float, default=0.75)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument(
@@ -444,9 +460,14 @@ def parse_args() -> argparse.Namespace:
         help="TP local ranks to offload (comma-separated), or 'all'/'none'",
     )
     parser.add_argument("--torch-num-threads", type=int, default=4)
+    parser.add_argument("--loss-chunk-size", type=int, default=1024)
     args = parser.parse_args()
     if args.samples <= 0:
         parser.error("--samples must be positive")
+    if args.sequence_length <= 0:
+        parser.error("--sequence-length must be positive")
+    if args.loss_chunk_size <= 0:
+        parser.error("--loss-chunk-size must be positive")
     if not 0.0 < args.retained_ratio <= 1.0:
         parser.error("--retained-ratio must be in (0, 1]")
     return args

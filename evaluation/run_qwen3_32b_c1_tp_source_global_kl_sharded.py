@@ -51,14 +51,28 @@ def activate_model_profile(name: str) -> None:
     if name == "qwen3_32b":
         slug = "qwen3_32b"
         MODEL_LABEL = "Qwen3-32B"
+        attention = "gqa"
     elif name == "qwen3_8b":
         slug = "qwen3_8b"
         MODEL_LABEL = "Qwen3-8B-Base"
+        attention = "gqa"
+    elif name == "llama31_8b":
+        slug = "llama31_8b"
+        MODEL_LABEL = "Llama-3.1-8B"
+        attention = "gqa"
+    elif name == "llama31_70b":
+        slug = "llama31_70b"
+        MODEL_LABEL = "Llama-3.1-70B"
+        attention = "gqa"
+    elif name == "llama2_7b":
+        slug = "llama2_7b"
+        MODEL_LABEL = "Llama-2-7B"
+        attention = "mha"
     else:
         raise ValueError(f"unknown Qwen3 C1 model profile: {name}")
-    FORMAT = f"basisserve.{slug}.gqa_c1.tp_source_global_kl_allocation.v2"
+    FORMAT = f"basisserve.{slug}.{attention}_c1.tp_source_global_kl_allocation.v2"
     PROFILE_FORMAT = (
-        f"basisserve.{slug}.gqa_c1.tp_source_global_kl_profile_shard.v1"
+        f"basisserve.{slug}.{attention}_c1.tp_source_global_kl_profile_shard.v1"
     )
 
 
@@ -92,7 +106,6 @@ def _add_shared_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--sequence-length", type=int, default=512)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--covariance-damping", type=float, default=1.0e-5)
-    parser.add_argument("--decoder-relative-jitter", type=float, default=0.0)
     parser.add_argument("--vocab-chunk-size", type=int, default=8192)
     parser.add_argument("--torch-num-threads", type=int, default=4)
     parser.add_argument(
@@ -173,8 +186,8 @@ def _validate_shared(
     )
     if min(positive) <= 0:
         raise ValueError("sample and compute arguments must be positive")
-    if args.covariance_damping < 0 or args.decoder_relative_jitter < 0:
-        raise ValueError("damping and jitter must be non-negative")
+    if args.covariance_damping < 0:
+        raise ValueError("damping must be non-negative")
     candidate_ranks = common._parse_ranks(args.candidate_ranks)
     if args.anchor_rank not in candidate_ranks:
         raise ValueError("anchor rank must be one of the candidate ranks")
@@ -183,9 +196,6 @@ def _validate_shared(
         raise ValueError(
             "factor directories must provide every non-full-rank candidate"
         )
-    if args.window_start < common.FRESH_WINDOW_START:
-        raise ValueError("Global-KL windows must begin after the 320 ALS documents")
-
     model_path = Path(args.model).expanduser().resolve()
     snapshot_dir = args.snapshot_dir.expanduser().resolve()
     model_config_sha256 = common._sha256(model_path / "config.json")
@@ -195,6 +205,13 @@ def _validate_shared(
         snapshot_dir=snapshot_dir,
     )
     reference = next(iter(factor_results.values()))["fit_config"]
+    calibration_window_count = int(reference["fit_windows"]) + int(
+        reference["validation_windows"]
+    )
+    assert args.window_start >= calibration_window_count, (
+        "Global-KL windows overlap the ALS fit/validation prefix: "
+        f"start={args.window_start}, required={calibration_window_count}"
+    )
     if float(reference["covariance_damping"]) != args.covariance_damping:
         raise ValueError("Global-KL damping must match the ALS factor banks")
     if reference.get("work_dtype") != "float32":
@@ -206,16 +223,23 @@ def _validate_shared(
             "Global-KL requires activation-weighted SVD initialization"
         )
     encoder_sweeps = int(reference.get("encoder_sweeps", -1))
-    minimum_encoder_sweeps = int(reference.get("minimum_encoder_sweeps", -1))
-    if not 0 <= minimum_encoder_sweeps <= encoder_sweeps:
-        raise ValueError("factor banks have an invalid encoder sweep protocol")
-    if (
-        reference.get("selection_boundaries") != "decoder-closed"
-        or reference.get("decoder_objective") != "full_layer"
-    ):
-        raise ValueError(
-            "Global-KL requires decoder-closed full-layer factor banks"
-        )
+    assert encoder_sweeps == 6
+    assert (
+        reference.get("checkpoint_policy")
+        == "fixed decoder-refitted endpoint after encoder sweep 6"
+    )
+    assert reference.get("decoder_objective") == "full_layer"
+    forbidden = {
+        "minimum_encoder_sweeps",
+        "encoder_relative_tolerance",
+        "encoder_patience",
+        "decoder_relative_jitter",
+        "encoder_relative_damping",
+        "maximum_backtracks",
+        "selection_boundaries",
+        "selection",
+    }
+    assert not forbidden.intersection(reference)
     expected_manifest_sha = reference["snapshot_manifest_sha256"]
     if common._sha256(snapshot_dir / "manifest.json") != expected_manifest_sha:
         raise ValueError("factor banks and covariance manifest hashes disagree")
@@ -226,6 +250,13 @@ def _validate_shared(
         confirmation_windows=args.confirmation_windows,
         sequence_length=args.sequence_length,
     )
+    provenance = {
+        **provenance,
+        "als_fit_and_heldout_window_count": calibration_window_count,
+        "disjoint_from_als_fit_and_heldout_prefix": (
+            args.window_start >= calibration_window_count
+        ),
+    }
     return (
         model_path,
         snapshot_dir,
@@ -262,10 +293,7 @@ def _configuration(
         "factor_stage": {
             "encoder_initialization": fit_config["encoder_initialization"],
             "encoder_sweeps": int(fit_config["encoder_sweeps"]),
-            "minimum_encoder_sweeps": int(
-                fit_config["minimum_encoder_sweeps"]
-            ),
-            "selection_boundaries": fit_config["selection_boundaries"],
+            "checkpoint_policy": fit_config["checkpoint_policy"],
             "decoder_objective": fit_config["decoder_objective"],
         },
         "anchor_rank": args.anchor_rank,
@@ -275,7 +303,6 @@ def _configuration(
         "sequence_length": args.sequence_length,
         "batch_size": args.batch_size,
         "covariance_damping": args.covariance_damping,
-        "decoder_relative_jitter": args.decoder_relative_jitter,
         "vocab_chunk_size": args.vocab_chunk_size,
         "model_dtype": args.model_dtype,
         "attn_implementation": args.attn_implementation,
@@ -305,11 +332,14 @@ def _load_model(args: argparse.Namespace, model_path: Path) -> nn.Module:
         int(model.config.num_hidden_layers),
         int(model.config.num_attention_heads),
         int(model.config.num_key_value_heads),
-        int(getattr(model.config, "head_dim", -1)),
+        int(
+            getattr(model.config, "head_dim", 0)
+            or model.config.hidden_size // model.config.num_attention_heads
+        ),
         int(model.config.hidden_size),
     )
     expected = (
-        "qwen3",
+        common.MODEL_TYPE,
         common.NUM_LAYERS,
         common.NUM_QUERY_HEADS,
         common.NUM_KV_HEADS,
@@ -456,7 +486,7 @@ def _profile(args: argparse.Namespace) -> None:
         snapshot_cache=snapshot_cache,
         anchor_rank=args.anchor_rank,
         covariance_damping=args.covariance_damping,
-        decoder_relative_jitter=args.decoder_relative_jitter,
+        decoder_relative_jitter=0.0,
         keep_factors=False,
     )
     anchor_metrics = common._evaluate_teacher_metrics(
@@ -509,7 +539,7 @@ def _profile(args: argparse.Namespace) -> None:
                 objective=objective,
                 source_ranks=source_ranks,
                 anchor_rank=args.anchor_rank,
-                decoder_relative_jitter=args.decoder_relative_jitter,
+                decoder_relative_jitter=0.0,
                 device=device,
             )
             common._install_factors(
@@ -740,7 +770,7 @@ def _finalize(args: argparse.Namespace) -> None:
         snapshot_cache=snapshot_cache,
         anchor_rank=args.anchor_rank,
         covariance_damping=args.covariance_damping,
-        decoder_relative_jitter=args.decoder_relative_jitter,
+        decoder_relative_jitter=0.0,
         keep_factors=False,
     )
 
@@ -774,7 +804,7 @@ def _finalize(args: argparse.Namespace) -> None:
                 snapshot_cache=snapshot_cache,
                 anchor_rank=args.anchor_rank,
                 covariance_damping=args.covariance_damping,
-                decoder_relative_jitter=args.decoder_relative_jitter,
+                decoder_relative_jitter=0.0,
                 keep_factors=False,
             )
             closure_diagnostics[label] = diagnostics
@@ -801,7 +831,7 @@ def _finalize(args: argparse.Namespace) -> None:
         snapshot_cache=snapshot_cache,
         anchor_rank=args.anchor_rank,
         covariance_damping=args.covariance_damping,
-        decoder_relative_jitter=args.decoder_relative_jitter,
+        decoder_relative_jitter=0.0,
         keep_factors=True,
     )
     assert selected_factors is not None
@@ -829,7 +859,7 @@ def _finalize(args: argparse.Namespace) -> None:
                 snapshot_cache=snapshot_cache,
                 anchor_rank=args.anchor_rank,
                 covariance_damping=args.covariance_damping,
-                decoder_relative_jitter=args.decoder_relative_jitter,
+                decoder_relative_jitter=0.0,
                 keep_factors=False,
             )
             test_metrics["uniform_anchor"] = _eval_ppl_fp32_loss(

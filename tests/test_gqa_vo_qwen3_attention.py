@@ -372,6 +372,61 @@ def test_c1_triton_backend_dispatches_after_sdpa_prefill(monkeypatch) -> None:
 
 
 @torch.inference_mode()
+def test_c1_triton_backend_dispatches_complete_prefill(monkeypatch) -> None:
+    torch.manual_seed(20260903)
+    config = Qwen3Config(
+        vocab_size=64,
+        hidden_size=32,
+        intermediate_size=64,
+        num_hidden_layers=2,
+        num_attention_heads=4,
+        num_key_value_heads=2,
+        head_dim=8,
+        max_position_embeddings=64,
+        attention_dropout=0.0,
+        _attn_implementation="sdpa",
+    )
+    source = Qwen3ForCausalLM(config).float().eval()
+    expected_model = _exact_c1_sdpa_model(source).float().eval()
+    candidate = _exact_c1_sdpa_model(
+        source,
+        attention_backend="triton",
+    ).float().eval()
+    calls: list[tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...]]] = []
+
+    def fake_triton_prefill(
+        query: torch.Tensor,
+        key: torch.Tensor,
+        value: torch.Tensor,
+        *,
+        scale: float,
+    ) -> torch.Tensor:
+        calls.append((tuple(query.shape), tuple(key.shape), tuple(value.shape)))
+        return F.scaled_dot_product_attention(
+            query,
+            key,
+            value,
+            dropout_p=0.0,
+            is_causal=True,
+            scale=scale,
+            enable_gqa=True,
+        )
+
+    monkeypatch.setattr(
+        gqa_vo_qwen3,
+        "compressed_v_prefill_attention",
+        fake_triton_prefill,
+    )
+    input_ids = torch.arange(12).view(1, 12) % config.vocab_size
+    expected = expected_model(input_ids=input_ids, use_cache=False).logits
+    actual = candidate(input_ids=input_ids, use_cache=False).logits
+
+    assert len(calls) == config.num_hidden_layers
+    assert all(query_shape[-2] == 12 for query_shape, _, _ in calls)
+    torch.testing.assert_close(actual, expected, rtol=2e-6, atol=2e-6)
+
+
+@torch.inference_mode()
 def test_c1_dense_cuda_backend_dispatches_after_sdpa_prefill(monkeypatch) -> None:
     torch.manual_seed(20260831)
     config = Qwen3Config(

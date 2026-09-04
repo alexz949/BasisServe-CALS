@@ -52,7 +52,7 @@ from basisserve.core.global_rank_sensitivity import (  # noqa: E402
 )
 from basisserve.core.gqa_routed_ov_joint import (  # noqa: E402
     covariance_with_trace_damping,
-    evaluate_quadratic,
+    head_products,
     quadratic_from_target,
 )
 from basisserve.core.metric_rank_allocation import (  # noqa: E402
@@ -67,6 +67,8 @@ from evaluation.eval_attention_o_proj_collective_ppl import (  # noqa: E402
 FORMAT = "basisserve.qwen3_32b.gqa_c1.tp_source_global_kl_allocation.v1"
 FACTOR_FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
 MODEL_LABEL = "Qwen3-32B"
+MODEL_TYPE = "qwen3"
+ATTENTION_TYPE = "gqa"
 SNAPSHOT_FORMAT = "basisserve.attention_o_proj_covariances.v1"
 WINDOWS_FORMAT = "basisserve.calibration.c4_document_windows.v1"
 NUM_LAYERS = 64
@@ -88,13 +90,15 @@ RANK_DEPENDENT_CONFIG_KEYS = {
 def activate_model_profile(name: str) -> None:
     """Select an audited Qwen3 GQA geometry for shared C1 tooling."""
 
-    global FORMAT, FACTOR_FORMAT, MODEL_LABEL
+    global FORMAT, FACTOR_FORMAT, MODEL_LABEL, MODEL_TYPE, ATTENTION_TYPE
     global NUM_LAYERS, NUM_QUERY_HEADS, NUM_KV_HEADS, HEADS_PER_SOURCE
     global HEAD_DIM, HIDDEN_SIZE, QUERY_WIDTH
     if name == "qwen3_32b":
         FORMAT = "basisserve.qwen3_32b.gqa_c1.tp_source_global_kl_allocation.v1"
         FACTOR_FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
         MODEL_LABEL = "Qwen3-32B"
+        MODEL_TYPE = "qwen3"
+        ATTENTION_TYPE = "gqa"
         NUM_LAYERS = 64
         NUM_QUERY_HEADS = 64
         NUM_KV_HEADS = 8
@@ -104,9 +108,44 @@ def activate_model_profile(name: str) -> None:
         FORMAT = "basisserve.qwen3_8b.gqa_c1.tp_source_global_kl_allocation.v1"
         FACTOR_FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.v1"
         MODEL_LABEL = "Qwen3-8B-Base"
+        MODEL_TYPE = "qwen3"
+        ATTENTION_TYPE = "gqa"
         NUM_LAYERS = 36
         NUM_QUERY_HEADS = 32
         NUM_KV_HEADS = 8
+        HEAD_DIM = 128
+        HIDDEN_SIZE = 4096
+    elif name == "llama31_8b":
+        FORMAT = "basisserve.llama31_8b.gqa_c1.tp_source_global_kl_allocation.v1"
+        FACTOR_FORMAT = "basisserve.llama31_8b.gqa_c1_joint.v1"
+        MODEL_LABEL = "Llama-3.1-8B"
+        MODEL_TYPE = "llama"
+        ATTENTION_TYPE = "gqa"
+        NUM_LAYERS = 32
+        NUM_QUERY_HEADS = 32
+        NUM_KV_HEADS = 8
+        HEAD_DIM = 128
+        HIDDEN_SIZE = 4096
+    elif name == "llama31_70b":
+        FORMAT = "basisserve.llama31_70b.gqa_c1.tp_source_global_kl_allocation.v1"
+        FACTOR_FORMAT = "basisserve.llama31_70b.gqa_c1_joint.v1"
+        MODEL_LABEL = "Llama-3.1-70B"
+        MODEL_TYPE = "llama"
+        ATTENTION_TYPE = "gqa"
+        NUM_LAYERS = 80
+        NUM_QUERY_HEADS = 64
+        NUM_KV_HEADS = 8
+        HEAD_DIM = 128
+        HIDDEN_SIZE = 8192
+    elif name == "llama2_7b":
+        FORMAT = "basisserve.llama2_7b.mha_c1.tp_source_global_kl_allocation.v1"
+        FACTOR_FORMAT = "basisserve.llama2_7b.mha_c1_v96_joint.v1"
+        MODEL_LABEL = "Llama-2-7B"
+        MODEL_TYPE = "llama"
+        ATTENTION_TYPE = "mha"
+        NUM_LAYERS = 32
+        NUM_QUERY_HEADS = 32
+        NUM_KV_HEADS = 32
         HEAD_DIM = 128
         HIDDEN_SIZE = 4096
     else:
@@ -464,8 +503,8 @@ def _load_snapshot_cache(
         int(geometry.get("hidden_size", -1)),
     )
     expected = (
-        "qwen3",
-        "gqa",
+        MODEL_TYPE,
+        ATTENTION_TYPE,
         NUM_LAYERS,
         NUM_QUERY_HEADS,
         NUM_KV_HEADS,
@@ -745,17 +784,31 @@ def _closed_factors(
         relative_jitter=decoder_relative_jitter,
     )
     cached = _quantized_cache(closure.A_unique, closure.D_heads, ranks)
-    deployed_loss = evaluate_quadratic(
-        objective,
-        cached.A.to(device=device, dtype=torch.float32),
-        cached.D.to(device=device, dtype=torch.float32),
-        mapping,
+    deployed_A = cached.A.to(device=device, dtype=torch.float32)
+    deployed_D = cached.D.to(device=device, dtype=torch.float32)
+    deployed_product = head_products(deployed_A, deployed_D, mapping)
+    target = (
+        snapshot.dense_o_weight.to(device=device, dtype=torch.float32)
+        .transpose(0, 1)
+        .reshape(NUM_QUERY_HEADS, HEAD_DIM, HIDDEN_SIZE)
     )
+    residual = target - deployed_product
+    deployed_loss_unclamped = float(
+        torch.einsum(
+            "hio,hkij,kjo->",
+            residual,
+            objective.covariance,
+            residual,
+        )
+    )
+    deployed_loss = max(0.0, deployed_loss_unclamped)
     diagnostics = {
         "closure": "full_layer_closed_form_decoder_refit",
         "deployed_bfloat16_fit_relative_mse": float(
             deployed_loss / objective.constant
         ),
+        "deployed_bfloat16_fit_quadratic_unclamped": deployed_loss_unclamped,
+        "deployed_bfloat16_fit_evaluation": "direct residual quadratic R^T C R",
         "absolute_jitter": closure.decoder.absolute_jitters[0],
         "condition_estimate": closure.decoder.condition_estimates[0],
         "matrix_dimension": closure.decoder.matrix_dimensions[0],
@@ -763,6 +816,7 @@ def _closed_factors(
         "solve_wall_time_seconds": closure.decoder.wall_times_seconds[0],
         "encoder_sha256": closure.encoder_sha256_after_solve,
     }
+    del deployed_A, deployed_D, deployed_product, target, residual
     return cached, diagnostics
 
 
@@ -1061,11 +1115,14 @@ def main() -> None:
         int(model.config.num_hidden_layers),
         int(model.config.num_attention_heads),
         int(model.config.num_key_value_heads),
-        int(getattr(model.config, "head_dim", -1)),
+        int(
+            getattr(model.config, "head_dim", 0)
+            or model.config.hidden_size // model.config.num_attention_heads
+        ),
         int(model.config.hidden_size),
     )
     expected_geometry = (
-        "qwen3",
+        MODEL_TYPE,
         NUM_LAYERS,
         NUM_QUERY_HEADS,
         NUM_KV_HEADS,
