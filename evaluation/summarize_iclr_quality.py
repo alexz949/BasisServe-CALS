@@ -29,30 +29,35 @@ PROFILES = {
         "prefix": "Q3-8B",
         "checkpoint_format": "basisserve.qwen3_8b.iclr_v_factors.v1",
         "quality_format": "basisserve.qwen3_8b.iclr_quality.v1",
+        "cuda_devices": ["NVIDIA L40S"] * 4,
     },
     "llama31-8b": {
         "label": "Llama-3.1-8B",
         "prefix": "L31-8B",
         "checkpoint_format": "basisserve.llama31_8b.iclr_v_factors.v1",
         "quality_format": "basisserve.llama31_8b.iclr_quality.v1",
+        "cuda_devices": ["NVIDIA L40S"] * 4,
     },
     "llama2-7b": {
         "label": "Llama-2-7B",
         "prefix": "L2-7B",
         "checkpoint_format": "basisserve.llama2_7b.iclr_v_factors.v1",
         "quality_format": "basisserve.llama2_7b.iclr_quality.v1",
+        "cuda_devices": ["NVIDIA L40S"] * 4,
     },
     "qwen3-32b": {
         "label": "Qwen3-32B-Base",
         "prefix": "Q3-32B",
         "checkpoint_format": "basisserve.qwen3_32b.iclr_v_factors.v1",
         "quality_format": "basisserve.qwen3_32b.iclr_quality.v1",
+        "cuda_devices": ["NVIDIA L40S"] * 4,
     },
     "llama31-70b": {
         "label": "Llama-3.1-70B",
         "prefix": "L31-70B",
         "checkpoint_format": "basisserve.llama31_70b.iclr_v_factors.v1",
         "quality_format": "basisserve.llama31_70b.iclr_quality.v1",
+        "cuda_devices": ["NVIDIA H200 NVL"] * 2,
     },
 }
 
@@ -93,6 +98,7 @@ def _audit_result(
     run_id: str,
     checkpoint_format: str,
     quality_format: str,
+    cuda_devices: list[str],
 ) -> tuple[dict[str, Any] | None, list[str]]:
     failures: list[str] = []
     if not result_path.is_file():
@@ -121,8 +127,8 @@ def _audit_result(
         failures.append(f"{run_id}: datasets version is not 5.0.0")
     if environment.get("lm_eval") != "0.4.11":
         failures.append(f"{run_id}: lm-eval version is not 0.4.11")
-    if environment.get("cuda_devices") != ["NVIDIA L40S"] * 4:
-        failures.append(f"{run_id}: evaluation did not record four L40S GPUs")
+    if environment.get("cuda_devices") != cuda_devices:
+        failures.append(f"{run_id}: evaluation recorded unexpected GPUs")
     return result, failures
 
 
@@ -219,6 +225,7 @@ def summarize(args: argparse.Namespace) -> int:
             run_id=run_id,
             checkpoint_format=str(profile["checkpoint_format"]),
             quality_format=str(profile["quality_format"]),
+            cuda_devices=list(profile["cuda_devices"]),
         )
         failures.extend(result_failures)
         if result is not None:

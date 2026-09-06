@@ -195,6 +195,33 @@ def test_quadratic_objective_matches_direct_residual_and_mixture() -> None:
     assert abs(evaluate_quadratic(mixed, A, D, mapping) - float(expected_mixture)) < 1e-9
 
 
+def test_fp32_full_rank_quadratic_uses_stable_scalar_accumulation() -> None:
+    torch.manual_seed(2026)
+    heads = 8
+    head_dim = 128
+    hidden_size = 8192
+    covariance = torch.zeros(
+        heads,
+        heads,
+        head_dim,
+        head_dim,
+        dtype=torch.float32,
+    )
+    covariance[torch.arange(heads), torch.arange(heads)] = torch.eye(head_dim)
+    target = torch.randn(heads, head_dim, hidden_size, dtype=torch.float32)
+    objective = quadratic_from_target(
+        covariance=covariance,
+        target=target,
+        name="fp32_full_rank",
+        trace_normalize=False,
+    )
+    encoder = torch.eye(head_dim).unsqueeze(0)
+    mapping = torch.zeros(heads, dtype=torch.long)
+
+    assert objective.constant.dtype == torch.float64
+    assert abs(evaluate_quadratic(objective, encoder, target, mapping)) < 1e-5
+
+
 def test_trace_normalization_and_function_prior() -> None:
     layout = _layout()
     torch.manual_seed(3)

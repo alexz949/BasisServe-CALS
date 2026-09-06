@@ -1,0 +1,443 @@
+{
+  "checkpoint": {
+    "artifact_sha256": "dbbf9a6465b8ee18a366fba64c098572df8eb7da7d312c5a7f71d4aafabaaae3",
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/llama31-70b/checkpoints/L31-70B-PALUG4-R80",
+    "format": "basisserve.llama31_70b.iclr_v_factors.v1",
+    "manifest_sha256": "54a789e244348e36d263893b27bc654f7e594cfcb4f276f3cc0c570ab66a7fc1"
+  },
+  "command": "evaluation/eval_llama31_70b_iclr_quality.py --run-id L31-70B-PALUG4-R80 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-70B/snapshots/349b2ddb53ce8f2849a6c168a81980ab25258dac --checkpoint-dir ICLR-results/llama31-70b/checkpoints/L31-70B-PALUG4-R80 --c4-windows results/calibration/llama31_70b_c4_validation_128x2048/windows.safetensors --output-dir ICLR-results/llama31-70b/quality/L31-70B-PALUG4-R80 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 130 --torch-num-threads 8 --stages wikitext2,c4,commonsense --tasks arc_easy,arc_challenge,hellaswag,piqa,winogrande,boolq,openbookqa --quality-shard-index 0 --quality-shard-count 1 --expected-gpu-count 2",
+  "compression": {
+    "allocation": "official_palu_fisher_uniform",
+    "dense_rank_sum_across_layers": 81920,
+    "equivalent_rank_target": 80,
+    "factorization_work_device": "cpu",
+    "factorization_work_dtype": "torch.float64",
+    "group_width": 512,
+    "groups": 2,
+    "head_dim": 128,
+    "head_group_size": 4,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        288,
+        288
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        384,
+        384
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        480,
+        480
+      ],
+      [
+        416,
+        416
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        480,
+        480
+      ],
+      [
+        416,
+        416
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        384,
+        384
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        416,
+        416
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        192,
+        192
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        192,
+        192
+      ],
+      [
+        192,
+        192
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        128,
+        128
+      ],
+      [
+        128,
+        128
+      ],
+      [
+        192,
+        192
+      ],
+      [
+        192,
+        192
+      ],
+      [
+        128,
+        128
+      ],
+      [
+        192,
+        192
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        384,
+        384
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        352,
+        352
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        192,
+        192
+      ]
+    ],
+    "method": "palu-fisher",
+    "method_label": "PaLU G-LRD4",
+    "nominal_group_rank": 320,
+    "nominal_retained_v_ratio": 0.625,
+    "nominal_v_cache_compression_ratio": 0.375,
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 64,
+    "projection": "v",
+    "rank_block_size": 32,
+    "rank_sum_across_layers": 51072,
+    "realized_retained_v_ratio": 0.6234375,
+    "realized_v_cache_compression_ratio": 0.3765625,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds_this_attempt": 1619.8658310510218,
+  "environment": {
+    "conda_environment": null,
+    "cuda_devices": [
+      "NVIDIA H200 NVL",
+      "NVIDIA H200 NVL"
+    ],
+    "datasets": "5.0.0",
+    "lm_eval": "0.4.11",
+    "peak_cuda_allocated_bytes": {
+      "0": 76409356800,
+      "1": 74315281408
+    },
+    "python": "3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0]",
+    "torch": "2.6.0+cu124",
+    "torch_num_threads": 8,
+    "transformers": "5.15.1"
+  },
+  "format": "basisserve.llama31_70b.iclr_quality.v1",
+  "metrics": {
+    "average_accuracy": 0.7398946162299309,
+    "c4_validation_128_ppl": 7.01752486956391,
+    "task_accuracy": [
+      {
+        "metric": "acc_norm",
+        "task": "arc_easy",
+        "value": 0.8413299663299664
+      },
+      {
+        "metric": "acc_norm",
+        "task": "arc_challenge",
+        "value": 0.6203071672354948
+      },
+      {
+        "metric": "acc_norm",
+        "task": "hellaswag",
+        "value": 0.8272256522605059
+      },
+      {
+        "metric": "acc_norm",
+        "task": "piqa",
+        "value": 0.8302502720348205
+      },
+      {
+        "metric": "acc",
+        "task": "winogrande",
+        "value": 0.7790055248618785
+      },
+      {
+        "metric": "acc",
+        "task": "boolq",
+        "value": 0.8391437308868501
+      },
+      {
+        "metric": "acc_norm",
+        "task": "openbookqa",
+        "value": 0.442
+      }
+    ],
+    "wikitext2_ppl": 5.647415159467864
+  },
+  "model": {
+    "config_sha256": "37653c55ea907be0dc75070afd416fc77e20981c60b7c7e9521ba343678c5349",
+    "huggingface_repo": "meta-llama/Llama-3.1-70B",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-70B/snapshots/349b2ddb53ce8f2849a6c168a81980ab25258dac",
+    "revision": "349b2ddb53ce8f2849a6c168a81980ab25258dac",
+    "safetensors_index_sha256": "2abe0910e23770a30ccf9b1b91804c64831c47f9c98defaa5293aa999433fc2b"
+  },
+  "run_id": "L31-70B-PALUG4-R80",
+  "stages": {
+    "c4": {
+      "file": "c4.json",
+      "sha256": "0c7811d461e2d9c8bc44edbe769655364c24e8b77e5bb79b0345650fffc5454e"
+    },
+    "commonsense": {
+      "file": "commonsense.json",
+      "sha256": "0648d2b338d207ef666a5f3466e414f8f577d465a88762d7bc3e1a4c1fc7029c"
+    },
+    "wikitext2": {
+      "file": "wikitext2.json",
+      "sha256": "c419a185038b2aecb03d0a03ec5b278031e7e6c309733ae7595a7fd0ec088218"
+    }
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-05T11:13:07.822770+00:00"
+}

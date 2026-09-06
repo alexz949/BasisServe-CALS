@@ -664,13 +664,19 @@ def quadratic_from_target(
         if tuple(precomputed_cross.shape) != tuple(target.shape):
             raise ValueError("precomputed cross must match target shape")
         cross = precomputed_cross.to(device=work.device, dtype=work.dtype) * scale
+    accumulation_dtype = (
+        torch.float64 if work.dtype == torch.float32 else work.dtype
+    )
     if precomputed_constant is None:
-        constant = torch.sum(target.to(work) * cross)
+        constant = torch.sum(
+            target.to(device=work.device, dtype=accumulation_dtype)
+            * cross.to(dtype=accumulation_dtype)
+        )
     else:
         constant = torch.as_tensor(
             precomputed_constant,
             device=work.device,
-            dtype=work.dtype,
+            dtype=accumulation_dtype,
         ) * scale
     return RoutedOVQuadratic(
         covariance=work,
@@ -1043,14 +1049,34 @@ def _evaluate_quadratic_with_scale(
     D_heads: torch.Tensor,
     head_to_kv_group: torch.Tensor,
 ) -> tuple[float, float]:
+    accumulation_dtype = (
+        torch.float64 if D_heads.dtype == torch.float32 else D_heads.dtype
+    )
+    evaluation_objective = RoutedOVQuadratic(
+        covariance=objective.covariance.to(dtype=accumulation_dtype),
+        cross=objective.cross.to(dtype=accumulation_dtype),
+        constant=objective.constant.to(dtype=accumulation_dtype),
+        name=objective.name,
+    )
+    evaluation_A = A_unique.to(dtype=accumulation_dtype)
     hessian, rhs = _reduced_normal_equations(
-        objective,
-        A_unique,
+        evaluation_objective,
+        evaluation_A,
         head_to_kv_group,
     )
-    quadratic = torch.einsum("hao,hkab,kbo->", D_heads, hessian, D_heads)
-    linear = torch.sum(D_heads * rhs)
-    loss = objective.constant - 2.0 * linear + quadratic
+    evaluation_D = D_heads.to(dtype=accumulation_dtype)
+    quadratic = torch.einsum(
+        "hao,hkab,kbo->",
+        evaluation_D,
+        hessian.to(dtype=accumulation_dtype),
+        evaluation_D,
+    )
+    linear = torch.sum(evaluation_D * rhs.to(dtype=accumulation_dtype))
+    loss = (
+        objective.constant.to(dtype=accumulation_dtype)
+        - 2.0 * linear
+        + quadratic
+    )
     expanded_scale = torch.stack(
         (
             objective.constant.abs(),
@@ -1060,7 +1086,7 @@ def _evaluate_quadratic_with_scale(
         )
     ).max()
     tolerance = (
-        max(1024.0 * torch.finfo(loss.dtype).eps, 1e-10)
+        max(1024.0 * torch.finfo(D_heads.dtype).eps, 1e-10)
         * expanded_scale
     )
     if float(loss) < 0:
@@ -1966,6 +1992,7 @@ def _zero_cg_diagnostics() -> CGDiagnostics:
 def fit_routed_ov_joint(
     *,
     objective: RoutedOVQuadratic,
+    evaluation_objective: RoutedOVQuadratic | None = None,
     initial_A: torch.Tensor,
     initial_D: torch.Tensor,
     head_to_kv_group: torch.Tensor,
@@ -2027,20 +2054,47 @@ def fit_routed_ov_joint(
         if work_device is not None
         else objective.covariance.device
     )
+    evaluation_dtype = (
+        torch.float64 if work_dtype == torch.float32 else work_dtype
+    )
+    evaluation_source = (
+        objective if evaluation_objective is None else evaluation_objective
+    )
+    loss_objective = RoutedOVQuadratic(
+        covariance=evaluation_source.covariance.detach().to(
+            device=device,
+            dtype=evaluation_dtype,
+        ),
+        cross=evaluation_source.cross.detach().to(
+            device=device,
+            dtype=evaluation_dtype,
+        ),
+        constant=evaluation_source.constant.detach().to(
+            device=device,
+            dtype=evaluation_dtype,
+        ),
+        name=evaluation_source.name,
+    )
     objective = RoutedOVQuadratic(
         covariance=objective.covariance.detach().to(device=device, dtype=work_dtype),
         cross=objective.cross.detach().to(device=device, dtype=work_dtype),
-        constant=objective.constant.detach().to(device=device, dtype=work_dtype),
+        constant=objective.constant.detach().to(
+            device=device,
+            dtype=torch.float64 if work_dtype == torch.float32 else work_dtype,
+        ),
         name=objective.name,
     )
-    components = {
+    evaluation_components = {
         str(name): RoutedOVQuadratic(
             covariance=value.covariance.detach().to(
                 device=device,
-                dtype=work_dtype,
+                dtype=evaluation_dtype,
             ),
-            cross=value.cross.detach().to(device=device, dtype=work_dtype),
-            constant=value.constant.detach().to(device=device, dtype=work_dtype),
+            cross=value.cross.detach().to(device=device, dtype=evaluation_dtype),
+            constant=value.constant.detach().to(
+                device=device,
+                dtype=evaluation_dtype,
+            ),
             name=value.name,
         )
         for name, value in (component_objectives or {}).items()
@@ -2057,7 +2111,7 @@ def fit_routed_ov_joint(
             1024.0 * torch.finfo(work_dtype).eps,
         )
         return relative * max(
-            abs(float(objective.constant)),
+            abs(float(loss_objective.constant)),
             abs(loss),
             abs(expanded_scale or 0.0),
             1.0,
@@ -2202,7 +2256,7 @@ def fit_routed_ov_joint(
         sweep: int,
         loss: float,
     ) -> None:
-        if checkpoint_callback is None and not components:
+        if checkpoint_callback is None and not evaluation_components:
             return
         checkpoint = RoutedOVCheckpointDiagnostics(
             boundary=boundary,
@@ -2213,7 +2267,7 @@ def fit_routed_ov_joint(
                     name,
                     evaluate_quadratic(component, A, D, mapping),
                 )
-                for name, component in components.items()
+                for name, component in evaluation_components.items()
             ),
             decoder_relative_stationarity=decoder_stationarity(A, D),
         )
@@ -2233,7 +2287,7 @@ def fit_routed_ov_joint(
     ) -> tuple[torch.Tensor, LinearSolveDiagnostics, float]:
         candidate_D, candidate_diagnostics = solve_decoder(current_A)
         candidate_loss, candidate_scale = _evaluate_quadratic_with_scale(
-            objective, current_A, candidate_D, mapping
+            loss_objective, current_A, candidate_D, mapping
         )
         tolerance = monotonicity_tolerance(
             current_loss,
@@ -2268,7 +2322,7 @@ def fit_routed_ov_joint(
                 relative_jitter_override=relative_jitter,
             )
             retried_loss, _ = _evaluate_quadratic_with_scale(
-                objective, current_A, retried_D, mapping
+                loss_objective, current_A, retried_D, mapping
             )
             if retried_loss < best_loss:
                 best_loss = retried_loss
@@ -2286,7 +2340,7 @@ def fit_routed_ov_joint(
             linear_solve_dtype_override=torch.float64,
         )
         refined_loss, _ = _evaluate_quadratic_with_scale(
-            objective, current_A, refined_D, mapping
+            loss_objective, current_A, refined_D, mapping
         )
         if refined_loss <= current_loss + tolerance:
             print(
@@ -2304,7 +2358,7 @@ def fit_routed_ov_joint(
             f"tolerance={tolerance:.9g}"
         )
 
-    initial_loss = evaluate_quadratic(objective, A, D, mapping)
+    initial_loss = evaluate_quadratic(loss_objective, A, D, mapping)
     emit_checkpoint("anchor", 0, initial_loss)
     D, first_decoder, decoder_only_loss = monotone_decoder_solve(
         A, D, initial_loss, boundary="initial"
@@ -2480,7 +2534,7 @@ def fit_routed_ov_joint(
                 while eta_used:
                     A[group].copy_(original_group + eta_used * delta)
                     realized_loss = evaluate_quadratic(
-                        objective,
+                        loss_objective,
                         A,
                         D,
                         mapping,
@@ -2574,7 +2628,7 @@ def fit_routed_ov_joint(
                 cg = _zero_cg_diagnostics()
             if verify_encoder_step_objective:
                 realized_loss = evaluate_quadratic(
-                    objective,
+                    loss_objective,
                     A,
                     D,
                     mapping,
