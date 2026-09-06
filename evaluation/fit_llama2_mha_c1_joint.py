@@ -980,8 +980,11 @@ def _fit_layer(
         fit_raw = _covariance_matrix_to_blocks(
             fit_matrix, device=device, dtype=work_dtype
         )
+        fit_evaluation_raw = _covariance_matrix_to_blocks(
+            fit_matrix, device=device, dtype=torch.float64
+        )
         validation_covariance = _covariance_matrix_to_blocks(
-            validation_matrix, device=device, dtype=work_dtype
+            validation_matrix, device=device, dtype=torch.float64
         )
         del fit_matrix, validation_matrix
     else:
@@ -1008,10 +1011,17 @@ def _fit_layer(
             head_dim=HEAD_DIM,
             row_chunk_size=args.covariance_row_chunk_size,
         )
+        fit_evaluation_raw = fit_raw.to(dtype=torch.float64)
+        validation_covariance = validation_covariance.to(dtype=torch.float64)
     fit_covariance, absolute_damping = covariance_with_trace_damping(
         fit_raw, relative_damping=args.covariance_damping
     )
     del fit_raw
+    fit_evaluation_covariance, _ = covariance_with_trace_damping(
+        fit_evaluation_raw,
+        relative_damping=args.covariance_damping,
+    )
+    del fit_evaluation_raw
     target = _dense_head_targets(weight, device=device, dtype=work_dtype)
     fit_objective = quadratic_from_target(
         covariance=fit_covariance,
@@ -1019,15 +1029,22 @@ def _fit_layer(
         name=f"{MODEL_TYPE}_c1_fit_layer_{layer:03d}",
         trace_normalize=False,
     )
+    fit_evaluation_objective = quadratic_from_target(
+        covariance=fit_evaluation_covariance,
+        target=target.to(dtype=torch.float64),
+        name=f"{MODEL_TYPE}_c1_fit_evaluation_layer_{layer:03d}",
+        trace_normalize=False,
+    )
     validation_objective = quadratic_from_target(
-        covariance=validation_covariance,
-        target=target,
+        covariance=validation_covariance.to(dtype=torch.float64),
+        target=target.to(dtype=torch.float64),
         name=f"{MODEL_TYPE}_c1_heldout_layer_{layer:03d}",
         trace_normalize=False,
     )
     mapping = _head_to_kv_group(device=device)
     if args.decoder_objective == "full_layer":
         solver_objective = fit_objective
+        solver_evaluation_objective = fit_evaluation_objective
         decoder_coupling_mode = "full_layer"
         solver_group_ranks: tuple[int, ...] | None = (
             (args.cache_rank,) * NUM_KV_HEADS
@@ -1042,6 +1059,17 @@ def _fit_layer(
             covariance=independent_covariance,
             target=target,
             name=f"{MODEL_TYPE}_a3_per_head_fit_layer_{layer:03d}",
+            trace_normalize=False,
+        )
+        evaluation_independent_covariance = mask_routed_covariance(
+            fit_evaluation_objective.covariance,
+            head_to_kv_group=mapping,
+            mode="diagonal",
+        )
+        solver_evaluation_objective = quadratic_from_target(
+            covariance=evaluation_independent_covariance,
+            target=target.to(dtype=torch.float64),
+            name=f"{MODEL_TYPE}_a3_per_head_fit_evaluation_layer_{layer:03d}",
             trace_normalize=False,
         )
         decoder_coupling_mode = "diagonal"
@@ -1103,6 +1131,7 @@ def _fit_layer(
     )
     result = fit_routed_ov_joint(
         objective=solver_objective,
+        evaluation_objective=solver_evaluation_objective,
         initial_A=initial_A,
         initial_D=initial_D,
         head_to_kv_group=mapping,
@@ -1133,7 +1162,7 @@ def _fit_layer(
     assert endpoint.boundary == "after_redecoder"
     assert endpoint.sweep == FORMAL_ENCODER_SWEEPS
     fit_loss = evaluate_quadratic(
-        fit_objective, selected_A, selected_D, mapping
+        fit_evaluation_objective, selected_A, selected_D, mapping
     )
     validation_loss = evaluate_quadratic(
         validation_objective, selected_A, selected_D, mapping
@@ -1141,7 +1170,7 @@ def _fit_layer(
     artifact_A = selected_A.to(device="cpu", dtype=factor_dtype).contiguous()
     artifact_D = selected_D.to(device="cpu", dtype=factor_dtype).contiguous()
     artifact_fit_loss = evaluate_quadratic(
-        fit_objective,
+        fit_evaluation_objective,
         artifact_A.to(device=device, dtype=work_dtype),
         artifact_D.to(device=device, dtype=work_dtype),
         mapping,

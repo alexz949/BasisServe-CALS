@@ -526,7 +526,7 @@ def evaluate(args: argparse.Namespace) -> int:
             _check(torch.cuda.is_available(), "CUDA is required"),
             _check(
                 torch.cuda.device_count() == args.expected_gpu_count,
-                f"exactly {args.expected_gpu_count} L40S GPUs must be visible",
+                f"exactly {args.expected_gpu_count} GPUs must be visible",
             ),
             _check(args.batch_size > 0, "batch size must be positive"),
             _check(args.lm_eval_batch_size > 0, "lm-eval batch size must be positive"),
@@ -559,8 +559,6 @@ def evaluate(args: argparse.Namespace) -> int:
     gpu_names = [
         torch.cuda.get_device_name(index) for index in range(args.expected_gpu_count)
     ]
-    if not _check(all(name == "NVIDIA L40S" for name in gpu_names), f"unexpected GPUs: {gpu_names}"):
-        return 2
     torch.set_num_threads(args.torch_num_threads)
     for index in range(args.expected_gpu_count):
         torch.cuda.reset_peak_memory_stats(index)
