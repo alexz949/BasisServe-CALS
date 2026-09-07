@@ -10,6 +10,7 @@ import math
 import os
 from pathlib import Path
 import shlex
+import statistics
 import sys
 import time
 
@@ -81,13 +82,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sequence-length", type=int, default=257)
     parser.add_argument("--page-slots", type=int, default=5)
-    parser.add_argument("--splits", type=int, default=5)
+    parser.add_argument("--splits", type=str, default="5")
+    parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--repeat", type=int, default=100)
     parser.add_argument("--output-json", type=Path, required=True)
     args = parser.parse_args()
     assert torch.cuda.is_available()
+    split_grid = tuple(int(value) for value in args.splits.split(","))
     assert args.sequence_length > 0 and args.page_slots > 0
-    assert 0 < args.splits <= args.page_slots
+    assert split_grid and len(split_grid) == len(set(split_grid))
+    assert all(0 < splits <= args.page_slots for splits in split_grid)
+    assert args.warmup >= 0 and args.repeat > 0
     torch.manual_seed(20260902)
     device = torch.device("cuda")
     batch = 1
@@ -141,39 +146,124 @@ def main() -> None:
             key[:, :, append_split:],
             start=append_split,
         )
-    observed = mapped_host_page32_v80_attention(
-        host_key,
-        query,
-        value,
-        page_ids,
-        sequence_length=args.sequence_length,
-        splits=args.splits,
-        host_key_device_pointer=pointer,
-    )
     reference = _reference(query, key, value, page_ids, page_size=32)
-    torch.cuda.synchronize()
-    difference = observed.float() - reference
-    maximum_absolute_error = float(difference.abs().max())
-    mean_absolute_error = float(difference.abs().mean())
-    assert maximum_absolute_error < 0.04
-    assert mean_absolute_error < 0.005
-    start = torch.cuda.Event(enable_timing=True)
-    stop = torch.cuda.Event(enable_timing=True)
-    start.record()
-    for _ in range(args.repeat):
-        mapped_host_page32_v80_attention(
+    workspace = torch.empty(
+        batch * 4 * kv_heads,
+        max(split_grid),
+        82,
+        dtype=torch.float32,
+        device=device,
+    )
+    output = torch.empty(
+        batch,
+        4 * kv_heads,
+        1,
+        80,
+        dtype=torch.bfloat16,
+        device=device,
+    )
+    properties = torch.cuda.get_device_properties(device)
+    l2_bytes = int(getattr(properties, "L2_cache_size", 48 * 1024 * 1024))
+    cache_flush = torch.zeros(
+        max(2 * l2_bytes, 64 * 1024 * 1024) // 4,
+        dtype=torch.float32,
+        device=device,
+    )
+    measurements = []
+    for splits in split_grid:
+        for _ in range(args.warmup):
+            mapped_host_page32_v80_attention(
+                host_key,
+                query,
+                value,
+                page_ids,
+                sequence_length=args.sequence_length,
+                splits=splits,
+                host_key_device_pointer=pointer,
+                workspace=workspace,
+                output=output,
+            )
+        observed = mapped_host_page32_v80_attention(
             host_key,
             query,
             value,
             page_ids,
             sequence_length=args.sequence_length,
-            splits=args.splits,
+            splits=splits,
             host_key_device_pointer=pointer,
+            workspace=workspace,
+            output=output,
         )
-    stop.record()
-    stop.synchronize()
+        torch.cuda.synchronize()
+        difference = observed.float() - reference
+        maximum_absolute_error = float(difference.abs().max())
+        mean_absolute_error = float(difference.abs().mean())
+        assert maximum_absolute_error < 0.04
+        assert mean_absolute_error < 0.005
+
+        start = torch.cuda.Event(enable_timing=True)
+        stop = torch.cuda.Event(enable_timing=True)
+        start.record()
+        for _ in range(args.repeat):
+            mapped_host_page32_v80_attention(
+                host_key,
+                query,
+                value,
+                page_ids,
+                sequence_length=args.sequence_length,
+                splits=splits,
+                host_key_device_pointer=pointer,
+                workspace=workspace,
+                output=output,
+            )
+        stop.record()
+        stop.synchronize()
+        warm_microseconds = 1000.0 * start.elapsed_time(stop) / args.repeat
+
+        cold_microseconds = []
+        for _ in range(args.repeat):
+            cache_flush.add_(1.0)
+            start.record()
+            mapped_host_page32_v80_attention(
+                host_key,
+                query,
+                value,
+                page_ids,
+                sequence_length=args.sequence_length,
+                splits=splits,
+                host_key_device_pointer=pointer,
+                workspace=workspace,
+                output=output,
+            )
+            stop.record()
+            stop.synchronize()
+            cold_microseconds.append(1000.0 * start.elapsed_time(stop))
+        measurements.append(
+            {
+                "splits": splits,
+                "numerics": {
+                    "maximum_absolute_error": maximum_absolute_error,
+                    "mean_absolute_error": mean_absolute_error,
+                },
+                "kernel": {
+                    "warm_mean_microseconds": warm_microseconds,
+                    "cold_median_microseconds": statistics.median(
+                        cold_microseconds
+                    ),
+                    "cold_mean_microseconds": statistics.fmean(
+                        cold_microseconds
+                    ),
+                },
+            }
+        )
+    best = min(
+        measurements,
+        key=lambda measurement: measurement["kernel"][
+            "cold_median_microseconds"
+        ],
+    )
     payload = {
-        "format": "basisserve.mapped_host_page32_v80_validation.v1",
+        "format": "basisserve.mapped_host_page32_v80_split_sweep.v1",
         "status": "complete",
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "command": shlex.join(sys.argv),
@@ -186,18 +276,18 @@ def main() -> None:
         "geometry": {
             "sequence_length": args.sequence_length,
             "page_slots": args.page_slots,
-            "splits": args.splits,
+            "split_grid": list(split_grid),
             "logical_host_read_bytes": (
                 batch * kv_heads * args.page_slots * 32 * 128 * 2
             ),
+            "l2_cache_bytes": l2_bytes,
+            "cache_flush_bytes": cache_flush.numel() * cache_flush.element_size(),
         },
-        "numerics": {
-            "maximum_absolute_error": maximum_absolute_error,
-            "mean_absolute_error": mean_absolute_error,
-        },
-        "kernel": {
+        "benchmark": {
+            "warmup": args.warmup,
             "repeat": args.repeat,
-            "mean_microseconds": 1000.0 * start.elapsed_time(stop) / args.repeat,
+            "measurements": measurements,
+            "best_cold_median_splits": best["splits"],
         },
         "wall_seconds": time.perf_counter() - wall_started,
     }

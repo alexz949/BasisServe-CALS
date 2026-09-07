@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run mapped-host exact-K attention through the full Qwen3-8B TP4 model."""
+"""Benchmark dense and exact-K-offload Qwen3-8B TP4 decode paths."""
 
 from __future__ import annotations
 
@@ -28,18 +28,27 @@ from basisserve.core.qwen3_8b_tp4_decode import (  # noqa: E402
     TP_SIZE,
     close_qwen3_tp4_packed_communicator,
     configure_qwen3_tp4_caches,
+    install_qwen3_tp4_decode_attention,
 )
 from basisserve.core.qwen3_8b_tp4_k_offload import (  # noqa: E402
     Qwen3TP4C1KOffloadDecodeAttention,
+    Qwen3TP4DenseKOffloadDecodeAttention,
+    install_qwen3_tp4_dense_k_offload_attention,
     install_qwen3_tp4_k_offload_attention,
     tp4_k_offload_cache_bytes,
 )
 from basisserve.kernels.mapped_host_paged_attention import (  # noqa: E402
     prepare_mapped_host_paged_attention_extension,
 )
+from evaluation.eval_qwen3_dense_ruler import _qwen3_config  # noqa: E402
 
 
 FORMAT = "basisserve.qwen3_8b.tp4_mapped_host_exact_k.v1"
+ARMS = ("dense", "dense_offload", "c1_base16_r8", "quest", "shadowkv")
+OFFLOAD_ATTENTION_TYPES = (
+    Qwen3TP4C1KOffloadDecodeAttention,
+    Qwen3TP4DenseKOffloadDecodeAttention,
+)
 
 
 def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
@@ -144,19 +153,36 @@ def _summarize(values: Sequence[float]) -> dict[str, float]:
 
 
 def _module_offload_totals(
-    modules: Sequence[Qwen3TP4C1KOffloadDecodeAttention],
+    modules: Sequence[torch.nn.Module],
 ) -> dict[str, float]:
     totals: dict[str, float] = {}
     for module in modules:
+        if not isinstance(module, OFFLOAD_ATTENTION_TYPES):
+            continue
         for name, value in module.offload_statistics().items():
             totals[name] = totals.get(name, 0.0) + float(value)
     return totals
 
 
+def _cache_bytes_per_rank(
+    modules: Sequence[torch.nn.Module],
+) -> dict[str, int]:
+    offloaded = tuple(
+        module for module in modules if isinstance(module, OFFLOAD_ATTENTION_TYPES)
+    )
+    assert len(offloaded) in (0, len(modules))
+    if offloaded:
+        return tp4_k_offload_cache_bytes(offloaded)
+    return {
+        "gpu_bytes_per_rank": sum(module.cache_bytes for module in modules),
+        "cpu_pinned_bytes_per_rank": 0,
+    }
+
+
 @torch.inference_mode()
 def _run_once(
     model: torch.nn.Module,
-    modules: Sequence[Qwen3TP4C1KOffloadDecodeAttention],
+    modules: Sequence[torch.nn.Module],
     *,
     batch_size: int,
     prompt_length: int,
@@ -218,16 +244,16 @@ def _run_once(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", type=Path, required=True)
-    parser.add_argument("--c1-factor-dir", type=Path, required=True)
+    parser.add_argument("--c1-factor-dir", type=Path)
     parser.add_argument("--routing-factor-dir", type=Path)
     parser.add_argument(
         "--router",
-        choices=("c1_base16_r8", "quest", "shadowkv"),
+        choices=ARMS,
         default="c1_base16_r8",
     )
     parser.add_argument(
         "--exact-key-storage",
-        choices=("mapped_host", "gpu"),
+        choices=("mapped_host", "pinned_cpu", "gpu"),
         default="mapped_host",
     )
     parser.add_argument("--batch-size", type=int, default=1)
@@ -241,6 +267,7 @@ def main() -> None:
     parser.add_argument("--page-size", type=int, default=32)
     parser.add_argument("--physical-token-budget", type=int, default=4096)
     parser.add_argument("--pinned-prefix-pages", type=int, default=1)
+    parser.add_argument("--yarn-factor", type=float, default=4.0)
     parser.add_argument(
         "--c1-allgather-backend",
         choices=("feature_direct", "uniform_nccl"),
@@ -250,6 +277,9 @@ def main() -> None:
     parser.add_argument("--output-json", type=Path, required=True)
     args = parser.parse_args()
 
+    is_dense_gpu = args.router == "dense"
+    is_dense_offload = args.router == "dense_offload"
+    is_dense = is_dense_gpu or is_dense_offload
     assert args.batch_size > 0
     assert args.prompt_length > 1
     assert args.decode_length > 0
@@ -257,43 +287,68 @@ def main() -> None:
     assert args.repeat_runs > 0
     assert args.page_size > 0
     assert args.physical_token_budget % args.page_size == 0
-    assert args.prompt_length + args.decode_length <= 32768
+    assert args.prompt_length + args.decode_length > 0
+    assert (args.c1_factor_dir is None) == is_dense
     assert (args.routing_factor_dir is not None) == (
         args.router == "c1_base16_r8"
     )
-    assert args.exact_key_storage == "mapped_host" or args.router == "c1_base16_r8"
+    assert (
+        is_dense_gpu
+        and args.exact_key_storage == "gpu"
+        or is_dense_offload
+        and args.exact_key_storage == "pinned_cpu"
+        or not is_dense
+        and (
+            args.exact_key_storage == "mapped_host"
+            or args.router == "c1_base16_r8"
+            and args.exact_key_storage == "gpu"
+        )
+    )
     torch.set_num_threads(args.torch_num_threads)
     local_rank = int(os.environ["LOCAL_RANK"])
     torch.cuda.set_device(local_rank)
     device = torch.device("cuda", local_rank)
-    prepare_mapped_host_paged_attention_extension()
+    if not is_dense:
+        prepare_mapped_host_paged_attention_extension()
 
     from transformers import AutoModelForCausalLM
     from transformers.distributed import DistributedConfig
 
+    model_path = args.model.expanduser().resolve()
+    capacity = args.prompt_length + args.decode_length
+    effective_config, rope_scaling = _qwen3_config(
+        model_path,
+        sequence_length=capacity,
+        yarn_factor=args.yarn_factor,
+    )
     load_started = time.perf_counter()
     model = AutoModelForCausalLM.from_pretrained(
-        args.model.expanduser().resolve(),
+        model_path,
+        config=effective_config,
         dtype=torch.bfloat16,
         attn_implementation="sdpa",
         distributed_config=DistributedConfig(tp_size=TP_SIZE),
         local_files_only=True,
     ).eval()
     assert dist.is_initialized() and dist.get_world_size() == TP_SIZE
-    modules = install_qwen3_tp4_k_offload_attention(
-        model,
-        c1_factor_dir=args.c1_factor_dir,
-        routing_factor_dir=args.routing_factor_dir,
-        routing_mode=args.router,
-        exact_key_storage=args.exact_key_storage,
-        base_rank=args.base_rank,
-        residual_rank=args.residual_rank,
-        page_size=args.page_size,
-        exact_token_budget=args.physical_token_budget,
-        pinned_prefix_pages=args.pinned_prefix_pages,
-        allgather_backend=args.c1_allgather_backend,
-    )
-    capacity = args.prompt_length + args.decode_length
+    if is_dense_gpu:
+        modules = install_qwen3_tp4_decode_attention(model)
+    elif is_dense_offload:
+        modules = install_qwen3_tp4_dense_k_offload_attention(model)
+    else:
+        modules = install_qwen3_tp4_k_offload_attention(
+            model,
+            c1_factor_dir=args.c1_factor_dir,
+            routing_factor_dir=args.routing_factor_dir,
+            routing_mode=args.router,
+            exact_key_storage=args.exact_key_storage,
+            base_rank=args.base_rank,
+            residual_rank=args.residual_rank,
+            page_size=args.page_size,
+            exact_token_budget=args.physical_token_budget,
+            pinned_prefix_pages=args.pinned_prefix_pages,
+            allgather_backend=args.c1_allgather_backend,
+        )
     configure_qwen3_tp4_caches(
         modules,
         batch_size=args.batch_size,
@@ -305,7 +360,7 @@ def main() -> None:
         time.perf_counter() - load_started,
         device=device,
     )
-    cache_bytes = tp4_k_offload_cache_bytes(modules)
+    cache_bytes = _cache_bytes_per_rank(modules)
     cache_bytes = {
         name: _global_max_int(value, device=device)
         for name, value in cache_bytes.items()
@@ -341,39 +396,69 @@ def main() -> None:
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "command": shlex.join(sys.argv),
             "protocol": {
-                "model": str(args.model.expanduser().resolve()),
+                "model": str(model_path),
                 "tp_size": TP_SIZE,
                 "dtype": "bfloat16",
                 "batch_size": args.batch_size,
                 "prompt_length": args.prompt_length,
                 "decode_length": args.decode_length,
-                "page_size": args.page_size,
+                "page_size": None if is_dense else args.page_size,
                 "physical_exact_k_tokens_per_local_kv_head": (
-                    args.physical_token_budget
+                    None if is_dense else args.physical_token_budget
                 ),
-                "pinned_prefix_pages": args.pinned_prefix_pages,
-                "force_current_page": True,
+                "pinned_prefix_pages": (
+                    None if is_dense else args.pinned_prefix_pages
+                ),
+                "force_current_page": not is_dense,
                 "routing": args.router,
                 "routing_kernel": (
-                    "fused_cuda_cached_base16_r8_page32_lse_with_decode_append"
+                    None
+                    if is_dense
+                    else "fused_cuda_cached_base16_r8_page32_lse_with_decode_append"
                 ),
                 "page_selection_kernel": (
-                    "fused_cuda_softmax_gqa_max_topk_sorted"
+                    None
+                    if is_dense
+                    else "fused_cuda_softmax_gqa_max_topk_sorted"
                 ),
                 "exact_k_storage": args.exact_key_storage,
                 "staging": (
-                    "GPU page IDs + fused mapped-host exact QK/softmax/V80; "
-                    "no CPU page pack or explicit H2D staging"
+                    "none"
+                    if is_dense_gpu
+                    else (
+                        "one shared full-prefix GPU K staging tensor; explicit "
+                        "pinned-CPU H2D per decode layer"
+                        if is_dense_offload
+                        else (
+                            "GPU page IDs + fused mapped-host exact QK/softmax/V80; "
+                            "no CPU page pack or explicit H2D staging"
+                        )
+                    )
                 ),
                 "resident_gpu_cache": (
-                    "C1-V80 + cached Base16 + residual "
-                    f"R{args.residual_rank} + layer-shared RoPE metadata"
+                    "dense K128/V128"
+                    if is_dense_gpu
+                    else (
+                        "dense V128 and one shared K128 H2D staging tensor"
+                        if is_dense_offload
+                        else (
+                            "C1-V80 + cached Base16 + residual "
+                            f"R{args.residual_rank} + layer-shared RoPE metadata"
+                        )
+                    )
                 ),
                 "collective": (
-                    "unchanged full-batch BF16 C1 latent AllGather followed by "
-                    "the complete decoder"
+                    None
+                    if is_dense
+                    else (
+                        "unchanged full-batch BF16 C1 latent AllGather followed by "
+                        "the complete decoder"
+                    )
                 ),
-                "c1_allgather_backend": args.c1_allgather_backend,
+                "c1_allgather_backend": (
+                    None if is_dense else args.c1_allgather_backend
+                ),
+                "rope_scaling": rope_scaling,
                 "warmup_runs": args.warmup_runs,
                 "repeat_runs": args.repeat_runs,
                 "prompt": "repeated-token synthetic full-model workload",
@@ -386,15 +471,23 @@ def main() -> None:
                 "model_load_and_cache_setup_seconds": load_seconds,
             },
             "artifacts": {
-                "c1_factor_dir": str(args.c1_factor_dir.expanduser().resolve()),
+                "c1_factor_dir": (
+                    None
+                    if args.c1_factor_dir is None
+                    else str(args.c1_factor_dir.expanduser().resolve())
+                ),
                 "routing_factor_dir": str(
                     args.routing_factor_dir.expanduser().resolve()
                 ) if args.routing_factor_dir is not None else None,
                 "c1_factor_sha256_by_layer": [
-                    module.factor_sha256 for module in modules
+                    module.factor_sha256
+                    for module in modules
+                    if isinstance(module, Qwen3TP4C1KOffloadDecodeAttention)
                 ],
                 "routing_factor_sha256_by_layer": [
-                    module.router_factor_sha256 for module in modules
+                    module.router_factor_sha256
+                    for module in modules
+                    if isinstance(module, Qwen3TP4C1KOffloadDecodeAttention)
                 ],
             },
             "cache": cache_bytes,

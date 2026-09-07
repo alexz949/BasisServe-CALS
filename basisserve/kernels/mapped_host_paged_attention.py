@@ -20,7 +20,8 @@ _VALUE_DIM = 80
 _QUERIES_PER_KV = 4
 _BASE_RANK = 16
 _RESIDUAL_RANK = 8
-_MAX_SPLITS = 32
+_DEFAULT_SPLITS = 32
+_MAX_SPLITS = 128
 
 
 @lru_cache(maxsize=1)
@@ -352,7 +353,7 @@ def mapped_host_page32_v80_attention(
     *,
     sequence_length: int,
     scale: float | None = None,
-    splits: int = _MAX_SPLITS,
+    splits: int = _DEFAULT_SPLITS,
     host_key_device_pointer: int | None = None,
     workspace: Tensor | None = None,
     output: Tensor | None = None,
@@ -426,7 +427,7 @@ def gpu_page32_v80_attention(
     *,
     sequence_length: int,
     scale: float | None = None,
-    splits: int = _MAX_SPLITS,
+    splits: int = _DEFAULT_SPLITS,
     workspace: Tensor | None = None,
     output: Tensor | None = None,
 ) -> Tensor:

@@ -28,6 +28,7 @@ from basisserve.core.qwen3_8b_tp4_decode import (
     TP_SIZE,
     Qwen3TP4C1DecodeAttention,
     Qwen3TP4C1FactorLayer,
+    Qwen3TP4DenseDecodeAttention,
     _Qwen3TP4StaticDecodeAttention,
     file_sha256,
     load_qwen3_tp4_c1_factor_layer,
@@ -123,6 +124,24 @@ def _apply_rope(values: Tensor, cos: Tensor, sin: Tensor) -> Tensor:
     return torch.cat(
         (first * cos - second * sin, second * cos + first * sin),
         dim=-1,
+    )
+
+
+def _feature_major_attention_view(
+    feature_major: Tensor,
+    *,
+    query_heads: int,
+    value_dim: int,
+) -> Tensor:
+    """View an AllGather source slot as the attention kernel output."""
+
+    batch = int(feature_major.shape[1])
+    assert feature_major.ndim == 2 and feature_major.is_contiguous()
+    assert tuple(feature_major.shape) == (query_heads * value_dim, batch)
+    return (
+        feature_major.view(query_heads, value_dim, batch)
+        .permute(2, 0, 1)
+        .unsqueeze(2)
     )
 
 
@@ -374,6 +393,7 @@ class PinnedCPUPageMajorKeyCache:
         self.last_host_pack_seconds = 0.0
         self.last_h2d_seconds = 0.0
         self.last_requested_bytes = 0
+        self.exact_key_bytes_h2d = 0
 
     @property
     def resident_bytes(self) -> int:
@@ -406,7 +426,13 @@ class PinnedCPUPageMajorKeyCache:
             start_event = torch.cuda.Event(enable_timing=True)
             stop_event = torch.cuda.Event(enable_timing=True)
             start_event.record(torch.cuda.current_stream(key.device))
-        destination.copy_(key.detach(), non_blocking=key.is_cuda)
+        detached = key.detach()
+        for batch_index in range(self.batch_size):
+            for head_index in range(self.kv_heads):
+                destination[batch_index, head_index].copy_(
+                    detached[batch_index, head_index],
+                    non_blocking=key.is_cuda,
+                )
         if stop_event is not None:
             stop_event.record(torch.cuda.current_stream(key.device))
             self._append_events = (start_event, stop_event)
@@ -418,6 +444,7 @@ class PinnedCPUPageMajorKeyCache:
         self.length = 0
         self.d2h_seconds = 0.0
         self.exact_key_bytes_d2h = 0
+        self.exact_key_bytes_h2d = 0
 
     def fetch(self, selected_page_ids: Tensor, *, device: torch.device) -> Tensor:
         """Pack selected pages on CPU and issue one blocking contiguous H2D copy."""
@@ -474,7 +501,33 @@ class PinnedCPUPageMajorKeyCache:
         stop.record(torch.cuda.current_stream(device))
         stop.synchronize()
         self.last_h2d_seconds = start.elapsed_time(stop) / 1000.0
+        self.exact_key_bytes_h2d += self.last_requested_bytes
         return destination
+
+    def fetch_full(self, destination: Tensor) -> Tensor:
+        """Issue full-prefix H2D copies without CPU-side page packing."""
+
+        assert destination.dtype == self.pages.dtype
+        assert tuple(destination.shape[:2]) == (self.batch_size, self.kv_heads)
+        assert int(destination.shape[2]) >= self.length
+        assert int(destination.shape[3]) == self.head_dim
+        source = self.pages.view(
+            self.batch_size,
+            self.kv_heads,
+            self.token_capacity,
+            self.head_dim,
+        )
+        output = destination[:, :, : self.length]
+        for batch_index in range(self.batch_size):
+            for head_index in range(self.kv_heads):
+                output[batch_index, head_index].copy_(
+                    source[batch_index, head_index, : self.length],
+                    non_blocking=True,
+                )
+        self.last_requested_bytes = output.numel() * output.element_size()
+        if destination.is_cuda:
+            self.exact_key_bytes_h2d += self.last_requested_bytes
+        return output
 
 
 class MappedHostExactKeyCache:
@@ -593,6 +646,182 @@ class _SharedRopeCache:
         self.sin = None
 
 
+class _SharedDenseKeyStaging:
+    """One full-prefix GPU K staging tensor shared by all transformer layers."""
+
+    def __init__(self) -> None:
+        self.key: Tensor | None = None
+
+    def configure(
+        self,
+        *,
+        batch_size: int,
+        capacity: int,
+        device: torch.device,
+        dtype: torch.dtype,
+    ) -> Tensor:
+        shape = (int(batch_size), KV_HEADS_PER_PROCESS, int(capacity), HEAD_DIM)
+        if (
+            self.key is None
+            or tuple(self.key.shape) != shape
+            or self.key.device != device
+            or self.key.dtype != dtype
+        ):
+            self.key = torch.empty(shape, device=device, dtype=dtype)
+        return self.key
+
+    def clear(self) -> None:
+        self.key = None
+
+
+class Qwen3TP4DenseKOffloadDecodeAttention(Qwen3TP4DenseDecodeAttention):
+    """Dense V on GPU with pinned-CPU K and full-prefix H2D per decode."""
+
+    def __init__(
+        self,
+        base_attention: nn.Module,
+        shared_key_staging: _SharedDenseKeyStaging,
+        *,
+        owns_shared_key_staging: bool,
+    ) -> None:
+        super().__init__(base_attention)
+        self.shared_key_staging = shared_key_staging
+        self.owns_shared_key_staging = bool(owns_shared_key_staging)
+        self.register_buffer("key_staging", None, persistent=False)
+        self.exact_key_cache: PinnedCPUPageMajorKeyCache | None = None
+        self.decode_calls = 0
+
+    def configure_cache(
+        self,
+        *,
+        batch_size: int,
+        capacity: int,
+        max_forward_tokens: int = 1,
+    ) -> None:
+        del max_forward_tokens
+        batch = int(batch_size)
+        length = int(capacity)
+        device = self.q_proj.weight.device
+        dtype = self.q_proj.weight.dtype
+        assert dtype == torch.bfloat16
+        self.key_cache = None
+        self.value_cache = torch.empty(
+            batch,
+            KV_HEADS_PER_PROCESS,
+            length,
+            HEAD_DIM,
+            device=device,
+            dtype=dtype,
+        )
+        self.key_staging = self.shared_key_staging.configure(
+            batch_size=batch,
+            capacity=length,
+            device=device,
+            dtype=dtype,
+        )
+        self.exact_key_cache = PinnedCPUPageMajorKeyCache(
+            batch_size=batch,
+            kv_heads=KV_HEADS_PER_PROCESS,
+            capacity=length,
+            head_dim=HEAD_DIM,
+            page_size=32,
+            dtype=dtype,
+        )
+        self._cache_length = 0
+        self.decode_calls = 0
+
+    def clear_cache(self) -> None:
+        self.key_cache = None
+        self.value_cache = None
+        self.key_staging = None
+        self.exact_key_cache = None
+        if self.owns_shared_key_staging:
+            self.shared_key_staging.clear()
+        self._cache_length = 0
+        self.decode_calls = 0
+
+    def reset_cache(self) -> None:
+        assert self.exact_key_cache is not None
+        self.exact_key_cache.reset()
+        self._cache_length = 0
+        self.decode_calls = 0
+
+    def set_cache_length(self, length: int) -> None:
+        assert int(length) == 0
+        self.reset_cache()
+
+    def _append_cache(
+        self,
+        key: Tensor,
+        value: Tensor,
+        *,
+        position_embeddings: tuple[Tensor, Tensor] | None = None,
+    ) -> tuple[Tensor, Tensor]:
+        del position_embeddings
+        assert self.value_cache is not None
+        assert self.exact_key_cache is not None
+        tokens = int(key.shape[2])
+        assert tokens == 1 or self._cache_length == 0
+        start = self._cache_length
+        stop = start + tokens
+        assert stop <= int(self.value_cache.shape[2])
+        self.value_cache[:, :, start:stop].copy_(value)
+        self.exact_key_cache.append(key)
+        self._cache_length = stop
+        return key, self.value_cache[:, :, :stop]
+
+    def _attention(
+        self,
+        query: Tensor,
+        key: Tensor,
+        value: Tensor,
+        *,
+        is_prefill: bool,
+    ) -> Tensor:
+        if is_prefill:
+            return super()._attention(query, key, value, is_prefill=True)
+        assert self.exact_key_cache is not None
+        assert self.key_staging is not None
+        staged_key = self.exact_key_cache.fetch_full(self.key_staging)
+        self.decode_calls += 1
+        return super()._attention(query, staged_key, value, is_prefill=False)
+
+    def offload_statistics(self) -> dict[str, float]:
+        assert self.exact_key_cache is not None
+        return {
+            "decode_calls": float(self.decode_calls),
+            "selected_pages": 0.0,
+            "exact_key_bytes_direct_read": 0.0,
+            "exact_key_bytes_d2h": float(
+                self.exact_key_cache.exact_key_bytes_d2h
+            ),
+            "exact_key_bytes_h2d": float(
+                self.exact_key_cache.exact_key_bytes_h2d
+            ),
+        }
+
+    @property
+    def gpu_cache_bytes(self) -> int:
+        result = 0 if self.value_cache is None else (
+            self.value_cache.numel() * self.value_cache.element_size()
+        )
+        if self.owns_shared_key_staging and self.key_staging is not None:
+            result += self.key_staging.numel() * self.key_staging.element_size()
+        return result
+
+    @property
+    def cpu_cache_bytes(self) -> int:
+        return (
+            0
+            if self.exact_key_cache is None
+            else self.exact_key_cache.resident_bytes
+        )
+
+    @property
+    def cache_bytes(self) -> int:
+        return self.gpu_cache_bytes + self.cpu_cache_bytes
+
+
 class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
     """TP4 C1 attention with selectable GPU routing and exact-K placement."""
 
@@ -680,7 +909,6 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
         self.register_buffer("quest_page_maximum", None, persistent=False)
         self.register_buffer("shadowkv_page_mean", None, persistent=False)
         self.register_buffer("mapped_attention_workspace", None, persistent=False)
-        self.register_buffer("mapped_attention_output", None, persistent=False)
         self.register_buffer("router_query_code", None, persistent=False)
         self.register_buffer("router_page_log_mass", None, persistent=False)
         self.register_buffer("selected_page_ids", None, persistent=False)
@@ -847,14 +1075,6 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
             dtype=torch.float32,
             device=device,
         )
-        self.mapped_attention_output = torch.empty(
-            batch,
-            QUERY_HEADS_PER_PROCESS,
-            1,
-            self.value_head_dim,
-            dtype=dtype,
-            device=device,
-        )
         maximum_selected_pages = min(self.pages_per_kv_head, page_capacity)
         self.selected_page_ids = torch.empty(
             batch * KV_HEADS_PER_PROCESS * maximum_selected_pages,
@@ -878,7 +1098,6 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
         self.router_page_log_mass = None
         self.selected_page_ids = None
         self.mapped_attention_workspace = None
-        self.mapped_attention_output = None
         self.exact_key_cache = None
         if self.owns_shared_rope_cache:
             assert self.shared_rope_cache is not None
@@ -1077,7 +1296,6 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
             )
         assert self.exact_key_cache is not None
         assert self.mapped_attention_workspace is not None
-        assert self.mapped_attention_output is not None
         page_count = math.ceil(self._cache_length / self.page_size)
         if self.routing_mode == "c1_base16_r8":
             assert self.base_cache is not None
@@ -1139,8 +1357,25 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
             * HEAD_DIM
             * self.exact_key_cache.key.element_size()
         )
+        batch = int(query.shape[0])
+        prepared = self._uniform_plan(tokens=batch, dtype=query.dtype)
+        if prepared is None:
+            feature_major_output = (
+                self.communicator.direct_local_feature_major_view(
+                    self.plan,
+                    tokens=batch,
+                    dtype=query.dtype,
+                )
+            )
+        else:
+            feature_major_output = prepared.local_feature_major_view_fast()
+        attention_output = _feature_major_attention_view(
+            feature_major_output,
+            query_heads=QUERY_HEADS_PER_PROCESS,
+            value_dim=self.value_head_dim,
+        )
         if isinstance(self.exact_key_cache, MappedHostExactKeyCache):
-            output = mapped_host_page32_v80_attention(
+            mapped_host_page32_v80_attention(
                 self.exact_key_cache.key,
                 query,
                 value,
@@ -1150,10 +1385,10 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
                 splits=32,
                 host_key_device_pointer=self.exact_key_cache.device_pointer,
                 workspace=self.mapped_attention_workspace,
-                output=self.mapped_attention_output,
+                output=attention_output,
             )
         else:
-            output = gpu_page32_v80_attention(
+            gpu_page32_v80_attention(
                 self.exact_key_cache.key,
                 query,
                 value,
@@ -1162,10 +1397,30 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
                 scale=self.scaling,
                 splits=32,
                 workspace=self.mapped_attention_workspace,
-                output=self.mapped_attention_output,
+                output=attention_output,
             )
         self._offload_totals["decode_calls"] += 1.0
-        return output
+        return feature_major_output
+
+
+def install_qwen3_tp4_dense_k_offload_attention(
+    model: nn.Module,
+) -> tuple[Qwen3TP4DenseKOffloadDecodeAttention, ...]:
+    """Install dense TP4 attention with explicit full-prefix K H2D decode."""
+
+    assert dist.is_initialized() and dist.get_world_size() == TP_SIZE
+    shared_key_staging = _SharedDenseKeyStaging()
+    installed: list[Qwen3TP4DenseKOffloadDecodeAttention] = []
+    for layer_index, layer in enumerate(model.model.layers):
+        replacement = Qwen3TP4DenseKOffloadDecodeAttention(
+            layer.self_attn,
+            shared_key_staging,
+            owns_shared_key_staging=layer_index == 0,
+        )
+        replacement.eval()
+        layer.self_attn = replacement
+        installed.append(replacement)
+    return tuple(installed)
 
 
 def install_qwen3_tp4_k_offload_attention(
@@ -1235,7 +1490,13 @@ def tp4_k_offload_cache_bytes(
     offloaded = tuple(
         module
         for module in modules
-        if isinstance(module, Qwen3TP4C1KOffloadDecodeAttention)
+        if isinstance(
+            module,
+            (
+                Qwen3TP4C1KOffloadDecodeAttention,
+                Qwen3TP4DenseKOffloadDecodeAttention,
+            ),
+        )
     )
     return {
         "gpu_bytes_per_rank": sum(module.gpu_cache_bytes for module in offloaded),
@@ -1250,8 +1511,10 @@ __all__ = [
     "PinnedCPUPageMajorKeyCache",
     "MappedHostExactKeyCache",
     "Qwen3TP4C1KOffloadDecodeAttention",
+    "Qwen3TP4DenseKOffloadDecodeAttention",
     "Qwen3TP4ConditionalRouterLayer",
     "conditional_router_page_log_mass",
+    "install_qwen3_tp4_dense_k_offload_attention",
     "install_qwen3_tp4_k_offload_attention",
     "load_qwen3_tp4_conditional_router_layer",
     "quest_page_scores",

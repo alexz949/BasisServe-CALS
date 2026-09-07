@@ -17,6 +17,7 @@ from basisserve.kernels.mapped_host_paged_attention import (
     select_fixed_group_max_pages_cuda,
 )
 from basisserve.core.qwen3_8b_tp4_k_offload import (
+    _feature_major_attention_view,
     conditional_router_page_log_mass,
     select_fixed_group_max_pages,
 )
@@ -25,6 +26,29 @@ from basisserve.core.qwen3_8b_tp4_k_offload import (
 _CUDA_BUILD_AVAILABLE = torch.cuda.is_available() and bool(
     os.environ.get("CUDA_HOME") or os.environ.get("CUDA_PATH")
 )
+
+
+def test_feature_major_attention_view_aliases_allgather_slot() -> None:
+    batch = 3
+    query_heads = 8
+    value_dim = 80
+    feature_major = torch.zeros(query_heads * value_dim, batch)
+    attention = _feature_major_attention_view(
+        feature_major,
+        query_heads=query_heads,
+        value_dim=value_dim,
+    )
+    expected = torch.arange(
+        batch * query_heads * value_dim,
+        dtype=feature_major.dtype,
+    ).reshape(batch, query_heads, 1, value_dim)
+    attention.copy_(expected)
+
+    assert attention.data_ptr() == feature_major.data_ptr()
+    torch.testing.assert_close(
+        feature_major.transpose(0, 1),
+        expected.reshape(batch, query_heads * value_dim),
+    )
 
 
 def _apply_rope_reference(

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evaluate TP4 mapped-host exact-K routing on fixed hard RULER samples."""
+"""Evaluate dense or mapped-host TP4 attention on fixed hard RULER samples."""
 
 from __future__ import annotations
 
@@ -27,9 +27,12 @@ from basisserve.core.qwen3_8b_tp4_decode import (  # noqa: E402
     TP_SIZE,
     close_qwen3_tp4_packed_communicator,
     configure_qwen3_tp4_caches,
+    install_qwen3_tp4_decode_attention,
 )
 from basisserve.core.qwen3_8b_tp4_k_offload import (  # noqa: E402
     Qwen3TP4C1KOffloadDecodeAttention,
+    Qwen3TP4DenseKOffloadDecodeAttention,
+    install_qwen3_tp4_dense_k_offload_attention,
     install_qwen3_tp4_k_offload_attention,
     tp4_k_offload_cache_bytes,
 )
@@ -58,10 +61,16 @@ DEFAULT_SAMPLE_SPEC = (
     "niah_single_3:3,fwe:2"
 )
 ROUTER_LABELS = {
+    "dense": "Dense K128/V128",
+    "dense_offload": "Dense K128 CPU-offload/V128 GPU",
     "c1_base16_r8": "C1 Base16+R8 Page32 group-max",
     "quest": "QUEST Min/Max Page32 group-max",
     "shadowkv": "ShadowKV-style mean-landmark Page32 group-max",
 }
+OFFLOAD_ATTENTION_TYPES = (
+    Qwen3TP4C1KOffloadDecodeAttention,
+    Qwen3TP4DenseKOffloadDecodeAttention,
+)
 
 
 def _atomic_json(path: Path, payload: Mapping[str, Any]) -> None:
@@ -155,11 +164,24 @@ def _global_max_float(value: float, *, device: torch.device) -> float:
 
 
 def _global_cache_bytes(
-    modules: Sequence[Qwen3TP4C1KOffloadDecodeAttention],
+    modules: Sequence[torch.nn.Module],
     *,
     device: torch.device,
 ) -> dict[str, int]:
-    local = tp4_k_offload_cache_bytes(modules)
+    offloaded = tuple(
+        module
+        for module in modules
+        if isinstance(module, OFFLOAD_ATTENTION_TYPES)
+    )
+    assert len(offloaded) in (0, len(modules))
+    local = (
+        tp4_k_offload_cache_bytes(offloaded)
+        if offloaded
+        else {
+            "gpu_bytes_per_rank": sum(module.cache_bytes for module in modules),
+            "cpu_pinned_bytes_per_rank": 0,
+        }
+    )
     result: dict[str, int] = {}
     for name, value in local.items():
         maximum = torch.tensor(int(value), dtype=torch.int64, device=device)
@@ -172,7 +194,7 @@ def _global_cache_bytes(
 
 
 def _global_offload_statistics(
-    modules: Sequence[Qwen3TP4C1KOffloadDecodeAttention],
+    modules: Sequence[torch.nn.Module],
     *,
     device: torch.device,
 ) -> dict[str, float]:
@@ -181,9 +203,12 @@ def _global_offload_statistics(
         "selected_pages",
         "exact_key_bytes_direct_read",
         "exact_key_bytes_d2h",
+        "exact_key_bytes_h2d",
     )
     local = {name: 0.0 for name in names}
     for module in modules:
+        if not isinstance(module, OFFLOAD_ATTENTION_TYPES):
+            continue
         for name, value in module.offload_statistics().items():
             local[name] += float(value)
     values = torch.tensor(
@@ -238,9 +263,18 @@ def _markdown(payload: Mapping[str, Any]) -> str:
         f"# Qwen3-8B TP4 {protocol['router_label']} RULER",
         "",
         (
-            f"Exact K storage: `{protocol['exact_key_storage']}`; Page32; "
-            f"strict physical B{protocol['physical_token_budget_per_kv_head']} "
-            "per KV head."
+            "Dense K128/V128 cache; no sparse page routing."
+            if protocol["router"] == "dense"
+            else (
+                "Pinned-CPU K128 cache with a full-prefix H2D transfer per "
+                "decode layer; GPU-resident V128; no sparse page routing."
+                if protocol["router"] == "dense_offload"
+                else (
+                    f"Exact K storage: `{protocol['exact_key_storage']}`; Page32; "
+                    f"strict physical B{protocol['physical_token_budget_per_kv_head']} "
+                    "per KV head."
+                )
+            )
         ),
         "",
         "| Task/sample | Score | Prompt | Output | Prefill tok/s | Decode tok/s |",
@@ -260,35 +294,53 @@ def _markdown(payload: Mapping[str, Any]) -> str:
             f"Aggregate decode throughput: `{summary['decode_tokens_per_second']:.4f} tok/s`.",
             f"Aggregate end-to-end model throughput: `{summary['end_to_end_model_tokens_per_second']:.2f} tok/s`.",
             (
-                "Requested physical exact-K reads: "
-                f"`{summary['physical_exact_k_gib_read']:.3f} GiB`, "
-                f"`{summary['physical_k_vector_tokens_fetched']:.0f}` K-vector tokens."
-            ),
-            (
-                "Requested physical exact-K read per decode step: "
-                f"`{summary['physical_exact_k_gib_per_decode_step']:.5f} GiB`."
-            ),
-            (
                 "GPU-resident runtime cache: "
                 f"`{cache['gpu_bytes_per_rank_maximum'] / 2**30:.3f} GiB/rank`; "
-                "mapped-host exact-K cache: "
+                "CPU-resident exact-K cache: "
                 f"`{cache['cpu_pinned_bytes_per_rank_maximum'] / 2**30:.3f} GiB/rank`."
             ),
         ]
     )
+    if protocol["router"] == "dense_offload":
+        lines.extend(
+            [
+                (
+                    "Full-prefix exact-K H2D traffic: "
+                    f"`{summary['full_k_h2d_gib']:.3f} GiB`, or "
+                    f"`{summary['full_k_h2d_gib_per_decode_step']:.3f} GiB` "
+                    "per decode step across TP ranks."
+                ),
+            ]
+        )
+    elif protocol["router"] != "dense":
+        lines.extend(
+            [
+                (
+                    "Requested physical exact-K reads: "
+                    f"`{summary['physical_exact_k_gib_read']:.3f} GiB`, "
+                    f"`{summary['physical_k_vector_tokens_fetched']:.0f}` "
+                    "K-vector tokens."
+                ),
+                (
+                    "Requested physical exact-K read per decode step: "
+                    f"`{summary['physical_exact_k_gib_per_decode_step']:.5f} GiB`."
+                ),
+            ]
+        )
     if summary["quality_oracle_samples"]:
         lines.append(
             "GPU-oracle token-sequence agreement: "
             f"`{summary['quality_oracle_sequence_matches']}/"
             f"{summary['quality_oracle_samples']}`."
         )
-    lines.extend(
-        [
-            "",
-            "Physical fetch is the requested Page32 exact-K payload read by the CUDA kernel; it is not a PCIe hardware-counter measurement.",
-            "",
-        ]
-    )
+    lines.append("")
+    if protocol["router"] not in ("dense", "dense_offload"):
+        lines.extend(
+            [
+                "Physical fetch is the requested Page32 exact-K payload read by the CUDA kernel; it is not a PCIe hardware-counter measurement.",
+                "",
+            ]
+        )
     return "\n".join(lines)
 
 
@@ -296,7 +348,7 @@ def _markdown(payload: Mapping[str, Any]) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", type=Path, required=True)
-    parser.add_argument("--c1-factor-dir", type=Path, required=True)
+    parser.add_argument("--c1-factor-dir", type=Path)
     parser.add_argument("--routing-factor-dir", type=Path)
     parser.add_argument(
         "--router",
@@ -305,7 +357,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--exact-key-storage",
-        choices=("mapped_host", "gpu"),
+        choices=("mapped_host", "pinned_cpu", "gpu"),
         default="mapped_host",
     )
     parser.add_argument("--data-dir", type=Path, required=True)
@@ -325,20 +377,36 @@ def main() -> None:
     parser.add_argument("--output-json", type=Path, required=True)
     args = parser.parse_args()
 
+    is_dense_gpu = args.router == "dense"
+    is_dense_offload = args.router == "dense_offload"
+    is_dense = is_dense_gpu or is_dense_offload
     assert args.sequence_length > 0
     assert args.samples_per_task > 0
     assert args.page_size == 32
     assert args.physical_token_budget % args.page_size == 0
     assert args.pinned_prefix_pages >= 0
+    assert (args.c1_factor_dir is None) == is_dense
     assert (args.routing_factor_dir is not None) == (
         args.router == "c1_base16_r8"
     )
-    assert args.exact_key_storage == "mapped_host" or args.router == "c1_base16_r8"
+    assert (
+        is_dense_gpu
+        and args.exact_key_storage == "gpu"
+        or is_dense_offload
+        and args.exact_key_storage == "pinned_cpu"
+        or not is_dense
+        and (
+            args.exact_key_storage == "mapped_host"
+            or args.router == "c1_base16_r8"
+            and args.exact_key_storage == "gpu"
+        )
+    )
     torch.set_num_threads(args.torch_num_threads)
     local_rank = int(os.environ["LOCAL_RANK"])
     torch.cuda.set_device(local_rank)
     device = torch.device("cuda", local_rank)
-    prepare_mapped_host_paged_attention_extension()
+    if not is_dense:
+        prepare_mapped_host_paged_attention_extension()
 
     from transformers import AutoModelForCausalLM, AutoTokenizer
     from transformers.distributed import DistributedConfig
@@ -381,19 +449,24 @@ def main() -> None:
         local_files_only=True,
     ).eval()
     assert dist.is_initialized() and dist.get_world_size() == TP_SIZE
-    modules = install_qwen3_tp4_k_offload_attention(
-        model,
-        c1_factor_dir=args.c1_factor_dir,
-        routing_factor_dir=args.routing_factor_dir,
-        routing_mode=args.router,
-        exact_key_storage=args.exact_key_storage,
-        base_rank=args.base_rank,
-        residual_rank=args.residual_rank,
-        page_size=args.page_size,
-        exact_token_budget=args.physical_token_budget,
-        pinned_prefix_pages=args.pinned_prefix_pages,
-        allgather_backend="uniform_nccl",
-    )
+    if is_dense_gpu:
+        modules = install_qwen3_tp4_decode_attention(model)
+    elif is_dense_offload:
+        modules = install_qwen3_tp4_dense_k_offload_attention(model)
+    else:
+        modules = install_qwen3_tp4_k_offload_attention(
+            model,
+            c1_factor_dir=args.c1_factor_dir,
+            routing_factor_dir=args.routing_factor_dir,
+            routing_mode=args.router,
+            exact_key_storage=args.exact_key_storage,
+            base_rank=args.base_rank,
+            residual_rank=args.residual_rank,
+            page_size=args.page_size,
+            exact_token_budget=args.physical_token_budget,
+            pinned_prefix_pages=args.pinned_prefix_pages,
+            allgather_backend="uniform_nccl",
+        )
     configure_qwen3_tp4_caches(
         modules,
         batch_size=1,
@@ -415,10 +488,11 @@ def main() -> None:
     )
     for module in modules:
         module.reset_cache()
-        module.configure_uniform_allgather(
-            tokens=args.warmup_prompt_tokens,
-            dtype=torch.bfloat16,
-        )
+        if isinstance(module, Qwen3TP4C1KOffloadDecodeAttention):
+            module.configure_uniform_allgather(
+                tokens=args.warmup_prompt_tokens,
+                dtype=torch.bfloat16,
+            )
     warmup_token = _prefill(model, warmup)
     _decode_step(model, warmup_token, position=args.warmup_prompt_tokens)
     torch.cuda.synchronize(device)
@@ -437,10 +511,11 @@ def main() -> None:
         assert prompt_tokens + task.tokens_to_generate <= args.sequence_length
         for module in modules:
             module.reset_cache()
-            module.configure_uniform_allgather(
-                tokens=prompt_tokens,
-                dtype=torch.bfloat16,
-            )
+            if isinstance(module, Qwen3TP4C1KOffloadDecodeAttention):
+                module.configure_uniform_allgather(
+                    tokens=prompt_tokens,
+                    dtype=torch.bfloat16,
+                )
 
         dist.barrier()
         torch.cuda.synchronize(device)
@@ -536,6 +611,10 @@ def main() -> None:
         record["runtime_global"]["exact_key_bytes_direct_read"]
         for record in records
     )
+    full_k_h2d_bytes = sum(
+        record["runtime_global"]["exact_key_bytes_h2d"]
+        for record in records
+    )
     selected_pages = sum(
         record["runtime_global"]["selected_pages"] for record in records
     )
@@ -570,6 +649,13 @@ def main() -> None:
             if total_decode_steps
             else 0.0
         ),
+        "full_k_h2d_bytes": full_k_h2d_bytes,
+        "full_k_h2d_gib": full_k_h2d_bytes / 2**30,
+        "full_k_h2d_gib_per_decode_step": (
+            full_k_h2d_bytes / total_decode_steps / 2**30
+            if total_decode_steps
+            else 0.0
+        ),
         "quality_oracle_samples": len(oracle_rows),
         "quality_oracle_sequence_matches": sum(
             record["quality_oracle_sequence_match"] is True
@@ -593,30 +679,52 @@ def main() -> None:
                 "router": args.router,
                 "router_label": ROUTER_LABELS[args.router],
                 "exact_key_storage": args.exact_key_storage,
-                "page_size": args.page_size,
-                "physical_token_budget_per_kv_head": args.physical_token_budget,
-                "pinned_prefix_pages": args.pinned_prefix_pages,
-                "force_current_page": True,
+                "page_size": None if is_dense else args.page_size,
+                "physical_token_budget_per_kv_head": (
+                    None if is_dense else args.physical_token_budget
+                ),
+                "pinned_prefix_pages": (
+                    None if is_dense else args.pinned_prefix_pages
+                ),
+                "force_current_page": False if is_dense else True,
                 "routing_aggregation": (
-                    "normalize page mass per Query head, then max over four "
-                    "heads in each physical GQA group"
+                    None
+                    if is_dense
+                    else (
+                        "normalize page mass per Query head, then max over four "
+                        "heads in each physical GQA group"
+                    )
                 ),
                 "routing_kernel": (
-                    "fused CUDA cached-Base16->RoPE QK + R8 Page32 LSE; "
-                    "fused decode append and layer-shared RoPE metadata"
+                    "none"
+                    if is_dense
+                    else (
+                        "fused CUDA cached-Base16->RoPE QK + R8 Page32 LSE; "
+                        "fused decode append and layer-shared RoPE metadata"
+                    )
                     if args.router == "c1_base16_r8"
                     else "PyTorch"
                 ),
                 "page_selection_kernel": (
-                    "fused CUDA softmax + four-Q-head max + Top-K + ID sort"
+                    None
+                    if is_dense
+                    else "fused CUDA softmax + four-Q-head max + Top-K + ID sort"
                 ),
-                "value_cache": "C1-V80 BF16 GPU resident",
+                "value_cache": (
+                    "dense V128 BF16 GPU resident"
+                    if is_dense
+                    else "C1-V80 BF16 GPU resident"
+                ),
                 "exact_attention": (
-                    "shared CUDA Page32 exact-QK online-softmax V80 kernel"
+                    "PyTorch SDPA dense K128/V128"
+                    if is_dense
+                    else "shared CUDA Page32 exact-QK online-softmax V80 kernel"
                 ),
-                "c1_collective": "TP4 BF16 latent AllGather",
+                "c1_collective": (
+                    None if is_dense else "TP4 BF16 latent AllGather"
+                ),
                 "rope_scaling": rope_scaling,
-                "first_generated_token_from_dense_c1_prefill": True,
+                "first_generated_token_from_dense_c1_prefill": not is_dense,
                 "shadowkv_scope": (
                     "Page32 post-RoPE mean-landmark selector only; excludes "
                     "ShadowKV chunk8 outlier/local caches and online SVD payload"
@@ -643,7 +751,11 @@ def main() -> None:
                 "ruler_revision": dataset_manifest["ruler"]["revision"],
             },
             "artifacts": {
-                "c1_factor_dir": str(args.c1_factor_dir.expanduser().resolve()),
+                "c1_factor_dir": (
+                    None
+                    if args.c1_factor_dir is None
+                    else str(args.c1_factor_dir.expanduser().resolve())
+                ),
                 "routing_factor_dir": (
                     None
                     if args.routing_factor_dir is None
@@ -655,10 +767,14 @@ def main() -> None:
                     else str(args.quality_oracle_json.expanduser().resolve())
                 ),
                 "c1_factor_sha256_by_layer": [
-                    module.factor_sha256 for module in modules
+                    module.factor_sha256
+                    for module in modules
+                    if isinstance(module, Qwen3TP4C1KOffloadDecodeAttention)
                 ],
                 "routing_factor_sha256_by_layer": [
-                    module.router_factor_sha256 for module in modules
+                    module.router_factor_sha256
+                    for module in modules
+                    if isinstance(module, Qwen3TP4C1KOffloadDecodeAttention)
                 ],
             },
             "cache": cache,

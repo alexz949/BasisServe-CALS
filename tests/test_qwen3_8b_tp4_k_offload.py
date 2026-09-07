@@ -48,6 +48,28 @@ def test_page_major_cache_appends_and_packs_selected_pages() -> None:
     assert cache.last_requested_bytes == observed.numel() * observed.element_size()
 
 
+def test_page_major_cache_fetches_full_prefix_without_packing() -> None:
+    cache = PinnedCPUPageMajorKeyCache(
+        batch_size=1,
+        kv_heads=2,
+        capacity=7,
+        head_dim=3,
+        page_size=2,
+        dtype=torch.float32,
+    )
+    first = torch.arange(1 * 2 * 5 * 3, dtype=torch.float32).reshape(1, 2, 5, 3)
+    second = torch.arange(1 * 2 * 2 * 3, dtype=torch.float32).reshape(1, 2, 2, 3) + 100
+    cache.append(first)
+    cache.append(second)
+    destination = torch.empty(1, 2, 7, 3)
+
+    observed = cache.fetch_full(destination)
+
+    torch.testing.assert_close(observed, torch.cat((first, second), dim=2))
+    assert cache.last_requested_bytes == observed.numel() * observed.element_size()
+    assert cache.exact_key_bytes_h2d == 0
+
+
 def test_group_max_selection_keeps_prefix_and_current_with_fixed_budget() -> None:
     page_log_mass = torch.tensor(
         [[[[100.0, 1.0, 8.0, 7.0, -5.0], [90.0, 9.0, 2.0, 6.0, -4.0]]]]

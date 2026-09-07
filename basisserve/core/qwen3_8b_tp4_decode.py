@@ -688,13 +688,14 @@ class Qwen3TP4C1DecodeAttention(_Qwen3TP4StaticDecodeAttention):
                 local_is_feature_major=local_is_feature_major,
             )
         if local_is_feature_major:
-            # The BF16 CUDA decode kernel was handed the prepared source slot as
-            # its output tensor, so avoid a second C++ local_view() call in the
-            # 1--2 KiB hot path. FP8 still needs to copy freshly quantized bytes.
+            # CUDA attention kernels may write directly into this source slot.
+            # In that case launch only the collective; FP8 still needs a copy
+            # after quantization.
+            fast_destination = prepared.local_feature_major_view_fast()
             if (
                 self.wire_dtype == "bfloat16"
-                and self.decode_attention_backend == "cuda"
                 and local.ndim == 2
+                and local.data_ptr() == fast_destination.data_ptr()
             ):
                 return prepared.gather_inplace_fast()
             destination = prepared.local_feature_major_view()
