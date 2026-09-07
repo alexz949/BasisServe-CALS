@@ -151,6 +151,7 @@ def aggregate(args: argparse.Namespace) -> None:
         "c1_export_sha256",
         "routing_factor_result_sha256",
         "routing_factor_tensor_sha256",
+        "routing_factor_format",
         "windows_sha256",
         "sequence_length",
         "prefill_tokens",
@@ -159,6 +160,8 @@ def aggregate(args: argparse.Namespace) -> None:
         "ranks",
         "nominal_token_budgets",
         "force_last_page",
+        "routing_support",
+        "value_rank",
         "layers",
         "dtype",
     )

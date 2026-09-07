@@ -241,7 +241,11 @@ def test_streaming_covariance_capture_uses_every_token_position() -> None:
         0: nn.Linear(3, 2, bias=False),
         1: nn.Linear(3, 2, bias=False),
     }
-    capture = _StreamingCovarianceCapture(modules, input_width=3)
+    capture = _StreamingCovarianceCapture(
+        modules,
+        input_width=3,
+        covariance_dtype=torch.float32,
+    )
     fit = torch.arange(24, dtype=torch.float32).reshape(2, 4, 3) / 10
     heldout = torch.arange(12, dtype=torch.float32).reshape(1, 4, 3) / 7
     try:

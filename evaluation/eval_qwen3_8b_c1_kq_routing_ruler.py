@@ -37,6 +37,7 @@ from basisserve.core.c1_k_routing_sidecar import (  # noqa: E402
 )
 from evaluation.eval_c1_block_scheduled_ppl import _dtype  # noqa: E402
 from evaluation.eval_qwen3_8b_c1_kq_routing_ppl import (  # noqa: E402
+    LOKI_FACTOR_FORMAT,
     _attention_modules,
     _load_routing_factors,
     _merge_runtime,
@@ -155,6 +156,10 @@ def _set_conditional_routing(
             base_bias=layer_factors["base_bias"],
             residual_encoder=layer_factors["residual_encoder"],
             residual_query_projector=layer_factors["residual_query"],
+        )
+        module.set_conditional_page_query_block_size(
+            1,
+            collect_statistics=True,
         )
 
 
@@ -431,6 +436,7 @@ def _evaluate_decode(
     adaptive_max_token_budget: int | None = None,
     adaptive_tail_mass_ratio: float | None = None,
     pinned_prefix_pages: int = 0,
+    routing_support: str = "physical_shared",
 ) -> dict[str, Any]:
     if sparse:
         _set_backend(modules, "native")
@@ -442,6 +448,7 @@ def _evaluate_decode(
             adaptive_max_budget=adaptive_max_token_budget,
             adaptive_tail_mass_ratio=adaptive_tail_mass_ratio,
             pinned_prefix_pages=pinned_prefix_pages,
+            routing_support=routing_support,
         )
     else:
         _set_sparse_policy(
@@ -851,6 +858,7 @@ def main() -> None:
         if sparse_policies[0].arm != routing_arm:
             raise AssertionError("base sparse policy differs from routing arm")
     arms = (BF16_ARM, c1_arm, *(policy.arm for policy in sparse_policies))
+    loki_mode = False
     if conditional_mode:
         conditional_factors, factor_paths, factor_result_paths = (
             _load_conditional_factors(
@@ -892,7 +900,12 @@ def main() -> None:
             "routing_factor_result_sha256": _sha256(factor_result_path),
             "routing_factor_tensor_sha256": _sha256(factor_path),
         }
-        routing_proxy_implementation = ROUTING_PROXY_IMPLEMENTATION
+        loki_mode = factor_result["format"] == LOKI_FACTOR_FORMAT
+        routing_proxy_implementation = (
+            "loki_key_pca_per_query_token_topk_exact_qk"
+            if loki_mode
+            else ROUTING_PROXY_IMPLEMENTATION
+        )
 
     protocol_identity = {
         "model_config_sha256": _sha256(model_path / "config.json"),
@@ -908,7 +921,9 @@ def main() -> None:
         "value_rank": value_rank,
         "routing_rank": args.routing_rank,
         "routing_mode": (
-            "conditional_v_base_residual" if conditional_mode else "kq_svd"
+            "conditional_v_base_residual"
+            if conditional_mode
+            else ("loki_key_pca" if loki_mode else "kq_svd")
         ),
         "conditional_base_rank": (
             args.conditional_base_rank if conditional_mode else None
@@ -921,7 +936,7 @@ def main() -> None:
         "prefill_chunk_size": args.prefill_chunk_size,
         "empty_cache_between_prefill_chunks": (args.empty_cache_between_prefill_chunks),
         "incremental_routing_sidecar": (
-            args.incremental_routing_sidecar or conditional_mode
+            args.incremental_routing_sidecar or conditional_mode or loki_mode
         ),
         "routing_proxy_implementation": routing_proxy_implementation,
         "force_last_page": args.force_last_page,
@@ -984,6 +999,12 @@ def main() -> None:
                 query_factors,
                 args.routing_rank,
             )
+            if loki_mode:
+                for module in modules:
+                    module.set_loki_query_block_size(
+                        1,
+                        collect_statistics=True,
+                    )
         rank_state["runtime"] = {
             "cuda_device": torch.cuda.get_device_name(device),
             "torch_version": torch.__version__,
@@ -995,7 +1016,7 @@ def main() -> None:
                 args.empty_cache_between_prefill_chunks
             ),
             "incremental_routing_sidecar": (
-                args.incremental_routing_sidecar or conditional_mode
+                args.incremental_routing_sidecar or conditional_mode or loki_mode
             ),
             "routing_mode": protocol_identity["routing_mode"],
             "rope_scaling": rope_scaling,
@@ -1032,7 +1053,9 @@ def main() -> None:
                     args.empty_cache_between_prefill_chunks
                 ),
                 incremental_routing_sidecar=(
-                    args.incremental_routing_sidecar or conditional_mode
+                    args.incremental_routing_sidecar
+                    or conditional_mode
+                    or loki_mode
                 ),
             )
             torch.cuda.synchronize(device)
@@ -1072,6 +1095,9 @@ def main() -> None:
                     adaptive_max_token_budget=(policy.adaptive_max_token_budget),
                     adaptive_tail_mass_ratio=policy.adaptive_tail_mass_ratio,
                     pinned_prefix_pages=args.pinned_prefix_pages,
+                    routing_support=(
+                        "per_query_head" if loki_mode else "physical_shared"
+                    ),
                 )
                 _restore_prompt_cache(routing_cache, prompt_tokens)
             bf16_result_row = copy.deepcopy(dense_records[key]["arms"][BF16_ARM])
@@ -1169,7 +1195,9 @@ def main() -> None:
                     args.empty_cache_between_prefill_chunks
                 ),
                 "incremental_routing_sidecar": (
-                    args.incremental_routing_sidecar or conditional_mode
+                    args.incremental_routing_sidecar
+                    or conditional_mode
+                    or loki_mode
                 ),
                 "first_generated_token_from_dense_c1_prefill": True,
                 "routing_enabled_during_decode": True,

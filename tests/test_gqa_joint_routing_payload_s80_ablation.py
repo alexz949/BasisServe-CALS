@@ -6,6 +6,7 @@ from basisserve.core.gqa_joint_routing_payload_s80_ablation import (
 )
 from basisserve.core.gqa_joint_routing_payload_s80_fisher import (
     compact_softmax_fisher_loss,
+    compact_softmax_fisher_map_loss,
     pack_symmetric_fisher_grams,
     page_softmax_fisher_gram,
     prepare_compact_softmax_fisher_routing,
@@ -102,3 +103,35 @@ def test_k_only_page_fisher_bcd_is_monotone() -> None:
         )
     assert all(right <= left + 1e-10 for left, right in zip(values, values[1:]))
     assert torch.count_nonzero(result.routing_encoders[:, :2]) == 0
+
+
+def test_page_fisher_bcd_fits_an_additive_target_map() -> None:
+    statistics = _problem()
+    selector = torch.zeros(2, 2, 4, dtype=torch.float64)
+    selector[:, :, 2:] = torch.eye(2, dtype=torch.float64)
+    fixed = 0.35 * selector
+    residual_target = selector - fixed
+    encoder = torch.zeros(1, 4, 2, dtype=torch.float64)
+    encoder[:, 2:] = torch.eye(2, dtype=torch.float64)
+    query = 0.65 * torch.eye(2, dtype=torch.float64).expand(2, -1, -1).clone()
+    result = fit_page_fisher_router(
+        statistics,
+        initial_routing_encoders=encoder,
+        initial_query_factors=query,
+        active_joint_rows=torch.arange(2, 4),
+        sweeps=2,
+        relative_damping=1e-10,
+        relative_tolerance=1e-10,
+        max_iterations=100,
+        target_maps=residual_target,
+    )
+    mapping = statistics.head_to_kv_group
+    residual_maps = torch.bmm(
+        result.routing_query_factors,
+        result.routing_encoders.index_select(0, mapping).transpose(1, 2),
+    )
+    total_loss = compact_softmax_fisher_map_loss(
+        statistics,
+        proxy_maps=fixed + residual_maps,
+    )
+    assert total_loss < 1e-14

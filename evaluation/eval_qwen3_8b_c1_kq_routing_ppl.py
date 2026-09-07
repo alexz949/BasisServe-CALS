@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Window NLL/PPL for C1-V64 plus KQ-SVD-routed exact-Key pages."""
+"""Window NLL/PPL for C1 Value compression plus routed exact-Key support."""
 
 from __future__ import annotations
 
@@ -45,6 +45,7 @@ from evaluation.eval_c1_block_scheduled_ppl import (  # noqa: E402
 
 FORMAT = "basisserve.qwen3_8b.c1_kq_routing_window_ppl.v1"
 FACTOR_FORMAT = "basisserve.qwen3_8b.pairwise_kq_svd.v1"
+LOKI_FACTOR_FORMAT = "basisserve.qwen3_8b.loki_key_pca.v1"
 
 
 def _sha256(path: Path) -> str:
@@ -87,21 +88,27 @@ def _load_routing_factors(
 ) -> tuple[torch.Tensor, torch.Tensor, dict[str, Any], Path, Path]:
     result_path = factor_dir / "result.json"
     result = json.loads(result_path.read_text(encoding="utf-8"))
-    if result.get("format") != FACTOR_FORMAT or result.get("status") != "complete":
-        raise ValueError("pairwise KQ-SVD factor result is incomplete or incompatible")
+    factor_format = result.get("format")
+    assert factor_format in (FACTOR_FORMAT, LOKI_FACTOR_FORMAT)
+    assert result.get("status") == "complete"
     if result["model"]["config_sha256"] != _sha256(model_path / "config.json"):
         raise ValueError("KQ-SVD factors belong to another model")
     factor_path = factor_dir / result["artifacts"]["factors"]["file"]
     if _sha256(factor_path) != result["artifacts"]["factors"]["sha256"]:
         raise ValueError("KQ-SVD factor hash mismatch")
     tensors = load_file(str(factor_path), device="cpu")
-    if not {
-        "independent_key_projector",
-        "independent_query_projector",
-    } <= set(tensors):
-        raise ValueError("pairwise checkpoint lacks independent KQ-SVD factors")
-    key = tensors["independent_key_projector"].contiguous()
-    query = tensors["independent_query_projector"].contiguous()
+    if factor_format == LOKI_FACTOR_FORMAT:
+        assert "key_projector" in tensors
+        key = tensors["key_projector"].contiguous()
+        query = key
+    else:
+        if not {
+            "independent_key_projector",
+            "independent_query_projector",
+        } <= set(tensors):
+            raise ValueError("pairwise checkpoint lacks independent KQ-SVD factors")
+        key = tensors["independent_key_projector"].contiguous()
+        query = tensors["independent_query_projector"].contiguous()
     if tuple(key.shape[:3]) != (layers, kv_heads, head_dim):
         raise ValueError("KQ-SVD Key factors have incompatible model geometry")
     if (
@@ -329,6 +336,7 @@ def _set_sparse_policy(
     adaptive_max_budget: int | None = None,
     adaptive_tail_mass_ratio: float | None = None,
     pinned_prefix_pages: int = 0,
+    routing_support: str = "physical_shared",
 ) -> None:
     for module in modules:
         module.set_reverse_shadow_config(
@@ -343,6 +351,7 @@ def _set_sparse_policy(
                 adaptive_max_token_budget=adaptive_max_budget,
                 adaptive_tail_mass_ratio_threshold=adaptive_tail_mass_ratio,
                 pinned_prefix_pages=pinned_prefix_pages,
+                quest_support=routing_support,
             )
         )
 
@@ -350,6 +359,12 @@ def _set_sparse_policy(
 def _markdown(payload: dict[str, Any]) -> str:
     metadata = payload["metadata"]
     baseline = payload["baseline"]
+    value_rank = int(metadata["value_rank"])
+    routing_method = (
+        "Loki Key-PCA"
+        if metadata["routing_factor_format"] == LOKI_FACTOR_FORMAT
+        else "KQ-SVD"
+    )
     corpus_coverage = metadata.get("corpus_coverage")
     if corpus_coverage and corpus_coverage["all_complete_blocks"]:
         evaluation_label = "full-corpus block"
@@ -360,10 +375,11 @@ def _markdown(payload: dict[str, Any]) -> str:
             else "suffix-conditioned"
         )
     lines = [
-        f"# Qwen3-8B C1-V64 + KQ-SVD exact-Key routing {evaluation_label} PPL",
+        f"# Qwen3-8B C1-V{value_rank} + {routing_method} exact-Key routing "
+        f"{evaluation_label} PPL",
         "",
-        "The same fixed evaluation tokens are scored under BF16 dense KV, full C1-V64 "
-        "with exact QK, and KQ-SVD page routing followed by exact QK over fetched pages.",
+        f"The same fixed evaluation tokens are scored under BF16 dense KV, full C1-V{value_rank} "
+        f"with exact QK, and {routing_method} routing followed by exact QK over fetched tokens.",
         "",
         f"Windows: `{metadata['samples']} x {metadata['sequence_length']}`; scored tokens: "
         f"`{metadata['sequence_length'] - metadata['prefill_tokens']}` tokens/window; "
@@ -373,9 +389,10 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"full C1 exact-QK {evaluation_label} PPL: `{baseline['c1_exact_qk']['ppl']:.8f}` "
         f"(ratio `{baseline['c1_vs_bf16']['ppl_ratio']:.8f}`).",
         "",
-        "| R | B | Sparse PPL | Sparse/C1 | Sparse/BF16 | NLL delta vs C1 | "
-        "Top-1 vs C1 | Physical K fraction | Exact-K MiB/token | GPU KV ratio |",
-        "|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| R | B/Q-head | Sparse PPL | Sparse/C1 | Sparse/BF16 | NLL delta vs C1 | "
+        "Top-1 vs C1 | Per-Q K fraction | Physical-union K fraction | "
+        "Exact-K MiB/token | GPU KV ratio |",
+        "|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in payload["aggregate"]:
         runtime = row["runtime_logical"]
@@ -386,6 +403,7 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"{row['sparse_vs_bf16']['ppl_ratio']:.8f} | "
             f"{row['sparse_vs_c1']['mean_nll_delta']:+.8e} | "
             f"{row['sparse_vs_c1']['top1_agreement']:.8f} | "
+            f"{runtime['query_selected_token_fraction']:.8f} | "
             f"{runtime['selected_token_fraction']:.8f} | "
             f"{runtime['cpu_exact_key_bytes_fetched'] / row['sparse']['evaluated_tokens'] / (1 << 20):.3f} | "
             f"{row['persistent_gpu_scalar_ratio']:.4f} |"
@@ -426,6 +444,11 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--exact-token-budgets", default="512,1024")
     parser.add_argument("--force-last-page", action="store_true")
     parser.add_argument(
+        "--routing-support",
+        choices=("physical_shared", "per_query_head"),
+        default="physical_shared",
+    )
+    parser.add_argument(
         "--dtype",
         choices=("float16", "bfloat16", "float32"),
         default="bfloat16",
@@ -445,6 +468,9 @@ def evaluate(args: argparse.Namespace) -> None:
     windows_path = args.windows.expanduser().resolve()
     output_json = args.output_json.expanduser().resolve()
     output_markdown = args.output_markdown.expanduser().resolve()
+    c1_result_path = c1_export / "results.json"
+    c1_result = json.loads(c1_result_path.read_text(encoding="utf-8"))
+    value_rank = int(c1_result["fit_config"]["cache_rank_per_head"])
     ranks = _parse_positive_ints(args.ranks, name="ranks")
     budgets = _parse_positive_ints(
         args.exact_token_budgets, name="exact-token budgets"
@@ -580,6 +606,7 @@ def evaluate(args: argparse.Namespace) -> None:
                         budget=selected_budget,
                         page_size=args.page_size,
                         force_last_page=args.force_last_page,
+                        routing_support=args.routing_support,
                     )
 
                 sparse = _schedule(
@@ -642,7 +669,7 @@ def evaluate(args: argparse.Namespace) -> None:
                     "routing_rank": rank,
                     "nominal_token_budget": budget,
                     "persistent_gpu_scalar_ratio": routing_storage_ratio(
-                        value_rank=64,
+                        value_rank=value_rank,
                         routing_rank=rank,
                         key_width=head_dim,
                         value_width=head_dim,
@@ -660,7 +687,6 @@ def evaluate(args: argparse.Namespace) -> None:
                 }
             )
 
-    c1_result_path = c1_export / "results.json"
     payload = {
         "format": FORMAT,
         "status": "complete",
@@ -676,6 +702,7 @@ def evaluate(args: argparse.Namespace) -> None:
             "routing_factor_tensor_sha256": _sha256(factor_path),
             "routing_factor_format": factor_result["format"],
             "routing_factor_fit_config": factor_result.get("fit_config"),
+            "routing_factor_method": factor_result.get("method"),
             "windows": str(windows_path),
             "windows_sha256": _sha256(windows_path),
             "windows_manifest_sha256": _sha256(windows_manifest_path),
@@ -688,6 +715,8 @@ def evaluate(args: argparse.Namespace) -> None:
             "ranks": list(ranks),
             "nominal_token_budgets": list(budgets),
             "force_last_page": args.force_last_page,
+            "routing_support": args.routing_support,
+            "value_rank": value_rank,
             "layers": layers,
             "dtype": str(dtype),
             "c1_replaced_layers": len(replacements),

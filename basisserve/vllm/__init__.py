@@ -4,9 +4,11 @@ from __future__ import annotations
 
 
 MODEL_ARCHITECTURE = "BasisServeQwen3ForCausalLM"
-DEEPSEEK_V2_LITE_MODEL_ARCHITECTURE = (
-    "BasisServeDeepseekV2LiteForCausalLM"
-)
+DENSE_DIFFKV_MODEL_ARCHITECTURE = "BasisServeQwen3DenseDiffKVForCausalLM"
+DEEPSEEK_V2_LITE_MODEL_ARCHITECTURE = "BasisServeDeepseekV2LiteForCausalLM"
+QWEN3_8B_FOLDED_C1_MODEL_ARCHITECTURE = "BasisServeQwen3_8BFoldedC1ForCausalLM"
+QWEN3_8B_FOLDED_PALU_MODEL_ARCHITECTURE = "BasisServeQwen3_8BFoldedPaLUForCausalLM"
+QWEN3_8B_SPARSE_C1_MODEL_ARCHITECTURE = "BasisServeQwen3_8BSparseC1ForCausalLM"
 
 
 def register() -> None:
@@ -14,21 +16,54 @@ def register() -> None:
 
     from vllm import ModelRegistry
 
+    if "BasisServeQwen3_32BFoldedForCausalLM" not in ModelRegistry.get_supported_archs():
+        ModelRegistry.register_model(
+            "BasisServeQwen3_32BFoldedForCausalLM",
+            "basisserve.vllm.qwen3_32b_folded:BasisServeQwen3_32BFoldedForCausalLM",
+        )
+
     if MODEL_ARCHITECTURE not in ModelRegistry.get_supported_archs():
         ModelRegistry.register_model(
             MODEL_ARCHITECTURE,
             "basisserve.vllm.qwen3_c1:BasisServeQwen3ForCausalLM",
         )
+    if DENSE_DIFFKV_MODEL_ARCHITECTURE not in ModelRegistry.get_supported_archs():
+        ModelRegistry.register_model(
+            DENSE_DIFFKV_MODEL_ARCHITECTURE,
+            "basisserve.vllm.qwen3_dense_diffkv:BasisServeQwen3DenseDiffKVForCausalLM",
+        )
     if DEEPSEEK_V2_LITE_MODEL_ARCHITECTURE not in ModelRegistry.get_supported_archs():
         ModelRegistry.register_model(
             DEEPSEEK_V2_LITE_MODEL_ARCHITECTURE,
-            "basisserve.vllm.deepseek_v2_lite_c1:"
-            "BasisServeDeepseekV2LiteForCausalLM",
+            "basisserve.vllm.deepseek_v2_lite_c1:BasisServeDeepseekV2LiteForCausalLM",
+        )
+    if QWEN3_8B_FOLDED_C1_MODEL_ARCHITECTURE not in ModelRegistry.get_supported_archs():
+        ModelRegistry.register_model(
+            QWEN3_8B_FOLDED_C1_MODEL_ARCHITECTURE,
+            "basisserve.vllm.qwen3_8b_folded_c1:BasisServeQwen3_8BFoldedC1ForCausalLM",
+        )
+    if (
+        QWEN3_8B_FOLDED_PALU_MODEL_ARCHITECTURE
+        not in ModelRegistry.get_supported_archs()
+    ):
+        ModelRegistry.register_model(
+            QWEN3_8B_FOLDED_PALU_MODEL_ARCHITECTURE,
+            "basisserve.vllm.qwen3_8b_folded_palu:"
+            "BasisServeQwen3_8BFoldedPaLUForCausalLM",
+        )
+    if QWEN3_8B_SPARSE_C1_MODEL_ARCHITECTURE not in ModelRegistry.get_supported_archs():
+        ModelRegistry.register_model(
+            QWEN3_8B_SPARSE_C1_MODEL_ARCHITECTURE,
+            "basisserve.vllm.qwen3_8b_sparse_c1:BasisServeQwen3_8BSparseC1ForCausalLM",
         )
 
 
 __all__ = [
+    "DENSE_DIFFKV_MODEL_ARCHITECTURE",
     "DEEPSEEK_V2_LITE_MODEL_ARCHITECTURE",
     "MODEL_ARCHITECTURE",
+    "QWEN3_8B_FOLDED_C1_MODEL_ARCHITECTURE",
+    "QWEN3_8B_FOLDED_PALU_MODEL_ARCHITECTURE",
+    "QWEN3_8B_SPARSE_C1_MODEL_ARCHITECTURE",
     "register",
 ]

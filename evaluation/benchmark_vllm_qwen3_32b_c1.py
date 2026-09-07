@@ -20,10 +20,13 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from basisserve.core.qwen3_32b_tp4_decode import file_sha256  # noqa: E402
-from basisserve.vllm import MODEL_ARCHITECTURE  # noqa: E402
+from basisserve.vllm import (  # noqa: E402
+    DENSE_DIFFKV_MODEL_ARCHITECTURE,
+    MODEL_ARCHITECTURE,
+)
 
 
-ARMS = ("dense", "compact_v64")
+ARMS = ("dense", "dense_diffkv_v128", "compact_v64")
 EXECUTION_MODES = ("eager", "cuda_graph")
 
 
@@ -60,9 +63,9 @@ def _validate_args(args: argparse.Namespace) -> tuple[Path, Path | None]:
     if not 0.0 < args.gpu_memory_utilization < 1.0:
         raise ValueError("gpu_memory_utilization must be between zero and one")
 
-    if args.arm == "dense":
+    if args.arm != "compact_v64":
         if args.factor_dir is not None or args.result_sha256 is not None:
-            raise ValueError("the dense arm does not accept C1 factors")
+            raise ValueError("dense arms do not accept C1 factors")
         return model, None
 
     if args.factor_dir is None or not args.result_sha256:
@@ -214,6 +217,10 @@ def main() -> None:
             "basisserve_c1_factor_dir": str(factor_dir),
             "basisserve_c1_result_sha256": args.result_sha256,
         }
+    elif args.arm == "dense_diffkv_v128":
+        hf_overrides = {
+            "architectures": [DENSE_DIFFKV_MODEL_ARCHITECTURE],
+        }
 
     use_cuda_graph = args.execution_mode == "cuda_graph"
     compilation_config = None
@@ -313,6 +320,22 @@ def main() -> None:
             "model": str(model),
             "factor_dir": None if factor_dir is None else str(factor_dir),
             "result_sha256": args.result_sha256,
+            "model_architecture": (
+                DENSE_DIFFKV_MODEL_ARCHITECTURE
+                if args.arm == "dense_diffkv_v128"
+                else MODEL_ARCHITECTURE
+                if args.arm == "compact_v64"
+                else "Qwen3ForCausalLM"
+            ),
+            "attention_backend": (
+                "basisserve_grouped_triton_diffkv_v128"
+                if args.arm == "dense_diffkv_v128"
+                else "basisserve_grouped_triton_diffkv_v64"
+                if args.arm == "compact_v64"
+                else "vllm_flash_attention"
+            ),
+            "key_head_size": 128,
+            "value_head_size": 64 if args.arm == "compact_v64" else 128,
             "tensor_parallel_size": 4,
             "batch_size": args.batch_size,
             "prefill_tokens_per_request": args.prefill_tokens,

@@ -46,6 +46,21 @@ def _selector(statistics: S80CompactSoftmaxFisherRouting) -> torch.Tensor:
     return result
 
 
+def _target_maps(
+    statistics: S80CompactSoftmaxFisherRouting,
+    target_maps: torch.Tensor | None,
+    *,
+    like: torch.Tensor,
+) -> torch.Tensor:
+    if target_maps is None:
+        return _selector(statistics).to(like).unsqueeze(0).expand(
+            statistics.queries_by_head.shape[0],
+            -1,
+            -1,
+        )
+    return target_maps.to(like)
+
+
 def _relative_damping(diagonal: torch.Tensor, relative: float) -> float:
     return float(relative) * max(
         float(diagonal.abs().mean()),
@@ -74,6 +89,7 @@ def refit_page_fisher_query_factors(
     relative_damping: float,
     relative_tolerance: float,
     max_iterations: int,
+    target_maps: torch.Tensor | None = None,
 ) -> tuple[torch.Tensor, tuple[CGDiagnostics, ...]]:
     """Solve unrestricted per-head query maps for fixed routing encoders."""
 
@@ -83,7 +99,11 @@ def refit_page_fisher_query_factors(
     )
     queries = statistics.queries_by_head.to(routing_encoders)
     grams = statistics.fisher_grams_by_head.to(routing_encoders)
-    selector = _selector(statistics).to(routing_encoders)
+    targets = _target_maps(
+        statistics,
+        target_maps,
+        like=routing_encoders,
+    )
     fitted = routing_encoders.new_empty(
         statistics.queries_by_head.shape[0],
         statistics.key_dim,
@@ -100,7 +120,7 @@ def refit_page_fisher_query_factors(
             gram,
             encoder,
         )
-        target = query @ selector
+        target = query @ targets[head]
         weighted_target = torch.einsum(
             "di,dij,jr->dr",
             target,
@@ -144,6 +164,7 @@ def refit_page_fisher_routing_encoders(
     relative_damping: float,
     relative_tolerance: float,
     max_iterations: int,
+    target_maps: torch.Tensor | None = None,
 ) -> tuple[torch.Tensor, tuple[CGDiagnostics, ...]]:
     """Solve group encoders with support restricted to selected joint rows."""
 
@@ -157,7 +178,11 @@ def refit_page_fisher_routing_encoders(
         device=routing_query_factors.device,
         dtype=torch.long,
     )
-    selector = _selector(statistics).to(routing_query_factors)
+    targets = _target_maps(
+        statistics,
+        target_maps,
+        like=routing_query_factors,
+    )
     encoders = routing_query_factors.new_zeros(
         int(mapping.max()) + 1,
         statistics.joint_dim,
@@ -176,7 +201,8 @@ def refit_page_fisher_routing_encoders(
         )
         active_grams = group_grams.index_select(-2, active).index_select(-1, active)
         active_to_joint = group_grams.index_select(-2, active)
-        target = torch.einsum("hdk,ki->hdi", group_queries, selector)
+        group_targets = targets.index_select(0, heads)
+        target = torch.einsum("hdk,hki->hdi", group_queries, group_targets)
         weighted_target = torch.einsum(
             "hdij,hdj->hdi",
             active_to_joint,
@@ -229,6 +255,7 @@ def fit_page_fisher_router(
     relative_damping: float,
     relative_tolerance: float,
     max_iterations: int,
+    target_maps: torch.Tensor | None = None,
 ) -> PageFisherRouterFit:
     """Alternately close unrestricted query maps and supported encoders."""
 
@@ -246,6 +273,7 @@ def fit_page_fisher_router(
             statistics,
             routing_payload_encoders=encoders,
             routing_query_factors=query_factors,
+            target_maps=target_maps,
         )
 
     for sweep in range(1, int(sweeps) + 1):
@@ -256,6 +284,7 @@ def fit_page_fisher_router(
             relative_damping=relative_damping,
             relative_tolerance=relative_tolerance,
             max_iterations=max_iterations,
+            target_maps=target_maps,
         )
         after_queries = loss()
         encoders, encoder_step = refit_page_fisher_routing_encoders(
@@ -265,6 +294,7 @@ def fit_page_fisher_router(
             relative_damping=relative_damping,
             relative_tolerance=relative_tolerance,
             max_iterations=max_iterations,
+            target_maps=target_maps,
         )
         encoder_diagnostics.append(encoder_step)
         records.append(
@@ -281,6 +311,7 @@ def fit_page_fisher_router(
         relative_damping=relative_damping,
         relative_tolerance=relative_tolerance,
         max_iterations=max_iterations,
+        target_maps=target_maps,
     )
     return PageFisherRouterFit(
         routing_encoders=encoders,

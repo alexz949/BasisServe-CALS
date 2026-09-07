@@ -23,6 +23,30 @@ class AffineReducedRankMap:
         return values @ self.left @ self.right + self.bias
 
 
+@dataclass(frozen=True)
+class AffinePredictiveSpectrum:
+    """Centered affine C-to-K predictability from sufficient statistics.
+
+    ``predictive_singular_values`` carry the units of the centered target and
+    give the exact reduced-rank-regression energy captured at every rank.
+    ``canonical_correlations`` are dimensionless CCA correlations and describe
+    cross-subspace alignment independently of target scale.
+    """
+
+    canonical_correlations: torch.Tensor
+    predictive_singular_values: torch.Tensor
+    target_centered_energy: float
+    predictable_energy: float
+    unrestricted_residual_energy: float
+
+    def captured_energy(self, rank: int) -> float:
+        selected = min(int(rank), int(self.predictive_singular_values.numel()))
+        return float(self.predictive_singular_values[:selected].square().sum())
+
+    def residual_energy(self, rank: int) -> float:
+        return max(0.0, self.target_centered_energy - self.captured_energy(rank))
+
+
 def conditional_routing_query_projector(
     residual_query_projector: torch.Tensor,
 ) -> torch.Tensor:
@@ -34,9 +58,7 @@ def conditional_routing_query_projector(
     predictive-base plus residual proxy score.
     """
 
-    query_heads, head_dim, residual_rank = map(
-        int, residual_query_projector.shape
-    )
+    query_heads, head_dim, residual_rank = map(int, residual_query_projector.shape)
     identity = torch.eye(
         head_dim,
         device=residual_query_projector.device,
@@ -78,14 +100,11 @@ def build_conditional_routing_sidecar(
         base_left.to(device=device, dtype=dtype),
         base_right.to(device=device, dtype=dtype),
     )
-    predicted_pre_rope.add_(
-        base_bias.to(device=device, dtype=dtype)[None, :, None, :]
-    )
+    predicted_pre_rope.add_(base_bias.to(device=device, dtype=dtype)[None, :, None, :])
     rotary_cos = cos.to(device=device, dtype=dtype).unsqueeze(1)
     rotary_sin = sin.to(device=device, dtype=dtype).unsqueeze(1)
     predicted_post_rope = (
-        predicted_pre_rope * rotary_cos
-        + _rotate_half(predicted_pre_rope) * rotary_sin
+        predicted_pre_rope * rotary_cos + _rotate_half(predicted_pre_rope) * rotary_sin
     )
     residual = exact_post_rope_key - predicted_post_rope
     residual_code = torch.einsum(
@@ -129,9 +148,7 @@ def fit_affine_reduced_rank_map(
         torch.rsqrt(eigenvalues.clamp_min(torch.finfo(covariance.dtype).tiny)),
         torch.zeros_like(eigenvalues),
     )
-    inverse_square_root = (
-        eigenvectors * inverse_roots.unsqueeze(0)
-    ) @ eigenvectors.mT
+    inverse_square_root = (eigenvectors * inverse_roots.unsqueeze(0)) @ eigenvectors.mT
     whitened_cross = inverse_square_root @ cross
     left_singular, singular_values, right_singular = torch.linalg.svd(
         whitened_cross,
@@ -142,6 +159,125 @@ def fit_affine_reduced_rank_map(
     right = singular_values[:selected, None] * right_singular[:selected]
     bias = mean_target - mean_input @ left @ right
     return AffineReducedRankMap(left=left, right=right, bias=bias)
+
+
+def fit_affine_metric_reduced_rank_map(
+    *,
+    row_count: int,
+    input_sum: torch.Tensor,
+    target_sum: torch.Tensor,
+    input_gram: torch.Tensor,
+    input_target_gram: torch.Tensor,
+    target_metric: torch.Tensor,
+    rank: int,
+) -> AffineReducedRankMap:
+    """Fit affine reduced-rank regression in a target-side PSD metric.
+
+    For row residuals ``E = K - C M - b``, this solves
+
+    ``min rank(M)<=r ||E H^(1/2)||_F^2``
+
+    for the supplied positive-semidefinite target metric ``H``.  The target
+    is transformed by the symmetric square root of ``H``, fitted with the
+    ordinary exact RRR solver, and mapped back with the numerical
+    Moore-Penrose inverse square root.  A query covariance can therefore
+    reorder the retained predictive directions without changing the
+    unrestricted linear conditional mean when the metric is nonsingular.
+    """
+
+    metric = 0.5 * (target_metric + target_metric.mT)
+    eigenvalues, eigenvectors = torch.linalg.eigh(metric)
+    scale = eigenvalues.abs().amax()
+    cutoff = torch.finfo(metric.dtype).eps * metric.shape[0] * scale
+    positive = eigenvalues > cutoff
+    roots = torch.where(
+        positive,
+        torch.sqrt(eigenvalues.clamp_min(0)),
+        torch.zeros_like(eigenvalues),
+    )
+    inverse_roots = torch.where(
+        positive,
+        torch.rsqrt(eigenvalues.clamp_min(torch.finfo(metric.dtype).tiny)),
+        torch.zeros_like(eigenvalues),
+    )
+    square_root = (eigenvectors * roots.unsqueeze(0)) @ eigenvectors.mT
+    inverse_square_root = (
+        eigenvectors * inverse_roots.unsqueeze(0)
+    ) @ eigenvectors.mT
+    transformed = fit_affine_reduced_rank_map(
+        row_count=row_count,
+        input_sum=input_sum,
+        target_sum=target_sum @ square_root,
+        input_gram=input_gram,
+        input_target_gram=input_target_gram @ square_root,
+        rank=rank,
+    )
+    return AffineReducedRankMap(
+        left=transformed.left,
+        right=transformed.right @ inverse_square_root,
+        bias=transformed.bias @ inverse_square_root,
+    )
+
+
+def affine_predictive_spectrum(
+    *,
+    row_count: int,
+    input_sum: torch.Tensor,
+    target_sum: torch.Tensor,
+    input_gram: torch.Tensor,
+    input_target_gram: torch.Tensor,
+    target_gram: torch.Tensor,
+) -> AffinePredictiveSpectrum:
+    """Compute affine RRR and CCA spectra from unnormalized row moments.
+
+    For centered input rows ``C`` and target rows ``K``, the singular values of
+    ``G_CC^{-1/2} G_CK`` give the target energy captured by the optimal
+    rank-constrained affine predictor.  Whitening the target as well gives the
+    canonical correlations.  Numerical null spaces are handled with the same
+    Moore-Penrose cutoff used by :func:`fit_affine_reduced_rank_map`.
+    """
+
+    count = float(row_count)
+    mean_input = input_sum / count
+    mean_target = target_sum / count
+    input_covariance = input_gram - count * torch.outer(mean_input, mean_input)
+    target_covariance = target_gram - count * torch.outer(mean_target, mean_target)
+    cross_covariance = input_target_gram - count * torch.outer(mean_input, mean_target)
+    input_covariance = 0.5 * (input_covariance + input_covariance.mT)
+    target_covariance = 0.5 * (target_covariance + target_covariance.mT)
+
+    def inverse_square_root(covariance: torch.Tensor) -> torch.Tensor:
+        eigenvalues, eigenvectors = torch.linalg.eigh(covariance)
+        cutoff = (
+            torch.finfo(covariance.dtype).eps
+            * covariance.shape[0]
+            * eigenvalues.abs().amax()
+        )
+        inverse_roots = torch.where(
+            eigenvalues > cutoff,
+            torch.rsqrt(eigenvalues.clamp_min(torch.finfo(covariance.dtype).tiny)),
+            torch.zeros_like(eigenvalues),
+        )
+        return (eigenvectors * inverse_roots.unsqueeze(0)) @ eigenvectors.mT
+
+    input_inverse_root = inverse_square_root(input_covariance)
+    target_inverse_root = inverse_square_root(target_covariance)
+    predictive = input_inverse_root @ cross_covariance
+    canonical = predictive @ target_inverse_root
+    predictive_singular_values = torch.linalg.svdvals(predictive)
+    canonical_correlations = torch.linalg.svdvals(canonical).clamp(0.0, 1.0)
+    target_energy = float(torch.trace(target_covariance))
+    predictable_energy = min(
+        target_energy,
+        float(predictive_singular_values.square().sum()),
+    )
+    return AffinePredictiveSpectrum(
+        canonical_correlations=canonical_correlations,
+        predictive_singular_values=predictive_singular_values,
+        target_centered_energy=target_energy,
+        predictable_energy=predictable_energy,
+        unrestricted_residual_energy=max(0.0, target_energy - predictable_energy),
+    )
 
 
 def residual_page_fisher_gram(
@@ -208,16 +344,17 @@ def residual_page_fisher_gram(
         page_rows,
     )
     score_mean = torch.sum(page_mass * page_scores, dim=-1, keepdim=True)
-    energy = float(
-        0.5 * torch.sum(page_mass * (page_scores - score_mean).square())
-    )
+    energy = float(0.5 * torch.sum(page_mass * (page_scores - score_mean).square()))
     return grams, energy
 
 
 __all__ = [
+    "AffinePredictiveSpectrum",
     "AffineReducedRankMap",
+    "affine_predictive_spectrum",
     "build_conditional_routing_sidecar",
     "conditional_routing_query_projector",
+    "fit_affine_metric_reduced_rank_map",
     "fit_affine_reduced_rank_map",
     "residual_page_fisher_gram",
 ]

@@ -23,7 +23,6 @@ from basisserve.core.c1_k_routing_sidecar import (
 )
 from basisserve.core.exact_qk_v_offload import (
     gqa_group_max_page_mass_mask,
-    gqa_union_page_mass_mask,
 )
 from basisserve.core.exact_qk_v_offload import (
     gqa_union_adaptive_page_mass_mask,
@@ -121,8 +120,13 @@ class ReverseShadowConfig:
             assert self.adaptive_tail_mass_ratio_threshold is not None
             if not 0.0 < self.adaptive_tail_mass_ratio_threshold <= 1.0:
                 raise ValueError("adaptive tail mass threshold must lie in (0, 1]")
-        if self.quest_support == "per_query_head" and self.selector != "quest_minmax":
-            raise ValueError("per-query-head support is only defined for QUEST")
+        if self.quest_support == "per_query_head" and self.selector not in (
+            "quest_minmax",
+            "kq_svd",
+        ):
+            raise ValueError(
+                "per-query-head support is only defined for QUEST and KQ-SVD"
+            )
         if head_dim <= 0:
             raise ValueError("head dimension must be positive")
 
@@ -613,28 +617,17 @@ def build_routing_page_geometry(
         )
     page_valid = valid_tokens.reshape(batch, page_count, page_size).any(dim=-1)
     page_valid = page_valid[:, None].expand(batch, kv_heads, page_count)
-    landmark_shape = (batch, kv_heads, page_count, 1, head_dim)
-    page_shape = (batch, kv_heads, page_count, head_dim)
+    empty_float = torch.empty(
+        0,
+        dtype=config.torch_landmark_dtype,
+        device=exact_key.device,
+    )
     return PostRoPEKLandmarks(
-        values=torch.zeros(
-            landmark_shape,
-            dtype=config.torch_landmark_dtype,
-            device=exact_key.device,
-        ),
-        radii=torch.zeros(
-            landmark_shape[:-1], dtype=torch.float32, device=exact_key.device
-        ),
+        values=empty_float,
+        radii=torch.empty(0, dtype=torch.float32, device=exact_key.device),
         valid=page_valid[..., None],
-        page_mins=torch.zeros(
-            page_shape,
-            dtype=config.torch_landmark_dtype,
-            device=exact_key.device,
-        ),
-        page_maxes=torch.zeros(
-            page_shape,
-            dtype=config.torch_landmark_dtype,
-            device=exact_key.device,
-        ),
+        page_mins=empty_float,
+        page_maxes=empty_float,
         page_bounds_valid=page_valid,
         sequence_length=sequence,
         page_size=page_size,
@@ -1456,7 +1449,7 @@ def _kq_svd_page_selection(
     config: ReverseShadowConfig,
     forced_page_mask: Tensor | None,
 ) -> tuple[Tensor, Tensor, dict[str, float]]:
-    """Rank group-normalized proxy mass under a fixed physical page budget."""
+    """Rank proxy mass under physical-shared or per-Query-head support."""
 
     batch, query_heads, _, head_dim = map(int, query.shape)
     sidecar_batch, kv_heads, sequence, rank = map(int, routing_sidecar.shape)
@@ -1479,6 +1472,7 @@ def _kq_svd_page_selection(
 
     page_count = int(page_valid.shape[-1])
     heads_per_group = query_heads // kv_heads
+    query_page_valid = _query_page_validity(valid, config.page_size)
     selected_batches = []
     score_batches = []
     adaptive_eligible_query_heads = 0
@@ -1500,6 +1494,89 @@ def _kq_svd_page_selection(
             config.pinned_prefix_pages * config.page_size,
         )
         routed_scores[:, :prefix_tokens] = -torch.inf
+        padding = page_count * config.page_size - sequence
+        padded_scores = (
+            torch.cat(
+                (
+                    routed_scores,
+                    torch.full(
+                        (query_heads, padding),
+                        -torch.inf,
+                        dtype=routed_scores.dtype,
+                        device=routed_scores.device,
+                    ),
+                ),
+                dim=-1,
+            )
+            if padding
+            else routed_scores
+        )
+        per_query_page_mass = torch.logsumexp(
+            padded_scores.reshape(
+                query_heads, page_count, config.page_size
+            ),
+            dim=-1,
+        )
+        if config.quest_support == "per_query_head":
+            per_query_page_scores = per_query_page_mass.float().masked_fill(
+                ~query_page_valid[batch_index], -torch.inf
+            )
+            if (
+                forced_page_mask is None
+                and config.pinned_prefix_pages == 0
+                and config.recent_exact_window == 0
+                and config.adaptive_max_page_budget is None
+            ):
+                selected_pages = torch.zeros_like(
+                    query_page_valid[batch_index]
+                )
+                selected_count = min(config.page_budget, page_count)
+                selected_pages.scatter_(
+                    1,
+                    torch.topk(
+                        per_query_page_scores,
+                        selected_count,
+                        dim=-1,
+                        largest=True,
+                        sorted=False,
+                    ).indices,
+                    True,
+                )
+                selected_pages &= query_page_valid[batch_index]
+                selected_batches.append(selected_pages)
+                score_batches.append(per_query_page_scores)
+                continue
+            preselected = torch.zeros_like(query_page_valid[batch_index])
+            if forced_page_mask is not None:
+                forced = forced_page_mask[batch_index].to(
+                    device=query.device,
+                    dtype=torch.bool,
+                )
+                if int(forced.shape[0]) == kv_heads:
+                    head_to_kv = _head_to_kv(
+                        query_heads, kv_heads, query.device
+                    )
+                    forced = forced.index_select(0, head_to_kv)
+                preselected |= forced
+            if config.pinned_prefix_pages:
+                preselected[..., : config.pinned_prefix_pages] |= (
+                    query_page_valid[
+                        batch_index, ..., : config.pinned_prefix_pages
+                    ]
+                )
+            selected_pages = _select_pages(
+                per_query_page_scores.unsqueeze(0),
+                valid[batch_index : batch_index + 1],
+                query_page_valid[batch_index : batch_index + 1],
+                config,
+                preselected.unsqueeze(0),
+            )[0]
+            selected_batches.append(selected_pages)
+            score_batches.append(per_query_page_scores)
+            continue
+        per_query_page_scores = torch.softmax(
+            per_query_page_mass.float(), dim=-1
+        ).masked_fill(~query_page_valid[batch_index], -torch.inf)
         if config.adaptive_max_page_budget is None:
             routed_page_budget = (
                 config.page_budget - config.pinned_prefix_pages
@@ -1536,42 +1613,26 @@ def _kq_svd_page_selection(
             adaptive_refined_query_heads += adaptive.refined_query_heads
             adaptive_tail_mass_ratio_sum += adaptive.tail_mass_ratio_sum
         selected_batches.append(selected_pages)
-        padding = page_count * config.page_size - sequence
-        padded_scores = (
-            torch.cat(
-                (
-                    routed_scores,
-                    torch.full(
-                        (query_heads, padding),
-                        -torch.inf,
-                        dtype=routed_scores.dtype,
-                        device=routed_scores.device,
-                    ),
-                ),
-                dim=-1,
-            )
-            if padding
-            else routed_scores
-        )
-        per_query_page_mass = torch.logsumexp(
-            padded_scores.reshape(
-                query_heads, page_count, config.page_size
-            ),
-            dim=-1,
-        )
         score_batches.append(
-            torch.softmax(per_query_page_mass.float(), dim=-1).reshape(
+            per_query_page_scores.reshape(
                 kv_heads, heads_per_group, page_count
             ).amax(dim=1)
         )
-    selected = torch.stack(selected_batches) & page_valid
+    owner_page_valid = (
+        query_page_valid
+        if config.quest_support == "per_query_head"
+        else page_valid
+    )
+    selected = torch.stack(selected_batches) & owner_page_valid
     if config.pinned_prefix_pages:
-        selected[..., : config.pinned_prefix_pages] = page_valid[
+        selected[..., : config.pinned_prefix_pages] = owner_page_valid[
             ..., : config.pinned_prefix_pages
         ]
-    page_scores = torch.stack(score_batches).masked_fill(~page_valid, -torch.inf)
+    page_scores = torch.stack(score_batches).masked_fill(
+        ~owner_page_valid, -torch.inf
+    )
 
-    if forced_page_mask is not None:
+    if forced_page_mask is not None and config.quest_support == "physical_shared":
         forced = forced_page_mask.to(device=query.device, dtype=torch.bool)
         if tuple(forced.shape) == (batch, query_heads, page_count):
             forced = _physical_page_union(
@@ -1583,7 +1644,7 @@ def _kq_svd_page_selection(
             device=query.device,
         )
         selected |= forced & page_valid
-    if config.recent_exact_window:
+    if config.recent_exact_window and config.quest_support == "physical_shared":
         for batch_index in range(batch):
             for group in range(kv_heads):
                 valid_tokens = torch.nonzero(
@@ -1832,13 +1893,14 @@ def c1_k_reverse_shadow_attention(
     config.validate(head_dim)
     if landmarks.sequence_length != sequence or landmarks.page_size != config.page_size:
         raise ValueError("landmark and attention cache geometry differs")
-    landmarks.validate(
-        batch=batch,
-        kv_heads=kv_heads,
-        head_dim=head_dim,
-        landmarks_per_page=config.landmarks_per_page,
-        device=query.device,
-    )
+    if config.selector != "kq_svd":
+        landmarks.validate(
+            batch=batch,
+            kv_heads=kv_heads,
+            head_dim=head_dim,
+            landmarks_per_page=config.landmarks_per_page,
+            device=query.device,
+        )
     if c1_value.device != query.device:
         raise ValueError("query, landmarks, and C1 Value must share a device")
     if c1_page_metadata is not None:

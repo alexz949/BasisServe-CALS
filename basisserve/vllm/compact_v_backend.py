@@ -1,4 +1,4 @@
-"""Paged K128/V64 attention for the BasisServe vLLM integration.
+"""Paged K128/dynamic-V attention for the BasisServe vLLM integration.
 
 Initial complete prefill uses BasisServe's causal compact-Value Triton kernel.
 Uniform single-token decode uses vLLM's grouped Triton paged-attention kernel,
@@ -31,7 +31,24 @@ from vllm.v1.attention.ops.triton_reshape_and_cache_flash import (
 
 
 VALUE_HEAD_SIZE = 64
+DENSE_VALUE_HEAD_SIZE = 128
 NUM_KV_SPLITS = 8
+
+
+def _kv_cache_shape(
+    num_blocks: int,
+    block_size: int,
+    num_kv_heads: int,
+    head_size: int,
+    value_head_size: int,
+) -> tuple[int, ...]:
+    assert block_size % 16 == 0
+    return (
+        num_blocks,
+        block_size,
+        num_kv_heads,
+        head_size + value_head_size,
+    )
 
 
 @register_backend(AttentionBackendEnum.CUSTOM)
@@ -46,8 +63,8 @@ class BasisServeCompactVBackend(FlashAttentionDiffKVBackend):
         return "CUSTOM"
 
     @staticmethod
-    def get_impl_cls() -> type["BasisServeCompactVImpl"]:
-        return BasisServeCompactVImpl
+    def get_impl_cls() -> type["BasisServeDiffKVImpl"]:
+        return BasisServeDiffKVImpl
 
     @staticmethod
     def get_kv_cache_shape(
@@ -58,13 +75,12 @@ class BasisServeCompactVBackend(FlashAttentionDiffKVBackend):
         cache_dtype_str: str = "auto",
     ) -> tuple[int, ...]:
         del cache_dtype_str
-        if block_size % 16 != 0:
-            raise ValueError("block size must be a multiple of 16")
-        return (
+        return _kv_cache_shape(
             num_blocks,
             block_size,
             num_kv_heads,
-            head_size + VALUE_HEAD_SIZE,
+            head_size,
+            VALUE_HEAD_SIZE,
         )
 
     @staticmethod
@@ -78,8 +94,29 @@ class BasisServeCompactVBackend(FlashAttentionDiffKVBackend):
         return (0, 1, 2, 3)
 
 
-class BasisServeCompactVImpl(FlashAttentionDiffKVImpl):
-    """Use compact-Value Triton kernels around the paged cache."""
+class BasisServeDenseVBackend(BasisServeCompactVBackend):
+    """K128/V128 control using exactly the same Triton attention template."""
+
+    @staticmethod
+    def get_kv_cache_shape(
+        num_blocks: int,
+        block_size: int,
+        num_kv_heads: int,
+        head_size: int,
+        cache_dtype_str: str = "auto",
+    ) -> tuple[int, ...]:
+        del cache_dtype_str
+        return _kv_cache_shape(
+            num_blocks,
+            block_size,
+            num_kv_heads,
+            head_size,
+            DENSE_VALUE_HEAD_SIZE,
+        )
+
+
+class BasisServeDiffKVImpl(FlashAttentionDiffKVImpl):
+    """Use the same dynamic-Value Triton kernels around the paged cache."""
 
     def _run_decode(
         self,
@@ -94,12 +131,13 @@ class BasisServeCompactVImpl(FlashAttentionDiffKVImpl):
         num_sequences = int(query.shape[0])
         key_cache = kv_cache[..., : self.head_size]
         value_cache = kv_cache[..., self.head_size :]
+        value_head_size = int(value_cache.shape[-1])
         intermediate = torch.empty(
             (
                 num_sequences,
                 self.num_heads,
                 NUM_KV_SPLITS,
-                VALUE_HEAD_SIZE + 1,
+                value_head_size + 1,
             ),
             dtype=torch.float32,
             device=query.device,
@@ -261,7 +299,9 @@ class BasisServeCompactVImpl(FlashAttentionDiffKVImpl):
 
 __all__ = [
     "BasisServeCompactVBackend",
-    "BasisServeCompactVImpl",
+    "BasisServeDenseVBackend",
+    "BasisServeDiffKVImpl",
+    "DENSE_VALUE_HEAD_SIZE",
     "NUM_KV_SPLITS",
     "VALUE_HEAD_SIZE",
 ]

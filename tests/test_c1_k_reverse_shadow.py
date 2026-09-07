@@ -744,6 +744,43 @@ def test_kq_svd_routing_uses_fixed_group_max_budget_for_exact_attention() -> Non
     torch.testing.assert_close(result.output, expected, rtol=1.0e-6, atol=1.0e-6)
 
 
+def test_kq_svd_can_select_tokens_independently_per_query_head() -> None:
+    query = torch.tensor(
+        [[[[1.0, 0.0]], [[0.0, 1.0]]]], dtype=torch.float64
+    )
+    exact_key = torch.tensor(
+        [[[[10.0, 0.0], [9.0, 0.0], [0.0, 8.0], [0.0, 7.0]]]],
+        dtype=torch.float64,
+    )
+    value = torch.tensor(
+        [[[[1.0], [3.0], [5.0], [7.0]]]], dtype=torch.float64
+    )
+    projector = torch.eye(2, dtype=torch.float64).unsqueeze(0)
+    config = _config(
+        page_size=1,
+        budget=2,
+        selector="kq_svd",
+        quest_support="per_query_head",
+    )
+    result = c1_k_reverse_shadow_attention(
+        query,
+        build_routing_page_geometry(
+            exact_key, page_size=1, landmark_dtype="float32"
+        ),
+        value,
+        config,
+        exact_key,
+        routing_sidecar=build_routing_sidecar(exact_key, projector),
+        routing_query_projector=projector,
+        vectorized_reference=True,
+    )
+    assert result.selected_page_ids.tolist() == [[[0, 1], [2, 3]]]
+    assert result.statistics["logical_selected_pages"] == 4
+    assert result.statistics["selected_pages"] == 4
+    assert result.statistics["query_selected_tokens"] == 4
+    assert result.statistics["selected_tokens"] == 4
+
+
 def test_kq_svd_block_routing_keeps_exact_k_and_causal_visibility() -> None:
     generator = torch.Generator().manual_seed(20260829)
     query = torch.randn(1, 4, 3, 4, generator=generator, dtype=torch.float64)

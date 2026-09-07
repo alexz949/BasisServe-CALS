@@ -94,6 +94,27 @@ def test_llama_profiles_share_the_fixed_c1_allocation_geometry() -> None:
             "basisserve.llama31_8b.gqa_c1.layer_global_kl_allocation.v1"
         )
 
+        fitter.activate_model_profile("llama31_70b")
+        layer_global.activate_model_profile("llama31_70b")
+        assert (
+            fitter.NUM_LAYERS,
+            fitter.NUM_HEADS,
+            fitter.NUM_KV_HEADS,
+            fitter.HEAD_DIM,
+            fitter.HIDDEN_SIZE,
+        ) == (80, 64, 8, 128, 8192)
+        assert common.MODEL_TYPE == "llama"
+        assert common.ATTENTION_TYPE == "gqa"
+        assert common.NUM_LAYERS == 80
+        assert common.NUM_QUERY_HEADS == 64
+        assert common.NUM_KV_HEADS == 8
+        assert common.HEADS_PER_SOURCE == 8
+        assert common.QUERY_WIDTH == 8192
+        assert runtime.MODEL_LABEL == "Llama-3.1-70B"
+        assert layer_global.FORMAT == (
+            "basisserve.llama31_70b.gqa_c1.layer_global_kl_allocation.v1"
+        )
+
         layer_global.activate_model_profile("llama2_7b")
         assert common.MODEL_TYPE == "llama"
         assert common.ATTENTION_TYPE == "mha"
