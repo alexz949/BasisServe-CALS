@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fit pinned-sink non-sink Page32 residual-R8 routers for Qwen3-8B."""
+"""Fit a pinned-sink Page32 residual-rank router sweep for Qwen3-8B."""
 
 from __future__ import annotations
 
@@ -51,7 +51,6 @@ from evaluation.eval_qwen3_8b_v80_conditional_residual_router import (  # noqa: 
 
 FORMAT = "basisserve.qwen3_8b.v80_base16_r8_nonsink_page32.v1"
 BASE_RANK = 16
-RESIDUAL_RANKS = (0, 8)
 
 
 def _parse_args() -> argparse.Namespace:
@@ -66,6 +65,10 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--page-size", type=int, default=32)
     parser.add_argument("--pinned-prefix-pages", type=int, default=1)
     parser.add_argument("--physical-token-budget", type=int, default=4096)
+    parser.add_argument(
+        "--residual-ranks",
+        default="0,2,4,8,12,16,24,32",
+    )
     parser.add_argument("--router-sweeps", type=int, default=40)
     parser.add_argument("--relative-damping", type=float, default=1e-5)
     parser.add_argument("--iterative-tolerance", type=float, default=1e-5)
@@ -81,6 +84,12 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+    os.replace(temporary, path)
+
+
+def _write_text(path: Path, contents: str) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(contents, encoding="utf-8")
     os.replace(temporary, path)
 
 
@@ -169,18 +178,14 @@ def _update_metrics(
     first_token = pinned_prefix_pages * page_size
     non_sink_probabilities = exact_probabilities[:, first_token:]
     non_sink_selected = query_mask[:, first_token:]
-    non_sink_mass = (
-        (non_sink_probabilities * non_sink_selected).sum(dim=-1)
-        / non_sink_probabilities.sum(dim=-1).clamp_min(
-            torch.finfo(torch.float32).tiny
-        )
-    )
+    non_sink_mass = (non_sink_probabilities * non_sink_selected).sum(
+        dim=-1
+    ) / non_sink_probabilities.sum(dim=-1).clamp_min(torch.finfo(torch.float32).tiny)
     routed_selected = selected_pages[:, pinned_prefix_pages:]
     routed_oracle = oracle_pages[:, pinned_prefix_pages:]
-    non_sink_page_recall = (
-        (routed_selected & routed_oracle).sum(dim=-1)
-        / routed_oracle.sum(dim=-1).clamp_min(1)
-    )
+    non_sink_page_recall = (routed_selected & routed_oracle).sum(
+        dim=-1
+    ) / routed_oracle.sum(dim=-1).clamp_min(1)
     exact_sparse_output = _output_from_scores(
         exact_scores,
         token_mask=selected_tokens,
@@ -200,13 +205,17 @@ def _update_metrics(
         softmax_fisher_transform(
             score_delta,
             conditional_probabilities,
-        ).square().sum()
+        )
+        .square()
+        .sum()
     )
     accumulator["conditional_fisher_energy"] += float(
         softmax_fisher_transform(
             conditional_exact_scores,
             conditional_probabilities,
-        ).square().sum()
+        )
+        .square()
+        .sum()
     )
     accumulator["dense_output_energy"] += float(dense_output.square().sum())
     accumulator["exact_refined_output_error"] += float(
@@ -228,18 +237,14 @@ def _finish_metrics(
     selected_fraction = sum(accumulator["selected_fraction"]) / len(
         accumulator["selected_fraction"]
     )
-    return {
-        "conditional_non_sink_raw_score_nmse": accumulator[
-            "conditional_raw_error"
-        ]
+    result = {
+        "conditional_non_sink_raw_score_nmse": accumulator["conditional_raw_error"]
         / accumulator["conditional_raw_energy"],
         "conditional_non_sink_softmax_fisher_nmse": accumulator[
             "conditional_fisher_error"
         ]
         / accumulator["conditional_fisher_energy"],
-        "non_sink_physical_page_recall_mean": sum(
-            accumulator["non_sink_page_recall"]
-        )
+        "non_sink_physical_page_recall_mean": sum(accumulator["non_sink_page_recall"])
         / len(accumulator["non_sink_page_recall"]),
         "non_sink_physical_page_recall_minimum": min(
             accumulator["non_sink_page_recall"]
@@ -256,11 +261,33 @@ def _finish_metrics(
         ),
         "selected_token_fraction_mean": selected_fraction,
         "physical_token_budget_mean": selected_fraction * tokens,
-        "exact_refined_output_relative_mse": accumulator[
-            "exact_refined_output_error"
-        ]
+        "exact_refined_output_relative_mse": accumulator["exact_refined_output_error"]
         / accumulator["dense_output_energy"],
     }
+    distributions = {
+        "attention_mass_recall": accumulator["attention_mass"],
+        "non_sink_attention_mass_recall": accumulator["non_sink_attention_mass"],
+        "non_sink_physical_page_recall": accumulator["non_sink_page_recall"],
+    }
+    for prefix, values in distributions.items():
+        tensor = torch.tensor(values, dtype=torch.float64)
+        for percentile, quantile in (
+            ("p01", 0.01),
+            ("p05", 0.05),
+            ("p10", 0.10),
+            ("p50", 0.50),
+        ):
+            result[f"{prefix}_{percentile}"] = float(torch.quantile(tensor, quantile))
+    attention = torch.tensor(
+        accumulator["attention_mass"],
+        dtype=torch.float64,
+    )
+    for threshold in (0.5, 0.8, 0.9):
+        label = str(threshold).replace(".", "p")
+        result[f"attention_mass_recall_below_{label}_rate"] = float(
+            (attention < threshold).double().mean()
+        )
+    return result
 
 
 def _evaluate_fresh(
@@ -271,6 +298,7 @@ def _evaluate_fresh(
     output_decoder: torch.Tensor,
     base_maps: tuple[AffineReducedRankMap, ...],
     factor_bank: dict[tuple[int, int], tuple[torch.Tensor, torch.Tensor]],
+    residual_ranks: tuple[int, ...],
     cos: torch.Tensor,
     sin: torch.Tensor,
     page_size: int,
@@ -286,11 +314,12 @@ def _evaluate_fresh(
     encoder = value_encoder.to(device=device, dtype=torch.float32)
     decoder = output_decoder.to(device=device, dtype=torch.float32)
     base_factors = _stack_base_map(base_maps, device=device)
-    residual_encoder, query_factor = (
-        tensor.to(device=device, dtype=torch.float32)
-        for tensor in factor_bank[(BASE_RANK, 8)]
-    )
-    accumulators = {"b16_r0": _new_metrics(), "b16_r8": _new_metrics()}
+    residual_factors = {
+        rank: tuple(tensor.to(device=device, dtype=torch.float32) for tensor in factors)
+        for (base_rank, rank), factors in factor_bank.items()
+        if base_rank == BASE_RANK
+    }
+    accumulators = {f"b16_r{rank}": _new_metrics() for rank in residual_ranks}
 
     for document in range(documents):
         print(
@@ -312,7 +341,6 @@ def _evaluate_fresh(
             dtype=torch.float32,
         )
         base_scores = torch.empty_like(exact_scores)
-        residual_scores = torch.empty_like(exact_scores)
         for group in range(groups):
             first = group * heads_per_group
             stop = first + heads_per_group
@@ -322,15 +350,6 @@ def _evaluate_fresh(
             base_scores[first:stop] = scaling * (
                 queries[first:stop] @ base_post[:, group].mT
             )
-            query_code = torch.einsum(
-                "hd,hdr->hr",
-                queries[first:stop],
-                query_factor[first:stop],
-            )
-            token_code = residual[:, group] @ residual_encoder[group]
-            residual_scores[first:stop] = base_scores[first:stop] + scaling * (
-                query_code @ token_code.mT
-            )
         exact_probabilities = torch.softmax(exact_scores, dim=-1)
         head_codes = codes.permute(1, 0, 2).index_select(0, head_to_group)
         dense_latent = torch.einsum(
@@ -339,12 +358,25 @@ def _evaluate_fresh(
             head_codes,
         )
         dense_output = torch.einsum("hr,hro->o", dense_latent, decoder)
-        for name, proxy_scores in (
-            ("b16_r0", base_scores),
-            ("b16_r8", residual_scores),
-        ):
+        for residual_rank in residual_ranks:
+            proxy_scores = base_scores
+            if residual_rank:
+                residual_encoder, query_factor = residual_factors[residual_rank]
+                proxy_scores = torch.empty_like(exact_scores)
+                for group in range(groups):
+                    first = group * heads_per_group
+                    stop = first + heads_per_group
+                    query_code = torch.einsum(
+                        "hd,hdr->hr",
+                        queries[first:stop],
+                        query_factor[first:stop],
+                    )
+                    token_code = residual[:, group] @ residual_encoder[group]
+                    proxy_scores[first:stop] = base_scores[first:stop] + scaling * (
+                        query_code @ token_code.mT
+                    )
             _update_metrics(
-                accumulators[name],
+                accumulators[f"b16_r{residual_rank}"],
                 proxy_scores=proxy_scores,
                 exact_scores=exact_scores,
                 exact_probabilities=exact_probabilities,
@@ -367,7 +399,6 @@ def _evaluate_fresh(
             residual,
             exact_scores,
             base_scores,
-            residual_scores,
             exact_probabilities,
             head_codes,
             dense_latent,
@@ -380,32 +411,59 @@ def _evaluate_fresh(
     }
 
 
-def _aggregate(layer_records: list[dict[str, Any]]) -> dict[str, Any]:
+def _aggregate(
+    layer_records: list[dict[str, Any]],
+    *,
+    residual_ranks: tuple[int, ...],
+) -> dict[str, Any]:
     result = {}
-    for arm in ("b16_r0", "b16_r8"):
+    for residual_rank in residual_ranks:
+        arm = f"b16_r{residual_rank}"
         fresh_rows = [record["fresh"][arm] for record in layer_records]
         fit_rows = [record["router_fit"][arm] for record in layer_records]
         result[arm] = {
             "base_rank": BASE_RANK,
-            "residual_rank": int(arm.rsplit("r", 1)[1]),
+            "residual_rank": residual_rank,
             "fit_page_fisher_nmse": sum(
                 float(row["fit_page_fisher_nmse"]) for row in fit_rows
             )
             / len(fit_rows),
             "validation_page_fisher_nmse": sum(
-                float(row["validation_page_fisher_nmse"])
-                for row in fit_rows
+                float(row["validation_page_fisher_nmse"]) for row in fit_rows
             )
             / len(fit_rows),
         }
         for key in fresh_rows[0]:
             values = [float(row[key]) for row in fresh_rows]
             result[arm][key] = (
-                min(values)
-                if key.endswith("minimum")
-                else sum(values) / len(values)
+                min(values) if key.endswith("minimum") else sum(values) / len(values)
             )
     return result
+
+
+def _markdown(payload: dict[str, Any]) -> str:
+    lines = [
+        "# Qwen3-8B C1-V80 Base16 Residual-Rank Sweep",
+        "",
+        "| Residual rank | Fit Page-Fisher NMSE | Validation Page-Fisher NMSE | Selected mass | P01 mass | P05 mass | Below 0.8 | Page recall | Output rel-MSE |",
+        "|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for _, row in sorted(
+        payload["aggregate"].items(),
+        key=lambda item: int(item[1]["residual_rank"]),
+    ):
+        lines.append(
+            f"| {row['residual_rank']} | {row['fit_page_fisher_nmse']:.6f} | "
+            f"{row['validation_page_fisher_nmse']:.6f} | "
+            f"{row['attention_mass_recall_mean']:.6f} | "
+            f"{row['attention_mass_recall_p01']:.6f} | "
+            f"{row['attention_mass_recall_p05']:.6f} | "
+            f"{row['attention_mass_recall_below_0p8_rate']:.6f} | "
+            f"{row['non_sink_physical_page_recall_mean']:.6f} | "
+            f"{row['exact_refined_output_relative_mse']:.6f} |"
+        )
+    lines.append("")
+    return "\n".join(lines)
 
 
 @torch.inference_mode()
@@ -422,6 +480,8 @@ def main() -> None:
     output_root = Path(args.output_dir).expanduser().resolve()
     output_root.mkdir(parents=True, exist_ok=True)
     layers = _parse_ints(args.layers)
+    residual_ranks = _parse_ints(args.residual_ranks)
+    assert 0 in residual_ranks
     device = torch.device(args.work_device)
     sequence = 32768
     page_budget = args.physical_token_budget // args.page_size
@@ -430,19 +490,18 @@ def main() -> None:
         sequence=sequence,
         device=device,
     )
-    c1_manifest = json.loads(
-        (c1_root / "results.json").read_text(encoding="utf-8")
-    )
+    c1_manifest = json.loads((c1_root / "results.json").read_text(encoding="utf-8"))
     fresh_manifest = json.loads(
         (fresh_root / "manifest.json").read_text(encoding="utf-8")
     )
     layer_records = []
     result_path = output_root / "result.json"
+    summary_path = output_root / "summary.md"
 
     for ordinal, layer in enumerate(layers, start=1):
         layer_started = time.monotonic()
         print(
-            f"[Base16 non-sink R8] layer={layer} ({ordinal}/{len(layers)})",
+            f"[Base16 residual-rank sweep] layer={layer} ({ordinal}/{len(layers)})",
             flush=True,
         )
         fit_root, fit_manifest = _discover_capture(
@@ -479,23 +538,21 @@ def main() -> None:
             excluded_prefix_pages=args.pinned_prefix_pages,
             device=device,
         )
-        validation_statistics, validation_reconstruction = (
-            _build_residual_statistics(
-                validation_queries,
-                validation_rows,
-                value_encoder=value_encoder,
-                base_maps=base_grid,
-                cos=cos,
-                sin=sin,
-                page_size=args.page_size,
-                excluded_prefix_pages=args.pinned_prefix_pages,
-                device=device,
-            )
+        validation_statistics, validation_reconstruction = _build_residual_statistics(
+            validation_queries,
+            validation_rows,
+            value_encoder=value_encoder,
+            base_maps=base_grid,
+            cos=cos,
+            sin=sin,
+            page_size=args.page_size,
+            excluded_prefix_pages=args.pinned_prefix_pages,
+            device=device,
         )
         factor_bank, router_fit = _fit_residual_grid(
             fit_statistics,
             validation_statistics,
-            residual_ranks=RESIDUAL_RANKS,
+            residual_ranks=residual_ranks,
             sweeps=args.router_sweeps,
             relative_damping=args.relative_damping,
             iterative_tolerance=args.iterative_tolerance,
@@ -509,6 +566,7 @@ def main() -> None:
             output_decoder=output_decoder,
             base_maps=base_maps,
             factor_bank=factor_bank,
+            residual_ranks=residual_ranks,
             cos=cos,
             sin=sin,
             page_size=args.page_size,
@@ -520,17 +578,21 @@ def main() -> None:
             torch.stack([getattr(item, name) for item in base_maps]).float()
             for name in ("left", "right", "bias")
         )
-        residual_encoder, residual_query = factor_bank[(BASE_RANK, 8)]
+        factor_tensors = {
+            "base_left_b16": left,
+            "base_right_b16": right,
+            "base_bias_b16": bias,
+        }
+        for residual_rank in residual_ranks:
+            if residual_rank == 0:
+                continue
+            residual_encoder, residual_query = factor_bank[(BASE_RANK, residual_rank)]
+            factor_tensors[f"residual_encoder_b16_r{residual_rank}"] = residual_encoder
+            factor_tensors[f"residual_query_b16_r{residual_rank}"] = residual_query
         artifact = f"layer_{layer:03d}.safetensors"
         _write_factors(
             output_root / artifact,
-            {
-                "base_left_b16": left,
-                "base_right_b16": right,
-                "base_bias_b16": bias,
-                "residual_encoder_b16_r8": residual_encoder,
-                "residual_query_b16_r8": residual_query,
-            },
+            factor_tensors,
         )
         layer_records.append(
             {
@@ -543,17 +605,19 @@ def main() -> None:
                 "seconds": time.monotonic() - layer_started,
             }
         )
-        _write_json(
-            result_path,
-            {
-                "format": FORMAT,
-                "status": "running",
-                "command": shlex.join(sys.argv),
-                "layers": layer_records,
-                "aggregate": _aggregate(layer_records),
-                "elapsed_seconds": time.monotonic() - started,
-            },
-        )
+        partial = {
+            "format": FORMAT,
+            "status": "running",
+            "command": shlex.join(sys.argv),
+            "layers": layer_records,
+            "aggregate": _aggregate(
+                layer_records,
+                residual_ranks=residual_ranks,
+            ),
+            "elapsed_seconds": time.monotonic() - started,
+        }
+        _write_json(result_path, partial)
+        _write_text(summary_path, _markdown(partial))
         del fit_statistics, validation_statistics, factor_bank, c1_tensors
         if device.type == "cuda":
             torch.cuda.empty_cache()
@@ -565,13 +629,13 @@ def main() -> None:
         "command": shlex.join(sys.argv),
         "protocol": {
             "model": str(model_root),
-            "fixed_payload": "C1-V80 ALS5",
+            "fixed_payload": str(c1_root),
             "fixed_predictive_base": (
                 "existing rank-16 affine C1-V80 to pre-RoPE K map"
             ),
+            "residual_ranks": list(residual_ranks),
             "residual": (
-                "rank-8 score correction over exact post-RoPE K minus "
-                "exact-RoPE Base16"
+                "rank-r score correction over exact post-RoPE K minus exact-RoPE Base16"
             ),
             "residual_objective": (
                 "exact-teacher Page32 Fisher conditioned on non-sink pages"
@@ -583,15 +647,12 @@ def main() -> None:
                 "16 independent C4 documents x 32768 tokens; last-token query"
             ),
             "final_capture": (
-                "fresh 4 independent C4 documents x 32768 tokens; "
-                "last-token query"
+                "fresh 4 independent C4 documents x 32768 tokens; last-token query"
             ),
             "page_size": args.page_size,
             "pinned_prefix_pages": args.pinned_prefix_pages,
             "physical_token_budget_per_kv_group": args.physical_token_budget,
-            "routed_pages_per_kv_group": (
-                page_budget - args.pinned_prefix_pages
-            ),
+            "routed_pages_per_kv_group": (page_budget - args.pinned_prefix_pages),
             "selection": (
                 "pin Page0, condition per-head page mass over remaining "
                 "pages, group-max, then select the remaining fixed budget"
@@ -602,7 +663,10 @@ def main() -> None:
             "iterative_max_iterations": args.iterative_max_iterations,
         },
         "layers": layer_records,
-        "aggregate": _aggregate(layer_records),
+        "aggregate": _aggregate(
+            layer_records,
+            residual_ranks=residual_ranks,
+        ),
         "elapsed_seconds": time.monotonic() - started,
         "environment": {
             "conda_environment": os.environ.get("CONDA_DEFAULT_ENV"),
@@ -615,7 +679,11 @@ def main() -> None:
         },
     }
     _write_json(result_path, result)
-    print(f"[Base16 non-sink R8] wrote {result_path}", flush=True)
+    _write_text(summary_path, _markdown(result))
+    print(
+        f"[Base16 residual-rank sweep] wrote {result_path} and {summary_path}",
+        flush=True,
+    )
 
 
 if __name__ == "__main__":

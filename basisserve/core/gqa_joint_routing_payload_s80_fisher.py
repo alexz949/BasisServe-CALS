@@ -229,30 +229,28 @@ def compact_softmax_fisher_roots(
     return eigenvectors * torch.sqrt(eigenvalues).unsqueeze(-2)
 
 
-def compact_softmax_fisher_loss(
+def compact_softmax_fisher_map_loss(
     routing: S80CompactSoftmaxFisherRouting,
     *,
-    routing_payload_encoders: torch.Tensor,
-    routing_query_factors: torch.Tensor,
+    proxy_maps: torch.Tensor,
+    target_maps: torch.Tensor | None = None,
 ) -> float:
-    """Evaluate the exact fixed-teacher Fisher quadratic from compact Grams."""
+    """Evaluate fixed-teacher Fisher loss between explicit proxy maps."""
 
-    mapping = routing.head_to_kv_group.to(
-        device=routing_payload_encoders.device,
-        dtype=torch.long,
-    )
-    encoders = routing_payload_encoders.index_select(0, mapping)
-    proxy_maps = torch.bmm(
-        routing_query_factors,
-        encoders.transpose(1, 2),
-    )
-    selector = proxy_maps.new_zeros(routing.key_dim, routing.joint_dim)
-    selector[:, routing.value_dim :] = torch.eye(
-        routing.key_dim,
-        device=selector.device,
-        dtype=selector.dtype,
-    )
-    error_maps = proxy_maps - selector.unsqueeze(0)
+    if target_maps is None:
+        target_maps = proxy_maps.new_zeros(
+            proxy_maps.shape[0],
+            routing.key_dim,
+            routing.joint_dim,
+        )
+        target_maps[:, :, routing.value_dim :] = torch.eye(
+            routing.key_dim,
+            device=proxy_maps.device,
+            dtype=proxy_maps.dtype,
+        )
+    else:
+        target_maps = target_maps.to(proxy_maps)
+    error_maps = proxy_maps - target_maps
     projected_errors = torch.einsum(
         "hdk,hki->hdi",
         routing.queries_by_head,
@@ -265,6 +263,31 @@ def compact_softmax_fisher_loss(
         projected_errors,
     )
     return float(value)
+
+
+def compact_softmax_fisher_loss(
+    routing: S80CompactSoftmaxFisherRouting,
+    *,
+    routing_payload_encoders: torch.Tensor,
+    routing_query_factors: torch.Tensor,
+    target_maps: torch.Tensor | None = None,
+) -> float:
+    """Evaluate the exact fixed-teacher Fisher quadratic from compact Grams."""
+
+    mapping = routing.head_to_kv_group.to(
+        device=routing_payload_encoders.device,
+        dtype=torch.long,
+    )
+    encoders = routing_payload_encoders.index_select(0, mapping)
+    proxy_maps = torch.bmm(
+        routing_query_factors,
+        encoders.transpose(1, 2),
+    )
+    return compact_softmax_fisher_map_loss(
+        routing,
+        proxy_maps=proxy_maps,
+        target_maps=target_maps,
+    )
 
 
 def compact_softmax_fisher_encoder_diagonal(
@@ -665,6 +688,7 @@ __all__ = [
     "compact_softmax_fisher_adapter_system",
     "compact_softmax_fisher_encoder_diagonal",
     "compact_softmax_fisher_loss",
+    "compact_softmax_fisher_map_loss",
     "compact_softmax_fisher_roots",
     "pack_symmetric_fisher_grams",
     "page_softmax_fisher_gram",

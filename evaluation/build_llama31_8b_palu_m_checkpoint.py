@@ -59,6 +59,7 @@ from palu.model.modules.svd_linear import HeadwiseLowRankModule  # noqa: E402
 
 
 WINDOWS_FORMAT = "basisserve.calibration.c4_document_windows.v1"
+PACKED_WINDOWS_FORMAT = "basisserve.calibration.c4_packed_windows.v1"
 MODEL_PROFILES = {
     "llama2_7b": {
         "label": "Llama-2-7B",
@@ -496,7 +497,7 @@ def _load_windows(
     if not path.is_file() or not manifest_path.is_file():
         raise FileNotFoundError(f"missing windows artifact or manifest under {path.parent}")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("format") != WINDOWS_FORMAT:
+    if manifest.get("format") not in (WINDOWS_FORMAT, PACKED_WINDOWS_FORMAT):
         raise ValueError("incompatible calibration-window manifest")
     if _sha256(path) != manifest["artifact"]["sha256"]:
         raise ValueError("calibration-window artifact hash changed")

@@ -37,6 +37,14 @@ PROFILES = {
         "checkpoint_format": "basisserve.llama2_7b.iclr_v_factors.v1",
         "run_prefix": "L2-7B-C1-R",
     },
+    "qwen3_32b": {
+        "checkpoint_format": "basisserve.qwen3_32b.iclr_v_factors.v1",
+        "run_prefix": "Q3-32B-C1-R",
+    },
+    "llama31_70b": {
+        "checkpoint_format": "basisserve.llama31_70b.iclr_v_factors.v1",
+        "run_prefix": "L31-70B-C1-R",
+    },
 }
 
 

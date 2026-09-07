@@ -71,7 +71,7 @@ def prepare(args: argparse.Namespace) -> None:
     dataset = load_dataset(
         "Salesforce/wikitext",
         "wikitext-2-raw-v1",
-        split="test",
+        split=args.split,
         cache_dir=str(args.dataset_cache.expanduser().resolve()),
         download_mode="reuse_dataset_if_exists",
     )
@@ -84,7 +84,7 @@ def prepare(args: argparse.Namespace) -> None:
     required = args.start_token + args.samples * args.sequence_length
     if int(input_ids.numel()) < required:
         raise ValueError(
-            f"WikiText test has {input_ids.numel()} tokens, requires {required}"
+            f"WikiText {args.split} has {input_ids.numel()} tokens, requires {required}"
         )
     rows = []
     records = []
@@ -117,7 +117,7 @@ def prepare(args: argparse.Namespace) -> None:
         "dataset": {
             "repo": "Salesforce/wikitext",
             "config": "wikitext-2-raw-v1",
-            "split": "test",
+            "split": args.split,
             "cache_dir": str(args.dataset_cache.expanduser().resolve()),
             "tokenized_total": int(input_ids.numel()),
         },
@@ -156,6 +156,11 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--samples", type=int, default=4)
     parser.add_argument("--sequence-length", type=int, default=32768)
     parser.add_argument("--start-token", type=int, default=0)
+    parser.add_argument(
+        "--split",
+        choices=("train", "validation", "test"),
+        default="test",
+    )
     parser.add_argument("--output-dir", type=Path, required=True)
     return parser
 

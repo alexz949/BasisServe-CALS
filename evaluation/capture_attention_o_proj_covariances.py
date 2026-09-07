@@ -89,6 +89,11 @@ def parse_args() -> argparse.Namespace:
         "--model-dtype", choices=("bfloat16", "float16"), default="bfloat16"
     )
     parser.add_argument(
+        "--covariance-dtype",
+        choices=("float32", "float64"),
+        default="float32",
+    )
+    parser.add_argument(
         "--attn-implementation",
         choices=("eager", "sdpa", "flash_attention_2"),
         default="sdpa",
@@ -128,9 +133,15 @@ def _load_ordered_windows(path: Path, *, expected: int) -> tuple[Tensor, dict[st
 
 
 class _StreamingCovarianceCapture:
-    def __init__(self, modules: Mapping[int, nn.Linear], input_width: int) -> None:
+    def __init__(
+        self,
+        modules: Mapping[int, nn.Linear],
+        input_width: int,
+        covariance_dtype: torch.dtype,
+    ) -> None:
         self.modules = dict(modules)
         self.input_width = int(input_width)
+        self.covariance_dtype = covariance_dtype
         self.sums: dict[str, dict[int, Tensor]] = {"fit": {}, "heldout": {}}
         self.rows = {"fit": 0, "heldout": 0}
         self.active_split: str | None = None
@@ -151,7 +162,9 @@ class _StreamingCovarianceCapture:
                 raise ValueError(
                     f"layer {layer} has unexpected o_proj input {tuple(activation.shape)}"
                 )
-            flat = activation.reshape(-1, self.input_width).float()
+            flat = activation.reshape(-1, self.input_width).to(
+                dtype=self.covariance_dtype
+            )
             if len(flat) != self.expected_rows:
                 raise ValueError("o_proj hook row count differs from the input batch")
             destination = self.sums[self.active_split].get(layer)
@@ -159,7 +172,7 @@ class _StreamingCovarianceCapture:
                 destination = torch.zeros(
                     self.input_width,
                     self.input_width,
-                    dtype=torch.float32,
+                    dtype=self.covariance_dtype,
                     device=activation.device,
                 )
                 self.sums[self.active_split][layer] = destination
@@ -288,7 +301,15 @@ def main() -> None:
         ):
             raise TypeError(f"layer {layer} has unsupported o_proj")
 
-    capture = _StreamingCovarianceCapture(modules, query_width)
+    covariance_dtype = {
+        "float32": torch.float32,
+        "float64": torch.float64,
+    }[args.covariance_dtype]
+    capture = _StreamingCovarianceCapture(
+        modules,
+        query_width,
+        covariance_dtype,
+    )
     input_device = model.get_input_embeddings().weight.device
     if input_device.type != "cuda":
         raise RuntimeError("input embeddings are not on CUDA")
@@ -379,6 +400,7 @@ def main() -> None:
             "activation_aware": True,
             "objective": "attention_o_proj_output_mse",
             "storage": "normalized_covariance_sufficient_statistics",
+            "covariance_dtype": str(covariance_dtype),
             "windows_file": str(windows_path),
             "windows_sha256": _sha256(windows_path),
             "windows_manifest_format": windows_manifest.get("format"),
