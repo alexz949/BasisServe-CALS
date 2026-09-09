@@ -16,8 +16,10 @@ group=${SLURM_ARRAY_TASK_ID:?}
 phase=${1:-full}
 extra=()
 if [[ $phase == smoke ]]; then
-    phase=smoke-l40s-m85
+    phase=smoke-l40s-b8k
     extra=(--limit 2)
+    tasks=(bbh_cot_fewshot minerva_math500 mbpp_plus_full)
+    arms=(Q3-32B-PALUM-R80 Q3-32B-C1-R80 Q3-32B-PALUG4-R80 Q3-32B-PALUG2-R80)
 fi
 for arm in "${arms[$((group * 2))]}" "${arms[$((group * 2 + 1))]}"; do
     for task in "${tasks[@]}"; do
@@ -27,7 +29,7 @@ for arm in "${arms[$((group * 2))]}" "${arms[$((group * 2 + 1))]}"; do
             --checkpoint-dir "ICLR-results/qwen3-32b/checkpoints/$arm"
             --output-dir "ICLR-results/qwen3-32b/hard-r80/$phase/$arm/$task"
             --task "$task" --max-length 8192 --max-num-seqs 64
-            --max-num-batched-tokens 16384 --gpu-memory-utilization 0.85
+            --max-num-batched-tokens 8192 --gpu-memory-utilization 0.85
             --torch-num-threads 4 --confirm-run-unsafe-code "${extra[@]}")
         printf '%q ' "${cmd[@]}"
         printf '\n'

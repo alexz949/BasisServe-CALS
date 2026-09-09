@@ -94,6 +94,7 @@ class LocalVLLMGenerationLM(TemplateLM):
         self.tokenizer = tokenizer
         self._max_length = int(max_length)
         self._default_max_gen_toks = int(default_max_gen_toks)
+        self.generation_records = []
 
     @property
     def eot_token_id(self) -> int:
@@ -172,6 +173,8 @@ class LocalVLLMGenerationLM(TemplateLM):
         prompts = []
         sampling_parameters = []
         cache_records = []
+        metadata = []
+        occurrences = {}
         for request in requests:
             context, raw_kwargs = request.args
             kwargs = normalize_gen_kwargs(
@@ -184,9 +187,23 @@ class LocalVLLMGenerationLM(TemplateLM):
             kwargs.pop("max_length", None)
             token_ids = self.tok_encode(context)
             assert isinstance(token_ids, list)
+            original_tokens = len(token_ids)
+            prompt_hash = hashlib.sha256(context.encode()).hexdigest()
+            key = (request.task_name, request.doc_id, prompt_hash)
+            sample_index = occurrences.get(key, 0)
+            occurrences[key] = sample_index + 1
+            if float(kwargs.get("temperature", 0)) > 0:
+                kwargs["seed"] = (int(prompt_hash[:8], 16) + sample_index) % (2**31)
             maximum_context = self._max_length - max_gen_toks
             assert maximum_context > 0
             token_ids = token_ids[-maximum_context:]
+            metadata.append({
+                "task": request.task_name, "doc_id": request.doc_id,
+                "sample_index": sample_index, "prompt_sha256": prompt_hash,
+                "seed": kwargs.get("seed"), "original_prompt_tokens": original_tokens,
+                "retained_prompt_tokens": len(token_ids), "max_gen_toks": max_gen_toks,
+                "stop_strings": until,
+            })
             prompts.append(TokensPrompt(prompt_token_ids=token_ids))
             sampling_parameters.append(
                 SamplingParams(
@@ -210,6 +227,13 @@ class LocalVLLMGenerationLM(TemplateLM):
             use_tqdm=not disable_tqdm,
         )
         assert len(outputs) == len(requests)
+        for output, record in zip(outputs, metadata, strict=True):
+            completion = output.outputs[0]
+            self.generation_records.append(record | {
+                "generated_tokens": len(completion.token_ids),
+                "finish_reason": completion.finish_reason,
+                "stop_reason": completion.stop_reason,
+            })
         responses = []
         for output, (context, generation_kwargs) in zip(
             outputs,
@@ -533,6 +557,7 @@ def evaluate(args: argparse.Namespace) -> int:
         if stages[task] is not None:
             continue
         task_started = time.perf_counter()
+        adapter.generation_records = []
         evaluation = lm_eval.simple_evaluate(
             model=adapter,
             tasks=[task],
@@ -545,6 +570,7 @@ def evaluate(args: argparse.Namespace) -> int:
         )
         if not _check(evaluation is not None, "lm-eval returned no results"):
             return 2
+        _write_json(output_dir / "generation_records.json", adapter.generation_records)
         metrics = _summarize_task(task, evaluation)
         if metrics is None:
             return 2
