@@ -123,19 +123,25 @@ def fit_affine_reduced_rank_map(
     input_gram: torch.Tensor,
     input_target_gram: torch.Tensor,
     rank: int,
+    fit_bias: bool = True,
 ) -> AffineReducedRankMap:
-    """Fit an unregularized affine reduced-rank regression from moments.
+    """Fit unregularized reduced-rank regression, optionally without an intercept.
 
     The centered input covariance is whitened with its numerical Moore-Penrose
     inverse square root.  Truncating the SVD of the whitened cross moment gives
     the exact least-squares rank-constrained solution.
+    With ``fit_bias=False``, use raw moments and constrain the bias to zero;
+    this refits the weight rather than removing an already fitted intercept.
     """
 
     count = float(row_count)
     mean_input = input_sum / count
     mean_target = target_sum / count
-    covariance = input_gram - count * torch.outer(mean_input, mean_input)
-    cross = input_target_gram - count * torch.outer(mean_input, mean_target)
+    covariance = input_gram
+    cross = input_target_gram
+    if fit_bias:
+        covariance = covariance - count * torch.outer(mean_input, mean_input)
+        cross = cross - count * torch.outer(mean_input, mean_target)
     covariance = 0.5 * (covariance + covariance.mT)
     eigenvalues, eigenvectors = torch.linalg.eigh(covariance)
     cutoff = (
@@ -157,7 +163,7 @@ def fit_affine_reduced_rank_map(
     selected = min(int(rank), int(singular_values.numel()))
     left = inverse_square_root @ left_singular[:, :selected]
     right = singular_values[:selected, None] * right_singular[:selected]
-    bias = mean_target - mean_input @ left @ right
+    bias = mean_target - mean_input @ left @ right if fit_bias else torch.zeros_like(mean_target)
     return AffineReducedRankMap(left=left, right=right, bias=bias)
 
 

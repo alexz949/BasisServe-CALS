@@ -173,6 +173,7 @@ def _fit_base_maps(
     cos: torch.Tensor,
     sin: torch.Tensor,
     device: torch.device,
+    fit_bias: bool = True,
 ) -> dict[int, tuple[AffineReducedRankMap, ...]]:
     documents, tokens, groups, joint_dim = map(int, rows.shape)
     head_dim = joint_dim // 2
@@ -213,6 +214,7 @@ def _fit_base_maps(
                 input_gram=input_gram[group],
                 input_target_gram=cross_gram[group],
                 rank=rank,
+                fit_bias=fit_bias,
             )
             for group in range(groups)
         )

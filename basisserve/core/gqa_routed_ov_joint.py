@@ -2501,7 +2501,7 @@ def fit_routed_ov_joint(
                         abs(gradient_inner),
                         abs(curvature),
                         gradient_norm * direction_norm,
-                        1.0,
+                        torch.finfo(A.dtype).tiny,
                     )
                 )
                 if gradient_norm == 0.0:
@@ -2556,7 +2556,35 @@ def fit_routed_ov_joint(
                         + eta_used**2 * curvature
                     )
                 if eta_used:
-                    accepted_delta = eta_used * delta
+                    # Verify the update actually stored in A, including FP32
+                    # rounding, in the same arithmetic as the evaluated loss.
+                    evaluation_A = A.to(dtype=evaluation_dtype).clone()
+                    evaluation_A[group].copy_(original_group.to(dtype=evaluation_dtype))
+                    evaluation_D = D.to(dtype=evaluation_dtype)
+                    evaluation_grams = _decoder_cross_grams(evaluation_D)
+                    evaluation_gradient = encoder_group_half_gradient(
+                        _per_head_encoder_half_gradient(
+                            objective=loss_objective,
+                            A_unique=evaluation_A,
+                            D_heads=evaluation_D,
+                            head_to_kv_group=mapping,
+                            decoder_grams=evaluation_grams,
+                        ),
+                        heads,
+                    )
+                    realized_delta = A[group].to(dtype=evaluation_dtype) - evaluation_A[group]
+                    evaluation_h_delta = encoder_hessian_vector_product(
+                        covariance=loss_objective.covariance,
+                        D_heads=evaluation_D,
+                        head_indices=heads,
+                        delta=realized_delta,
+                        decoder_grams=evaluation_grams,
+                    )
+                    predicted = float(
+                        2 * torch.sum(realized_delta * evaluation_gradient)
+                        + torch.sum(realized_delta * evaluation_h_delta)
+                    )
+                    accepted_delta = realized_delta.to(dtype=A.dtype)
                     predicted_loss = old_loss + predicted
                     verification_tolerance = 1e-9 * max(
                         abs(old_loss),

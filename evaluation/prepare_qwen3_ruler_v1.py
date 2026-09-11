@@ -125,6 +125,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--tasks", default="all")
     parser.add_argument("--random-seed", type=int, default=42)
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--prompt-margin", type=int, default=0)
     parser.add_argument("--output-dir", type=Path, required=True)
     return parser
 
@@ -164,7 +165,7 @@ def main() -> None:
                 output_dir=output_dir,
                 tokenizer_path=tokenizer_path,
                 task_name=task.name,
-                sequence_length=args.max_seq_length,
+                sequence_length=args.max_seq_length-args.prompt_margin,
                 samples=args.num_samples,
                 seed=args.random_seed,
             )
@@ -222,6 +223,7 @@ def main() -> None:
             "sequence_length": args.max_seq_length,
             "samples_per_task": args.num_samples,
             "random_seed": args.random_seed,
+            "prompt_margin": args.prompt_margin,
             "tasks": [task.name for task in tasks],
         },
         "commands": commands,

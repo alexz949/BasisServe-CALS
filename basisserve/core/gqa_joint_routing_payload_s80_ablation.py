@@ -211,17 +211,12 @@ def refit_page_fisher_routing_encoders(
         rhs = torch.einsum("hdi,hdr->ir", weighted_target, query_codes)
 
         def operator(value: torch.Tensor) -> torch.Tensor:
-            transformed = torch.einsum(
-                "hdij,jr->hdir",
-                active_grams,
-                value,
-            )
-            return torch.einsum(
-                "hdia,hda,hdb->ib",
-                transformed,
-                query_codes,
-                query_codes,
-            )
+            # Associate G @ (E @ u) before the final outer product with u.
+            # This avoids a [heads, documents, features, rank] intermediate
+            # and applies each Fisher Gram to one vector instead of rank vectors.
+            projected = torch.einsum("ir,hdr->hdi", value, query_codes)
+            transformed = torch.einsum("hdij,hdj->hdi", active_grams, projected)
+            return torch.einsum("hdi,hdr->ir", transformed, query_codes)
 
         diagonal = torch.einsum(
             "hdi,hdr->ir",
@@ -304,6 +299,11 @@ def fit_page_fisher_router(
                 loss_after_queries=after_queries,
                 loss_after_encoder=loss(),
             )
+        )
+        print(
+            f"Page-Fisher sweep {sweep}/{sweeps}: "
+            f"loss {before:.6g} -> {records[-1].loss_after_encoder:.6g}",
+            flush=True,
         )
     query_factors, query_diagnostics = refit_page_fisher_query_factors(
         statistics,

@@ -178,6 +178,35 @@ def append_recent_tokens(ids, selected_valid, physical_valid, query_positions):
     extra=allowed & ~duplicate
     return torch.cat((ids,recent),-1),torch.cat((selected_valid,extra),-1)
 
+
+def fixed_budget_recent_support(proxy_scores, valid, *, kv_heads, budget=2048):
+    """Decode support: sink32, exact sliding recent64, disjoint ranked pages.
+
+    Short contexts retain every valid token. Long contexts select 61 complete
+    historical pages at B2048; pages intersecting recent64 are ineligible.
+    """
+    batch, heads, queries, length = proxy_scores.shape
+    assert queries == 1 and budget >= 96 and budget % 32 == 0
+    physical = valid.reshape(batch, kv_heads, heads // kv_heads, 1, length).any(2)
+    if length <= budget:
+        ids = torch.arange(length, device=proxy_scores.device).view(1, 1, 1, -1)
+        return ids.expand(batch, kv_heads, 1, -1), physical
+    positions = torch.arange(length, device=proxy_scores.device)
+    # Preserve original page scores for eligible pages, excluding any page
+    # that overlaps the sliding recent window, including its partial boundary.
+    historical = positions < ((length - 64) // 32) * 32
+    eligible = valid & historical
+    pages, page_valid = _selected_pages(
+        proxy_scores.masked_fill(~eligible, -torch.inf), eligible,
+        kv_heads=kv_heads, page_size=32, page_budget=(budget-64)//32,
+        pinned_prefix_pages=1,
+    )
+    ids = (pages[..., None]*32 + torch.arange(32, device=pages.device)).flatten(-2)
+    selected = page_valid[..., None].expand(*page_valid.shape, 32).flatten(-2)
+    selected = selected & physical.gather(-1, ids)
+    return append_recent_tokens(ids, selected, physical,
+                                torch.tensor([length-1], device=pages.device))
+
 @torch.inference_mode()
 def c1_conditional_page_recent64_attention(
     query: Tensor,
@@ -193,6 +222,7 @@ def c1_conditional_page_recent64_attention(
     query_block_size: int,
     attention_mask: Tensor | None = None,
     collect_statistics: bool = True,
+    recent_within_budget: bool = False,
 ) -> C1ConditionalPageAttentionResult:
     """Apply full-causal Base+Residual routing and selected exact-QK attention.
 
@@ -370,6 +400,11 @@ def c1_conditional_page_recent64_attention(
             selected_token_ids, selected_physical_valid, physical_valid,
             sequence_length-query_length+torch.arange(query_start,query_stop,device=query.device),
         )
+        if recent_within_budget:
+            assert query_length == 1 and page_size == 32 and pinned_prefix_pages == 1
+            selected_token_ids, selected_physical_valid = fixed_budget_recent_support(
+                proxy_scores, expanded_valid, kv_heads=kv_heads, budget=exact_token_budget,
+            )
         query_token_ids = selected_token_ids.index_select(1, head_to_kv)
         selected_valid = selected_physical_valid.index_select(1, head_to_kv)
         assert expanded_key is not None and expanded_value is not None
@@ -428,6 +463,12 @@ def c1_conditional_page_recent64_attention(
         )
 
         if collect_statistics:
+            if recent_within_budget:
+                touched = torch.zeros(batch, kv_heads, block_queries, page_count,
+                                      device=query.device, dtype=torch.int32)
+                touched.scatter_add_(-1, selected_token_ids // page_size,
+                                     selected_physical_valid.to(torch.int32))
+                selected_page_valid = touched > 0
             logical_selected_tokens += int(selected_valid.sum().item())
             physical_selected_tokens += int(selected_physical_valid.sum().item())
             logical_selected_pages += int(
