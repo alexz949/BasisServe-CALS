@@ -125,6 +125,9 @@ def select_tokens(qcode, kcode, config):
 
 def selected_attention(q, k, v, ids, scale):
     selected_k, selected_v = gather_heads(k,ids), gather_heads(v,ids)
+    if q.is_cuda and q.dtype in (torch.float16, torch.bfloat16) and v.shape[-1] <= q.shape[-1]:
+        from basisserve.core.compact_v_flash import compact_v_flash_attention
+        return compact_v_flash_attention(q, selected_k, selected_v, scale=scale)
     return F.scaled_dot_product_attention(q,selected_k,selected_v,scale=scale,dropout_p=0,is_causal=False)
 
 

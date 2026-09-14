@@ -1,4 +1,4 @@
-"""Compact V-only attention adapter for the audited Transformers 5.3 API."""
+"""Compact V-only attention adapter for Transformers' layered hybrid cache."""
 
 import hashlib
 import copy
@@ -29,8 +29,7 @@ def _schema_checked_update(cache, key_states, value_states, layer_idx, cache_kwa
 
 def fork_gated_v_cache(cache):
     fork = copy.copy(cache)
-    for name in ('key_cache', 'value_cache', 'conv_states', 'recurrent_states'):
-        setattr(fork, name, [None if value is None else value.detach().clone() for value in getattr(cache, name)])
+    fork.layers = copy.deepcopy(cache.layers)
     if hasattr(cache, '_basisserve_v_schemas'):
         fork._basisserve_v_schemas = copy.deepcopy(cache._basisserve_v_schemas)
         fork._basisserve_native_update = MethodType(type(cache).update, fork)
@@ -39,10 +38,9 @@ def fork_gated_v_cache(cache):
 
 
 def reset_gated_v_cache(cache):
-    for name in ('key_cache', 'value_cache', 'conv_states', 'recurrent_states'):
-        values = getattr(cache, name)
-        for index in range(len(values)):
-            values[index] = None
+    from transformers.cache_utils import DynamicLayer, LinearAttentionLayer
+    assert all(type(layer) in (DynamicLayer, LinearAttentionLayer) for layer in cache.layers)
+    cache.layers = [type(layer)() for layer in cache.layers]
     if hasattr(cache, '_basisserve_v_schemas'):
         cache._basisserve_v_schemas.clear()
 
@@ -86,10 +84,11 @@ class GatedVAttention(nn.Module):
         q = n.q_norm(q).transpose(1, 2)
         k = n.k_norm(n.k_proj(hidden_states).view(batch, length, self.kv_heads, self.head_dim)).transpose(1, 2)
         v = F.linear(hidden_states, self.latent_weight, self.latent_bias).view(batch, length, self.groups, self.rank).transpose(1, 2)
+        pre_key = k
         q, k = apply_rotary_pos_emb(q, k, *position_embeddings)
         if past_key_values is not None:
             schemas = getattr(past_key_values, '_basisserve_v_schemas', {})
-            existing = past_key_values.value_cache[self.layer_idx]
+            existing = past_key_values.layers[self.layer_idx].values
             assert existing is None or schemas.get(self.layer_idx) == self.schema
             schemas[self.layer_idx] = self.schema
             past_key_values._basisserve_v_schemas = schemas
@@ -101,28 +100,51 @@ class GatedVAttention(nn.Module):
             assert v.shape[1] == self.groups and v.shape[-1] == self.rank
         mapping = torch.arange(heads, device=q.device) // n.num_key_value_groups
         group_mapping = mapping // self.kv_per_group
-        k_heads, v_heads = k[:, mapping], v[:, group_mapping]
-        full_length = k.shape[2]
-        positions = cache_position if cache_position is not None else torch.arange(full_length - length, full_length, device=q.device)
-        outputs = []
-        for start in range(0, length, self.query_chunk):
-            stop = min(start + self.query_chunk, length)
-            if attention_mask is None:
-                mask = torch.arange(full_length, device=q.device)[None, :] <= positions[start:stop, None]
-            else:
-                assert attention_mask.ndim == 4
-                mask = attention_mask[..., start:stop, :full_length]
-            # Q/K keep native width and scaling; V remains latent throughout.
-            out = F.scaled_dot_product_attention(q[:, :, start:stop], k_heads, v_heads,
-                attn_mask=mask, dropout_p=0.0, scale=n.scaling)
-            outputs.append(out)
-        latent = torch.cat(outputs, dim=2).transpose(1, 2)
+        latent = self.attention(q, k, v, pre_key=pre_key, position_embeddings=position_embeddings,
+            attention_mask=attention_mask, cache_position=cache_position, cache=past_key_values)
         head_decoder = self.decoder[group_mapping].reshape(heads, self.rank, self.kv_per_group, self.head_dim)
         local_head = mapping % self.kv_per_group
         head_decoder = head_decoder[torch.arange(heads, device=q.device), :, local_head, :]
         restored = torch.einsum('bqhr,hrd->bqhd', latent, head_decoder)
         post = (restored * logits.sigmoid()).reshape(batch, length, -1)
         return self.o_proj(post), None
+
+    def attention(self, q, k, v, *, pre_key, position_embeddings, attention_mask, cache_position, cache):
+        n = self.native
+        heads, length = q.shape[1:3]
+        mapping = torch.arange(heads, device=q.device) // n.num_key_value_groups
+        group_mapping = mapping // self.kv_per_group
+        full_length = k.shape[2]
+        flash = (q.is_cuda and q.dtype in (torch.float16, torch.bfloat16)
+            and self.kv_per_group == 1 and self.rank <= self.head_dim
+            and attention_mask is None and (length == full_length or length == 1))
+        if flash:
+            from torch.nn.attention import SDPBackend, sdpa_kernel
+            # Pad only the transient V input, retaining the compact persistent cache.
+            # Equal Q/K/V widths enable fused FlashAttention with native GQA.
+            padded = F.pad(v, (0, self.head_dim-self.rank))
+            with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
+                out = F.scaled_dot_product_attention(q, k, padded, dropout_p=0.0,
+                    is_causal=length == full_length, scale=n.scaling, enable_gqa=True)
+            latent = out[..., :self.rank].transpose(1, 2)
+            self.last_attention_backend = 'flash'
+        else:
+            k_heads, v_heads = k[:, mapping], v[:, group_mapping]
+            positions = cache_position if cache_position is not None else torch.arange(full_length - length, full_length, device=q.device)
+            outputs = []
+            for start in range(0, length, self.query_chunk):
+                stop = min(start + self.query_chunk, length)
+                if attention_mask is None:
+                    mask = torch.arange(full_length, device=q.device)[None, :] <= positions[start:stop, None]
+                else:
+                    assert attention_mask.ndim == 4
+                    mask = attention_mask[..., start:stop, :full_length]
+                out = F.scaled_dot_product_attention(q[:, :, start:stop], k_heads, v_heads,
+                    attn_mask=mask, dropout_p=0.0, scale=n.scaling)
+                outputs.append(out)
+            latent = torch.cat(outputs, dim=2).transpose(1, 2)
+            self.last_attention_backend = 'chunked_masked'
+        return latent
 
 
 class GatedVRuntime:

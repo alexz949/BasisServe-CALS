@@ -7,6 +7,7 @@ from transformers import DynamicCache
 from transformers.models.qwen3.modeling_qwen3 import apply_rotary_pos_emb
 
 from basisserve.checkpoint.gqa_vo_qwen3 import GQATiedVOQwen3Attention
+from basisserve.checkpoint.c1_attention_layers import c1_attention_layers
 from basisserve.core.c1_lrqk import LRQKConfig, LRQKState
 from basisserve.kernels.compressed_v_decode_attention import compressed_v_prefill_attention
 
@@ -43,6 +44,8 @@ def _forward(self,hidden_states,position_embeddings,attention_mask,past_key_valu
     if previous == 0:
         assert self.layer_idx not in past_key_values.lrqk_states
         state = LRQKState(q,k,cfg,self.layer_idx)
+        if getattr(self, '_lrqk_official', False):
+            state.bind_values(v)
         past_key_values.lrqk_states[self.layer_idx] = state
         if cfg.prefill_backend == 'triton':
             output = compressed_v_prefill_attention(q,k,v,scale=self.scaling)
@@ -58,8 +61,7 @@ def _forward(self,hidden_states,position_embeddings,attention_mask,past_key_valu
 
 def install_c1_lrqk(model,config=LRQKConfig()):
     """Install after C1 factor export; preserve Q/K norms, RoPE, C1 writer/decoder."""
-    for layer in model.model.layers:
-        module = layer.self_attn
+    for _, module in c1_attention_layers(model):
         assert isinstance(module,GQATiedVOQwen3Attention) and module.key_projector is None
         assert module.reverse_shadow_config is None and not hasattr(module,'_lrqk_config')
         module._lrqk_config = config

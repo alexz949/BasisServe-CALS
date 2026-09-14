@@ -633,3 +633,29 @@ def test_flex_prefill_matches_causal_reference(
     observed = compressed_v_prefill_attention(query, key, value)
     expected = reference_compressed_v_prefill_attention(query, key, value)
     torch.testing.assert_close(observed, expected, rtol=2e-2, atol=2e-2)
+
+
+@pytest.mark.skipif(torch.cuda.device_count() < 2, reason="requires two CUDA devices")
+@pytest.mark.parametrize("value_dim", [32, 96, 128])
+def test_prefill_uses_tensor_device_and_its_current_stream(value_dim):
+    previous = torch.cuda.current_device()
+    stream = torch.cuda.Stream(device=1)
+    with torch.cuda.stream(stream):
+        generator = torch.Generator(device='cuda:1').manual_seed(20260828)
+        q = torch.randn(1, 8, 257, 128, device='cuda:1',
+            dtype=torch.bfloat16, generator=generator)
+        k = torch.randn(1, 2, 257, 128, device='cuda:1',
+            dtype=torch.bfloat16, generator=generator)
+        v = torch.randn(1, 2, 257, value_dim, device='cuda:1',
+            dtype=torch.bfloat16, generator=generator)
+        # The caller's device differs from its tensors. Both the launch and
+        # the consumer must stay ordered on device 1's selected stream.
+        with torch.cuda.device(0):
+            actual = compressed_v_prefill_attention(q, k, v)
+            assert torch.cuda.current_device() == 0
+        consumed = actual.clone()
+        expected = reference_compressed_v_prefill_attention(q, k, v)
+    stream.synchronize()
+    assert torch.cuda.current_device() == previous
+    assert consumed.device == q.device
+    torch.testing.assert_close(consumed, expected, rtol=2e-2, atol=2e-2)

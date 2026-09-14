@@ -25,7 +25,7 @@ Before running any job, evaluation, or large script:
 
 - Summarize the exact command you are about to run, not Slurm command.
 - Every time when create and submit a sbatch file, remember to delete.
-- Ask for explicit confirmation before launching the job.
+- Ask for explicit confirmation before launching the actual job, you should automatically launch the smoke test by yourself without asking my approval.
 - When running the job, make sure to include some log files so either you and me can trace the progress.
 - Avoid creating too many retry-ish folder, if a job fails, resubmit with the same settings
 If the user's instruction is ambiguous, incomplete, or underspecified:

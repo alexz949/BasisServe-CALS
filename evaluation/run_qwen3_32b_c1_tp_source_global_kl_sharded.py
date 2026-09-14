@@ -23,7 +23,7 @@ import sys
 import time
 from typing import Any, Mapping, Sequence
 
-from safetensors.torch import save_file
+from safetensors.torch import load_file, save_file
 import torch
 from torch import nn
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -87,6 +87,31 @@ def _cuda_device_indices() -> tuple[int, ...]:
     return tuple(indices)
 
 
+def _select_fit_windows(path, *, window_start, profile_windows, confirmation_windows, sequence_length):
+    resolved = path.expanduser().resolve()
+    manifest_path = resolved.parent / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    assert manifest["status"] == "complete" and not manifest.get("test_only", False)
+    assert common._sha256(resolved) == manifest["sha256"]
+    payload = load_file(str(resolved), device="cpu")
+    assert set(payload) == {"input_ids"}
+    tokens = payload["input_ids"]
+    stop = window_start + profile_windows + confirmation_windows
+    indices = list(range(window_start, stop))
+    assert window_start >= 0 and stop <= len(tokens)
+    assert set(indices) <= set(manifest["fit_ids"])
+    assert not set(indices).intersection(manifest["validation_ids"])
+    assert sequence_length == tokens.shape[1]
+    selected = tokens[window_start:stop].to(torch.long).contiguous()
+    provenance = dict(path=str(resolved), sha256=manifest["sha256"],
+        manifest=str(manifest_path), manifest_sha256=common._sha256(manifest_path),
+        window_start=window_start, window_stop_exclusive=stop,
+        profile_indices=indices[:profile_windows], confirmation_indices=indices[profile_windows:],
+        stored_sequence_length=int(tokens.shape[1]), used_sequence_length=sequence_length,
+        disjoint_from_als_fit_and_heldout_prefix=False, disjoint_from_diagnostic=True)
+    return selected[:profile_windows], selected[profile_windows:], provenance
+
+
 def _add_shared_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--model", required=True)
     parser.add_argument("--windows", type=Path, required=True)
@@ -101,10 +126,12 @@ def _add_shared_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--anchor-rank", type=int, default=96)
     parser.add_argument("--candidate-ranks", default="64,80,96,112,128")
     parser.add_argument("--window-start", type=int, default=common.FRESH_WINDOW_START)
+    parser.add_argument("--probe-source", choices=("fresh", "fit"), default="fresh")
     parser.add_argument("--profile-windows", type=int, default=8)
     parser.add_argument("--confirmation-windows", type=int, default=8)
     parser.add_argument("--sequence-length", type=int, default=512)
     parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--mlp-chunk-size", type=int, default=0)
     parser.add_argument("--covariance-damping", type=float, default=1.0e-5)
     parser.add_argument("--vocab-chunk-size", type=int, default=8192)
     parser.add_argument("--torch-num-threads", type=int, default=4)
@@ -208,7 +235,7 @@ def _validate_shared(
     calibration_window_count = int(reference["fit_windows"]) + int(
         reference["validation_windows"]
     )
-    assert args.window_start >= calibration_window_count, (
+    assert args.probe_source == "fit" or args.window_start >= calibration_window_count, (
         "Global-KL windows overlap the ALS fit/validation prefix: "
         f"start={args.window_start}, required={calibration_window_count}"
     )
@@ -243,7 +270,13 @@ def _validate_shared(
     expected_manifest_sha = reference["snapshot_manifest_sha256"]
     if common._sha256(snapshot_dir / "manifest.json") != expected_manifest_sha:
         raise ValueError("factor banks and covariance manifest hashes disagree")
-    profile, confirmation, provenance = common._select_fresh_windows(
+    selector = _select_fit_windows if args.probe_source == "fit" else common._select_fresh_windows
+    if args.probe_source == "fit":
+        manifest = json.loads((args.windows.parent / "manifest.json").read_text())
+        assert manifest["model_config_sha256"] == model_config_sha256
+        assert manifest["fit_ids"] == list(range(int(reference["fit_windows"])))
+        assert args.window_start + args.profile_windows + args.confirmation_windows <= int(reference["fit_windows"])
+    profile, confirmation, provenance = selector(
         args.windows,
         window_start=args.window_start,
         profile_windows=args.profile_windows,
@@ -252,6 +285,7 @@ def _validate_shared(
     )
     provenance = {
         **provenance,
+        "probe_source": args.probe_source,
         "als_fit_and_heldout_window_count": calibration_window_count,
         "disjoint_from_als_fit_and_heldout_prefix": (
             args.window_start >= calibration_window_count
@@ -302,6 +336,7 @@ def _configuration(
         "confirmation_windows": args.confirmation_windows,
         "sequence_length": args.sequence_length,
         "batch_size": args.batch_size,
+        "mlp_chunk_size": args.mlp_chunk_size,
         "covariance_damping": args.covariance_damping,
         "vocab_chunk_size": args.vocab_chunk_size,
         "model_dtype": args.model_dtype,
@@ -327,6 +362,11 @@ def _load_model(args: argparse.Namespace, model_path: Path) -> nn.Module:
         },
     ).eval()
     model.config.use_cache = False
+    if args.mlp_chunk_size:
+        from evaluation.chunked_prefill_mlp import ChunkedTokenwise
+        assert args.mlp_chunk_size > 0
+        for layer in model.model.layers:
+            layer.mlp = ChunkedTokenwise(layer.mlp, args.mlp_chunk_size)
     geometry = (
         str(model.config.model_type),
         int(model.config.num_hidden_layers),
@@ -954,7 +994,7 @@ def _finalize(args: argparse.Namespace) -> None:
                 args.confirmation_windows / args.batch_size
             ),
             "disjoint_from_profile": True,
-            "disjoint_from_als_fit_and_heldout": True,
+            "disjoint_from_als_fit_and_heldout": windows_provenance["disjoint_from_als_fit_and_heldout_prefix"],
             "windows_provenance": windows_provenance,
         },
         "selection": {

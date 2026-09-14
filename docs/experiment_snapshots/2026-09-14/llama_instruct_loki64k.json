@@ -1,0 +1,33 @@
+{
+  "status": "complete",
+  "verified_predictions": 88,
+  "protocol": {
+    "baseline_sha256": "4b15e18f6c24719ce6625b5070191a2f324157dfffe7c245edc565f8a7da83db",
+    "pca_sha256": "4d4547670045b3293f1bbe02d54a86a52c6b8f4e7f0a70c597a200983df5fc61",
+    "rank": 32,
+    "topk_per_query_head": 2048,
+    "extra_recent": 0,
+    "extra_sink": 0,
+    "physical_gqa_union": "uncapped",
+    "source_sha256": {
+      "evaluation/eval_llama_instruct_loki.py": "250a35d98b4e59860b9b73a7080efa19db642397733329fe44e6d2955b3d8855",
+      "evaluation/eval_k_routing_ruler.py": "e8f52da4eead19bbde8cd3e9cf82e589b7faad58e14f059c6d9fee65168d427e",
+      "basisserve/core/c1_loki_attention.py": "4bf6e52b1b4eac63ebb53bcac1cd323df11bb5fd2f9f700761136b106f52ceaf",
+      "basisserve/kernels/indexed_sparse_decode_attention.py": "cad6bb38ad30cc470a7c8b3ca5fbd730f54345c8094aaa3c2608e4bf712c4fbb"
+    }
+  },
+  "mean": 85.9469696969697,
+  "tasks": {
+    "niah_single_1": 100.0,
+    "niah_single_2": 87.5,
+    "niah_single_3": 100.0,
+    "niah_multikey_1": 100.0,
+    "niah_multikey_2": 100.0,
+    "niah_multiquery": 93.75,
+    "niah_multivalue": 100.0,
+    "vt": 72.5,
+    "fwe": 91.66666666666666,
+    "qa_1": 50.0,
+    "qa_2": 50.0
+  }
+}

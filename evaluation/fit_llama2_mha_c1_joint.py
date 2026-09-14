@@ -61,6 +61,7 @@ HEAD_DIM = 128
 HIDDEN_SIZE = 4096
 FORMAL_ENCODER_SWEEPS = 6
 FORMAL_ENCODER_CG_ITERATIONS = 16
+ATTENTION_LAYERS: tuple[int, ...] | None = None
 
 
 def activate_model_profile(name: str) -> None:
@@ -68,6 +69,9 @@ def activate_model_profile(name: str) -> None:
 
     global FORMAT, LAYER_FORMAT, MODEL_LABEL, MODEL_TYPE, ATTENTION_TYPE
     global NUM_LAYERS, NUM_HEADS, NUM_KV_HEADS, HEAD_DIM, HIDDEN_SIZE
+    global ATTENTION_LAYERS, FORMAL_ENCODER_SWEEPS
+    ATTENTION_LAYERS = None
+    FORMAL_ENCODER_SWEEPS = 6
     if name == "llama2_7b":
         return
     if name == "qwen3_32b":
@@ -238,9 +242,29 @@ def _atomic_safetensors(path: Path, payload: Mapping[str, Tensor]) -> None:
     os.replace(temporary, path)
 
 
+def activate_nemotron_h_profile(attention_layers: Sequence[int]) -> None:
+    """Select the pinned 47B geometry using layers discovered by native audit."""
+    global FORMAT, LAYER_FORMAT, MODEL_LABEL, MODEL_TYPE, ATTENTION_TYPE
+    global NUM_LAYERS, NUM_HEADS, NUM_KV_HEADS, HEAD_DIM, HIDDEN_SIZE
+    global ATTENTION_LAYERS, FORMAL_ENCODER_SWEEPS
+    layers = tuple(map(int, attention_layers))
+    assert len(layers) == 5 and layers == tuple(sorted(set(layers)))
+    assert min(layers) >= 0 and max(layers) < 98
+    FORMAT = 'basisserve.nemotron_h_47b.gqa_c1_joint.v1'
+    LAYER_FORMAT = 'basisserve.nemotron_h_47b.gqa_c1_joint.layer.v1'
+    MODEL_LABEL, MODEL_TYPE, ATTENTION_TYPE = 'Nemotron-H-47B-Reasoning-128K', 'nemotron_h', 'gqa'
+    NUM_LAYERS, NUM_HEADS, NUM_KV_HEADS, HEAD_DIM, HIDDEN_SIZE = 98, 64, 8, 128, 8192
+    ATTENTION_LAYERS = layers
+    FORMAL_ENCODER_SWEEPS = 12
+
+
+def _attention_layers() -> tuple[int, ...]:
+    return tuple(range(NUM_LAYERS)) if ATTENTION_LAYERS is None else ATTENTION_LAYERS
+
+
 def _parse_layers(raw: str) -> tuple[int, ...]:
     if raw.strip().lower() == "all":
-        return tuple(range(NUM_LAYERS))
+        return _attention_layers()
     layers: set[int] = set()
     for piece in raw.split(","):
         piece = piece.strip()
@@ -256,6 +280,7 @@ def _parse_layers(raw: str) -> tuple[int, ...]:
     selected = tuple(sorted(layers))
     if not selected or min(selected) < 0 or max(selected) >= NUM_LAYERS:
         raise ValueError(f"selected layers are outside {MODEL_LABEL}")
+    assert set(selected) <= set(_attention_layers())
     return selected
 
 
@@ -410,7 +435,7 @@ def _snapshot_manifest(snapshot_dir: Path) -> dict[str, Any]:
     )
     if observed != expected:
         raise ValueError(f"unexpected {MODEL_LABEL} snapshot geometry: {observed}")
-    if tuple(map(int, manifest.get("layers", ()))) != tuple(range(NUM_LAYERS)):
+    if tuple(map(int, manifest.get("layers", ()))) != _attention_layers():
         raise ValueError(f"snapshot must cover every {MODEL_LABEL} decoder layer")
     return manifest
 
@@ -532,6 +557,7 @@ def _fit_config(
         )
         / (2 * NUM_KV_HEADS * HEAD_DIM),
         "work_dtype": args.work_dtype,
+        "allow_tf32": args.allow_tf32,
         "factor_dtype": args.factor_dtype,
         "encoder_initialization": args.encoder_initialization,
         "encoder_initialization_seed": args.encoder_initialization_seed,
@@ -1287,6 +1313,8 @@ def _fit_shard(args: argparse.Namespace) -> None:
     if args.layer_shard_count <= 0 or not 0 <= args.layer_shard_index < args.layer_shard_count:
         raise ValueError("invalid layer shard")
     torch.set_num_threads(args.torch_num_threads)
+    torch.backends.cuda.matmul.allow_tf32 = args.allow_tf32
+    torch.backends.cudnn.allow_tf32 = args.allow_tf32
     device = torch.device(args.device)
     if device.type != "cuda" or not torch.cuda.is_available():
         raise RuntimeError("C1 joint fitting requires CUDA")
@@ -1485,6 +1513,7 @@ def _add_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument("--cache-rank", type=int, default=96)
     parser.add_argument("--work-dtype", choices=("float32", "float64"), default="float64")
+    parser.add_argument("--allow-tf32", action="store_true")
     parser.add_argument(
         "--factor-dtype",
         choices=("float16", "bfloat16", "float32"),

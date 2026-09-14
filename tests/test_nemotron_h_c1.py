@@ -138,6 +138,26 @@ def test_large_model_loading_reserves_solver_gpu_without_cpu_offload() -> None:
     }
 
 
+def test_discovers_native_transformers_nemotron_targets() -> None:
+    from transformers import NemotronHConfig, NemotronHForCausalLM
+
+    config = NemotronHConfig(
+        hidden_size=16, intermediate_size=32, vocab_size=32,
+        layers_block_type=["linear_attention", "mlp", "full_attention"],
+        num_attention_heads=2, num_key_value_heads=1, head_dim=8,
+        mamba_num_heads=4, mamba_head_dim=8, n_groups=1, ssm_state_size=4,
+    )
+    with torch.device("meta"):
+        model = NemotronHForCausalLM(config)
+    targets = discover_nemotron_h_c1_targets(model)
+    assert [(t.layer_index, t.layer_kind, t.projection_name, t.input_width, t.output_width)
+            for t in targets] == [
+        (0, "linear_attention", "out_proj", 32, 16),
+        (2, "full_attention", "o_proj", 16, 16),
+    ]
+    assert projection_for_target(model, targets[0]) is model.model.layers[0].mixer.out_proj
+
+
 def test_large_model_loading_rejects_one_gpu_and_cpu_offload() -> None:
     try:
         _model_loading_configuration(

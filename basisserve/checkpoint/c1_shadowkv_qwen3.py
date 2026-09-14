@@ -4,6 +4,7 @@ import torch
 from transformers import DynamicCache
 from transformers.models.qwen3.modeling_qwen3 import apply_rotary_pos_emb
 from basisserve.checkpoint.gqa_vo_qwen3 import GQATiedVOQwen3Attention
+from basisserve.checkpoint.c1_attention_layers import c1_attention_layers
 from basisserve.kernels.compressed_v_decode_attention import compressed_v_prefill_attention
 from basisserve.core.c1_shadowkv import C1ShadowKVState
 
@@ -46,8 +47,7 @@ def forward(self,hidden_states,position_embeddings,attention_mask,past_key_value
 
 
 def install_c1_shadowkv(model):
-    for layer in model.model.layers:
-        module=layer.self_attn
+    for _, module in c1_attention_layers(model):
         assert isinstance(module,GQATiedVOQwen3Attention) and module.key_projector is None
         assert module.reverse_shadow_config is None
         module.forward=MethodType(forward,module)

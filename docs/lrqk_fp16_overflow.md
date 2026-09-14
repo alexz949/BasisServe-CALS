@@ -1,5 +1,15 @@
 # LRQK FP16 overflow diagnosis and FP32 routing state
 
+This document describes our historical FP16 overflow workaround, not a
+requirement to keep BF16 experiments' routing state in FP32. Upstream LRQK
+at revision `caf16293db2e4423a84ab2e895bacf64479f1eb7` performs prefill/decode
+factor solves in FP32 and casts the returned factors back to the input K
+dtype (`cast_lrqk_prefill` / `cast_lrqk_decode`,
+[official source](https://github.com/tenghuilee/LRQK/blob/caf16293db2e4423a84ab2e895bacf64479f1eb7/lrqk_attention.py#L784-L840)).
+Current Qwen3-32B and Nemotron K-routing evaluations use BF16 persistent
+LRQK state with FP32 solves. Existing FP32-state results retain their original
+precision provenance and must not be silently relabeled or mixed with BF16 runs.
+
 The original FP16 V100 run completed the full-K control but encountered non-finite LRQK states on long generations. This diagnosis preserved the original arithmetic and observed the FP32 outputs immediately before the FP16 cast.
 
 | k1152 sample | Layer (zero-based) | Decode update | Maximum absolute new K-code | Nonfinite FP32 | Nonfinite after FP16 |

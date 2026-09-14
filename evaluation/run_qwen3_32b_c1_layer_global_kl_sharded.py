@@ -280,6 +280,9 @@ def _validate_shared(
     dict[str, Any],
 ]:
     validated = list(runtime._validate_shared(args))
+    if args.probe_source == "fit":
+        assert args.local_error_split == "fit"
+        assert args.secondary_windows is None
     if args.secondary_windows is None:
         return tuple(validated)
     assert args.factorized_probe_rank is not None
@@ -330,7 +333,7 @@ def _validate_shared(
 
 def _profile_dataset_name(args: argparse.Namespace) -> str:
     if args.secondary_windows is None:
-        return "c4_train_fresh_documents"
+        return "c4_train_fit_windows" if args.probe_source == "fit" else "c4_train_fresh_documents"
     if args.secondary_window_mode == "replace":
         return str(args.secondary_domain_name)
     return f"c4+{args.secondary_domain_name}"
@@ -2055,7 +2058,7 @@ def _finalize(args: argparse.Namespace) -> None:
                 / args.batch_size
             ),
             "disjoint_from_profile": True,
-            "disjoint_from_als_fit_and_heldout": True,
+            "disjoint_from_als_fit_and_heldout": windows_provenance["disjoint_from_als_fit_and_heldout_prefix"],
             "windows_provenance": windows_provenance,
         },
         "selection": {

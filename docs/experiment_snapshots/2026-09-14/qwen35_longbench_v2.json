@@ -1,0 +1,1256 @@
+{
+  "status": "complete",
+  "scope": "formal",
+  "samples_per_arm": 70,
+  "scores": {
+    "full": {
+      "accuracy": 52.857142857142854,
+      "unparsed": 5,
+      "groups": {
+        "domain": {
+          "Code Repository Understanding": {
+            "n": 3,
+            "accuracy": 66.66666666666667
+          },
+          "Long In-context Learning": {
+            "n": 6,
+            "accuracy": 50.0
+          },
+          "Long Structured Data Understanding": {
+            "n": 1,
+            "accuracy": 100.0
+          },
+          "Long-dialogue History Understanding": {
+            "n": 11,
+            "accuracy": 81.81818181818181
+          },
+          "Multi-Document QA": {
+            "n": 33,
+            "accuracy": 39.39393939393939
+          },
+          "Single-Document QA": {
+            "n": 16,
+            "accuracy": 56.25
+          }
+        },
+        "difficulty": {
+          "easy": {
+            "n": 19,
+            "accuracy": 63.1578947368421
+          },
+          "hard": {
+            "n": 51,
+            "accuracy": 49.01960784313726
+          }
+        }
+      },
+      "delta_vs_full_pp": 0.0
+    },
+    "exact_sparse": {
+      "accuracy": 52.857142857142854,
+      "unparsed": 7,
+      "groups": {
+        "domain": {
+          "Code Repository Understanding": {
+            "n": 3,
+            "accuracy": 66.66666666666667
+          },
+          "Long In-context Learning": {
+            "n": 6,
+            "accuracy": 50.0
+          },
+          "Long Structured Data Understanding": {
+            "n": 1,
+            "accuracy": 100.0
+          },
+          "Long-dialogue History Understanding": {
+            "n": 11,
+            "accuracy": 72.72727272727273
+          },
+          "Multi-Document QA": {
+            "n": 33,
+            "accuracy": 45.45454545454545
+          },
+          "Single-Document QA": {
+            "n": 16,
+            "accuracy": 50.0
+          }
+        },
+        "difficulty": {
+          "easy": {
+            "n": 19,
+            "accuracy": 57.89473684210526
+          },
+          "hard": {
+            "n": 51,
+            "accuracy": 50.98039215686274
+          }
+        }
+      },
+      "delta_vs_full_pp": 0.0
+    },
+    "b16r16": {
+      "accuracy": 57.142857142857146,
+      "unparsed": 5,
+      "groups": {
+        "domain": {
+          "Code Repository Understanding": {
+            "n": 3,
+            "accuracy": 66.66666666666667
+          },
+          "Long In-context Learning": {
+            "n": 6,
+            "accuracy": 50.0
+          },
+          "Long Structured Data Understanding": {
+            "n": 1,
+            "accuracy": 100.0
+          },
+          "Long-dialogue History Understanding": {
+            "n": 11,
+            "accuracy": 90.9090909090909
+          },
+          "Multi-Document QA": {
+            "n": 33,
+            "accuracy": 42.42424242424242
+          },
+          "Single-Document QA": {
+            "n": 16,
+            "accuracy": 62.5
+          }
+        },
+        "difficulty": {
+          "easy": {
+            "n": 19,
+            "accuracy": 68.42105263157895
+          },
+          "hard": {
+            "n": 51,
+            "accuracy": 52.94117647058823
+          }
+        }
+      },
+      "delta_vs_full_pp": 4.285714285714292
+    },
+    "b32r32": {
+      "accuracy": 55.714285714285715,
+      "unparsed": 5,
+      "groups": {
+        "domain": {
+          "Code Repository Understanding": {
+            "n": 3,
+            "accuracy": 66.66666666666667
+          },
+          "Long In-context Learning": {
+            "n": 6,
+            "accuracy": 33.333333333333336
+          },
+          "Long Structured Data Understanding": {
+            "n": 1,
+            "accuracy": 100.0
+          },
+          "Long-dialogue History Understanding": {
+            "n": 11,
+            "accuracy": 72.72727272727273
+          },
+          "Multi-Document QA": {
+            "n": 33,
+            "accuracy": 48.484848484848484
+          },
+          "Single-Document QA": {
+            "n": 16,
+            "accuracy": 62.5
+          }
+        },
+        "difficulty": {
+          "easy": {
+            "n": 19,
+            "accuracy": 68.42105263157895
+          },
+          "hard": {
+            "n": 51,
+            "accuracy": 50.98039215686274
+          }
+        }
+      },
+      "delta_vs_full_pp": 2.857142857142861
+    },
+    "loki": {
+      "accuracy": 50.0,
+      "unparsed": 6,
+      "groups": {
+        "domain": {
+          "Code Repository Understanding": {
+            "n": 3,
+            "accuracy": 66.66666666666667
+          },
+          "Long In-context Learning": {
+            "n": 6,
+            "accuracy": 33.333333333333336
+          },
+          "Long Structured Data Understanding": {
+            "n": 1,
+            "accuracy": 100.0
+          },
+          "Long-dialogue History Understanding": {
+            "n": 11,
+            "accuracy": 54.54545454545455
+          },
+          "Multi-Document QA": {
+            "n": 33,
+            "accuracy": 42.42424242424242
+          },
+          "Single-Document QA": {
+            "n": 16,
+            "accuracy": 62.5
+          }
+        },
+        "difficulty": {
+          "easy": {
+            "n": 19,
+            "accuracy": 57.89473684210526
+          },
+          "hard": {
+            "n": 51,
+            "accuracy": 47.05882352941177
+          }
+        }
+      },
+      "delta_vs_full_pp": -2.857142857142854
+    },
+    "shadowkv": {
+      "accuracy": 50.0,
+      "unparsed": 4,
+      "groups": {
+        "domain": {
+          "Code Repository Understanding": {
+            "n": 3,
+            "accuracy": 66.66666666666667
+          },
+          "Long In-context Learning": {
+            "n": 6,
+            "accuracy": 50.0
+          },
+          "Long Structured Data Understanding": {
+            "n": 1,
+            "accuracy": 100.0
+          },
+          "Long-dialogue History Understanding": {
+            "n": 11,
+            "accuracy": 81.81818181818181
+          },
+          "Multi-Document QA": {
+            "n": 33,
+            "accuracy": 33.333333333333336
+          },
+          "Single-Document QA": {
+            "n": 16,
+            "accuracy": 56.25
+          }
+        },
+        "difficulty": {
+          "easy": {
+            "n": 19,
+            "accuracy": 57.89473684210526
+          },
+          "hard": {
+            "n": 51,
+            "accuracy": 47.05882352941177
+          }
+        }
+      },
+      "delta_vs_full_pp": -2.857142857142854
+    },
+    "base16": {
+      "accuracy": 51.42857142857143,
+      "unparsed": 6,
+      "groups": {
+        "domain": {
+          "Code Repository Understanding": {
+            "n": 3,
+            "accuracy": 100.0
+          },
+          "Long In-context Learning": {
+            "n": 6,
+            "accuracy": 33.333333333333336
+          },
+          "Long Structured Data Understanding": {
+            "n": 1,
+            "accuracy": 0.0
+          },
+          "Long-dialogue History Understanding": {
+            "n": 11,
+            "accuracy": 72.72727272727273
+          },
+          "Multi-Document QA": {
+            "n": 33,
+            "accuracy": 39.39393939393939
+          },
+          "Single-Document QA": {
+            "n": 16,
+            "accuracy": 62.5
+          }
+        },
+        "difficulty": {
+          "easy": {
+            "n": 19,
+            "accuracy": 57.89473684210526
+          },
+          "hard": {
+            "n": 51,
+            "accuracy": 49.01960784313726
+          }
+        }
+      },
+      "delta_vs_full_pp": -1.4285714285714235
+    }
+  },
+  "data_protocol": {
+    "dataset_revision": "2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9",
+    "dataset_sha256": "15d61c22d92c96900b3c4948b6aeea218d3214b676a65df48e7b8555604c7fe2",
+    "inventory_sha256": "e17401f351a7598e3ae59514eedaa5614470dce1d972789b0fe715141b08ecc6",
+    "model": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "model_config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+    "tokenizer_config_sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+    "samples": 70,
+    "eligible": 70,
+    "selection": "seed73 hash order within domains; round-robin domains; labels unused",
+    "prompt_min_tokens": 32768,
+    "total_limit": 65536,
+    "reasoning_cap": 1024,
+    "answer_cap": 1024,
+    "truncation": false,
+    "padding": false,
+    "native_thinking": false,
+    "sampling": "greedy (official default is temperature0.1)",
+    "official_templates": {
+      "0shot_cot.txt": "6cc33d92fd8f611662b756c1f10f302c541ca005b58c46d5f3188ac3a939bfe8",
+      "0shot_cot_ans.txt": "85ec59df4ac0e27aabbc619a7ca5cf3ae1787dd5a76cf51a18944eb52c91955f"
+    },
+    "answer_template": "Please read the following text and answer the questions below.\n\nThe text is too long and omitted here.\n\nWhat is the correct answer to this question: $Q$\nChoices:\n(A) $C_A$\n(B) $C_B$\n(C) $C_C$\n(D) $C_D$\n\nLet\u2019s think step by step: $COT$\n\nBased on the above, what is the single, most likely answer choice? Format your response as follows: \"The correct answer is (insert answer here)\".",
+    "answer_stage": "official second stage omits document, includes generated reasoning",
+    "source_code_sha256": "7f3a43e9dadca51ef8c097f119b390288be14ffad49b6c6d47da45e207abec2d",
+    "official_answer_cap": 128
+  },
+  "protocols": {
+    "full": {
+      "arm": "full",
+      "sources": {},
+      "model_identity": {
+        "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+        "model_files_sha256": {
+          "model.safetensors-00001-of-00004.safetensors": "db6f444b43d318c92f360a13a25561a6a65b10c0631b8ed305a426dbaa6c380e",
+          "model.safetensors-00002-of-00004.safetensors": "31c7d7e2dd5d207840b31cc59083c8f4c4718959149e0358c0364052bb9a0330",
+          "model.safetensors-00003-of-00004.safetensors": "7ec36ba3a4176a44c3c0876ad80c56a2f70c84bf008d82e9501df642f17dadec",
+          "model.safetensors-00004-of-00004.safetensors": "b62b0c4cd7e44edee103ee8f4fe225f246d5e768e07bfd5f25b63a8aa1fdd0c6"
+        }
+      },
+      "v_bank_sha256": "74850e973b72d1d8ab084908a318e8b975c57640e31bef486d772ff8c0855f0e",
+      "data_sha256": "d4257a829c2c31bed57592d8ca51375b87d9e60047bc6143d866d42651530929",
+      "code_sha256": {
+        "evaluation/eval_qwen35_longbench_v2.py": "f96918e0832c7aee0c8dd1f8d843f387f97799cf89e0946bc8e6ae5392140234",
+        "evaluation/eval_qwen35_k_routing_ruler.py": "b5c526c5750623469705f134fb394696c880b6ff33986458ded2e2ad421e5eb2",
+        "evaluation/prepare_qwen35_longbench_v2.py": "7f3a43e9dadca51ef8c097f119b390288be14ffad49b6c6d47da45e207abec2d",
+        "basisserve/core/qwen35_k_routing_runtime.py": "f1a455ed89128230305147c4761701449a64495ebb2073b31c2f24c292a07f1c",
+        "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+        "basisserve/core/c1_lrqk.py": "1373a5122cb6d4af76cd1ce01b11a5862d9625139e2f49d8f2c4b5b0a449ba1f",
+        "basisserve/core/c1_shadowkv.py": "b350701092c51f1c49a0742bc5ee51eaff6889526d02756daf9107fad6ac787d",
+        "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+        "basisserve/core/c1_conditional_page_attention.py": "72ebb2f3f4d1a9b47518ef4324e1ea3e6dbf158b023c5b39573a830e8df39911",
+        "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756"
+      },
+      "budget": {
+        "ours": 2048,
+        "recent_inside_ours": 64,
+        "pinned_sink": 0,
+        "page_size": 32,
+        "loki_topk_per_head": 2048,
+        "lrqk_topk_per_head": 2048,
+        "lrqk_extra_recent": 64,
+        "shadowkv_routed": 2048,
+        "shadowkv_outlier_chunks": 48,
+        "shadowkv_chunk": 8,
+        "shadowkv_short_prompt": "full support when prompt fits routed/outlier/local capacity"
+      },
+      "prefill": "full causal attention with allocated V192; Wo uncompressed",
+      "generation": {
+        "mode": "official two-stage CoT; answer stage omits document",
+        "sampling": "greedy",
+        "native_thinking": false,
+        "reasoning_cap": 1024,
+        "answer_cap": 1024,
+        "official_answer_cap": 128
+      },
+      "eos_token_ids": [
+        248044
+      ]
+    },
+    "exact_sparse": {
+      "attention_backend": "split indexed for page routers and Loki; original full/ShadowKV",
+      "arm": "exact_sparse",
+      "sources": {},
+      "model_identity": {
+        "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+        "model_files_sha256": {
+          "model.safetensors-00001-of-00004.safetensors": "db6f444b43d318c92f360a13a25561a6a65b10c0631b8ed305a426dbaa6c380e",
+          "model.safetensors-00002-of-00004.safetensors": "31c7d7e2dd5d207840b31cc59083c8f4c4718959149e0358c0364052bb9a0330",
+          "model.safetensors-00003-of-00004.safetensors": "7ec36ba3a4176a44c3c0876ad80c56a2f70c84bf008d82e9501df642f17dadec",
+          "model.safetensors-00004-of-00004.safetensors": "b62b0c4cd7e44edee103ee8f4fe225f246d5e768e07bfd5f25b63a8aa1fdd0c6"
+        }
+      },
+      "v_bank_sha256": "74850e973b72d1d8ab084908a318e8b975c57640e31bef486d772ff8c0855f0e",
+      "data_sha256": "d4257a829c2c31bed57592d8ca51375b87d9e60047bc6143d866d42651530929",
+      "code_sha256": {
+        "evaluation/eval_qwen35_longbench_v2_split.py": "aec7be453b904b91542bb7a06f9af7f4e9f1d0ad645ef7c85edfe74ad5dc7323",
+        "evaluation/eval_qwen35_k_routing_ruler.py": "b5c526c5750623469705f134fb394696c880b6ff33986458ded2e2ad421e5eb2",
+        "evaluation/prepare_qwen35_longbench_v2.py": "7f3a43e9dadca51ef8c097f119b390288be14ffad49b6c6d47da45e207abec2d",
+        "evaluation/qwen35_split_routing.py": "da5cfa4c94f8eec59d8d66047a4809c97c9cd3fbdbf169a7fa36de0a81be1cfb",
+        "basisserve/kernels/split_indexed_attention.py": "68e153f0107bb9f5f6cf015ebbb36e6be24b6adcbcd5f6987e1a8bccfa70334a",
+        "basisserve/core/qwen35_k_routing_runtime.py": "f1a455ed89128230305147c4761701449a64495ebb2073b31c2f24c292a07f1c",
+        "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+        "basisserve/core/c1_lrqk.py": "1373a5122cb6d4af76cd1ce01b11a5862d9625139e2f49d8f2c4b5b0a449ba1f",
+        "basisserve/core/c1_shadowkv.py": "b350701092c51f1c49a0742bc5ee51eaff6889526d02756daf9107fad6ac787d",
+        "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+        "basisserve/core/c1_conditional_page_attention.py": "72ebb2f3f4d1a9b47518ef4324e1ea3e6dbf158b023c5b39573a830e8df39911",
+        "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756"
+      },
+      "budget": {
+        "ours": 2048,
+        "recent_inside_ours": 64,
+        "pinned_sink": 0,
+        "page_size": 32,
+        "loki_topk_per_head": 2048,
+        "lrqk_topk_per_head": 2048,
+        "lrqk_extra_recent": 64,
+        "shadowkv_routed": 2048,
+        "shadowkv_outlier_chunks": 48,
+        "shadowkv_chunk": 8,
+        "shadowkv_short_prompt": "full support when prompt fits routed/outlier/local capacity"
+      },
+      "prefill": "full causal attention with allocated V192; Wo uncompressed",
+      "generation": {
+        "mode": "official two-stage CoT; answer stage omits document",
+        "sampling": "greedy",
+        "native_thinking": false,
+        "reasoning_cap": 1024,
+        "answer_cap": 1024,
+        "official_answer_cap": 128
+      },
+      "eos_token_ids": [
+        248044
+      ]
+    },
+    "b16r16": {
+      "attention_backend": "split indexed for page routers and Loki; original full/ShadowKV",
+      "arm": "b16r16",
+      "sources": {
+        "l03.pt": "ee7b70f371e7d3f8985f11c3b4e4f9d9295075e04e8ead6ee175ecb39ab14fb1",
+        "l07.pt": "1a0f0bd1ee7a8d70e7d83c1041427a4dc26651a4e44140623b7ca8819d5be6dc",
+        "l11.pt": "ec08fddcbdaaaa1f94c8a0bf7279cd794a6619bc00232a0d6230fea264ae9d20",
+        "l15.pt": "afbfe931ea46adc720d615600fbea10c90d95dfb5ccbe5eda14cfe4620b1c0aa",
+        "l19.pt": "86e48dcd48706fca53a20b4ca9d304e4c9dfce98b0716c4e4e8ee4bf89389c9d",
+        "l23.pt": "bb896f2dc648582113976687726143b56982c2e27822ad99f4065dc7aca23364",
+        "l27.pt": "6d98eceffd68efc688d82362143df56373af1755acb50af0100aaa708703d334",
+        "l31.pt": "3c5bf65eebc0df7f7ddf05bcda7d3485c53f90a615f098beab1a3e9c80dfeb71"
+      },
+      "model_identity": {
+        "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+        "model_files_sha256": {
+          "model.safetensors-00001-of-00004.safetensors": "db6f444b43d318c92f360a13a25561a6a65b10c0631b8ed305a426dbaa6c380e",
+          "model.safetensors-00002-of-00004.safetensors": "31c7d7e2dd5d207840b31cc59083c8f4c4718959149e0358c0364052bb9a0330",
+          "model.safetensors-00003-of-00004.safetensors": "7ec36ba3a4176a44c3c0876ad80c56a2f70c84bf008d82e9501df642f17dadec",
+          "model.safetensors-00004-of-00004.safetensors": "b62b0c4cd7e44edee103ee8f4fe225f246d5e768e07bfd5f25b63a8aa1fdd0c6"
+        }
+      },
+      "v_bank_sha256": "74850e973b72d1d8ab084908a318e8b975c57640e31bef486d772ff8c0855f0e",
+      "data_sha256": "d4257a829c2c31bed57592d8ca51375b87d9e60047bc6143d866d42651530929",
+      "code_sha256": {
+        "evaluation/eval_qwen35_longbench_v2_split.py": "aec7be453b904b91542bb7a06f9af7f4e9f1d0ad645ef7c85edfe74ad5dc7323",
+        "evaluation/eval_qwen35_k_routing_ruler.py": "b5c526c5750623469705f134fb394696c880b6ff33986458ded2e2ad421e5eb2",
+        "evaluation/prepare_qwen35_longbench_v2.py": "7f3a43e9dadca51ef8c097f119b390288be14ffad49b6c6d47da45e207abec2d",
+        "evaluation/qwen35_split_routing.py": "da5cfa4c94f8eec59d8d66047a4809c97c9cd3fbdbf169a7fa36de0a81be1cfb",
+        "basisserve/kernels/split_indexed_attention.py": "68e153f0107bb9f5f6cf015ebbb36e6be24b6adcbcd5f6987e1a8bccfa70334a",
+        "basisserve/core/qwen35_k_routing_runtime.py": "f1a455ed89128230305147c4761701449a64495ebb2073b31c2f24c292a07f1c",
+        "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+        "basisserve/core/c1_lrqk.py": "1373a5122cb6d4af76cd1ce01b11a5862d9625139e2f49d8f2c4b5b0a449ba1f",
+        "basisserve/core/c1_shadowkv.py": "b350701092c51f1c49a0742bc5ee51eaff6889526d02756daf9107fad6ac787d",
+        "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+        "basisserve/core/c1_conditional_page_attention.py": "72ebb2f3f4d1a9b47518ef4324e1ea3e6dbf158b023c5b39573a830e8df39911",
+        "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756"
+      },
+      "budget": {
+        "ours": 2048,
+        "recent_inside_ours": 64,
+        "pinned_sink": 0,
+        "page_size": 32,
+        "loki_topk_per_head": 2048,
+        "lrqk_topk_per_head": 2048,
+        "lrqk_extra_recent": 64,
+        "shadowkv_routed": 2048,
+        "shadowkv_outlier_chunks": 48,
+        "shadowkv_chunk": 8,
+        "shadowkv_short_prompt": "full support when prompt fits routed/outlier/local capacity"
+      },
+      "prefill": "full causal attention with allocated V192; Wo uncompressed",
+      "generation": {
+        "mode": "official two-stage CoT; answer stage omits document",
+        "sampling": "greedy",
+        "native_thinking": false,
+        "reasoning_cap": 1024,
+        "answer_cap": 1024,
+        "official_answer_cap": 128
+      },
+      "eos_token_ids": [
+        248044
+      ]
+    },
+    "b32r32": {
+      "attention_backend": "split indexed for page routers and Loki; original full/ShadowKV",
+      "arm": "b32r32",
+      "sources": {
+        "l03.pt": "480c6446dd7c25e37b7237372ca7480aeff9eed2b8330483c515dbd8d477ac98",
+        "l07.pt": "2c19458404ca79d0391f52e667c10ee6619f158172eeeab0d3e9e15100aec605",
+        "l11.pt": "560134e2c4cf87b336dc4b678d0e05810a7b7265ed89e5b9caa45d16b6ab2021",
+        "l15.pt": "f2bfa189aede33b72d438ac98b93b691b99038d16531f26de74987250b4df0e6",
+        "l19.pt": "68fc182fada8ce44d25ad9f61cd455e5ce436c57e968adfa6889d1db22170b21",
+        "l23.pt": "f207b0f2945ebdc0b5d0e868f95fefddcb49f73892c34d061d35905514b2a8d5",
+        "l27.pt": "da74cbb8f5cca90a33dd7c193ed2bf4b729285aa986d34e4aa06532c7ff610c1",
+        "l31.pt": "481a2fe0b253b2f23fa2cb9dab236d2addc6dc6112047e4372e41d7ffea72942"
+      },
+      "model_identity": {
+        "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+        "model_files_sha256": {
+          "model.safetensors-00001-of-00004.safetensors": "db6f444b43d318c92f360a13a25561a6a65b10c0631b8ed305a426dbaa6c380e",
+          "model.safetensors-00002-of-00004.safetensors": "31c7d7e2dd5d207840b31cc59083c8f4c4718959149e0358c0364052bb9a0330",
+          "model.safetensors-00003-of-00004.safetensors": "7ec36ba3a4176a44c3c0876ad80c56a2f70c84bf008d82e9501df642f17dadec",
+          "model.safetensors-00004-of-00004.safetensors": "b62b0c4cd7e44edee103ee8f4fe225f246d5e768e07bfd5f25b63a8aa1fdd0c6"
+        }
+      },
+      "v_bank_sha256": "74850e973b72d1d8ab084908a318e8b975c57640e31bef486d772ff8c0855f0e",
+      "data_sha256": "d4257a829c2c31bed57592d8ca51375b87d9e60047bc6143d866d42651530929",
+      "code_sha256": {
+        "evaluation/eval_qwen35_longbench_v2_split.py": "aec7be453b904b91542bb7a06f9af7f4e9f1d0ad645ef7c85edfe74ad5dc7323",
+        "evaluation/eval_qwen35_k_routing_ruler.py": "b5c526c5750623469705f134fb394696c880b6ff33986458ded2e2ad421e5eb2",
+        "evaluation/prepare_qwen35_longbench_v2.py": "7f3a43e9dadca51ef8c097f119b390288be14ffad49b6c6d47da45e207abec2d",
+        "evaluation/qwen35_split_routing.py": "da5cfa4c94f8eec59d8d66047a4809c97c9cd3fbdbf169a7fa36de0a81be1cfb",
+        "basisserve/kernels/split_indexed_attention.py": "68e153f0107bb9f5f6cf015ebbb36e6be24b6adcbcd5f6987e1a8bccfa70334a",
+        "basisserve/core/qwen35_k_routing_runtime.py": "f1a455ed89128230305147c4761701449a64495ebb2073b31c2f24c292a07f1c",
+        "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+        "basisserve/core/c1_lrqk.py": "1373a5122cb6d4af76cd1ce01b11a5862d9625139e2f49d8f2c4b5b0a449ba1f",
+        "basisserve/core/c1_shadowkv.py": "b350701092c51f1c49a0742bc5ee51eaff6889526d02756daf9107fad6ac787d",
+        "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+        "basisserve/core/c1_conditional_page_attention.py": "72ebb2f3f4d1a9b47518ef4324e1ea3e6dbf158b023c5b39573a830e8df39911",
+        "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756"
+      },
+      "budget": {
+        "ours": 2048,
+        "recent_inside_ours": 64,
+        "pinned_sink": 0,
+        "page_size": 32,
+        "loki_topk_per_head": 2048,
+        "lrqk_topk_per_head": 2048,
+        "lrqk_extra_recent": 64,
+        "shadowkv_routed": 2048,
+        "shadowkv_outlier_chunks": 48,
+        "shadowkv_chunk": 8,
+        "shadowkv_short_prompt": "full support when prompt fits routed/outlier/local capacity"
+      },
+      "prefill": "full causal attention with allocated V192; Wo uncompressed",
+      "generation": {
+        "mode": "official two-stage CoT; answer stage omits document",
+        "sampling": "greedy",
+        "native_thinking": false,
+        "reasoning_cap": 1024,
+        "answer_cap": 1024,
+        "official_answer_cap": 128
+      },
+      "eos_token_ids": [
+        248044
+      ]
+    },
+    "loki": {
+      "attention_backend": "split indexed for page routers and Loki; original full/ShadowKV",
+      "arm": "loki",
+      "sources": {
+        "l03.pt": "af45a43544b13a75bf2170a9e9956b61e4f5e5710e2af0669f6e2e45da7a7b2c",
+        "l07.pt": "caa734b3ef739e1d358510b3964e6e1eaff1f4f6402d06885321585f4f9f225a",
+        "l11.pt": "4595cdd6536fb5c9ac88038b77f28962547e0902d162277cc1ae5f04c4400cf0",
+        "l15.pt": "e169a689859a28cc0f1a783ae8ef236c404b8c293197d2d7402ed0517b27d0e1",
+        "l19.pt": "4871d8b73a6c0d552012139aeb5f66b993cb1f9c2846e75930178e6d09715864",
+        "l23.pt": "d8ffa8858cdca0f03b78131287224a2175c4d2e6b601524372f07ef7eb5e39db",
+        "l27.pt": "ed6be6c68400ef27916ef85b2df9df39f5acc5505786c10bd43a041f9a1416c1",
+        "l31.pt": "c366ba0730d4266c7ee13cc4e8e57f90ca9b1fb7b93ef6c5a83a6521a49cdc7c"
+      },
+      "model_identity": {
+        "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+        "model_files_sha256": {
+          "model.safetensors-00001-of-00004.safetensors": "db6f444b43d318c92f360a13a25561a6a65b10c0631b8ed305a426dbaa6c380e",
+          "model.safetensors-00002-of-00004.safetensors": "31c7d7e2dd5d207840b31cc59083c8f4c4718959149e0358c0364052bb9a0330",
+          "model.safetensors-00003-of-00004.safetensors": "7ec36ba3a4176a44c3c0876ad80c56a2f70c84bf008d82e9501df642f17dadec",
+          "model.safetensors-00004-of-00004.safetensors": "b62b0c4cd7e44edee103ee8f4fe225f246d5e768e07bfd5f25b63a8aa1fdd0c6"
+        }
+      },
+      "v_bank_sha256": "74850e973b72d1d8ab084908a318e8b975c57640e31bef486d772ff8c0855f0e",
+      "data_sha256": "d4257a829c2c31bed57592d8ca51375b87d9e60047bc6143d866d42651530929",
+      "code_sha256": {
+        "evaluation/eval_qwen35_longbench_v2_split.py": "aec7be453b904b91542bb7a06f9af7f4e9f1d0ad645ef7c85edfe74ad5dc7323",
+        "evaluation/eval_qwen35_k_routing_ruler.py": "b5c526c5750623469705f134fb394696c880b6ff33986458ded2e2ad421e5eb2",
+        "evaluation/prepare_qwen35_longbench_v2.py": "7f3a43e9dadca51ef8c097f119b390288be14ffad49b6c6d47da45e207abec2d",
+        "evaluation/qwen35_split_routing.py": "da5cfa4c94f8eec59d8d66047a4809c97c9cd3fbdbf169a7fa36de0a81be1cfb",
+        "basisserve/kernels/split_indexed_attention.py": "68e153f0107bb9f5f6cf015ebbb36e6be24b6adcbcd5f6987e1a8bccfa70334a",
+        "basisserve/core/qwen35_k_routing_runtime.py": "f1a455ed89128230305147c4761701449a64495ebb2073b31c2f24c292a07f1c",
+        "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+        "basisserve/core/c1_lrqk.py": "1373a5122cb6d4af76cd1ce01b11a5862d9625139e2f49d8f2c4b5b0a449ba1f",
+        "basisserve/core/c1_shadowkv.py": "b350701092c51f1c49a0742bc5ee51eaff6889526d02756daf9107fad6ac787d",
+        "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+        "basisserve/core/c1_conditional_page_attention.py": "72ebb2f3f4d1a9b47518ef4324e1ea3e6dbf158b023c5b39573a830e8df39911",
+        "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756"
+      },
+      "budget": {
+        "ours": 2048,
+        "recent_inside_ours": 64,
+        "pinned_sink": 0,
+        "page_size": 32,
+        "loki_topk_per_head": 2048,
+        "lrqk_topk_per_head": 2048,
+        "lrqk_extra_recent": 64,
+        "shadowkv_routed": 2048,
+        "shadowkv_outlier_chunks": 48,
+        "shadowkv_chunk": 8,
+        "shadowkv_short_prompt": "full support when prompt fits routed/outlier/local capacity"
+      },
+      "prefill": "full causal attention with allocated V192; Wo uncompressed",
+      "generation": {
+        "mode": "official two-stage CoT; answer stage omits document",
+        "sampling": "greedy",
+        "native_thinking": false,
+        "reasoning_cap": 1024,
+        "answer_cap": 1024,
+        "official_answer_cap": 128
+      },
+      "eos_token_ids": [
+        248044
+      ]
+    },
+    "shadowkv": {
+      "attention_backend": "split indexed for page routers and Loki; original full/ShadowKV",
+      "arm": "shadowkv",
+      "sources": {},
+      "model_identity": {
+        "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+        "model_files_sha256": {
+          "model.safetensors-00001-of-00004.safetensors": "db6f444b43d318c92f360a13a25561a6a65b10c0631b8ed305a426dbaa6c380e",
+          "model.safetensors-00002-of-00004.safetensors": "31c7d7e2dd5d207840b31cc59083c8f4c4718959149e0358c0364052bb9a0330",
+          "model.safetensors-00003-of-00004.safetensors": "7ec36ba3a4176a44c3c0876ad80c56a2f70c84bf008d82e9501df642f17dadec",
+          "model.safetensors-00004-of-00004.safetensors": "b62b0c4cd7e44edee103ee8f4fe225f246d5e768e07bfd5f25b63a8aa1fdd0c6"
+        }
+      },
+      "v_bank_sha256": "74850e973b72d1d8ab084908a318e8b975c57640e31bef486d772ff8c0855f0e",
+      "data_sha256": "d4257a829c2c31bed57592d8ca51375b87d9e60047bc6143d866d42651530929",
+      "code_sha256": {
+        "evaluation/eval_qwen35_longbench_v2_split.py": "aec7be453b904b91542bb7a06f9af7f4e9f1d0ad645ef7c85edfe74ad5dc7323",
+        "evaluation/eval_qwen35_k_routing_ruler.py": "b5c526c5750623469705f134fb394696c880b6ff33986458ded2e2ad421e5eb2",
+        "evaluation/prepare_qwen35_longbench_v2.py": "7f3a43e9dadca51ef8c097f119b390288be14ffad49b6c6d47da45e207abec2d",
+        "evaluation/qwen35_split_routing.py": "da5cfa4c94f8eec59d8d66047a4809c97c9cd3fbdbf169a7fa36de0a81be1cfb",
+        "basisserve/kernels/split_indexed_attention.py": "68e153f0107bb9f5f6cf015ebbb36e6be24b6adcbcd5f6987e1a8bccfa70334a",
+        "basisserve/core/qwen35_k_routing_runtime.py": "f1a455ed89128230305147c4761701449a64495ebb2073b31c2f24c292a07f1c",
+        "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+        "basisserve/core/c1_lrqk.py": "1373a5122cb6d4af76cd1ce01b11a5862d9625139e2f49d8f2c4b5b0a449ba1f",
+        "basisserve/core/c1_shadowkv.py": "b350701092c51f1c49a0742bc5ee51eaff6889526d02756daf9107fad6ac787d",
+        "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+        "basisserve/core/c1_conditional_page_attention.py": "72ebb2f3f4d1a9b47518ef4324e1ea3e6dbf158b023c5b39573a830e8df39911",
+        "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756"
+      },
+      "budget": {
+        "ours": 2048,
+        "recent_inside_ours": 64,
+        "pinned_sink": 0,
+        "page_size": 32,
+        "loki_topk_per_head": 2048,
+        "lrqk_topk_per_head": 2048,
+        "lrqk_extra_recent": 64,
+        "shadowkv_routed": 2048,
+        "shadowkv_outlier_chunks": 48,
+        "shadowkv_chunk": 8,
+        "shadowkv_short_prompt": "full support when prompt fits routed/outlier/local capacity"
+      },
+      "prefill": "full causal attention with allocated V192; Wo uncompressed",
+      "generation": {
+        "mode": "official two-stage CoT; answer stage omits document",
+        "sampling": "greedy",
+        "native_thinking": false,
+        "reasoning_cap": 1024,
+        "answer_cap": 1024,
+        "official_answer_cap": 128
+      },
+      "eos_token_ids": [
+        248044
+      ]
+    },
+    "base16": {
+      "attention_backend": "Base16 only, no residual state; split indexed attention",
+      "arm": "base16",
+      "sources": {
+        "l03.pt": "ee7b70f371e7d3f8985f11c3b4e4f9d9295075e04e8ead6ee175ecb39ab14fb1",
+        "l07.pt": "1a0f0bd1ee7a8d70e7d83c1041427a4dc26651a4e44140623b7ca8819d5be6dc",
+        "l11.pt": "ec08fddcbdaaaa1f94c8a0bf7279cd794a6619bc00232a0d6230fea264ae9d20",
+        "l15.pt": "afbfe931ea46adc720d615600fbea10c90d95dfb5ccbe5eda14cfe4620b1c0aa",
+        "l19.pt": "86e48dcd48706fca53a20b4ca9d304e4c9dfce98b0716c4e4e8ee4bf89389c9d",
+        "l23.pt": "bb896f2dc648582113976687726143b56982c2e27822ad99f4065dc7aca23364",
+        "l27.pt": "6d98eceffd68efc688d82362143df56373af1755acb50af0100aaa708703d334",
+        "l31.pt": "3c5bf65eebc0df7f7ddf05bcda7d3485c53f90a615f098beab1a3e9c80dfeb71"
+      },
+      "model_identity": {
+        "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+        "model_files_sha256": {
+          "model.safetensors-00001-of-00004.safetensors": "db6f444b43d318c92f360a13a25561a6a65b10c0631b8ed305a426dbaa6c380e",
+          "model.safetensors-00002-of-00004.safetensors": "31c7d7e2dd5d207840b31cc59083c8f4c4718959149e0358c0364052bb9a0330",
+          "model.safetensors-00003-of-00004.safetensors": "7ec36ba3a4176a44c3c0876ad80c56a2f70c84bf008d82e9501df642f17dadec",
+          "model.safetensors-00004-of-00004.safetensors": "b62b0c4cd7e44edee103ee8f4fe225f246d5e768e07bfd5f25b63a8aa1fdd0c6"
+        }
+      },
+      "v_bank_sha256": "74850e973b72d1d8ab084908a318e8b975c57640e31bef486d772ff8c0855f0e",
+      "data_sha256": "d4257a829c2c31bed57592d8ca51375b87d9e60047bc6143d866d42651530929",
+      "code_sha256": {
+        "evaluation/eval_qwen35_longbench_v2_base.py": "a157ae541382946edd71b1219ca0c31f45811d92918171de889e3133d19f92db",
+        "evaluation/eval_qwen35_k_routing_ruler.py": "b5c526c5750623469705f134fb394696c880b6ff33986458ded2e2ad421e5eb2",
+        "evaluation/prepare_qwen35_longbench_v2.py": "7f3a43e9dadca51ef8c097f119b390288be14ffad49b6c6d47da45e207abec2d",
+        "evaluation/qwen35_split_routing.py": "da5cfa4c94f8eec59d8d66047a4809c97c9cd3fbdbf169a7fa36de0a81be1cfb",
+        "evaluation/qwen35_base_routing.py": "3f388b5c57bce15afc8fd0f8a3eb47d65ac2bae6067bea7059ae933267671d12",
+        "basisserve/kernels/split_indexed_attention.py": "68e153f0107bb9f5f6cf015ebbb36e6be24b6adcbcd5f6987e1a8bccfa70334a",
+        "basisserve/core/qwen35_k_routing_runtime.py": "f1a455ed89128230305147c4761701449a64495ebb2073b31c2f24c292a07f1c",
+        "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+        "basisserve/core/c1_lrqk.py": "1373a5122cb6d4af76cd1ce01b11a5862d9625139e2f49d8f2c4b5b0a449ba1f",
+        "basisserve/core/c1_shadowkv.py": "b350701092c51f1c49a0742bc5ee51eaff6889526d02756daf9107fad6ac787d",
+        "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+        "basisserve/core/c1_conditional_page_attention.py": "72ebb2f3f4d1a9b47518ef4324e1ea3e6dbf158b023c5b39573a830e8df39911",
+        "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756"
+      },
+      "budget": {
+        "ours": 2048,
+        "recent_inside_ours": 64,
+        "pinned_sink": 0,
+        "page_size": 32,
+        "loki_topk_per_head": 2048,
+        "lrqk_topk_per_head": 2048,
+        "lrqk_extra_recent": 64,
+        "shadowkv_routed": 2048,
+        "shadowkv_outlier_chunks": 48,
+        "shadowkv_chunk": 8,
+        "shadowkv_short_prompt": "full support when prompt fits routed/outlier/local capacity"
+      },
+      "prefill": "full causal attention with allocated V192; Wo uncompressed",
+      "generation": {
+        "mode": "official two-stage CoT; answer stage omits document",
+        "sampling": "greedy",
+        "native_thinking": false,
+        "reasoning_cap": 1024,
+        "answer_cap": 1024,
+        "official_answer_cap": 128
+      },
+      "eos_token_ids": [
+        248044
+      ]
+    }
+  },
+  "first_logits_parity": "bitwise for paired long-context reasoning stage; answer-stage inputs depend on reasoning",
+  "artifacts": {
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/000.json": "b5ded87d81aa79bac4a2d368992a220308f74a3cb24720bceb1073a7f5baa8c7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/001.json": "21ddda55a83dd7fbe4b118e787eeeb57b1fb14d5a992192547d55aed9925808b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/002.json": "fae7e84d71ec173f7b6b73a44bf12dad04e162697ac5caf1876a560589478f97",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/003.json": "69440ffa383dd7750142184cf102d7c668635eba33de906b20a92fd9f40c865c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/004.json": "ffde27b6210e042a201ac177716b6c0d79ac5802e56b37766fd8c6f9bd46c2b3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/005.json": "6bcb7b87993ed80caf26d0979f8d84ad80fd728c91d9158802d2f85d3c60476b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/006.json": "e3216ad639e1e554ea80255cf2f7117fc38ad18fe8ba3e6ae9f99f60d9644f05",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/007.json": "ec4c5481533865780574a81307d5f412afc46e30eb836c4a868bc5c907e6b503",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/008.json": "ae89d93c6b13f5bd03fa16b1203dbd569f611b1984c3485bf58e2067ddd90fb2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/009.json": "2c900cf8fae9dfeba620fe8d8d64c99fda10527756b8b5f5e758b6eae313c6a3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/010.json": "0ec75ccf21f36e59fa7c6c32bcb1b833557bcbe42ebadf2ea71e1e48adc181cf",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/011.json": "654b2f95e6b50123a8592e139fc55fdfd4f559f8aa981ed148a92b30ba226d70",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/012.json": "469eb68083411c721f7df11db99967c0e7e95953ec6aa00533be26e5bc82f70d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/013.json": "301a7ff8e92cf34f42ccb8af2fad88ad8b2907cf9b7212529c05487aad0ebeef",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/014.json": "a58ffc89809b6593be5b744ef99eb878b4aa4929c364d3f17db715619b3f000d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/015.json": "cfec766d3fd8d06e17d4da27ed1522376c40a52d736ce731e8d8d2eb2a6877fa",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/016.json": "ae67137611f9ecf7b8130dc86afdbff034387009e5f23f04384503b86eb71caa",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/017.json": "62f8ccd206bbc2fb7e87e085c6a8f9a147d3dd6ac6e26b39e6ccda5b390d65bd",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/018.json": "34ccc0bdcbec453e6eaed65d818069ad5f0bdd048c45bec1bd9ec2527a12c919",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/019.json": "69fb6bb1a23b8d57d71526e5e8681f9f489571efbe23bb485173c21860deef6b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/020.json": "1ec63693d6ec03700c1832204aa867c2977d008ae935b652886b36a4938646bc",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/021.json": "ac9cfde16c8878b5445cf46b8d3a0b579bf94eb9ab9645402613465a21c31242",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/022.json": "ed436ddb30a8ba204d0a89b765d820689659d0d0d599bc51241e0be6addd74e0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/023.json": "f104d0712cec4d26621e5c70dce7f1fb45ed4892d637eb0a8027a983368719d7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/024.json": "8fdc7316796176a4b60e46ba66e5285cfe673bd4e275ca0463e2d3b5133e433e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/025.json": "b5126d08d1190d93202ab44fc588f5634f72d25cd4236d47e4a931a82779742c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/026.json": "15b3703568eda9c9de9dc2d5f835ab20a8e86316032278e35516dfbefaac687a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/027.json": "c233029c57551289381d7c2eb173ea12419c3237d5e4b20d09d74944cac088d0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/028.json": "0198102974ae9325605ab9d1f9c72c5bd63d4d11943948cadd0aca89f7978955",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/029.json": "2638d7288022587f1f17268042d3177689da5fd4827042130049da7e197e47c5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/030.json": "1ff830fe779aec139ee73abbb0d909ccff489cf653e0490b7c706c2bbf9d8156",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/031.json": "77f55105d53fd03ac34c50602259687e5acb20ce740ac31463538deeaaf97955",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/032.json": "11a7733422099eb84c161005d7df218126e1a33c71a2a29387b3de42a8aba4f1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/033.json": "e88c6b69a0dd266443aa7960b37a71e5b69ece8e88a703ed104a065955575dbb",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/034.json": "6d31631f9342bd49f219cb12752d8e563a3cc601fb289011387a4a8b66990ae0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/035.json": "3331630adc0d35b2c265bb5255c9339fdff7311e1b87c0e33abe9a2cddaa4bc2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/036.json": "8f0501f97c945b3d69d2e120be208660ae0d560439c3f503ff76eae67ee84756",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/037.json": "de2420b5fa7e4c9de5c08dca0bb112915bc65c56c6fe960741fd6bbdc021de5b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/038.json": "18fa64caf22f77ad9a1e4210147b6a531222390fa2855000294baa76e3a05758",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/039.json": "db606f87911f475b3ea5770a0df39881c82cc65afd0be4ab93245bab6c28882b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/040.json": "6896ae6c7993e0595ffe63762ef80fea0c21c56a1c871d4cfe2e13056715fd76",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/041.json": "54e93c49ff278e2a6e675c03e46e8a5cc0209bb978659437c95e453d3b6e86f2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/042.json": "a661336988d6082a882467f06a5c42bf749caf92df0f5a3dda010ad33f5abfc6",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/043.json": "8175808956f77a87f823df85036393f8aba5f9ed221fce83b7cabd606efca3e7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/044.json": "aacb6d836d2d86f7b584fde34ebdec3c3f0b4c29a7b4cccb3854a6dd568ee565",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/045.json": "82b7c2834e888dc899f0e416c0281c2bcc1faa397d5feeb316f229149f7fda41",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/046.json": "3fa20147e3afe2e361158be04dfaf83b76de758bf59fe6cc0ca54a2d825e46df",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/047.json": "4a610479f11d5dd794c31ee533223167e703016e9562d797f363ade3b409d6df",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/048.json": "d6aeda8c261e417556d7a24636b8d959501584e98bca2a78d8d506f2fe257821",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/049.json": "4c297870251051c2ac9191ccf957a434b1f8b8615668398cb017ee16475705f4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/050.json": "194cb77648d71288dd487807a2587b8fd7ee2f42bb80f591b851d2a7a894e2f3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/051.json": "bd01c68637c6ce49c758f9f989b5cefe75e3bf901fbc0f184e378d4f032cb6c8",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/052.json": "0c8c7e73ee8943b3ae4390d5cb21240d23f890e6d74935040624c6911870fc3c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/053.json": "c9fa11990a543c061205df248b3701f07282f721c2fe186021ace3e372b56447",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/054.json": "f6dc180c46dcf04efd22508cff009d2e33b7333352dcecb48eab4846b9bc51fc",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/055.json": "e179955086c8483535de0257837cf4ac9c18f34771e005fa9df57effc777c26a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/056.json": "0e39736d787e92de4cba1d731f513dc08407724ad04e0bd2db08a87186deb124",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/057.json": "872e24d12b194cd6c6ee1d24eca93bee125c6c22eb0e1eda53d7008945592d53",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/058.json": "166d865e986183c128f955aec50ddee26224c765d2121d30da019b57ac670081",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/059.json": "4b7931537bb180487a26c56f8a35dca8aa991f96e5dc8fc9d3af85fbc97794ea",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/060.json": "b871789577b2f63f51523ac7a001b220611226d3cd70933ea6d018c7506f7a94",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/061.json": "5a387c783852b81ed902a126f546143527d0d425ef69fcd253dd03ba1539d9e1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/062.json": "5a3740084b76ce563430f8c02810d0602f71b1fff0f95b3215bc64ac156f3275",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/063.json": "891c75dffe8d87464366777555127a75b363b129b5ef2e2ba2f6438584b63255",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/064.json": "e04bb008782cb8aeb8e93d63a3fd4a747992f98c8afbec714c0f73b3cd49044d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/065.json": "ae859429c9b3a470ee49b5ddecf3cdb30de2e288a164606337d3a1dce1601637",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/066.json": "403ee6a46f477ff18a9ec3db22fe178fa658f113c5c7075d8223f5f7e4f55412",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/067.json": "272c33e2271e64515634ebdd105e7974444d3d3a3082b7716c32540fc3fdf34b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/068.json": "9b06e0f89daf3d3aa8374c6f47833d6796403cab2f74c5bd1ed9a34996ef6931",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/full/069.json": "97f89153518543cae2753280d9cf7c14c8dbe284b87d25b7265a706b35dc417c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/000.json": "8e60e698678dea3afbcee24a38f64ae1b0c1e5cd4d8aff52d64866c71129206b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/001.json": "6b7b8b96678e9ca98272d765b3e8334d2bce9835a7eda46293742a646a94cf88",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/002.json": "5cd33f2cf20a618698ee9993842a330720bb570f686ede07701726d200b12492",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/003.json": "096fb62147b77ea9290a92c51a409ccb1652b94119b07fd8bf91a69dc86e6f3e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/004.json": "e3a122accf3ba98ffe9519d44de6cc427bf0a703059a11d75d39bf900dcefe6a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/005.json": "f7b3b32fa0936e728e571203951a34a8aa972a91ac338755d9a7f7d1f5e3d3ce",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/006.json": "56de3323a1436ad3827668d22813b5826ad78fe3f17f418b7d2607369e516120",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/007.json": "fe814aed0a124200a971505f383ad405825ac995e2448c8607581014e4a2e0d4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/008.json": "0cb3418bf6ca8f6ae4de24a41289172b0e2ff33cc8eb0158d34cadda4192247c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/009.json": "d291a4356b1b3d8fcae05d0b1abc9d37bb22ab06ae5e4ec9863ae385e6c3d27a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/010.json": "462371abe69feb8c08e9f2399bcef18f82f08f3d274b5c0efe106f7a32057eda",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/011.json": "5ae3d36f6d739801ff595d6f214cb18efb1e72f887dd2df806b8918a0431548b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/012.json": "4d47607c849c30cb7cf2ac8358532f70e810a457a4a13cb4ca0df5ec03e36350",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/013.json": "cb5d27c915b6d080434dc55e20855698cadb08c9e700484723957bd1c279ed23",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/014.json": "ed992fa263a95950d17b937a2a54d8f70f958396b0200a7fd25c079ea0be9ba5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/015.json": "6eb810433ab76b21f419fbb0397396cead377cb75f65b203a94592cd917729d5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/016.json": "a419ac66aa6c79b69d41776840d43cb39b91cf4896b4797c8328a0cca4395eb4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/017.json": "5e61a7604cbd13c2a51058c654e002581c1acd4b93085c4222629ab983f1eaf4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/018.json": "8ed40ce49c8f2a3e9c43219eb385c729a33baceefb9b0b76d5e7272883d6d185",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/019.json": "150e889687317dc1413973c563c5c9987151615e3c77b71f4099e3f2e35f7778",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/020.json": "7d044b6718cc4cdd1f71bcc0d4f35825f0046b6b92c7b1363b70ddefbafb0e79",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/021.json": "3e3642d6f3cd96a37fa8a0c6979fc650a1962e40688b9582941652b8b34fea2c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/022.json": "676c8c70bf17744270d21bca4c2c3820b13db7d6218584da9f1621eafe69cd81",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/023.json": "aba45f42fa6bb30f27c32a4a173209f1b0ca8686e7d2d53d52768e2837f3e2c7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/024.json": "4e2c53ec094ac20f4d22ea8f974722c462b2f02959125a72514beea19206b475",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/025.json": "9256f01f01159929b1c60551c1332c21d9d87d7bdf1a88a65032a65042b2933b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/026.json": "0e21328727cb93943402534be7600500cdc285d332885c7c7f43ea599791b889",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/027.json": "8b4588c4bcef04803ab45836ab0df39987ec8dd57c52a979f491d7fd665bb84a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/028.json": "d41c70b98841ae32edc64e443f5a597f229e2d013abafaadf80d256dabb0ebce",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/029.json": "f674dcb0122eaee2e8e0cf6f4aa48092c665d4347b63cb6210df89eb3086cf19",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/030.json": "a54742c00c48ee8348a0c05737b8d76aef36c7c3224a049778f2a9d8f845001c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/031.json": "cb644f97a73f1403b63e3362b3f4fbd30171fae2775153e76016b01b49f4c5b0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/032.json": "7fb4a1476a46636d668514204cf8db6ec42f4cbe56129bb224237054fa1b5335",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/033.json": "8f48ddcc22ed51c5fbc587f91bf64d3eeb53d81e6a462b2ea0d20b2318f97324",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/034.json": "48e6dae631020c1c97cf431b08d3876fbdc837e2ae36a8d55caecdcc0c0f33b7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/035.json": "2511b4cb08b6dd6f2f161f0bf4ae812d15e346cea8b0cad0ec88616459ad5e15",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/036.json": "07959406d1a4e271be9ac08956715cea92c92e290696f9efdc04f855e02c3c3f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/037.json": "0441e676e5791613fc078cbee731825be878378e82458cbd8149833cdb831956",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/038.json": "a99eaa9689e77b0ae27947fd324951dacc177b5a677f3de433dd694858e36e12",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/039.json": "883b24c226f91eaa9b2c2a28f54e24584d17584c77e3955183e1cd3dccf2eeeb",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/040.json": "1147847bcebf3282eea81cac58242f1deea7c66bb9785405aa43d54e7096ef5f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/041.json": "e689c56fcf113218d244d8f22a5ec611af90facf20e47ac07dbe47fcde9dfda4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/042.json": "0167457c43b97959b97d23d5e43484444cb4ae322cdf6456f674eb209c8a50fa",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/043.json": "cff37b3253e3fc42ee8b9fea57ba593e331878281eec07d198480ed0442481f4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/044.json": "1468391be543433ff2b2c4891e9574487539d37861d2881cf6adf3ed5b87f24e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/045.json": "90c8bbe75b10af70a459949fa09895cad82b421dcb323d2e9979a489b51add03",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/046.json": "d7ad78c4485e9378abfdb5567526ded0accd23ed8aa415457af1c507a5febede",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/047.json": "a55d58b9a1fb1380ca48efc55f2c1ae07678e8f5f75a690da6fb0b638369d882",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/048.json": "d5ec188660440bef5331734f33618162904f221d37a644c44f10c579146814a4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/049.json": "ab8c8a39e5ceda912faa41dca4292f6cfd23c32c925a871fae6c67821f4430ac",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/050.json": "5b427f881377400441ed85a63f2903ab931d60e3e823cb4e33a378b79f5fd365",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/051.json": "dbe4cf684ccf7721ba8db4dbf499ad8cdec45087108d5998048e51da31c4e06d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/052.json": "7499f9b69618e2480a0d6d0830854483b257e226f4694be13c95ab8e1b15a56d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/053.json": "696eb0d8bcfbff77d16773a6bf209659aae221d7b10b0c4d628d0d4712958b41",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/054.json": "eac521c1df90ea4970b037bbb9330ea01150151766c3b002fa8fa9dd9aedaaa3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/055.json": "0a007f786f98b23ecbfa3c44fd24a1e3816cd98963f9a366e5335d3a650b7743",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/056.json": "efdac3b3138bf8a25ce97bef92b388913380cedebe00c6669df8e95d7a608364",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/057.json": "91a77f96e3758c0afdd54a0288e7f175e8694f2e05bb12d04ff2401a29af291b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/058.json": "4458cac1bc683262bd45a2612b5c038716f1fe3af361038aa9ff5931e1b2cdc4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/059.json": "bee3ca46880c80c6c754c0c1319ca48aaef9ee9ce3e470849975c3e84522f559",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/060.json": "6c420ad7479e1f844d4a39ad1c2a470904c3831b2cecd1263eeacf53161050a0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/061.json": "42490b7c9d7340f472a2fece3a043e5742daf3b3194fd6040bb4f15129d5f68c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/062.json": "9f2f05950e45c81729a7404c0199585226167c205e0980041ad6b9d9632b2cad",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/063.json": "11afecb0454b1b6acd7dfe6652b00022da01e328d6c43b5db0f01b8b8deaabd7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/064.json": "d909af906f581c24d7ffded277cb5f5ccb1f1d0f9a58c8f76a655625a379c191",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/065.json": "c782024a63e48a47706ef40382ad40d8922d6f58f2ce5165aa31918962bb4dc9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/066.json": "51857962f44bff51bc71fc9b0855f5b4d3f484eed0b873d3c0ae6fa26ad47b33",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/067.json": "38bae75b84e1b763bae6139ceba5aae85a4890f3b801f398bef26a17486a9c21",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/068.json": "543971a6a481cb07cc4e3d32415c0568d7f063e7b2be5b76bdc0594baeb8e2be",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/exact_sparse/069.json": "71a68c0c35c81bd19033404914d3102790c7a54d01b2450030679681022f1ce1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/000.json": "4afaacf56ac4462181cf9e76f295830f58943ea5f804371176bccbff51feb4ee",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/001.json": "83561d1e168631cfaf66f76ece0c5d281967cae268cd5a16087143378733d0e6",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/002.json": "404ee3923348566b35d145923320363700d2a6cce8a65158979f6fe6051f658e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/003.json": "64eb743f158d3bc14305cc46de9acc0b517967e2a167b5481a65c84005e0fb64",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/004.json": "e599f2838d005ce37a1e0da121318639930d84a7537e69b77634652dcc60e0ac",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/005.json": "b175fdbdac92012aa1bae256af12bd70ccfd64baf0f7578863c2b2f5e63c7076",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/006.json": "811ffca178fe7f14905e4095bcfdf95ddc97bfd1d53b0a852aca36df167dcf4a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/007.json": "74e1a5a9265da655e8570f060723cdbf84ebc631d07fbc536e28c00235df570f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/008.json": "4816e0db5f94cf4859dcad8986e0259defd83225bb7a3ba1347c2411a4c3cd3a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/009.json": "a139a599083b8222e12c04fe2916d63c124a5094d143cfa9616891fb7a5ae9b1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/010.json": "7d1653a6763c29e1f4c597a47453c11843c894a675357d7f4a289037f2e611e5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/011.json": "5b32ea7b3fae48932e85f54aa5bc93af53e365bceeb1b80c32ea0710d82e3562",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/012.json": "8c2146ea030a48dc2cac00a9a79bc0c1e8b839ccc67bf14a54933ee4be1fac4c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/013.json": "11fd83756fd7d34f3c6f4523c987e7d5ac4720f1c0b24e14af73f3ffe01c57c0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/014.json": "f7d8a6f64fdc4691d63efe1282a7484698daf9e8cb3b49ca12bf65a02a86baa6",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/015.json": "8d016f0c2b595288d97b0e096b4778318357bc89024440c9a79bea287acc5e8e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/016.json": "8902e96efa076f4bbf2d5136b1b6e1a286e4776a6b5aeff6275250a682756adf",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/017.json": "cd11318e93d04e940446f40f67e0fdfacf0f3e3cf6e1fa74d30ec144b231a09a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/018.json": "70914ebe5727f0d6e46a9c89ffa5957847b9b17784e9b20472007212facdabb7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/019.json": "66be68b14ba5a9c981c290599836af8b7b4bdb108e5a05a53a685db218dc1d6f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/020.json": "5d6c0b7a763c2ca5ea60e8f80d239356bc7ecb68af701a11629044da654dccea",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/021.json": "5859002ed6f8f275e3982f22c4e4f28578d3e719a5b8ce353350c080547084fc",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/022.json": "eb2f1a403e135cd6f8b6aa6201e9eeb80a70e47af0f475bb78b960f1eb9ed753",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/023.json": "533cbe2221bb63cf39440742598aafa9f1e398059e07c82fdb5e9e494f1df892",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/024.json": "4a758aa1338f2524a6c7a45b0c50696db1a71fdf8b07147c7bc5a8a90b7c2970",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/025.json": "af6a23b7d84b929e0348e77f1ee4af7431af71c5fa4a0d63e1c9e5dc86d84c69",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/026.json": "b4a1a3e8282d5b523f2e7655967ca40254d2fd31be31b65f7e08ea5bc429423d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/027.json": "040d3caf01a474458517ce75150c0bc89b71f255b9026a31617ea603e953fa09",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/028.json": "4a82b46ed92a04631e467ea0dc0a7026f066c6ff0e9ff787260a7d912a15b5e6",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/029.json": "dc17e1cc8f643002b4f6e4015c50c4a725c1fc520097e37fd3db6be089165fc2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/030.json": "c8ccbb2e85b3fdd54568366ec770e53ec764c060844dcc856e1e376c3b94a70a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/031.json": "9c384ecd81cc3108870df5dad479e72f003a8bf92bd9a98e203a91814942978e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/032.json": "f5a08c5aebb4d92d9ebaffffb4e1bc6fa04f87ba7b104b910de69843fc18a5fe",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/033.json": "79c3eb68baff1199218f772f20fed54b00444acb2662ed3166674ebfc0a0420c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/034.json": "323305de9ee5982a119908e1e742e851d0550503f46f24f918bfa9a7c16a8bff",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/035.json": "e52fe01eaa906bf6d6a568f9932a386d41e6e57f49c801342e648ac258623542",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/036.json": "7db93462f8328e26a0fa0049c353a36f47cd723101bd0ca0fe81570333444543",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/037.json": "13f98b041dc1e7f962296985819566a95687689ced81a8d9fb6007e56626af3a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/038.json": "6231816137cccb265a5f61f376af90aab15ff9448804ad2bb15c6460627cca04",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/039.json": "08b0169effd6968f4d8991b068f1acc3083e6778e880359536e6a5a579f0c4ef",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/040.json": "ad9bdd7ad6a094b41486746be22a0b5144d84ed8b76f9dd08dbfe6c54f286106",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/041.json": "7783c56e6e4959ecc4cece7ada319894ace7555f1ff5fd6ff700feadd1e64a39",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/042.json": "c7493f321f13f3fa2c9304d26b12079577d6be38b08efa8a826d2999fd0d7cea",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/043.json": "af444dc527acfb2665d81fc5b473e91818d71e36ad8555375ae4fe16c067f613",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/044.json": "6fffbb4cfd8ef682637b571a5350316db592f60e283001ebdeb43f3771de21b3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/045.json": "d2d7b274746a90b91cdc5ddbb7b181c21ad0eb0464901b4b05351e5a0b824833",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/046.json": "cb7e82bd3db28f2dcb1d02610b1bedd7af5c6d80c728a7f6927bf1ff2031716a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/047.json": "abf90321f5cdecd7710653e7f07ed0cce3634356ac6860c1f2d1fb91713f913a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/048.json": "18c218aeae5b7ac44fee9b63ff3ad8c27a9224e348279390647c887fa4fad75e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/049.json": "551149fc7968537e7c297e7fd99a8cbe9562ddb1dbfde50a5edef6f0845c21a9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/050.json": "5b0b66f639a118d1f45c749dd95dacb8cbf5d11967fb33addaeb8815482efa15",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/051.json": "a60e8f80f0ce2cdd1792e393534821bfa637e1b8883e883b67472e2bd5ecab6c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/052.json": "5ff84876b2fb3d9e64167a920cde7b8c361a0db9267c0e51f7a12eb788b45003",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/053.json": "55b9e52fa3565acbe9895f691df9f26ece6713bf8c60223df80b533b9c2d2f2b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/054.json": "eb4a2a90f31fc5cbe62284cf9ac1bf1baacc2908d9b5fbcbca635f638dc28cfc",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/055.json": "971eefe039f5a1d9cd45783f5e11f06a9e7b1381b6d991a5e7c59681d977c5b3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/056.json": "6cd91d8ccfd390396462c08ffa8cab0754ad7eca12bff679d872430bd62f5443",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/057.json": "10e85eb39e9257a02b4f5ee925dbf95bdc8fd4be2f1ed47e374a944b6ce0b132",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/058.json": "f17d6b7524a6cbf4601156b354a3e834cb273f629d176d9209c01b6dd23d9d54",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/059.json": "4345ccc64cd243442f826c3159ea36323a9e08555fb7d8b6a23e4ebd5f235c0f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/060.json": "c990fe43847b33db8e25a65234ec3b6c490787b182ce6358ca04335e2b844f21",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/061.json": "bf3027818fad8a3468ff06fbc9da4b0ff67869c210e0f08f56b556452772c19c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/062.json": "3771b6bf3e6145fb28821d08aea01c284bc2ae1412d29340ad62c3b021970578",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/063.json": "7a194ec802ad03b8751f2aed3684b8c18a03d861213b4c8c56c988970ed6a79d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/064.json": "540fc3b36de3bafdf5c4c2368fb8cf2c47b39be8abb745a63775fca82df3fd79",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/065.json": "3f0be1d12d6a9773a08ce208c717cd2f7e8ed605c4ae198f9b30cb9d4c12fc4a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/066.json": "127c94f324238381d28cf5f033b8ba54511d3c19e00bbc2f21d17e530103d0a8",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/067.json": "ef2606a2b25cc6db3ac30bca828a201fd96619f1e0cda91bf56c181b61445954",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/068.json": "f9494789b324ec8088c3fa76c350523c1c59ec6b34031ef485abe4261cb4a6fd",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b16r16/069.json": "52f4f02bcbad518621d7d4296c66d1c39d586d64a76e50a45a9872f65cd1998a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/000.json": "4921c8714425958ad8602e30fa21dc3a3bbdebc1d5c67da0acdaac0ae9b3e691",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/001.json": "283a282cb57cbaf1a3acdc3ceb2075beb8b37bdf92c739653c09fdf05b13c71b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/002.json": "1851dbe46dd38a91c38c1a31ac28f4ad6138f092c64e38c3bfb8b72ecff93104",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/003.json": "d2923e660c8c2f4eeaaac007659e902c9b84dc5d20a7726e3ca5264600b20551",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/004.json": "596e41065f0497ea23b5fffdd0f21b6dcf63089805a1648873a14001dbcfe7ed",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/005.json": "f8edcae9ccd63e95d9011274b3b5d50f4887fbee836bf91c3e5840c5c25c3627",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/006.json": "6f907a0f7ce6ab7be35c3dd0bf91e38e1d4e9612cd52b48854c81e3df5463db8",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/007.json": "9b40b896cdc0d408052caf9f20b7c6b38c710e3c0a10d5436ff14b49dc1858df",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/008.json": "a1319d54a7efbbd328db2e8b0116d89d0b45578972550cad21f12bb3b0f7e544",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/009.json": "09551cdf97eeef57659d786a3a9c7d6eb9876018a8e181b769c4de06fbc7cc8b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/010.json": "8c4a40d95e10b293f49ae98ee913cb456de338e7f62fecc6ef3c0407b2b9f7c8",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/011.json": "d5c1b45bc971ca92b20d336dd8956dc11a90c32e1c6af6cfd39ef0ac9f0beeb6",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/012.json": "4edc50bcbba7dfb26e56f15a1c6a2e51736f8cd89c55d9072b2baad1198692f1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/013.json": "533854d225238b95f1495cb000ee13164e62bfa112916dc37e7a4800d41fc9f9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/014.json": "09c5156e710d8d7a44e7bfc9256d0ee1e5c661255826f3b0cb19e488858c644c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/015.json": "a65e49ee5357643783671f5a5758ecb776f8407f5edaf635fafeb460c21c7ed5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/016.json": "d3ec7303b18421a4bb94e82640c637dee9ff365516f5f6dafb450ec72e87841f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/017.json": "3ccdb9fd428a4da317da54c64c7fb9529e9bdbff262dfe3bd4a28cb2b432baa4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/018.json": "dbb2cab04bc33ca3769b812bc39eea391a2395d159474325c05288cf7a8c37e1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/019.json": "f106e942298accc5b33502c685c570aa223bcc5c3b447ac86aa11ee2e10c0d83",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/020.json": "abbefe9194b1837900fab2ef23b1d0963fa292375baa0eb091d67ad2d2a81972",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/021.json": "9ade89feb3762edf2d35077c41338b52c4dfb22c3bbdffe781f42a086f842d95",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/022.json": "bd5ccb8c7188ed894a110961869616262c146863cdc330f94c1662d424fe3361",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/023.json": "0848d108b1182b92c1e6dfc7eb7d81795cbb0e2b703f8ae3875108a3a8076b3b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/024.json": "507b71ffd38608060bf7034f54e4c378da9dd735cacb735503de0ac90609d80e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/025.json": "5d99c7ab39f899eabf1cfc279575907ed8654d04e001256df2c86061637c5ba1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/026.json": "41e7229f90d4c4827ff784ec55b48bdbf7f63a0180c393e342fe14620ebb45ab",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/027.json": "a515ee67f29b7a534cacecdf5c2c04661827e2f10c89e0775e4cef6f858551db",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/028.json": "26ba37c921612331d721bd6a4f8c2168aae04602928a61ca67b41d599cb37406",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/029.json": "bf9baa094877978bfaec6b54e37bd7bcfa67ca208cc660adb337e7d343681171",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/030.json": "d4c94876eb425125421e9e6066722414fe6fd1f645abcb79fe4e3b2e317fcec3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/031.json": "1603d7a2df2b68d6779c1159c123ff8b40de07fe98bca2780aab22f134cd27ac",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/032.json": "6f1815c805970b7d79adb9dca7f93e0c342b237ec09d9c29abd32bb0eeda5323",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/033.json": "a0d54a50e8d75717f8c8193a7a13dd9c14bad36a0eaa64dcd130aab427721358",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/034.json": "eed0680aee46b743c2629a156ee46bf8ad1789d76b1f48b0505efb895b65c9f7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/035.json": "d2be0a2f74a2d28fb68d5e5d913eabed6fc8ade12c13b07095fddfded0410baf",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/036.json": "187e2e4378e5ffb6028b41e3a3e5894ce90d3d9ea789e8be5ec80ee81b55622a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/037.json": "247548ae13a245b795b80b821789cd9a52e1ff57c9a1f599872218dc5e5219c5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/038.json": "d7ba4bd1f4f9c732a1843fe74583422311361d99daf39745edd6164902ea28eb",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/039.json": "c281857df1ded78c49943b1f481a3f66954a0d251199a5e4b3614cf5a6e13d34",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/040.json": "f4344f3c398611c59edb188866a89530f77f4de054ada5b0ac2481b316c6b883",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/041.json": "35efcbdace53b664aa5a6f4d95cf641330d6ef93008beda91c707e164094b5f6",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/042.json": "23f8f172e2c805c620c544bdb26d6d2220fdf83f6cde5eec67ee5a119f1ecd53",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/043.json": "cad06f8f3537561b325f4ee1de68c0346a40bfc55b2519bcfdd522f42181c400",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/044.json": "cbe3352afaaf705ec66e49d5f85048a83c12d5311cdd729528bcd54f99bf95f8",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/045.json": "870f873de4aa797b0ef2bb0e40d1757d8821a73fd23965c0dff44b5e980b46ab",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/046.json": "3d16fcc125746c3e8e317cf3181ee3f0d2bb2b46127e726b4adbf631d0472205",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/047.json": "4e5f14fbbc2b292a19d9f125201c45a0059811e332ca38f028af05c093c23352",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/048.json": "54b6a7d905161ab4b6ff9f84500aab7e3d76343e193a86e67e7304819e3fe1a7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/049.json": "5cfbde6e48cf7152f9d446103bd95db0b6ebfff2c4c091a5de58722f24c778dd",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/050.json": "10bcead363e7849dd0ab48d4e7ee5c3ac8719d762533520d55b826aa6061545b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/051.json": "a1562db338df694447678b1672422005e578a8d706a3ddf7dfd1db8f91622fef",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/052.json": "e66ecd30f073537766882ab8e0f4448773ac19bda032d4cfd8d052bd83f31469",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/053.json": "80e3e7d79677207ac6e0958a6d07ab7a768a4e2815e2f86dc6914256e92c35a7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/054.json": "af2d933b210eb59a2c0adbdf02a5a23661377404b41d8d82fd78bda58afcb769",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/055.json": "eca2d44a8ba582e3912fd6993ec133e08485ddfb1a1c13aaa4e58206489c122e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/056.json": "028ab879ea9053d6cc3b3b9f196c01c6d5e5f5f58b77e06857db8c06066368b6",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/057.json": "4e71a152d7c695c2259b0cc91b4982c9607dcbc7c41cf49cd8f3def8ed1cdb7a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/058.json": "0a79e318b8b8b0d8e5e9869fc860168f8f89a3aff7501ff977cae1b30c606fd1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/059.json": "61d98ece6e1d95590558d1a1d4cda0dd943f4a74c47e9ca0ad601977c6a874fb",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/060.json": "b8544a7fccd7be4be96d1b189e2589163810b7e573bcea878bed93cb22c577c8",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/061.json": "86b27564983a5f805aaf76574c996761b830a3af29da6df30bbcc3c43cdf5c4a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/062.json": "d69642bb4ee8f9389f3903477954c6c57a14ed358e46fe41a235292442379878",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/063.json": "50d6f79108c5e713de002401661c5763b095780be60e3fd924e86b930e732d36",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/064.json": "bdf9fdfa826d82096ab857e63675ac6664adb2ca4b4b3725458277320f88975a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/065.json": "cb3923e3fc94292dc4bf7887609bbe8a7d37ad41801ae21ccb260b70cd5794bc",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/066.json": "aee6eefe8b6ee357bc6ec6722431c2dda3627b9bfcfb1986c3710aea9e3089f3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/067.json": "9542405ff3e629a2fcca9bd171b78f7d0734fe6994b6b849ec189791b4d8db7a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/068.json": "372d8764035b6d02776b7617fa61f30c1d83e223e8780b83478a51a5b03d4df4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/b32r32/069.json": "7400db1aef3dc36e483c0b03e1457cea95877525e78a98e03087d73c89b65ada",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/000.json": "072fb9a3529f01932bd2d9ffa08cee3a3fdcb0375c2a11a9b098a4d27a6499d0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/001.json": "24adf7e61258516339969d871cde1c2e7b13a02673aa56b9a03fb44b0985c90f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/002.json": "b2e23fe522388f903f22bbd96060ec52bc837963404851524341eacdd68ed77e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/003.json": "f8c107b32d99e06de41875234af29a01c809d0419ab7f0a37bd3eb72185ce701",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/004.json": "9ad42b31cea7f22d17925ad889a1a022ed95cce4ab26508ec535f0b78c11e8ac",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/005.json": "20e23c8902926a0228eb2eea992404fde32f87e0b4ece5c7f95158adf4ad4671",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/006.json": "62449bcac4bb62aa001473330bc66c0f2bdfccd154d4a60921989eb84f8a83e0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/007.json": "5e6fafe65a36eae8d41da8f2d87d62a78b3834ec83065c57ec01f3d73bfe87ae",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/008.json": "52dbb8323b06c66da658ecb97d30cda53dc51b3e6e7a761ba573b5ff463d1710",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/009.json": "ed908ef431c6ee7bc20e1077709315335ad2d60f8c33959b88c5b3adb1a0eea1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/010.json": "c2add5fee67e3137b1b4ae1531ed7da6774385fe57d28e543ccde712eb50ce0a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/011.json": "2e2618f558196ff0921d13166602f0a3c017a034d4a96ab5c394dafdac8fb675",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/012.json": "66b5b792026c7da0ccb2498830f54afe617601bbf8cd6021c704fc7995c30b67",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/013.json": "6fe050b8f7d30b772607a7b60c5acc0e17b242a0e315bd92b8068597f44feec6",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/014.json": "9150d26a78b0ead405b01b1d00bd41d4882200940a2c5a1001a9a110a6a527b6",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/015.json": "6782a456696f2908f6e3cc315aa8b024d5432d3288f62c07a89a45360f9b43e3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/016.json": "83e8125dcb606e7b8ff53ffb24125ea8f00e1fd7d87682f2e9cb9f70a5502d7a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/017.json": "e36137a6506e7c02e5a5a661ae4da9e34e5727f94bfa775acb5cab1688752d56",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/018.json": "cc5c2dfdf98c07ae0a8848f59caecee0c43cc69a7090e5ccebad1a9d9d2da756",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/019.json": "5abf692758ca6224da2d873ee048a283385ecf11c72638cfc8d4f8e3c21befca",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/020.json": "c45c91f4b2dada100e64002a29bd43f5cd03b5f3f56599f82cbdf5857a538acc",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/021.json": "dbdc99b34877850e07c7a1ead35b3c2fed19f701bda247d7e001d4aa7198d671",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/022.json": "492d97a9dced69cb07cce9d6b85adf75251c48535a20b1d84a8e5e03aecef9ea",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/023.json": "5072c63bcf8cbc8242ba69b484e5f2f65e96952650e19e8d1f91c72c14b7bb58",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/024.json": "3a116145d777e14249c7714112c8b6c63169d03154e472158318d53aaefb3434",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/025.json": "b6c933a568994391c10ef8ae3c5dc12e4eb561c913b70909645a2a0626bc74b3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/026.json": "56c98398d16a4cb16a67beca42397bc22a8612ae75461fb9f11f199cc3c0f543",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/027.json": "84ad7e4aac13aa664a57402ab68de2548d64d54f9d4bcf6c540477dc8a1c3cee",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/028.json": "d4ff0c0151a198510c47d666da454c13dd134efd12774d6912c0f4ce7aa5d629",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/029.json": "c0d904bae94de28b64f43fd552e71b994de5c1f7152a5f3cb19a0e966dd780bd",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/030.json": "0a5a07123d8438e6123cbc1199660f8eb0744b596ecef87114e1217c91ac17f4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/031.json": "50f3dd1863c91c140a408ea603b764b395e11e7bf87648f6a76051be5241006c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/032.json": "2792c2d62914e584d06ada509beedcd8ff24cba02118a7c0aa79f9e23fa40ee2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/033.json": "7acbb776802c8e1a520f5f149433d52f321374d4f0fa228545302c158e1762ca",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/034.json": "3e35dc835fffccadaaca301d6e90236852baca246623302c1a86fe5b54bbbccc",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/035.json": "b8c22c79fe343ceedb14d74ebdfaa3ab8fef5e605996268a52093f3eaa46745d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/036.json": "80185b608587fd7c78b7785aa6fb8488ecf1d06bddf3bc8cbad23c81c84d1fee",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/037.json": "a6e16ecebba02e689bae6e6e61d15a38c013d5f2aa2c8bf9acdd60a8fa64e4fd",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/038.json": "766af337e7ebb24a1b784ac9b052d9b68644468195f21e28a3df4071512c6787",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/039.json": "36caf7a26dde4dc8ae28a1026fb6dd2dd8e439bab2970b0ccf4b32849a93a76a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/040.json": "9bc6d9f0de6f739344603b8430f2520bb4f93c960709c0eeeee7dc4b5dd0d7a5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/041.json": "67a605f6e2453b9bd32baccc1f3df55cb0337002064f04c30531ff944c9adbb8",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/042.json": "d5f701cecb0dfecf4db11c2e45b79dcf86d4bc781ca829d558fd004a205a2a3c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/043.json": "f36cf3f95b08caf594ba991630e69eba94f9d41577e17c64a9b375ef494a385a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/044.json": "78b88cce9847ac821cbe1810defb6bc4668293fbe021f4ba45b494a2dc9dc4c9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/045.json": "918b79e2fb074497ff68b87cc2945ed1d727b9d6afbf0fa2f2e765526006963e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/046.json": "1200b129bb96dac28d6c5c55850ec33bfd762d25d91edcecf2f967930b5b5601",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/047.json": "81a2ee66298ad12efca579b2de81a0f625badc2cb595b075918c840b5893ad47",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/048.json": "9704f266b1ce46d5e35b3c65e87cc82e7f55755dfffc69b733a099f5af843594",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/049.json": "b1c50360dd2d404f6a2eddd272ad496a0d199bb36eec5181dcbf8475b518ffb2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/050.json": "f185c87bccc82c2ff9dab1d0b6774f71a36b9caa199bde60bb587da73ebd799d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/051.json": "847313d90b2502672a22ece7fa042221d37e594d01b997bdc64d0ec523e05cf6",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/052.json": "4f086da9f8ebc8968ee29683c6cdd89a3ceebdd5f60b48157163cf6d1bcc1f57",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/053.json": "81d5ae0db5264d7d3522f98db26e7805354e680c88bc2fcc1caa3519dd7aabcb",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/054.json": "83d247b9d0f5396b6cf4addc76c5e57f782e6c6811ebb1cecb93b3a00145d0ba",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/055.json": "6078e2a16bfe50c14c431fa600f92f785db4a4dd11e82c52a2b58f38899df1ba",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/056.json": "eabf6cd992b325beb0c673811fd973cda55362d53d1a0590c3e6a0c15256b6fd",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/057.json": "0fd93254647dd72afe7701ab1dc87115acb621c1da4700b3e21be171a857d51a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/058.json": "0256640c5c58739c73eefb93e484c6b1318bb071986af05d92573d554a500194",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/059.json": "f5b6cd7c8e782169746fe436800d813273701ad4ab056a650d000de2a9f9a6db",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/060.json": "2ebcc372e401f497f2690e8b079a004a8607a244ddfcd9056509e93ea26aa932",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/061.json": "c9f6eed80edcf9c32773350cf7e5eb30f7b7aad366bb8e87d60ce7ea71ecad52",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/062.json": "09e7e34a7dc3967abc4c62483ae0d166ae02100abded9dc63d2a78a9c78e2470",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/063.json": "d8ac2fe6c9b3bbe55f76706a055f777d30d532bfb17a4b2feef5b0eca3145dcc",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/064.json": "ff51d1221e96c4091be0194971e7f1e6b7832e8bfdc0d6e95af8d54cb5eb43c7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/065.json": "e51fee7f793b0e747862d02f67f497c9851adcadb90a5c9d07e0e7dea5f44309",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/066.json": "0b70dfd533cebc6257027b28ba13a7084865658ab600e73573efd46df0e0efb9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/067.json": "8be939a2843b9cb6a2e5ad2057969015fe7eefa14d2581f8bb48698c6e530bc9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/068.json": "273a8c712d3c707902af07a03cc1eb043287f75d41a2afef3024455b61732b62",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/loki/069.json": "61385d2902af47ede006af878359e2e48b7776673d541a0a975e61f00127b3f1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/000.json": "ca7068bc2d510f8d2570b20951c660caa66070c2916a92ccb258228db12cfbe5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/001.json": "654ceeb38e8af29021f40872e80672b3a3f9eaf342ac6dd2e06921861e588407",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/002.json": "86ed3fb6cef43edbe1d8b1db157f4d53bfa0843029387259d68dec244d708a78",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/003.json": "79083aae1f0038c2bd7bcdd8ed6908edf6ed536e2c28208cbe77ae6d7b83fe83",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/004.json": "3aedd05176995085f941017a6cbc4b17e951dc1f0438f40010d2ded6f853d008",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/005.json": "5cb78194d3c804c9ab46cbe874e89b79929c5796f147b09193b65e6d9ac96525",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/006.json": "f982b97a0a9ac3303f6457c87004c18715400ae5c0bcf5b77fb49c611f6eb67d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/007.json": "4fd7a216190ba7b4c09585c8c214072e3c7ecfaba39d94ffc850703b256d60bc",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/008.json": "45dc693232de811d852e029bfb99c791eea419a2ef8949e05fb17a3fa69219a3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/009.json": "428e083ff8347568174ebcc080120efec22dd4bb074d34df29c3410fb2877be5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/010.json": "01b9fd32c70d360015f33b8c54d1dd6cece32f7db698d93a591b059b04953b5a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/011.json": "0c7d12c436c184316827d89c791ff042ccd4f7f5e810da1cdd4b9e914ccc5a77",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/012.json": "2bb059969a29f126963a08535737a7eaa85b74b344998f03a378a96eb8e10f8c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/013.json": "d90ac07c09f7ad315dae0940e97a1bf4708ffd49b5cec09f749ebaa7af2dc48e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/014.json": "0e31599ef0098174334282eaadfd27120cf1aac52cfc93fa1306506362faee28",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/015.json": "f926176a3cda816aa86d31193ed86cd95a812128eb553a4e0accdd766f8816b7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/016.json": "71c8a1e5eb685f458375eb23bf0e0d284dca083fb83179ef8a9b2f5ccdd35012",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/017.json": "33ef4779754b9666d6e6f18a3d2d7f4eaaf9f9803a16b25a02e2eca97f82d957",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/018.json": "6d7ab481ba34064226530728d00bcb36e73157db0af9b66393954195f13323ef",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/019.json": "fc83c7a560c573e185339f0eaa5365bc0e54a85fc6b6633ff2c6e9500a945c64",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/020.json": "77316867715d0551330a4cc5741e48f558bc1231398fd63274b185a21711beb3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/021.json": "577263f9f509595008b34a324f7b594232b8e0ec219b6bd047b6e0279f72cae8",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/022.json": "5369e4e1d4e7077eb0f51b86d164ea13ed9735ef1e6b29bb13a7a7f2127cc58d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/023.json": "82b02cd955dff31f167e519938429eab4e7f0ebb4a73a37c4b55b0fc2da9a8c1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/024.json": "be68d54f18a6c0a6a8f4a523ceccd0cae9eb7115bbc324dad2f60dd045030af2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/025.json": "44df04a5810298df9ccab7316f0056662e38a1967aa1c2d7e3d8765ed1987cba",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/026.json": "a9af09b4a36e8ed4d6c0e0dcb7de509e4e6978c7a266e6d3f72b23a8c035f12f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/027.json": "fe2a3e4517b6de55f97f77c85c161378af4bcc9816af5ebdd415d869b98121f3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/028.json": "b4e4434ca4a0743e7326ead110bf36fd0869e18a4c5fa741f3416c4b11fc04ed",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/029.json": "69db9ae8e2056d4daf258ba9a30250e002bf97c036b2cdcc161a757aee0120ff",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/030.json": "252b2d624fee70a440e7848ce966d86f297e10089514994c09e5df683f15f92d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/031.json": "c843f3a805d10b43df70bae32c9efd4799a0ac8c65f30898503347411ebccb81",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/032.json": "deec90d53d6cc72110a0c20f96e1c12747c685e120045259b8dc310bcf2496da",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/033.json": "29b26c5cc82af3991f010500d0fdfd58ca103c960bf84dc5d41406e24c06322c",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/034.json": "b0fac634528199aff6c2cf794b0eb6d0cd149a43c1e4e98b8e31224759729d4f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/035.json": "282fcd7c94796e0d0acc5d89d1a64ddef0393258ac0fd4625c787f0c72c1d2c5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/036.json": "9f2c32ca61a96443365b6576f80a6b8192a8353a964eccb451d1a917edb6be4d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/037.json": "6558f482e3830ec1ae9fb024b94e5ff217e7391601be580be06a8ee3f24e3285",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/038.json": "ee3e173bcf878066fe17dd0363b635b73c2627d4cffdc675e2ee586696b4d9d9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/039.json": "893b535673718ee8616aea6e23f3ab5c81a5f902330690a1730bc572fffb03db",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/040.json": "874e829287823afac5a18f39766ed6e759d63802be3edc32f282102b44aaadca",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/041.json": "4561e0a71c275f7fb2bdc5d5c82e5db5cf081f0dc8ba90629907e140d8eb537a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/042.json": "430554b7ce05c6353f685689cf0ceaf6634231e4b730148289dbfa0912b90c73",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/043.json": "559b86685d6ce3fd94cfc6ccdbb5145a77044b465902fa28a15edc96d5c88c4a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/044.json": "6f9bfa1ce00464a98e8e2779fa30ba4d1f11f28d6b2427559e7c5a7a35992cc2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/045.json": "a6d6d3014e27e430ae6a7231c4bab3573bd17b4c36c6753b69cbb9525317b477",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/046.json": "2294887d83a8fb23efe30c08fb53525f53982bcfe4f964c44d52f971306469ee",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/047.json": "ff2c9d33050dc2bf36a7c75f1f2c8ca1ed855657bac4cd0abd06e82d71ddc568",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/048.json": "c0536654bb1c132356860d750c470616104ddb8556d89fd2117d24e3c3d6fe0b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/049.json": "9269d4e58d7031063f923a2b76f0e10b662878587d4065c97704be7a35a3c925",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/050.json": "b7d4833d0a4d3aded89f9db105e06059f8e12e02fcb70465630bcdd9060738d5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/051.json": "356ec82c9cab15c578637f66e3d83d44b761f2ae789cd0ebfaf2b2d39904543a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/052.json": "5451b89b8ab01be0121afb7ada26e7811deeafa6ec18edcbfbfc8896c236076e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/053.json": "b9f80e927ce03182b934fee90fab7b04cd0ceaca5cb1f158b45ac5eaf4e84faf",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/054.json": "f7440f7384ce24079e57fcb96c583f4d5b12fa2ebcb2601ea738f5eafd045d3f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/055.json": "b452bef7735ff7feed380b6a36c00ec794124c4384f5508812ed300b9b7004d5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/056.json": "6eb155ad009554ee2ad55e00ef1ed39f4456c5a3778d5dec4b80a2eec7f63d39",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/057.json": "67d5d3ff254712c912bf9a68f24dcf589ff58bf223cb29c4de004127af9f50ef",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/058.json": "f4c4d938d8c667ee38902af569fd3f7d66f7e60393dc7e1734b71ede5331bbc5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/059.json": "ff929e69ce520f861a1d310a1e31abffc67dc3537f9fd329dbef5cb3c87858b9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/060.json": "bea05e1461dc73f38e3a58d8c6af9a569c4b07321f89585fd1ca83452e704913",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/061.json": "b37f1f4727a552de8dbc3894caab6b984d5e55fdc184dc3ceb077c62291552e4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/062.json": "b939c9e57c6161a96304b6e801204e814ba7d46df2f0b6ae3a70b32eabaa3815",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/063.json": "ad188af3f793a988e65b518808938c7305732766f55168cbcfbf8f203d4e6c71",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/064.json": "1d52c90817240f7050fe63ab0268fceac57dbd19ee350eee82bde922ee8e21fe",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/065.json": "279c7dace2bd51626dfb47768a09d8a454911210adbb317c80056c3a143b50e2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/066.json": "aa1f110681e88b2c13552050b6c534e8343041e71db600e00adc980efa316201",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/067.json": "d6b1f67025b04ff3b28651fb96acc76b79c4b6b62d0ca6a2591f8bb92ae21b44",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/068.json": "78ad5d86d4c588141f87b4eb86226a251e346b43c34fd961621b23a1a3cd2e24",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/shadowkv/069.json": "eb14a8aca7d7d232d325e1845699a39489ed560d74484543dd76b9cae040ddb6",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/000.json": "7fa8ab999d820a0f5299a6eb1d9a549df63c27124183243e85b78d4df7b13132",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/001.json": "340d4d47a498d167604d9ee67a94f09c96348b5da62a562ad1e8d3b4220a836f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/002.json": "22dd94eb16d87b6e45f12ddaea36743b70810cd284a2aab6045a7590529f5716",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/003.json": "94fa551f94d83a18b97b05fb8a458aac887579587ecc31cb49f547ea4be71b49",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/004.json": "a6933fc10d69f1dad87eda2d29a625230231247c306693a2078c859d65661f88",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/005.json": "8769207b8041c7d6d2f840996a4f2658e1106c9c06bcded5762b2500c7db1bef",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/006.json": "1c4a78a8b0672e5f8d8fb4c39ef92abd5caa6572668983c098d4c527d367701d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/007.json": "ce07e8b85c9fa8686cae53b8e91ac77ef6157d343348ce716e2bd0e96941587f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/008.json": "40a16202ac0f43557aa939d75ca4064c1fe80918a0cf92adc748dc139a57b6d9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/009.json": "63ef4b4665a796649d1bc127ccf31443af549bee30288f4ffb0bbf6a9b79b732",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/010.json": "a0b0a448af1c7c9e31e80eb81e6f8f150592c2faa9c8c68bab026463b2b74004",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/011.json": "e5930ae195b4015d7c8ffea0254fe60dac82a0e78f950491de8205902e880c05",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/012.json": "6aac6eb5c0f42aa66c27cc8356ba656e14e4172aa9f6a0fdf230fe20d5aef1d8",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/013.json": "8d03942bc491a2fc15438189e432072fbeb92a886ef2901615aa56c5485bc4b2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/014.json": "bf8566a0d87cd123378a34ea395ce4d8e2c385b0c416fad6606ec860b98383b8",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/015.json": "011daa1b95635584cac0cc9a0ded97c3d1b2e5ef80ccae209b6acdbdf9fac063",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/016.json": "45bddb91569977c2e5a5221b09c9bf8b87246bc7a5621f7f5286fc6543e219f5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/017.json": "cd608cfcbd344a2154985b9c2271c2e74a53f7447f0c1bf629c0e4be0101f379",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/018.json": "7b0742e71013f8f3a6e2c1606f75774c1e10384cf75e98f3bc5fa5e50fee6004",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/019.json": "b70b33a2804901adf496e6b4be8142c40dd4d0cd767685130e227196a9ef91a9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/020.json": "957f1f5df9fb8e6b334f2c92a29f6d497873f5131f1b6b20a7502ec87f5b8a72",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/021.json": "53d90c2870c35fb307c3ef0f2543ed732b3afb9c3363d2e2ef14d910fc94cab2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/022.json": "1d46986b3d512b782b85b3c072dbd2aeecabf4fd0e83d90994af55abc5f4f132",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/023.json": "65d35fbe9b403ad9d42ebada073d48880d557a3d8e300c69ad82746b4dcaa2e0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/024.json": "a54bcc53c6071fcbb9f07179cff1329248ab2ad851b771dca5ef11a4d2758de0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/025.json": "7be199b6cf56ab9ee3a86e7bd390affeaad5ea0b4c24eebe8f3eaa89f8a92114",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/026.json": "2302956ef8ddb1b549c074c1afd698d681fb74695315592af9543b9ebd87a4a2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/027.json": "fd59e14ef82f9f0cbe1c8475e1ff1798bebef53d3c5ee0639f62a67f7961c101",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/028.json": "28d743c70556f6048a4030f84217ab6dc452a97e4e54224c2d852e670a2f4f0e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/029.json": "cf7de7f9c5f68b4d3d7046ecc909b3e83e2db1d4bf2f6f82830a7bc8e4223fd2",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/030.json": "cf207a873ad7cb9a5acc424082f6d4d2e13f3a92d03a7a49cf114866dc58f166",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/031.json": "c21c8e3821b650c6c7e68520bcc9910f6b18ae8ee8963515465c8c6cc17a566d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/032.json": "88e4d43b1a3a705817a0d20a62a4cb35cd7f1167c8f5c245d59884e2b140766b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/033.json": "b229ad3b554b136073b9216fca2567c3d02927a4ec1f672b7fb7b1e8849d765d",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/034.json": "7200f9fab01a67ab9a281d1ff0ff666b5dc4ec41845154d63c12c1af78a39fd0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/035.json": "349c7855ff697272e0f7e2a63f044f17536f2cd89666ea9992de01630655865f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/036.json": "8421f116fcb46f0dc7f8d2c0829cb653b23bdf9f53c722de337667ea8fe9ae66",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/037.json": "bfc928023afac31d6469b5904e4ea625e9334bd65f3901bf0bd0f474dce6c2f7",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/038.json": "cfc6eb32d3d086a52273c701d8f793cc66bcc6f81b5053f0c30eea3c793585b5",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/039.json": "b5c92280853c1ee970fd0bf2e39ff1b16b1646c086b5bca08f66310a07cf8e1a",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/040.json": "f1410edb1c504d88eb6ef60d39161d09bb234b68cc88249a051a6946efd25cb9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/041.json": "da4706a368bdd4e31443eb0719a06c10d79cbb17bc53e41c0fb851ef1622819f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/042.json": "bd810fa3f1e25f7c8e255bed44a76a5d30f415e2e9f0a7f310a8925810ae1591",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/043.json": "e70aa115476218d26c36b0a2c04820f20b7d2f5b2c8962b30d90db2ccc506f38",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/044.json": "8bd452c86c284da24506ed32474dedce5c7a7327dd106875a63f7a8158781bf4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/045.json": "1410750fdd968897ed703babbd7e29cdc708f1ce3dafc4188b56990f6be33c69",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/046.json": "dcf3bd5689aafb2424cd24d578922d7644f0ea9a31e3a7ae2caad6c631bf4a1b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/047.json": "1d39b4e78345b4aaf1e9aaf2a863f18b4162cf0004e8241d8fbbf4e264871dfc",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/048.json": "e19a9ef078de9e0de46a810350d761b908b8ff5c19dcd42b821fd82e97af6656",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/049.json": "e7f644d12ba3b8836df018cf6b24fea46a1a219c73b0946478ead2ec461af7d0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/050.json": "815084330d4710d16d5245e5a893ae220d07e6c0f0806c9b52d4f1470be79202",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/051.json": "c1f0df94c623098404818824fe6dbc9fba632b50b319f0ab1d157e47a09ea00f",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/052.json": "f855b2677775f0540c9a8ebafdd7757efe279975491da95774c45175e55211a3",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/053.json": "1b1c613a184d6dc4bce04c6ac7731ebdec62d283e6ba61d98fb5136fc6435da1",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/054.json": "492dc10dc7d1f5923888bf29449164c174e6648166a96ce5b08c0804bf09bfa9",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/055.json": "0b9a1f1f3fb46744fa799bf9e717de4d5f34f694b0a7f7c187273af49c23d988",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/056.json": "dedbf105b1ac0acfbb4332fccdde81fd9186f0f5fa0e8742a1823cb17189ebfd",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/057.json": "3fb23689596e25b8f32482727625d8b84a47ad911c0f98641ad97e988acfa6b4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/058.json": "5af4d110f756d11dc354eeb989d667c27ec6ca4df2125831cf4e5df7f1870eb0",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/059.json": "800f574d19b883264a10c35bed3c085489c44953a7347bdc655ca3d415acc423",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/060.json": "57e63eb97408341f9da4f7955ac7df156a18780393b204d70193ae24199c12ec",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/061.json": "fd27fbbd6284c24defb4449fdd30a372b2bf80e01961d9263bf691847dba3333",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/062.json": "d385be32c638a3ca2b7314e55d7e0d2ec26438668a56040e34c69dcf84bacae4",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/063.json": "6eaa957bb36ec99eecbc0e8ed290a5945c820baec0850c761876bbdb2249b905",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/064.json": "e5324e10193a8054dd5659d1f156dafe97668a026a673f0a6dca7300968b0861",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/065.json": "20d18cbe5b0af902e6cc6441c1a5cc794c2f32d55c1f8f349bd124b770705643",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/066.json": "c552da8b8c916a7c7be323f012cf54e924764bc5bc27a9f56549c36470d0a30e",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/067.json": "6ef2cd7bbf3b33c00f42bf6aaf4abd95d5361d3b8f6581a611324dd89764f39b",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/068.json": "5e70d8b617802f290f87931b7a84e665a23e06349a8ca98c58011c5db9bec386",
+    "results/k_routing_fit/qwen35_9b/longbench_v2_split_eval/base16/069.json": "940e40ee1b24f00cc1d07cded7dec181f96a4bf7214cbc79175a2edfd03700d8"
+  }
+}

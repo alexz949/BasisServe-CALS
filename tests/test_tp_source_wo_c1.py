@@ -10,6 +10,48 @@ from basisserve.core.tp_source_wo_c1 import (
 )
 
 
+def test_nemotron_v96_matches_wire_reduction_for_different_input_widths() -> None:
+    attention = TPSourceWOLayout(input_width=8192, output_width=8192, tp_size=4, source_rank=1536)
+    mamba = TPSourceWOLayout(input_width=16384, output_width=8192, tp_size=4, source_rank=1536)
+    assert attention.gathered_width == mamba.gathered_width == 6144
+    assert attention.compressed_allgather_ring_bytes_per_rank == mamba.compressed_allgather_ring_bytes_per_rank == 9216
+    assert attention.reduction_vs_dense_allreduce == mamba.reduction_vs_dense_allreduce == 0.625
+    assert attention.retained_ratio_vs_dense_allgather == 0.75
+    assert mamba.retained_ratio_vs_dense_allgather == 0.375
+
+
+def test_installed_wo_matches_explicit_source_factor_execution():
+    from evaluation.install_nemotron_h_wo import fold_into_projection
+
+    torch.manual_seed(21)
+    layout=TPSourceWOLayout(input_width=12,output_width=9,tp_size=3,source_rank=2)
+    encoders=torch.randn(3,4,2).bfloat16()
+    decoders=torch.randn(3,2,9).bfloat16()
+    projection=torch.nn.Linear(12,9,bias=False)
+    fold_into_projection(projection,dict(source_encoders=encoders,source_decoders=decoders),layout)
+    x=torch.randn(5,12)
+    explicit=torch.einsum('bsd,sdr,sro->bo',x.reshape(5,3,4),encoders.float(),decoders.float())
+    torch.testing.assert_close(projection(x),explicit,atol=4e-6,rtol=2e-5)
+
+
+def test_wo_stored_factors_heldout_metric_matches_direct_folded_execution() -> None:
+    from basisserve.core.tp_source_wo_fit import TPSourceWOFitConfig, fit_tp_source_wo_c1
+
+    generator = torch.Generator().manual_seed(57)
+    layout = TPSourceWOLayout(input_width=8, output_width=6, tp_size=2, source_rank=2)
+    weight = torch.randn(6, 8, generator=generator, dtype=torch.float64)
+    fit = torch.randn(40, 8, generator=generator, dtype=torch.float64)
+    heldout = torch.randn(19, 8, generator=generator, dtype=torch.float64)
+    result = fit_tp_source_wo_c1(weight, fit.T @ fit / len(fit), heldout.T @ heldout / len(heldout),
+        layout, config=TPSourceWOFitConfig(encoder_sweeps=2, minimum_encoder_sweeps=2),
+        work_device='cpu', work_dtype=torch.float64, factor_dtype=torch.bfloat16)
+    folded = fold_factors_to_dense_weight(result.source_encoders.double(), result.source_decoders.double(), layout)
+    exact, actual = heldout @ weight.T, heldout @ folded.T
+    direct = ((actual-exact).square().sum() / exact.square().sum()).item()
+    assert abs(direct-result.quantized_heldout_relative_mse) < 1e-10
+    assert result.diagnostics['encoder_sweeps_completed'] == 2
+
+
 def test_deepseek_v2_lite_tp8_rank192_communication_accounting() -> None:
     layout = TPSourceWOLayout(
         input_width=2048,

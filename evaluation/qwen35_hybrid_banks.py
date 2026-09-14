@@ -82,7 +82,7 @@ def kl(model, windows, teacher_hidden, bank):
 
 def profile_jobs(anchors, shard_index=0, num_shards=1, layers=LAYERS):
     assert num_shards > 0 and 0 <= shard_index < num_shards
-    assert len(anchors) == len(set(anchors)) and set(anchors) <= {64, 80, 96, 128}
+    assert len(anchors) == len(set(anchors)) and set(anchors) <= {64, 80, 96, 128, 192}
     jobs = []
     for anchor in anchors:
         base = [anchor] * len(layers)
@@ -194,7 +194,7 @@ def main():
     p.add_argument('--profile-dir', default='results/q35_hybrid/kl')
     p.add_argument('--bank-dir', default='results/q35_hybrid/banks')
     p.add_argument('--device', default='cuda:0')
-    p.add_argument('--anchor', type=int, choices=[64, 80, 96, 128, 256], default=64)
+    p.add_argument('--anchor', type=int, choices=[64, 80, 96, 128, 192, 256], default=64)
     p.add_argument('--target-average-rank', type=int, choices=RANKS)
     p.add_argument('--all-anchors', action='store_true')
     p.add_argument('--shard-index', type=int, default=0)

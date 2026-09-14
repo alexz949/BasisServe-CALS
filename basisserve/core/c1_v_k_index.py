@@ -115,8 +115,8 @@ def _broadcast_rotary(
         raise ValueError("cos and sin must share [batch, sequence, head dim] geometry")
     if int(cos.shape[0]) not in (1, int(value.shape[0])):
         raise ValueError("rotary batch dimension does not broadcast to the input")
-    if tuple(cos.shape[1:]) != (int(value.shape[2]), int(value.shape[3])):
-        raise ValueError("rotary sequence/head dimensions differ from the input")
+    assert cos.shape[1] == value.shape[2]
+    assert 0 < cos.shape[2] <= value.shape[3] and cos.shape[2] % 2 == 0
     return (
         cos.to(device=value.device, dtype=torch.float32).unsqueeze(1),
         sin.to(device=value.device, dtype=torch.float32).unsqueeze(1),
@@ -124,19 +124,25 @@ def _broadcast_rotary(
 
 
 def apply_rotary(value: Tensor, cos: Tensor, sin: Tensor) -> Tensor:
-    """Apply the half-split RoPE convention used by Qwen3."""
+    """Apply half-split RoPE to the configured rotary prefix."""
 
     cosine, sine = _broadcast_rotary(value, cos, sin)
     value_fp32 = value.float()
-    return value_fp32 * cosine + _rotate_half(value_fp32) * sine
+    width = cosine.shape[-1]
+    prefix = value_fp32[..., :width]
+    rotated = prefix * cosine + _rotate_half(prefix) * sine
+    return torch.cat((rotated, value_fp32[..., width:]), dim=-1)
 
 
 def invert_rotary(value: Tensor, cos: Tensor, sin: Tensor) -> Tensor:
-    """Undo Qwen3 RoPE up to the precision of the supplied post-RoPE tensor."""
+    """Undo prefix RoPE up to the precision of the supplied post-RoPE tensor."""
 
     cosine, sine = _broadcast_rotary(value, cos, sin)
     value_fp32 = value.float()
-    return value_fp32 * cosine - _rotate_half(value_fp32) * sine
+    width = cosine.shape[-1]
+    prefix = value_fp32[..., :width]
+    restored = prefix * cosine - _rotate_half(prefix) * sine
+    return torch.cat((restored, value_fp32[..., width:]), dim=-1)
 
 
 def page_center_rotary_embeddings(

@@ -9,8 +9,8 @@ coordinates without expanding grouped-query K/V heads or storing scores.
 
 Decode exposes two deliberately separate implementations: a purpose-built
 one-query Triton kernel and an architecture-specific handwritten CUDA kernel
-family. Neither implementation falls back to the other. Causal prefill uses a
-separately tiled Triton kernel that supports arbitrary compact Value widths.
+family. Neither implementation falls back to the other. Causal prefill uses
+FlashAttention for equal Q/K/V widths and tiled Triton for compact Value widths.
 """
 
 from __future__ import annotations
@@ -943,6 +943,13 @@ def compressed_v_prefill_attention(
             "compressed-V prefill requires matching Q/K lengths greater than one"
         )
     selected_scale = qk_dim**-0.5 if scale is None else float(scale)
+    if qk_dim == value_dim:
+        from flash_attn import flash_attn_func
+        with torch.cuda.device(query.device):
+            return flash_attn_func(
+                query.transpose(1, 2), key.transpose(1, 2), value.transpose(1, 2),
+                dropout_p=0.0, softmax_scale=selected_scale, causal=True,
+            ).transpose(1, 2)
     if not math.isfinite(selected_scale) or selected_scale <= 0.0:
         raise ValueError("attention scale must be finite and positive")
     output = torch.empty(
@@ -957,30 +964,31 @@ def compressed_v_prefill_attention(
     block_n = 64
     block_qk = triton.next_power_of_2(qk_dim)
     block_value = triton.next_power_of_2(value_dim)
-    _compressed_v_gqa_prefill_kernel[
-        (triton.cdiv(sequence_length, block_m), batch * query_heads)
-    ](
-        query,
-        key,
-        value,
-        output,
-        sequence_length,
-        *query.stride(),
-        *key.stride(),
-        *value.stride(),
-        *output.stride(),
-        scale=selected_scale,
-        QUERY_HEADS=query_heads,
-        HEADS_PER_KV=query_heads // kv_heads,
-        QK_DIM=qk_dim,
-        VALUE_DIM=value_dim,
-        BLOCK_M=block_m,
-        BLOCK_N=block_n,
-        BLOCK_QK=block_qk,
-        BLOCK_VALUE=block_value,
-        num_warps=4,
-        num_stages=2,
-    )
+    with torch.cuda.device(query.device):
+        _compressed_v_gqa_prefill_kernel[
+            (triton.cdiv(sequence_length, block_m), batch * query_heads)
+        ](
+            query,
+            key,
+            value,
+            output,
+            sequence_length,
+            *query.stride(),
+            *key.stride(),
+            *value.stride(),
+            *output.stride(),
+            scale=selected_scale,
+            QUERY_HEADS=query_heads,
+            HEADS_PER_KV=query_heads // kv_heads,
+            QK_DIM=qk_dim,
+            VALUE_DIM=value_dim,
+            BLOCK_M=block_m,
+            BLOCK_N=block_n,
+            BLOCK_QK=block_qk,
+            BLOCK_VALUE=block_value,
+            num_warps=4,
+            num_stages=2,
+        )
     return output
 
 

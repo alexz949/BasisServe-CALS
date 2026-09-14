@@ -62,9 +62,11 @@ class C1ShadowKVState:
         b,h,n=ids.shape
         selected_u=self.u[:,None].expand(b,h,-1,self.rank).gather(2,ids[...,None].expand(b,h,n,self.rank))
         pre=torch.einsum('bhrk,bhkd->bhrd',selected_u,self.sv)
-        cos=self.cos[:,None].expand(b,h,-1,-1).gather(2,ids[...,None].expand(b,h,n,pre.shape[-1]))
-        sin=self.sin[:,None].expand(b,h,-1,-1).gather(2,ids[...,None].expand(b,h,n,pre.shape[-1]))
-        return pre*cos+rotate_half(pre)*sin
+        width=self.cos.shape[-1]
+        cos=self.cos[:,None].expand(b,h,-1,-1).gather(2,ids[...,None].expand(b,h,n,width))
+        sin=self.sin[:,None].expand(b,h,-1,-1).gather(2,ids[...,None].expand(b,h,n,width))
+        rotated=pre[...,:width]*cos+rotate_half(pre[...,:width])*sin
+        return torch.cat((rotated,pre[...,width:]),dim=-1)
 
     @torch.inference_mode()
     def decode(self,query,current_key,resident_value,scale):
@@ -80,6 +82,9 @@ class C1ShadowKVState:
         value=gather_group(resident_value,self.selected_ids)
         groups=query.shape[1]//h
         assert torch.isfinite(key).all() and key.dtype==value.dtype==query.dtype
+        if query.is_cuda and query.dtype in (torch.float16,torch.bfloat16) and value.shape[-1]<=query.shape[-1]:
+            from basisserve.core.compact_v_flash import compact_v_flash_attention
+            return compact_v_flash_attention(query,key,value,scale=scale)
         return F.scaled_dot_product_attention(query,key.repeat_interleave(groups,1),value.repeat_interleave(groups,1),
             scale=scale,dropout_p=0,is_causal=False)
 
