@@ -1,0 +1,21 @@
+{
+  "status": "complete",
+  "model": "Llama-3.1-8B-Instruct",
+  "verified_predictions": 1650,
+  "means": {
+    "full": 88.9090909090909,
+    "ours": 88.02525252525253,
+    "loki": 86.80303030303031,
+    "lrqk": 88.0,
+    "shadowkv": 85.43939393939394
+  },
+  "evaluation_directory": "/workspace/runs/l31-v96/eval-deterministic",
+  "numerical_policy": {
+    "model_dtype": "bfloat16",
+    "float32_matmul_precision": "highest",
+    "cuda_matmul_allow_tf32": false,
+    "cudnn_allow_tf32": false,
+    "deterministic_algorithms": true,
+    "cublas_workspace_config": ":4096:8"
+  }
+}
