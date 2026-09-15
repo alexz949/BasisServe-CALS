@@ -12,7 +12,7 @@ from basisserve.kernels.indexed_sparse_decode_attention import (
     gqa_page32_log_mass_triton,
 )
 from basisserve.kernels.mapped_host_paged_attention import (
-    gpu_page32_v80_attention,
+    gpu_paged_attention,
     select_fixed_group_max_pages_cuda,
 )
 
@@ -225,9 +225,10 @@ def c1_conditional_page_topk_attention(
         and page_budget < page_count
         and page_budget <= 128
         and page_count <= 4096
-        and query_heads == 4 * kv_heads
+        and query_heads % kv_heads == 0
+        and query_heads // kv_heads <= 16
         and head_dim == 128
-        and value_rank == 80
+        and 0 < value_rank <= 256
         and routing_rank <= 256
         and query.is_cuda
         and exact_post_key.is_cuda
@@ -279,7 +280,7 @@ def c1_conditional_page_topk_attention(
                 force_current_page=False,
             )
             output_blocks.append(
-                gpu_page32_v80_attention(
+                gpu_paged_attention(
                     exact_post_key,
                     query_block,
                     c1_value,

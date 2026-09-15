@@ -118,9 +118,12 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
     assert attention_mask is None or length == 1
     if self._routing_arm == 'ours':
         t = self._routing_factors
-        current = build_conditional_routing_sidecar(v,k,base_left=t['base_left_b16'],
-            base_right=t['base_right_b16'],base_bias=t['base_bias_b16'],
-            residual_encoder=t['residual_encoder_b16_r16'],cos=cos,sin=sin)
+        if self._routing_base_rank==0:
+            current=torch.einsum('bhtd,hdr->bhtr',k,t['residual_encoder'].to(k.dtype))
+        else:
+            current = build_conditional_routing_sidecar(v,k,base_left=t['base_left'],
+                base_right=t['base_right'],base_bias=t['base_bias'],
+                residual_encoder=t['residual_encoder'],cos=cos,sin=sin)
         past_key_values.sidecars[self.layer_idx] = (torch.cat((past_key_values.sidecars[self.layer_idx],current),2)
             if previous else current)
     k,v = past_key_values.update(k,v,self.layer_idx)
@@ -161,7 +164,10 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
                 query_block_size=1,attention_mask=attention_mask,collect_statistics=True)
             output = result.output.to(v.dtype)
             past_key_values.statistics[self.layer_idx] = result.statistics
-    return self.o_proj(output.transpose(1,2).contiguous().reshape(batch,length,-1)),None
+    # Release the full prefill Q buffer before allocating the output projection.
+    del q, pre
+    output=output.transpose(1,2).contiguous().reshape(batch,length,-1)
+    return self.o_proj(output),None
 
 
 @torch.inference_mode()
@@ -203,9 +209,20 @@ def install(model, checkpoint, manifest, arm, bank, *, dense_v=False):
         if arm in ('full','exact_sparse','ours'):
             replacement._routing_arm=arm
             if arm=='ours':
-                replacement._routing_factors={k:v.to(device) for k,v in bank[record['layer']].items()}
-                replacement._routing_projector=conditional_routing_query_projector(
-                    replacement._routing_factors['residual_query_b16_r16']).to(device)
+                payload=bank[record['layer']]
+                base_keys=[k for k in payload if k.startswith('base_left_b')]
+                residual_keys=[k for k in payload if k.startswith('residual_encoder_b')]
+                assert len(base_keys)==len(residual_keys)==1
+                base_tag=base_keys[0].removeprefix('base_left_')
+                residual_tag=residual_keys[0].removeprefix('residual_encoder_')
+                assert residual_tag.startswith(base_tag+'_r')
+                replacement._routing_factors={
+                    **{name:payload[name+'_'+base_tag].to(device) for name in ('base_left','base_right','base_bias')},
+                    **{name:payload[name+'_'+residual_tag].to(device) for name in ('residual_encoder','residual_query')}}
+                replacement._routing_base_rank=int(base_tag[1:])
+                residual_query=replacement._routing_factors['residual_query']
+                replacement._routing_projector=(residual_query if replacement._routing_base_rank==0 else
+                    conditional_routing_query_projector(residual_query)).to(device)
             replacement.forward=MethodType(routing_forward,replacement)
     if arm=='lrqk':
         lrqk_adapter.LRQKState=LRQKState

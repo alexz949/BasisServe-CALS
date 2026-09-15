@@ -15,7 +15,7 @@ at::Tensor mapped_host_append_bf16_cuda(
 
 int64_t mapped_host_device_pointer_cuda(const at::Tensor& host_key);
 
-at::Tensor mapped_host_paged_v80_attention_cuda(
+at::Tensor mapped_host_paged_attention_cuda(
     int64_t host_key_device_pointer,
     int64_t host_key_capacity,
     const at::Tensor& query,
@@ -25,9 +25,11 @@ at::Tensor mapped_host_paged_v80_attention_cuda(
     const at::Tensor& output,
     int64_t sequence_length,
     double scale,
-    int64_t splits);
+    int64_t splits, const at::Tensor& value_prefix, int64_t prefix_width);
 
-at::Tensor conditional_router_page32_lse_cuda(
+at::Tensor conditional_router_query_code_cuda(const at::Tensor& query, const at::Tensor& residual_query, const at::Tensor& query_code);
+
+at::Tensor conditional_router_page_lse_cuda(
     const at::Tensor& query,
     const at::Tensor& base_code,
     const at::Tensor& residual_code,
@@ -38,7 +40,7 @@ at::Tensor conditional_router_page32_lse_cuda(
     const at::Tensor& rope_sin,
     const at::Tensor& query_code,
     const at::Tensor& output,
-    double scale);
+    double scale, bool query_code_prepared);
 
 void conditional_router_append_decode_cuda(
     const at::Tensor& key,
@@ -85,7 +87,7 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, module) {
       pybind11::arg("host_key"));
   module.def(
       "attention",
-      &mapped_host_paged_v80_attention_cuda,
+      &mapped_host_paged_attention_cuda,
       pybind11::arg("host_key_device_pointer"),
       pybind11::arg("host_key_capacity"),
       pybind11::arg("query"),
@@ -95,10 +97,13 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, module) {
       pybind11::arg("output"),
       pybind11::arg("sequence_length"),
       pybind11::arg("scale"),
-      pybind11::arg("splits"));
+      pybind11::arg("splits"),
+      pybind11::arg("value_prefix"),
+      pybind11::arg("prefix_width"));
+  module.def("conditional_router_query_code", &conditional_router_query_code_cuda);
   module.def(
-      "conditional_router_page32_lse",
-      &conditional_router_page32_lse_cuda,
+      "conditional_router_page_lse",
+      &conditional_router_page_lse_cuda,
       pybind11::arg("query"),
       pybind11::arg("base_code"),
       pybind11::arg("residual_code"),
@@ -109,7 +114,8 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, module) {
       pybind11::arg("rope_sin"),
       pybind11::arg("query_code"),
       pybind11::arg("output"),
-      pybind11::arg("scale"));
+      pybind11::arg("scale"),
+      pybind11::arg("query_code_prepared"));
   module.def(
       "conditional_router_append_decode",
       &conditional_router_append_decode_cuda,

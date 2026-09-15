@@ -40,11 +40,11 @@ from basisserve.kernels.feature_ragged_allgather import FeatureRaggedCommunicato
 from basisserve.kernels.mapped_host_paged_attention import (
     append_mapped_host_key,
     conditional_router_append_decode,
-    conditional_router_page32_lse,
-    gpu_page32_v80_attention,
+    conditional_router_page_lse,
+    gpu_paged_attention,
     mapped_host_bf16_empty,
     mapped_host_device_pointer,
-    mapped_host_page32_v80_attention,
+    mapped_host_paged_attention,
     select_fixed_group_max_pages_cuda,
 )
 
@@ -852,7 +852,7 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
             "auto",
             0,
         )
-        assert c1_factors.source_rank == 80
+        assert 0 < c1_factors.source_rank <= 256
         assert routing_mode in ("c1_base16_r8", "quest", "shadowkv")
         assert exact_key_storage in ("mapped_host", "gpu")
         assert (router is not None) == (routing_mode == "c1_base16_r8")
@@ -862,9 +862,9 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
         assert not owns_shared_rope_cache or shared_rope_cache is not None
         if router is not None:
             assert router.layer_index == self.layer_idx
-            assert router.base_rank == 16 and router.residual_rank == 8
+            assert 0 <= router.base_rank <= 128 and 0 < router.residual_rank <= 128
         assert exact_token_budget % page_size == 0
-        assert page_size == 32
+        assert page_size in (16, 32, 64)
         self.routing_mode = routing_mode
         self.exact_key_storage = exact_key_storage
         self.page_size = int(page_size)
@@ -900,6 +900,7 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
         )
         self.router_factor_path = None if router is None else str(router.path)
         self.router_factor_sha256 = None if router is None else router.sha256
+        self.base_rank = 0 if router is None else int(router.base_rank)
         self.residual_rank = 0 if router is None else int(router.residual_rank)
         self.register_buffer("base_cache", None, persistent=False)
         self.register_buffer("residual_cache", None, persistent=False)
@@ -994,7 +995,7 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
                 batch,
                 KV_HEADS_PER_PROCESS,
                 length,
-                16,
+                self.base_rank,
                 device=device,
                 dtype=dtype,
             )
@@ -1052,7 +1053,7 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
                 dtype=dtype,
             )
         assert dtype == torch.bfloat16
-        assert self.page_size == 32
+        assert self.page_size in (16, 32, 64)
         if self.exact_key_storage == "mapped_host":
             self.exact_key_cache = MappedHostExactKeyCache(
                 batch_size=batch,
@@ -1307,7 +1308,7 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
             assert self.offload_residual_query is not None
             assert self.router_query_code is not None
             assert self.router_page_log_mass is not None
-            page_scores = conditional_router_page32_lse(
+            page_scores = conditional_router_page_lse(
                 query,
                 self.base_cache[:, :, : self._cache_length],
                 self.residual_cache[:, :, : self._cache_length],
@@ -1317,6 +1318,7 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
                 rope_cos=self.rope_cos_cache[: self._cache_length],
                 rope_sin=self.rope_sin_cache[: self._cache_length],
                 scale=self.scaling,
+                page_size=self.page_size,
                 query_code=self.router_query_code,
                 output=self.router_page_log_mass[:, :, :, :page_count],
             )
@@ -1375,12 +1377,13 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
             value_dim=self.value_head_dim,
         )
         if isinstance(self.exact_key_cache, MappedHostExactKeyCache):
-            mapped_host_page32_v80_attention(
+            mapped_host_paged_attention(
                 self.exact_key_cache.key,
                 query,
                 value,
                 selected_page_ids,
                 sequence_length=self._cache_length,
+                page_size=self.page_size,
                 scale=self.scaling,
                 splits=32,
                 host_key_device_pointer=self.exact_key_cache.device_pointer,
@@ -1388,12 +1391,13 @@ class Qwen3TP4C1KOffloadDecodeAttention(Qwen3TP4C1DecodeAttention):
                 output=attention_output,
             )
         else:
-            gpu_page32_v80_attention(
+            gpu_paged_attention(
                 self.exact_key_cache.key,
                 query,
                 value,
                 selected_page_ids,
                 sequence_length=self._cache_length,
+                page_size=self.page_size,
                 scale=self.scaling,
                 splits=32,
                 workspace=self.mapped_attention_workspace,

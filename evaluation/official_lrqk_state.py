@@ -17,7 +17,7 @@ class OfficialLRQKState:
         self.length = k.shape[2]
         self.steps = 0
         self.cache = upstream.LightAttentionIndicesFactory(
-            num_lite_tokens=64, attn_topk=2048,
+            num_lite_tokens=64, attn_topk=config.topk,
             num_key_value_groups=q.shape[1]//k.shape[1], r=32,
             max_iter=(2,2), tol=(0.01,0.01), capacity=self.length+1024,
             init_aq_ak_method=upstream.InitAQAK.randn)
@@ -41,4 +41,4 @@ class OfficialLRQKState:
         return dict(length=self.length, decode_steps=self.steps,
             selected_per_query_head=self.cache.Kgpu.shape[2],
             implementation='upstream LightAttentionIndicesFactory unchanged',
-            cpu_offload=True, rank=32, topk=2048, lite=64, tolerance=0.01)
+            cpu_offload=True, rank=32, topk=self.config.topk, lite=64, tolerance=0.01)

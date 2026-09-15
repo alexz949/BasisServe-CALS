@@ -9,11 +9,11 @@ import torch
 from basisserve.kernels.mapped_host_paged_attention import (
     append_mapped_host_key,
     conditional_router_append_decode,
-    conditional_router_page32_lse,
-    gpu_page32_v80_attention,
+    conditional_router_page_lse,
+    gpu_paged_attention,
     mapped_host_bf16_empty,
     mapped_host_device_pointer,
-    mapped_host_page32_v80_attention,
+    mapped_host_paged_attention,
     select_fixed_group_max_pages_cuda,
 )
 from basisserve.core.qwen3_8b_tp4_k_offload import (
@@ -68,12 +68,13 @@ def _apply_rope_reference(
     or (torch.cuda.is_available() and torch.cuda.get_device_capability()[0] < 8),
     reason="the BF16 Tensor-Core router requires a CUDA build node with SM80+",
 )
-def test_conditional_router_page32_lse_matches_pytorch_reference() -> None:
+@pytest.mark.parametrize("base_rank,residual_rank,group,page", [(16,8,4,32),(4,16,1,16),(32,20,8,64),(0,20,2,32)])
+def test_conditional_router_page_lse_matches_pytorch_reference(base_rank, residual_rank, group, page) -> None:
     torch.manual_seed(20260902)
     device = torch.device("cuda")
     batch = 1
     kv_heads = 2
-    query_heads = 8
+    query_heads = 2 * group
     tokens = 70
     query = torch.randn(
         batch,
@@ -95,21 +96,21 @@ def test_conditional_router_page32_lse_matches_pytorch_reference() -> None:
         batch,
         kv_heads,
         tokens,
-        8,
+        residual_rank,
         dtype=torch.bfloat16,
         device=device,
     )
     base_left = torch.randn(
-        kv_heads, 80, 16, dtype=torch.bfloat16, device=device
+        kv_heads, 80, base_rank, dtype=torch.bfloat16, device=device
     ) / 8
     base_right = torch.randn(
-        kv_heads, 16, 128, dtype=torch.bfloat16, device=device
+        kv_heads, base_rank, 128, dtype=torch.bfloat16, device=device
     ) / 8
     base_bias = torch.randn(
         kv_heads, 128, dtype=torch.bfloat16, device=device
     ) / 8
     residual_query = torch.randn(
-        query_heads, 128, 8, dtype=torch.bfloat16, device=device
+        query_heads, 128, residual_rank, dtype=torch.bfloat16, device=device
     ) / 8
     angles = torch.randn(tokens, 64, dtype=torch.float32, device=device)
     rope_cos = angles.cos().to(torch.bfloat16)
@@ -117,7 +118,7 @@ def test_conditional_router_page32_lse_matches_pytorch_reference() -> None:
     base_code = torch.einsum("bgtv,gvr->bgtr", value, base_left)
     scale = 128**-0.5
 
-    observed = conditional_router_page32_lse(
+    observed = conditional_router_page_lse(
         query,
         base_code,
         residual_code,
@@ -127,6 +128,7 @@ def test_conditional_router_page32_lse_matches_pytorch_reference() -> None:
         rope_cos=rope_cos,
         rope_sin=rope_sin,
         scale=scale,
+        page_size=page,
     )
     expected = conditional_router_page_log_mass(
         query,
@@ -138,7 +140,7 @@ def test_conditional_router_page32_lse_matches_pytorch_reference() -> None:
         residual_query=residual_query,
         rope_cos=rope_cos,
         rope_sin=rope_sin,
-        page_size=32,
+        page_size=page,
         page_chunk=2,
         scale=scale,
     )
@@ -191,7 +193,8 @@ def test_fused_group_max_page_selection_matches_pytorch_reference(
     or (torch.cuda.is_available() and torch.cuda.get_device_capability()[0] < 8),
     reason="the BF16 fused append requires a CUDA build node with SM80+",
 )
-def test_conditional_router_append_decode_matches_pytorch_reference() -> None:
+@pytest.mark.parametrize("value_dim,base_rank,residual_rank", [(80,16,8),(96,4,16),(128,32,20),(37,0,20)])
+def test_conditional_router_append_decode_matches_pytorch_reference(value_dim, base_rank, residual_rank) -> None:
     torch.manual_seed(31415)
     device = torch.device("cuda")
     batch = 1
@@ -210,33 +213,33 @@ def test_conditional_router_append_decode_matches_pytorch_reference() -> None:
         batch,
         1,
         kv_heads,
-        80,
+        value_dim,
         dtype=torch.bfloat16,
         device=device,
     ).transpose(1, 2)
     base_left = torch.randn(
-        kv_heads, 80, 16, dtype=torch.bfloat16, device=device
+        kv_heads, value_dim, base_rank, dtype=torch.bfloat16, device=device
     ) / 8
     base_right = torch.randn(
-        kv_heads, 16, 128, dtype=torch.bfloat16, device=device
+        kv_heads, base_rank, 128, dtype=torch.bfloat16, device=device
     ) / 8
     base_bias = torch.randn(
         kv_heads, 128, dtype=torch.bfloat16, device=device
     ) / 8
     residual_encoder = torch.randn(
-        kv_heads, 128, 8, dtype=torch.bfloat16, device=device
+        kv_heads, 128, residual_rank, dtype=torch.bfloat16, device=device
     ) / 8
     angles = torch.randn(1, 64, dtype=torch.float32, device=device)
     rope_cos = angles.cos().to(torch.bfloat16)
     rope_sin = angles.sin().to(torch.bfloat16)
     value_cache = torch.zeros(
-        batch, kv_heads, capacity, 80, dtype=torch.bfloat16, device=device
+        batch, kv_heads, capacity, value_dim, dtype=torch.bfloat16, device=device
     )
     base_cache = torch.zeros(
-        batch, kv_heads, capacity, 16, dtype=torch.bfloat16, device=device
+        batch, kv_heads, capacity, base_rank, dtype=torch.bfloat16, device=device
     )
     residual_cache = torch.zeros(
-        batch, kv_heads, capacity, 8, dtype=torch.bfloat16, device=device
+        batch, kv_heads, capacity, residual_rank, dtype=torch.bfloat16, device=device
     )
     rope_cos_cache = torch.zeros(
         capacity, 64, dtype=torch.bfloat16, device=device
@@ -349,7 +352,7 @@ def test_mapped_host_page32_v80_matches_exact_selected_page_attention() -> None:
         exact_key,
         (0, 0, 0, capacity - sequence),
     )
-    observed = mapped_host_page32_v80_attention(
+    observed = mapped_host_paged_attention(
         host_key,
         query,
         value,
@@ -358,7 +361,7 @@ def test_mapped_host_page32_v80_matches_exact_selected_page_attention() -> None:
         splits=2,
         host_key_device_pointer=mapped_host_device_pointer(host_key),
     )
-    gpu_observed = gpu_page32_v80_attention(
+    gpu_observed = gpu_paged_attention(
         padded_key,
         query,
         value,
@@ -402,7 +405,7 @@ def test_mapped_host_page32_v80_matches_exact_selected_page_attention() -> None:
 
     torch.testing.assert_close(observed, expected, rtol=2.0e-2, atol=2.0e-2)
 
-    gpu_observed = gpu_page32_v80_attention(
+    gpu_observed = gpu_paged_attention(
         padded_key,
         query,
         value,
@@ -411,3 +414,29 @@ def test_mapped_host_page32_v80_matches_exact_selected_page_attention() -> None:
         splits=2,
     )
     torch.testing.assert_close(gpu_observed, observed, rtol=0.0, atol=0.0)
+
+
+@pytest.mark.skipif(not _CUDA_BUILD_AVAILABLE, reason='CUDA extension required')
+@pytest.mark.parametrize('value_dim,group,page', [(80,4,32),(96,1,16),(128,8,64),(37,2,32),(128,4,1)])
+def test_general_paged_attention(value_dim, group, page):
+    torch.manual_seed(123)
+    batch, heads, length, capacity = 2, 2, 2*page+3, 3*page+11
+    key = torch.randn(batch, heads, capacity, 128, device='cuda', dtype=torch.bfloat16)
+    value = torch.randn(batch, heads, capacity, value_dim, device='cuda', dtype=torch.bfloat16)
+    query = torch.randn(batch, heads*group, 1, 128, device='cuda', dtype=torch.bfloat16)
+    ids = torch.tensor([0,2,-1],device='cuda').expand(batch,heads,-1).contiguous()
+    host = mapped_host_bf16_empty(batch=batch,kv_heads=heads,capacity=capacity)
+    append_mapped_host_key(host,key[:,:,:length],start=0)
+    positions = torch.cat((torch.arange(page,device='cuda'),torch.arange(2*page,min(3*page,length),device='cuda')))
+    q = query.float().reshape(batch,heads,group,128)
+    scores = (q @ key[:,:,positions].float().transpose(-1,-2)) / math.sqrt(128)
+    expected = (scores.softmax(-1) @ value[:,:,positions].float()).reshape(batch,heads*group,1,value_dim)
+    for splits in (1,3):
+        for function, source in [(gpu_paged_attention,key),(mapped_host_paged_attention,host)]:
+            # Feature-major output exercises noncontiguous output strides.
+            backing = torch.empty(heads*group*value_dim,batch,device='cuda',dtype=torch.bfloat16)
+            output = backing.T.reshape(batch,heads*group,1,value_dim)
+            actual = function(source,query,value,ids,sequence_length=length,page_size=page,splits=splits,output=output)
+            torch.testing.assert_close(actual.float(),expected,atol=0.004,rtol=0.015)
+            empty = function(source,query,value,torch.full_like(ids,-1),sequence_length=length,page_size=page,splits=splits)
+            assert torch.count_nonzero(empty)==0

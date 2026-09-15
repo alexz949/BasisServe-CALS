@@ -18,14 +18,15 @@ namespace {
 
 constexpr int kWarpSize = 32;
 constexpr int kThreads = 256;
-constexpr int kQueriesPerKv = 4;
+constexpr int kQueriesPerKv = BASIS_GQA;
 constexpr int kQueryKeyDim = 128;
-constexpr int kValueRank = 80;
-constexpr int kBaseRank = 16;
-constexpr int kResidualRank = 8;
-constexpr int kPageSize = 32;
-constexpr int kMaxPages = 4096;
+constexpr int kValueRank = BASIS_VALUE_DIM;
+constexpr int kBaseRank = BASIS_BASE_RANK;
+constexpr int kResidualRank = BASIS_RESIDUAL_RANK;
+constexpr int kPageSize = BASIS_PAGE_SIZE;
+constexpr int kMaxPages = 8192;
 constexpr int kMaxSelectedPages = 128;
+constexpr int kBasePadded = ((kBaseRank + 15) / 16 > 0 ? (kBaseRank + 15) / 16 : 1) * 16;
 constexpr int kHalfHeadDim = kQueryKeyDim / 2;
 constexpr int kSharedQueryElements = 16 * kQueryKeyDim;
 constexpr int kSharedScratchElements =
@@ -87,7 +88,7 @@ __global__ void residual_query_code_kernel(
   }
 }
 
-__global__ void conditional_router_page32_lse_kernel(
+__global__ void conditional_router_page_lse_kernel(
     const c10::BFloat16* __restrict__ query,
     const c10::BFloat16* __restrict__ base_code,
     const c10::BFloat16* __restrict__ residual_code,
@@ -114,15 +115,13 @@ __global__ void conditional_router_page32_lse_kernel(
     int64_t output_stride_query,
     float scale) {
 #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 800
-  __shared__ __align__(16) __nv_bfloat16
-      shared_scratch[kSharedScratchElements];
-  __shared__ __align__(16) float
-      shared_accumulator[kSharedAccumulatorElements];
-  __shared__ __align__(16) __nv_bfloat16
-      shared_base[kPageSize * kBaseRank];
-  __shared__ __align__(16) __nv_bfloat16
-      shared_key[kPageSize * kQueryKeyDim];
-  __shared__ __align__(16) float shared_scores[16 * kPageSize];
+  extern __shared__ __align__(16) unsigned char storage[];
+  auto* shared_accumulator = reinterpret_cast<float*>(storage);
+  auto* shared_scores = shared_accumulator + kSharedAccumulatorElements;
+  auto* shared_scratch = reinterpret_cast<__nv_bfloat16*>(shared_scores + 16 * kPageSize);
+  auto* shared_base = shared_scratch + ((kSharedScratchElements + 7) / 8) * 8;
+  auto* shared_right = shared_base + kPageSize * kBasePadded;
+  auto* shared_key = shared_right + kBasePadded * kQueryKeyDim;
 
   const int thread = static_cast<int>(threadIdx.x);
   const int warp = thread / kWarpSize;
@@ -134,18 +133,23 @@ __global__ void conditional_router_page32_lse_kernel(
   const int64_t batch = kv_row / kv_heads;
   const int64_t page_start = page * kPageSize;
 
-  for (int index = thread; index < kPageSize * kBaseRank;
+  for (int index = thread; index < kPageSize * kBasePadded;
        index += kThreads) {
-    const int page_token = index / kBaseRank;
-    const int feature = index % kBaseRank;
+    const int page_token = index / kBasePadded;
+    const int feature = index % kBasePadded;
     const int64_t token = page_start + page_token;
     __nv_bfloat16 loaded = __float2bfloat16_rn(0.0f);
-    if (token < tokens) {
+    if (token < tokens && feature < kBaseRank) {
       const int64_t source = batch * base_stride_batch +
           kv_head * base_stride_head + token * base_stride_token + feature;
       loaded = *reinterpret_cast<const __nv_bfloat16*>(base_code + source);
     }
     shared_base[index] = loaded;
+  }
+  for (int index = thread; index < kBasePadded * kQueryKeyDim; index += kThreads) {
+    shared_right[index] = index / kQueryKeyDim < kBaseRank
+        ? *reinterpret_cast<const __nv_bfloat16*>(base_right + kv_head * kBaseRank * kQueryKeyDim + index)
+        : __float2bfloat16_rn(0.0f);
   }
   __syncthreads();
 
@@ -172,16 +176,11 @@ __global__ void conditional_router_page32_lse_kernel(
           wmma::row_major>
           right;
       wmma::fill_fragment(accumulator, 0.0f);
-      wmma::load_matrix_sync(
-          left,
-          shared_base + output_row * kBaseRank,
-          kBaseRank);
-      wmma::load_matrix_sync(
-          right,
-          reinterpret_cast<const __nv_bfloat16*>(base_right) +
-              kv_head * kBaseRank * kQueryKeyDim + output_column,
-          kQueryKeyDim);
-      wmma::mma_sync(accumulator, left, right, accumulator);
+      for (int inner = 0; inner < kBasePadded; inner += 16) {
+        wmma::load_matrix_sync(left, shared_base + output_row * kBasePadded + inner, kBasePadded);
+        wmma::load_matrix_sync(right, shared_right + inner * kQueryKeyDim + output_column, kQueryKeyDim);
+        wmma::mma_sync(accumulator, left, right, accumulator);
+      }
       wmma::store_matrix_sync(
           shared_accumulator + output_row * kQueryKeyDim + output_column,
           accumulator,
@@ -239,20 +238,19 @@ __global__ void conditional_router_page32_lse_kernel(
     shared_scratch[index] = loaded;
   }
   __nv_bfloat16* shared_query_code = shared_scratch + kSharedQueryElements;
-  if (thread < kQueriesPerKv * kResidualRank) {
-    shared_query_code[thread] =
+  for (int index = thread; index < kQueriesPerKv * kResidualRank; index += kThreads) {
+    shared_query_code[index] =
         *reinterpret_cast<const __nv_bfloat16*>(
             query_code +
             (batch * kv_heads * kQueriesPerKv +
              kv_head * kQueriesPerKv) *
                 kResidualRank +
-            thread);
+            index);
   }
   __syncthreads();
 
-  if (warp < 2) {
+  for (int output_column = warp * 16; output_column < kPageSize; output_column += (kThreads / kWarpSize) * 16) {
     using namespace nvcuda;
-    const int output_column = warp * 16;
     wmma::fragment<wmma::accumulator, 16, 16, 16, float> accumulator;
     wmma::fill_fragment(accumulator, 0.0f);
 #pragma unroll
@@ -291,37 +289,32 @@ __global__ void conditional_router_page32_lse_kernel(
   }
   __syncthreads();
 
-  if (warp < kQueriesPerKv) {
-    const int page_token = lane;
-    const int64_t token = page_start + page_token;
-    float score = -CUDART_INF_F;
-    if (token < tokens) {
-      const float base_score =
-          round_bfloat16(shared_scores[warp * kPageSize + page_token]);
-      float residual_score = 0.0f;
+  for (int head = warp; head < kQueriesPerKv; head += kThreads / kWarpSize) {
+    float scores[(kPageSize + 31) / 32];
+    float local_max = -CUDART_INF_F;
 #pragma unroll
-      for (int residual = 0; residual < kResidualRank; ++residual) {
-        residual_score = fmaf(
-            __bfloat162float(
-                shared_query_code[warp * kResidualRank + residual]),
-            static_cast<float>(
-                residual_code[
-                    batch * residual_stride_batch +
-                    kv_head * residual_stride_head +
-                    token * residual_stride_token + residual]),
-            residual_score);
+    for (int slot = 0; slot < (kPageSize + 31) / 32; ++slot) {
+      const int page_token = lane + slot * 32;
+      const int64_t token = page_start + page_token;
+      float score = -CUDART_INF_F;
+      if (page_token < kPageSize && token < tokens) {
+        float residual_score = 0.0f;
+        for (int residual = 0; residual < kResidualRank; ++residual) {
+          residual_score = fmaf(__bfloat162float(shared_query_code[head * kResidualRank + residual]),
+              static_cast<float>(residual_code[batch * residual_stride_batch + kv_head * residual_stride_head + token * residual_stride_token + residual]), residual_score);
+        }
+        score = round_bfloat16(round_bfloat16(round_bfloat16(shared_scores[head * kPageSize + page_token]) + round_bfloat16(residual_score)) * scale);
       }
-      residual_score = round_bfloat16(residual_score);
-      score = round_bfloat16(
-          round_bfloat16(base_score + residual_score) * scale);
+      scores[slot] = score;
+      local_max = fmaxf(local_max, score);
     }
-    const float maximum = warp_max(score);
-    const float sum = warp_sum(__expf(score - maximum));
-    if (lane == 0) {
-      output[batch * output_stride_batch + kv_head * output_stride_head +
-             warp * output_stride_query + page] = maximum + __logf(sum);
-    }
+    const float maximum = warp_max(local_max);
+    float local_sum = 0.0f;
+    for (int slot = 0; slot < (kPageSize + 31) / 32; ++slot) local_sum += __expf(scores[slot] - maximum);
+    const float sum = warp_sum(local_sum);
+    if (lane == 0) output[batch * output_stride_batch + kv_head * output_stride_head + head * output_stride_query + page] = maximum + __logf(sum);
   }
+
 #endif
 }
 
@@ -357,7 +350,7 @@ __global__ void conditional_router_append_decode_kernel(
     int64_t rope_cache_stride_token,
     bool write_rope) {
   __shared__ __align__(16) __nv_bfloat16 shared_value[kValueRank];
-  __shared__ __align__(16) __nv_bfloat16 shared_base[kBaseRank];
+  __shared__ __align__(16) __nv_bfloat16 shared_base[kBaseRank > 0 ? kBaseRank : 1];
   __shared__ __align__(16) __nv_bfloat16 shared_residual[kQueryKeyDim];
 
   const int thread = static_cast<int>(threadIdx.x);
@@ -371,7 +364,7 @@ __global__ void conditional_router_append_decode_kernel(
   const int64_t key_input_base =
       batch * key_stride_batch + kv_head * key_stride_head;
 
-  if (thread < kValueRank) {
+  for (int thread = threadIdx.x; thread < kValueRank; thread += kThreads) {
     const c10::BFloat16 loaded = value[value_input_base + thread];
     shared_value[thread] =
         *reinterpret_cast<const __nv_bfloat16*>(value + value_input_base + thread);
@@ -453,7 +446,7 @@ __global__ void conditional_router_append_decode_kernel(
   }
   __syncthreads();
 
-  if (warp < kResidualRank) {
+  for (int residual = warp; residual < kResidualRank; residual += kThreads / kWarpSize) {
     float partial = 0.0f;
 #pragma unroll
     for (int feature = lane; feature < kQueryKeyDim; feature += kWarpSize) {
@@ -461,7 +454,7 @@ __global__ void conditional_router_append_decode_kernel(
           __bfloat162float(shared_residual[feature]),
           static_cast<float>(
               residual_encoder[
-                  (kv_head * kQueryKeyDim + feature) * kResidualRank + warp]),
+                  (kv_head * kQueryKeyDim + feature) * kResidualRank + residual]),
           partial);
     }
     const float result = warp_sum(partial);
@@ -469,7 +462,7 @@ __global__ void conditional_router_append_decode_kernel(
       residual_cache[
           batch * residual_cache_stride_batch +
           kv_head * residual_cache_stride_head +
-          start * residual_cache_stride_token + warp] =
+          start * residual_cache_stride_token + residual] =
           static_cast<c10::BFloat16>(result);
     }
   }
@@ -633,7 +626,33 @@ __global__ void select_fixed_group_max_pages_kernel(
 
 }  // namespace
 
-at::Tensor conditional_router_page32_lse_cuda(
+at::Tensor conditional_router_query_code_cuda(
+    const at::Tensor& query, const at::Tensor& residual_query,
+    const at::Tensor& query_code) {
+  assert(query.is_cuda() && residual_query.device() == query.device() && query_code.device() == query.device());
+  assert(query.scalar_type() == at::kBFloat16 && residual_query.scalar_type() == at::kBFloat16 && query_code.scalar_type() == at::kBFloat16);
+  assert(query.dim() == 4 && query.size(2) == 1 && query.size(3) == kQueryKeyDim && query.stride(3) == 1);
+  assert(residual_query.sizes() == at::IntArrayRef({query.size(1), kQueryKeyDim, kResidualRank}));
+  assert(query_code.numel() == query.size(0) * query.size(1) * kResidualRank);
+  assert(residual_query.is_contiguous() && query_code.is_contiguous());
+  c10::cuda::CUDAGuard guard(query.device());
+  const cudaStream_t stream = c10::cuda::getCurrentCUDAStream(query.get_device()).stream();
+  residual_query_code_kernel
+      <<<static_cast<unsigned int>(query.size(0) * query.size(1)),
+         kWarpSize,
+         0,
+         stream>>>(
+          query.const_data_ptr<c10::BFloat16>(),
+          residual_query.const_data_ptr<c10::BFloat16>(),
+          query_code.mutable_data_ptr<c10::BFloat16>(),
+          query.size(1),
+          query.stride(0),
+          query.stride(1));
+  assert(cudaGetLastError() == cudaSuccess);
+  return query_code;
+}
+
+at::Tensor conditional_router_page_lse_cuda(
     const at::Tensor& query,
     const at::Tensor& base_code,
     const at::Tensor& residual_code,
@@ -644,7 +663,7 @@ at::Tensor conditional_router_page32_lse_cuda(
     const at::Tensor& rope_sin,
     const at::Tensor& query_code,
     const at::Tensor& output,
-    double scale) {
+    double scale, bool query_code_prepared) {
   assert(query.is_cuda() && base_code.is_cuda() && residual_code.is_cuda());
   assert(base_right.is_cuda() && base_bias.is_cuda());
   assert(residual_query.is_cuda() && rope_cos.is_cuda() && rope_sin.is_cuda());
@@ -703,22 +722,15 @@ at::Tensor conditional_router_page32_lse_cuda(
   c10::cuda::CUDAGuard guard(query.device());
   const cudaStream_t stream =
       c10::cuda::getCurrentCUDAStream(query.get_device()).stream();
-  residual_query_code_kernel
-      <<<static_cast<unsigned int>(query.size(0) * query.size(1)),
-         kWarpSize,
-         0,
-         stream>>>(
-          query.const_data_ptr<c10::BFloat16>(),
-          residual_query.const_data_ptr<c10::BFloat16>(),
-          query_code.mutable_data_ptr<c10::BFloat16>(),
-          query.size(1),
-          query.stride(0),
-          query.stride(1));
-  conditional_router_page32_lse_kernel
+  if (!query_code_prepared) conditional_router_query_code_cuda(query, residual_query, query_code);
+  constexpr int shared_bytes = sizeof(float) * (kSharedAccumulatorElements + 16 * kPageSize)
+      + sizeof(__nv_bfloat16) * (((kSharedScratchElements + 7) / 8) * 8 + kPageSize * kBasePadded + kBasePadded * kQueryKeyDim + kPageSize * kQueryKeyDim);
+  assert(cudaFuncSetAttribute(conditional_router_page_lse_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, shared_bytes) == cudaSuccess);
+  conditional_router_page_lse_kernel
       <<<static_cast<unsigned int>(
              base_code.size(0) * base_code.size(1) * pages),
          kThreads,
-         0,
+         shared_bytes,
          stream>>>(
           query.const_data_ptr<c10::BFloat16>(),
           base_code.const_data_ptr<c10::BFloat16>(),
@@ -913,8 +925,22 @@ at::Tensor select_fixed_group_max_pages_cuda(
             page_log_mass.stride(0),
             page_log_mass.stride(1),
             page_log_mass.stride(2));
-  } else {
+  } else if (pages <= kThreads * 16) {
     select_fixed_group_max_pages_kernel<16>
+        <<<static_cast<unsigned int>(rows), kThreads, 0, stream>>>(
+            page_log_mass.const_data_ptr<float>(),
+            output.mutable_data_ptr<int64_t>(),
+            page_log_mass.size(1),
+            pages,
+            selected_count,
+            prefix_count,
+            fixed_count,
+            force_current_page,
+            page_log_mass.stride(0),
+            page_log_mass.stride(1),
+            page_log_mass.stride(2));
+  } else {
+    select_fixed_group_max_pages_kernel<32>
         <<<static_cast<unsigned int>(rows), kThreads, 0, stream>>>(
             page_log_mass.const_data_ptr<float>(),
             output.mutable_data_ptr<int64_t>(),

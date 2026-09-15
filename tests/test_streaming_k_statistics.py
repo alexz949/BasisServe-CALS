@@ -45,3 +45,16 @@ def test_fisher_packing_and_query_major_window_minor_order():
     torch.testing.assert_close(restored.fisher_grams_by_head,grams.reshape(heads,queries*windows,dim,dim),rtol=0,atol=0)
     assert restored.teacher_fisher_energy==4.
     assert payloads[0]['packed'].shape[-1]==dim*(dim+1)//2
+
+
+def test_base_zero_removes_intercept_and_leaves_full_key_as_residual():
+    torch.manual_seed(23)
+    v=torch.randn(50,2,8,dtype=torch.float64)
+    k=torch.randn_like(v)+4
+    moments=RawBaseMoments(2,8);moments.update(v,k)
+    encoder=torch.eye(8).expand(2,-1,-1)
+    maps=base_from_moments(moments.tensors(),encoder,rank=0)[0]
+    for g,base in enumerate(maps):
+        prediction=v[:,g]@base.left@base.right+base.bias
+        assert torch.count_nonzero(prediction)==0
+    assert base_mse(moments.tensors(),encoder,maps)['relative_mse']==1.

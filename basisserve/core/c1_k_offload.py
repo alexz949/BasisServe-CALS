@@ -571,3 +571,103 @@ def offloaded_kq_svd_c1_attention(
         selection=selection,
         pages=pages,
     )
+
+
+class PreparedExactKeyPageFetch:
+    """Reusable staging for the existing page store; no hot-path allocations.
+
+    GPU page IDs are copied to a preallocated pinned index buffer. The CPU
+    gathers requested pages into pinned staging, then one asynchronous DMA
+    copies that staging to the GPU. The D2H dependency is intentionally kept.
+    """
+
+    def __init__(self, store: PinnedCPUExactKeyPageStore, *, pages_per_head: int,
+                 page_size: int, device: torch.device):
+        assert pages_per_head > 0 and page_size > 0 and device.type == 'cuda'
+        assert store.exact_key.is_pinned()
+        self.bank = store._page_bank(page_size)
+        batch, heads, length, dim = store.exact_key.shape
+        self.batch, self.heads = batch, heads
+        self.page_size, self.pages_per_head = page_size, pages_per_head
+        count = batch * heads * pages_per_head
+        self.gpu_indices = torch.empty(batch, heads, pages_per_head, device=device, dtype=torch.int64)
+        self.host_indices = torch.empty(count, dtype=torch.int64, pin_memory=True)
+        self.offsets = (torch.arange(batch * heads, device=device).view(batch, heads, 1)
+                        * math.ceil(length / page_size))
+        self.staging = torch.empty(count, page_size, dim, dtype=store.exact_key.dtype, pin_memory=True)
+        self.destination = torch.empty_like(self.staging, device=device)
+        self.indices_ready = torch.cuda.Event()
+        self.requested_bytes = self.staging.numel() * self.staging.element_size()
+        self.device = device
+
+    def __call__(self, page_ids: Tensor) -> Tensor:
+        assert page_ids.shape == self.gpu_indices.shape
+        torch.add(page_ids, self.offsets, out=self.gpu_indices)
+        self.host_indices.copy_(self.gpu_indices.view(-1), non_blocking=True)
+        self.indices_ready.record(torch.cuda.current_stream(self.device))
+        self.indices_ready.synchronize()
+        torch.index_select(self.bank, 0, self.host_indices, out=self.staging)
+        self.destination.copy_(self.staging, non_blocking=True)
+        return self.destination.view(self.batch, self.heads,
+                                     self.pages_per_head * self.page_size, -1)
+
+
+class PreparedQueryKeyFetch:
+    """Deduplicated token DMA, with an inverse map for independent query supports.
+
+    The union controls only the bytes fetched. Attention must use inverse_ids
+    for K and the original per-query token IDs for V. Buffers are reused on
+    one CUDA stream; the D2H event also protects the prior staging H2D read.
+    """
+    def __init__(self,store: PinnedCPUExactKeyPageStore,*,groups:int,
+                 tokens_per_query:int,device:torch.device):
+        assert store.exact_key.is_pinned() and groups>0 and tokens_per_query>0
+        b,h,t,d=store.exact_key.shape
+        self.shape=(b,h,groups,tokens_per_query);self.length=t
+        self.bank=store._page_bank(1).view(b*h*t,d)
+        self.count=b*h*groups*tokens_per_query
+        self.group_requests=groups*tokens_per_query
+        self.sentinel=b*h*t;self.device=device
+        self.encoded=torch.empty(self.count,device=device,dtype=torch.int64)
+        self.sorted_ids=torch.empty_like(self.encoded);self.permutation=torch.empty_like(self.encoded)
+        self.starts=torch.empty(self.count,device=device,dtype=torch.bool)
+        self.positions=torch.empty_like(self.encoded)
+        self.unique_ids=torch.empty_like(self.encoded)
+        self.inverse_ids=torch.empty(self.shape,device=device,dtype=torch.int64)
+        self.gpu_count=torch.empty((),device=device,dtype=torch.int64)
+        self.host_count=torch.empty((),dtype=torch.int64,pin_memory=True)
+        self.host_indices=torch.empty(self.count,dtype=torch.int64,pin_memory=True)
+        self.staging=torch.empty(self.count,d,dtype=store.exact_key.dtype,pin_memory=True)
+        self.destination=torch.empty_like(self.staging,device=device)
+        self.ready=torch.cuda.Event();self.actual_count=0
+
+    def compact(self,ids:Tensor):
+        from basisserve.kernels.selected_key_compaction import encode_requests,pack_requests
+        assert ids.shape==self.shape and ids.is_contiguous() and ids.dtype==torch.int64
+        grid=((self.count+255)//256,)
+        encode_requests[grid](ids,self.encoded,LENGTH=self.length,GROUP_REQUESTS=self.group_requests,COUNT=self.count,BLOCK=256)
+        torch.sort(self.encoded,out=(self.sorted_ids,self.permutation))
+        self.starts[:1].fill_(True)
+        torch.ne(self.sorted_ids[1:],self.sorted_ids[:-1],out=self.starts[1:])
+        torch.cumsum(self.starts,0,out=self.positions)
+        pack_requests[grid](self.sorted_ids,self.permutation,self.positions,self.unique_ids,
+            self.inverse_ids,self.gpu_count,SENTINEL=self.sentinel,COUNT=self.count,BLOCK=256)
+
+    def __call__(self,ids:Tensor):
+        self.compact(ids)
+        self.host_count.copy_(self.gpu_count,non_blocking=True)
+        self.ready.record(torch.cuda.current_stream(self.device));self.ready.synchronize()
+        self.actual_count=int(self.host_count)
+        n=self.actual_count
+        self.host_indices[:n].copy_(self.unique_ids[:n],non_blocking=True)
+        self.ready.record(torch.cuda.current_stream(self.device));self.ready.synchronize()
+        torch.index_select(self.bank,0,self.host_indices[:n],out=self.staging[:n])
+        self.destination[:n].copy_(self.staging[:n],non_blocking=True)
+        return self.destination
+
+    def traffic(self):
+        return dict(unique_key_tokens=self.actual_count,
+            logical_k_bytes=self.actual_count*self.destination.shape[-1]*self.destination.element_size(),
+            h2d_dma_payload_bytes=self.actual_count*self.destination.shape[-1]*self.destination.element_size(),
+            d2h_index_payload_bytes=(self.actual_count+1)*8,
+            measured_pcie_bus_bytes=None)

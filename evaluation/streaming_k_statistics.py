@@ -1,6 +1,6 @@
 """Small sufficient statistics for affine V-to-K regression and packed Fisher."""
 import torch
-from basisserve.core.c1_v_conditional_k_router import fit_affine_reduced_rank_map
+from basisserve.core.c1_v_conditional_k_router import AffineReducedRankMap, fit_affine_reduced_rank_map
 from basisserve.core.gqa_joint_routing_payload_s80_fisher import (
     S80CompactSoftmaxFisherRouting, pack_symmetric_fisher_grams,
     unpack_symmetric_fisher_grams,
@@ -35,6 +35,11 @@ class RawBaseMoments:
 
 def base_from_moments(moments, encoder, rank=16):
     f = encoder.cpu().double()
+    if rank == 0:
+        # Pure R routing: zero predictor, including zero intercept.
+        return {0: tuple(AffineReducedRankMap(torch.zeros(f.shape[-1], 0, dtype=torch.float64),
+            torch.zeros(0, moments['sum_k'].shape[-1], dtype=torch.float64),
+            torch.zeros_like(moments['sum_k'][g])) for g in range(len(f)))}
     maps = []
     for g in range(len(f)):
         maps.append(fit_affine_reduced_rank_map(row_count=int(moments['count']),

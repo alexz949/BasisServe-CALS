@@ -28,7 +28,7 @@ from basisserve.core.qwen3_8b_tp4_k_offload import (  # noqa: E402
 )
 from basisserve.kernels.mapped_host_paged_attention import (  # noqa: E402
     conditional_router_append_decode,
-    conditional_router_page32_lse,
+    conditional_router_page_lse,
     prepare_mapped_host_paged_attention_extension,
     select_fixed_group_max_pages_cuda,
 )
@@ -129,7 +129,7 @@ def _inputs(tokens: int, *, device: torch.device) -> dict[str, Tensor]:
 
 
 def _fused(inputs: dict[str, Tensor]) -> Tensor:
-    return conditional_router_page32_lse(
+    return conditional_router_page_lse(
         inputs["query"],
         inputs["base_code"],
         inputs["residual_code"],
@@ -413,7 +413,7 @@ def main() -> None:
         repeat=args.reference_repeat,
     )
     payload = {
-        "format": "basisserve.conditional_router_page32_lse_validation.v2",
+        "format": "basisserve.conditional_router_page_lse_validation.v2",
         "status": "complete",
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "command": shlex.join(sys.argv),

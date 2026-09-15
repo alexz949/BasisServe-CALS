@@ -38,7 +38,7 @@ def encoder_for(identity, layer):
 
 
 def restore_base(payload):
-    return {16:tuple(AffineReducedRankMap(payload['left'][g],payload['right'][g],payload['bias'][g])
+    return {payload['left'].shape[-1]:tuple(AffineReducedRankMap(payload['left'][g],payload['right'][g],payload['bias'][g])
         for g in range(len(payload['left'])))}
 
 
@@ -62,7 +62,7 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
         if fisher:
             base_payloads[layer],meta=verified(layer_file(args.output,'base',layer))
             assert meta['protocol']==protocol and meta['identity_sha256']==sha256(args.identity)
-            _,selection_meta=verified(layer_file(args.output,'moments',layer))
+            _,selection_meta=verified(layer_file(args.moments_root or args.output,'moments',layer))
             selections[layer]=selection_meta['selections']
         else:
             moments[layer]={s:RawBaseMoments(groups,dim) for s in ('fit','heldout')}
@@ -90,7 +90,7 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
                     value_encoder=base_payloads[layer]['encoder'],base_maps=restore_base(base_payloads[layer]),
                     page_size=32,excluded_prefix_pages=1,device=torch.device('cuda'))
                 path=args.output/'fisher'/f'l{layer:03d}'/f'w{index:03d}.safetensors'
-                save_record(path,packed_fisher(stats[16]),dict(protocol=protocol,layer=layer,
+                save_record(path,packed_fisher(stats[args.base_rank]),dict(protocol=protocol,layer=layer,
                     window_id=index,split=split,base_sha256=sha256(layer_file(args.output,'base',layer)),
                     diagnostics=diagnostics,storage='symmetric upper triangle FP32'))
         handles.append(module.register_forward_pre_hook(capture,with_kwargs=True))
@@ -119,7 +119,7 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
                     context_length=args.sequence_length,num_bins=4,queries_per_bin=qpb)
                 selections[split]=selected
             tensors={f'{split}_{name}':value for split,m in moments[layer].items() for name,value in m.tensors().items()}
-            save_record(layer_file(args.output,'moments',layer),tensors,
+            save_record(layer_file(args.moments_root or args.output,'moments',layer),tensors,
                 dict(protocol=protocol,layer=layer,selections=selections,selection_fit_only=True))
             payload={f'{split}_covariance':covariances[layer][split].cpu()/moments[layer][split].count
                 for split in ('fit','heldout')}
@@ -132,17 +132,25 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
 
 def fit_bases(args,identity,layers,protocol):
     for layer in layers:
-        payload,meta=verified(layer_file(args.output,'moments',layer))
-        assert meta['protocol']==protocol
+        payload,meta=verified(layer_file(args.moments_root or args.output,'moments',layer))
+        assert meta['protocol']['model_config_sha256']==protocol['model_config_sha256']
+        assert meta['protocol']['windows_sha256']==protocol['windows_sha256']
+        assert meta['protocol']['sequence_length']==protocol['sequence_length']
+        assert not meta['protocol']['smoke'] or args.smoke
+        for key in ('windows_manifest_sha256', 'fit_queries', 'diagnostic_queries'):
+            assert meta['protocol'][key] == protocol[key]
+        if not args.smoke:
+            for key in ('fit_ids', 'diagnostic_ids'):
+                assert meta['protocol'][key] == protocol[key]
         split_moments={s:{k.removeprefix(s+'_'):v for k,v in payload.items() if k.startswith(s+'_')}
             for s in ('fit','heldout')}
         encoder=encoder_for(identity,layer)
-        bases=base_from_moments(split_moments['fit'],encoder)
-        tensors={name:torch.stack([getattr(m,name) for m in bases[16]]) for name in ('left','right','bias')}
+        bases=base_from_moments(split_moments['fit'],encoder,rank=args.base_rank)
+        tensors={name:torch.stack([getattr(m,name) for m in bases[args.base_rank]]) for name in ('left','right','bias')}
         tensors['encoder']=encoder
         save_record(layer_file(args.output,'base',layer),tensors,dict(protocol=protocol,layer=layer,
-            identity_sha256=sha256(args.identity),moments_sha256=sha256(layer_file(args.output,'moments',layer)),
-            metrics={s:base_mse(m,encoder,bases[16]) for s,m in split_moments.items()}))
+            identity_sha256=sha256(args.identity),moments_sha256=sha256(layer_file(args.moments_root or args.output,'moments',layer)),
+            metrics={s:base_mse(m,encoder,bases[args.base_rank]) for s,m in split_moments.items()}))
 
 
 def fit_residuals(args,identity,layers,protocol):
@@ -160,16 +168,16 @@ def fit_residuals(args,identity,layers,protocol):
                 assert record['base_sha256']==sha256(layer_file(args.output,'base',layer))
                 payloads.append(payload)
             heads=payloads[0]['queries'].shape[0]
-            stats[split]={16:load_fisher_windows(payloads,heads,groups,dim)}
+            stats[split]={args.base_rank:load_fisher_windows(payloads,heads,groups,dim)}
             del payloads
-        factors,losses=_fit_residual_grid(stats['fit'],stats['heldout'],residual_ranks=(16,),
+        factors,losses=_fit_residual_grid(stats['fit'],stats['heldout'],residual_ranks=(args.residual_rank,),
             sweeps=args.sweeps,relative_damping=1e-5,iterative_tolerance=1e-5,
             iterative_max_iterations=args.pcg_iterations,device=torch.device('cuda'))
-        tensors={f'base_{name}_b16':base[name].float() for name in ('left','right','bias')}
-        tensors.update(residual_encoder_b16_r16=factors[(16,16)][0].cpu().float(),
-            residual_query_b16_r16=factors[(16,16)][1].cpu().float())
+        tensors={f'base_{name}_b{args.base_rank}':base[name].float() for name in ('left','right','bias')}
+        tensors.update({f'residual_encoder_b{args.base_rank}_r{args.residual_rank}':factors[(args.base_rank,args.residual_rank)][0].cpu().float(),
+            f'residual_query_b{args.base_rank}_r{args.residual_rank}':factors[(args.base_rank,args.residual_rank)][1].cpu().float()})
         assert all(torch.isfinite(t).all() for t in tensors.values())
-        save_record(layer_file(args.output,'ours_b16r16',layer),tensors,
+        save_record(layer_file(args.output,f'ours_b{args.base_rank}r{args.residual_rank}',layer),tensors,
             dict(protocol=protocol,layer=layer,v_rank=base['encoder'].shape[-1],identity_sha256=sha256(args.identity),losses=losses,
                 base_sha256=sha256(layer_file(args.output,'base',layer)),sweeps=args.sweeps,pcg_iterations=args.pcg_iterations))
         del stats,factors
@@ -205,6 +213,9 @@ def main():
     p.add_argument('stage',choices=('moments','base','fisher','fit','assemble-covariance','all'))
     for name in ('identity','windows','output'):p.add_argument('--'+name,type=Path,required=True)
     p.add_argument('--layers',required=True)
+    p.add_argument('--base-rank',type=int,default=16)
+    p.add_argument('--residual-rank',type=int,default=16)
+    p.add_argument('--moments-root',type=Path)
     p.add_argument('--sequence-length',type=int,default=65536)
     p.add_argument('--fit-count',type=int,default=64)
     p.add_argument('--diagnostic-count',type=int,default=16)
@@ -213,6 +224,8 @@ def main():
     p.add_argument('--pcg-iterations',type=int,default=100)
     p.add_argument('--smoke',action='store_true')
     args=p.parse_args();configure()
+    assert 0<=args.base_rank<=128 and 0<args.residual_rank<=128
+    assert args.moments_root is None or args.stage not in ('moments','all')
     identity=read_json(args.identity)
     assert identity['status']=='complete'
     assert sha256(Path(identity['model'])/'config.json')==identity['model_config_sha256']
@@ -233,7 +246,7 @@ def main():
         windows_sha256=sha256(args.windows),windows_manifest_sha256=sha256(args.windows.with_name('manifest.json')),
         sequence_length=args.sequence_length,fit_ids=list(range(args.fit_count)),
         diagnostic_ids=list(range(64,64+args.diagnostic_count)),fit_queries=64,diagnostic_queries=32,
-        base_rank=16,residual_rank=16,page_size=32,excluded_prefix_pages=1,chunk_rows=args.chunk_rows,
+        base_rank=args.base_rank,residual_rank=args.residual_rank,page_size=32,excluded_prefix_pages=1,chunk_rows=args.chunk_rows,
         smoke=args.smoke,teacher='native dense BF16 SDPA, model.model, use_cache=False',
         base_moments='FP64 raw moments and encoder transform; no bitwise claim versus projected FP32 accumulation',
         covariance='FP32 chunked normalized o_proj input second moment',

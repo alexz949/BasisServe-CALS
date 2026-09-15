@@ -177,6 +177,8 @@ def _gqa_indexed_attention_kernel(
     key_ptr,
     value_ptr,
     selected_ptr,
+    key_rows_ptr,
+    prefix_ptr,
     output_ptr,
     sequence_length,
     query_stride_batch,
@@ -191,6 +193,9 @@ def _gqa_indexed_attention_kernel(
     value_stride_head,
     value_stride_token,
     value_stride_feature,
+    prefix_stride_batch,
+    prefix_stride_head,
+    prefix_stride_token,
     selected_stride_batch,
     selected_stride_head,
     selected_stride_token,
@@ -207,6 +212,8 @@ def _gqa_indexed_attention_kernel(
     BLOCK_QK: tl.constexpr,
     BLOCK_VALUE: tl.constexpr,
     BLOCK_SELECTED: tl.constexpr,
+    PACKED_KEYS: tl.constexpr,
+    PREFIX_DIM: tl.constexpr,
 ):
     row = tl.program_id(0)
     batch_index = row // QUERY_HEADS
@@ -241,11 +248,17 @@ def _gqa_indexed_attention_kernel(
             & (token_ids >= 0)
             & (token_ids < sequence_length)
         )
+        if PACKED_KEYS:
+            key_token=tl.load(key_rows_ptr+batch_index*selected_stride_batch+query_head*selected_stride_head+
+                selected_offsets*selected_stride_token,selected_offsets<SELECTED_COUNT,other=-1)
+            valid=valid&(key_token>=0)
+        else:
+            key_token=token_ids
         keys = tl.load(
             key_ptr
             + batch_index * key_stride_batch
             + kv_head * key_stride_head
-            + token_ids[:, None] * key_stride_token
+            + key_token[:, None] * key_stride_token
             + qk_offsets[None, :] * key_stride_feature,
             mask=valid[:, None] & (qk_offsets[None, :] < QK_DIM),
             other=0.0,
@@ -271,10 +284,15 @@ def _gqa_indexed_attention_kernel(
             + batch_index * value_stride_batch
             + kv_head * value_stride_head
             + token_ids[:, None] * value_stride_token
-            + value_offsets[None, :] * value_stride_feature,
-            mask=valid[:, None] & (value_offsets[None, :] < VALUE_DIM),
+            + (value_offsets[None, :]-PREFIX_DIM) * value_stride_feature,
+            mask=valid[:, None] & (value_offsets[None, :] < VALUE_DIM)&(value_offsets[None,:]>=PREFIX_DIM),
             other=0.0,
         ).to(tl.float32)
+        if PREFIX_DIM>0:
+            prefix=tl.load(prefix_ptr+batch_index*prefix_stride_batch+kv_head*prefix_stride_head+
+                token_ids[:,None]*prefix_stride_token+value_offsets[None,:],
+                valid[:,None]&(value_offsets[None,:]<PREFIX_DIM),other=0.).to(tl.float32)
+            values=tl.where(value_offsets[None,:]<PREFIX_DIM,prefix,values)
         accumulator = accumulator * previous_scale + tl.sum(
             probabilities[:, None] * values,
             axis=0,
@@ -418,13 +436,24 @@ def gqa_indexed_sparse_decode_attention_triton(
     selected_token_ids: Tensor,
     *,
     scale: float,
+    selected_key_rows: Tensor | None = None,
+    value_prefix: Tensor | None = None,
+    output: Tensor | None = None,
 ) -> Tensor:
     """Attend directly to per-Query selected token IDs without K/V gathers."""
 
-    assert query.ndim == exact_key.ndim == value.ndim == 4
+    assert query.ndim == value.ndim == 4
     batch, query_heads, query_tokens, qk_dim = map(int, query.shape)
-    key_batch, kv_heads, sequence_length, key_dim = map(int, exact_key.shape)
     value_batch, value_heads, value_length, value_dim = map(int, value.shape)
+    packed=selected_key_rows is not None
+    if packed:
+        assert exact_key.ndim==2 and selected_key_rows.is_contiguous()
+        key_batch,kv_heads,sequence_length,key_dim=batch,value_heads,value_length,exact_key.shape[-1]
+        key_strides=(0,0,exact_key.stride(0),exact_key.stride(1))
+    else:
+        assert exact_key.ndim==4
+        key_batch,kv_heads,sequence_length,key_dim=map(int,exact_key.shape)
+        key_strides=exact_key.stride()
     if selected_token_ids.ndim == 4:
         assert int(selected_token_ids.shape[2]) == 1
         selected_token_ids = selected_token_ids[:, :, 0]
@@ -445,16 +474,21 @@ def gqa_indexed_sparse_decode_attention_triton(
     assert query.dtype in (torch.float16, torch.bfloat16)
     assert all(tensor.stride(-1) == 1 for tensor in tensors)
     selected_token_ids = selected_token_ids.contiguous()
+    if packed:
+        assert selected_key_rows.shape==selected_token_ids.shape
+        assert selected_key_rows.device==query.device and selected_key_rows.dtype==torch.int64
+    prefix_dim=0
+    prefix_strides=(0,0,0)
+    if value_prefix is not None:
+        assert value_prefix.shape[:3]==value.shape[:3] and value_prefix.stride(-1)==1
+        assert value_prefix.dtype==query.dtype and value_prefix.device==query.device
+        prefix_dim=value_prefix.shape[-1];prefix_strides=value_prefix.stride()[:3]
+        value_dim+=prefix_dim
     selected_scale = float(scale)
     assert math.isfinite(selected_scale) and selected_scale > 0.0
-    output = torch.empty(
-        batch,
-        query_heads,
-        1,
-        value_dim,
-        dtype=query.dtype,
-        device=query.device,
-    )
+    if output is None:
+        output=torch.empty(batch,query_heads,1,value_dim,dtype=query.dtype,device=query.device)
+    assert output.shape==(batch,query_heads,1,value_dim) and output.dtype==query.dtype and output.device==query.device
     block_qk = triton.next_power_of_2(qk_dim)
     block_value = triton.next_power_of_2(value_dim)
     block_selected = 32 if value_dim > 64 else 64
@@ -464,11 +498,14 @@ def gqa_indexed_sparse_decode_attention_triton(
             exact_key,
             value,
             selected_token_ids,
+            selected_key_rows if packed else selected_token_ids,
+            value_prefix if prefix_dim else value,
             output,
             sequence_length,
             *query.stride(),
-            *exact_key.stride(),
+            *key_strides,
             *value.stride(),
+            *prefix_strides,
             *selected_token_ids.stride(),
             *output.stride(),
             SCALE=selected_scale,
@@ -480,6 +517,8 @@ def gqa_indexed_sparse_decode_attention_triton(
             BLOCK_QK=block_qk,
             BLOCK_VALUE=block_value,
             BLOCK_SELECTED=block_selected,
+            PACKED_KEYS=packed,
+            PREFIX_DIM=prefix_dim,
             num_warps=4,
             num_stages=2,
         )

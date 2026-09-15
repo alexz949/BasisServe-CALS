@@ -25,7 +25,7 @@ from basisserve.kernels.mapped_host_paged_attention import (  # noqa: E402
     append_mapped_host_key,
     mapped_host_bf16_empty,
     mapped_host_device_pointer,
-    mapped_host_page32_v80_attention,
+    mapped_host_paged_attention,
 )
 
 
@@ -172,7 +172,7 @@ def main() -> None:
     measurements = []
     for splits in split_grid:
         for _ in range(args.warmup):
-            mapped_host_page32_v80_attention(
+            mapped_host_paged_attention(
                 host_key,
                 query,
                 value,
@@ -183,7 +183,7 @@ def main() -> None:
                 workspace=workspace,
                 output=output,
             )
-        observed = mapped_host_page32_v80_attention(
+        observed = mapped_host_paged_attention(
             host_key,
             query,
             value,
@@ -205,7 +205,7 @@ def main() -> None:
         stop = torch.cuda.Event(enable_timing=True)
         start.record()
         for _ in range(args.repeat):
-            mapped_host_page32_v80_attention(
+            mapped_host_paged_attention(
                 host_key,
                 query,
                 value,
@@ -224,7 +224,7 @@ def main() -> None:
         for _ in range(args.repeat):
             cache_flush.add_(1.0)
             start.record()
-            mapped_host_page32_v80_attention(
+            mapped_host_paged_attention(
                 host_key,
                 query,
                 value,

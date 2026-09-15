@@ -20,13 +20,17 @@ def chunk_tokens(chunks,size):
 
 class C1ShadowKVState:
     @torch.inference_mode()
-    def __init__(self,pre_key,post_key,cos,sin,rank=160,budget=2048,chunk=8,outliers=48):
+    def __init__(self,pre_key,post_key,cos,sin,rank=160,budget=2048,chunk=8,outliers=48,landmark_alignment=1):
         b,h,length,d=pre_key.shape
-        assert b==1 and pre_key.shape==post_key.shape and budget%chunk==0
+        assert b>0 and pre_key.shape==post_key.shape and budget%chunk==0
         assert pre_key.dtype==post_key.dtype and 0<rank<=min(length,h*d)
         self.rank,self.budget,self.chunk=rank,budget,chunk
         self.outliers=outliers;self.prompt_length=length;self.length=length;self.steps=0
         self.chunks=length//chunk-4
+        assert landmark_alignment>0
+        # ShadowKVCache_CPU aligns the context chunk count for its CUTLASS path.
+        # The accuracy adapter's ShadowKVCache uses an unaligned chunk count.
+        self.chunks-=self.chunks%landmark_alignment
         assert self.chunks>outliers+budget//chunk
         self.context_end=self.chunks*chunk
         flat=pre_key.transpose(1,2).reshape(b,length,h*d)

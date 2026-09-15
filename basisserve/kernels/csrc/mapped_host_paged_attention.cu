@@ -12,16 +12,16 @@
 namespace {
 
 constexpr int kWarpSize = 32;
-constexpr int kQueriesPerKv = 4;
+constexpr int kQueriesPerKv = BASIS_GQA;
 constexpr int kThreads = kQueriesPerKv * kWarpSize;
 constexpr int kQueryKeyDim = 128;
-constexpr int kValueDim = 80;
-constexpr int kPageSize = 32;
-constexpr int kTokenTile = 4;
+constexpr int kValueDim = BASIS_VALUE_DIM;
+constexpr int kPageSize = BASIS_PAGE_SIZE;
+constexpr int kTokenTile = kPageSize < 4 ? kPageSize : 4;
 constexpr int kVectorBytes = sizeof(uint4);
 constexpr int kElementsPerVector = kVectorBytes / sizeof(uint16_t);
 constexpr int kKeyVectors = kQueryKeyDim / kElementsPerVector;
-constexpr int kValueVectors = kValueDim / kElementsPerVector;
+constexpr int kValueRegisters = (kValueDim + kWarpSize - 1) / kWarpSize;
 
 __device__ __forceinline__ float2 bf16_pair(uint32_t bits) {
   return make_float2(
@@ -76,10 +76,12 @@ __device__ __forceinline__ float warp_max(float value) {
 }
 
 template <bool kDirectOutput>
-__global__ void mapped_host_page32_v80_kernel(
+__global__ void mapped_host_paged_kernel(
     const c10::BFloat16* __restrict__ host_key,
     const c10::BFloat16* __restrict__ query,
     const c10::BFloat16* __restrict__ value,
+    const c10::BFloat16* __restrict__ value_prefix,
+    int64_t prefix_width, int64_t prefix_stride_batch, int64_t prefix_stride_head, int64_t prefix_stride_token,
     const int64_t* __restrict__ selected_page_ids,
     float* __restrict__ workspace,
     c10::BFloat16* __restrict__ output,
@@ -131,9 +133,7 @@ __global__ void mapped_host_page32_v80_kernel(
   }
   __syncthreads();
 
-  float accumulator0 = 0.0f;
-  float accumulator1 = 0.0f;
-  float accumulator2 = 0.0f;
+  float accumulator[kValueRegisters] = {};
   float running_max = -CUDART_INF_F;
   float running_sum = 0.0f;
 
@@ -148,8 +148,7 @@ __global__ void mapped_host_page32_v80_kernel(
     const int64_t page_start = page_id * kPageSize;
     for (int tile_start = 0; tile_start < kPageSize;
          tile_start += kTokenTile) {
-      const int key_vector = static_cast<int>(threadIdx.x);
-      if (key_vector < kTokenTile * kKeyVectors) {
+      for (int key_vector = threadIdx.x; key_vector < kTokenTile * kKeyVectors; key_vector += blockDim.x) {
         const int token = key_vector / kKeyVectors;
         const int vector = key_vector % kKeyVectors;
         const int64_t source_token = page_start + tile_start + token;
@@ -164,21 +163,15 @@ __global__ void mapped_host_page32_v80_kernel(
         reinterpret_cast<uint4*>(shared_key)[key_vector] = loaded;
       }
 
-      const int value_thread =
-          static_cast<int>(threadIdx.x) - kTokenTile * kKeyVectors;
-      if (value_thread >= 0 && value_thread < kTokenTile * kValueVectors) {
-        const int token = value_thread / kValueVectors;
-        const int vector = value_thread % kValueVectors;
+      for (int index = threadIdx.x; index < kTokenTile * kValueDim; index += blockDim.x) {
+        const int token = index / kValueDim;
+        const int feature = index % kValueDim;
         const int64_t source_token = page_start + tile_start + token;
-        uint4 loaded = make_uint4(0, 0, 0, 0);
-        if (source_token < sequence_length) {
-          const int64_t source = batch * value_stride_batch +
-              kv_head * value_stride_head +
-              source_token * value_stride_token +
-              vector * kElementsPerVector;
-          loaded = *reinterpret_cast<const uint4*>(value + source);
-        }
-        reinterpret_cast<uint4*>(shared_value)[value_thread] = loaded;
+        shared_value[token][feature] = source_token < sequence_length
+            ? (feature < prefix_width
+                ? value_prefix[batch * prefix_stride_batch + kv_head * prefix_stride_head + source_token * prefix_stride_token + feature]
+                : value[batch * value_stride_batch + kv_head * value_stride_head + source_token * value_stride_token + feature - prefix_width])
+            : c10::BFloat16(0.0f);
       }
       __syncthreads();
 
@@ -196,20 +189,12 @@ __global__ void mapped_host_page32_v80_kernel(
           const float next_max = fmaxf(running_max, score);
           const float previous_scale = __expf(running_max - next_max);
           const float probability = __expf(score - next_max);
-          accumulator0 = fmaf(
-              probability,
-              static_cast<float>(shared_value[token][lane]),
-              accumulator0 * previous_scale);
-          accumulator1 = fmaf(
-              probability,
-              static_cast<float>(shared_value[token][lane + kWarpSize]),
-              accumulator1 * previous_scale);
-          if (lane < kValueDim - 2 * kWarpSize) {
-            accumulator2 = fmaf(
-                probability,
-                static_cast<float>(
-                    shared_value[token][lane + 2 * kWarpSize]),
-                accumulator2 * previous_scale);
+#pragma unroll
+          for (int slot = 0; slot < kValueRegisters; ++slot) {
+            const int feature = lane + slot * kWarpSize;
+            if (feature < kValueDim) {
+              accumulator[slot] = fmaf(probability, static_cast<float>(shared_value[token][feature]), accumulator[slot] * previous_scale);
+            }
           }
           running_sum = running_sum * previous_scale + probability;
           running_max = next_max;
@@ -220,26 +205,20 @@ __global__ void mapped_host_page32_v80_kernel(
   }
 
   if constexpr (kDirectOutput) {
-    const float inverse_sum = 1.0f / running_sum;
-    const int64_t output_base = batch * output_stride_batch +
-        query_head * output_stride_head;
-    output[output_base + lane * output_stride_feature] =
-        static_cast<c10::BFloat16>(accumulator0 * inverse_sum);
-    output[output_base + (lane + kWarpSize) * output_stride_feature] =
-        static_cast<c10::BFloat16>(accumulator1 * inverse_sum);
-    if (lane < kValueDim - 2 * kWarpSize) {
-      output[output_base +
-             (lane + 2 * kWarpSize) * output_stride_feature] =
-          static_cast<c10::BFloat16>(accumulator2 * inverse_sum);
+    const float inverse_sum = running_sum > 0.0f ? 1.0f / running_sum : 0.0f;
+    const int64_t output_base = batch * output_stride_batch + query_head * output_stride_head;
+#pragma unroll
+    for (int slot = 0; slot < kValueRegisters; ++slot) {
+      const int feature = lane + slot * kWarpSize;
+      if (feature < kValueDim) output[output_base + feature * output_stride_feature] = static_cast<c10::BFloat16>(accumulator[slot] * inverse_sum);
     }
   } else {
     const int64_t row = batch * query_heads + query_head;
-    const int64_t base =
-        row * workspace_stride_row + split * workspace_stride_split;
-    workspace[base + lane] = accumulator0;
-    workspace[base + lane + kWarpSize] = accumulator1;
-    if (lane < kValueDim - 2 * kWarpSize) {
-      workspace[base + lane + 2 * kWarpSize] = accumulator2;
+    const int64_t base = row * workspace_stride_row + split * workspace_stride_split;
+#pragma unroll
+    for (int slot = 0; slot < kValueRegisters; ++slot) {
+      const int feature = lane + slot * kWarpSize;
+      if (feature < kValueDim) workspace[base + feature] = accumulator[slot];
     }
     if (lane == 0) {
       workspace[base + kValueDim] = running_max;
@@ -248,7 +227,7 @@ __global__ void mapped_host_page32_v80_kernel(
   }
 }
 
-__global__ void reduce_page32_v80_kernel(
+__global__ void reduce_paged_kernel(
     const float* __restrict__ workspace,
     c10::BFloat16* __restrict__ output,
     int64_t splits,
@@ -275,7 +254,7 @@ __global__ void reduce_page32_v80_kernel(
   for (int split = lane; split < splits; split += kWarpSize) {
     const int64_t base = row_base + split * workspace_stride_split;
     local_sum = fmaf(
-        __expf(workspace[base + kValueDim] - maximum),
+        (workspace[base + kValueDim + 1] > 0.0f ? __expf(workspace[base + kValueDim] - maximum) : 0.0f),
         workspace[base + kValueDim + 1],
         local_sum);
   }
@@ -286,14 +265,14 @@ __global__ void reduce_page32_v80_kernel(
     for (int split = 0; split < splits; ++split) {
       const int64_t base = row_base + split * workspace_stride_split;
       combined = fmaf(
-          __expf(workspace[base + kValueDim] - maximum),
+          (workspace[base + kValueDim + 1] > 0.0f ? __expf(workspace[base + kValueDim] - maximum) : 0.0f),
           workspace[base + feature],
           combined);
     }
     const int64_t output_base = batch * output_stride_batch +
         query_head * output_stride_head;
     output[output_base + feature * output_stride_feature] =
-        static_cast<c10::BFloat16>(combined / total);
+        static_cast<c10::BFloat16>(total > 0.0f ? combined / total : 0.0f);
   }
 }
 
@@ -376,7 +355,7 @@ int64_t mapped_host_device_pointer_cuda(const at::Tensor& host_key) {
   return reinterpret_cast<int64_t>(device_pointer);
 }
 
-at::Tensor mapped_host_paged_v80_attention_cuda(
+at::Tensor mapped_host_paged_attention_cuda(
     int64_t host_key_device_pointer,
     int64_t host_key_capacity,
     const at::Tensor& query,
@@ -386,7 +365,7 @@ at::Tensor mapped_host_paged_v80_attention_cuda(
     const at::Tensor& output,
     int64_t sequence_length,
     double scale,
-    int64_t splits) {
+    int64_t splits, const at::Tensor& value_prefix, int64_t prefix_width) {
   assert(query.is_cuda() && value.is_cuda() && selected_page_ids.is_cuda());
   assert(query.scalar_type() == at::kBFloat16);
   assert(value.scalar_type() == at::kBFloat16);
@@ -394,7 +373,13 @@ at::Tensor mapped_host_paged_v80_attention_cuda(
   assert(workspace.scalar_type() == at::kFloat);
   assert(output.scalar_type() == at::kBFloat16);
   assert(query.size(2) == 1 && query.size(3) == kQueryKeyDim);
-  assert(value.size(3) == kValueDim);
+  assert(value.size(3) + prefix_width == kValueDim);
+  assert(prefix_width >= 0);
+  if (prefix_width) {
+    assert(value_prefix.device() == value.device() && value_prefix.scalar_type() == at::kBFloat16);
+    assert(value_prefix.sizes() == at::IntArrayRef({value.size(0), value.size(1), value.size(2), prefix_width}));
+    assert(value_prefix.stride(3) == 1);
+  }
   assert(query.size(1) == kQueriesPerKv * value.size(1));
   assert(host_key_device_pointer != 0);
   assert(sequence_length > 0 && sequence_length <= host_key_capacity);
@@ -407,11 +392,13 @@ at::Tensor mapped_host_paged_v80_attention_cuda(
   const int64_t query_heads = query.size(1);
 
   if (splits == 1) {
-    mapped_host_page32_v80_kernel<true>
+    mapped_host_paged_kernel<true>
         <<<static_cast<unsigned int>(kv_rows), kThreads, 0, stream>>>(
             reinterpret_cast<const c10::BFloat16*>(host_key_device_pointer),
             query.const_data_ptr<c10::BFloat16>(),
             value.const_data_ptr<c10::BFloat16>(),
+            value_prefix.const_data_ptr<c10::BFloat16>(), prefix_width,
+            value_prefix.stride(0), value_prefix.stride(1), value_prefix.stride(2),
             selected_page_ids.const_data_ptr<int64_t>(),
             workspace.mutable_data_ptr<float>(),
             output.mutable_data_ptr<c10::BFloat16>(),
@@ -435,7 +422,7 @@ at::Tensor mapped_host_paged_v80_attention_cuda(
             output.stride(3),
             static_cast<float>(scale));
   } else {
-    mapped_host_page32_v80_kernel<false>
+    mapped_host_paged_kernel<false>
         <<<static_cast<unsigned int>(kv_rows * splits),
            kThreads,
            0,
@@ -443,6 +430,8 @@ at::Tensor mapped_host_paged_v80_attention_cuda(
             reinterpret_cast<const c10::BFloat16*>(host_key_device_pointer),
             query.const_data_ptr<c10::BFloat16>(),
             value.const_data_ptr<c10::BFloat16>(),
+            value_prefix.const_data_ptr<c10::BFloat16>(), prefix_width,
+            value_prefix.stride(0), value_prefix.stride(1), value_prefix.stride(2),
             selected_page_ids.const_data_ptr<int64_t>(),
             workspace.mutable_data_ptr<float>(),
             output.mutable_data_ptr<c10::BFloat16>(),
@@ -465,7 +454,7 @@ at::Tensor mapped_host_paged_v80_attention_cuda(
             output.stride(1),
             output.stride(3),
             static_cast<float>(scale));
-    reduce_page32_v80_kernel
+    reduce_paged_kernel
         <<<static_cast<unsigned int>(query.size(0) * query_heads),
            kWarpSize,
            0,
