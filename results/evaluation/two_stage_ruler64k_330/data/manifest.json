@@ -1,0 +1,147 @@
+{
+  "artifacts": {
+    "fwe": {
+      "match_type": "all",
+      "maximum_prompt_tokens": 65337,
+      "minimum_prompt_tokens": 60241,
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data/fwe/validation.jsonl",
+      "rows": 30,
+      "sha256": "de830a1fdc46942dba0a77542d3d25ee6a68b7135ece24bb72409b9c0da604df",
+      "tokens_to_generate": 50
+    },
+    "niah_multikey_1": {
+      "match_type": "all",
+      "maximum_prompt_tokens": 65401,
+      "minimum_prompt_tokens": 64799,
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data/niah_multikey_1/validation.jsonl",
+      "rows": 30,
+      "sha256": "02773264d11ee8fad96a6471563d2284cb55dcb4293c006a564a862411d4ad64",
+      "tokens_to_generate": 128
+    },
+    "niah_multikey_2": {
+      "match_type": "all",
+      "maximum_prompt_tokens": 65401,
+      "minimum_prompt_tokens": 64854,
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data/niah_multikey_2/validation.jsonl",
+      "rows": 30,
+      "sha256": "93261b026cf6d474f7f23e2b6710efb047ea4236a71391c709392e219e5a5927",
+      "tokens_to_generate": 128
+    },
+    "niah_multiquery": {
+      "match_type": "all",
+      "maximum_prompt_tokens": 65399,
+      "minimum_prompt_tokens": 64793,
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data/niah_multiquery/validation.jsonl",
+      "rows": 30,
+      "sha256": "3d64be89deb54f54cec4cbd783469514ea862bda0cd82987650e8087ea1f5573",
+      "tokens_to_generate": 128
+    },
+    "niah_multivalue": {
+      "match_type": "all",
+      "maximum_prompt_tokens": 65401,
+      "minimum_prompt_tokens": 64791,
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data/niah_multivalue/validation.jsonl",
+      "rows": 30,
+      "sha256": "5e9d82f1de503efeaea13e527bc6ebaca8fdb020cd2700a8bb0304f22c6a1a60",
+      "tokens_to_generate": 128
+    },
+    "niah_single_1": {
+      "match_type": "all",
+      "maximum_prompt_tokens": 65388,
+      "minimum_prompt_tokens": 65376,
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data/niah_single_1/validation.jsonl",
+      "rows": 30,
+      "sha256": "291a3705546c8299ff3d559d809f6901ce95c120bf98fc4935d9d7e14072263f",
+      "tokens_to_generate": 128
+    },
+    "niah_single_2": {
+      "match_type": "all",
+      "maximum_prompt_tokens": 65399,
+      "minimum_prompt_tokens": 64800,
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data/niah_single_2/validation.jsonl",
+      "rows": 30,
+      "sha256": "b47f554b0de4842462e7575bde23b0853915bfcfdad1dd38cc63ac8ecef2b7af",
+      "tokens_to_generate": 128
+    },
+    "niah_single_3": {
+      "match_type": "all",
+      "maximum_prompt_tokens": 65401,
+      "minimum_prompt_tokens": 64793,
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data/niah_single_3/validation.jsonl",
+      "rows": 30,
+      "sha256": "dce8d60b19738288293d3b775499067eea9263693df1c1148d0740acc971e1e9",
+      "tokens_to_generate": 128
+    },
+    "qa_1": {
+      "match_type": "part",
+      "maximum_prompt_tokens": 65391,
+      "minimum_prompt_tokens": 61468,
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data/qa_1/validation.jsonl",
+      "rows": 30,
+      "sha256": "978bc30dabf4fc00a0c36941fa0e45f80b937578e424ade4e3e9104c6f928e94",
+      "tokens_to_generate": 32
+    },
+    "qa_2": {
+      "match_type": "part",
+      "maximum_prompt_tokens": 65468,
+      "minimum_prompt_tokens": 61638,
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data/qa_2/validation.jsonl",
+      "rows": 30,
+      "sha256": "fc002e5cca6867fb6cac65e12ac4e1665693c2cbdaad868e07386d4af710348a",
+      "tokens_to_generate": 32
+    },
+    "vt": {
+      "match_type": "all",
+      "maximum_prompt_tokens": 65499,
+      "minimum_prompt_tokens": 65486,
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data/vt/validation.jsonl",
+      "rows": 30,
+      "sha256": "c7f14cbfca9469357f27b23c75c9df904ce429752fc737ce723f317f609dabce",
+      "tokens_to_generate": 30
+    }
+  },
+  "command": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/prepare_qwen3_ruler_v1.py --ruler-root results/tools/RULER --tokenizer-path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --max-seq-length 65536 --num-samples 30 --random-seed 42 --prompt-margin 8 --workers 2 --tasks niah_single_1,niah_single_2,niah_single_3,niah_multikey_1,niah_multikey_2,niah_multiquery,niah_multivalue,vt,fwe,qa_1,qa_2 --output-dir results/evaluation/two_stage_ruler64k_330/data",
+  "commands": {
+    "fwe": "/home/zhangal/.conda/envs/basis/bin/python3.11 /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER/scripts/data/prepare.py --save_dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data --benchmark synthetic --task fwe --subset validation --tokenizer_path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --tokenizer_type hf --max_seq_length 65528 --num_samples 30 --random_seed 42 --model_template_type base",
+    "niah_multikey_1": "/home/zhangal/.conda/envs/basis/bin/python3.11 /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER/scripts/data/prepare.py --save_dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data --benchmark synthetic --task niah_multikey_1 --subset validation --tokenizer_path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --tokenizer_type hf --max_seq_length 65528 --num_samples 30 --random_seed 42 --model_template_type base",
+    "niah_multikey_2": "/home/zhangal/.conda/envs/basis/bin/python3.11 /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER/scripts/data/prepare.py --save_dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data --benchmark synthetic --task niah_multikey_2 --subset validation --tokenizer_path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --tokenizer_type hf --max_seq_length 65528 --num_samples 30 --random_seed 42 --model_template_type base",
+    "niah_multiquery": "/home/zhangal/.conda/envs/basis/bin/python3.11 /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER/scripts/data/prepare.py --save_dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data --benchmark synthetic --task niah_multiquery --subset validation --tokenizer_path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --tokenizer_type hf --max_seq_length 65528 --num_samples 30 --random_seed 42 --model_template_type base",
+    "niah_multivalue": "/home/zhangal/.conda/envs/basis/bin/python3.11 /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER/scripts/data/prepare.py --save_dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data --benchmark synthetic --task niah_multivalue --subset validation --tokenizer_path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --tokenizer_type hf --max_seq_length 65528 --num_samples 30 --random_seed 42 --model_template_type base",
+    "niah_single_1": "/home/zhangal/.conda/envs/basis/bin/python3.11 /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER/scripts/data/prepare.py --save_dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data --benchmark synthetic --task niah_single_1 --subset validation --tokenizer_path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --tokenizer_type hf --max_seq_length 65528 --num_samples 30 --random_seed 42 --model_template_type base",
+    "niah_single_2": "/home/zhangal/.conda/envs/basis/bin/python3.11 /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER/scripts/data/prepare.py --save_dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data --benchmark synthetic --task niah_single_2 --subset validation --tokenizer_path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --tokenizer_type hf --max_seq_length 65528 --num_samples 30 --random_seed 42 --model_template_type base",
+    "niah_single_3": "/home/zhangal/.conda/envs/basis/bin/python3.11 /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER/scripts/data/prepare.py --save_dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data --benchmark synthetic --task niah_single_3 --subset validation --tokenizer_path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --tokenizer_type hf --max_seq_length 65528 --num_samples 30 --random_seed 42 --model_template_type base",
+    "qa_1": "/home/zhangal/.conda/envs/basis/bin/python3.11 /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER/scripts/data/prepare.py --save_dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data --benchmark synthetic --task qa_1 --subset validation --tokenizer_path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --tokenizer_type hf --max_seq_length 65528 --num_samples 30 --random_seed 42 --model_template_type base",
+    "qa_2": "/home/zhangal/.conda/envs/basis/bin/python3.11 /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER/scripts/data/prepare.py --save_dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data --benchmark synthetic --task qa_2 --subset validation --tokenizer_path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --tokenizer_type hf --max_seq_length 65528 --num_samples 30 --random_seed 42 --model_template_type base",
+    "vt": "/home/zhangal/.conda/envs/basis/bin/python3.11 /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER/scripts/data/prepare.py --save_dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/two_stage_ruler64k_330/data --benchmark synthetic --task vt --subset validation --tokenizer_path /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b --tokenizer_type hf --max_seq_length 65528 --num_samples 30 --random_seed 42 --model_template_type base"
+  },
+  "created_at": "2026-09-16T01:17:43.393175+00:00",
+  "format": "basisserve.ruler_v1.qwen3_base_dataset.v1",
+  "protocol": {
+    "model_template_type": "base",
+    "prompt_margin": 8,
+    "random_seed": 42,
+    "samples_per_task": 30,
+    "sequence_length": 65536,
+    "tasks": [
+      "niah_single_1",
+      "niah_single_2",
+      "niah_single_3",
+      "niah_multikey_1",
+      "niah_multikey_2",
+      "niah_multiquery",
+      "niah_multivalue",
+      "vt",
+      "fwe",
+      "qa_1",
+      "qa_2"
+    ]
+  },
+  "ruler": {
+    "prepare_script_sha256": "f2d210860fbf5c640cb41ed104c7a923c9f4043f6e6c354277daacc73afc643d",
+    "revision": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a",
+    "root": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/tools/RULER"
+  },
+  "status": "complete",
+  "tokenizer_config_sha256": "8004530facf809ac432114de2a4dcc65fcb632da5ec16d666091aeb6a2ee444a",
+  "tokenizer_path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b"
+}

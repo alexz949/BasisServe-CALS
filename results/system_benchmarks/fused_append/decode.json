@@ -1,0 +1,1425 @@
+{
+  "status": "complete",
+  "runs": [
+    {
+      "fused": true,
+      "repeat": 10,
+      "smoke": true,
+      "path": "results/system_benchmarks/two_stage/two_fused_w64_r10/optimized_b16_w4_r0_smoke/summary.json",
+      "summary": {
+        "status": "complete",
+        "mode": "optimized",
+        "rank": 16,
+        "length": 8192,
+        "warps": 4,
+        "environment": "basis",
+        "command": "python -m benchmarks.system.bench_local_kernels --mode optimized --rank 16 --length 65536 --warps 4 --repeat 0 --smoke",
+        "hit_fraction": 0.7023793458938599,
+        "operator_ms_per_step": {},
+        "router_ms_per_step": {},
+        "native_wall_ms": 264.14865255355835,
+        "cuda_median_after10_ms": null,
+        "cuda_mean_after10_ms": null,
+        "decode_input_ids": [
+          [
+            279
+          ],
+          [
+            4872
+          ],
+          [
+            3952
+          ],
+          [
+            5274
+          ],
+          [
+            627
+          ],
+          [
+            5876
+          ],
+          [
+            1953
+          ],
+          [
+            54949
+          ],
+          [
+            25
+          ]
+        ],
+        "all_decode_logits_finite": true,
+        "samples": [],
+        "router_samples": [],
+        "sources": {
+          "/deac/csc/yangGrp/zhangal/BasisServe-CALS/benchmarks/system/bench_local_kernels.py": "ed28f9d6735fc2ed318c901368dada08520ce137795c3960d78d06e1544e9523",
+          "basisserve/kernels/gqa_slot_attention.py": "cb1b989b830b0802a0aa5f14eaac0c0a63962e65bb548e9d1bf7c09cfc369952",
+          "benchmarks/system/local_kernel_candidates.py": "7b3cb9b7ccf0aa817a701399bb7728daabeac5d9ffbd21afaa2a5cfde7f2d4ad"
+        },
+        "scope": "Trace always serves original router/attention; both candidates see identical real queries, IDs and evolving slot state. Fetch replay uses actual miss lists without rerunning the planner; repeated microbench reads can be cache-warm. Trace native timings include probes and are NOT serving performance. Non-trace modes perform normal 100-step continuous decode with no A/B probes."
+      }
+    },
+    {
+      "fused": false,
+      "repeat": 10,
+      "smoke": false,
+      "path": "results/system_benchmarks/two_stage/two_w64_r10/optimized_b16_w4_r0/summary.json",
+      "summary": {
+        "status": "complete",
+        "mode": "optimized",
+        "rank": 16,
+        "length": 65536,
+        "warps": 4,
+        "environment": "basis",
+        "command": "python -m benchmarks.system.bench_local_kernels --mode optimized --rank 16 --length 65536 --warps 4 --repeat 0",
+        "hit_fraction": 0.7267863750457764,
+        "operator_ms_per_step": {},
+        "router_ms_per_step": {},
+        "native_wall_ms": 33.35180044174194,
+        "cuda_median_after10_ms": 31.29804801940918,
+        "cuda_mean_after10_ms": 32.54582358466254,
+        "decode_input_ids": [
+          [
+            304
+          ],
+          [
+            11937
+          ],
+          [
+            11
+          ],
+          [
+            358
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            374
+          ],
+          [
+            264
+          ],
+          [
+            5457
+          ],
+          [
+            311
+          ],
+          [
+            387
+          ],
+          [
+            29299
+          ],
+          [
+            20262
+          ],
+          [
+            449
+          ],
+          [
+            13
+          ],
+          [
+            3005
+          ],
+          [
+            753
+          ],
+          [
+            1101
+          ],
+          [
+            264
+          ],
+          [
+            14964
+          ],
+          [
+            3187
+          ],
+          [
+            315
+          ],
+          [
+            1148
+          ],
+          [
+            649
+          ],
+          [
+            387
+          ],
+          [
+            17427
+          ],
+          [
+            994
+          ],
+          [
+            499
+          ],
+          [
+            3207
+          ],
+          [
+            10032
+          ],
+          [
+            311
+          ],
+          [
+            5379
+          ],
+          [
+            311
+          ],
+          [
+            701
+          ],
+          [
+            9021
+          ],
+          [
+            13
+          ],
+          [
+            128001
+          ],
+          [
+            128000
+          ],
+          [
+            1129
+          ],
+          [
+            5
+          ],
+          [
+            5792
+          ],
+          [
+            26
+          ],
+          [
+            40
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            753
+          ],
+          [
+            3446
+          ],
+          [
+            374
+          ],
+          [
+            11311
+          ],
+          [
+            430
+          ],
+          [
+            60883
+          ],
+          [
+            2349
+          ],
+          [
+            374
+          ],
+          [
+            3284
+          ],
+          [
+            422
+          ],
+          [
+            499
+          ],
+          [
+            3207
+          ],
+          [
+            10032
+          ],
+          [
+            311
+          ],
+          [
+            5379
+          ],
+          [
+            311
+          ],
+          [
+            701
+          ],
+          [
+            9021
+          ],
+          [
+            627
+          ],
+          [
+            40
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            468
+          ],
+          [
+            12583
+          ],
+          [
+            86
+          ],
+          [
+            320
+          ],
+          [
+            82396
+          ],
+          [
+            1680
+          ],
+          [
+            358
+          ],
+          [
+            1781
+          ],
+          [
+            358
+          ],
+          [
+            4070
+          ],
+          [
+            2744
+          ],
+          [
+            1027
+          ],
+          [
+            264
+          ],
+          [
+            11782
+          ],
+          [
+            13836
+          ],
+          [
+            719
+          ],
+          [
+            358
+          ],
+          [
+            8101
+          ],
+          [
+            856
+          ],
+          [
+            11939
+          ],
+          [
+            369
+          ],
+          [
+            24685
+          ],
+          [
+            2216
+          ],
+          [
+            3940
+          ],
+          [
+            994
+          ],
+          [
+            358
+          ],
+          [
+            574
+          ],
+          [
+            922
+          ],
+          [
+            63360
+          ],
+          [
+            477
+          ],
+          [
+            37755
+          ],
+          [
+            1667
+          ],
+          [
+            2362
+          ],
+          [
+            13
+          ]
+        ],
+        "all_decode_logits_finite": true,
+        "samples": [],
+        "router_samples": [],
+        "sources": {
+          "/deac/csc/yangGrp/zhangal/BasisServe-CALS/benchmarks/system/bench_local_kernels.py": "ed28f9d6735fc2ed318c901368dada08520ce137795c3960d78d06e1544e9523",
+          "basisserve/kernels/gqa_slot_attention.py": "cb1b989b830b0802a0aa5f14eaac0c0a63962e65bb548e9d1bf7c09cfc369952",
+          "benchmarks/system/local_kernel_candidates.py": "7b3cb9b7ccf0aa817a701399bb7728daabeac5d9ffbd21afaa2a5cfde7f2d4ad"
+        },
+        "scope": "Trace always serves original router/attention; both candidates see identical real queries, IDs and evolving slot state. Fetch replay uses actual miss lists without rerunning the planner; repeated microbench reads can be cache-warm. Trace native timings include probes and are NOT serving performance. Non-trace modes perform normal 100-step continuous decode with no A/B probes."
+      }
+    },
+    {
+      "fused": true,
+      "repeat": 10,
+      "smoke": false,
+      "path": "results/system_benchmarks/two_stage/two_fused_w64_r10/optimized_b16_w4_r0/summary.json",
+      "summary": {
+        "status": "complete",
+        "mode": "optimized",
+        "rank": 16,
+        "length": 65536,
+        "warps": 4,
+        "environment": "basis",
+        "command": "python -m benchmarks.system.bench_local_kernels --mode optimized --rank 16 --length 65536 --warps 4 --repeat 0",
+        "hit_fraction": 0.7267910242080688,
+        "operator_ms_per_step": {},
+        "router_ms_per_step": {},
+        "native_wall_ms": 40.12468338012695,
+        "cuda_median_after10_ms": 30.328831672668457,
+        "cuda_mean_after10_ms": 31.271653344896105,
+        "decode_input_ids": [
+          [
+            304
+          ],
+          [
+            11937
+          ],
+          [
+            11
+          ],
+          [
+            358
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            374
+          ],
+          [
+            264
+          ],
+          [
+            5457
+          ],
+          [
+            311
+          ],
+          [
+            387
+          ],
+          [
+            29299
+          ],
+          [
+            20262
+          ],
+          [
+            449
+          ],
+          [
+            13
+          ],
+          [
+            3005
+          ],
+          [
+            753
+          ],
+          [
+            1101
+          ],
+          [
+            264
+          ],
+          [
+            14964
+          ],
+          [
+            3187
+          ],
+          [
+            315
+          ],
+          [
+            1148
+          ],
+          [
+            649
+          ],
+          [
+            387
+          ],
+          [
+            17427
+          ],
+          [
+            994
+          ],
+          [
+            499
+          ],
+          [
+            3207
+          ],
+          [
+            10032
+          ],
+          [
+            311
+          ],
+          [
+            5379
+          ],
+          [
+            311
+          ],
+          [
+            701
+          ],
+          [
+            9021
+          ],
+          [
+            13
+          ],
+          [
+            128001
+          ],
+          [
+            128000
+          ],
+          [
+            1129
+          ],
+          [
+            5
+          ],
+          [
+            5792
+          ],
+          [
+            26
+          ],
+          [
+            40
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            753
+          ],
+          [
+            3446
+          ],
+          [
+            374
+          ],
+          [
+            11311
+          ],
+          [
+            430
+          ],
+          [
+            60883
+          ],
+          [
+            2349
+          ],
+          [
+            374
+          ],
+          [
+            3284
+          ],
+          [
+            422
+          ],
+          [
+            499
+          ],
+          [
+            3207
+          ],
+          [
+            10032
+          ],
+          [
+            311
+          ],
+          [
+            5379
+          ],
+          [
+            311
+          ],
+          [
+            701
+          ],
+          [
+            9021
+          ],
+          [
+            627
+          ],
+          [
+            40
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            468
+          ],
+          [
+            12583
+          ],
+          [
+            86
+          ],
+          [
+            320
+          ],
+          [
+            82396
+          ],
+          [
+            1680
+          ],
+          [
+            358
+          ],
+          [
+            1781
+          ],
+          [
+            358
+          ],
+          [
+            4070
+          ],
+          [
+            2744
+          ],
+          [
+            1027
+          ],
+          [
+            264
+          ],
+          [
+            11782
+          ],
+          [
+            13836
+          ],
+          [
+            719
+          ],
+          [
+            358
+          ],
+          [
+            8101
+          ],
+          [
+            856
+          ],
+          [
+            11939
+          ],
+          [
+            369
+          ],
+          [
+            24685
+          ],
+          [
+            2216
+          ],
+          [
+            3940
+          ],
+          [
+            994
+          ],
+          [
+            358
+          ],
+          [
+            574
+          ],
+          [
+            922
+          ],
+          [
+            63360
+          ],
+          [
+            477
+          ],
+          [
+            37755
+          ],
+          [
+            1667
+          ],
+          [
+            2362
+          ],
+          [
+            13
+          ]
+        ],
+        "all_decode_logits_finite": true,
+        "samples": [],
+        "router_samples": [],
+        "sources": {
+          "/deac/csc/yangGrp/zhangal/BasisServe-CALS/benchmarks/system/bench_local_kernels.py": "ed28f9d6735fc2ed318c901368dada08520ce137795c3960d78d06e1544e9523",
+          "basisserve/kernels/gqa_slot_attention.py": "cb1b989b830b0802a0aa5f14eaac0c0a63962e65bb548e9d1bf7c09cfc369952",
+          "benchmarks/system/local_kernel_candidates.py": "7b3cb9b7ccf0aa817a701399bb7728daabeac5d9ffbd21afaa2a5cfde7f2d4ad"
+        },
+        "scope": "Trace always serves original router/attention; both candidates see identical real queries, IDs and evolving slot state. Fetch replay uses actual miss lists without rerunning the planner; repeated microbench reads can be cache-warm. Trace native timings include probes and are NOT serving performance. Non-trace modes perform normal 100-step continuous decode with no A/B probes."
+      }
+    },
+    {
+      "fused": true,
+      "repeat": 11,
+      "smoke": false,
+      "path": "results/system_benchmarks/two_stage/two_fused_w64_r11/optimized_b16_w4_r0/summary.json",
+      "summary": {
+        "status": "complete",
+        "mode": "optimized",
+        "rank": 16,
+        "length": 65536,
+        "warps": 4,
+        "environment": "basis",
+        "command": "python -m benchmarks.system.bench_local_kernels --mode optimized --rank 16 --length 65536 --warps 4 --repeat 0",
+        "hit_fraction": 0.7268186211585999,
+        "operator_ms_per_step": {},
+        "router_ms_per_step": {},
+        "native_wall_ms": 33.69363784790039,
+        "cuda_median_after10_ms": 30.29043197631836,
+        "cuda_mean_after10_ms": 33.06442165374756,
+        "decode_input_ids": [
+          [
+            304
+          ],
+          [
+            11937
+          ],
+          [
+            11
+          ],
+          [
+            358
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            374
+          ],
+          [
+            264
+          ],
+          [
+            5457
+          ],
+          [
+            311
+          ],
+          [
+            387
+          ],
+          [
+            29299
+          ],
+          [
+            20262
+          ],
+          [
+            449
+          ],
+          [
+            13
+          ],
+          [
+            3005
+          ],
+          [
+            753
+          ],
+          [
+            1101
+          ],
+          [
+            264
+          ],
+          [
+            14964
+          ],
+          [
+            3187
+          ],
+          [
+            315
+          ],
+          [
+            1148
+          ],
+          [
+            649
+          ],
+          [
+            387
+          ],
+          [
+            17427
+          ],
+          [
+            994
+          ],
+          [
+            499
+          ],
+          [
+            3207
+          ],
+          [
+            10032
+          ],
+          [
+            311
+          ],
+          [
+            5379
+          ],
+          [
+            311
+          ],
+          [
+            701
+          ],
+          [
+            9021
+          ],
+          [
+            13
+          ],
+          [
+            128001
+          ],
+          [
+            128000
+          ],
+          [
+            1129
+          ],
+          [
+            5
+          ],
+          [
+            5792
+          ],
+          [
+            26
+          ],
+          [
+            40
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            753
+          ],
+          [
+            3446
+          ],
+          [
+            374
+          ],
+          [
+            11311
+          ],
+          [
+            430
+          ],
+          [
+            60883
+          ],
+          [
+            2349
+          ],
+          [
+            374
+          ],
+          [
+            3284
+          ],
+          [
+            422
+          ],
+          [
+            499
+          ],
+          [
+            3207
+          ],
+          [
+            10032
+          ],
+          [
+            311
+          ],
+          [
+            5379
+          ],
+          [
+            311
+          ],
+          [
+            701
+          ],
+          [
+            9021
+          ],
+          [
+            627
+          ],
+          [
+            40
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            468
+          ],
+          [
+            12583
+          ],
+          [
+            86
+          ],
+          [
+            320
+          ],
+          [
+            82396
+          ],
+          [
+            1680
+          ],
+          [
+            358
+          ],
+          [
+            1781
+          ],
+          [
+            358
+          ],
+          [
+            4070
+          ],
+          [
+            2744
+          ],
+          [
+            1027
+          ],
+          [
+            264
+          ],
+          [
+            11782
+          ],
+          [
+            13836
+          ],
+          [
+            719
+          ],
+          [
+            358
+          ],
+          [
+            8101
+          ],
+          [
+            856
+          ],
+          [
+            11939
+          ],
+          [
+            369
+          ],
+          [
+            24685
+          ],
+          [
+            2216
+          ],
+          [
+            3940
+          ],
+          [
+            994
+          ],
+          [
+            358
+          ],
+          [
+            574
+          ],
+          [
+            922
+          ],
+          [
+            63360
+          ],
+          [
+            477
+          ],
+          [
+            37755
+          ],
+          [
+            1667
+          ],
+          [
+            2362
+          ],
+          [
+            13
+          ]
+        ],
+        "all_decode_logits_finite": true,
+        "samples": [],
+        "router_samples": [],
+        "sources": {
+          "/deac/csc/yangGrp/zhangal/BasisServe-CALS/benchmarks/system/bench_local_kernels.py": "ed28f9d6735fc2ed318c901368dada08520ce137795c3960d78d06e1544e9523",
+          "basisserve/kernels/gqa_slot_attention.py": "cb1b989b830b0802a0aa5f14eaac0c0a63962e65bb548e9d1bf7c09cfc369952",
+          "benchmarks/system/local_kernel_candidates.py": "7b3cb9b7ccf0aa817a701399bb7728daabeac5d9ffbd21afaa2a5cfde7f2d4ad"
+        },
+        "scope": "Trace always serves original router/attention; both candidates see identical real queries, IDs and evolving slot state. Fetch replay uses actual miss lists without rerunning the planner; repeated microbench reads can be cache-warm. Trace native timings include probes and are NOT serving performance. Non-trace modes perform normal 100-step continuous decode with no A/B probes."
+      }
+    },
+    {
+      "fused": false,
+      "repeat": 11,
+      "smoke": false,
+      "path": "results/system_benchmarks/two_stage/two_w64_r11/optimized_b16_w4_r0/summary.json",
+      "summary": {
+        "status": "complete",
+        "mode": "optimized",
+        "rank": 16,
+        "length": 65536,
+        "warps": 4,
+        "environment": "basis",
+        "command": "python -m benchmarks.system.bench_local_kernels --mode optimized --rank 16 --length 65536 --warps 4 --repeat 0",
+        "hit_fraction": 0.7268288135528564,
+        "operator_ms_per_step": {},
+        "router_ms_per_step": {},
+        "native_wall_ms": 34.02873516082764,
+        "cuda_median_after10_ms": 31.317503929138184,
+        "cuda_mean_after10_ms": 33.35037129720052,
+        "decode_input_ids": [
+          [
+            304
+          ],
+          [
+            11937
+          ],
+          [
+            11
+          ],
+          [
+            358
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            374
+          ],
+          [
+            264
+          ],
+          [
+            5457
+          ],
+          [
+            311
+          ],
+          [
+            387
+          ],
+          [
+            29299
+          ],
+          [
+            20262
+          ],
+          [
+            449
+          ],
+          [
+            13
+          ],
+          [
+            3005
+          ],
+          [
+            753
+          ],
+          [
+            1101
+          ],
+          [
+            264
+          ],
+          [
+            14964
+          ],
+          [
+            3187
+          ],
+          [
+            315
+          ],
+          [
+            1148
+          ],
+          [
+            649
+          ],
+          [
+            387
+          ],
+          [
+            17427
+          ],
+          [
+            994
+          ],
+          [
+            499
+          ],
+          [
+            3207
+          ],
+          [
+            10032
+          ],
+          [
+            311
+          ],
+          [
+            5379
+          ],
+          [
+            311
+          ],
+          [
+            701
+          ],
+          [
+            9021
+          ],
+          [
+            13
+          ],
+          [
+            128001
+          ],
+          [
+            128000
+          ],
+          [
+            1129
+          ],
+          [
+            5
+          ],
+          [
+            5792
+          ],
+          [
+            26
+          ],
+          [
+            40
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            753
+          ],
+          [
+            3446
+          ],
+          [
+            374
+          ],
+          [
+            11311
+          ],
+          [
+            430
+          ],
+          [
+            60883
+          ],
+          [
+            2349
+          ],
+          [
+            374
+          ],
+          [
+            3284
+          ],
+          [
+            422
+          ],
+          [
+            499
+          ],
+          [
+            3207
+          ],
+          [
+            10032
+          ],
+          [
+            311
+          ],
+          [
+            5379
+          ],
+          [
+            311
+          ],
+          [
+            701
+          ],
+          [
+            9021
+          ],
+          [
+            627
+          ],
+          [
+            40
+          ],
+          [
+            86
+          ],
+          [
+            6863
+          ],
+          [
+            468
+          ],
+          [
+            12583
+          ],
+          [
+            86
+          ],
+          [
+            320
+          ],
+          [
+            82396
+          ],
+          [
+            1680
+          ],
+          [
+            358
+          ],
+          [
+            1781
+          ],
+          [
+            358
+          ],
+          [
+            4070
+          ],
+          [
+            2744
+          ],
+          [
+            1027
+          ],
+          [
+            264
+          ],
+          [
+            11782
+          ],
+          [
+            13836
+          ],
+          [
+            719
+          ],
+          [
+            358
+          ],
+          [
+            8101
+          ],
+          [
+            856
+          ],
+          [
+            11939
+          ],
+          [
+            369
+          ],
+          [
+            24685
+          ],
+          [
+            2216
+          ],
+          [
+            3940
+          ],
+          [
+            994
+          ],
+          [
+            358
+          ],
+          [
+            574
+          ],
+          [
+            922
+          ],
+          [
+            63360
+          ],
+          [
+            477
+          ],
+          [
+            37755
+          ],
+          [
+            1667
+          ],
+          [
+            2362
+          ],
+          [
+            13
+          ]
+        ],
+        "all_decode_logits_finite": true,
+        "samples": [],
+        "router_samples": [],
+        "sources": {
+          "/deac/csc/yangGrp/zhangal/BasisServe-CALS/benchmarks/system/bench_local_kernels.py": "ed28f9d6735fc2ed318c901368dada08520ce137795c3960d78d06e1544e9523",
+          "basisserve/kernels/gqa_slot_attention.py": "cb1b989b830b0802a0aa5f14eaac0c0a63962e65bb548e9d1bf7c09cfc369952",
+          "benchmarks/system/local_kernel_candidates.py": "7b3cb9b7ccf0aa817a701399bb7728daabeac5d9ffbd21afaa2a5cfde7f2d4ad"
+        },
+        "scope": "Trace always serves original router/attention; both candidates see identical real queries, IDs and evolving slot state. Fetch replay uses actual miss lists without rerunning the planner; repeated microbench reads can be cache-warm. Trace native timings include probes and are NOT serving performance. Non-trace modes perform normal 100-step continuous decode with no A/B probes."
+      }
+    }
+  ],
+  "mean_cuda_medians_ms": {
+    "reference": 31.30777597427368,
+    "fused": 30.309631824493408
+  },
+  "reduction_percent": 3.1881668969411026,
+  "checks": {
+    "identical_generated_sequences": true,
+    "recorded_tokens": 101,
+    "worst_code_relative_mse": {
+      "bases": 3.5956120025826266e-11,
+      "residuals": 1.2240414903885721e-08
+    },
+    "smoke_verified_layers": 32
+  },
+  "sources": {
+    "benchmarks/system/fused_append.py": "5008dc9379365cdfa6e6e5c170a815f0cf52707539cd1e090ec2b9cc408c94e4",
+    "benchmarks/system/native_basis_cache.py": "2efdf7a473927aaf0d41855591ea9cbdc3d0771165d60129737b8629ca444b04",
+    "benchmarks/system/bench_two_stage.py": "0771176ae93fbb174a7624c7c412cf6ee6449e55a61590260ef394212c30a2e5",
+    "benchmarks/system/validate_fused_append.py": "fb00eb96da2b19877530336a261570712cbfa022e2b5eebc53e85a151d05e1ad",
+    "benchmarks/system/run_fused_append.py": "2bdbb0b1b8f16fea1a3f99bf38ad1ff29ccae9adcfb5dea76a1eaf607a6947d4"
+  }
+}

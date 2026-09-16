@@ -1,0 +1,2370 @@
+[
+  {
+    "layer": 0,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15258400158665597,
+      "B16_to_K128": 0.1266626230138515,
+      "bias_BF16_round": 0.1517336032397902,
+      "RoPE_BF16_round": 0.17069003228647128,
+      "load_query_codes": 0.11482490783647174,
+      "QK": 0.12226454445726725,
+      "residual_dot_score_round": 0.100041960147629,
+      "Page_LSE": 0.06119832743186308
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2097.824183006536,
+      "B16_to_K128": 1741.4401960784314,
+      "bias_BF16_round": 2086.132352941176,
+      "RoPE_BF16_round": 2346.7576797385623,
+      "load_query_codes": 1578.6875816993463,
+      "QK": 1680.9725490196079,
+      "residual_dot_score_round": 1375.4419934640525,
+      "Page_LSE": 841.3944444444445
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.04239360094070435,
+        "raw_ms": [
+          0.042854401469230655,
+          0.04193280041217804
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04707840085029602,
+        "raw_ms": [
+          0.04746240079402923,
+          0.04669440090656281
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10360319614410402,
+        "raw_ms": [
+          0.10434559583663941,
+          0.1028607964515686
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.002304000034928322,
+        "raw_ms": [
+          0.002816000021994114,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.002252800017595291,
+        "raw_ms": [
+          0.0027135999873280523,
+          0.0017920000478625297
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 9.973764747428504e-08,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.005307902116328478,
+    "original_score_max_abs": 0.15187931060791016,
+    "selected_page_overlap": 0.9959676861763
+  },
+  {
+    "layer": 1,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15546726329849184,
+      "B16_to_K128": 0.12552238239200225,
+      "bias_BF16_round": 0.14824711418316505,
+      "RoPE_BF16_round": 0.1700132778945187,
+      "load_query_codes": 0.11699991434807208,
+      "QK": 0.1237838852178907,
+      "residual_dot_score_round": 0.09787030107099205,
+      "Page_LSE": 0.062095861594867484
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2133.3418300653593,
+      "B16_to_K128": 1722.4343137254903,
+      "bias_BF16_round": 2034.2660130718953,
+      "RoPE_BF16_round": 2332.9441176470586,
+      "load_query_codes": 1605.4879084967317,
+      "QK": 1698.578431372549,
+      "residual_dot_score_round": 1342.9888888888888,
+      "Page_LSE": 852.0874183006536
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.04213759899139405,
+        "raw_ms": [
+          0.04249599874019623,
+          0.04177919924259186
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04687359929084778,
+        "raw_ms": [
+          0.04730879962444305,
+          0.046438398957252505
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10373120307922364,
+        "raw_ms": [
+          0.104038405418396,
+          0.10342400074005127
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022272000089287756,
+        "raw_ms": [
+          0.002662399969995022,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.002199999988079071,
+        "raw_ms": [
+          0.002659199945628643,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 9.42432194506182e-08,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.007741489447653294,
+    "original_score_max_abs": 0.07140636444091797,
+    "selected_page_overlap": 0.9959676861763
+  },
+  {
+    "layer": 2,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15425073749998555,
+      "B16_to_K128": 0.12515288440427572,
+      "bias_BF16_round": 0.14807594100802093,
+      "RoPE_BF16_round": 0.17045890400978325,
+      "load_query_codes": 0.11834636361658543,
+      "QK": 0.12346036595971997,
+      "residual_dot_score_round": 0.0977885914248827,
+      "Page_LSE": 0.06246621207674642
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2111.946732026144,
+      "B16_to_K128": 1713.549183006536,
+      "bias_BF16_round": 2027.4035947712418,
+      "RoPE_BF16_round": 2333.8632352941177,
+      "load_query_codes": 1620.3566993464053,
+      "QK": 1690.3758169934638,
+      "residual_dot_score_round": 1338.8869281045752,
+      "Page_LSE": 855.2653594771242
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.042009600996971125,
+        "raw_ms": [
+          0.042393600940704344,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04674560129642487,
+        "raw_ms": [
+          0.04715520143508911,
+          0.04633600115776062
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10373119711875917,
+        "raw_ms": [
+          0.10414079427719117,
+          0.10332159996032715
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021503999829292296,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0016896000131964683
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.2921979930524685e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.011495757848024368,
+    "original_score_max_abs": 0.125,
+    "selected_page_overlap": 0.9939515590667725
+  },
+  {
+    "layer": 3,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15559448729655148,
+      "B16_to_K128": 0.12389888498321551,
+      "bias_BF16_round": 0.14959220094004277,
+      "RoPE_BF16_round": 0.1703824339971942,
+      "load_query_codes": 0.11852375677194639,
+      "QK": 0.1221989106379554,
+      "residual_dot_score_round": 0.09752763414091024,
+      "Page_LSE": 0.06228169123218405
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2137.990849673203,
+      "B16_to_K128": 1702.468300653595,
+      "bias_BF16_round": 2055.514705882353,
+      "RoPE_BF16_round": 2341.1888888888884,
+      "load_query_codes": 1628.6098039215685,
+      "QK": 1679.1093137254902,
+      "residual_dot_score_round": 1340.1065359477125,
+      "Page_LSE": 855.7995098039215
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.04216319918632508,
+        "raw_ms": [
+          0.04254719913005829,
+          0.04177919924259186
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04695039987564087,
+        "raw_ms": [
+          0.04741120040416717,
+          0.046489599347114566
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10370559692382814,
+        "raw_ms": [
+          0.10419199466705323,
+          0.10321919918060303
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004478400014340878,
+        "raw_ms": [
+          0.004812800139188766,
+          0.004143999889492989
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022528000175952912,
+        "raw_ms": [
+          0.002662399969995022,
+          0.0018432000651955605
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.002611199952661991,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.1770974595037842e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.00912744551897049,
+    "original_score_max_abs": 0.125,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 4,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15419046433361588,
+      "B16_to_K128": 0.12510489414811818,
+      "bias_BF16_round": 0.1481931236341425,
+      "RoPE_BF16_round": 0.17033015618383637,
+      "load_query_codes": 0.11798099664974511,
+      "QK": 0.12360803114055254,
+      "residual_dot_score_round": 0.0979797496515795,
+      "Page_LSE": 0.06261258425840999
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2112.140359477124,
+      "B16_to_K128": 1713.7187908496733,
+      "bias_BF16_round": 2029.9872549019608,
+      "RoPE_BF16_round": 2333.225980392157,
+      "load_query_codes": 1616.1338235294115,
+      "QK": 1693.214379084967,
+      "residual_dot_score_round": 1342.1516339869283,
+      "Page_LSE": 857.6831699346404
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041984000802040095,
+        "raw_ms": [
+          0.042342400550842284,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04674559980630874,
+        "raw_ms": [
+          0.04720639884471893,
+          0.04628480076789856
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.1037567973136902,
+        "raw_ms": [
+          0.10434559583663941,
+          0.10316799879074097
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.004915200173854828,
+          0.004095999896526337
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021503999829292296,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.3030265222369053e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.010057446546852589,
+    "original_score_max_abs": 0.09024429321289062,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 5,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15371356332850655,
+      "B16_to_K128": 0.12671268325764534,
+      "bias_BF16_round": 0.15043128691650526,
+      "RoPE_BF16_round": 0.17086679565831706,
+      "load_query_codes": 0.11485782389401283,
+      "QK": 0.12251614857076563,
+      "residual_dot_score_round": 0.1002650414240659,
+      "Page_LSE": 0.06063665695018139
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2117.3297385620917,
+      "B16_to_K128": 1745.4057189542484,
+      "bias_BF16_round": 2072.117973856209,
+      "RoPE_BF16_round": 2353.6071895424834,
+      "load_query_codes": 1582.1107843137254,
+      "QK": 1687.6004901960785,
+      "residual_dot_score_round": 1381.102287581699,
+      "Page_LSE": 835.240522875817
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.0422655999660492,
+        "raw_ms": [
+          0.04259839951992035,
+          0.04193280041217804
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04692479968070984,
+        "raw_ms": [
+          0.04741120040416717,
+          0.046438398957252505
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10347520112991333,
+        "raw_ms": [
+          0.10368000268936158,
+          0.10327039957046509
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.004915200173854828,
+          0.004095999896526337
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021503999829292296,
+        "raw_ms": [
+          0.0025087999179959296,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021503999829292296,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.0150305485012723e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.010612976737320423,
+    "original_score_max_abs": 0.0967111587524414,
+    "selected_page_overlap": 0.9959676861763
+  },
+  {
+    "layer": 6,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15367354445268344,
+      "B16_to_K128": 0.12656187577643657,
+      "bias_BF16_round": 0.14989719901050447,
+      "RoPE_BF16_round": 0.17115355164646828,
+      "load_query_codes": 0.1154371419906812,
+      "QK": 0.1223311660404937,
+      "residual_dot_score_round": 0.1000127392412598,
+      "Page_LSE": 0.060932781841472446
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2115.9537581699346,
+      "B16_to_K128": 1742.6491830065358,
+      "bias_BF16_round": 2063.956699346405,
+      "RoPE_BF16_round": 2356.638562091503,
+      "load_query_codes": 1589.4710784313727,
+      "QK": 1684.3959150326798,
+      "residual_dot_score_round": 1377.0901960784313,
+      "Page_LSE": 838.9924836601307
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.04218879938125611,
+        "raw_ms": [
+          0.04254719913005829,
+          0.04183039963245392
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04702640026807785,
+        "raw_ms": [
+          0.04746240079402923,
+          0.04659039974212646
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10388479828834535,
+        "raw_ms": [
+          0.10439679622650147,
+          0.10337280035018921
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004531200043857098,
+        "raw_ms": [
+          0.004915200173854828,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021503999829292296,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.4167862616432103e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.00979543011635542,
+    "original_score_max_abs": 0.125,
+    "selected_page_overlap": 0.9959676861763
+  },
+  {
+    "layer": 7,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.153357206334362,
+      "B16_to_K128": 0.12515520614900055,
+      "bias_BF16_round": 0.1481576233629389,
+      "RoPE_BF16_round": 0.17048740343364074,
+      "load_query_codes": 0.1183228917081441,
+      "QK": 0.12373537627743797,
+      "residual_dot_score_round": 0.09794594225433363,
+      "Page_LSE": 0.06283835048014215
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2097.283660130719,
+      "B16_to_K128": 1711.5985294117647,
+      "bias_BF16_round": 2026.175163398693,
+      "RoPE_BF16_round": 2331.5529411764705,
+      "load_query_codes": 1618.1611111111113,
+      "QK": 1692.1812091503268,
+      "residual_dot_score_round": 1339.4898692810457,
+      "Page_LSE": 859.3651960784314
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.04193200021982193,
+        "raw_ms": [
+          0.04223999977111816,
+          0.041624000668525694
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04666880071163178,
+        "raw_ms": [
+          0.04710400104522705,
+          0.0462336003780365
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.1037824034690857,
+        "raw_ms": [
+          0.10408960580825806,
+          0.10347520112991333
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004531200043857098,
+        "raw_ms": [
+          0.004915200173854828,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.002611199952661991,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.0150305485012723e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.012366849929094315,
+    "original_score_max_abs": 0.12280654907226562,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 8,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15361718963260923,
+      "B16_to_K128": 0.12473045820653154,
+      "bias_BF16_round": 0.1494049594949195,
+      "RoPE_BF16_round": 0.17055783833091429,
+      "load_query_codes": 0.1182751480715976,
+      "QK": 0.12300854511558786,
+      "residual_dot_score_round": 0.09780804975252516,
+      "Page_LSE": 0.06259781139531476
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2100.7642156862744,
+      "B16_to_K128": 1705.7289215686276,
+      "bias_BF16_round": 2043.1606209150325,
+      "RoPE_BF16_round": 2332.4330065359477,
+      "load_query_codes": 1617.4504901960784,
+      "QK": 1682.1812091503268,
+      "residual_dot_score_round": 1337.5563725490194,
+      "Page_LSE": 856.0450980392156
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041907200217247004,
+        "raw_ms": [
+          0.04223999977111816,
+          0.04157440066337585
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04666880071163178,
+        "raw_ms": [
+          0.04710400104522705,
+          0.0462336003780365
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10365439653396608,
+        "raw_ms": [
+          0.10429439544677735,
+          0.10301439762115479
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0022272000089287756,
+        "raw_ms": [
+          0.0027135999873280523,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.0420163931712523e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.008496161550283432,
+    "original_score_max_abs": 0.07518911361694336,
+    "selected_page_overlap": 0.9959676861763
+  },
+  {
+    "layer": 9,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15331801862947658,
+      "B16_to_K128": 0.12505706183491855,
+      "bias_BF16_round": 0.1480295712852729,
+      "RoPE_BF16_round": 0.1703927605628997,
+      "load_query_codes": 0.11901720158912249,
+      "QK": 0.12356850260970333,
+      "residual_dot_score_round": 0.09810427263953408,
+      "Page_LSE": 0.06251261084907235
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2098.407679738562,
+      "B16_to_K128": 1711.6102941176468,
+      "bias_BF16_round": 2026.026633986928,
+      "RoPE_BF16_round": 2332.1034313725486,
+      "load_query_codes": 1628.944934640523,
+      "QK": 1691.236928104575,
+      "residual_dot_score_round": 1342.7173202614379,
+      "Page_LSE": 855.5872549019608
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041984000802040095,
+        "raw_ms": [
+          0.042342400550842284,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04672000110149384,
+        "raw_ms": [
+          0.04715520143508911,
+          0.04628480076789856
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10396159887313844,
+        "raw_ms": [
+          0.10429439544677735,
+          0.10362880229949951
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022255999967455862,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0018400000408291817
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0017920000478625297
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 8.739756651721109e-08,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.009905960410833359,
+    "original_score_max_abs": 0.1457681655883789,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 10,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15348973389494522,
+      "B16_to_K128": 0.12505243086719964,
+      "bias_BF16_round": 0.14856077545779692,
+      "RoPE_BF16_round": 0.17075627132183124,
+      "load_query_codes": 0.11786522258323912,
+      "QK": 0.1235641724965825,
+      "residual_dot_score_round": 0.09798082403709404,
+      "Page_LSE": 0.06273056934131135
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2099.5142156862744,
+      "B16_to_K128": 1710.533660130719,
+      "bias_BF16_round": 2032.093300653595,
+      "RoPE_BF16_round": 2335.6950980392157,
+      "load_query_codes": 1612.2232026143793,
+      "QK": 1690.1764705882351,
+      "residual_dot_score_round": 1340.2338235294117,
+      "Page_LSE": 858.0620915032681
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041907200217247004,
+        "raw_ms": [
+          0.04223999977111816,
+          0.04157440066337585
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04677120000123977,
+        "raw_ms": [
+          0.04720639884471893,
+          0.04633600115776062
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10380799770355226,
+        "raw_ms": [
+          0.10424319505691529,
+          0.10337280035018921
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004531200043857098,
+        "raw_ms": [
+          0.004915200173854828,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0023552000522613524,
+        "raw_ms": [
+          0.0029184000566601755,
+          0.0017920000478625297
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.2281034855732287e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.009485051035881042,
+    "original_score_max_abs": 0.0767822265625,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 11,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15341991840678476,
+      "B16_to_K128": 0.12533985457525856,
+      "bias_BF16_round": 0.14738714187478463,
+      "RoPE_BF16_round": 0.1705476066928629,
+      "load_query_codes": 0.11851590816198129,
+      "QK": 0.12402906704900622,
+      "residual_dot_score_round": 0.09808017857359291,
+      "Page_LSE": 0.06268032466572879
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2095.2037581699346,
+      "B16_to_K128": 1711.7238562091504,
+      "bias_BF16_round": 2012.8161764705883,
+      "RoPE_BF16_round": 2329.1107843137256,
+      "load_query_codes": 1618.5315359477124,
+      "QK": 1693.8228758169935,
+      "residual_dot_score_round": 1339.4477124183006,
+      "Page_LSE": 856.0039215686274
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.04185599982738494,
+        "raw_ms": [
+          0.04223999977111816,
+          0.04147199988365173
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04659200012683869,
+        "raw_ms": [
+          0.04700160026550293,
+          0.04618239998817444
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.1037567973136902,
+        "raw_ms": [
+          0.10439679622650147,
+          0.10311679840087891
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004480000026524067,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004095999896526337
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021503999829292296,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.1941865807330032e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.008967905305325985,
+    "original_score_max_abs": 0.12005138397216797,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 12,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15269655549165975,
+      "B16_to_K128": 0.12521691382939606,
+      "bias_BF16_round": 0.14807597679555823,
+      "RoPE_BF16_round": 0.1703990161491275,
+      "load_query_codes": 0.11865150503441842,
+      "QK": 0.12451417002816072,
+      "residual_dot_score_round": 0.09792315353749856,
+      "Page_LSE": 0.06252270913418069
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2089.924346405229,
+      "B16_to_K128": 1713.8165032679738,
+      "bias_BF16_round": 2026.6834967320262,
+      "RoPE_BF16_round": 2332.2140522875816,
+      "load_query_codes": 1623.9571895424835,
+      "QK": 1704.198202614379,
+      "residual_dot_score_round": 1340.2527777777777,
+      "Page_LSE": 855.7346405228758
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041984000802040095,
+        "raw_ms": [
+          0.04229120016098022,
+          0.04167680144309997
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04669440090656281,
+        "raw_ms": [
+          0.04715520143508911,
+          0.0462336003780365
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10391039848327638,
+        "raw_ms": [
+          0.10455039739608765,
+          0.10327039957046509
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004504800029098987,
+        "raw_ms": [
+          0.004812800139188766,
+          0.004196799919009208
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021503999829292296,
+        "raw_ms": [
+          0.0025087999179959296,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0022272000089287756,
+        "raw_ms": [
+          0.002662399969995022,
+          0.0017920000478625297
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.419135173819086e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.011804061941802502,
+    "original_score_max_abs": 0.11338615417480469,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 13,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15333329155329048,
+      "B16_to_K128": 0.12562226350685798,
+      "bias_BF16_round": 0.1471741637445354,
+      "RoPE_BF16_round": 0.1706911890960595,
+      "load_query_codes": 0.11818582649998409,
+      "QK": 0.12407528167323524,
+      "residual_dot_score_round": 0.09813015012781345,
+      "Page_LSE": 0.06278783379822403
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2094.8656862745097,
+      "B16_to_K128": 1716.2728758169935,
+      "bias_BF16_round": 2010.7186274509804,
+      "RoPE_BF16_round": 2332.012254901961,
+      "load_query_codes": 1614.675,
+      "QK": 1695.1377450980392,
+      "residual_dot_score_round": 1340.6709150326797,
+      "Page_LSE": 857.818137254902
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041932800412178034,
+        "raw_ms": [
+          0.04229120016098022,
+          0.04157440066337585
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04666880071163178,
+        "raw_ms": [
+          0.04710400104522705,
+          0.0462336003780365
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10357680320739746,
+        "raw_ms": [
+          0.10408960580825806,
+          0.10306400060653687
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004531200043857098,
+        "raw_ms": [
+          0.004915200173854828,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021503999829292296,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.0960206964227837e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.008658748120069504,
+    "original_score_max_abs": 0.06590080261230469,
+    "selected_page_overlap": 0.9939515590667725
+  },
+  {
+    "layer": 14,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15389826074067034,
+      "B16_to_K128": 0.125177660983115,
+      "bias_BF16_round": 0.147087741034608,
+      "RoPE_BF16_round": 0.17136298781032586,
+      "load_query_codes": 0.11866223507339856,
+      "QK": 0.12339563244186227,
+      "residual_dot_score_round": 0.09765121208256858,
+      "Page_LSE": 0.06276426983345142
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2101.0908496732022,
+      "B16_to_K128": 1708.983823529412,
+      "bias_BF16_round": 2008.11045751634,
+      "RoPE_BF16_round": 2339.5274509803917,
+      "load_query_codes": 1620.0321895424838,
+      "QK": 1684.6547385620916,
+      "residual_dot_score_round": 1333.1799019607843,
+      "Page_LSE": 856.887091503268
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041932800412178034,
+        "raw_ms": [
+          0.04223999977111816,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04664320051670075,
+        "raw_ms": [
+          0.04710400104522705,
+          0.04618239998817444
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10372960567474365,
+        "raw_ms": [
+          0.10408960580825806,
+          0.10336960554122925
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022528000175952912,
+        "raw_ms": [
+          0.002662399969995022,
+          0.0018432000651955605
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002662399969995022,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 9.547214574467944e-08,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.010984326712787151,
+    "original_score_max_abs": 0.10960578918457031,
+    "selected_page_overlap": 1.0
+  },
+  {
+    "layer": 15,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.1534823768596555,
+      "B16_to_K128": 0.12672922765746555,
+      "bias_BF16_round": 0.15094305205982433,
+      "RoPE_BF16_round": 0.17055979660101334,
+      "load_query_codes": 0.1143628218923022,
+      "QK": 0.12280252196284684,
+      "residual_dot_score_round": 0.10042640189005314,
+      "Page_LSE": 0.06069380107683906
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2117.3040849673203,
+      "B16_to_K128": 1748.2418300653596,
+      "bias_BF16_round": 2082.2738562091504,
+      "RoPE_BF16_round": 2352.888725490196,
+      "load_query_codes": 1577.6460784313724,
+      "QK": 1694.072549019608,
+      "residual_dot_score_round": 1385.3918300653595,
+      "Page_LSE": 837.2767973856209
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.04221439957618714,
+        "raw_ms": [
+          0.04259839951992035,
+          0.04183039963245392
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.047052799165248876,
+        "raw_ms": [
+          0.04756479859352112,
+          0.046540799736976626
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.1040127992630005,
+        "raw_ms": [
+          0.10434559583663941,
+          0.10368000268936158
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004531200043857098,
+        "raw_ms": [
+          0.004915200173854828,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0018432000651955605
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002662399969995022,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.4261586045449803e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.009720826521515846,
+    "original_score_max_abs": 0.09375,
+    "selected_page_overlap": 1.0
+  },
+  {
+    "layer": 16,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.153805650029423,
+      "B16_to_K128": 0.12463024040331772,
+      "bias_BF16_round": 0.1485891204828614,
+      "RoPE_BF16_round": 0.17115037800994176,
+      "load_query_codes": 0.11825144364903191,
+      "QK": 0.1231903920519023,
+      "residual_dot_score_round": 0.0977254744121698,
+      "Page_LSE": 0.06265730096135225
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2102.7450980392155,
+      "B16_to_K128": 1703.8751633986928,
+      "bias_BF16_round": 2031.4276143790848,
+      "RoPE_BF16_round": 2339.872549019608,
+      "load_query_codes": 1616.6678104575165,
+      "QK": 1684.190359477124,
+      "residual_dot_score_round": 1336.048202614379,
+      "Page_LSE": 856.6156862745097
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.04213760048151016,
+        "raw_ms": [
+          0.04264959990978241,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04677120000123977,
+        "raw_ms": [
+          0.04725759923458099,
+          0.04628480076789856
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10362879633903505,
+        "raw_ms": [
+          0.10429439544677735,
+          0.10296319723129273
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0017920000478625297
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.0494481017531143e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.01233096607029438,
+    "original_score_max_abs": 0.125,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 17,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15329585813872695,
+      "B16_to_K128": 0.12515936380398732,
+      "bias_BF16_round": 0.14840896267069958,
+      "RoPE_BF16_round": 0.17073582368397733,
+      "load_query_codes": 0.11815126227951993,
+      "QK": 0.12342587177547028,
+      "residual_dot_score_round": 0.09812924811387772,
+      "Page_LSE": 0.0626936095337408
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2093.8545751633987,
+      "B16_to_K128": 1709.5406862745097,
+      "bias_BF16_round": 2027.1049019607842,
+      "RoPE_BF16_round": 2332.065522875817,
+      "load_query_codes": 1613.8176470588235,
+      "QK": 1685.8630718954248,
+      "residual_dot_score_round": 1340.338725490196,
+      "Page_LSE": 856.3264705882352
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.04183039963245391,
+        "raw_ms": [
+          0.0421887993812561,
+          0.04147199988365173
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04659200012683869,
+        "raw_ms": [
+          0.04700160026550293,
+          0.04618239998817444
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10337280035018921,
+        "raw_ms": [
+          0.10383360385894776,
+          0.10291199684143067
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022272000089287756,
+        "raw_ms": [
+          0.002662399969995022,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0022272000089287756,
+        "raw_ms": [
+          0.002662399969995022,
+          0.0017920000478625297
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.0703972463943501e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.009906415827572346,
+    "original_score_max_abs": 0.08836537599563599,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 18,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.1532549306149908,
+      "B16_to_K128": 0.12500322101572361,
+      "bias_BF16_round": 0.14779738014975308,
+      "RoPE_BF16_round": 0.17058548251986272,
+      "load_query_codes": 0.11868231290061923,
+      "QK": 0.1238538096931566,
+      "residual_dot_score_round": 0.0982012163773893,
+      "Page_LSE": 0.06262164672850466
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2096.188562091503,
+      "B16_to_K128": 1709.7676470588237,
+      "bias_BF16_round": 2021.541339869281,
+      "RoPE_BF16_round": 2333.2321895424834,
+      "load_query_codes": 1623.3116013071894,
+      "QK": 1694.0462418300656,
+      "residual_dot_score_round": 1343.1754901960785,
+      "Page_LSE": 856.5256535947711
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041958400607109064,
+        "raw_ms": [
+          0.04229120016098022,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04666880071163178,
+        "raw_ms": [
+          0.04705280065536499,
+          0.04628480076789856
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10388479828834535,
+        "raw_ms": [
+          0.10434559583663941,
+          0.10342400074005127
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.002611199952661991,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.613184110738075e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.009649822488427162,
+    "original_score_max_abs": 0.08472013473510742,
+    "selected_page_overlap": 1.0
+  },
+  {
+    "layer": 19,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15345341988139927,
+      "B16_to_K128": 0.12504346035786704,
+      "bias_BF16_round": 0.14813548589735837,
+      "RoPE_BF16_round": 0.17093244217991405,
+      "load_query_codes": 0.11815380555300843,
+      "QK": 0.12334049263585972,
+      "residual_dot_score_round": 0.09799214731761828,
+      "Page_LSE": 0.06294874617697493
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2095.956699346405,
+      "B16_to_K128": 1707.9168300653594,
+      "bias_BF16_round": 2023.3212418300652,
+      "RoPE_BF16_round": 2334.6954248366014,
+      "load_query_codes": 1613.8138888888889,
+      "QK": 1684.656699346405,
+      "residual_dot_score_round": 1338.4341503267972,
+      "Page_LSE": 859.7908496732026
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041907200217247004,
+        "raw_ms": [
+          0.04223999977111816,
+          0.04157440066337585
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04666880071163178,
+        "raw_ms": [
+          0.04710400104522705,
+          0.0462336003780365
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10388479828834535,
+        "raw_ms": [
+          0.10424319505691529,
+          0.1035264015197754
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004504800029098988,
+        "raw_ms": [
+          0.0049136001616716385,
+          0.004095999896526337
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021503999829292296,
+        "raw_ms": [
+          0.0025087999179959296,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002662399969995022,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.3427592193693272e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.0093295369297266,
+    "original_score_max_abs": 0.0898885726928711,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 20,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15385490966439,
+      "B16_to_K128": 0.12500404682801544,
+      "bias_BF16_round": 0.1475705237398237,
+      "RoPE_BF16_round": 0.17085037896375885,
+      "load_query_codes": 0.11860847931365606,
+      "QK": 0.1235682932646114,
+      "residual_dot_score_round": 0.09821421286198113,
+      "Page_LSE": 0.06232915536376336
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2101.2754901960784,
+      "B16_to_K128": 1707.2444444444445,
+      "bias_BF16_round": 2015.4464052287578,
+      "RoPE_BF16_round": 2333.3913398692807,
+      "load_query_codes": 1619.8968954248367,
+      "QK": 1687.6356209150326,
+      "residual_dot_score_round": 1341.361928104575,
+      "Page_LSE": 851.2612745098039
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041958400607109064,
+        "raw_ms": [
+          0.04229120016098022,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04666880071163178,
+        "raw_ms": [
+          0.04710400104522705,
+          0.0462336003780365
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.1035264015197754,
+        "raw_ms": [
+          0.104038405418396,
+          0.10301439762115479
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004531200043857098,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004198399931192398
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0017920000478625297
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 9.05176591459167e-08,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.010663285851478577,
+    "original_score_max_abs": 0.09375,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 21,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15313978635333866,
+      "B16_to_K128": 0.1253140595122325,
+      "bias_BF16_round": 0.1470407124870097,
+      "RoPE_BF16_round": 0.1706696928564183,
+      "load_query_codes": 0.11906643258319752,
+      "QK": 0.12415289661807097,
+      "residual_dot_score_round": 0.09817787692359045,
+      "Page_LSE": 0.06243854266614197
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2094.5985294117645,
+      "B16_to_K128": 1714.006862745098,
+      "bias_BF16_round": 2011.1772875816994,
+      "RoPE_BF16_round": 2334.3671568627447,
+      "load_query_codes": 1628.5537581699346,
+      "QK": 1698.1248366013072,
+      "residual_dot_score_round": 1342.846568627451,
+      "Page_LSE": 854.0150326797385
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.042009600996971125,
+        "raw_ms": [
+          0.042342400550842284,
+          0.04167680144309997
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04666880071163178,
+        "raw_ms": [
+          0.04705280065536499,
+          0.04628480076789856
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.1037567973136902,
+        "raw_ms": [
+          0.10419199466705323,
+          0.10332159996032715
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004480000026524067,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004095999896526337
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021247999742627145,
+        "raw_ms": [
+          0.0025087999179959296,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 9.850558058133174e-08,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.011289362795650959,
+    "original_score_max_abs": 0.125,
+    "selected_page_overlap": 0.9919354319572449
+  },
+  {
+    "layer": 22,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15356125443739654,
+      "B16_to_K128": 0.12524945968425533,
+      "bias_BF16_round": 0.14748130602712928,
+      "RoPE_BF16_round": 0.171076414790708,
+      "load_query_codes": 0.11827554339788705,
+      "QK": 0.12345349474621412,
+      "residual_dot_score_round": 0.09816639361651246,
+      "Page_LSE": 0.06273613329989713
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2096.916993464052,
+      "B16_to_K128": 1710.3124183006537,
+      "bias_BF16_round": 2013.893790849673,
+      "RoPE_BF16_round": 2336.0908496732027,
+      "load_query_codes": 1615.0818627450979,
+      "QK": 1685.7880718954248,
+      "residual_dot_score_round": 1340.4864379084968,
+      "Page_LSE": 856.6774509803921
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041958400607109064,
+        "raw_ms": [
+          0.04229120016098022,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04664320051670075,
+        "raw_ms": [
+          0.04705280065536499,
+          0.0462336003780365
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10373119711875917,
+        "raw_ms": [
+          0.10414079427719117,
+          0.10332159996032715
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.0045056000351905824,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0017920000478625297
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.1309186476182731e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.011085092090070248,
+    "original_score_max_abs": 0.11374664306640625,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 23,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15381944199773212,
+      "B16_to_K128": 0.1254100043495882,
+      "bias_BF16_round": 0.14748543566281655,
+      "RoPE_BF16_round": 0.1706625664546841,
+      "load_query_codes": 0.11841608854501603,
+      "QK": 0.12391177297515912,
+      "residual_dot_score_round": 0.09765782026279304,
+      "Page_LSE": 0.0626368697522108
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2100.872549019608,
+      "B16_to_K128": 1712.85522875817,
+      "bias_BF16_round": 2014.3624183006534,
+      "RoPE_BF16_round": 2330.9166666666665,
+      "load_query_codes": 1617.332026143791,
+      "QK": 1692.3923202614378,
+      "residual_dot_score_round": 1333.814705882353,
+      "Page_LSE": 855.4970588235293
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041907200217247004,
+        "raw_ms": [
+          0.04223999977111816,
+          0.04157440066337585
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04666880071163178,
+        "raw_ms": [
+          0.04705280065536499,
+          0.04628480076789856
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10360320210456848,
+        "raw_ms": [
+          0.10393600463867188,
+          0.10327039957046509
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004530400037765503,
+        "raw_ms": [
+          0.0049136001616716385,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021503999829292296,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.3369523799156013e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.010820320807397366,
+    "original_score_max_abs": 0.125,
+    "selected_page_overlap": 0.9939515590667725
+  },
+  {
+    "layer": 24,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15374828221540865,
+      "B16_to_K128": 0.12445217346648109,
+      "bias_BF16_round": 0.14748011898074886,
+      "RoPE_BF16_round": 0.17130439667144723,
+      "load_query_codes": 0.11979745075441108,
+      "QK": 0.12287969953402925,
+      "residual_dot_score_round": 0.09758652990782828,
+      "Page_LSE": 0.06275134846964564
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2101.566503267974,
+      "B16_to_K128": 1701.1215686274509,
+      "bias_BF16_round": 2015.8877450980392,
+      "RoPE_BF16_round": 2341.538888888889,
+      "load_query_codes": 1637.496732026144,
+      "QK": 1679.627614379085,
+      "residual_dot_score_round": 1333.8983660130718,
+      "Page_LSE": 857.7405228758171
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041932800412178034,
+        "raw_ms": [
+          0.04229120016098022,
+          0.04157440066337585
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04664320051670075,
+        "raw_ms": [
+          0.04710400104522705,
+          0.04618239998817444
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.1040127992630005,
+        "raw_ms": [
+          0.10455039739608765,
+          0.10347520112991333
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004454400017857551,
+        "raw_ms": [
+          0.004812800139188766,
+          0.004095999896526337
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.002611199952661991,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.1387451337441235e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.011485844850540161,
+    "original_score_max_abs": 0.125,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 25,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15308943311007672,
+      "B16_to_K128": 0.12520811041948415,
+      "bias_BF16_round": 0.14783069017537445,
+      "RoPE_BF16_round": 0.17102005146090113,
+      "load_query_codes": 0.1183385493489119,
+      "QK": 0.12378413373986295,
+      "residual_dot_score_round": 0.09795009905815492,
+      "Page_LSE": 0.06277893268723382
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2090.8272875816992,
+      "B16_to_K128": 1710.0366013071896,
+      "bias_BF16_round": 2019.0057189542483,
+      "RoPE_BF16_round": 2335.71568627451,
+      "load_query_codes": 1616.2151960784313,
+      "QK": 1690.5885620915033,
+      "residual_dot_score_round": 1337.7588235294118,
+      "Page_LSE": 857.4066993464053
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.04188160002231597,
+        "raw_ms": [
+          0.0421887993812561,
+          0.04157440066337585
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04687360078096389,
+        "raw_ms": [
+          0.04746240079402923,
+          0.04628480076789856
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10383279919624329,
+        "raw_ms": [
+          0.10419039726257324,
+          0.10347520112991333
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004480000026524067,
+        "raw_ms": [
+          0.004812800139188766,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0022272000089287756,
+        "raw_ms": [
+          0.002662399969995022,
+          0.0017920000478625297
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.2538245641735557e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.01188665721565485,
+    "original_score_max_abs": 0.1875,
+    "selected_page_overlap": 0.9939515590667725
+  },
+  {
+    "layer": 26,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15342541462405723,
+      "B16_to_K128": 0.12524327408309924,
+      "bias_BF16_round": 0.14863406231317194,
+      "RoPE_BF16_round": 0.17055159465561845,
+      "load_query_codes": 0.11799292293793667,
+      "QK": 0.12377380560852788,
+      "residual_dot_score_round": 0.09789842662378852,
+      "Page_LSE": 0.06248049915379992
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2098.2753267973853,
+      "B16_to_K128": 1712.8509803921568,
+      "bias_BF16_round": 2032.7478758169934,
+      "RoPE_BF16_round": 2332.496241830065,
+      "load_query_codes": 1613.693790849673,
+      "QK": 1692.754248366013,
+      "residual_dot_score_round": 1338.877614379085,
+      "Page_LSE": 854.4952614379084
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041958400607109064,
+        "raw_ms": [
+          0.04229120016098022,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04666880071163178,
+        "raw_ms": [
+          0.04710400104522705,
+          0.0462336003780365
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10391039848327638,
+        "raw_ms": [
+          0.10424319505691529,
+          0.10357760190963745
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004480000026524067,
+        "raw_ms": [
+          0.004812800139188766,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021503999829292296,
+        "raw_ms": [
+          0.0025087999179959296,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.005759999994188547,
+        "raw_ms": [
+          0.002611199952661991,
+          0.008908800035715102
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.1542390154772875e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.01040577981621027,
+    "original_score_max_abs": 0.07411670684814453,
+    "selected_page_overlap": 1.0
+  },
+  {
+    "layer": 27,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.153008370601439,
+      "B16_to_K128": 0.12482550344887933,
+      "bias_BF16_round": 0.14826332845882384,
+      "RoPE_BF16_round": 0.17069523182267504,
+      "load_query_codes": 0.11896419234354497,
+      "QK": 0.1233996622339845,
+      "residual_dot_score_round": 0.09818240908455192,
+      "Page_LSE": 0.0626613020061013
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2092.598529411765,
+      "B16_to_K128": 1707.1593137254902,
+      "bias_BF16_round": 2027.7035947712418,
+      "RoPE_BF16_round": 2334.490522875817,
+      "load_query_codes": 1626.9978758169934,
+      "QK": 1687.6589869281045,
+      "residual_dot_score_round": 1342.7785947712418,
+      "Page_LSE": 856.9789215686275
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041984000802040095,
+        "raw_ms": [
+          0.042342400550842284,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04677120000123977,
+        "raw_ms": [
+          0.04720639884471893,
+          0.04633600115776062
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10383360385894776,
+        "raw_ms": [
+          0.10408960580825806,
+          0.10357760190963745
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004556799866259098,
+        "raw_ms": [
+          0.004966399818658829,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.6546329106859048e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.012696557678282261,
+    "original_score_max_abs": 0.09373652935028076,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 28,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.1538268409494948,
+      "B16_to_K128": 0.12451387564776509,
+      "bias_BF16_round": 0.14883157665320795,
+      "RoPE_BF16_round": 0.17131918355941664,
+      "load_query_codes": 0.11837358541934365,
+      "QK": 0.12258128029791751,
+      "residual_dot_score_round": 0.09777485323385524,
+      "Page_LSE": 0.06277880423899908
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2101.2691176470585,
+      "B16_to_K128": 1700.8550653594773,
+      "bias_BF16_round": 2033.0339869281045,
+      "RoPE_BF16_round": 2340.213888888889,
+      "load_query_codes": 1616.9789215686276,
+      "QK": 1674.4558823529412,
+      "residual_dot_score_round": 1335.6009803921568,
+      "Page_LSE": 857.5562091503267
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041958400607109064,
+        "raw_ms": [
+          0.04229120016098022,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04674560129642487,
+        "raw_ms": [
+          0.04715520143508911,
+          0.04633600115776062
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10373119711875917,
+        "raw_ms": [
+          0.10414079427719117,
+          0.10332159996032715
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004480000026524067,
+        "raw_ms": [
+          0.004812800139188766,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022007999941706657,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.001841600053012371
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.002611199952661991,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 9.377082221817545e-08,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.010483610443770885,
+    "original_score_max_abs": 0.09603118896484375,
+    "selected_page_overlap": 1.0
+  },
+  {
+    "layer": 29,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15332067579273956,
+      "B16_to_K128": 0.12556483419466488,
+      "bias_BF16_round": 0.14793288206178987,
+      "RoPE_BF16_round": 0.1704694442954914,
+      "load_query_codes": 0.11777803476667338,
+      "QK": 0.124277245650445,
+      "residual_dot_score_round": 0.09797355880974326,
+      "Page_LSE": 0.06268332442845276
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2093.9640522875816,
+      "B16_to_K128": 1714.8910130718953,
+      "bias_BF16_round": 2020.3807189542483,
+      "RoPE_BF16_round": 2328.1718954248367,
+      "load_query_codes": 1608.5434640522878,
+      "QK": 1697.305882352941,
+      "residual_dot_score_round": 1338.065522875817,
+      "Page_LSE": 856.0921568627451
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.04188160002231597,
+        "raw_ms": [
+          0.04223999977111816,
+          0.04152320027351379
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04659200012683869,
+        "raw_ms": [
+          0.04700160026550293,
+          0.04618239998817444
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10347520112991333,
+        "raw_ms": [
+          0.10398720502853394,
+          0.10296319723129273
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004480000026524067,
+        "raw_ms": [
+          0.0048640001565217975,
+          0.004095999896526337
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.0025599999353289604,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.002662399969995022,
+          0.0016896000131964683
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.1552004508530445e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.012593557126820087,
+    "original_score_max_abs": 0.11551284790039062,
+    "selected_page_overlap": 1.0
+  },
+  {
+    "layer": 30,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.15346886815968214,
+      "B16_to_K128": 0.12475037351469796,
+      "bias_BF16_round": 0.14695948070105364,
+      "RoPE_BF16_round": 0.17129826567210793,
+      "load_query_codes": 0.1197904658850075,
+      "QK": 0.12318876136028065,
+      "residual_dot_score_round": 0.09787587269438405,
+      "Page_LSE": 0.06266791201278618
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2095.8624183006536,
+      "B16_to_K128": 1703.665522875817,
+      "bias_BF16_round": 2006.966339869281,
+      "RoPE_BF16_round": 2339.3513071895427,
+      "load_query_codes": 1635.930065359477,
+      "QK": 1682.3392156862744,
+      "residual_dot_score_round": 1336.6513071895424,
+      "Page_LSE": 855.8303921568627
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041932800412178034,
+        "raw_ms": [
+          0.04223999977111816,
+          0.04162560105323791
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04671999961137771,
+        "raw_ms": [
+          0.04720639884471893,
+          0.0462336003780365
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.1036799967288971,
+        "raw_ms": [
+          0.10414079427719117,
+          0.10321919918060303
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004454400017857551,
+        "raw_ms": [
+          0.004812800139188766,
+          0.004095999896526337
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022272000089287756,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0018432000651955605
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.002149599976837635,
+        "raw_ms": [
+          0.002558399923145771,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.3336331505797716e-07,
+    "linear_reference_max_abs": 4.76837158203125e-07,
+    "original_score_rmse": 0.012769272550940514,
+    "original_score_max_abs": 0.125,
+    "selected_page_overlap": 0.9979838132858276
+  },
+  {
+    "layer": 31,
+    "tokens": 8129,
+    "phase_fraction": {
+      "load_base_right": 0.1535971056971539,
+      "B16_to_K128": 0.12541004882504417,
+      "bias_BF16_round": 0.14735352465817067,
+      "RoPE_BF16_round": 0.170799421802612,
+      "load_query_codes": 0.1183447283317641,
+      "QK": 0.12367663852089912,
+      "residual_dot_score_round": 0.09804036522481885,
+      "Page_LSE": 0.06277816693953713
+    },
+    "mean_block_cycles": {
+      "load_base_right": 2098.082679738562,
+      "B16_to_K128": 1713.0573529411765,
+      "bias_BF16_round": 2012.7975490196077,
+      "RoPE_BF16_round": 2333.060294117647,
+      "load_query_codes": 1616.5475490196077,
+      "QK": 1689.3795751633986,
+      "residual_dot_score_round": 1339.1970588235292,
+      "Page_LSE": 857.5277777777778
+    },
+    "timing": {
+      "original_page_kernel": {
+        "median_ms": 0.041907200217247004,
+        "raw_ms": [
+          0.04223999977111816,
+          0.04157440066337585
+        ]
+      },
+      "instrumented_split_kernel": {
+        "median_ms": 0.04661760032176972,
+        "raw_ms": [
+          0.04700160026550293,
+          0.0462336003780365
+        ]
+      },
+      "transformed_query_total": {
+        "median_ms": 0.10350080132484436,
+        "raw_ms": [
+          0.10398720502853394,
+          0.10301439762115479
+        ]
+      },
+      "residual_query_projection": {
+        "median_ms": 0.004480000026524067,
+        "raw_ms": [
+          0.004812800139188766,
+          0.004147199913859367
+        ]
+      },
+      "append_V128_to_B16": {
+        "median_ms": 0.0022016000002622604,
+        "raw_ms": [
+          0.002611199952661991,
+          0.0017920000478625297
+        ]
+      },
+      "append_V80_to_B16_dimension_control": {
+        "median_ms": 0.0021759999915957453,
+        "raw_ms": [
+          0.002611199952661991,
+          0.001740800030529499
+        ]
+      }
+    },
+    "original_split_bitwise_equal": true,
+    "linear_reference_rmse": 1.4600097131278744e-07,
+    "linear_reference_max_abs": 9.5367431640625e-07,
+    "original_score_rmse": 0.015182054601609707,
+    "original_score_max_abs": 0.2535552978515625,
+    "selected_page_overlap": 1.0
+  }
+]

@@ -32,11 +32,9 @@ class BasisCache:
     def H2D(self):pass
     def print_stats(self):print('Basis Dense V, mapped CPU K, rank',self.width,flush=True)
 
-    def attention(self,q,k,v,layer,positions):
-        n=q.shape[2];start=self.length;end=start+n;r=self.width
-        assert n==1 or start==0
+    def append_codes(self,k,v,layer):
+        n=k.shape[2];start=self.length;end=start+n;r=self.width
         self.values[layer][:,:,start:end]=v
-        append_mapped_host_key(self.keys[layer],k,start=start)
         f=self.factors[layer];rope=self.llm.cos_sin_cache
         for left in range(0,n,2048):
             right=min(n,left+2048);x=v[:,:,left:right]
@@ -50,6 +48,13 @@ class BasisCache:
             residual=(k[:,:,left:right]-predicted)@f['encoder']
             self.bases[layer][:,:,start+left:start+right]=full_base[...,:r]
             self.residuals[layer][:,:,start+left:start+right]=residual
+
+    def attention(self,q,k,v,layer,positions):
+        n=q.shape[2];start=self.length;end=start+n;r=self.width
+        assert n==1 or start==0
+        append_mapped_host_key(self.keys[layer],k,start=start)
+        self.append_codes(k,v,layer)
+        f=self.factors[layer]
         if n>1:
             out=flash_attn_with_kvcache(q=q.transpose(1,2),k_cache=k.transpose(1,2),v_cache=v.transpose(1,2),causal=True)
         else:

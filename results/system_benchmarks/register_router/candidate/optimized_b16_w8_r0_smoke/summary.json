@@ -1,0 +1,54 @@
+{
+  "status": "complete",
+  "mode": "optimized",
+  "rank": 16,
+  "length": 8192,
+  "warps": 8,
+  "environment": "basis",
+  "command": "/home/zhangal/.conda/envs/basis/bin/python -m benchmarks.system.bench_register_router --mode candidate --rank 16 --warps 8 --repeat 0 --smoke",
+  "hit_fraction": 0.7023824453353882,
+  "operator_ms_per_step": {},
+  "router_ms_per_step": {},
+  "native_wall_ms": 222.9921817779541,
+  "cuda_median_after10_ms": null,
+  "cuda_mean_after10_ms": null,
+  "decode_input_ids": [
+    [
+      279
+    ],
+    [
+      4872
+    ],
+    [
+      3952
+    ],
+    [
+      5274
+    ],
+    [
+      627
+    ],
+    [
+      5876
+    ],
+    [
+      1953
+    ],
+    [
+      54949
+    ],
+    [
+      25
+    ]
+  ],
+  "all_decode_logits_finite": true,
+  "samples": [],
+  "router_samples": [],
+  "sources": {
+    "/deac/csc/yangGrp/zhangal/BasisServe-CALS/benchmarks/system/bench_local_kernels.py": "75afed9ba926e01330bd123ec77c892a2876b34a43b2613ae74bfa0dc77a22d4",
+    "basisserve/kernels/gqa_slot_attention.py": "cb1b989b830b0802a0aa5f14eaac0c0a63962e65bb548e9d1bf7c09cfc369952",
+    "benchmarks/system/local_kernel_candidates.py": "7b3cb9b7ccf0aa817a701399bb7728daabeac5d9ffbd21afaa2a5cfde7f2d4ad"
+  },
+  "scope": "Trace always serves original router/attention; both candidates see identical real queries, IDs and evolving slot state. Fetch replay uses actual miss lists without rerunning the planner; repeated microbench reads can be cache-warm. Trace native timings include probes and are NOT serving performance. Non-trace modes perform normal 100-step continuous decode with no A/B probes.",
+  "register_router_mode": "candidate"
+}

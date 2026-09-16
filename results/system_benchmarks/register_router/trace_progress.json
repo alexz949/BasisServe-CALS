@@ -1,0 +1,93 @@
+[
+  {
+    "path": "results/system_benchmarks/register_router/candidate/optimized_b16_w8_r0_smoke/summary.json",
+    "status": "complete",
+    "mode": "optimized",
+    "rank": 16,
+    "length": 8192,
+    "warps": 8,
+    "environment": "basis",
+    "command": "/home/zhangal/.conda/envs/basis/bin/python -m benchmarks.system.bench_register_router --mode candidate --rank 16 --warps 8 --repeat 0 --smoke",
+    "hit_fraction": 0.7023824453353882,
+    "operator_ms_per_step": {},
+    "router_ms_per_step": {},
+    "native_wall_ms": 222.9921817779541,
+    "cuda_median_after10_ms": null,
+    "cuda_mean_after10_ms": null,
+    "all_decode_logits_finite": true,
+    "scope": "Trace always serves original router/attention; both candidates see identical real queries, IDs and evolving slot state. Fetch replay uses actual miss lists without rerunning the planner; repeated microbench reads can be cache-warm. Trace native timings include probes and are NOT serving performance. Non-trace modes perform normal 100-step continuous decode with no A/B probes.",
+    "register_router_mode": "candidate"
+  },
+  {
+    "path": "results/system_benchmarks/register_router/trace_b16_w4_r0/summary.json",
+    "status": "complete",
+    "mode": "trace",
+    "rank": 16,
+    "length": 65536,
+    "warps": 4,
+    "environment": "basis",
+    "command": "/home/zhangal/.conda/envs/basis/bin/python -m benchmarks.system.bench_register_router --mode trace --rank 16 --warps 4 --repeat 0",
+    "hit_fraction": 0.7253332138061523,
+    "operator_ms_per_step": {
+      "attention_old": 0.669277920722963,
+      "attention_gqa4": 1.3050694540143069,
+      "attention_gqa8": 1.0850777462124868,
+      "fetch_scalar": 1.374640164822338,
+      "fetch_vector": 1.3745419237017615
+    },
+    "router_ms_per_step": {
+      "original": 8.892643165588378,
+      "candidate": 6.781358397006988
+    },
+    "native_wall_ms": 1480.6744408607485,
+    "cuda_median_after10_ms": 36.1210880279541,
+    "cuda_mean_after10_ms": 1441.7953565385606,
+    "all_decode_logits_finite": true,
+    "scope": "Trace always serves original router/attention; both candidates see identical real queries, IDs and evolving slot state. Fetch replay uses actual miss lists without rerunning the planner; repeated microbench reads can be cache-warm. Trace native timings include probes and are NOT serving performance. Non-trace modes perform normal 100-step continuous decode with no A/B probes.",
+    "register_router_mode": "trace"
+  },
+  {
+    "path": "results/system_benchmarks/register_router/trace_b16_w8_r0/summary.json",
+    "status": "complete",
+    "mode": "trace",
+    "rank": 16,
+    "length": 65536,
+    "warps": 8,
+    "environment": "basis",
+    "command": "/home/zhangal/.conda/envs/basis/bin/python -m benchmarks.system.bench_register_router --mode trace --rank 16 --warps 8 --repeat 0",
+    "hit_fraction": 0.7253262400627136,
+    "operator_ms_per_step": {},
+    "router_ms_per_step": {
+      "original": 8.876131165027617,
+      "candidate": 6.332979214191435
+    },
+    "native_wall_ms": 207.59199619293213,
+    "cuda_median_after10_ms": 36.13340759277344,
+    "cuda_mean_after10_ms": 161.89372028774685,
+    "all_decode_logits_finite": true,
+    "scope": "Trace always serves original router/attention; both candidates see identical real queries, IDs and evolving slot state. Fetch replay uses actual miss lists without rerunning the planner; repeated microbench reads can be cache-warm. Trace native timings include probes and are NOT serving performance. Non-trace modes perform normal 100-step continuous decode with no A/B probes.",
+    "register_router_mode": "trace"
+  },
+  {
+    "path": "results/system_benchmarks/register_router/trace_b8_w8_r0/summary.json",
+    "status": "complete",
+    "mode": "trace",
+    "rank": 8,
+    "length": 65536,
+    "warps": 8,
+    "environment": "basis",
+    "command": "/home/zhangal/.conda/envs/basis/bin/python -m benchmarks.system.bench_register_router --mode trace --rank 8 --warps 8 --repeat 0",
+    "hit_fraction": 0.7178645133972168,
+    "operator_ms_per_step": {},
+    "router_ms_per_step": {
+      "original": 8.324067139625551,
+      "candidate": 5.8733287990093235
+    },
+    "native_wall_ms": 205.15543937683105,
+    "cuda_median_after10_ms": 35.54201698303223,
+    "cuda_mean_after10_ms": 160.30397911071776,
+    "all_decode_logits_finite": true,
+    "scope": "Trace always serves original router/attention; both candidates see identical real queries, IDs and evolving slot state. Fetch replay uses actual miss lists without rerunning the planner; repeated microbench reads can be cache-warm. Trace native timings include probes and are NOT serving performance. Non-trace modes perform normal 100-step continuous decode with no A/B probes.",
+    "register_router_mode": "trace"
+  }
+]

@@ -21,6 +21,7 @@ def main():
     p.add_argument('--method',choices=['full','shadowkv_cpu','basis16','basis8'],required=True)
     p.add_argument('--length',type=int,default=65536)
     p.add_argument('--batch',type=int,default=1)
+    p.add_argument('--window',type=int,default=64)
     p.add_argument('--smoke',action='store_true')
     p.add_argument('--output',type=Path,default=Path('results/system_benchmarks/shadow_native'))
     a=p.parse_args()
@@ -56,7 +57,7 @@ def main():
         attn_mode=a.method,sparse_budget=2048,rank=160,chunk_size=8,minference=False)
     if a.method.startswith('basis'):llm.kv_cache.validate=a.smoke
     windows=load_file(str(run_root/'calibration/windows.safetensors'))['input_ids']
-    pairs=[[64+i,64+(i+8)%16] for i in range(a.batch)]
+    pairs=[[64+(a.window-64+i)%16,64+(a.window-64+i+8)%16] for i in range(a.batch)]
     tokens=torch.stack([torch.cat((windows[x],windows[y]))[:length] for x,y in pairs]).long().cuda()
     native_prefill=llm.batch_prefill;native_h2d=llm.kv_cache.H2D;native_inference=llm.inference
     details={};prefill_logits=[];events=[]

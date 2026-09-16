@@ -1,0 +1,37 @@
+{
+  "status": "complete",
+  "environment": "basis",
+  "command": "python -m benchmarks.system.profile_router_phases --smoke",
+  "model": "Llama-3.1-8B base",
+  "gpu": "NVIDIA L40S",
+  "batch": 1,
+  "length": 8192,
+  "summed_median_kernel_ms": {
+    "original_page_kernel": 1.3438968092203136,
+    "instrumented_split_kernel": 1.4958072125911717,
+    "transformed_query_total": 3.3194463789463042,
+    "residual_query_projection": 0.14409840088337664,
+    "append_V128_to_B16": 0.07021839991211892,
+    "append_V80_to_B16_dimension_control": 0.07362319985404613
+  },
+  "phase_wall_proxy_ms": {
+    "load_base_right": 0.20644637791418613,
+    "B16_to_K128": 0.16834461273905083,
+    "bias_BF16_round": 0.1993533618968199,
+    "RoPE_BF16_round": 0.22946062214301294,
+    "load_query_codes": 0.1585680461075192,
+    "QK": 0.1658569594640531,
+    "residual_dot_score_round": 0.13200159823171836,
+    "Page_LSE": 0.08386523072395348
+  },
+  "average_page_overlap": 0.997416790574789,
+  "max_score_difference": 0.2535552978515625,
+  "source_sha256": {
+    "results/system_benchmarks/router_phases/smoke/source/mapped_host_paged_attention.cpp": "24b0cdf06428916a55dcb010a78d163df7d24f953560170f87cca9f31f8632c7",
+    "results/system_benchmarks/router_phases/smoke/source/mapped_host_paged_attention.cu": "54d8865424e347704d9e4c198ef8d2dfaa5df93eea8eb4f4f233d0e8e2ad9b7a",
+    "results/system_benchmarks/router_phases/smoke/source/conditional_router_page32.cu": "bad14910083c3cffd56c30f9a9700cb088a38fb8ebaf4de06b111526cec4506f",
+    "/deac/csc/yangGrp/zhangal/BasisServe-CALS/benchmarks/system/profile_router_phases.py": "dffe31e2290c3c5fc5f0bce562456f6cf1d01f988ae8f98a22296dc88c31955e",
+    "benchmarks/system/transformed_query_router.py": "d892c65d199454d4e168aebe7f7c4eb8d99122e7f1bde6a71485e5a6096f7613"
+  },
+  "scope": "First real decode query in each of 32 layers. Graph-replayed kernels exclude Python overhead. Phase proportions are clock64 block cycles from a split, instrumented layout, including barriers/stalls; scaled wall proxies are NOT independent measured phase latencies. Transformed query omits original intermediate BF16 K/RoPE rounding and is a diagnostic prototype, not a serving replacement. V80 is a dimension-only control; actual native values are Dense V128."
+}
