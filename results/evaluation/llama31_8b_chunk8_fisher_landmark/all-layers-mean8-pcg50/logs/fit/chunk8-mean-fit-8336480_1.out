@@ -1,0 +1,28 @@
+Compact Chunk-Fisher sweep 1/8: train=0.0592403 heldout=0.102476 query_cg=50.0/50 encoder_cg=50.0/50 wall=1.900s
+Compact Chunk-Fisher sweep 2/8: train=0.0557322 heldout=0.0993703 query_cg=50.0/50 encoder_cg=50.0/50 wall=1.531s
+Compact Chunk-Fisher sweep 3/8: train=0.0551503 heldout=0.0993555 query_cg=50.0/50 encoder_cg=50.0/50 wall=1.530s
+Compact Chunk-Fisher sweep 4/8: train=0.0548716 heldout=0.0992156 query_cg=50.0/50 encoder_cg=50.0/50 wall=1.531s
+Compact Chunk-Fisher sweep 5/8: train=0.0547021 heldout=0.0992592 query_cg=50.0/50 encoder_cg=50.0/50 wall=1.531s
+Compact Chunk-Fisher sweep 6/8: train=0.0545837 heldout=0.0992001 query_cg=50.0/50 encoder_cg=50.0/50 wall=1.531s
+Compact Chunk-Fisher sweep 7/8: train=0.0544991 heldout=0.0992354 query_cg=50.0/50 encoder_cg=50.0/50 wall=1.531s
+Compact Chunk-Fisher sweep 8/8: train=0.0544358 heldout=0.0991821 query_cg=50.0/50 encoder_cg=50.0/50 wall=1.532s
+# Layer 1 Mean-128 Chunk8 Fisher Fit
+
+| Split | Fisher NMSE init | Fisher NMSE final |
+|---|---:|---:|
+| fit | 0.664215 | 0.0544066 |
+| heldout | 0.676829 | 0.0991181 |
+
+| Sweep | Train Fisher NMSE | Held-out Fisher NMSE | Query CG mean/max/hit | Encoder CG mean/max/hit | Wall (s) |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 0.0592403 | 0.102476 | 50.0/50/32 | 50.0/50/8 | 1.90 |
+| 2 | 0.0557322 | 0.0993703 | 50.0/50/32 | 50.0/50/8 | 1.53 |
+| 3 | 0.0551503 | 0.0993555 | 50.0/50/32 | 50.0/50/8 | 1.53 |
+| 4 | 0.0548716 | 0.0992156 | 50.0/50/32 | 50.0/50/8 | 1.53 |
+| 5 | 0.0547021 | 0.0992592 | 50.0/50/32 | 50.0/50/8 | 1.53 |
+| 6 | 0.0545837 | 0.0992001 | 50.0/50/32 | 50.0/50/8 | 1.53 |
+| 7 | 0.0544991 | 0.0992354 | 50.0/50/32 | 50.0/50/8 | 1.53 |
+| 8 | 0.0544358 | 0.0991821 | 50.0/50/32 | 50.0/50/8 | 1.53 |
+
+The objective is evaluated exactly from fixed-teacher Mean-128 Fisher sufficient statistics. Flat-1024 is not captured or fitted.
+

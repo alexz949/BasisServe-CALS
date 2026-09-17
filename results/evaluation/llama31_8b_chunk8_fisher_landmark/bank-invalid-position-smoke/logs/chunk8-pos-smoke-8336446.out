@@ -1,0 +1,39 @@
+#########################BEGIN-PROLOG#########################
+JobName   = chunk8-pos-smoke
+Account   = yanggrp
+NodeList  = lovelace
+Resources = cpu=4,mem=64G,node=1,billing=4,gres/gpu=1,gres/gpu:l40s=1
+WorkDir   = /deac/csc/yangGrp/zhangal/BasisServe-CALS
+###########################END-PROLOG#########################
+{'stage': 'capture bank', 'split': 'fit', 'window': 0, 'layers': [1], 'elapsed_seconds': 12.732504807412624}
+{'stage': 'capture bank', 'split': 'heldout', 'window': 64, 'layers': [1], 'elapsed_seconds': 25.145222671329975}
+{'stage': 'layer bank complete', 'layer': 1, 'windows': 2, 'bytes': 469862896}
+Chunk-Fisher sufficient statistics 1/1
+Chunk-Fisher sufficient statistics 1/1
+Compact Chunk-Fisher sweep 1/8: train=0.599807 heldout=1.04163 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.577s
+Compact Chunk-Fisher sweep 2/8: train=0.562905 heldout=1.09475 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.525s
+Compact Chunk-Fisher sweep 3/8: train=0.55105 heldout=1.1248 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.527s
+Compact Chunk-Fisher sweep 4/8: train=0.544852 heldout=1.15033 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.528s
+Compact Chunk-Fisher sweep 5/8: train=0.540935 heldout=1.1733 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.526s
+Compact Chunk-Fisher sweep 6/8: train=0.538148 heldout=1.19457 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.530s
+Compact Chunk-Fisher sweep 7/8: train=0.53605 heldout=1.21391 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.527s
+Compact Chunk-Fisher sweep 8/8: train=0.53445 heldout=1.23144 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.528s
+{'stage': 'fit complete', 'feature': 'mean', 'layer': 1, 'initial': {'fit': {'fisher_loss': 388.1932373046875, 'fisher_nmse': 0.8607143657034416, 'base_fisher_energy': 451.0128479003906, 'chunk_logit_rel_mse': 0.01212002136280896, 'exact_chunk_support_recall': 0.8415466917504091, 'routed_candidate_attention_mass': 0.6656677114442573}, 'heldout': {'fisher_loss': 184.02102661132812, 'fisher_nmse': 0.8673525463157912, 'base_fisher_energy': 212.16404724121094, 'chunk_logit_rel_mse': 0.011336064747524154, 'exact_chunk_support_recall': 0.8473040112003218, 'routed_candidate_attention_mass': 0.6721353924513096}}, 'final': {'fit': {'fisher_loss': 240.75, 'fisher_nmse': 0.5337985405976092, 'base_fisher_energy': 451.0128479003906, 'chunk_logit_rel_mse': 0.012304874866390706, 'exact_chunk_support_recall': 0.8449986801715568, 'routed_candidate_attention_mass': 0.6680342951731291}, 'heldout': {'fisher_loss': 262.98187255859375, 'fisher_nmse': 1.2395213796973228, 'base_fisher_energy': 212.16404724121094, 'chunk_logit_rel_mse': 0.012561077788899365, 'exact_chunk_support_recall': 0.8206646682228893, 'routed_candidate_attention_mass': 0.6610278833395569}}}
+Chunk-Fisher feature preconditioner 1/1
+Chunk-Fisher Kronecker preconditioner wall=0.080s
+Packed Chunk-Fisher sweep 1/4: train=0.415437 heldout=1.35662 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.649s
+Packed Chunk-Fisher sweep 2/4: train=0.370081 heldout=1.48801 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.650s
+Packed Chunk-Fisher sweep 3/4: train=0.354681 heldout=1.56149 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.654s
+Packed Chunk-Fisher sweep 4/4: train=0.346652 heldout=1.61757 query_cg=50.0/50 encoder_cg=50.0/50 wall=0.649s
+{'stage': 'fit complete', 'feature': 'flat', 'layer': 1, 'initial': {'fit': {'fisher_loss': 388.1932373046875, 'fisher_nmse': 0.8607143657034416, 'base_fisher_energy': 451.0128479003906, 'chunk_logit_rel_mse': 0.012120021359654547, 'exact_chunk_support_recall': 0.8415466917504091, 'routed_candidate_attention_mass': 0.6656677114442573}, 'heldout': {'fisher_loss': 184.02102661132812, 'fisher_nmse': 0.8673525463157912, 'base_fisher_energy': 212.16404724121094, 'chunk_logit_rel_mse': 0.011336064752691295, 'exact_chunk_support_recall': 0.8473040112003218, 'routed_candidate_attention_mass': 0.6721353924513096}}, 'final': {'fit': {'fisher_loss': 155.0979766845703, 'fisher_nmse': 0.34388815619466523, 'base_fisher_energy': 451.0128479003906, 'chunk_logit_rel_mse': 0.012615878458638003, 'exact_chunk_support_recall': 0.8550804866245016, 'routed_candidate_attention_mass': 0.6737859040658805}, 'heldout': {'fisher_loss': 347.0605163574219, 'fisher_nmse': 1.6358121032770745, 'base_fisher_energy': 212.16404724121094, 'chunk_logit_rel_mse': 0.013702491035074038, 'exact_chunk_support_recall': 0.7961425450630486, 'routed_candidate_attention_mass': 0.6505912878492381}}}
+# Layer 1 Direct Chunk8 Fisher Fit
+
+| Feature | Split | Fisher NMSE init | Fisher NMSE final | Chunk rel-MSE final | Exact support recall | Routed-candidate mass |
+|---|---|---:|---:|---:|---:|---:|
+| mean | fit | 0.860714 | 0.533799 | 0.0123049 | 0.8450 | 0.6680 |
+| mean | heldout | 0.867353 | 1.23952 | 0.0125611 | 0.8207 | 0.6610 |
+| flat | fit | 0.860714 | 0.343888 | 0.0126159 | 0.8551 | 0.6738 |
+| flat | heldout | 0.867353 | 1.63581 | 0.0137025 | 0.7961 | 0.6506 |
+
+Fisher candidates exclude fixed sink32 and exact recent64. The saved deployment tensors contain only the direct chunk encoder and the per-query-head query factor.
+

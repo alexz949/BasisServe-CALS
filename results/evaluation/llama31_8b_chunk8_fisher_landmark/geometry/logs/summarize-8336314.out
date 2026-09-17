@@ -1,0 +1,121 @@
+#########################BEGIN-PROLOG#########################
+JobName   = c8-geom-summary
+Account   = yanggrp
+NodeList  = lovelace
+Resources = cpu=2,mem=4G,node=1,billing=2
+WorkDir   = /deac/csc/yangGrp/zhangal/BasisServe-CALS
+###########################END-PROLOG#########################
+{
+  "TOKEN_B16R16_PAGE32": {
+    "chunk_logit_rel_mse": null,
+    "chunk_logit_pearson": null,
+    "routed_chunk_recall_exact_qk": 0.6435850175766973,
+    "routed_chunk_recall_b16r16": 0.6697262819898242,
+    "attention_mass": 0.9217920120536292,
+    "non_sink_attention_mass": 0.8247500831162142,
+    "output_rel_mse": 0.006504129292919697,
+    "wo_rel_mse": 0.005423367575515871,
+    "support_tokens_mean": 2036.604380607605,
+    "support_tokens_min": 2017,
+    "support_tokens_max": 2048,
+    "historical_chunks_mean": 246.20572090148926,
+    "historical_chunks_min": 244,
+    "historical_chunks_max": 248
+  },
+  "EXACT_QK_PAGE32": {
+    "chunk_logit_rel_mse": null,
+    "chunk_logit_pearson": null,
+    "routed_chunk_recall_exact_qk": 0.6677448673444815,
+    "routed_chunk_recall_b16r16": 0.6432418980282364,
+    "attention_mass": 0.9256671785215076,
+    "non_sink_attention_mass": 0.8334824873943489,
+    "output_rel_mse": 0.005516893799843329,
+    "wo_rel_mse": 0.004565781559161699,
+    "support_tokens_mean": 2036.461724281311,
+    "support_tokens_min": 2017,
+    "support_tokens_max": 2048,
+    "historical_chunks_mean": 246.18540477752686,
+    "historical_chunks_min": 244,
+    "historical_chunks_max": 248
+  },
+  "TOKEN_B16R16_CHUNK8_LSE": {
+    "chunk_logit_rel_mse": 0.003608678719290399,
+    "chunk_logit_pearson": 0.985991222470053,
+    "routed_chunk_recall_exact_qk": 0.811769328767241,
+    "routed_chunk_recall_b16r16": 1.0,
+    "attention_mass": 0.9307652748029795,
+    "non_sink_attention_mass": 0.845760088313682,
+    "output_rel_mse": 0.004975170443331174,
+    "wo_rel_mse": 0.0040682432104912685,
+    "support_tokens_mean": 2048.0,
+    "support_tokens_min": 2048,
+    "support_tokens_max": 2048,
+    "historical_chunks_mean": 248.0,
+    "historical_chunks_min": 248,
+    "historical_chunks_max": 248
+  },
+  "EXACT_QK_CHUNK8_LSE": {
+    "chunk_logit_rel_mse": 0.0,
+    "chunk_logit_pearson": 1.0,
+    "routed_chunk_recall_exact_qk": 1.0,
+    "routed_chunk_recall_b16r16": 0.811769328767241,
+    "attention_mass": 0.9349538831074824,
+    "non_sink_attention_mass": 0.8555299645342984,
+    "output_rel_mse": 0.004214353794873721,
+    "wo_rel_mse": 0.0034388544193343956,
+    "support_tokens_mean": 2048.0,
+    "support_tokens_min": 2048,
+    "support_tokens_max": 2048,
+    "historical_chunks_mean": 248.0,
+    "historical_chunks_min": 248,
+    "historical_chunks_max": 248
+  },
+  "EXACT_K_MEAN_CHUNK8": {
+    "chunk_logit_rel_mse": 0.017044900313536192,
+    "chunk_logit_pearson": 0.9696760158595783,
+    "routed_chunk_recall_exact_qk": 0.7909336867744514,
+    "routed_chunk_recall_b16r16": 0.7465969536447119,
+    "attention_mass": 0.9076506577282544,
+    "non_sink_attention_mass": 0.769966542823795,
+    "output_rel_mse": 0.0073721395789508514,
+    "wo_rel_mse": 0.006068062303593114,
+    "support_tokens_mean": 2048.0,
+    "support_tokens_min": 2048,
+    "support_tokens_max": 2048,
+    "historical_chunks_mean": 248.0,
+    "historical_chunks_min": 248,
+    "historical_chunks_max": 248
+  },
+  "BASE16_MEAN_CHUNK8": {
+    "chunk_logit_rel_mse": 0.02803292259465552,
+    "chunk_logit_pearson": 0.9265818160697596,
+    "routed_chunk_recall_exact_qk": 0.6565280310871913,
+    "routed_chunk_recall_b16r16": 0.6668562575096075,
+    "attention_mass": 0.8927819651828486,
+    "non_sink_attention_mass": 0.7332637580517485,
+    "output_rel_mse": 0.013066032767932383,
+    "wo_rel_mse": 0.01150911566824534,
+    "support_tokens_mean": 2048.0,
+    "support_tokens_min": 2048,
+    "support_tokens_max": 2048,
+    "historical_chunks_mean": 248.0,
+    "historical_chunks_min": 248,
+    "historical_chunks_max": 248
+  },
+  "BASE16_OLD_R16_MEAN_CHUNK8": {
+    "chunk_logit_rel_mse": 0.01933914570938512,
+    "chunk_logit_pearson": 0.9603439967586268,
+    "routed_chunk_recall_exact_qk": 0.7407874979978715,
+    "routed_chunk_recall_b16r16": 0.7979844393712483,
+    "attention_mass": 0.9048145683244684,
+    "non_sink_attention_mass": 0.7636473373086119,
+    "output_rel_mse": 0.008165542679724901,
+    "wo_rel_mse": 0.006745737233749266,
+    "support_tokens_mean": 2048.0,
+    "support_tokens_min": 2048,
+    "support_tokens_max": 2048,
+    "historical_chunks_mean": 248.0,
+    "historical_chunks_min": 248,
+    "historical_chunks_max": 248
+  }
+}

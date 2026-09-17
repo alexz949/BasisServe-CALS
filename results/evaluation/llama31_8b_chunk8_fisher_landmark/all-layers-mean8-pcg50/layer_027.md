@@ -1,0 +1,19 @@
+# Layer 27 Mean-128 Chunk8 Fisher Fit
+
+| Split | Fisher NMSE init | Fisher NMSE final |
+|---|---:|---:|
+| fit | 0.876206 | 0.394609 |
+| heldout | 0.897852 | 0.488961 |
+
+| Sweep | Train Fisher NMSE | Held-out Fisher NMSE | Query CG mean/max/hit | Encoder CG mean/max/hit | Wall (s) |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 0.413387 | 0.492245 | 50.0/50/32 | 50.0/50/8 | 1.67 |
+| 2 | 0.398688 | 0.48728 | 50.0/50/32 | 50.0/50/8 | 1.55 |
+| 3 | 0.396444 | 0.487868 | 50.0/50/32 | 50.0/50/8 | 1.55 |
+| 4 | 0.395574 | 0.488234 | 50.0/50/32 | 50.0/50/8 | 1.55 |
+| 5 | 0.395143 | 0.488531 | 50.0/50/32 | 50.0/50/8 | 1.55 |
+| 6 | 0.394899 | 0.488709 | 50.0/50/32 | 50.0/50/8 | 1.55 |
+| 7 | 0.394748 | 0.488844 | 50.0/50/32 | 50.0/50/8 | 1.55 |
+| 8 | 0.394647 | 0.488931 | 50.0/50/32 | 50.0/50/8 | 1.55 |
+
+The objective is evaluated exactly from fixed-teacher Mean-128 Fisher sufficient statistics. Flat-1024 is not captured or fitted.

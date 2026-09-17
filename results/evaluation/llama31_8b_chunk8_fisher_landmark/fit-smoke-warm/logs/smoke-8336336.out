@@ -1,0 +1,32 @@
+#########################BEGIN-PROLOG#########################
+JobName   = c8-fisher-warm
+Account   = yanggrp
+NodeList  = lovelace
+Resources = cpu=4,mem=96G,node=1,billing=4,gres/gpu=1,gres/gpu:l40s=1
+WorkDir   = /deac/csc/yangGrp/zhangal/BasisServe-CALS
+###########################END-PROLOG#########################
+{'stage': 'capture', 'split': 'fit', 'window': 0, 'layer': 0, 'positions': [65471]}
+{'stage': 'capture', 'split': 'heldout', 'window': 64, 'layer': 0, 'positions': [65407]}
+Chunk-Fisher sweep 1/4: train=0.463637 heldout=0.953262
+Chunk-Fisher sweep 2/4: train=0.462253 heldout=0.931487
+Chunk-Fisher sweep 3/4: train=0.462046 heldout=0.923664
+Chunk-Fisher sweep 4/4: train=0.46196 heldout=0.919557
+{'stage': 'fit', 'feature': 'mean', 'initial': {'fit': {'fisher_loss': 6.880539894104004, 'fisher_nmse': 0.7806090503562515, 'base_fisher_energy': 8.814322471618652, 'chunk_logit_rel_mse': 0.3572033106550203, 'exact_chunk_support_recall': 0.6932632839307189, 'routed_candidate_attention_mass': 0.36436966247856617}, 'heldout': {'fisher_loss': 8.217615127563477, 'fisher_nmse': 0.8873467019664102, 'base_fisher_energy': 9.260884284973145, 'chunk_logit_rel_mse': 0.35102052308452125, 'exact_chunk_support_recall': 0.7006915560923517, 'routed_candidate_attention_mass': 0.4265978455077857}}, 'final': {'fit': {'fisher_loss': 4.071814060211182, 'fisher_nmse': 0.46195428784481923, 'base_fisher_energy': 8.814322471618652, 'chunk_logit_rel_mse': 0.24240639251766158, 'exact_chunk_support_recall': 0.7483349964022636, 'routed_candidate_attention_mass': 0.3732967048417777}, 'heldout': {'fisher_loss': 8.504644393920898, 'fisher_nmse': 0.918340423248854, 'base_fisher_energy': 9.260884284973145, 'chunk_logit_rel_mse': 0.33763857409291426, 'exact_chunk_support_recall': 0.7006915593519807, 'routed_candidate_attention_mass': 0.42450861004181206}}}
+Chunk-Fisher sweep 1/4: train=0.274705 heldout=1.1743
+Chunk-Fisher sweep 2/4: train=0.266937 heldout=1.1216
+Chunk-Fisher sweep 3/4: train=0.264049 heldout=1.10764
+Chunk-Fisher sweep 4/4: train=0.263261 heldout=1.08279
+{'stage': 'fit', 'feature': 'flat', 'initial': {'fit': {'fisher_loss': 6.880539894104004, 'fisher_nmse': 0.7806090503562515, 'base_fisher_energy': 8.814322471618652, 'chunk_logit_rel_mse': 0.35720331084241896, 'exact_chunk_support_recall': 0.6932632839307189, 'routed_candidate_attention_mass': 0.36436966247856617}, 'heldout': {'fisher_loss': 8.217598915100098, 'fisher_nmse': 0.8873449513276073, 'base_fisher_energy': 9.260884284973145, 'chunk_logit_rel_mse': 0.3510205228774969, 'exact_chunk_support_recall': 0.7006915560923517, 'routed_candidate_attention_mass': 0.4265978455077857}}, 'final': {'fit': {'fisher_loss': 2.320039987564087, 'fisher_nmse': 0.2632125152028886, 'base_fisher_energy': 8.814322471618652, 'chunk_logit_rel_mse': 0.2673171381510603, 'exact_chunk_support_recall': 0.8168544636573642, 'routed_candidate_attention_mass': 0.3803868698887527}, 'heldout': {'fisher_loss': 9.966381072998047, 'fisher_nmse': 1.076180283255418, 'base_fisher_energy': 9.260884284973145, 'chunk_logit_rel_mse': 0.33649260290889266, 'exact_chunk_support_recall': 0.6768698440864682, 'routed_candidate_attention_mass': 0.4170368127524853}}}
+# Llama-3.1-8B-Instruct Direct Chunk8 Fisher ALS Smoke
+
+This smoke uses Dense V128, frozen Base16, audited 64K calibration windows, four ALS sweeps, and a final query closure solve.
+
+| Feature | Split | Fisher NMSE init | Fisher NMSE final | Chunk rel-MSE final | Exact support recall | Routed-candidate mass |
+|---|---|---:|---:|---:|---:|---:|
+| mean | fit | 0.780609 | 0.461954 | 0.242406 | 0.7483 | 0.3733 |
+| mean | heldout | 0.887347 | 0.91834 | 0.337639 | 0.7007 | 0.4245 |
+| flat | fit | 0.780609 | 0.263213 | 0.267317 | 0.8169 | 0.3804 |
+| flat | heldout | 0.887345 | 1.07618 | 0.336493 | 0.6769 | 0.4170 |
+
+The objective masks the four fixed sink chunks and excludes exact recent64 tokens. Saved deployment factors contain only the direct chunk encoder and per-query-head factor; the old token R16 is initialization-only.
+

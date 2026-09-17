@@ -1,0 +1,60 @@
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 14143.84it/s]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/diagnose_chunk8_landmark_geometry.py", line 862, in <module>
+    main()
+  File "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/diagnose_chunk8_landmark_geometry.py", line 858, in main
+    run_stage(args, spec)
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/diagnose_chunk8_landmark_geometry.py", line 758, in run_stage
+    result = model.model(windows[window : window + 1].long().cuda(), use_cache=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/transformers/utils/output_capturing.py", line 262, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/transformers/models/llama/modeling_llama.py", line 403, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/transformers/modeling_layers.py", line 114, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/transformers/models/llama/modeling_llama.py", line 308, in forward
+    hidden_states, _ = self.self_attn(
+                       ^^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1845, in _call_impl
+    return inner()
+           ^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1772, in inner
+    args_kwargs_result = hook(self, args, kwargs)  # type: ignore[misc]
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/diagnose_chunk8_landmark_geometry.py", line 718, in capture
+    sums, audits = geometry_window_metrics(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/diagnose_chunk8_landmark_geometry.py", line 456, in geometry_window_metrics
+    report[f"{prefix}_count"] += tensor.numel()
+    ~~~~~~^^^^^^^^^^^^^^^^^^^
+KeyError: 'support_tokens_count'

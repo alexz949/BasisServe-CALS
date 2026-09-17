@@ -1,0 +1,16 @@
+#########################BEGIN-PROLOG#########################
+JobName   = c8-geom-smoke
+Account   = yanggrp
+NodeList  = lovelace
+Resources = cpu=2,mem=48G,node=1,billing=2,gres/gpu=1,gres/gpu:l40s=1
+WorkDir   = /deac/csc/yangGrp/zhangal/BasisServe-CALS
+###########################END-PROLOG#########################
+ONLINE_STEP 32
+ONLINE_STEP 64
+ONLINE_STEP 96
+ONLINE_STEP 128
+ONLINE_STEP 160
+ONLINE_STEP 192
+ONLINE_STEP 224
+ONLINE_STEP 256
+{'layer': 0, 'window': 64, 'exact_chunk_wo': 0.007333983353746887, 'exact_mean_wo': 0.0087704706606823, 'base_old_r16_mean_wo': 0.008769200375485304}

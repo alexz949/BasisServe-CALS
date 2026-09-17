@@ -1,0 +1,7 @@
+{
+  "environment": "basis",
+  "python": "/home/zhangal/.conda/envs/basis/bin/python",
+  "smoke": "/home/zhangal/.conda/envs/basis/bin/python -u -m evaluation.diagnose_page_landmarks smoke --root /home/zhangal/BasisServe-CALS-runs/llama31_8b_instruct_64k --output /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/llama31_8b_b16r16_page_landmarks_64k --budget 2048",
+  "evaluate": "/home/zhangal/.conda/envs/basis/bin/python -u -m evaluation.diagnose_page_landmarks evaluate --root /home/zhangal/BasisServe-CALS-runs/llama31_8b_instruct_64k --output /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/llama31_8b_b16r16_page_landmarks_64k --budget 2048 --shard-index $SLURM_ARRAY_TASK_ID",
+  "summarize": "/home/zhangal/.conda/envs/basis/bin/python -u -m evaluation.diagnose_page_landmarks summarize --root /home/zhangal/BasisServe-CALS-runs/llama31_8b_instruct_64k --output /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/llama31_8b_b16r16_page_landmarks_64k --budget 2048"
+}

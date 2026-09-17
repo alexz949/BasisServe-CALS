@@ -1,0 +1,16 @@
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 11280.33it/s]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/capture_chunk8_fisher_landmark_bank.py", line 247, in <module>
+    main()
+  File "/home/zhangal/.conda/envs/basis/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/capture_chunk8_fisher_landmark_bank.py", line 87, in main
+    "fit": selected_positions(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/fit_chunk8_fisher_landmark_formal.py", line 66, in selected_positions
+    assert min(result) + 1 > SINK_TOKENS + RECENT_TOKENS
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

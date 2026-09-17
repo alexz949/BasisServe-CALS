@@ -1,0 +1,16 @@
+#########################BEGIN-PROLOG#########################
+JobName   = b16r16-lm-smoke
+Account   = yanggrp
+NodeList  = gpu-a100-01
+Resources = cpu=2,mem=100G,node=1,billing=13209,gres/gpu=1,gres/gpu:a100_80=1
+WorkDir   = /deac/csc/yangGrp/zhangal/BasisServe-CALS
+###########################END-PROLOG#########################
+ONLINE_STEP 32
+ONLINE_STEP 64
+ONLINE_STEP 96
+ONLINE_STEP 128
+ONLINE_STEP 160
+ONLINE_STEP 192
+ONLINE_STEP 224
+ONLINE_STEP 256
+{'layer': 0, 'window': 64, 'teacher_wo_rel_mse': 0.007685192935207437, 'lm8x4_wo_rel_mse': 0.00829021762856585, 'lm8x4_teacher_recall': 0.7632556336466223}
