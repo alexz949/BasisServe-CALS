@@ -1,0 +1,143 @@
+{
+  "status": "complete",
+  "protocol": {
+    "format": "basisserve.llama_dense128_tp2_ruler.v1",
+    "numerical_policy": {
+      "model_dtype": "bfloat16",
+      "float32_matmul_precision": "highest",
+      "cuda_matmul_allow_tf32": false,
+      "cudnn_allow_tf32": false,
+      "deterministic_algorithms": true,
+      "cublas_workspace_config": ":4096:8"
+    },
+    "identity_sha256": "0cb442b27b4a45b5012b14cddba7f0af7866505510ce28fedfb067dd419b1636",
+    "prompts_sha256": "d1dbe3be83ad70b1472bd9ba2b3e8587a415b452edcd9e26470fc76f04c0db57",
+    "dtype": "bfloat16",
+    "sequence_length": 131072,
+    "samples": 1100,
+    "samples_per_task": 100,
+    "arms": [
+      "full"
+    ],
+    "rank_schedule": [
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128
+    ],
+    "generation": "greedy; native EOS; official task caps; original dense V and Full-K",
+    "kernels": "Triton prefill and dense Triton decode; dispatch counts checked per prompt",
+    "memory_policy": "V96 and B16R16 routing sidecars remain on GPU; B16R16 exact K is held in pinned CPU memory and only selected K rows are fetched for decode",
+    "source_sha256": {
+      "evaluation/deterministic_evaluation.py": "3d0a34d9283efdd534eb56feeaafc0ef8ca80954f1cdda3012bc7ff5061836cc",
+      "evaluation/eval_llama_cal128.py": "505a7417da9c566619a459ea3a5064c206b955fda9e4c735bc1aeff40497f472",
+      "evaluation/eval_k_routing_ruler.py": "9a7b4eb086f2f9cd24677877a7f51e1a6c4db8c6ef086a61c86d9de5cb2c3933",
+      "evaluation/k_routing_config.py": "b2cae49062c98fe9b78e6a8af80236790f81b70c3d81f621db14d24c47e2ead5",
+      "evaluation/ruler_v1.py": "3cfbbce999dbd811fbc0a08bf41cbfe85e0bf9ef5efd87a1c59ec2a0a4c76ca7",
+      "evaluation/v96kl_common.py": "e3a0d2203d960c3a67b9bdb262bdae4de78edc16e30b5b611c49d38aa78a1509",
+      "evaluation/chunked_prefill_mlp.py": "54877ee2e0a6d94904e33716a84f324617e867668521b2dcb8bb0eb0ce44deac",
+      "evaluation/llama_sink_recent_routing.py": "dba222ac3411de8f763160285e036268083e8581dab3d4af86d133ed0b5a1840",
+      "evaluation/llama_b16r16_k_offload.py": "d8baa76da517cfe7011a629f1e2c9d91ee39eca43ac01c6a31e0c90c541a41f6",
+      "evaluation/llama_resident_prefill.py": "9e7bacc2136c58e79bda0749956d7371d2db73ff569a372969395cf3727b2989",
+      "basisserve/core/c1_lrqk.py": "fdd6d795d1968346af3b02d7aa803e445f72913e965cec49b92d62e3c9955c67",
+      "basisserve/core/c1_shadowkv.py": "f658a4ca69c2e5a5f1ca37ab14386673857338ba0e3b999c7c28ca752a830c65",
+      "basisserve/core/c1_loki_attention.py": "0a4cd5d9ed27dcc42035f000f1216425125fa96963c75239b950603cd6760035",
+      "basisserve/core/c1_k_routing_sidecar.py": "286a1f69618d8c7b53756bdac709b2989d12bb74eb5440065a0424ff6109dd6e",
+      "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c",
+      "basisserve/checkpoint/gqa_vo_qwen3.py": "866518b80c0d5253819ee7c9172495e92cfa0abe062f2ff4d3006cc59d755b4d",
+      "basisserve/checkpoint/c1_lrqk_qwen3.py": "5354256aae2c9c96da3d4f8385a587d8fb8b13f8afef73161540b9da6403812d",
+      "basisserve/checkpoint/c1_shadowkv_qwen3.py": "49d7ba0e7b1837fa108743181c36b2f339b4c5b72c6a7592f2d85bd64b4da586",
+      "basisserve/kernels/compressed_v_decode_attention.py": "9e13f8581f5af28e173063cacc0d996caeb722a7dc4d0678d1d3cbde70392418",
+      "basisserve/kernels/indexed_sparse_decode_attention.py": "cad6bb38ad30cc470a7c8b3ca5fbd730f54345c8094aaa3c2608e4bf712c4fbb",
+      "basisserve/kernels/split_indexed_attention.py": "3362f9eecbd0daf14847587e936118516dea8ccc16a0174bd6273eec1344ded6",
+      "evaluation/eval_llama_dense128.py": "c5bce85c487eed5479c2e8db4c18e03ca727755e4e4801ab6a6cb0354a7fc950",
+      "evaluation/llama_prefill_memory.py": "b4f9946365555b956bd9df18fe862644b6555b85abd24dfda79171713d9fcab4"
+    },
+    "eos_ids": [
+      128001,
+      128008,
+      128009
+    ],
+    "versions": {
+      "torch": "2.11.0+cu128",
+      "transformers": "5.17.0",
+      "triton": "3.6.0"
+    },
+    "value_mode": "original V128 and original Wo",
+    "distributed": {
+      "tensor_parallel_size": 2,
+      "plan": "Llama native QKV/MLP colwise and O/down rowwise",
+      "transport": "NCCL host transport",
+      "nccl_p2p_disable": 1,
+      "local_query_heads": 16,
+      "local_key_value_heads": 4
+    }
+  },
+  "tasks": {
+    "niah_single_1": {
+      "full": 100.0
+    },
+    "niah_single_2": {
+      "full": 100.0
+    },
+    "niah_single_3": {
+      "full": 99.0
+    },
+    "niah_multikey_1": {
+      "full": 99.0
+    },
+    "niah_multikey_2": {
+      "full": 89.0
+    },
+    "niah_multiquery": {
+      "full": 98.75
+    },
+    "niah_multivalue": {
+      "full": 94.25
+    },
+    "vt": {
+      "full": 76.2
+    },
+    "fwe": {
+      "full": 74.66666666666666
+    },
+    "qa_1": {
+      "full": 78.0
+    },
+    "qa_2": {
+      "full": 46.0
+    }
+  },
+  "means": {
+    "full": 86.80606060606061
+  },
+  "verified_predictions": 1100
+}

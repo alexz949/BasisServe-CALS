@@ -16,7 +16,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, DynamicCache
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from evaluation.v96kl_common import configure, read_json, write_json, sha256
-from evaluation.k_routing_config import routing_config
+from evaluation.k_routing_config import routing_config, validate_residual_fisher_support
 from evaluation.ruler_v1 import parse_tasks, ruler_prompt, sample_score
 from basisserve.checkpoint.gqa_vo_qwen3 import GQATiedVOQwen3Attention
 from basisserve.checkpoint.gqa_vo_nemotron_h import nemotron_h_c1_attention
@@ -27,7 +27,9 @@ from basisserve.core.c1_lrqk import LRQKConfig
 from basisserve.core.c1_lrqk import LRQKState
 from basisserve.core.c1_v_conditional_k_router import build_conditional_routing_sidecar, conditional_routing_query_projector
 from basisserve.core.c1_conditional_page_attention import c1_conditional_page_topk_attention
-from basisserve.kernels.compressed_v_decode_attention import compressed_v_prefill_attention
+from basisserve.kernels.compressed_v_decode_attention import (
+    compressed_v_decode_attention_triton, compressed_v_prefill_attention,
+)
 
 ARMS = ('full','exact_sparse','lrqk','shadowkv','ours')
 
@@ -126,12 +128,22 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
                 residual_encoder=t['residual_encoder'],cos=cos,sin=sin)
         past_key_values.sidecars[self.layer_idx] = (torch.cat((past_key_values.sidecars[self.layer_idx],current),2)
             if previous else current)
+    elif self._routing_arm == 'loki':
+        from basisserve.core.c1_k_routing_sidecar import build_routing_sidecar
+        current = build_routing_sidecar(k, self._loki_projector)
+        past_key_values.sidecars[self.layer_idx] = (torch.cat((past_key_values.sidecars[self.layer_idx], current), 2)
+            if previous else current)
     k,v = past_key_values.update(k,v,self.layer_idx)
     if previous == 0:
         output = compressed_v_prefill_attention(q,k,v,scale=self.scaling)
     elif self._routing_arm == 'full':
-        output = torch.nn.functional.scaled_dot_product_attention(q,k,v,enable_gqa=True,
-            is_causal=False,dropout_p=0.,scale=self.scaling)
+        output = compressed_v_decode_attention_triton(q,k,v,scale=self.scaling)
+    elif self._routing_arm == 'loki':
+        from basisserve.core.c1_loki_attention import c1_loki_recent_decode
+        result = c1_loki_recent_decode(q, k, v, self._loki_projector,
+            past_key_values.sidecars[self.layer_idx], scale=self.scaling)
+        output = result.output
+        past_key_values.statistics[self.layer_idx] = result.statistics
     else:
         if self._routing_arm == 'exact_sparse':
             # FP32 identity routing gives an exact-QK Page-mass oracle with the same GQA rule.
@@ -206,8 +218,10 @@ def install(model, checkpoint, manifest, arm, bank, *, dense_v=False):
             layer.mixer=replacement
         else:
             layer.self_attn=replacement
-        if arm in ('full','exact_sparse','ours'):
+        if arm in ('full','exact_sparse','ours','loki'):
             replacement._routing_arm=arm
+            if arm == 'loki':
+                replacement._loki_projector = bank[record['layer']]['projector'].to(device=device, dtype=torch.bfloat16)
             if arm=='ours':
                 payload=bank[record['layer']]
                 base_keys=[k for k in payload if k.startswith('base_left_b')]
@@ -273,8 +287,9 @@ def inputs(args, tokenizer):
             i=record['layer'];path=args.bank/f'layer_{i:03d}.safetensors'
             audit=read_json(path.with_suffix('.json'))
             assert audit['status']=='complete' and audit['layer']==i and audit['v_rank']==record['ranks'][0]
+            validate_residual_fisher_support(audit['protocol'], runtime_config.model_type)
             if runtime_config.model_type == 'llama':
-                assert audit['protocol']['format'] == 'basisserve.k_router.streaming.v1'
+                assert audit['protocol']['format'] == 'basisserve.k_router.streaming.v2'
                 assert audit['identity_sha256'] == sha256(args.identity)
                 assert audit['protocol']['sequence_length'] == 65536
                 assert not audit['protocol']['smoke']
@@ -299,7 +314,7 @@ def inputs(args, tokenizer):
                  'full causal FlashAttention-2 for equal QKV widths, C1 Triton for compact V'),rank_schedule=identity['layer_ranks'],
         exact_sparse='FP32 exact-QK normalized Page32 mass, GQA max, pinned page0 within B2048',
         ours='native Base16/Residual16 Page32 GQA max, pinned page0 within B2048',
-        lrqk=dict(rank=32,topk_per_query_head=2048,recent=64,prefill_iterations=2,decode_iterations=2,tolerance=1e-8,seed=0,state_dtype='bfloat16',solve_dtype='float32'),
+        lrqk=dict(rank=32,topk_per_query_head=2048,recent=64,prefill_iterations=2,decode_iterations=2,tolerance=0.01,seed=0,state_dtype='bfloat16',solve_dtype='float32'),
         shadowkv=dict(rank=160,chunk=8,routed=2048,outlier_chunks=48,extra_support='native local and generated tokens'),
         source_sha256={n:sha256(ROOT/n) for n in ('evaluation/eval_k_routing_ruler.py',
             'evaluation/k_routing_config.py',

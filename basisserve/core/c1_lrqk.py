@@ -36,7 +36,7 @@ class LRQKConfig:
     recent: int = 64
     prefill_iterations: int = 2
     decode_iterations: int = 2
-    tolerance: float = 1e-8
+    tolerance: float = 0.01
     seed: int = 0
     prefill_backend: str = 'triton'
 
@@ -126,8 +126,8 @@ def select_tokens(qcode, kcode, config):
 def selected_attention(q, k, v, ids, scale):
     selected_k, selected_v = gather_heads(k,ids), gather_heads(v,ids)
     if q.is_cuda and q.dtype in (torch.float16, torch.bfloat16) and v.shape[-1] <= q.shape[-1]:
-        from basisserve.core.compact_v_flash import compact_v_flash_attention
-        return compact_v_flash_attention(q, selected_k, selected_v, scale=scale)
+        from basisserve.kernels.compressed_v_decode_attention import compressed_v_decode_attention_triton
+        return compressed_v_decode_attention_triton(q, selected_k, selected_v, scale=scale)
     return F.scaled_dot_product_attention(q,selected_k,selected_v,scale=scale,dropout_p=0,is_causal=False)
 
 

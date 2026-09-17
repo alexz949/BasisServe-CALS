@@ -1,0 +1,119 @@
+{
+  "status": "complete",
+  "format": "basisserve.llama31_v128_ruler128k_export.v1",
+  "model": "Llama-3.1-8B-Instruct",
+  "sequence_length": 131072,
+  "tasks": 11,
+  "samples_per_task": 100,
+  "samples_per_arm": 1100,
+  "arms": [
+    "dense",
+    "ours_b16r16",
+    "shadowkv",
+    "lrqk_t832_recent64",
+    "loki_t856"
+  ],
+  "external_dependencies": {
+    "ShadowKV": {
+      "repository": "https://github.com/ByteDance-Seed/ShadowKV.git",
+      "commit": "e51904cdeab7d4d34013370f09f2cf5fcd655e15"
+    }
+  },
+  "code_sha256": {
+    "evaluation/deterministic_evaluation.py": "3d0a34d9283efdd534eb56feeaafc0ef8ca80954f1cdda3012bc7ff5061836cc",
+    "evaluation/eval_llama_cal128.py": "50e6eb56eafbb96c9f695609bc7fa620f60f07b3e4d28dfe4b1a88295828fcd7",
+    "evaluation/eval_k_routing_ruler.py": "af86c2e5b704bf5ad26a83347ed8f5f0b4c0cd3aa34deaff26fbfb9a31d767dc",
+    "evaluation/k_routing_config.py": "b2cae49062c98fe9b78e6a8af80236790f81b70c3d81f621db14d24c47e2ead5",
+    "evaluation/ruler_v1.py": "3cfbbce999dbd811fbc0a08bf41cbfe85e0bf9ef5efd87a1c59ec2a0a4c76ca7",
+    "evaluation/v96kl_common.py": "e3a0d2203d960c3a67b9bdb262bdae4de78edc16e30b5b611c49d38aa78a1509",
+    "evaluation/chunked_prefill_mlp.py": "54877ee2e0a6d94904e33716a84f324617e867668521b2dcb8bb0eb0ce44deac",
+    "evaluation/llama_sink_recent_routing.py": "cdfb9921b35444ead1848f774d12227dfb64d1bb482aa57709b86c94bb8b9bf3",
+    "evaluation/llama_b16r16_k_offload.py": "d8baa76da517cfe7011a629f1e2c9d91ee39eca43ac01c6a31e0c90c541a41f6",
+    "evaluation/llama_resident_prefill.py": "9e7bacc2136c58e79bda0749956d7371d2db73ff569a372969395cf3727b2989",
+    "evaluation/eval_llama_dense128.py": "c5bce85c487eed5479c2e8db4c18e03ca727755e4e4801ab6a6cb0354a7fc950",
+    "evaluation/llama_prefill_memory.py": "b4f9946365555b956bd9df18fe862644b6555b85abd24dfda79171713d9fcab4",
+    "evaluation/eval_llama_dense_v_routing128.py": "69e480e5814c0b042b58f5e8c75972313f36f1692bb727efe3f5d6c60551afba",
+    "evaluation/llama_baseline_prefill.py": "26aeecb53fdbcca5d7a5317cd6a5a1b21a9bfe8b7e92d33f17048acc65221650",
+    "evaluation/official_shadowkv_cpu.py": "e67e84fb8653436e81fb912a9647774c8b241dad874bfca817b546eafda8433c",
+    "evaluation/run_llama_ruler100.py": "c0dd3745c778507ee37e516da0cef5650a21533b67fdf971da9787a2e64a12ff",
+    "evaluation/audit_llama_dense_prefill.py": "2fed726ea40b146530e39b079c2d9d2f0f7bbd7b284bbd2fa9b6d4bdd653a125",
+    "evaluation/summarize_llama_dense_v128.py": "5d78478586da25d77f7e9ba77c7fd9933ca55ecac4780f2272f3fc91ffedb3c9",
+    "basisserve/core/c1_lrqk.py": "fdd6d795d1968346af3b02d7aa803e445f72913e965cec49b92d62e3c9955c67",
+    "basisserve/core/c1_shadowkv.py": "801b63fba3aeeec0f81ace8c66f402d3a40fa78f9e38bba1ecae368f9514f273",
+    "basisserve/core/c1_loki_attention.py": "0a4cd5d9ed27dcc42035f000f1216425125fa96963c75239b950603cd6760035",
+    "basisserve/core/c1_k_routing_sidecar.py": "286a1f69618d8c7b53756bdac709b2989d12bb74eb5440065a0424ff6109dd6e",
+    "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c",
+    "basisserve/checkpoint/gqa_vo_qwen3.py": "866518b80c0d5253819ee7c9172495e92cfa0abe062f2ff4d3006cc59d755b4d",
+    "basisserve/checkpoint/c1_lrqk_qwen3.py": "5354256aae2c9c96da3d4f8385a587d8fb8b13f8afef73161540b9da6403812d",
+    "basisserve/checkpoint/c1_shadowkv_qwen3.py": "49d7ba0e7b1837fa108743181c36b2f339b4c5b72c6a7592f2d85bd64b4da586",
+    "basisserve/kernels/compressed_v_decode_attention.py": "9e13f8581f5af28e173063cacc0d996caeb722a7dc4d0678d1d3cbde70392418",
+    "basisserve/kernels/indexed_sparse_decode_attention.py": "ddea7866d35c6cde410fcc9ebea534535c119ac19e7285f0cf73c6740943e773",
+    "basisserve/kernels/split_indexed_attention.py": "3362f9eecbd0daf14847587e936118516dea8ccc16a0174bd6273eec1344ded6"
+  },
+  "files": {
+    "README.md": {
+      "bytes": 1619,
+      "sha256": "ee27ef3f1b3a12d84bcd29cb70ad38eefc887ab82f6926ebc7e2d30e17f1aa11"
+    },
+    "predictions/dense.jsonl": {
+      "bytes": 907383,
+      "sha256": "a15be97f6d088a5696722e0c0dfe1732640b647bbe3ab598c320ec52988d2ceb"
+    },
+    "predictions/loki_t856.jsonl": {
+      "bytes": 4874772,
+      "sha256": "7bb5792155faa3a16e09d3f53254eb95996e6d0c4ce4f76543694114eb46c1e7"
+    },
+    "predictions/lrqk_t832_recent64.jsonl": {
+      "bytes": 7857235,
+      "sha256": "83acc02d8c9dfc49b107ae4fd5b6b0f099fc018944fc9fb105af484501f4ecc2"
+    },
+    "predictions/ours_b16r16.jsonl": {
+      "bytes": 3921975,
+      "sha256": "13e6d7be01d7f653f65be089ddc3dc329ff3f2825732a4e23ec7f9a2d835e252"
+    },
+    "predictions/shadowkv.jsonl": {
+      "bytes": 1026203,
+      "sha256": "9a8dc90025b2b01e7c15aab54b72f1518a2e32e9048a2aec6fd542da77dc6f5f"
+    },
+    "prompts.json": {
+      "bytes": 364253,
+      "sha256": "d1dbe3be83ad70b1472bd9ba2b3e8587a415b452edcd9e26470fc76f04c0db57"
+    },
+    "ruler-manifest.json": {
+      "bytes": 10390,
+      "sha256": "586dddb5c5da57288a708a4f4cd80296443bc3df8f74df60f221def67f2a84ac"
+    },
+    "run_metadata.json": {
+      "bytes": 43341,
+      "sha256": "fa4d22adcaefbb82a7c62f3886ec2e239dc478576cd0c5014fd6866d7a1b49d7"
+    },
+    "v128/audit_summary.json": {
+      "bytes": 788550,
+      "sha256": "118e65d8815b07b336b4a01a6727d9cc9736784a7d3eeaf91bae4c6551c50c64"
+    },
+    "v128/summary.json": {
+      "bytes": 7266,
+      "sha256": "15cb6f6adacdfd42ba14b237da099f398b7070f5e605c919c533b67fe5e3226c"
+    },
+    "v128-dense/summary.json": {
+      "bytes": 5183,
+      "sha256": "fc4b2d0ad4a7cdc7371c849d7546f342dfc4b2cd30a3e323c4a7895643206673"
+    },
+    "v128-dense/summary.md": {
+      "bytes": 441,
+      "sha256": "d9bf0b542721866df3ab310bd8e4524957c590eb8194c350d86167089e3d0678"
+    },
+    "v128-prefill-check/summary.json": {
+      "bytes": 801,
+      "sha256": "8ee76c19fa0a27f23fc251861d12b6c36a1645a35aab402c7d2b0851708c2df5"
+    },
+    "v128-summary.json": {
+      "bytes": 8985,
+      "sha256": "8571e606fa2bb530b42e2477dc6b406916fb3826e72ab7ac6340b661a0398eda"
+    },
+    "v128-summary.md": {
+      "bytes": 1758,
+      "sha256": "8775d2347c8ebb8951ac1234e56cfa4a3ab8aa9382e960d89f795c694e0a3a36"
+    }
+  }
+}

@@ -363,4 +363,27 @@ def c1_loki_pca_topk_attention(
     )
 
 
-__all__ = ["C1LokiAttentionResult", "c1_loki_pca_topk_attention"]
+@torch.inference_mode()
+def c1_loki_recent_decode(query, exact_key, value, projector, sidecar, *,
+                         top_k=2048, recent_tokens=64, scale):
+    """Per-query-head historical PCA Top-K plus an exact recent suffix."""
+    batch, heads, query_length, _ = query.shape
+    groups, length = exact_key.shape[1:3]
+    assert query_length == 1 and query.is_cuda and top_k > 0 and recent_tokens >= 0
+    mapping = _head_to_kv(heads, groups, query.device)
+    projected_q = torch.einsum('bhqd,hdr->bhqr', query, projector[mapping].to(query.dtype))
+    scores = gqa_proxy_scores_triton(projected_q[:, :, 0].contiguous(), sidecar, scale=scale)
+    historical = max(0, length-recent_tokens)
+    count = min(top_k, historical)
+    old = scores[..., :historical].topk(count, dim=-1, sorted=False).indices
+    recent = torch.arange(historical, length, device=query.device).expand(batch, heads, 1, -1)
+    ids = torch.cat((old, recent), -1)
+    output = gqa_indexed_sparse_decode_attention_triton(query, exact_key, value, ids, scale=scale)
+    physical = _physical_union_count(ids, torch.ones_like(ids, dtype=torch.bool),
+                                    kv_heads=groups, sequence_length=length)
+    return C1LokiAttentionResult(output, dict(
+        selected_per_query_head=ids.shape[-1], historical_per_query_head=count,
+        recent_tokens=length-historical, physical_tokens_mean=float(physical)/(batch*groups)))
+
+
+__all__ = ["C1LokiAttentionResult", "c1_loki_pca_topk_attention", "c1_loki_recent_decode"]

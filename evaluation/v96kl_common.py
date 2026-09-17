@@ -34,6 +34,8 @@ def read_json(path):
 
 def write_json(path, value):
     path = Path(path)
+    # Compare the persisted JSON representation on resume (JSON keys are strings).
+    value = json.loads(json.dumps(value, allow_nan=False))
     path.parent.mkdir(parents=True, exist_ok=True)
     # Completed artifacts are immutable. Identical writes are harmless on resume.
     if path.exists():

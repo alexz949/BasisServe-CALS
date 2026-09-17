@@ -87,8 +87,8 @@ class C1ShadowKVState:
         groups=query.shape[1]//h
         assert torch.isfinite(key).all() and key.dtype==value.dtype==query.dtype
         if query.is_cuda and query.dtype in (torch.float16,torch.bfloat16) and value.shape[-1]<=query.shape[-1]:
-            from basisserve.core.compact_v_flash import compact_v_flash_attention
-            return compact_v_flash_attention(query,key,value,scale=scale)
+            from basisserve.kernels.compressed_v_decode_attention import compressed_v_decode_attention_triton
+            return compressed_v_decode_attention_triton(query,key,value,scale=scale)
         return F.scaled_dot_product_attention(query,key.repeat_interleave(groups,1),value.repeat_interleave(groups,1),
             scale=scale,dropout_p=0,is_causal=False)
 

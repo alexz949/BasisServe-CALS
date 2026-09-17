@@ -298,9 +298,10 @@ def residual_page_fisher_gram(
     """Build exact-teacher Page-Fisher Grams for residual-Key features.
 
     Page masses and within-page conditional weights always come from the exact
-    Key.  Prefix pages that are pinned in the physical cache are removed before
-    the non-sink distribution is normalized.  Only the page representative
-    uses the residual feature.  The returned energy is the Page-Fisher energy
+    Key. Callers pass only the causal historical prefix, excluding any recent
+    tokens that are always retained. Prefix pages pinned in the physical cache
+    are removed before the candidate distribution is normalized. Only the page
+    representative uses the residual feature. The returned energy is the Page-Fisher energy
     of the exact residual score, so a zero-dimensional residual router has
     normalized loss one.
     """
@@ -309,6 +310,8 @@ def residual_page_fisher_gram(
     exact_key_rows = exact_key_rows[first_token:]
     residual_rows = residual_rows[first_token:]
     tokens = int(exact_key_rows.shape[0])
+    if tokens == 0:
+        return queries.new_zeros((queries.shape[0], queries.shape[1], queries.shape[1])), 0.0
     pages = (tokens + int(page_size) - 1) // int(page_size)
     padded_tokens = pages * int(page_size)
     padding = padded_tokens - tokens

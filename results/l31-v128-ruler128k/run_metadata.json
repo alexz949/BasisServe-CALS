@@ -1,0 +1,788 @@
+{
+  "format": "basisserve.compact_predictions.v1",
+  "arms": {
+    "dense": {
+      "samples": 1100,
+      "protocol": {
+        "format": "basisserve.llama_dense128_tp2_ruler.v1",
+        "numerical_policy": {
+          "model_dtype": "bfloat16",
+          "float32_matmul_precision": "highest",
+          "cuda_matmul_allow_tf32": false,
+          "cudnn_allow_tf32": false,
+          "deterministic_algorithms": true,
+          "cublas_workspace_config": ":4096:8"
+        },
+        "identity_sha256": "0cb442b27b4a45b5012b14cddba7f0af7866505510ce28fedfb067dd419b1636",
+        "prompts_sha256": "d1dbe3be83ad70b1472bd9ba2b3e8587a415b452edcd9e26470fc76f04c0db57",
+        "dtype": "bfloat16",
+        "sequence_length": 131072,
+        "samples": 1100,
+        "samples_per_task": 100,
+        "arms": [
+          "full"
+        ],
+        "rank_schedule": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "generation": "greedy; native EOS; official task caps; original dense V and Full-K",
+        "kernels": "Triton prefill and dense Triton decode; dispatch counts checked per prompt",
+        "memory_policy": "V96 and B16R16 routing sidecars remain on GPU; B16R16 exact K is held in pinned CPU memory and only selected K rows are fetched for decode",
+        "source_sha256": {
+          "evaluation/deterministic_evaluation.py": "3d0a34d9283efdd534eb56feeaafc0ef8ca80954f1cdda3012bc7ff5061836cc",
+          "evaluation/eval_llama_cal128.py": "505a7417da9c566619a459ea3a5064c206b955fda9e4c735bc1aeff40497f472",
+          "evaluation/eval_k_routing_ruler.py": "9a7b4eb086f2f9cd24677877a7f51e1a6c4db8c6ef086a61c86d9de5cb2c3933",
+          "evaluation/k_routing_config.py": "b2cae49062c98fe9b78e6a8af80236790f81b70c3d81f621db14d24c47e2ead5",
+          "evaluation/ruler_v1.py": "3cfbbce999dbd811fbc0a08bf41cbfe85e0bf9ef5efd87a1c59ec2a0a4c76ca7",
+          "evaluation/v96kl_common.py": "e3a0d2203d960c3a67b9bdb262bdae4de78edc16e30b5b611c49d38aa78a1509",
+          "evaluation/chunked_prefill_mlp.py": "54877ee2e0a6d94904e33716a84f324617e867668521b2dcb8bb0eb0ce44deac",
+          "evaluation/llama_sink_recent_routing.py": "dba222ac3411de8f763160285e036268083e8581dab3d4af86d133ed0b5a1840",
+          "evaluation/llama_b16r16_k_offload.py": "d8baa76da517cfe7011a629f1e2c9d91ee39eca43ac01c6a31e0c90c541a41f6",
+          "evaluation/llama_resident_prefill.py": "9e7bacc2136c58e79bda0749956d7371d2db73ff569a372969395cf3727b2989",
+          "basisserve/core/c1_lrqk.py": "fdd6d795d1968346af3b02d7aa803e445f72913e965cec49b92d62e3c9955c67",
+          "basisserve/core/c1_shadowkv.py": "f658a4ca69c2e5a5f1ca37ab14386673857338ba0e3b999c7c28ca752a830c65",
+          "basisserve/core/c1_loki_attention.py": "0a4cd5d9ed27dcc42035f000f1216425125fa96963c75239b950603cd6760035",
+          "basisserve/core/c1_k_routing_sidecar.py": "286a1f69618d8c7b53756bdac709b2989d12bb74eb5440065a0424ff6109dd6e",
+          "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c",
+          "basisserve/checkpoint/gqa_vo_qwen3.py": "866518b80c0d5253819ee7c9172495e92cfa0abe062f2ff4d3006cc59d755b4d",
+          "basisserve/checkpoint/c1_lrqk_qwen3.py": "5354256aae2c9c96da3d4f8385a587d8fb8b13f8afef73161540b9da6403812d",
+          "basisserve/checkpoint/c1_shadowkv_qwen3.py": "49d7ba0e7b1837fa108743181c36b2f339b4c5b72c6a7592f2d85bd64b4da586",
+          "basisserve/kernels/compressed_v_decode_attention.py": "9e13f8581f5af28e173063cacc0d996caeb722a7dc4d0678d1d3cbde70392418",
+          "basisserve/kernels/indexed_sparse_decode_attention.py": "cad6bb38ad30cc470a7c8b3ca5fbd730f54345c8094aaa3c2608e4bf712c4fbb",
+          "basisserve/kernels/split_indexed_attention.py": "3362f9eecbd0daf14847587e936118516dea8ccc16a0174bd6273eec1344ded6",
+          "evaluation/eval_llama_dense128.py": "c5bce85c487eed5479c2e8db4c18e03ca727755e4e4801ab6a6cb0354a7fc950",
+          "evaluation/llama_prefill_memory.py": "b4f9946365555b956bd9df18fe862644b6555b85abd24dfda79171713d9fcab4"
+        },
+        "eos_ids": [
+          128001,
+          128008,
+          128009
+        ],
+        "versions": {
+          "torch": "2.11.0+cu128",
+          "transformers": "5.17.0",
+          "triton": "3.6.0"
+        },
+        "value_mode": "original V128 and original Wo",
+        "distributed": {
+          "tensor_parallel_size": 2,
+          "plan": "Llama native QKV/MLP colwise and O/down rowwise",
+          "transport": "NCCL host transport",
+          "nccl_p2p_disable": 1,
+          "local_query_heads": 16,
+          "local_key_value_heads": 4
+        }
+      },
+      "bank_sha256": {},
+      "commands": [
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --output /workspace/runs/l31-ruler100/v128-dense --shard 0 --shards 2",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --output /workspace/runs/l31-ruler100/v128-dense --shard 1 --shards 2"
+      ],
+      "python": "/workspace/conda/envs/basis/bin/python",
+      "gpu": [
+        "NVIDIA L40S"
+      ]
+    },
+    "ours_b16r16": {
+      "samples": 1100,
+      "protocol": {
+        "format": "basisserve.llama_dense_v_routing128.v1",
+        "numerical_policy": {
+          "model_dtype": "bfloat16",
+          "float32_matmul_precision": "highest",
+          "cuda_matmul_allow_tf32": false,
+          "cudnn_allow_tf32": false,
+          "deterministic_algorithms": true,
+          "cublas_workspace_config": ":4096:8"
+        },
+        "identity_sha256": "0cb442b27b4a45b5012b14cddba7f0af7866505510ce28fedfb067dd419b1636",
+        "prompts_sha256": "d1dbe3be83ad70b1472bd9ba2b3e8587a415b452edcd9e26470fc76f04c0db57",
+        "dtype": "bfloat16",
+        "sequence_length": 131072,
+        "samples": 1100,
+        "samples_per_task": 100,
+        "arms": [
+          "ours",
+          "shadowkv",
+          "loki",
+          "lrqk"
+        ],
+        "value_mode": "original dense V128 cache and original Wo",
+        "rank_schedule": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "generation": "greedy; native EOS; official task caps",
+        "prefill": "exact full causal attention with original dense V128",
+        "memory_policy": "ours/Loki: resident K/V128; LRQK: prefill K/V on CPU, restored per layer at first decode; ShadowKV: official pinned-CPU historical V and selected-V transfers throughout decode",
+        "ours": {
+          "base": 16,
+          "residual": 16,
+          "page_size": 32,
+          "physical_group_budget": 2048,
+          "sink": 32,
+          "recent": 64,
+          "routing_feature": "original dense V128; separately refitted Base16/Residual16"
+        },
+        "shadowkv": {
+          "rank": 160,
+          "chunk": 8,
+          "routed": 2048,
+          "outlier_chunks": 48,
+          "implementation": "upstream ShadowKVCache_CPU and compiled upstream CUDA kernels",
+          "extra_support": "official aligned local tail and generated tokens",
+          "upstream_sources": {
+            "external/ShadowKV/models/kv_cache.py": "62f790d3e2cdafb7bb713c898524b0be16e68c94745c4077fd0fc8e7252f2da4",
+            "external/ShadowKV/models/tensor_op.py": "48ef0a076adf9a3046be9d337062f7d2d9bdb9b20893c5228f32d0e94040b824",
+            "external/ShadowKV/kernels/shadowkv.cpython-312-x86_64-linux-gnu.so": "fba7b49b57be46cc84fff793950bab9301fdc36552ea446a152d9aa6a320921e"
+          }
+        },
+        "loki": {
+          "pca_rank": 32,
+          "topk_per_query_head": 856,
+          "recent": 0,
+          "forced_sink": 0,
+          "manifest_sha256": "24e4ffdb8f8f8fc0624e0d5a19214f0cada6ef2c150d1c624f38ddbfc48052c3"
+        },
+        "lrqk": {
+          "rank": 32,
+          "topk_per_query_head": 832,
+          "recent": 64,
+          "prefill_iterations": 2,
+          "decode_iterations": 2,
+          "tolerance": 0.01,
+          "seed": 0,
+          "state_dtype": "bfloat16",
+          "solve_dtype": "float32"
+        },
+        "source_sha256": {
+          "evaluation/deterministic_evaluation.py": "3d0a34d9283efdd534eb56feeaafc0ef8ca80954f1cdda3012bc7ff5061836cc",
+          "evaluation/eval_llama_dense_v_routing128.py": "69e480e5814c0b042b58f5e8c75972313f36f1692bb727efe3f5d6c60551afba",
+          "evaluation/eval_k_routing_ruler.py": "9a7b4eb086f2f9cd24677877a7f51e1a6c4db8c6ef086a61c86d9de5cb2c3933",
+          "evaluation/k_routing_config.py": "b2cae49062c98fe9b78e6a8af80236790f81b70c3d81f621db14d24c47e2ead5",
+          "evaluation/ruler_v1.py": "3cfbbce999dbd811fbc0a08bf41cbfe85e0bf9ef5efd87a1c59ec2a0a4c76ca7",
+          "evaluation/v96kl_common.py": "e3a0d2203d960c3a67b9bdb262bdae4de78edc16e30b5b611c49d38aa78a1509",
+          "evaluation/chunked_prefill_mlp.py": "54877ee2e0a6d94904e33716a84f324617e867668521b2dcb8bb0eb0ce44deac",
+          "evaluation/llama_baseline_prefill.py": "26aeecb53fdbcca5d7a5317cd6a5a1b21a9bfe8b7e92d33f17048acc65221650",
+          "evaluation/official_shadowkv_cpu.py": "e67e84fb8653436e81fb912a9647774c8b241dad874bfca817b546eafda8433c",
+          "evaluation/llama_prefill_memory.py": "b4f9946365555b956bd9df18fe862644b6555b85abd24dfda79171713d9fcab4",
+          "evaluation/llama_sink_recent_routing.py": "dba222ac3411de8f763160285e036268083e8581dab3d4af86d133ed0b5a1840",
+          "basisserve/core/c1_lrqk.py": "fdd6d795d1968346af3b02d7aa803e445f72913e965cec49b92d62e3c9955c67",
+          "basisserve/core/c1_shadowkv.py": "f658a4ca69c2e5a5f1ca37ab14386673857338ba0e3b999c7c28ca752a830c65",
+          "basisserve/core/c1_loki_attention.py": "0a4cd5d9ed27dcc42035f000f1216425125fa96963c75239b950603cd6760035",
+          "basisserve/core/c1_k_routing_sidecar.py": "286a1f69618d8c7b53756bdac709b2989d12bb74eb5440065a0424ff6109dd6e",
+          "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c",
+          "basisserve/checkpoint/gqa_vo_qwen3.py": "866518b80c0d5253819ee7c9172495e92cfa0abe062f2ff4d3006cc59d755b4d",
+          "basisserve/checkpoint/c1_lrqk_qwen3.py": "5354256aae2c9c96da3d4f8385a587d8fb8b13f8afef73161540b9da6403812d",
+          "basisserve/checkpoint/c1_shadowkv_qwen3.py": "49d7ba0e7b1837fa108743181c36b2f339b4c5b72c6a7592f2d85bd64b4da586",
+          "basisserve/kernels/compressed_v_decode_attention.py": "9e13f8581f5af28e173063cacc0d996caeb722a7dc4d0678d1d3cbde70392418",
+          "basisserve/kernels/indexed_sparse_decode_attention.py": "cad6bb38ad30cc470a7c8b3ca5fbd730f54345c8094aaa3c2608e4bf712c4fbb",
+          "basisserve/kernels/split_indexed_attention.py": "3362f9eecbd0daf14847587e936118516dea8ccc16a0174bd6273eec1344ded6"
+        },
+        "eos_ids": [
+          128001,
+          128008,
+          128009
+        ],
+        "versions": {
+          "torch": "2.11.0+cu128",
+          "transformers": "5.17.0",
+          "triton": "3.6.0"
+        }
+      },
+      "bank_sha256": {
+        "0": "1f542b46ea90b8794c5a673bf7985ae541ad425b7c9e392091ed7abcf736cb6e",
+        "1": "ccd7ff9fd74a7b088797b8756269ce7a294230dff8183b6898dafd5d3edaf337",
+        "2": "a3940ff345dc91f2ee07e02dd05ea26f04be1291f7417d8e1f653695bd8ac4c6",
+        "3": "758e3c484acdd0dee6a277b1d7a4f805854cb40b17a00d9674a73a10475fe2d8",
+        "4": "c5792295bf2da7e8b6cad8f6298440b1eb53254f6c19287c879857fc4c220101",
+        "5": "1f62044da432153a58c8d40f99ec2a035ff5562469e2ef73b19697cd9b7a91ad",
+        "6": "eee559bb7be700c7bc636aa172212e2c2db2807413c3f23d5f1c098a267e3f41",
+        "7": "a8e11d3c56fe521f576150f4b4dbd44c2dc23905ef6be953ac0a911d12a7a2b5",
+        "8": "c34a6b0de44ff1ee17b55619288b514526cc61b5040ad4fb99b38bc1b6e8da79",
+        "9": "502c6146349563673b72a88ac8b8c1a151dc7767c52ca6fd16ad2ac83e7d457d",
+        "10": "a5b0347d8b992ab1115a24f1b2cf299b65d332fb711392e01df302951987c13e",
+        "11": "515c1418d5e5f80292ac339f497b2835699a2c33d8dd7666a9d86788393d9bd1",
+        "12": "2d0b0b8b7f868634f2a16e91aab0005e2a49401815da31ba2fd7e75d22c4796a",
+        "13": "4977d83f3550ba36986f54c337b7bb37217bc2ef8dff6b5a14459859ad216c2a",
+        "14": "0d2629e99ed8ed783ed3f9b782716fa94e66913feaf0eb0beb60a284448d0769",
+        "15": "1a8504d27077bc2dff4aa5a8655bd4d3b996a1ad1fc6e4ab137c23ab3360faf7",
+        "16": "89ab5e92d816a9fb49ffa6fe4665ec6c31a16b02633935393f5470292731a547",
+        "17": "c800c5ccd5902baed0d7a928550a7e3faae6ee8c8bba56749441897d95d8499d",
+        "18": "7ea6d6ddb42e434382347ad50b1266e80192569e22c9f7750660beba5c87d501",
+        "19": "b3da27cffcd06001f651053e473134fca9fe30397e481615b126a39f0ccaa244",
+        "20": "07a0dcb9fe75fc2250b1c7e6b99aed39baeca4c02639686163ea0f11a8b46e95",
+        "21": "91f416998e8fe25cfba9ba21c78be0f71f78c6fd4a82b4cc979b7ba95ff0596c",
+        "22": "2d4235079851365491db5d8dc88523a00cfa819f1e80f7be33098f8545efc94d",
+        "23": "ca79a199129dcc40d43b7eeb85f1e2106a576538c07ed181b0a8360861a17790",
+        "24": "d387a3e2a7003ad078d8edbb14fa941f6ed7fc2af071188ba421d6249f6ebbd4",
+        "25": "536e25dfb9c98c088780ff8119e6d0ffd83c062404ce23f306699ef03a323fdc",
+        "26": "52941dfbdb97acabd4544d14e01c93b8c5e970166c5eeb12178aa0b3b2a32fc2",
+        "27": "f4c3dbf6feff0f405262ccbf40c73d86698ff0df45f8cf0c8da463e024c0abcb",
+        "28": "ec223afc18534cd70430bacd17ec09c5bdc1de98d1cc1a49fb18ad83aa9d903a",
+        "29": "7c540d1b35e44ccb14667169d0eacfea1ad2cdcff93e5caf9881c094dec86e88",
+        "30": "c3a2f167ea638b9384a3f3144759a2885c38c0f4178ea230a4b7294de43d91d4",
+        "31": "218693058151cb89c7cf125af617dc1b69ac683953de59ddd838a91abb88d377"
+      },
+      "commands": [
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm ours --shard 0 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm ours --shard 1 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm ours --shard 2 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm ours --shard 3 --shards 4"
+      ],
+      "python": "/workspace/conda/envs/basis/bin/python",
+      "gpu": [
+        [
+          "NVIDIA L40S"
+        ]
+      ]
+    },
+    "shadowkv": {
+      "samples": 1100,
+      "protocol": {
+        "format": "basisserve.llama_dense_v_routing128.v1",
+        "numerical_policy": {
+          "model_dtype": "bfloat16",
+          "float32_matmul_precision": "highest",
+          "cuda_matmul_allow_tf32": false,
+          "cudnn_allow_tf32": false,
+          "deterministic_algorithms": true,
+          "cublas_workspace_config": ":4096:8"
+        },
+        "identity_sha256": "0cb442b27b4a45b5012b14cddba7f0af7866505510ce28fedfb067dd419b1636",
+        "prompts_sha256": "d1dbe3be83ad70b1472bd9ba2b3e8587a415b452edcd9e26470fc76f04c0db57",
+        "dtype": "bfloat16",
+        "sequence_length": 131072,
+        "samples": 1100,
+        "samples_per_task": 100,
+        "arms": [
+          "ours",
+          "shadowkv",
+          "loki",
+          "lrqk"
+        ],
+        "value_mode": "original dense V128 cache and original Wo",
+        "rank_schedule": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "generation": "greedy; native EOS; official task caps",
+        "prefill": "exact full causal attention with original dense V128",
+        "memory_policy": "ours/Loki: resident K/V128; LRQK: prefill K/V on CPU, restored per layer at first decode; ShadowKV: official pinned-CPU historical V and selected-V transfers throughout decode",
+        "ours": {
+          "base": 16,
+          "residual": 16,
+          "page_size": 32,
+          "physical_group_budget": 2048,
+          "sink": 32,
+          "recent": 64,
+          "routing_feature": "original dense V128; separately refitted Base16/Residual16"
+        },
+        "shadowkv": {
+          "rank": 160,
+          "chunk": 8,
+          "routed": 2048,
+          "outlier_chunks": 48,
+          "implementation": "upstream ShadowKVCache_CPU and compiled upstream CUDA kernels",
+          "extra_support": "official aligned local tail and generated tokens",
+          "upstream_sources": {
+            "external/ShadowKV/models/kv_cache.py": "62f790d3e2cdafb7bb713c898524b0be16e68c94745c4077fd0fc8e7252f2da4",
+            "external/ShadowKV/models/tensor_op.py": "48ef0a076adf9a3046be9d337062f7d2d9bdb9b20893c5228f32d0e94040b824",
+            "external/ShadowKV/kernels/shadowkv.cpython-312-x86_64-linux-gnu.so": "fba7b49b57be46cc84fff793950bab9301fdc36552ea446a152d9aa6a320921e"
+          }
+        },
+        "loki": {
+          "pca_rank": 32,
+          "topk_per_query_head": 856,
+          "recent": 0,
+          "forced_sink": 0,
+          "manifest_sha256": "24e4ffdb8f8f8fc0624e0d5a19214f0cada6ef2c150d1c624f38ddbfc48052c3"
+        },
+        "lrqk": {
+          "rank": 32,
+          "topk_per_query_head": 832,
+          "recent": 64,
+          "prefill_iterations": 2,
+          "decode_iterations": 2,
+          "tolerance": 0.01,
+          "seed": 0,
+          "state_dtype": "bfloat16",
+          "solve_dtype": "float32"
+        },
+        "source_sha256": {
+          "evaluation/deterministic_evaluation.py": "3d0a34d9283efdd534eb56feeaafc0ef8ca80954f1cdda3012bc7ff5061836cc",
+          "evaluation/eval_llama_dense_v_routing128.py": "69e480e5814c0b042b58f5e8c75972313f36f1692bb727efe3f5d6c60551afba",
+          "evaluation/eval_k_routing_ruler.py": "9a7b4eb086f2f9cd24677877a7f51e1a6c4db8c6ef086a61c86d9de5cb2c3933",
+          "evaluation/k_routing_config.py": "b2cae49062c98fe9b78e6a8af80236790f81b70c3d81f621db14d24c47e2ead5",
+          "evaluation/ruler_v1.py": "3cfbbce999dbd811fbc0a08bf41cbfe85e0bf9ef5efd87a1c59ec2a0a4c76ca7",
+          "evaluation/v96kl_common.py": "e3a0d2203d960c3a67b9bdb262bdae4de78edc16e30b5b611c49d38aa78a1509",
+          "evaluation/chunked_prefill_mlp.py": "54877ee2e0a6d94904e33716a84f324617e867668521b2dcb8bb0eb0ce44deac",
+          "evaluation/llama_baseline_prefill.py": "26aeecb53fdbcca5d7a5317cd6a5a1b21a9bfe8b7e92d33f17048acc65221650",
+          "evaluation/official_shadowkv_cpu.py": "e67e84fb8653436e81fb912a9647774c8b241dad874bfca817b546eafda8433c",
+          "evaluation/llama_prefill_memory.py": "b4f9946365555b956bd9df18fe862644b6555b85abd24dfda79171713d9fcab4",
+          "evaluation/llama_sink_recent_routing.py": "dba222ac3411de8f763160285e036268083e8581dab3d4af86d133ed0b5a1840",
+          "basisserve/core/c1_lrqk.py": "fdd6d795d1968346af3b02d7aa803e445f72913e965cec49b92d62e3c9955c67",
+          "basisserve/core/c1_shadowkv.py": "f658a4ca69c2e5a5f1ca37ab14386673857338ba0e3b999c7c28ca752a830c65",
+          "basisserve/core/c1_loki_attention.py": "0a4cd5d9ed27dcc42035f000f1216425125fa96963c75239b950603cd6760035",
+          "basisserve/core/c1_k_routing_sidecar.py": "286a1f69618d8c7b53756bdac709b2989d12bb74eb5440065a0424ff6109dd6e",
+          "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c",
+          "basisserve/checkpoint/gqa_vo_qwen3.py": "866518b80c0d5253819ee7c9172495e92cfa0abe062f2ff4d3006cc59d755b4d",
+          "basisserve/checkpoint/c1_lrqk_qwen3.py": "5354256aae2c9c96da3d4f8385a587d8fb8b13f8afef73161540b9da6403812d",
+          "basisserve/checkpoint/c1_shadowkv_qwen3.py": "49d7ba0e7b1837fa108743181c36b2f339b4c5b72c6a7592f2d85bd64b4da586",
+          "basisserve/kernels/compressed_v_decode_attention.py": "9e13f8581f5af28e173063cacc0d996caeb722a7dc4d0678d1d3cbde70392418",
+          "basisserve/kernels/indexed_sparse_decode_attention.py": "cad6bb38ad30cc470a7c8b3ca5fbd730f54345c8094aaa3c2608e4bf712c4fbb",
+          "basisserve/kernels/split_indexed_attention.py": "3362f9eecbd0daf14847587e936118516dea8ccc16a0174bd6273eec1344ded6"
+        },
+        "eos_ids": [
+          128001,
+          128008,
+          128009
+        ],
+        "versions": {
+          "torch": "2.11.0+cu128",
+          "transformers": "5.17.0",
+          "triton": "3.6.0"
+        }
+      },
+      "bank_sha256": {},
+      "commands": [
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm shadowkv --shard 0 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm shadowkv --shard 1 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm shadowkv --shard 2 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm shadowkv --shard 3 --shards 4"
+      ],
+      "python": "/workspace/conda/envs/basis/bin/python",
+      "gpu": [
+        [
+          "NVIDIA L40S"
+        ]
+      ]
+    },
+    "lrqk_t832_recent64": {
+      "samples": 1100,
+      "protocol": {
+        "format": "basisserve.llama_dense_v_routing128.v1",
+        "numerical_policy": {
+          "model_dtype": "bfloat16",
+          "float32_matmul_precision": "highest",
+          "cuda_matmul_allow_tf32": false,
+          "cudnn_allow_tf32": false,
+          "deterministic_algorithms": true,
+          "cublas_workspace_config": ":4096:8"
+        },
+        "identity_sha256": "0cb442b27b4a45b5012b14cddba7f0af7866505510ce28fedfb067dd419b1636",
+        "prompts_sha256": "d1dbe3be83ad70b1472bd9ba2b3e8587a415b452edcd9e26470fc76f04c0db57",
+        "dtype": "bfloat16",
+        "sequence_length": 131072,
+        "samples": 1100,
+        "samples_per_task": 100,
+        "arms": [
+          "ours",
+          "shadowkv",
+          "loki",
+          "lrqk"
+        ],
+        "value_mode": "original dense V128 cache and original Wo",
+        "rank_schedule": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "generation": "greedy; native EOS; official task caps",
+        "prefill": "exact full causal attention with original dense V128",
+        "memory_policy": "ours/Loki: resident K/V128; LRQK: prefill K/V on CPU, restored per layer at first decode; ShadowKV: official pinned-CPU historical V and selected-V transfers throughout decode",
+        "ours": {
+          "base": 16,
+          "residual": 16,
+          "page_size": 32,
+          "physical_group_budget": 2048,
+          "sink": 32,
+          "recent": 64,
+          "routing_feature": "original dense V128; separately refitted Base16/Residual16"
+        },
+        "shadowkv": {
+          "rank": 160,
+          "chunk": 8,
+          "routed": 2048,
+          "outlier_chunks": 48,
+          "implementation": "upstream ShadowKVCache_CPU and compiled upstream CUDA kernels",
+          "extra_support": "official aligned local tail and generated tokens",
+          "upstream_sources": {
+            "external/ShadowKV/models/kv_cache.py": "62f790d3e2cdafb7bb713c898524b0be16e68c94745c4077fd0fc8e7252f2da4",
+            "external/ShadowKV/models/tensor_op.py": "48ef0a076adf9a3046be9d337062f7d2d9bdb9b20893c5228f32d0e94040b824",
+            "external/ShadowKV/kernels/shadowkv.cpython-312-x86_64-linux-gnu.so": "fba7b49b57be46cc84fff793950bab9301fdc36552ea446a152d9aa6a320921e"
+          }
+        },
+        "loki": {
+          "pca_rank": 32,
+          "topk_per_query_head": 856,
+          "recent": 0,
+          "forced_sink": 0,
+          "manifest_sha256": "24e4ffdb8f8f8fc0624e0d5a19214f0cada6ef2c150d1c624f38ddbfc48052c3"
+        },
+        "lrqk": {
+          "rank": 32,
+          "topk_per_query_head": 832,
+          "recent": 64,
+          "prefill_iterations": 2,
+          "decode_iterations": 2,
+          "tolerance": 0.01,
+          "seed": 0,
+          "state_dtype": "bfloat16",
+          "solve_dtype": "float32"
+        },
+        "source_sha256": {
+          "evaluation/deterministic_evaluation.py": "3d0a34d9283efdd534eb56feeaafc0ef8ca80954f1cdda3012bc7ff5061836cc",
+          "evaluation/eval_llama_dense_v_routing128.py": "69e480e5814c0b042b58f5e8c75972313f36f1692bb727efe3f5d6c60551afba",
+          "evaluation/eval_k_routing_ruler.py": "9a7b4eb086f2f9cd24677877a7f51e1a6c4db8c6ef086a61c86d9de5cb2c3933",
+          "evaluation/k_routing_config.py": "b2cae49062c98fe9b78e6a8af80236790f81b70c3d81f621db14d24c47e2ead5",
+          "evaluation/ruler_v1.py": "3cfbbce999dbd811fbc0a08bf41cbfe85e0bf9ef5efd87a1c59ec2a0a4c76ca7",
+          "evaluation/v96kl_common.py": "e3a0d2203d960c3a67b9bdb262bdae4de78edc16e30b5b611c49d38aa78a1509",
+          "evaluation/chunked_prefill_mlp.py": "54877ee2e0a6d94904e33716a84f324617e867668521b2dcb8bb0eb0ce44deac",
+          "evaluation/llama_baseline_prefill.py": "26aeecb53fdbcca5d7a5317cd6a5a1b21a9bfe8b7e92d33f17048acc65221650",
+          "evaluation/official_shadowkv_cpu.py": "e67e84fb8653436e81fb912a9647774c8b241dad874bfca817b546eafda8433c",
+          "evaluation/llama_prefill_memory.py": "b4f9946365555b956bd9df18fe862644b6555b85abd24dfda79171713d9fcab4",
+          "evaluation/llama_sink_recent_routing.py": "dba222ac3411de8f763160285e036268083e8581dab3d4af86d133ed0b5a1840",
+          "basisserve/core/c1_lrqk.py": "fdd6d795d1968346af3b02d7aa803e445f72913e965cec49b92d62e3c9955c67",
+          "basisserve/core/c1_shadowkv.py": "f658a4ca69c2e5a5f1ca37ab14386673857338ba0e3b999c7c28ca752a830c65",
+          "basisserve/core/c1_loki_attention.py": "0a4cd5d9ed27dcc42035f000f1216425125fa96963c75239b950603cd6760035",
+          "basisserve/core/c1_k_routing_sidecar.py": "286a1f69618d8c7b53756bdac709b2989d12bb74eb5440065a0424ff6109dd6e",
+          "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c",
+          "basisserve/checkpoint/gqa_vo_qwen3.py": "866518b80c0d5253819ee7c9172495e92cfa0abe062f2ff4d3006cc59d755b4d",
+          "basisserve/checkpoint/c1_lrqk_qwen3.py": "5354256aae2c9c96da3d4f8385a587d8fb8b13f8afef73161540b9da6403812d",
+          "basisserve/checkpoint/c1_shadowkv_qwen3.py": "49d7ba0e7b1837fa108743181c36b2f339b4c5b72c6a7592f2d85bd64b4da586",
+          "basisserve/kernels/compressed_v_decode_attention.py": "9e13f8581f5af28e173063cacc0d996caeb722a7dc4d0678d1d3cbde70392418",
+          "basisserve/kernels/indexed_sparse_decode_attention.py": "cad6bb38ad30cc470a7c8b3ca5fbd730f54345c8094aaa3c2608e4bf712c4fbb",
+          "basisserve/kernels/split_indexed_attention.py": "3362f9eecbd0daf14847587e936118516dea8ccc16a0174bd6273eec1344ded6"
+        },
+        "eos_ids": [
+          128001,
+          128008,
+          128009
+        ],
+        "versions": {
+          "torch": "2.11.0+cu128",
+          "transformers": "5.17.0",
+          "triton": "3.6.0"
+        }
+      },
+      "bank_sha256": {},
+      "commands": [
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm lrqk --shard 0 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm lrqk --shard 1 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm lrqk --shard 2 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm lrqk --shard 3 --shards 4"
+      ],
+      "python": "/workspace/conda/envs/basis/bin/python",
+      "gpu": [
+        [
+          "NVIDIA L40S"
+        ]
+      ]
+    },
+    "loki_t856": {
+      "samples": 1100,
+      "protocol": {
+        "format": "basisserve.llama_dense_v_routing128.v1",
+        "numerical_policy": {
+          "model_dtype": "bfloat16",
+          "float32_matmul_precision": "highest",
+          "cuda_matmul_allow_tf32": false,
+          "cudnn_allow_tf32": false,
+          "deterministic_algorithms": true,
+          "cublas_workspace_config": ":4096:8"
+        },
+        "identity_sha256": "0cb442b27b4a45b5012b14cddba7f0af7866505510ce28fedfb067dd419b1636",
+        "prompts_sha256": "d1dbe3be83ad70b1472bd9ba2b3e8587a415b452edcd9e26470fc76f04c0db57",
+        "dtype": "bfloat16",
+        "sequence_length": 131072,
+        "samples": 1100,
+        "samples_per_task": 100,
+        "arms": [
+          "ours",
+          "shadowkv",
+          "loki",
+          "lrqk"
+        ],
+        "value_mode": "original dense V128 cache and original Wo",
+        "rank_schedule": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "generation": "greedy; native EOS; official task caps",
+        "prefill": "exact full causal attention with original dense V128",
+        "memory_policy": "ours/Loki: resident K/V128; LRQK: prefill K/V on CPU, restored per layer at first decode; ShadowKV: official pinned-CPU historical V and selected-V transfers throughout decode",
+        "ours": {
+          "base": 16,
+          "residual": 16,
+          "page_size": 32,
+          "physical_group_budget": 2048,
+          "sink": 32,
+          "recent": 64,
+          "routing_feature": "original dense V128; separately refitted Base16/Residual16"
+        },
+        "shadowkv": {
+          "rank": 160,
+          "chunk": 8,
+          "routed": 2048,
+          "outlier_chunks": 48,
+          "implementation": "upstream ShadowKVCache_CPU and compiled upstream CUDA kernels",
+          "extra_support": "official aligned local tail and generated tokens",
+          "upstream_sources": {
+            "external/ShadowKV/models/kv_cache.py": "62f790d3e2cdafb7bb713c898524b0be16e68c94745c4077fd0fc8e7252f2da4",
+            "external/ShadowKV/models/tensor_op.py": "48ef0a076adf9a3046be9d337062f7d2d9bdb9b20893c5228f32d0e94040b824",
+            "external/ShadowKV/kernels/shadowkv.cpython-312-x86_64-linux-gnu.so": "fba7b49b57be46cc84fff793950bab9301fdc36552ea446a152d9aa6a320921e"
+          }
+        },
+        "loki": {
+          "pca_rank": 32,
+          "topk_per_query_head": 856,
+          "recent": 0,
+          "forced_sink": 0,
+          "manifest_sha256": "24e4ffdb8f8f8fc0624e0d5a19214f0cada6ef2c150d1c624f38ddbfc48052c3"
+        },
+        "lrqk": {
+          "rank": 32,
+          "topk_per_query_head": 832,
+          "recent": 64,
+          "prefill_iterations": 2,
+          "decode_iterations": 2,
+          "tolerance": 0.01,
+          "seed": 0,
+          "state_dtype": "bfloat16",
+          "solve_dtype": "float32"
+        },
+        "source_sha256": {
+          "evaluation/deterministic_evaluation.py": "3d0a34d9283efdd534eb56feeaafc0ef8ca80954f1cdda3012bc7ff5061836cc",
+          "evaluation/eval_llama_dense_v_routing128.py": "69e480e5814c0b042b58f5e8c75972313f36f1692bb727efe3f5d6c60551afba",
+          "evaluation/eval_k_routing_ruler.py": "9a7b4eb086f2f9cd24677877a7f51e1a6c4db8c6ef086a61c86d9de5cb2c3933",
+          "evaluation/k_routing_config.py": "b2cae49062c98fe9b78e6a8af80236790f81b70c3d81f621db14d24c47e2ead5",
+          "evaluation/ruler_v1.py": "3cfbbce999dbd811fbc0a08bf41cbfe85e0bf9ef5efd87a1c59ec2a0a4c76ca7",
+          "evaluation/v96kl_common.py": "e3a0d2203d960c3a67b9bdb262bdae4de78edc16e30b5b611c49d38aa78a1509",
+          "evaluation/chunked_prefill_mlp.py": "54877ee2e0a6d94904e33716a84f324617e867668521b2dcb8bb0eb0ce44deac",
+          "evaluation/llama_baseline_prefill.py": "26aeecb53fdbcca5d7a5317cd6a5a1b21a9bfe8b7e92d33f17048acc65221650",
+          "evaluation/official_shadowkv_cpu.py": "e67e84fb8653436e81fb912a9647774c8b241dad874bfca817b546eafda8433c",
+          "evaluation/llama_prefill_memory.py": "b4f9946365555b956bd9df18fe862644b6555b85abd24dfda79171713d9fcab4",
+          "evaluation/llama_sink_recent_routing.py": "dba222ac3411de8f763160285e036268083e8581dab3d4af86d133ed0b5a1840",
+          "basisserve/core/c1_lrqk.py": "fdd6d795d1968346af3b02d7aa803e445f72913e965cec49b92d62e3c9955c67",
+          "basisserve/core/c1_shadowkv.py": "f658a4ca69c2e5a5f1ca37ab14386673857338ba0e3b999c7c28ca752a830c65",
+          "basisserve/core/c1_loki_attention.py": "0a4cd5d9ed27dcc42035f000f1216425125fa96963c75239b950603cd6760035",
+          "basisserve/core/c1_k_routing_sidecar.py": "286a1f69618d8c7b53756bdac709b2989d12bb74eb5440065a0424ff6109dd6e",
+          "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c",
+          "basisserve/checkpoint/gqa_vo_qwen3.py": "866518b80c0d5253819ee7c9172495e92cfa0abe062f2ff4d3006cc59d755b4d",
+          "basisserve/checkpoint/c1_lrqk_qwen3.py": "5354256aae2c9c96da3d4f8385a587d8fb8b13f8afef73161540b9da6403812d",
+          "basisserve/checkpoint/c1_shadowkv_qwen3.py": "49d7ba0e7b1837fa108743181c36b2f339b4c5b72c6a7592f2d85bd64b4da586",
+          "basisserve/kernels/compressed_v_decode_attention.py": "9e13f8581f5af28e173063cacc0d996caeb722a7dc4d0678d1d3cbde70392418",
+          "basisserve/kernels/indexed_sparse_decode_attention.py": "cad6bb38ad30cc470a7c8b3ca5fbd730f54345c8094aaa3c2608e4bf712c4fbb",
+          "basisserve/kernels/split_indexed_attention.py": "3362f9eecbd0daf14847587e936118516dea8ccc16a0174bd6273eec1344ded6"
+        },
+        "eos_ids": [
+          128001,
+          128008,
+          128009
+        ],
+        "versions": {
+          "torch": "2.11.0+cu128",
+          "transformers": "5.17.0",
+          "triton": "3.6.0"
+        }
+      },
+      "bank_sha256": {
+        "0": "492448b34c4b9c4c89a3259a6175be10897bfee551c7140f15626198e83410de",
+        "1": "b808eea1b75c615fd03050932d2f8a726cefbab2f7437456c185c726de5a405a",
+        "2": "ffbaf40891d94485cc866fcb7bdc3a87e3456fb6d74dd1e98c9dd4712283ce9c",
+        "3": "30cfe4c3b2759ae15b55266ce2cfb9f415bb06981ae72baa46d100313bd564b1",
+        "4": "51782fd028aef34ab04fb90a28687358a89092ba9effcc49034bd4f110f49bde",
+        "5": "46e04b98abe6c936267e24271c13c5f22071073a9251e8584fd9ebe82e53f84f",
+        "6": "c4120e07699456ae03e51fdc30e3f51809b737e9b5da19bf416c95155881794f",
+        "7": "692e31b0755c49d7b21089e53a47495c3d7d2428babe58acd7308b8ff13d6ecf",
+        "8": "fe54895b899053fd9efac2d9e7baedc41d0e63d5fff1468bb7026b7770f632cd",
+        "9": "7f8a1ff61f55345ac0c49516a5135e159b9a72cabdb1a4fe3faa385ea51da645",
+        "10": "ca2888008def317242a9a58e85cd92bdef2c6a424d886ea1d9821c568fbd6c82",
+        "11": "052cca89c0b79a9b7458c77494fe22fb3e2d267df657f5e81a87b8b838dea258",
+        "12": "6668e6770b1b7ee8792a06779a21f809897cce0a075f219cfddef0ca58b676bc",
+        "13": "7e22f6e26765a22fa6e06e6b4ac1c852091e2572f8b84aca373b02173d7c4d5b",
+        "14": "23986c3d7ecbb589bd1cdc8ded9aae747957c5eb25409cdbdd9d757904d0c406",
+        "15": "0aff0cfc892bacc544cf8dbdab1493c28198494e02ac0b25c82b0a6314481ec5",
+        "16": "04e6a9352568051096004173a43f2e523e8e285a03ee052ac51b0a832f8ff701",
+        "17": "8105382be62e202442e2a63164f83e09bb1547504fcd840ed17c908f3dca31a0",
+        "18": "b5aa6df40f860c532012b91c872243c16225d0a49bf56c55a5f7df8fa34c756c",
+        "19": "cdb3bcf55394d9cbf6e2bef3b5b27f816c3ea6c47ba8bf52899c25b3959d7a04",
+        "20": "cbe8fc6fc83c1bc5b0ce8a86ab0dedf3ad55a3ae250b69eb62c6acf03112d4fd",
+        "21": "83bfee9abc4d8a1a5e0b1ddaa7870ba56946a5980843ac0b7ffe49a4cfafbaf7",
+        "22": "9f45ffe64cca7735d42726fa192c261ddb7a81f80f58f532193d3e3ea29eca2c",
+        "23": "a2da9f18f03a363d0c099e05bea273ebccd416d3e8d38284d92e2aaeebce5d52",
+        "24": "9acd4b8c3685d6ce4d88ad8a14ee546dce60338a54820033d41bdbcd10f0e6fa",
+        "25": "3c855b02b6aed7f30a029ab3c9630d589d838f9d42ad0fdf160a5e213ddc2ee7",
+        "26": "8bcbc288fc0daaff1c986cde1d192300c865a0f7c7675d08f5ecd0c38492cc88",
+        "27": "58c05d5be85fd1b19e6fa6c8ffdf2f3f0af5127502ed9f1286e4c4c3c696260e",
+        "28": "7121fa5f751d7cb54674437cb868e9662215e1207ea9044ad46e32f082725f64",
+        "29": "1f8b4ad1c93159e68c2d55c667b378149a872e2fcaadc273fbd96f8f98b9af5d",
+        "30": "e94b9aafe1f98a85a1ddc62a52e4ef4b413b2fca1724e2e0eb14e760b67a2689",
+        "31": "bf694ea677605a8a7fc284facac08f8985f20c33a7475378e64db266caed5146"
+      },
+      "commands": [
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm loki --shard 0 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm loki --shard 1 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm loki --shard 2 --shards 4",
+        "/workspace/BasisServe-CALS/evaluation/eval_llama_dense_v_routing128.py evaluate --identity /workspace/runs/l31-cal128/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-dense128/router/ours_b16r16 --loki /workspace/runs/l31-loki-wiki/pca --output /workspace/runs/l31-ruler100/v128 --dense-reference /workspace/runs/l31-ruler100/v128-dense/full --arm loki --shard 3 --shards 4"
+      ],
+      "python": "/workspace/conda/envs/basis/bin/python",
+      "gpu": [
+        [
+          "NVIDIA L40S"
+        ]
+      ]
+    }
+  }
+}

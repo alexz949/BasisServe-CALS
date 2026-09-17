@@ -10,7 +10,7 @@ coordinates without expanding grouped-query K/V heads or storing scores.
 Decode exposes two deliberately separate implementations: a purpose-built
 one-query Triton kernel and an architecture-specific handwritten CUDA kernel
 family. Neither implementation falls back to the other. Causal prefill uses
-FlashAttention for equal Q/K/V widths and tiled Triton for compact Value widths.
+the tiled Triton kernel for both dense and compact Value widths.
 """
 
 from __future__ import annotations
@@ -419,8 +419,9 @@ def _validate_inputs(query: Tensor, key: Tensor, value: Tensor) -> tuple[int, ..
         raise ValueError("compressed-V attention Q/K head dimensions differ")
     if kv_heads <= 0 or query_heads % kv_heads:
         raise ValueError("query heads must be divisible by KV heads")
-    if sequence_length <= 0 or not 0 < value_dim <= 128:
-        raise ValueError("cache sequence and compressed Value width must be supported")
+    assert sequence_length > 0 and 0 < value_dim <= 256, (
+        "cache sequence must be positive and compressed Value width must lie in [1, 256]"
+    )
     if qk_dim <= 0 or qk_dim > 256:
         raise ValueError("Q/K head dimension must lie in [1, 256]")
     if query.dtype != key.dtype or query.dtype != value.dtype:
@@ -943,13 +944,6 @@ def compressed_v_prefill_attention(
             "compressed-V prefill requires matching Q/K lengths greater than one"
         )
     selected_scale = qk_dim**-0.5 if scale is None else float(scale)
-    if qk_dim == value_dim:
-        from flash_attn import flash_attn_func
-        with torch.cuda.device(query.device):
-            return flash_attn_func(
-                query.transpose(1, 2), key.transpose(1, 2), value.transpose(1, 2),
-                dropout_p=0.0, softmax_scale=selected_scale, causal=True,
-            ).transpose(1, 2)
     if not math.isfinite(selected_scale) or selected_scale <= 0.0:
         raise ValueError("attention scale must be finite and positive")
     output = torch.empty(

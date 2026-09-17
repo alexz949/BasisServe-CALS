@@ -1,0 +1,219 @@
+{
+  "status": "complete",
+  "protocol": {
+    "format": "basisserve.llama_dense_v_routing128.v1",
+    "numerical_policy": {
+      "model_dtype": "bfloat16",
+      "float32_matmul_precision": "highest",
+      "cuda_matmul_allow_tf32": false,
+      "cudnn_allow_tf32": false,
+      "deterministic_algorithms": true,
+      "cublas_workspace_config": ":4096:8"
+    },
+    "identity_sha256": "0cb442b27b4a45b5012b14cddba7f0af7866505510ce28fedfb067dd419b1636",
+    "prompts_sha256": "d1dbe3be83ad70b1472bd9ba2b3e8587a415b452edcd9e26470fc76f04c0db57",
+    "dtype": "bfloat16",
+    "sequence_length": 131072,
+    "samples": 1100,
+    "samples_per_task": 100,
+    "arms": [
+      "ours",
+      "shadowkv",
+      "loki",
+      "lrqk"
+    ],
+    "value_mode": "original dense V128 cache and original Wo",
+    "rank_schedule": [
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128
+    ],
+    "generation": "greedy; native EOS; official task caps",
+    "prefill": "exact full causal attention with original dense V128",
+    "memory_policy": "ours/Loki: resident K/V128; LRQK: prefill K/V on CPU, restored per layer at first decode; ShadowKV: official pinned-CPU historical V and selected-V transfers throughout decode",
+    "ours": {
+      "base": 16,
+      "residual": 16,
+      "page_size": 32,
+      "physical_group_budget": 2048,
+      "sink": 32,
+      "recent": 64,
+      "routing_feature": "original dense V128; separately refitted Base16/Residual16"
+    },
+    "shadowkv": {
+      "rank": 160,
+      "chunk": 8,
+      "routed": 2048,
+      "outlier_chunks": 48,
+      "implementation": "upstream ShadowKVCache_CPU and compiled upstream CUDA kernels",
+      "extra_support": "official aligned local tail and generated tokens",
+      "upstream_sources": {
+        "external/ShadowKV/models/kv_cache.py": "62f790d3e2cdafb7bb713c898524b0be16e68c94745c4077fd0fc8e7252f2da4",
+        "external/ShadowKV/models/tensor_op.py": "48ef0a076adf9a3046be9d337062f7d2d9bdb9b20893c5228f32d0e94040b824",
+        "external/ShadowKV/kernels/shadowkv.cpython-312-x86_64-linux-gnu.so": "fba7b49b57be46cc84fff793950bab9301fdc36552ea446a152d9aa6a320921e"
+      }
+    },
+    "loki": {
+      "pca_rank": 32,
+      "topk_per_query_head": 856,
+      "recent": 0,
+      "forced_sink": 0,
+      "manifest_sha256": "24e4ffdb8f8f8fc0624e0d5a19214f0cada6ef2c150d1c624f38ddbfc48052c3"
+    },
+    "lrqk": {
+      "rank": 32,
+      "topk_per_query_head": 832,
+      "recent": 64,
+      "prefill_iterations": 2,
+      "decode_iterations": 2,
+      "tolerance": 0.01,
+      "seed": 0,
+      "state_dtype": "bfloat16",
+      "solve_dtype": "float32"
+    },
+    "source_sha256": {
+      "evaluation/deterministic_evaluation.py": "3d0a34d9283efdd534eb56feeaafc0ef8ca80954f1cdda3012bc7ff5061836cc",
+      "evaluation/eval_llama_dense_v_routing128.py": "69e480e5814c0b042b58f5e8c75972313f36f1692bb727efe3f5d6c60551afba",
+      "evaluation/eval_k_routing_ruler.py": "9a7b4eb086f2f9cd24677877a7f51e1a6c4db8c6ef086a61c86d9de5cb2c3933",
+      "evaluation/k_routing_config.py": "b2cae49062c98fe9b78e6a8af80236790f81b70c3d81f621db14d24c47e2ead5",
+      "evaluation/ruler_v1.py": "3cfbbce999dbd811fbc0a08bf41cbfe85e0bf9ef5efd87a1c59ec2a0a4c76ca7",
+      "evaluation/v96kl_common.py": "e3a0d2203d960c3a67b9bdb262bdae4de78edc16e30b5b611c49d38aa78a1509",
+      "evaluation/chunked_prefill_mlp.py": "54877ee2e0a6d94904e33716a84f324617e867668521b2dcb8bb0eb0ce44deac",
+      "evaluation/llama_baseline_prefill.py": "26aeecb53fdbcca5d7a5317cd6a5a1b21a9bfe8b7e92d33f17048acc65221650",
+      "evaluation/official_shadowkv_cpu.py": "e67e84fb8653436e81fb912a9647774c8b241dad874bfca817b546eafda8433c",
+      "evaluation/llama_prefill_memory.py": "b4f9946365555b956bd9df18fe862644b6555b85abd24dfda79171713d9fcab4",
+      "evaluation/llama_sink_recent_routing.py": "dba222ac3411de8f763160285e036268083e8581dab3d4af86d133ed0b5a1840",
+      "basisserve/core/c1_lrqk.py": "fdd6d795d1968346af3b02d7aa803e445f72913e965cec49b92d62e3c9955c67",
+      "basisserve/core/c1_shadowkv.py": "f658a4ca69c2e5a5f1ca37ab14386673857338ba0e3b999c7c28ca752a830c65",
+      "basisserve/core/c1_loki_attention.py": "0a4cd5d9ed27dcc42035f000f1216425125fa96963c75239b950603cd6760035",
+      "basisserve/core/c1_k_routing_sidecar.py": "286a1f69618d8c7b53756bdac709b2989d12bb74eb5440065a0424ff6109dd6e",
+      "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c",
+      "basisserve/checkpoint/gqa_vo_qwen3.py": "866518b80c0d5253819ee7c9172495e92cfa0abe062f2ff4d3006cc59d755b4d",
+      "basisserve/checkpoint/c1_lrqk_qwen3.py": "5354256aae2c9c96da3d4f8385a587d8fb8b13f8afef73161540b9da6403812d",
+      "basisserve/checkpoint/c1_shadowkv_qwen3.py": "49d7ba0e7b1837fa108743181c36b2f339b4c5b72c6a7592f2d85bd64b4da586",
+      "basisserve/kernels/compressed_v_decode_attention.py": "9e13f8581f5af28e173063cacc0d996caeb722a7dc4d0678d1d3cbde70392418",
+      "basisserve/kernels/indexed_sparse_decode_attention.py": "cad6bb38ad30cc470a7c8b3ca5fbd730f54345c8094aaa3c2608e4bf712c4fbb",
+      "basisserve/kernels/split_indexed_attention.py": "3362f9eecbd0daf14847587e936118516dea8ccc16a0174bd6273eec1344ded6"
+    },
+    "eos_ids": [
+      128001,
+      128008,
+      128009
+    ],
+    "versions": {
+      "torch": "2.11.0+cu128",
+      "transformers": "5.17.0",
+      "triton": "3.6.0"
+    }
+  },
+  "tasks": {
+    "niah_single_1": {
+      "ours": 100.0,
+      "shadowkv": 100.0,
+      "loki": 84.0,
+      "lrqk": 100.0
+    },
+    "niah_single_2": {
+      "ours": 100.0,
+      "shadowkv": 100.0,
+      "loki": 97.0,
+      "lrqk": 100.0
+    },
+    "niah_single_3": {
+      "ours": 100.0,
+      "shadowkv": 100.0,
+      "loki": 0.0,
+      "lrqk": 100.0
+    },
+    "niah_multikey_1": {
+      "ours": 99.0,
+      "shadowkv": 99.0,
+      "loki": 98.0,
+      "lrqk": 99.0
+    },
+    "niah_multikey_2": {
+      "ours": 80.0,
+      "shadowkv": 76.0,
+      "loki": 31.0,
+      "lrqk": 83.0
+    },
+    "niah_multiquery": {
+      "ours": 97.75,
+      "shadowkv": 97.25,
+      "loki": 45.25,
+      "lrqk": 98.5
+    },
+    "niah_multivalue": {
+      "ours": 88.5,
+      "shadowkv": 89.5,
+      "loki": 48.0,
+      "lrqk": 92.25
+    },
+    "vt": {
+      "ours": 73.0,
+      "shadowkv": 70.2,
+      "loki": 39.0,
+      "lrqk": 64.2
+    },
+    "fwe": {
+      "ours": 69.66666666666666,
+      "shadowkv": 69.33333333333333,
+      "loki": 33.666666666666664,
+      "lrqk": 58.0
+    },
+    "qa_1": {
+      "ours": 80.0,
+      "shadowkv": 79.0,
+      "loki": 64.0,
+      "lrqk": 80.0
+    },
+    "qa_2": {
+      "ours": 47.0,
+      "shadowkv": 46.0,
+      "loki": 34.0,
+      "lrqk": 46.0
+    }
+  },
+  "means": {
+    "ours": 84.99242424242424,
+    "shadowkv": 84.20757575757575,
+    "loki": 52.17424242424242,
+    "lrqk": 83.72272727272728
+  },
+  "means_10_excluding_single_3": {
+    "ours": 83.49166666666666,
+    "shadowkv": 82.62833333333333,
+    "loki": 57.391666666666666,
+    "lrqk": 82.095
+  },
+  "verified_predictions": 4400
+}

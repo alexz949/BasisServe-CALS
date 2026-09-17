@@ -6,6 +6,19 @@ from transformers import AutoConfig
 from evaluation.v96kl_common import sha256
 
 
+def residual_fisher_support(model_type):
+    """Candidate exclusions used by the current model's page selector."""
+    assert model_type in ('llama', 'qwen3', 'qwen3_5', 'nemotron_h')
+    return dict(excluded_prefix_pages=0 if model_type == 'qwen3_5' else 1,
+                excluded_recent_tokens=64 if model_type in ('llama', 'qwen3_5') else 0)
+
+
+def validate_residual_fisher_support(protocol, model_type):
+    expected = residual_fisher_support(model_type)
+    assert all(protocol.get(name) == value for name, value in expected.items()), (
+        'Residual Fisher support differs from runtime; refit residual statistics and factors')
+
+
 def routing_config(identity, *, rope, sequence_length):
     path = Path(identity['model'])
     assert sha256(path / 'config.json') == identity['model_config_sha256']
