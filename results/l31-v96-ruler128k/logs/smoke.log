@@ -1,0 +1,16 @@
+START base
+EXIT base 0
+START fisher
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights:  30%|██▉       | 87/291 [00:00<00:00, 869.89it/s]Loading weights:  60%|█████▉    | 174/291 [00:00<00:00, 854.85it/s]Loading weights:  89%|████████▉ | 260/291 [00:00<00:00, 784.67it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 833.08it/s]
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 0, 'layers': [0]}
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 32, 'layers': [0]}
+EXIT fisher 0
+START fit
+    fit residual router base=16 rank=16
+Page-Fisher sweep 1/2: loss 20.1701 -> 18.3183
+Page-Fisher sweep 2/2: loss 18.3183 -> 17.9764
+{'stage': 'fit complete', 'layer': 0, 'losses': {'b16_r0': {'base_rank': 16, 'residual_rank': 0, 'fit_page_fisher_nmse': 1.0, 'validation_page_fisher_nmse': 1.0}, 'b16_r16': {'base_rank': 16, 'residual_rank': 16, 'fit_page_fisher_nmse': 0.12020913316026316, 'validation_page_fisher_nmse': 0.18221622279002206, 'sweeps': [{'sweep': 1, 'loss_before': 20.170116424560547, 'loss_after_queries': 16.956911087036133, 'loss_after_encoder': 18.318283081054688}, {'sweep': 2, 'loss_before': 18.318283081054688, 'loss_after_queries': 17.161203384399414, 'loss_after_encoder': 17.97637176513672}], 'final_query_maximum_iterations': 4, 'final_query_maximum_relative_residual': 0.06614188849925995}}}
+EXIT fit 0
+SMOKE COMPLETE

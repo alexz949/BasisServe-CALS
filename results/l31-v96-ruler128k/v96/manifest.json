@@ -1,0 +1,568 @@
+{
+  "status": "complete",
+  "format": "basisserve.uniform_c1_als.v1",
+  "model": {
+    "path": "/workspace/hf-data/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+    "config_sha256": "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+    "safetensors_index_sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+  },
+  "compression": {
+    "allocation": "uniform_per_layer_per_head",
+    "rank": 96
+  },
+  "fit_config": {
+    "allow_tf32": false,
+    "attention_type": "gqa",
+    "cache_rank_per_head": 96,
+    "checkpoint_policy": "fixed decoder-refitted endpoint after encoder sweep 6",
+    "covariance_damping": 1e-07,
+    "covariance_row_chunk_size": null,
+    "decoder_objective": "full_layer",
+    "dense_v_cache_rank": 1024,
+    "encoder_cg_fixed_iterations": 16,
+    "encoder_cg_max_iterations": 16,
+    "encoder_cg_mode": "fixed",
+    "encoder_cg_relative_tolerance": 1e-08,
+    "encoder_initialization": "activation-weighted-svd",
+    "encoder_initialization_seed": 0,
+    "encoder_sweeps": 6,
+    "factor_dtype": "bfloat16",
+    "fit_rows": 4194304,
+    "fit_windows": 32,
+    "head_dim": 128,
+    "hidden_size": 4096,
+    "model": "/workspace/hf-data/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+    "model_config_sha256": "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+    "model_label": "Llama-3.1-8B",
+    "model_type": "llama",
+    "num_hidden_layers": 32,
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "objective": "full-layer attention-output MSE with cross-head covariance",
+    "positions_per_window": 131072,
+    "snapshot_dir": "/workspace/runs/l31-cal128/covariance",
+    "snapshot_manifest_sha256": "4a978b33c55e204446d8a1fd2bd0ad118ad702fc2aacca435ca9b0da279c11f5",
+    "total_kv_retained_ratio_with_dense_k": 0.875,
+    "total_v_cache_rank": 768,
+    "v_retained_ratio": 0.75,
+    "validation_positions_per_window": 131072,
+    "validation_rows": 2097152,
+    "validation_windows": 16,
+    "work_dtype": "float32"
+  },
+  "fit_results_sha256": "3919aa9b6b33fe38dbf14c3e4f587c8c04593492cf97a59fdd7a638dea2266c7",
+  "layers": [
+    {
+      "layer": 0,
+      "file": "layer_000.safetensors",
+      "sha256": "0f8b35cfd4ec0cc674989752f652a191fe2f493eee676a045379b9de2b42a8f9",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "ff9dbd0a11bbc07a5ba848d0d8c9f44ea4035e36b9238b1474a8260ef8af2ed8"
+    },
+    {
+      "layer": 1,
+      "file": "layer_001.safetensors",
+      "sha256": "e980d7f81105dcea1db1404889bf929f4114c8287d93c2af5d573e89630b181d",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "1cc51c4fd84b8b8039cace8bcf0d7ca0d4dfa63a07d1db8631e42550cc39c739"
+    },
+    {
+      "layer": 2,
+      "file": "layer_002.safetensors",
+      "sha256": "92ac62b56b921e52f713ce7117b0ba169db208259e2ddd08cfbc5a1a3a3d9de9",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "fac262745d60cec14b8785b30d46aeb2f0cc54c4d7cfbfed7e15747f585f89c3"
+    },
+    {
+      "layer": 3,
+      "file": "layer_003.safetensors",
+      "sha256": "391bcd283edd8811be38e142ddbd65e2e874fab7ad2d4844802bb3ccd9211fed",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "4e135b790fc169870fdb1c238a7735ab6bc00a809fb44bad6b0097018c00f4b8"
+    },
+    {
+      "layer": 4,
+      "file": "layer_004.safetensors",
+      "sha256": "798fe4ea8eb4e13d74e95289d0bc7655481efffadc5358f7f047a5317a03fdf1",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "117c0883ca4e5be3d2d451762f0ed6b191391da40d7751a91db287368030262c"
+    },
+    {
+      "layer": 5,
+      "file": "layer_005.safetensors",
+      "sha256": "1d732d9c403b7c365ecc03aa7fcb2a7b16e693dcd8ee37b50cbc621977e84295",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "55fb5412416317be372fe6df3c076196c3ba82cbba1302090f719505d0bee63c"
+    },
+    {
+      "layer": 6,
+      "file": "layer_006.safetensors",
+      "sha256": "1de79335389c1fb16c0dad2fc7075d6502731ec140d4163d9f270861daa4dc2f",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "d6e1419d8901c38712c29380ebf3b1dafd9b985afa0f0199442dc23d1f358a16"
+    },
+    {
+      "layer": 7,
+      "file": "layer_007.safetensors",
+      "sha256": "e2af6b32ad3f98f04d7c9a92da564f4a1f29a95592294f301348a712d353631d",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "6474dba245cdc72be9906b010935cf0324a9099f737a8ff6cb1aa3216da3276c"
+    },
+    {
+      "layer": 8,
+      "file": "layer_008.safetensors",
+      "sha256": "25d7e3e8aaf873e55ee2f3c0ce7a96b00dc425cde4ebff87284350f8c0b735c1",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "051b14df8fcdf1eef7d9ee7584ed3c0f141e59ca29233d02ca46ede674c8a453"
+    },
+    {
+      "layer": 9,
+      "file": "layer_009.safetensors",
+      "sha256": "ac18625c72646bf7f53edcbd3081e6782ce9a66ca155f0563874cc44ca1c7dd2",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "c7bcc5ddc8e0517116220ff44441f65633366c37351fbb01bbe7694f54ea1e46"
+    },
+    {
+      "layer": 10,
+      "file": "layer_010.safetensors",
+      "sha256": "f4fc956878e472b6d288aba0215df58928afa120d2ef9a4670c36bb1c938df98",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "02d6a4fc0b86782848372202c5891cabb9ac19309980a6e25149ef1a9d7e9b05"
+    },
+    {
+      "layer": 11,
+      "file": "layer_011.safetensors",
+      "sha256": "02cd4119708eda5c6b032f7b0cb3eda2eb2faeda6e9a1737a48dd863cbf262b6",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "fe07da755a31b0ab642fc0db4836124f20cc2d6e3671156526494534d9cccd1f"
+    },
+    {
+      "layer": 12,
+      "file": "layer_012.safetensors",
+      "sha256": "efb53a914f4bde8502631ba6961e68341a02d16905dcbea6208dfe0027eb5624",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "69443492a425eb1662b1b37fee6dcc19c10963c02b9085b9be319980df2f28ce"
+    },
+    {
+      "layer": 13,
+      "file": "layer_013.safetensors",
+      "sha256": "a06458a80fd39ada1f5e666772b810f759a6f9a1e934dded8254ac4dbbededab",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "824e943c8dfbea288cf17b5816b49106a6d4dbec1e428e3598bcc1b6ec42fc62"
+    },
+    {
+      "layer": 14,
+      "file": "layer_014.safetensors",
+      "sha256": "b47b59a202817ab7ac015b691f9b7b6715d2cda8e3618360bf559699660df7bc",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "86258e8473eb592b002994e0a1856122eeaba9d91daabced982f10d265300661"
+    },
+    {
+      "layer": 15,
+      "file": "layer_015.safetensors",
+      "sha256": "c49a6f92c654dcf161dd8505d09a15edfdaf4eb9903f17f4e124683f694d68f1",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "cc3d19ce7802eb991a774a06e993251ce8eee3c2290be747908149fa0448e55e"
+    },
+    {
+      "layer": 16,
+      "file": "layer_016.safetensors",
+      "sha256": "7c403a3925c37565bffb49ca1ffd115e48adfd5b9c7b2e393de757136b40d859",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "6ad9d932b32ea727f6fa43a4131ec4efbfc892ba535c0ba7344f437f6b2af686"
+    },
+    {
+      "layer": 17,
+      "file": "layer_017.safetensors",
+      "sha256": "c582dd94a8d34f34b0a9addd4ee080d7b097902d894e5aff1e00804bb4d50c50",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "18ac025c83d413a4f00b88345a22caf0a08853fbed36015ae4dd14fcf091bbaa"
+    },
+    {
+      "layer": 18,
+      "file": "layer_018.safetensors",
+      "sha256": "9ec5b4fba678f4f006be7fe2949b42cff754942d4ce7b7fadb101400a08c4bfa",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "551558582b8fafb3cf071dbfbc353ae3b152f1e6ba99f6c72b1e858221a64c3b"
+    },
+    {
+      "layer": 19,
+      "file": "layer_019.safetensors",
+      "sha256": "c8ac8d365ff0770ef855221e542dbb207162824c5441bae050ea7a183c63a758",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "6eb868ba0bcee65aba2384d5a1470a647cc983a2bc931974c1debfb2bd6f84ab"
+    },
+    {
+      "layer": 20,
+      "file": "layer_020.safetensors",
+      "sha256": "2f5ace3a0e5e0e5f807fbcb083b7beb9e640f5d4aae54073d18bbc27ca42c860",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "36f5b2dfba7175abba990edb2dbc230805bddd18763432b84e8db7df13480bf0"
+    },
+    {
+      "layer": 21,
+      "file": "layer_021.safetensors",
+      "sha256": "076f86da32df3e08814101bbc919a968a39ea63d0e73cfa7365e8e173b6be3e1",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "87442c2cf93a4bfc6907c272f752a33da72675bc06a0c0440c948eb5983a6d3d"
+    },
+    {
+      "layer": 22,
+      "file": "layer_022.safetensors",
+      "sha256": "3bf20e1cff4c1dfa3dff3e5dc68e883f0f8a743fbf9a469b2ce62bf216a08974",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "36740c8cc1242a56daafc034a6ba9e649d61f3bcb6cd6d9376be02b998c9ba9e"
+    },
+    {
+      "layer": 23,
+      "file": "layer_023.safetensors",
+      "sha256": "6807b2ee13ec72f5bc3c98cb828b94d3c80fbd2228bd7cf7c3a58b847b02146a",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "d30e819fb2595b1b6cf5a11dfaf4063d4dde14a03e9a08d7dcc07315d295979a"
+    },
+    {
+      "layer": 24,
+      "file": "layer_024.safetensors",
+      "sha256": "da66ecc3ee2c324c1666da01752e7c666b9a6922d3056c82af012c509435f380",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "298ca873d72f24af492af937fe6d1c037e0d9275ec93bd5584a261ac4cfb9e9f"
+    },
+    {
+      "layer": 25,
+      "file": "layer_025.safetensors",
+      "sha256": "3da052f4a2618009cf8102d522136f74fb559153388d81d6b1d314ec9da5a0e3",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "1da42e024d81f730047c507ae1b4cf4125775fcc835dbc08102087dcc3e9a371"
+    },
+    {
+      "layer": 26,
+      "file": "layer_026.safetensors",
+      "sha256": "0b83730b88b342dd7de09b3cf6544e67c458785016d0ae5fbb2495866386bc16",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "27e924fe32e61f6c3381d4a916a6248f88a115d12569074a082d30bc329ce400"
+    },
+    {
+      "layer": 27,
+      "file": "layer_027.safetensors",
+      "sha256": "88265dd6517ba84fbbdeb91625fb112a79424d2cb5946720c3abc82b92c8633a",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "0c49b43aa3bf58739eb634f6e2e2ae7d28188f200dbeec2bb94778bfa8b7d221"
+    },
+    {
+      "layer": 28,
+      "file": "layer_028.safetensors",
+      "sha256": "f6fa349b1358af6fb4a87055b498ed8a7069d0ff167390bbc80ab5bf771760e2",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "a3a5501f1393fd37607a1ea360f863c77821afff366ac0b40ea6e6f3c98cfd53"
+    },
+    {
+      "layer": 29,
+      "file": "layer_029.safetensors",
+      "sha256": "256e139522cb18fc71a6dae4e26ba638b1cac8c7bd2304cf72843fb5906f236f",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "68cc889854bf7a567209d2549c3f1a0f50f6ac7504e5e4e41f6d1bdf12f42ef5"
+    },
+    {
+      "layer": 30,
+      "file": "layer_030.safetensors",
+      "sha256": "812edd4c4db529839bde475b8ed13301e6e22c4593c957f25a716af3c2ee0731",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "ca99ebecbfd4803416f38a667a7b46076b8af8443b5e128ba6b78cfa6ff16363"
+    },
+    {
+      "layer": 31,
+      "file": "layer_031.safetensors",
+      "sha256": "89b907b4f6d66c61a2abc8cac5b6b27bb2ec6918570775bce371f6cd417b6496",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "source_sha256": "dc655adee18304db5a4cdcc1f57d4b302c89aa4edcd951848dde39269f730100"
+    }
+  ]
+}

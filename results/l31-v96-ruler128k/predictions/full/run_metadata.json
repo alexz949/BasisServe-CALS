@@ -1,0 +1,266 @@
+[
+  {
+    "protocol": {
+      "format": "basisserve.llama_cal128_ruler.v1",
+      "numerical_policy": {
+        "model_dtype": "bfloat16",
+        "float32_matmul_precision": "highest",
+        "cuda_matmul_allow_tf32": false,
+        "cudnn_allow_tf32": false,
+        "deterministic_algorithms": true,
+        "cublas_workspace_config": ":4096:8"
+      },
+      "identity_sha256": "3db1c684c8e356edf87218f65cad25a032433ec431ea3ad32ef492921ad14266",
+      "prompts_sha256": "086a3e901db92f6e8dd5efefcb863f85f19eeb0b88da317cb0fc16f50019fe8a",
+      "dtype": "bfloat16",
+      "sequence_length": 131072,
+      "samples": 1100,
+      "samples_per_task": 100,
+      "arms": [
+        "full",
+        "ours",
+        "lrqk",
+        "shadowkv",
+        "loki"
+      ],
+      "rank_schedule": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "generation": "greedy; native EOS; official task caps; same compressed V in every arm",
+      "kernels": "our Triton prefill and decode; actual dispatch counts checked per prompt",
+      "memory_policy": "V96 and B16R16 routing sidecars remain on GPU; B16R16 exact K is held in pinned CPU memory and only selected K rows are fetched for decode",
+      "shadowkv": {
+        "rank": 160,
+        "chunk": 8,
+        "routed": 2048,
+        "outlier_chunks": 48,
+        "implementation": "resident C1ShadowKVState; reconstructed historical K; direct V96"
+      },
+      "lrqk": {
+        "rank": 32,
+        "topk_per_query_head": 832,
+        "recent": 64
+      },
+      "loki": {
+        "pca_rank": 32,
+        "topk_per_query_head": 856,
+        "recent": 0
+      },
+      "ours": {
+        "base": 16,
+        "residual": 16,
+        "page_size": 32,
+        "page_budget_tokens": 2048,
+        "sink_tokens": 32,
+        "sink_within_page_budget": true,
+        "recent_tokens": 64,
+        "recent_outside_page_budget": false,
+        "maximum_support_tokens": 2048
+      },
+      "source_sha256": {
+        "evaluation/deterministic_evaluation.py": "3d0a34d9283efdd534eb56feeaafc0ef8ca80954f1cdda3012bc7ff5061836cc",
+        "evaluation/eval_llama_cal128.py": "a4bb8c49e52030e56dc2035de104969d4348f871829aa2f65f16098e3a9a46f8",
+        "evaluation/eval_k_routing_ruler.py": "de87df9b05649d6bd84b49e4d9b360a5d9d8bf154a136b7378b1e07f756991e3",
+        "evaluation/k_routing_config.py": "b2cae49062c98fe9b78e6a8af80236790f81b70c3d81f621db14d24c47e2ead5",
+        "evaluation/ruler_v1.py": "3cfbbce999dbd811fbc0a08bf41cbfe85e0bf9ef5efd87a1c59ec2a0a4c76ca7",
+        "evaluation/v96kl_common.py": "e3a0d2203d960c3a67b9bdb262bdae4de78edc16e30b5b611c49d38aa78a1509",
+        "evaluation/chunked_prefill_mlp.py": "54877ee2e0a6d94904e33716a84f324617e867668521b2dcb8bb0eb0ce44deac",
+        "evaluation/llama_sink_recent_routing.py": "ea32718ebb97d92be075e26fef3e45e9fc49fc4f777c5f6db304004d24b21566",
+        "evaluation/llama_b16r16_k_offload.py": "f7c131b4951ac4ff88e971c50b238a847ebb07491d22dcea6ff070f3b16494c8",
+        "evaluation/llama_resident_prefill.py": "9e7bacc2136c58e79bda0749956d7371d2db73ff569a372969395cf3727b2989",
+        "basisserve/core/c1_lrqk.py": "fdd6d795d1968346af3b02d7aa803e445f72913e965cec49b92d62e3c9955c67",
+        "basisserve/core/c1_shadowkv.py": "801b63fba3aeeec0f81ace8c66f402d3a40fa78f9e38bba1ecae368f9514f273",
+        "basisserve/core/c1_loki_attention.py": "0a4cd5d9ed27dcc42035f000f1216425125fa96963c75239b950603cd6760035",
+        "basisserve/core/c1_k_routing_sidecar.py": "286a1f69618d8c7b53756bdac709b2989d12bb74eb5440065a0424ff6109dd6e",
+        "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c",
+        "basisserve/checkpoint/gqa_vo_qwen3.py": "866518b80c0d5253819ee7c9172495e92cfa0abe062f2ff4d3006cc59d755b4d",
+        "basisserve/checkpoint/c1_lrqk_qwen3.py": "5354256aae2c9c96da3d4f8385a587d8fb8b13f8afef73161540b9da6403812d",
+        "basisserve/checkpoint/c1_shadowkv_qwen3.py": "49d7ba0e7b1837fa108743181c36b2f339b4c5b72c6a7592f2d85bd64b4da586",
+        "basisserve/kernels/compressed_v_decode_attention.py": "9e13f8581f5af28e173063cacc0d996caeb722a7dc4d0678d1d3cbde70392418",
+        "basisserve/kernels/indexed_sparse_decode_attention.py": "ddea7866d35c6cde410fcc9ebea534535c119ac19e7285f0cf73c6740943e773",
+        "basisserve/kernels/split_indexed_attention.py": "3362f9eecbd0daf14847587e936118516dea8ccc16a0174bd6273eec1344ded6"
+      },
+      "eos_ids": [
+        128001,
+        128008,
+        128009
+      ],
+      "versions": {
+        "torch": "2.11.0+cu128",
+        "transformers": "5.17.0",
+        "triton": "3.6.0"
+      }
+    },
+    "bank_sha256": {},
+    "command": "/workspace/BasisServe-CALS/evaluation/eval_llama_cal128.py evaluate --identity /workspace/runs/l31-v96/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-v96/router/ours_b16r16 --output /workspace/runs/l31-v96/core --arm full --shard 0 --shards 1",
+    "python": "/workspace/conda/envs/basis/bin/python",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition"
+  },
+  {
+    "protocol": {
+      "format": "basisserve.llama_cal128_ruler.v1",
+      "numerical_policy": {
+        "model_dtype": "bfloat16",
+        "float32_matmul_precision": "highest",
+        "cuda_matmul_allow_tf32": false,
+        "cudnn_allow_tf32": false,
+        "deterministic_algorithms": true,
+        "cublas_workspace_config": ":4096:8"
+      },
+      "identity_sha256": "3db1c684c8e356edf87218f65cad25a032433ec431ea3ad32ef492921ad14266",
+      "prompts_sha256": "086a3e901db92f6e8dd5efefcb863f85f19eeb0b88da317cb0fc16f50019fe8a",
+      "dtype": "bfloat16",
+      "sequence_length": 131072,
+      "samples": 1100,
+      "samples_per_task": 100,
+      "arms": [
+        "full",
+        "ours",
+        "lrqk",
+        "shadowkv",
+        "loki"
+      ],
+      "rank_schedule": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "generation": "greedy; native EOS; official task caps; same compressed V in every arm",
+      "kernels": "our Triton prefill and decode; actual dispatch counts checked per prompt",
+      "memory_policy": "V96 and B16R16 routing sidecars remain on GPU; B16R16 exact K is held in pinned CPU memory and only selected K rows are fetched for decode",
+      "shadowkv": {
+        "rank": 160,
+        "chunk": 8,
+        "routed": 2048,
+        "outlier_chunks": 48,
+        "implementation": "resident C1ShadowKVState; reconstructed historical K; direct V96"
+      },
+      "lrqk": {
+        "rank": 32,
+        "topk_per_query_head": 832,
+        "recent": 64
+      },
+      "loki": {
+        "pca_rank": 32,
+        "topk_per_query_head": 856,
+        "recent": 0
+      },
+      "ours": {
+        "base": 16,
+        "residual": 16,
+        "page_size": 32,
+        "page_budget_tokens": 2048,
+        "sink_tokens": 32,
+        "sink_within_page_budget": true,
+        "recent_tokens": 64,
+        "recent_outside_page_budget": false,
+        "maximum_support_tokens": 2048
+      },
+      "source_sha256": {
+        "evaluation/deterministic_evaluation.py": "3d0a34d9283efdd534eb56feeaafc0ef8ca80954f1cdda3012bc7ff5061836cc",
+        "evaluation/eval_llama_cal128.py": "a4bb8c49e52030e56dc2035de104969d4348f871829aa2f65f16098e3a9a46f8",
+        "evaluation/eval_k_routing_ruler.py": "de87df9b05649d6bd84b49e4d9b360a5d9d8bf154a136b7378b1e07f756991e3",
+        "evaluation/k_routing_config.py": "b2cae49062c98fe9b78e6a8af80236790f81b70c3d81f621db14d24c47e2ead5",
+        "evaluation/ruler_v1.py": "3cfbbce999dbd811fbc0a08bf41cbfe85e0bf9ef5efd87a1c59ec2a0a4c76ca7",
+        "evaluation/v96kl_common.py": "e3a0d2203d960c3a67b9bdb262bdae4de78edc16e30b5b611c49d38aa78a1509",
+        "evaluation/chunked_prefill_mlp.py": "54877ee2e0a6d94904e33716a84f324617e867668521b2dcb8bb0eb0ce44deac",
+        "evaluation/llama_sink_recent_routing.py": "ea32718ebb97d92be075e26fef3e45e9fc49fc4f777c5f6db304004d24b21566",
+        "evaluation/llama_b16r16_k_offload.py": "f7c131b4951ac4ff88e971c50b238a847ebb07491d22dcea6ff070f3b16494c8",
+        "evaluation/llama_resident_prefill.py": "9e7bacc2136c58e79bda0749956d7371d2db73ff569a372969395cf3727b2989",
+        "basisserve/core/c1_lrqk.py": "fdd6d795d1968346af3b02d7aa803e445f72913e965cec49b92d62e3c9955c67",
+        "basisserve/core/c1_shadowkv.py": "801b63fba3aeeec0f81ace8c66f402d3a40fa78f9e38bba1ecae368f9514f273",
+        "basisserve/core/c1_loki_attention.py": "0a4cd5d9ed27dcc42035f000f1216425125fa96963c75239b950603cd6760035",
+        "basisserve/core/c1_k_routing_sidecar.py": "286a1f69618d8c7b53756bdac709b2989d12bb74eb5440065a0424ff6109dd6e",
+        "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c",
+        "basisserve/checkpoint/gqa_vo_qwen3.py": "866518b80c0d5253819ee7c9172495e92cfa0abe062f2ff4d3006cc59d755b4d",
+        "basisserve/checkpoint/c1_lrqk_qwen3.py": "5354256aae2c9c96da3d4f8385a587d8fb8b13f8afef73161540b9da6403812d",
+        "basisserve/checkpoint/c1_shadowkv_qwen3.py": "49d7ba0e7b1837fa108743181c36b2f339b4c5b72c6a7592f2d85bd64b4da586",
+        "basisserve/kernels/compressed_v_decode_attention.py": "9e13f8581f5af28e173063cacc0d996caeb722a7dc4d0678d1d3cbde70392418",
+        "basisserve/kernels/indexed_sparse_decode_attention.py": "ddea7866d35c6cde410fcc9ebea534535c119ac19e7285f0cf73c6740943e773",
+        "basisserve/kernels/split_indexed_attention.py": "3362f9eecbd0daf14847587e936118516dea8ccc16a0174bd6273eec1344ded6"
+      },
+      "eos_ids": [
+        128001,
+        128008,
+        128009
+      ],
+      "versions": {
+        "torch": "2.11.0+cu128",
+        "transformers": "5.17.0",
+        "triton": "3.6.0"
+      },
+      "batch_size": 2,
+      "batch_arm": "full",
+      "padding": "right; logical per-sample routing; independent EOS",
+      "batch_source_sha256": {
+        "evaluation/llama_b16r16_batch.py": "ece20f93de06ddc7b0b8641d4a13f76fb11deb415015cf9c042f8b8c8ef249c9",
+        "evaluation/llama_v96_baseline_batch.py": "14d10f716d32b57b5dd7f99897662d2f03c9f3e3cc9b5813180bac977971e419",
+        "evaluation/eval_llama_v96_baseline_batch.py": "27d6e831aec4bf2cc86b73a1e684c55252805b9f95ea5d43c57f8258385eba81"
+      }
+    },
+    "bank_sha256": {},
+    "command": "/workspace/BasisServe-CALS/evaluation/eval_llama_v96_baseline_batch.py evaluate --identity /workspace/runs/l31-v96/identity.json --data /workspace/runs/l31-ruler100/ruler --bank /workspace/runs/l31-v96/router/ours_b16r16 --output /workspace/runs/l31-v96/core --arm full --shard 0 --shards 1",
+    "python": "/workspace/conda/envs/basis/bin/python",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition"
+  }
+]

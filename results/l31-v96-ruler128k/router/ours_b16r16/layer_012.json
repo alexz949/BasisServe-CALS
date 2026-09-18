@@ -1,0 +1,471 @@
+{
+  "status": "complete",
+  "sha256": "beb73c8aa8c1c5fe855d10f80357c2776086f994c5ef627b7fe14778391a8e17",
+  "protocol": {
+    "format": "basisserve.k_router.streaming.v2",
+    "model_config_sha256": "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+    "windows_sha256": "e72d506bf7d2cff99ff75fe359d9541c8b4b28c3fbc72babb2a19a44f0a51574",
+    "windows_manifest_sha256": "c1815826c29741a213622f57b36ada34bca5f412d869b243cc0f066e07329230",
+    "sequence_length": 131072,
+    "fit_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "diagnostic_ids": [
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47
+    ],
+    "fit_queries": 64,
+    "diagnostic_queries": 32,
+    "base_rank": 16,
+    "residual_rank": 16,
+    "page_size": 32,
+    "excluded_prefix_pages": 1,
+    "excluded_recent_tokens": 64,
+    "chunk_rows": 2048,
+    "deployment_page_budget_tokens": 2048,
+    "sink_tokens_within_page_budget": 32,
+    "recent_tokens_within_page_budget": 64,
+    "maximum_deployment_support_tokens": 2048,
+    "value_feature_mode": "C1 V96",
+    "smoke": false,
+    "teacher": "native dense BF16 SDPA, model.model, use_cache=False",
+    "base_moments": "FP64 raw moments and encoder transform; no bitwise claim versus projected FP32 accumulation",
+    "covariance": "FP32 chunked normalized o_proj input second moment",
+    "source_sha256": {
+      "evaluation/fit_k_routing_streaming.py": "d4ff779a460e2275fd2e0907fd85a4e032006bf62abf7df8689ed01f54cd3308",
+      "evaluation/streaming_k_statistics.py": "2b8a6f1aad6a680de93c67b3ea2060c4246e30e5d8da5958eb2e1a567902f509",
+      "evaluation/fit_qwen3_8b_q8_fisher_residual.py": "722457fa895e0ea3169c89da9bdecfa4220873aa04800ad292135f011b57d39a",
+      "basisserve/core/query_position_sampling.py": "f7aaaab96efa23714cc7fe4363db374addccb9e4f6d9add3477b21d9bd4b59d5",
+      "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c"
+    }
+  },
+  "layer": 12,
+  "v_rank": 96,
+  "identity_sha256": "3db1c684c8e356edf87218f65cad25a032433ec431ea3ad32ef492921ad14266",
+  "losses": {
+    "b16_r0": {
+      "base_rank": 16,
+      "residual_rank": 0,
+      "fit_page_fisher_nmse": 1.0,
+      "validation_page_fisher_nmse": 1.0
+    },
+    "b16_r16": {
+      "base_rank": 16,
+      "residual_rank": 16,
+      "fit_page_fisher_nmse": 0.007674322311206812,
+      "validation_page_fisher_nmse": 0.010541290299115266,
+      "sweeps": [
+        {
+          "sweep": 1,
+          "loss_before": 10055.94921875,
+          "loss_after_queries": 8038.1484375,
+          "loss_after_encoder": 6125.064453125
+        },
+        {
+          "sweep": 2,
+          "loss_before": 6125.064453125,
+          "loss_after_queries": 5636.65234375,
+          "loss_after_encoder": 5540.40966796875
+        },
+        {
+          "sweep": 3,
+          "loss_before": 5540.40966796875,
+          "loss_after_queries": 5404.55029296875,
+          "loss_after_encoder": 5376.2470703125
+        },
+        {
+          "sweep": 4,
+          "loss_before": 5376.2470703125,
+          "loss_after_queries": 5315.31982421875,
+          "loss_after_encoder": 5298.521484375
+        },
+        {
+          "sweep": 5,
+          "loss_before": 5298.521484375,
+          "loss_after_queries": 5274.361328125,
+          "loss_after_encoder": 5257.18896484375
+        },
+        {
+          "sweep": 6,
+          "loss_before": 5257.18896484375,
+          "loss_after_queries": 5246.1591796875,
+          "loss_after_encoder": 5231.0224609375
+        },
+        {
+          "sweep": 7,
+          "loss_before": 5231.0224609375,
+          "loss_after_queries": 5235.7041015625,
+          "loss_after_encoder": 5216.8603515625
+        },
+        {
+          "sweep": 8,
+          "loss_before": 5216.8603515625,
+          "loss_after_queries": 5231.001953125,
+          "loss_after_encoder": 5207.83349609375
+        },
+        {
+          "sweep": 9,
+          "loss_before": 5207.83349609375,
+          "loss_after_queries": 5225.8896484375,
+          "loss_after_encoder": 5204.8095703125
+        },
+        {
+          "sweep": 10,
+          "loss_before": 5204.8095703125,
+          "loss_after_queries": 5235.69921875,
+          "loss_after_encoder": 5207.8623046875
+        },
+        {
+          "sweep": 11,
+          "loss_before": 5207.8623046875,
+          "loss_after_queries": 5229.2646484375,
+          "loss_after_encoder": 5211.80419921875
+        },
+        {
+          "sweep": 12,
+          "loss_before": 5211.80419921875,
+          "loss_after_queries": 5226.451171875,
+          "loss_after_encoder": 5207.986328125
+        },
+        {
+          "sweep": 13,
+          "loss_before": 5207.986328125,
+          "loss_after_queries": 5225.685546875,
+          "loss_after_encoder": 5206.60498046875
+        },
+        {
+          "sweep": 14,
+          "loss_before": 5206.60498046875,
+          "loss_after_queries": 5219.203125,
+          "loss_after_encoder": 5206.74609375
+        },
+        {
+          "sweep": 15,
+          "loss_before": 5206.74609375,
+          "loss_after_queries": 5221.09326171875,
+          "loss_after_encoder": 5205.544921875
+        },
+        {
+          "sweep": 16,
+          "loss_before": 5205.544921875,
+          "loss_after_queries": 5216.0869140625,
+          "loss_after_encoder": 5197.91162109375
+        },
+        {
+          "sweep": 17,
+          "loss_before": 5197.91162109375,
+          "loss_after_queries": 5209.421875,
+          "loss_after_encoder": 5190.87939453125
+        },
+        {
+          "sweep": 18,
+          "loss_before": 5190.87939453125,
+          "loss_after_queries": 5199.328125,
+          "loss_after_encoder": 5186.45849609375
+        },
+        {
+          "sweep": 19,
+          "loss_before": 5186.45849609375,
+          "loss_after_queries": 5191.66650390625,
+          "loss_after_encoder": 5176.1455078125
+        },
+        {
+          "sweep": 20,
+          "loss_before": 5176.1455078125,
+          "loss_after_queries": 5184.37109375,
+          "loss_after_encoder": 5174.09375
+        },
+        {
+          "sweep": 21,
+          "loss_before": 5174.09375,
+          "loss_after_queries": 5180.41796875,
+          "loss_after_encoder": 5169.44482421875
+        },
+        {
+          "sweep": 22,
+          "loss_before": 5169.44482421875,
+          "loss_after_queries": 5175.0576171875,
+          "loss_after_encoder": 5167.43310546875
+        },
+        {
+          "sweep": 23,
+          "loss_before": 5167.43310546875,
+          "loss_after_queries": 5172.62548828125,
+          "loss_after_encoder": 5163.35205078125
+        },
+        {
+          "sweep": 24,
+          "loss_before": 5163.35205078125,
+          "loss_after_queries": 5170.1591796875,
+          "loss_after_encoder": 5158.853515625
+        },
+        {
+          "sweep": 25,
+          "loss_before": 5158.853515625,
+          "loss_after_queries": 5158.4560546875,
+          "loss_after_encoder": 5151.99267578125
+        },
+        {
+          "sweep": 26,
+          "loss_before": 5151.99267578125,
+          "loss_after_queries": 5153.7998046875,
+          "loss_after_encoder": 5146.4052734375
+        },
+        {
+          "sweep": 27,
+          "loss_before": 5146.4052734375,
+          "loss_after_queries": 5146.8076171875,
+          "loss_after_encoder": 5139.966796875
+        },
+        {
+          "sweep": 28,
+          "loss_before": 5139.966796875,
+          "loss_after_queries": 5137.810546875,
+          "loss_after_encoder": 5131.9697265625
+        },
+        {
+          "sweep": 29,
+          "loss_before": 5131.9697265625,
+          "loss_after_queries": 5133.787109375,
+          "loss_after_encoder": 5130.6708984375
+        },
+        {
+          "sweep": 30,
+          "loss_before": 5130.6708984375,
+          "loss_after_queries": 5128.123046875,
+          "loss_after_encoder": 5122.83544921875
+        },
+        {
+          "sweep": 31,
+          "loss_before": 5122.83544921875,
+          "loss_after_queries": 5120.47802734375,
+          "loss_after_encoder": 5118.78369140625
+        },
+        {
+          "sweep": 32,
+          "loss_before": 5118.78369140625,
+          "loss_after_queries": 5116.9990234375,
+          "loss_after_encoder": 5114.71484375
+        },
+        {
+          "sweep": 33,
+          "loss_before": 5114.71484375,
+          "loss_after_queries": 5114.103515625,
+          "loss_after_encoder": 5109.22021484375
+        },
+        {
+          "sweep": 34,
+          "loss_before": 5109.22021484375,
+          "loss_after_queries": 5104.89404296875,
+          "loss_after_encoder": 5102.0380859375
+        },
+        {
+          "sweep": 35,
+          "loss_before": 5102.0380859375,
+          "loss_after_queries": 5101.6279296875,
+          "loss_after_encoder": 5099.4404296875
+        },
+        {
+          "sweep": 36,
+          "loss_before": 5099.4404296875,
+          "loss_after_queries": 5098.70458984375,
+          "loss_after_encoder": 5095.66259765625
+        },
+        {
+          "sweep": 37,
+          "loss_before": 5095.66259765625,
+          "loss_after_queries": 5094.28125,
+          "loss_after_encoder": 5090.3173828125
+        },
+        {
+          "sweep": 38,
+          "loss_before": 5090.3173828125,
+          "loss_after_queries": 5091.462890625,
+          "loss_after_encoder": 5089.8125
+        },
+        {
+          "sweep": 39,
+          "loss_before": 5089.8125,
+          "loss_after_queries": 5089.236328125,
+          "loss_after_encoder": 5087.22265625
+        },
+        {
+          "sweep": 40,
+          "loss_before": 5087.22265625,
+          "loss_after_queries": 5086.41943359375,
+          "loss_after_encoder": 5084.46337890625
+        },
+        {
+          "sweep": 41,
+          "loss_before": 5084.46337890625,
+          "loss_after_queries": 5085.6279296875,
+          "loss_after_encoder": 5083.85107421875
+        },
+        {
+          "sweep": 42,
+          "loss_before": 5083.85107421875,
+          "loss_after_queries": 5084.396484375,
+          "loss_after_encoder": 5079.37255859375
+        },
+        {
+          "sweep": 43,
+          "loss_before": 5079.37255859375,
+          "loss_after_queries": 5080.40087890625,
+          "loss_after_encoder": 5079.3408203125
+        },
+        {
+          "sweep": 44,
+          "loss_before": 5079.3408203125,
+          "loss_after_queries": 5079.509765625,
+          "loss_after_encoder": 5077.85693359375
+        },
+        {
+          "sweep": 45,
+          "loss_before": 5077.85693359375,
+          "loss_after_queries": 5082.3525390625,
+          "loss_after_encoder": 5080.11181640625
+        },
+        {
+          "sweep": 46,
+          "loss_before": 5080.11181640625,
+          "loss_after_queries": 5079.4560546875,
+          "loss_after_encoder": 5076.9072265625
+        },
+        {
+          "sweep": 47,
+          "loss_before": 5076.9072265625,
+          "loss_after_queries": 5079.68359375,
+          "loss_after_encoder": 5078.6435546875
+        },
+        {
+          "sweep": 48,
+          "loss_before": 5078.6435546875,
+          "loss_after_queries": 5078.94970703125,
+          "loss_after_encoder": 5077.208984375
+        },
+        {
+          "sweep": 49,
+          "loss_before": 5077.208984375,
+          "loss_after_queries": 5075.4306640625,
+          "loss_after_encoder": 5073.07568359375
+        },
+        {
+          "sweep": 50,
+          "loss_before": 5073.07568359375,
+          "loss_after_queries": 5075.10546875,
+          "loss_after_encoder": 5072.6884765625
+        },
+        {
+          "sweep": 51,
+          "loss_before": 5072.6884765625,
+          "loss_after_queries": 5072.5712890625,
+          "loss_after_encoder": 5071.29736328125
+        },
+        {
+          "sweep": 52,
+          "loss_before": 5071.29736328125,
+          "loss_after_queries": 5074.62548828125,
+          "loss_after_encoder": 5072.7734375
+        },
+        {
+          "sweep": 53,
+          "loss_before": 5072.7734375,
+          "loss_after_queries": 5070.822265625,
+          "loss_after_encoder": 5069.9345703125
+        },
+        {
+          "sweep": 54,
+          "loss_before": 5069.9345703125,
+          "loss_after_queries": 5069.20556640625,
+          "loss_after_encoder": 5065.8427734375
+        },
+        {
+          "sweep": 55,
+          "loss_before": 5065.8427734375,
+          "loss_after_queries": 5065.4375,
+          "loss_after_encoder": 5063.63671875
+        },
+        {
+          "sweep": 56,
+          "loss_before": 5063.63671875,
+          "loss_after_queries": 5064.5654296875,
+          "loss_after_encoder": 5062.40869140625
+        },
+        {
+          "sweep": 57,
+          "loss_before": 5062.40869140625,
+          "loss_after_queries": 5064.072265625,
+          "loss_after_encoder": 5061.65966796875
+        },
+        {
+          "sweep": 58,
+          "loss_before": 5061.65966796875,
+          "loss_after_queries": 5061.37451171875,
+          "loss_after_encoder": 5058.64013671875
+        },
+        {
+          "sweep": 59,
+          "loss_before": 5058.64013671875,
+          "loss_after_queries": 5061.0439453125,
+          "loss_after_encoder": 5059.4130859375
+        },
+        {
+          "sweep": 60,
+          "loss_before": 5059.4130859375,
+          "loss_after_queries": 5058.84521484375,
+          "loss_after_encoder": 5057.44580078125
+        }
+      ],
+      "final_query_maximum_iterations": 50,
+      "final_query_maximum_relative_residual": 0.0021564059425145388
+    }
+  },
+  "base_sha256": "449a2d2edf430cedde0456583234f8bf3aaf83c7fbd4677f6a4f812669320cf0",
+  "sweeps": 60,
+  "pcg_iterations": 50
+}

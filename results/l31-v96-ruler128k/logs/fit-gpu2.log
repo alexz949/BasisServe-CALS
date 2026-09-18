@@ -1,0 +1,933 @@
+/workspace/conda/envs/basis/bin/python -u -m evaluation.fit_k_routing_streaming base --identity /workspace/runs/l31-v96/identity.json --windows /workspace/runs/l31-cal128/calibration/windows.safetensors --moments-root /workspace/runs/l31-dense128/router --output /workspace/runs/l31-v96/router --sequence-length 131072 --fit-count 32 --diagnostic-count 16 --sweeps 60 --pcg-iterations 50 --layers 16,17,18,19,20,21,22,23
+/workspace/conda/envs/basis/bin/python -u -m evaluation.fit_k_routing_streaming fisher --identity /workspace/runs/l31-v96/identity.json --windows /workspace/runs/l31-cal128/calibration/windows.safetensors --moments-root /workspace/runs/l31-dense128/router --output /workspace/runs/l31-v96/router --sequence-length 131072 --fit-count 32 --diagnostic-count 16 --sweeps 60 --pcg-iterations 50 --layers 16,17,18,19,20,21,22,23
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 12240.06it/s]
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 0, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 1, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 2, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 3, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 4, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 5, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 6, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 7, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 8, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 9, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 10, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 11, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 12, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 13, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 14, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 15, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 16, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 17, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 18, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 19, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 20, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 21, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 22, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 23, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 24, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 25, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 26, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 27, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 28, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 29, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 30, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+  residual features/Fisher window=1/1 Q=64
+{'stage': 'fisher', 'window': 31, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 32, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 33, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 34, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 35, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 36, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 37, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 38, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 39, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 40, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 41, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 42, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 43, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 44, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 45, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 46, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+  residual features/Fisher window=1/1 Q=32
+{'stage': 'fisher', 'window': 47, 'layers': [16, 17, 18, 19, 20, 21, 22, 23]}
+/workspace/conda/envs/basis/bin/python -u -m evaluation.fit_k_routing_streaming fit --identity /workspace/runs/l31-v96/identity.json --windows /workspace/runs/l31-cal128/calibration/windows.safetensors --moments-root /workspace/runs/l31-dense128/router --output /workspace/runs/l31-v96/router --sequence-length 131072 --fit-count 32 --diagnostic-count 16 --sweeps 60 --pcg-iterations 50 --layers 16,17,18,19,20,21,22,23
+    fit residual router base=16 rank=16
+Page-Fisher sweep 1/60: loss 21048.1 -> 11706.5
+Page-Fisher sweep 2/60: loss 11706.5 -> 10481
+Page-Fisher sweep 3/60: loss 10481 -> 10148.6
+Page-Fisher sweep 4/60: loss 10148.6 -> 9995.69
+Page-Fisher sweep 5/60: loss 9995.69 -> 9910.63
+Page-Fisher sweep 6/60: loss 9910.63 -> 9861.36
+Page-Fisher sweep 7/60: loss 9861.36 -> 9827.32
+Page-Fisher sweep 8/60: loss 9827.32 -> 9803.71
+Page-Fisher sweep 9/60: loss 9803.71 -> 9786.04
+Page-Fisher sweep 10/60: loss 9786.04 -> 9769.14
+Page-Fisher sweep 11/60: loss 9769.14 -> 9757.46
+Page-Fisher sweep 12/60: loss 9757.46 -> 9755.35
+Page-Fisher sweep 13/60: loss 9755.35 -> 9752.04
+Page-Fisher sweep 14/60: loss 9752.04 -> 9743.84
+Page-Fisher sweep 15/60: loss 9743.84 -> 9739.56
+Page-Fisher sweep 16/60: loss 9739.56 -> 9737.7
+Page-Fisher sweep 17/60: loss 9737.7 -> 9741.28
+Page-Fisher sweep 18/60: loss 9741.28 -> 9735.83
+Page-Fisher sweep 19/60: loss 9735.83 -> 9738.29
+Page-Fisher sweep 20/60: loss 9738.29 -> 9737.77
+Page-Fisher sweep 21/60: loss 9737.77 -> 9733.81
+Page-Fisher sweep 22/60: loss 9733.81 -> 9728.36
+Page-Fisher sweep 23/60: loss 9728.36 -> 9730.18
+Page-Fisher sweep 24/60: loss 9730.18 -> 9729.02
+Page-Fisher sweep 25/60: loss 9729.02 -> 9730.79
+Page-Fisher sweep 26/60: loss 9730.79 -> 9717.39
+Page-Fisher sweep 27/60: loss 9717.39 -> 9718.92
+Page-Fisher sweep 28/60: loss 9718.92 -> 9714.01
+Page-Fisher sweep 29/60: loss 9714.01 -> 9708.67
+Page-Fisher sweep 30/60: loss 9708.67 -> 9710.63
+Page-Fisher sweep 31/60: loss 9710.63 -> 9706.52
+Page-Fisher sweep 32/60: loss 9706.52 -> 9707.56
+Page-Fisher sweep 33/60: loss 9707.56 -> 9704.51
+Page-Fisher sweep 34/60: loss 9704.51 -> 9704.17
+Page-Fisher sweep 35/60: loss 9704.17 -> 9702.76
+Page-Fisher sweep 36/60: loss 9702.76 -> 9700.65
+Page-Fisher sweep 37/60: loss 9700.65 -> 9703.58
+Page-Fisher sweep 38/60: loss 9703.58 -> 9704.07
+Page-Fisher sweep 39/60: loss 9704.07 -> 9702.25
+Page-Fisher sweep 40/60: loss 9702.25 -> 9701.75
+Page-Fisher sweep 41/60: loss 9701.75 -> 9699.44
+Page-Fisher sweep 42/60: loss 9699.44 -> 9703.25
+Page-Fisher sweep 43/60: loss 9703.25 -> 9704.32
+Page-Fisher sweep 44/60: loss 9704.32 -> 9702.64
+Page-Fisher sweep 45/60: loss 9702.64 -> 9703.33
+Page-Fisher sweep 46/60: loss 9703.33 -> 9702.76
+Page-Fisher sweep 47/60: loss 9702.76 -> 9702.49
+Page-Fisher sweep 48/60: loss 9702.49 -> 9700.28
+Page-Fisher sweep 49/60: loss 9700.28 -> 9709.5
+Page-Fisher sweep 50/60: loss 9709.5 -> 9704.26
+Page-Fisher sweep 51/60: loss 9704.26 -> 9714.01
+Page-Fisher sweep 52/60: loss 9714.01 -> 9725.3
+Page-Fisher sweep 53/60: loss 9725.3 -> 9729.96
+Page-Fisher sweep 54/60: loss 9729.96 -> 9731.7
+Page-Fisher sweep 55/60: loss 9731.7 -> 9737.99
+Page-Fisher sweep 56/60: loss 9737.99 -> 9745.03
+Page-Fisher sweep 57/60: loss 9745.03 -> 9745.06
+Page-Fisher sweep 58/60: loss 9745.06 -> 9747.92
+Page-Fisher sweep 59/60: loss 9747.92 -> 9747.4
+Page-Fisher sweep 60/60: loss 9747.4 -> 9741.42
+{'stage': 'fit complete', 'layer': 16, 'losses': {'b16_r0': {'base_rank': 16, 'residual_rank': 0, 'fit_page_fisher_nmse': 1.0, 'validation_page_fisher_nmse': 1.0}, 'b16_r16': {'base_rank': 16, 'residual_rank': 16, 'fit_page_fisher_nmse': 0.02199657246353216, 'validation_page_fisher_nmse': 0.02805146735758443, 'sweeps': [{'sweep': 1, 'loss_before': 21048.080078125, 'loss_after_queries': 15619.0986328125, 'loss_after_encoder': 11706.474609375}, {'sweep': 2, 'loss_before': 11706.474609375, 'loss_after_queries': 10806.08984375, 'loss_after_encoder': 10480.9833984375}, {'sweep': 3, 'loss_before': 10480.9833984375, 'loss_after_queries': 10272.51171875, 'loss_after_encoder': 10148.6015625}, {'sweep': 4, 'loss_before': 10148.6015625, 'loss_after_queries': 10054.8564453125, 'loss_after_encoder': 9995.6875}, {'sweep': 5, 'loss_before': 9995.6875, 'loss_after_queries': 9947.4814453125, 'loss_after_encoder': 9910.6279296875}, {'sweep': 6, 'loss_before': 9910.6279296875, 'loss_after_queries': 9884.8251953125, 'loss_after_encoder': 9861.36328125}, {'sweep': 7, 'loss_before': 9861.36328125, 'loss_after_queries': 9847.328125, 'loss_after_encoder': 9827.31640625}, {'sweep': 8, 'loss_before': 9827.31640625, 'loss_after_queries': 9817.6630859375, 'loss_after_encoder': 9803.7138671875}, {'sweep': 9, 'loss_before': 9803.7138671875, 'loss_after_queries': 9800.1416015625, 'loss_after_encoder': 9786.0400390625}, {'sweep': 10, 'loss_before': 9786.0400390625, 'loss_after_queries': 9782.080078125, 'loss_after_encoder': 9769.13671875}, {'sweep': 11, 'loss_before': 9769.13671875, 'loss_after_queries': 9769.55859375, 'loss_after_encoder': 9757.4609375}, {'sweep': 12, 'loss_before': 9757.4609375, 'loss_after_queries': 9763.84765625, 'loss_after_encoder': 9755.34765625}, {'sweep': 13, 'loss_before': 9755.34765625, 'loss_after_queries': 9757.5126953125, 'loss_after_encoder': 9752.044921875}, {'sweep': 14, 'loss_before': 9752.044921875, 'loss_after_queries': 9750.94140625, 'loss_after_encoder': 9743.8388671875}, {'sweep': 15, 'loss_before': 9743.8388671875, 'loss_after_queries': 9745.900390625, 'loss_after_encoder': 9739.560546875}, {'sweep': 16, 'loss_before': 9739.560546875, 'loss_after_queries': 9742.966796875, 'loss_after_encoder': 9737.701171875}, {'sweep': 17, 'loss_before': 9737.701171875, 'loss_after_queries': 9738.490234375, 'loss_after_encoder': 9741.28125}, {'sweep': 18, 'loss_before': 9741.28125, 'loss_after_queries': 9736.7568359375, 'loss_after_encoder': 9735.826171875}, {'sweep': 19, 'loss_before': 9735.826171875, 'loss_after_queries': 9741.0751953125, 'loss_after_encoder': 9738.29296875}, {'sweep': 20, 'loss_before': 9738.29296875, 'loss_after_queries': 9737.02734375, 'loss_after_encoder': 9737.7705078125}, {'sweep': 21, 'loss_before': 9737.7705078125, 'loss_after_queries': 9738.8916015625, 'loss_after_encoder': 9733.806640625}, {'sweep': 22, 'loss_before': 9733.806640625, 'loss_after_queries': 9736.8818359375, 'loss_after_encoder': 9728.36328125}, {'sweep': 23, 'loss_before': 9728.36328125, 'loss_after_queries': 9731.22265625, 'loss_after_encoder': 9730.1796875}, {'sweep': 24, 'loss_before': 9730.1796875, 'loss_after_queries': 9728.8759765625, 'loss_after_encoder': 9729.021484375}, {'sweep': 25, 'loss_before': 9729.021484375, 'loss_after_queries': 9731.0712890625, 'loss_after_encoder': 9730.79296875}, {'sweep': 26, 'loss_before': 9730.79296875, 'loss_after_queries': 9726.65234375, 'loss_after_encoder': 9717.392578125}, {'sweep': 27, 'loss_before': 9717.392578125, 'loss_after_queries': 9715.1591796875, 'loss_after_encoder': 9718.9150390625}, {'sweep': 28, 'loss_before': 9718.9150390625, 'loss_after_queries': 9714.9345703125, 'loss_after_encoder': 9714.0146484375}, {'sweep': 29, 'loss_before': 9714.0146484375, 'loss_after_queries': 9711.1044921875, 'loss_after_encoder': 9708.673828125}, {'sweep': 30, 'loss_before': 9708.673828125, 'loss_after_queries': 9710.5439453125, 'loss_after_encoder': 9710.62890625}, {'sweep': 31, 'loss_before': 9710.62890625, 'loss_after_queries': 9710.1767578125, 'loss_after_encoder': 9706.5234375}, {'sweep': 32, 'loss_before': 9706.5234375, 'loss_after_queries': 9708.2724609375, 'loss_after_encoder': 9707.5615234375}, {'sweep': 33, 'loss_before': 9707.5615234375, 'loss_after_queries': 9708.5, 'loss_after_encoder': 9704.505859375}, {'sweep': 34, 'loss_before': 9704.505859375, 'loss_after_queries': 9704.6884765625, 'loss_after_encoder': 9704.1708984375}, {'sweep': 35, 'loss_before': 9704.1708984375, 'loss_after_queries': 9706.810546875, 'loss_after_encoder': 9702.755859375}, {'sweep': 36, 'loss_before': 9702.755859375, 'loss_after_queries': 9702.263671875, 'loss_after_encoder': 9700.6484375}, {'sweep': 37, 'loss_before': 9700.6484375, 'loss_after_queries': 9703.759765625, 'loss_after_encoder': 9703.58203125}, {'sweep': 38, 'loss_before': 9703.58203125, 'loss_after_queries': 9704.240234375, 'loss_after_encoder': 9704.06640625}, {'sweep': 39, 'loss_before': 9704.06640625, 'loss_after_queries': 9705.6162109375, 'loss_after_encoder': 9702.251953125}, {'sweep': 40, 'loss_before': 9702.251953125, 'loss_after_queries': 9700.7998046875, 'loss_after_encoder': 9701.75390625}, {'sweep': 41, 'loss_before': 9701.75390625, 'loss_after_queries': 9701.3466796875, 'loss_after_encoder': 9699.439453125}, {'sweep': 42, 'loss_before': 9699.439453125, 'loss_after_queries': 9699.6943359375, 'loss_after_encoder': 9703.248046875}, {'sweep': 43, 'loss_before': 9703.248046875, 'loss_after_queries': 9700.609375, 'loss_after_encoder': 9704.318359375}, {'sweep': 44, 'loss_before': 9704.318359375, 'loss_after_queries': 9704.0703125, 'loss_after_encoder': 9702.640625}, {'sweep': 45, 'loss_before': 9702.640625, 'loss_after_queries': 9699.3916015625, 'loss_after_encoder': 9703.3271484375}, {'sweep': 46, 'loss_before': 9703.3271484375, 'loss_after_queries': 9701.576171875, 'loss_after_encoder': 9702.76171875}, {'sweep': 47, 'loss_before': 9702.76171875, 'loss_after_queries': 9704.6953125, 'loss_after_encoder': 9702.494140625}, {'sweep': 48, 'loss_before': 9702.494140625, 'loss_after_queries': 9699.64453125, 'loss_after_encoder': 9700.279296875}, {'sweep': 49, 'loss_before': 9700.279296875, 'loss_after_queries': 9706.251953125, 'loss_after_encoder': 9709.4970703125}, {'sweep': 50, 'loss_before': 9709.4970703125, 'loss_after_queries': 9709.392578125, 'loss_after_encoder': 9704.2578125}, {'sweep': 51, 'loss_before': 9704.2578125, 'loss_after_queries': 9713.31640625, 'loss_after_encoder': 9714.005859375}, {'sweep': 52, 'loss_before': 9714.005859375, 'loss_after_queries': 9730.98828125, 'loss_after_encoder': 9725.296875}, {'sweep': 53, 'loss_before': 9725.296875, 'loss_after_queries': 9734.837890625, 'loss_after_encoder': 9729.9619140625}, {'sweep': 54, 'loss_before': 9729.9619140625, 'loss_after_queries': 9739.681640625, 'loss_after_encoder': 9731.6953125}, {'sweep': 55, 'loss_before': 9731.6953125, 'loss_after_queries': 9737.919921875, 'loss_after_encoder': 9737.98828125}, {'sweep': 56, 'loss_before': 9737.98828125, 'loss_after_queries': 9747.09375, 'loss_after_encoder': 9745.025390625}, {'sweep': 57, 'loss_before': 9745.025390625, 'loss_after_queries': 9749.57421875, 'loss_after_encoder': 9745.0556640625}, {'sweep': 58, 'loss_before': 9745.0556640625, 'loss_after_queries': 9748.767578125, 'loss_after_encoder': 9747.919921875}, {'sweep': 59, 'loss_before': 9747.919921875, 'loss_after_queries': 9750.822265625, 'loss_after_encoder': 9747.396484375}, {'sweep': 60, 'loss_before': 9747.396484375, 'loss_after_queries': 9744.7216796875, 'loss_after_encoder': 9741.4208984375}], 'final_query_maximum_iterations': 50, 'final_query_maximum_relative_residual': 0.0026230900548398495}}}
+    fit residual router base=16 rank=16
+Page-Fisher sweep 1/60: loss 21577.1 -> 11407.8
+Page-Fisher sweep 2/60: loss 11407.8 -> 10337
+Page-Fisher sweep 3/60: loss 10337 -> 10033.4
+Page-Fisher sweep 4/60: loss 10033.4 -> 9871.62
+Page-Fisher sweep 5/60: loss 9871.62 -> 9774.35
+Page-Fisher sweep 6/60: loss 9774.35 -> 9706.06
+Page-Fisher sweep 7/60: loss 9706.06 -> 9657.53
+Page-Fisher sweep 8/60: loss 9657.53 -> 9625.52
+Page-Fisher sweep 9/60: loss 9625.52 -> 9602.87
+Page-Fisher sweep 10/60: loss 9602.87 -> 9586.69
+Page-Fisher sweep 11/60: loss 9586.69 -> 9574.78
+Page-Fisher sweep 12/60: loss 9574.78 -> 9565.86
+Page-Fisher sweep 13/60: loss 9565.86 -> 9559.43
+Page-Fisher sweep 14/60: loss 9559.43 -> 9554.23
+Page-Fisher sweep 15/60: loss 9554.23 -> 9552.29
+Page-Fisher sweep 16/60: loss 9552.29 -> 9548.99
+Page-Fisher sweep 17/60: loss 9548.99 -> 9547.35
+Page-Fisher sweep 18/60: loss 9547.35 -> 9546.4
+Page-Fisher sweep 19/60: loss 9546.4 -> 9545.47
+Page-Fisher sweep 20/60: loss 9545.47 -> 9544.41
+Page-Fisher sweep 21/60: loss 9544.41 -> 9541.34
+Page-Fisher sweep 22/60: loss 9541.34 -> 9541.94
+Page-Fisher sweep 23/60: loss 9541.94 -> 9539.67
+Page-Fisher sweep 24/60: loss 9539.67 -> 9537.99
+Page-Fisher sweep 25/60: loss 9537.99 -> 9536.24
+Page-Fisher sweep 26/60: loss 9536.24 -> 9536.82
+Page-Fisher sweep 27/60: loss 9536.82 -> 9536.15
+Page-Fisher sweep 28/60: loss 9536.15 -> 9533.75
+Page-Fisher sweep 29/60: loss 9533.75 -> 9533.46
+Page-Fisher sweep 30/60: loss 9533.46 -> 9532.41
+Page-Fisher sweep 31/60: loss 9532.41 -> 9531.83
+Page-Fisher sweep 32/60: loss 9531.83 -> 9530.64
+Page-Fisher sweep 33/60: loss 9530.64 -> 9531.79
+Page-Fisher sweep 34/60: loss 9531.79 -> 9528.58
+Page-Fisher sweep 35/60: loss 9528.58 -> 9529.81
+Page-Fisher sweep 36/60: loss 9529.81 -> 9528.94
+Page-Fisher sweep 37/60: loss 9528.94 -> 9527.07
+Page-Fisher sweep 38/60: loss 9527.07 -> 9527.28
+Page-Fisher sweep 39/60: loss 9527.28 -> 9528.19
+Page-Fisher sweep 40/60: loss 9528.19 -> 9528.89
+Page-Fisher sweep 41/60: loss 9528.89 -> 9529.06
+Page-Fisher sweep 42/60: loss 9529.06 -> 9530.32
+Page-Fisher sweep 43/60: loss 9530.32 -> 9531.84
+Page-Fisher sweep 44/60: loss 9531.84 -> 9532.05
+Page-Fisher sweep 45/60: loss 9532.05 -> 9532.01
+Page-Fisher sweep 46/60: loss 9532.01 -> 9534.47
+Page-Fisher sweep 47/60: loss 9534.47 -> 9534.32
+Page-Fisher sweep 48/60: loss 9534.32 -> 9535.92
+Page-Fisher sweep 49/60: loss 9535.92 -> 9536.47
+Page-Fisher sweep 50/60: loss 9536.47 -> 9539.31
+Page-Fisher sweep 51/60: loss 9539.31 -> 9540.07
+Page-Fisher sweep 52/60: loss 9540.07 -> 9539.38
+Page-Fisher sweep 53/60: loss 9539.38 -> 9539.99
+Page-Fisher sweep 54/60: loss 9539.99 -> 9542.13
+Page-Fisher sweep 55/60: loss 9542.13 -> 9544.17
+Page-Fisher sweep 56/60: loss 9544.17 -> 9544.53
+Page-Fisher sweep 57/60: loss 9544.53 -> 9544.84
+Page-Fisher sweep 58/60: loss 9544.84 -> 9546.64
+Page-Fisher sweep 59/60: loss 9546.64 -> 9547.18
+Page-Fisher sweep 60/60: loss 9547.18 -> 9548.04
+{'stage': 'fit complete', 'layer': 17, 'losses': {'b16_r0': {'base_rank': 16, 'residual_rank': 0, 'fit_page_fisher_nmse': 1.0, 'validation_page_fisher_nmse': 1.0}, 'b16_r16': {'base_rank': 16, 'residual_rank': 16, 'fit_page_fisher_nmse': 0.022081908578017225, 'validation_page_fisher_nmse': 0.026320760935688307, 'sweeps': [{'sweep': 1, 'loss_before': 21577.083984375, 'loss_after_queries': 15565.1171875, 'loss_after_encoder': 11407.783203125}, {'sweep': 2, 'loss_before': 11407.783203125, 'loss_after_queries': 10625.9443359375, 'loss_after_encoder': 10336.97265625}, {'sweep': 3, 'loss_before': 10336.97265625, 'loss_after_queries': 10157.548828125, 'loss_after_encoder': 10033.423828125}, {'sweep': 4, 'loss_before': 10033.423828125, 'loss_after_queries': 9949.634765625, 'loss_after_encoder': 9871.615234375}, {'sweep': 5, 'loss_before': 9871.615234375, 'loss_after_queries': 9826.4658203125, 'loss_after_encoder': 9774.345703125}, {'sweep': 6, 'loss_before': 9774.345703125, 'loss_after_queries': 9743.185546875, 'loss_after_encoder': 9706.0595703125}, {'sweep': 7, 'loss_before': 9706.0595703125, 'loss_after_queries': 9683.296875, 'loss_after_encoder': 9657.53125}, {'sweep': 8, 'loss_before': 9657.53125, 'loss_after_queries': 9642.984375, 'loss_after_encoder': 9625.515625}, {'sweep': 9, 'loss_before': 9625.515625, 'loss_after_queries': 9615.029296875, 'loss_after_encoder': 9602.87109375}, {'sweep': 10, 'loss_before': 9602.87109375, 'loss_after_queries': 9594.8037109375, 'loss_after_encoder': 9586.689453125}, {'sweep': 11, 'loss_before': 9586.689453125, 'loss_after_queries': 9581.3017578125, 'loss_after_encoder': 9574.783203125}, {'sweep': 12, 'loss_before': 9574.783203125, 'loss_after_queries': 9570.66015625, 'loss_after_encoder': 9565.857421875}, {'sweep': 13, 'loss_before': 9565.857421875, 'loss_after_queries': 9563.4140625, 'loss_after_encoder': 9559.4345703125}, {'sweep': 14, 'loss_before': 9559.4345703125, 'loss_after_queries': 9556.8203125, 'loss_after_encoder': 9554.2333984375}, {'sweep': 15, 'loss_before': 9554.2333984375, 'loss_after_queries': 9554.560546875, 'loss_after_encoder': 9552.291015625}, {'sweep': 16, 'loss_before': 9552.291015625, 'loss_after_queries': 9550.8134765625, 'loss_after_encoder': 9548.9853515625}, {'sweep': 17, 'loss_before': 9548.9853515625, 'loss_after_queries': 9548.724609375, 'loss_after_encoder': 9547.3525390625}, {'sweep': 18, 'loss_before': 9547.3525390625, 'loss_after_queries': 9548.640625, 'loss_after_encoder': 9546.404296875}, {'sweep': 19, 'loss_before': 9546.404296875, 'loss_after_queries': 9546.875, 'loss_after_encoder': 9545.466796875}, {'sweep': 20, 'loss_before': 9545.466796875, 'loss_after_queries': 9546.3408203125, 'loss_after_encoder': 9544.412109375}, {'sweep': 21, 'loss_before': 9544.412109375, 'loss_after_queries': 9543.49609375, 'loss_after_encoder': 9541.337890625}, {'sweep': 22, 'loss_before': 9541.337890625, 'loss_after_queries': 9543.5439453125, 'loss_after_encoder': 9541.935546875}, {'sweep': 23, 'loss_before': 9541.935546875, 'loss_after_queries': 9540.8828125, 'loss_after_encoder': 9539.666015625}, {'sweep': 24, 'loss_before': 9539.666015625, 'loss_after_queries': 9539.818359375, 'loss_after_encoder': 9537.994140625}, {'sweep': 25, 'loss_before': 9537.994140625, 'loss_after_queries': 9538.0546875, 'loss_after_encoder': 9536.236328125}, {'sweep': 26, 'loss_before': 9536.236328125, 'loss_after_queries': 9538.220703125, 'loss_after_encoder': 9536.818359375}, {'sweep': 27, 'loss_before': 9536.818359375, 'loss_after_queries': 9537.25390625, 'loss_after_encoder': 9536.146484375}, {'sweep': 28, 'loss_before': 9536.146484375, 'loss_after_queries': 9535.90625, 'loss_after_encoder': 9533.7529296875}, {'sweep': 29, 'loss_before': 9533.7529296875, 'loss_after_queries': 9535.1083984375, 'loss_after_encoder': 9533.455078125}, {'sweep': 30, 'loss_before': 9533.455078125, 'loss_after_queries': 9533.193359375, 'loss_after_encoder': 9532.41015625}, {'sweep': 31, 'loss_before': 9532.41015625, 'loss_after_queries': 9533.892578125, 'loss_after_encoder': 9531.833984375}, {'sweep': 32, 'loss_before': 9531.833984375, 'loss_after_queries': 9532.5185546875, 'loss_after_encoder': 9530.64453125}, {'sweep': 33, 'loss_before': 9530.64453125, 'loss_after_queries': 9533.7490234375, 'loss_after_encoder': 9531.7861328125}, {'sweep': 34, 'loss_before': 9531.7861328125, 'loss_after_queries': 9530.43359375, 'loss_after_encoder': 9528.5791015625}, {'sweep': 35, 'loss_before': 9528.5791015625, 'loss_after_queries': 9531.470703125, 'loss_after_encoder': 9529.8134765625}, {'sweep': 36, 'loss_before': 9529.8134765625, 'loss_after_queries': 9530.796875, 'loss_after_encoder': 9528.943359375}, {'sweep': 37, 'loss_before': 9528.943359375, 'loss_after_queries': 9529.3359375, 'loss_after_encoder': 9527.0703125}, {'sweep': 38, 'loss_before': 9527.0703125, 'loss_after_queries': 9528.009765625, 'loss_after_encoder': 9527.283203125}, {'sweep': 39, 'loss_before': 9527.283203125, 'loss_after_queries': 9529.9775390625, 'loss_after_encoder': 9528.1875}, {'sweep': 40, 'loss_before': 9528.1875, 'loss_after_queries': 9530.486328125, 'loss_after_encoder': 9528.88671875}, {'sweep': 41, 'loss_before': 9528.88671875, 'loss_after_queries': 9529.90234375, 'loss_after_encoder': 9529.056640625}, {'sweep': 42, 'loss_before': 9529.056640625, 'loss_after_queries': 9532.00390625, 'loss_after_encoder': 9530.32421875}, {'sweep': 43, 'loss_before': 9530.32421875, 'loss_after_queries': 9532.892578125, 'loss_after_encoder': 9531.8427734375}, {'sweep': 44, 'loss_before': 9531.8427734375, 'loss_after_queries': 9533.728515625, 'loss_after_encoder': 9532.0546875}, {'sweep': 45, 'loss_before': 9532.0546875, 'loss_after_queries': 9533.525390625, 'loss_after_encoder': 9532.01171875}, {'sweep': 46, 'loss_before': 9532.01171875, 'loss_after_queries': 9535.8642578125, 'loss_after_encoder': 9534.47265625}, {'sweep': 47, 'loss_before': 9534.47265625, 'loss_after_queries': 9537.08203125, 'loss_after_encoder': 9534.318359375}, {'sweep': 48, 'loss_before': 9534.318359375, 'loss_after_queries': 9536.884765625, 'loss_after_encoder': 9535.91796875}, {'sweep': 49, 'loss_before': 9535.91796875, 'loss_after_queries': 9538.2412109375, 'loss_after_encoder': 9536.47265625}, {'sweep': 50, 'loss_before': 9536.47265625, 'loss_after_queries': 9541.2275390625, 'loss_after_encoder': 9539.310546875}, {'sweep': 51, 'loss_before': 9539.310546875, 'loss_after_queries': 9542.3095703125, 'loss_after_encoder': 9540.07421875}, {'sweep': 52, 'loss_before': 9540.07421875, 'loss_after_queries': 9541.5234375, 'loss_after_encoder': 9539.380859375}, {'sweep': 53, 'loss_before': 9539.380859375, 'loss_after_queries': 9542.041015625, 'loss_after_encoder': 9539.9873046875}, {'sweep': 54, 'loss_before': 9539.9873046875, 'loss_after_queries': 9543.728515625, 'loss_after_encoder': 9542.134765625}, {'sweep': 55, 'loss_before': 9542.134765625, 'loss_after_queries': 9545.3427734375, 'loss_after_encoder': 9544.169921875}, {'sweep': 56, 'loss_before': 9544.169921875, 'loss_after_queries': 9546.3583984375, 'loss_after_encoder': 9544.5302734375}, {'sweep': 57, 'loss_before': 9544.5302734375, 'loss_after_queries': 9546.884765625, 'loss_after_encoder': 9544.84375}, {'sweep': 58, 'loss_before': 9544.84375, 'loss_after_queries': 9549.43359375, 'loss_after_encoder': 9546.6416015625}, {'sweep': 59, 'loss_before': 9546.6416015625, 'loss_after_queries': 9550.146484375, 'loss_after_encoder': 9547.181640625}, {'sweep': 60, 'loss_before': 9547.181640625, 'loss_after_queries': 9551.048828125, 'loss_after_encoder': 9548.0380859375}], 'final_query_maximum_iterations': 50, 'final_query_maximum_relative_residual': 0.004752970300614834}}}
+    fit residual router base=16 rank=16
+Page-Fisher sweep 1/60: loss 18118.5 -> 10030.3
+Page-Fisher sweep 2/60: loss 10030.3 -> 9125.64
+Page-Fisher sweep 3/60: loss 9125.64 -> 8914.93
+Page-Fisher sweep 4/60: loss 8914.93 -> 8812.04
+Page-Fisher sweep 5/60: loss 8812.04 -> 8747.33
+Page-Fisher sweep 6/60: loss 8747.33 -> 8700.09
+Page-Fisher sweep 7/60: loss 8700.09 -> 8663.68
+Page-Fisher sweep 8/60: loss 8663.68 -> 8636.21
+Page-Fisher sweep 9/60: loss 8636.21 -> 8610.45
+Page-Fisher sweep 10/60: loss 8610.45 -> 8588.98
+Page-Fisher sweep 11/60: loss 8588.98 -> 8570.64
+Page-Fisher sweep 12/60: loss 8570.64 -> 8554.66
+Page-Fisher sweep 13/60: loss 8554.66 -> 8541.44
+Page-Fisher sweep 14/60: loss 8541.44 -> 8533.03
+Page-Fisher sweep 15/60: loss 8533.03 -> 8527.05
+Page-Fisher sweep 16/60: loss 8527.05 -> 8521.92
+Page-Fisher sweep 17/60: loss 8521.92 -> 8518.26
+Page-Fisher sweep 18/60: loss 8518.26 -> 8514.39
+Page-Fisher sweep 19/60: loss 8514.39 -> 8513.93
+Page-Fisher sweep 20/60: loss 8513.93 -> 8511.74
+Page-Fisher sweep 21/60: loss 8511.74 -> 8513.02
+Page-Fisher sweep 22/60: loss 8513.02 -> 8511.44
+Page-Fisher sweep 23/60: loss 8511.44 -> 8510.33
+Page-Fisher sweep 24/60: loss 8510.33 -> 8509.43
+Page-Fisher sweep 25/60: loss 8509.43 -> 8508.04
+Page-Fisher sweep 26/60: loss 8508.04 -> 8507.58
+Page-Fisher sweep 27/60: loss 8507.58 -> 8507.17
+Page-Fisher sweep 28/60: loss 8507.17 -> 8508.65
+Page-Fisher sweep 29/60: loss 8508.65 -> 8508.52
+Page-Fisher sweep 30/60: loss 8508.52 -> 8509.32
+Page-Fisher sweep 31/60: loss 8509.32 -> 8510.76
+Page-Fisher sweep 32/60: loss 8510.76 -> 8510.62
+Page-Fisher sweep 33/60: loss 8510.62 -> 8510.99
+Page-Fisher sweep 34/60: loss 8510.99 -> 8510.71
+Page-Fisher sweep 35/60: loss 8510.71 -> 8510.61
+Page-Fisher sweep 36/60: loss 8510.61 -> 8511.6
+Page-Fisher sweep 37/60: loss 8511.6 -> 8509.97
+Page-Fisher sweep 38/60: loss 8509.97 -> 8509.64
+Page-Fisher sweep 39/60: loss 8509.64 -> 8509.99
+Page-Fisher sweep 40/60: loss 8509.99 -> 8512
+Page-Fisher sweep 41/60: loss 8512 -> 8513.45
+Page-Fisher sweep 42/60: loss 8513.45 -> 8514.23
+Page-Fisher sweep 43/60: loss 8514.23 -> 8513.68
+Page-Fisher sweep 44/60: loss 8513.68 -> 8513.37
+Page-Fisher sweep 45/60: loss 8513.37 -> 8514.31
+Page-Fisher sweep 46/60: loss 8514.31 -> 8513.1
+Page-Fisher sweep 47/60: loss 8513.1 -> 8513.53
+Page-Fisher sweep 48/60: loss 8513.53 -> 8513.4
+Page-Fisher sweep 49/60: loss 8513.4 -> 8511.55
+Page-Fisher sweep 50/60: loss 8511.55 -> 8514.48
+Page-Fisher sweep 51/60: loss 8514.48 -> 8513.25
+Page-Fisher sweep 52/60: loss 8513.25 -> 8513.38
+Page-Fisher sweep 53/60: loss 8513.38 -> 8511.24
+Page-Fisher sweep 54/60: loss 8511.24 -> 8513.91
+Page-Fisher sweep 55/60: loss 8513.91 -> 8515.3
+Page-Fisher sweep 56/60: loss 8515.3 -> 8513.68
+Page-Fisher sweep 57/60: loss 8513.68 -> 8513.8
+Page-Fisher sweep 58/60: loss 8513.8 -> 8513.81
+Page-Fisher sweep 59/60: loss 8513.81 -> 8514.71
+Page-Fisher sweep 60/60: loss 8514.71 -> 8514.71
+{'stage': 'fit complete', 'layer': 18, 'losses': {'b16_r0': {'base_rank': 16, 'residual_rank': 0, 'fit_page_fisher_nmse': 1.0, 'validation_page_fisher_nmse': 1.0}, 'b16_r16': {'base_rank': 16, 'residual_rank': 16, 'fit_page_fisher_nmse': 0.017697470105005164, 'validation_page_fisher_nmse': 0.022475248790994447, 'sweeps': [{'sweep': 1, 'loss_before': 18118.513671875, 'loss_after_queries': 13668.1513671875, 'loss_after_encoder': 10030.33203125}, {'sweep': 2, 'loss_before': 10030.33203125, 'loss_after_queries': 9347.8798828125, 'loss_after_encoder': 9125.642578125}, {'sweep': 3, 'loss_before': 9125.642578125, 'loss_after_queries': 8987.2294921875, 'loss_after_encoder': 8914.927734375}, {'sweep': 4, 'loss_before': 8914.927734375, 'loss_after_queries': 8849.705078125, 'loss_after_encoder': 8812.04296875}, {'sweep': 5, 'loss_before': 8812.04296875, 'loss_after_queries': 8771.6650390625, 'loss_after_encoder': 8747.3291015625}, {'sweep': 6, 'loss_before': 8747.3291015625, 'loss_after_queries': 8719.2685546875, 'loss_after_encoder': 8700.0947265625}, {'sweep': 7, 'loss_before': 8700.0947265625, 'loss_after_queries': 8680.921875, 'loss_after_encoder': 8663.6767578125}, {'sweep': 8, 'loss_before': 8663.6767578125, 'loss_after_queries': 8649.982421875, 'loss_after_encoder': 8636.2099609375}, {'sweep': 9, 'loss_before': 8636.2099609375, 'loss_after_queries': 8624.1943359375, 'loss_after_encoder': 8610.453125}, {'sweep': 10, 'loss_before': 8610.453125, 'loss_after_queries': 8600.408203125, 'loss_after_encoder': 8588.9814453125}, {'sweep': 11, 'loss_before': 8588.9814453125, 'loss_after_queries': 8581.1591796875, 'loss_after_encoder': 8570.6435546875}, {'sweep': 12, 'loss_before': 8570.6435546875, 'loss_after_queries': 8563.9853515625, 'loss_after_encoder': 8554.6630859375}, {'sweep': 13, 'loss_before': 8554.6630859375, 'loss_after_queries': 8549.40625, 'loss_after_encoder': 8541.4375}, {'sweep': 14, 'loss_before': 8541.4375, 'loss_after_queries': 8538.0419921875, 'loss_after_encoder': 8533.03125}, {'sweep': 15, 'loss_before': 8533.03125, 'loss_after_queries': 8531.4951171875, 'loss_after_encoder': 8527.0498046875}, {'sweep': 16, 'loss_before': 8527.0498046875, 'loss_after_queries': 8525.5234375, 'loss_after_encoder': 8521.919921875}, {'sweep': 17, 'loss_before': 8521.919921875, 'loss_after_queries': 8520.6767578125, 'loss_after_encoder': 8518.2626953125}, {'sweep': 18, 'loss_before': 8518.2626953125, 'loss_after_queries': 8516.587890625, 'loss_after_encoder': 8514.392578125}, {'sweep': 19, 'loss_before': 8514.392578125, 'loss_after_queries': 8515.8203125, 'loss_after_encoder': 8513.9287109375}, {'sweep': 20, 'loss_before': 8513.9287109375, 'loss_after_queries': 8514.15234375, 'loss_after_encoder': 8511.744140625}, {'sweep': 21, 'loss_before': 8511.744140625, 'loss_after_queries': 8513.6376953125, 'loss_after_encoder': 8513.0234375}, {'sweep': 22, 'loss_before': 8513.0234375, 'loss_after_queries': 8513.4775390625, 'loss_after_encoder': 8511.4404296875}, {'sweep': 23, 'loss_before': 8511.4404296875, 'loss_after_queries': 8512.2939453125, 'loss_after_encoder': 8510.330078125}, {'sweep': 24, 'loss_before': 8510.330078125, 'loss_after_queries': 8509.7353515625, 'loss_after_encoder': 8509.43359375}, {'sweep': 25, 'loss_before': 8509.43359375, 'loss_after_queries': 8509.4072265625, 'loss_after_encoder': 8508.04296875}, {'sweep': 26, 'loss_before': 8508.04296875, 'loss_after_queries': 8507.634765625, 'loss_after_encoder': 8507.576171875}, {'sweep': 27, 'loss_before': 8507.576171875, 'loss_after_queries': 8507.90625, 'loss_after_encoder': 8507.1728515625}, {'sweep': 28, 'loss_before': 8507.1728515625, 'loss_after_queries': 8508.3544921875, 'loss_after_encoder': 8508.6513671875}, {'sweep': 29, 'loss_before': 8508.6513671875, 'loss_after_queries': 8508.9111328125, 'loss_after_encoder': 8508.5185546875}, {'sweep': 30, 'loss_before': 8508.5185546875, 'loss_after_queries': 8509.44921875, 'loss_after_encoder': 8509.322265625}, {'sweep': 31, 'loss_before': 8509.322265625, 'loss_after_queries': 8511.365234375, 'loss_after_encoder': 8510.7568359375}, {'sweep': 32, 'loss_before': 8510.7568359375, 'loss_after_queries': 8511.5869140625, 'loss_after_encoder': 8510.615234375}, {'sweep': 33, 'loss_before': 8510.615234375, 'loss_after_queries': 8512.3974609375, 'loss_after_encoder': 8510.990234375}, {'sweep': 34, 'loss_before': 8510.990234375, 'loss_after_queries': 8511.9140625, 'loss_after_encoder': 8510.712890625}, {'sweep': 35, 'loss_before': 8510.712890625, 'loss_after_queries': 8512.642578125, 'loss_after_encoder': 8510.6083984375}, {'sweep': 36, 'loss_before': 8510.6083984375, 'loss_after_queries': 8513.10546875, 'loss_after_encoder': 8511.599609375}, {'sweep': 37, 'loss_before': 8511.599609375, 'loss_after_queries': 8511.8203125, 'loss_after_encoder': 8509.97265625}, {'sweep': 38, 'loss_before': 8509.97265625, 'loss_after_queries': 8511.8154296875, 'loss_after_encoder': 8509.638671875}, {'sweep': 39, 'loss_before': 8509.638671875, 'loss_after_queries': 8511.8046875, 'loss_after_encoder': 8509.990234375}, {'sweep': 40, 'loss_before': 8509.990234375, 'loss_after_queries': 8513.1708984375, 'loss_after_encoder': 8511.99609375}, {'sweep': 41, 'loss_before': 8511.99609375, 'loss_after_queries': 8515.10546875, 'loss_after_encoder': 8513.4462890625}, {'sweep': 42, 'loss_before': 8513.4462890625, 'loss_after_queries': 8515.80078125, 'loss_after_encoder': 8514.228515625}, {'sweep': 43, 'loss_before': 8514.228515625, 'loss_after_queries': 8515.486328125, 'loss_after_encoder': 8513.6826171875}, {'sweep': 44, 'loss_before': 8513.6826171875, 'loss_after_queries': 8515.06640625, 'loss_after_encoder': 8513.365234375}, {'sweep': 45, 'loss_before': 8513.365234375, 'loss_after_queries': 8516.072265625, 'loss_after_encoder': 8514.310546875}, {'sweep': 46, 'loss_before': 8514.310546875, 'loss_after_queries': 8514.88671875, 'loss_after_encoder': 8513.1025390625}, {'sweep': 47, 'loss_before': 8513.1025390625, 'loss_after_queries': 8514.73828125, 'loss_after_encoder': 8513.5283203125}, {'sweep': 48, 'loss_before': 8513.5283203125, 'loss_after_queries': 8514.6796875, 'loss_after_encoder': 8513.396484375}, {'sweep': 49, 'loss_before': 8513.396484375, 'loss_after_queries': 8513.6806640625, 'loss_after_encoder': 8511.548828125}, {'sweep': 50, 'loss_before': 8511.548828125, 'loss_after_queries': 8515.1015625, 'loss_after_encoder': 8514.48046875}, {'sweep': 51, 'loss_before': 8514.48046875, 'loss_after_queries': 8514.875, 'loss_after_encoder': 8513.2529296875}, {'sweep': 52, 'loss_before': 8513.2529296875, 'loss_after_queries': 8513.6171875, 'loss_after_encoder': 8513.376953125}, {'sweep': 53, 'loss_before': 8513.376953125, 'loss_after_queries': 8514.4140625, 'loss_after_encoder': 8511.244140625}, {'sweep': 54, 'loss_before': 8511.244140625, 'loss_after_queries': 8514.9169921875, 'loss_after_encoder': 8513.9140625}, {'sweep': 55, 'loss_before': 8513.9140625, 'loss_after_queries': 8516.1435546875, 'loss_after_encoder': 8515.3046875}, {'sweep': 56, 'loss_before': 8515.3046875, 'loss_after_queries': 8515.556640625, 'loss_after_encoder': 8513.67578125}, {'sweep': 57, 'loss_before': 8513.67578125, 'loss_after_queries': 8516.244140625, 'loss_after_encoder': 8513.8037109375}, {'sweep': 58, 'loss_before': 8513.8037109375, 'loss_after_queries': 8515.4638671875, 'loss_after_encoder': 8513.810546875}, {'sweep': 59, 'loss_before': 8513.810546875, 'loss_after_queries': 8516.658203125, 'loss_after_encoder': 8514.7080078125}, {'sweep': 60, 'loss_before': 8514.7080078125, 'loss_after_queries': 8516.3916015625, 'loss_after_encoder': 8514.712890625}], 'final_query_maximum_iterations': 50, 'final_query_maximum_relative_residual': 0.002214605687186122}}}
+    fit residual router base=16 rank=16
+Page-Fisher sweep 1/60: loss 16442.9 -> 9197.32
+Page-Fisher sweep 2/60: loss 9197.32 -> 8198.04
+Page-Fisher sweep 3/60: loss 8198.04 -> 7920.52
+Page-Fisher sweep 4/60: loss 7920.52 -> 7798.43
+Page-Fisher sweep 5/60: loss 7798.43 -> 7734.98
+Page-Fisher sweep 6/60: loss 7734.98 -> 7696.04
+Page-Fisher sweep 7/60: loss 7696.04 -> 7670.51
+Page-Fisher sweep 8/60: loss 7670.51 -> 7651.94
+Page-Fisher sweep 9/60: loss 7651.94 -> 7636.34
+Page-Fisher sweep 10/60: loss 7636.34 -> 7624.78
+Page-Fisher sweep 11/60: loss 7624.78 -> 7615.78
+Page-Fisher sweep 12/60: loss 7615.78 -> 7607.66
+Page-Fisher sweep 13/60: loss 7607.66 -> 7600.57
+Page-Fisher sweep 14/60: loss 7600.57 -> 7596.84
+Page-Fisher sweep 15/60: loss 7596.84 -> 7591.42
+Page-Fisher sweep 16/60: loss 7591.42 -> 7589.3
+Page-Fisher sweep 17/60: loss 7589.3 -> 7585.16
+Page-Fisher sweep 18/60: loss 7585.16 -> 7583.37
+Page-Fisher sweep 19/60: loss 7583.37 -> 7580.72
+Page-Fisher sweep 20/60: loss 7580.72 -> 7578.55
+Page-Fisher sweep 21/60: loss 7578.55 -> 7576.24
+Page-Fisher sweep 22/60: loss 7576.24 -> 7575.3
+Page-Fisher sweep 23/60: loss 7575.3 -> 7573.35
+Page-Fisher sweep 24/60: loss 7573.35 -> 7573.24
+Page-Fisher sweep 25/60: loss 7573.24 -> 7573.21
+Page-Fisher sweep 26/60: loss 7573.21 -> 7573.29
+Page-Fisher sweep 27/60: loss 7573.29 -> 7572.26
+Page-Fisher sweep 28/60: loss 7572.26 -> 7574.51
+Page-Fisher sweep 29/60: loss 7574.51 -> 7572.88
+Page-Fisher sweep 30/60: loss 7572.88 -> 7571.76
+Page-Fisher sweep 31/60: loss 7571.76 -> 7571.59
+Page-Fisher sweep 32/60: loss 7571.59 -> 7571.84
+Page-Fisher sweep 33/60: loss 7571.84 -> 7570.83
+Page-Fisher sweep 34/60: loss 7570.83 -> 7569.94
+Page-Fisher sweep 35/60: loss 7569.94 -> 7568.91
+Page-Fisher sweep 36/60: loss 7568.91 -> 7568.73
+Page-Fisher sweep 37/60: loss 7568.73 -> 7569.01
+Page-Fisher sweep 38/60: loss 7569.01 -> 7568.52
+Page-Fisher sweep 39/60: loss 7568.52 -> 7568.41
+Page-Fisher sweep 40/60: loss 7568.41 -> 7569.64
+Page-Fisher sweep 41/60: loss 7569.64 -> 7571.47
+Page-Fisher sweep 42/60: loss 7571.47 -> 7570.74
+Page-Fisher sweep 43/60: loss 7570.74 -> 7569.51
+Page-Fisher sweep 44/60: loss 7569.51 -> 7571.66
+Page-Fisher sweep 45/60: loss 7571.66 -> 7570.83
+Page-Fisher sweep 46/60: loss 7570.83 -> 7573.87
+Page-Fisher sweep 47/60: loss 7573.87 -> 7574.43
+Page-Fisher sweep 48/60: loss 7574.43 -> 7575.28
+Page-Fisher sweep 49/60: loss 7575.28 -> 7576.59
+Page-Fisher sweep 50/60: loss 7576.59 -> 7576.98
+Page-Fisher sweep 51/60: loss 7576.98 -> 7579.1
+Page-Fisher sweep 52/60: loss 7579.1 -> 7580.03
+Page-Fisher sweep 53/60: loss 7580.03 -> 7582.33
+Page-Fisher sweep 54/60: loss 7582.33 -> 7582.52
+Page-Fisher sweep 55/60: loss 7582.52 -> 7584.13
+Page-Fisher sweep 56/60: loss 7584.13 -> 7584.69
+Page-Fisher sweep 57/60: loss 7584.69 -> 7586.45
+Page-Fisher sweep 58/60: loss 7586.45 -> 7589.35
+Page-Fisher sweep 59/60: loss 7589.35 -> 7590.05
+Page-Fisher sweep 60/60: loss 7590.05 -> 7591.44
+{'stage': 'fit complete', 'layer': 19, 'losses': {'b16_r0': {'base_rank': 16, 'residual_rank': 0, 'fit_page_fisher_nmse': 1.0, 'validation_page_fisher_nmse': 1.0}, 'b16_r16': {'base_rank': 16, 'residual_rank': 16, 'fit_page_fisher_nmse': 0.022574602754928213, 'validation_page_fisher_nmse': 0.027434096936330345, 'sweeps': [{'sweep': 1, 'loss_before': 16442.859375, 'loss_after_queries': 12644.11328125, 'loss_after_encoder': 9197.3173828125}, {'sweep': 2, 'loss_before': 9197.3173828125, 'loss_after_queries': 8488.955078125, 'loss_after_encoder': 8198.0439453125}, {'sweep': 3, 'loss_before': 8198.0439453125, 'loss_after_queries': 8024.7529296875, 'loss_after_encoder': 7920.5166015625}, {'sweep': 4, 'loss_before': 7920.5166015625, 'loss_after_queries': 7847.3837890625, 'loss_after_encoder': 7798.43359375}, {'sweep': 5, 'loss_before': 7798.43359375, 'loss_after_queries': 7762.90869140625, 'loss_after_encoder': 7734.9794921875}, {'sweep': 6, 'loss_before': 7734.9794921875, 'loss_after_queries': 7714.083984375, 'loss_after_encoder': 7696.0419921875}, {'sweep': 7, 'loss_before': 7696.0419921875, 'loss_after_queries': 7683.5703125, 'loss_after_encoder': 7670.5126953125}, {'sweep': 8, 'loss_before': 7670.5126953125, 'loss_after_queries': 7661.345703125, 'loss_after_encoder': 7651.9443359375}, {'sweep': 9, 'loss_before': 7651.9443359375, 'loss_after_queries': 7644.5947265625, 'loss_after_encoder': 7636.34130859375}, {'sweep': 10, 'loss_before': 7636.34130859375, 'loss_after_queries': 7630.72265625, 'loss_after_encoder': 7624.77734375}, {'sweep': 11, 'loss_before': 7624.77734375, 'loss_after_queries': 7621.71142578125, 'loss_after_encoder': 7615.7783203125}, {'sweep': 12, 'loss_before': 7615.7783203125, 'loss_after_queries': 7612.2470703125, 'loss_after_encoder': 7607.65576171875}, {'sweep': 13, 'loss_before': 7607.65576171875, 'loss_after_queries': 7604.67724609375, 'loss_after_encoder': 7600.56591796875}, {'sweep': 14, 'loss_before': 7600.56591796875, 'loss_after_queries': 7600.37451171875, 'loss_after_encoder': 7596.84375}, {'sweep': 15, 'loss_before': 7596.84375, 'loss_after_queries': 7595.134765625, 'loss_after_encoder': 7591.41748046875}, {'sweep': 16, 'loss_before': 7591.41748046875, 'loss_after_queries': 7591.79931640625, 'loss_after_encoder': 7589.30078125}, {'sweep': 17, 'loss_before': 7589.30078125, 'loss_after_queries': 7587.98828125, 'loss_after_encoder': 7585.15673828125}, {'sweep': 18, 'loss_before': 7585.15673828125, 'loss_after_queries': 7585.455078125, 'loss_after_encoder': 7583.37109375}, {'sweep': 19, 'loss_before': 7583.37109375, 'loss_after_queries': 7582.88671875, 'loss_after_encoder': 7580.720703125}, {'sweep': 20, 'loss_before': 7580.720703125, 'loss_after_queries': 7580.69482421875, 'loss_after_encoder': 7578.548828125}, {'sweep': 21, 'loss_before': 7578.548828125, 'loss_after_queries': 7578.6767578125, 'loss_after_encoder': 7576.2421875}, {'sweep': 22, 'loss_before': 7576.2421875, 'loss_after_queries': 7577.984375, 'loss_after_encoder': 7575.302734375}, {'sweep': 23, 'loss_before': 7575.302734375, 'loss_after_queries': 7575.0244140625, 'loss_after_encoder': 7573.3525390625}, {'sweep': 24, 'loss_before': 7573.3525390625, 'loss_after_queries': 7574.88525390625, 'loss_after_encoder': 7573.2431640625}, {'sweep': 25, 'loss_before': 7573.2431640625, 'loss_after_queries': 7574.8095703125, 'loss_after_encoder': 7573.20654296875}, {'sweep': 26, 'loss_before': 7573.20654296875, 'loss_after_queries': 7575.69384765625, 'loss_after_encoder': 7573.2900390625}, {'sweep': 27, 'loss_before': 7573.2900390625, 'loss_after_queries': 7574.50439453125, 'loss_after_encoder': 7572.2578125}, {'sweep': 28, 'loss_before': 7572.2578125, 'loss_after_queries': 7575.7109375, 'loss_after_encoder': 7574.51318359375}, {'sweep': 29, 'loss_before': 7574.51318359375, 'loss_after_queries': 7574.5830078125, 'loss_after_encoder': 7572.875}, {'sweep': 30, 'loss_before': 7572.875, 'loss_after_queries': 7574.326171875, 'loss_after_encoder': 7571.76123046875}, {'sweep': 31, 'loss_before': 7571.76123046875, 'loss_after_queries': 7573.083984375, 'loss_after_encoder': 7571.5927734375}, {'sweep': 32, 'loss_before': 7571.5927734375, 'loss_after_queries': 7573.39208984375, 'loss_after_encoder': 7571.8447265625}, {'sweep': 33, 'loss_before': 7571.8447265625, 'loss_after_queries': 7572.951171875, 'loss_after_encoder': 7570.83349609375}, {'sweep': 34, 'loss_before': 7570.83349609375, 'loss_after_queries': 7571.6025390625, 'loss_after_encoder': 7569.93505859375}, {'sweep': 35, 'loss_before': 7569.93505859375, 'loss_after_queries': 7570.86962890625, 'loss_after_encoder': 7568.9111328125}, {'sweep': 36, 'loss_before': 7568.9111328125, 'loss_after_queries': 7570.37841796875, 'loss_after_encoder': 7568.734375}, {'sweep': 37, 'loss_before': 7568.734375, 'loss_after_queries': 7570.7890625, 'loss_after_encoder': 7569.01220703125}, {'sweep': 38, 'loss_before': 7569.01220703125, 'loss_after_queries': 7570.1767578125, 'loss_after_encoder': 7568.52294921875}, {'sweep': 39, 'loss_before': 7568.52294921875, 'loss_after_queries': 7570.134765625, 'loss_after_encoder': 7568.408203125}, {'sweep': 40, 'loss_before': 7568.408203125, 'loss_after_queries': 7570.7412109375, 'loss_after_encoder': 7569.64453125}, {'sweep': 41, 'loss_before': 7569.64453125, 'loss_after_queries': 7573.08544921875, 'loss_after_encoder': 7571.4716796875}, {'sweep': 42, 'loss_before': 7571.4716796875, 'loss_after_queries': 7572.20849609375, 'loss_after_encoder': 7570.73974609375}, {'sweep': 43, 'loss_before': 7570.73974609375, 'loss_after_queries': 7571.06494140625, 'loss_after_encoder': 7569.50927734375}, {'sweep': 44, 'loss_before': 7569.50927734375, 'loss_after_queries': 7572.20703125, 'loss_after_encoder': 7571.65625}, {'sweep': 45, 'loss_before': 7571.65625, 'loss_after_queries': 7572.39501953125, 'loss_after_encoder': 7570.830078125}, {'sweep': 46, 'loss_before': 7570.830078125, 'loss_after_queries': 7574.8583984375, 'loss_after_encoder': 7573.869140625}, {'sweep': 47, 'loss_before': 7573.869140625, 'loss_after_queries': 7575.6259765625, 'loss_after_encoder': 7574.42822265625}, {'sweep': 48, 'loss_before': 7574.42822265625, 'loss_after_queries': 7577.20703125, 'loss_after_encoder': 7575.27734375}, {'sweep': 49, 'loss_before': 7575.27734375, 'loss_after_queries': 7577.15478515625, 'loss_after_encoder': 7576.59033203125}, {'sweep': 50, 'loss_before': 7576.59033203125, 'loss_after_queries': 7577.7314453125, 'loss_after_encoder': 7576.984375}, {'sweep': 51, 'loss_before': 7576.984375, 'loss_after_queries': 7580.33203125, 'loss_after_encoder': 7579.0986328125}, {'sweep': 52, 'loss_before': 7579.0986328125, 'loss_after_queries': 7580.890625, 'loss_after_encoder': 7580.0283203125}, {'sweep': 53, 'loss_before': 7580.0283203125, 'loss_after_queries': 7583.65380859375, 'loss_after_encoder': 7582.3310546875}, {'sweep': 54, 'loss_before': 7582.3310546875, 'loss_after_queries': 7583.29296875, 'loss_after_encoder': 7582.51611328125}, {'sweep': 55, 'loss_before': 7582.51611328125, 'loss_after_queries': 7585.31201171875, 'loss_after_encoder': 7584.12646484375}, {'sweep': 56, 'loss_before': 7584.12646484375, 'loss_after_queries': 7586.07421875, 'loss_after_encoder': 7584.6875}, {'sweep': 57, 'loss_before': 7584.6875, 'loss_after_queries': 7587.5166015625, 'loss_after_encoder': 7586.451171875}, {'sweep': 58, 'loss_before': 7586.451171875, 'loss_after_queries': 7590.4990234375, 'loss_after_encoder': 7589.349609375}, {'sweep': 59, 'loss_before': 7589.349609375, 'loss_after_queries': 7591.48193359375, 'loss_after_encoder': 7590.04736328125}, {'sweep': 60, 'loss_before': 7590.04736328125, 'loss_after_queries': 7593.0439453125, 'loss_after_encoder': 7591.4404296875}], 'final_query_maximum_iterations': 50, 'final_query_maximum_relative_residual': 0.0019614165648818016}}}
+    fit residual router base=16 rank=16
+Page-Fisher sweep 1/60: loss 21126.6 -> 11235.3
+Page-Fisher sweep 2/60: loss 11235.3 -> 10237.7
+Page-Fisher sweep 3/60: loss 10237.7 -> 9916.21
+Page-Fisher sweep 4/60: loss 9916.21 -> 9738.24
+Page-Fisher sweep 5/60: loss 9738.24 -> 9635.76
+Page-Fisher sweep 6/60: loss 9635.76 -> 9574.17
+Page-Fisher sweep 7/60: loss 9574.17 -> 9532.84
+Page-Fisher sweep 8/60: loss 9532.84 -> 9505.57
+Page-Fisher sweep 9/60: loss 9505.57 -> 9483.83
+Page-Fisher sweep 10/60: loss 9483.83 -> 9469.57
+Page-Fisher sweep 11/60: loss 9469.57 -> 9456.69
+Page-Fisher sweep 12/60: loss 9456.69 -> 9446.74
+Page-Fisher sweep 13/60: loss 9446.74 -> 9436.96
+Page-Fisher sweep 14/60: loss 9436.96 -> 9429.14
+Page-Fisher sweep 15/60: loss 9429.14 -> 9422.45
+Page-Fisher sweep 16/60: loss 9422.45 -> 9417.47
+Page-Fisher sweep 17/60: loss 9417.47 -> 9411.8
+Page-Fisher sweep 18/60: loss 9411.8 -> 9407.86
+Page-Fisher sweep 19/60: loss 9407.86 -> 9404.41
+Page-Fisher sweep 20/60: loss 9404.41 -> 9399.94
+Page-Fisher sweep 21/60: loss 9399.94 -> 9396.29
+Page-Fisher sweep 22/60: loss 9396.29 -> 9391.93
+Page-Fisher sweep 23/60: loss 9391.93 -> 9390.22
+Page-Fisher sweep 24/60: loss 9390.22 -> 9388
+Page-Fisher sweep 25/60: loss 9388 -> 9385.39
+Page-Fisher sweep 26/60: loss 9385.39 -> 9383.7
+Page-Fisher sweep 27/60: loss 9383.7 -> 9381.23
+Page-Fisher sweep 28/60: loss 9381.23 -> 9378.64
+Page-Fisher sweep 29/60: loss 9378.64 -> 9378.35
+Page-Fisher sweep 30/60: loss 9378.35 -> 9377.29
+Page-Fisher sweep 31/60: loss 9377.29 -> 9375.44
+Page-Fisher sweep 32/60: loss 9375.44 -> 9373.43
+Page-Fisher sweep 33/60: loss 9373.43 -> 9372.26
+Page-Fisher sweep 34/60: loss 9372.26 -> 9371.8
+Page-Fisher sweep 35/60: loss 9371.8 -> 9371.32
+Page-Fisher sweep 36/60: loss 9371.32 -> 9371.96
+Page-Fisher sweep 37/60: loss 9371.96 -> 9372.4
+Page-Fisher sweep 38/60: loss 9372.4 -> 9373.65
+Page-Fisher sweep 39/60: loss 9373.65 -> 9372.72
+Page-Fisher sweep 40/60: loss 9372.72 -> 9371.05
+Page-Fisher sweep 41/60: loss 9371.05 -> 9371.2
+Page-Fisher sweep 42/60: loss 9371.2 -> 9371.68
+Page-Fisher sweep 43/60: loss 9371.68 -> 9370.87
+Page-Fisher sweep 44/60: loss 9370.87 -> 9369.44
+Page-Fisher sweep 45/60: loss 9369.44 -> 9371.05
+Page-Fisher sweep 46/60: loss 9371.05 -> 9369.7
+Page-Fisher sweep 47/60: loss 9369.7 -> 9368.37
+Page-Fisher sweep 48/60: loss 9368.37 -> 9369.43
+Page-Fisher sweep 49/60: loss 9369.43 -> 9369.29
+Page-Fisher sweep 50/60: loss 9369.29 -> 9368.33
+Page-Fisher sweep 51/60: loss 9368.33 -> 9367.42
+Page-Fisher sweep 52/60: loss 9367.42 -> 9364.5
+Page-Fisher sweep 53/60: loss 9364.5 -> 9365.29
+Page-Fisher sweep 54/60: loss 9365.29 -> 9364.8
+Page-Fisher sweep 55/60: loss 9364.8 -> 9363.78
+Page-Fisher sweep 56/60: loss 9363.78 -> 9362.51
+Page-Fisher sweep 57/60: loss 9362.51 -> 9362.31
+Page-Fisher sweep 58/60: loss 9362.31 -> 9361.09
+Page-Fisher sweep 59/60: loss 9361.09 -> 9359.46
+Page-Fisher sweep 60/60: loss 9359.46 -> 9358.5
+{'stage': 'fit complete', 'layer': 20, 'losses': {'b16_r0': {'base_rank': 16, 'residual_rank': 0, 'fit_page_fisher_nmse': 1.0, 'validation_page_fisher_nmse': 1.0}, 'b16_r16': {'base_rank': 16, 'residual_rank': 16, 'fit_page_fisher_nmse': 0.02484923106291502, 'validation_page_fisher_nmse': 0.029999954165614788, 'sweeps': [{'sweep': 1, 'loss_before': 21126.5625, 'loss_after_queries': 15441.025390625, 'loss_after_encoder': 11235.265625}, {'sweep': 2, 'loss_before': 11235.265625, 'loss_after_queries': 10507.8388671875, 'loss_after_encoder': 10237.6533203125}, {'sweep': 3, 'loss_before': 10237.6533203125, 'loss_after_queries': 10044.009765625, 'loss_after_encoder': 9916.212890625}, {'sweep': 4, 'loss_before': 9916.212890625, 'loss_after_queries': 9810.58984375, 'loss_after_encoder': 9738.2392578125}, {'sweep': 5, 'loss_before': 9738.2392578125, 'loss_after_queries': 9680.357421875, 'loss_after_encoder': 9635.7646484375}, {'sweep': 6, 'loss_before': 9635.7646484375, 'loss_after_queries': 9604.791015625, 'loss_after_encoder': 9574.1669921875}, {'sweep': 7, 'loss_before': 9574.1669921875, 'loss_after_queries': 9556.5322265625, 'loss_after_encoder': 9532.8408203125}, {'sweep': 8, 'loss_before': 9532.8408203125, 'loss_after_queries': 9523.5556640625, 'loss_after_encoder': 9505.5712890625}, {'sweep': 9, 'loss_before': 9505.5712890625, 'loss_after_queries': 9498.9404296875, 'loss_after_encoder': 9483.83203125}, {'sweep': 10, 'loss_before': 9483.83203125, 'loss_after_queries': 9481.6845703125, 'loss_after_encoder': 9469.572265625}, {'sweep': 11, 'loss_before': 9469.572265625, 'loss_after_queries': 9467.1943359375, 'loss_after_encoder': 9456.685546875}, {'sweep': 12, 'loss_before': 9456.685546875, 'loss_after_queries': 9455.916015625, 'loss_after_encoder': 9446.744140625}, {'sweep': 13, 'loss_before': 9446.744140625, 'loss_after_queries': 9445.31640625, 'loss_after_encoder': 9436.96484375}, {'sweep': 14, 'loss_before': 9436.96484375, 'loss_after_queries': 9436.4609375, 'loss_after_encoder': 9429.1376953125}, {'sweep': 15, 'loss_before': 9429.1376953125, 'loss_after_queries': 9430.033203125, 'loss_after_encoder': 9422.4462890625}, {'sweep': 16, 'loss_before': 9422.4462890625, 'loss_after_queries': 9423.802734375, 'loss_after_encoder': 9417.4677734375}, {'sweep': 17, 'loss_before': 9417.4677734375, 'loss_after_queries': 9418.130859375, 'loss_after_encoder': 9411.7958984375}, {'sweep': 18, 'loss_before': 9411.7958984375, 'loss_after_queries': 9414.390625, 'loss_after_encoder': 9407.861328125}, {'sweep': 19, 'loss_before': 9407.861328125, 'loss_after_queries': 9409.6103515625, 'loss_after_encoder': 9404.408203125}, {'sweep': 20, 'loss_before': 9404.408203125, 'loss_after_queries': 9405.001953125, 'loss_after_encoder': 9399.935546875}, {'sweep': 21, 'loss_before': 9399.935546875, 'loss_after_queries': 9400.9658203125, 'loss_after_encoder': 9396.29296875}, {'sweep': 22, 'loss_before': 9396.29296875, 'loss_after_queries': 9397.3740234375, 'loss_after_encoder': 9391.93359375}, {'sweep': 23, 'loss_before': 9391.93359375, 'loss_after_queries': 9394.4130859375, 'loss_after_encoder': 9390.2197265625}, {'sweep': 24, 'loss_before': 9390.2197265625, 'loss_after_queries': 9392.728515625, 'loss_after_encoder': 9388.0}, {'sweep': 25, 'loss_before': 9388.0, 'loss_after_queries': 9388.693359375, 'loss_after_encoder': 9385.39453125}, {'sweep': 26, 'loss_before': 9385.39453125, 'loss_after_queries': 9387.9833984375, 'loss_after_encoder': 9383.7041015625}, {'sweep': 27, 'loss_before': 9383.7041015625, 'loss_after_queries': 9385.99609375, 'loss_after_encoder': 9381.2333984375}, {'sweep': 28, 'loss_before': 9381.2333984375, 'loss_after_queries': 9382.212890625, 'loss_after_encoder': 9378.642578125}, {'sweep': 29, 'loss_before': 9378.642578125, 'loss_after_queries': 9381.416015625, 'loss_after_encoder': 9378.3525390625}, {'sweep': 30, 'loss_before': 9378.3525390625, 'loss_after_queries': 9380.673828125, 'loss_after_encoder': 9377.294921875}, {'sweep': 31, 'loss_before': 9377.294921875, 'loss_after_queries': 9379.5439453125, 'loss_after_encoder': 9375.4423828125}, {'sweep': 32, 'loss_before': 9375.4423828125, 'loss_after_queries': 9376.8017578125, 'loss_after_encoder': 9373.43359375}, {'sweep': 33, 'loss_before': 9373.43359375, 'loss_after_queries': 9375.66796875, 'loss_after_encoder': 9372.2626953125}, {'sweep': 34, 'loss_before': 9372.2626953125, 'loss_after_queries': 9375.04296875, 'loss_after_encoder': 9371.796875}, {'sweep': 35, 'loss_before': 9371.796875, 'loss_after_queries': 9373.5146484375, 'loss_after_encoder': 9371.318359375}, {'sweep': 36, 'loss_before': 9371.318359375, 'loss_after_queries': 9373.5986328125, 'loss_after_encoder': 9371.96484375}, {'sweep': 37, 'loss_before': 9371.96484375, 'loss_after_queries': 9374.8251953125, 'loss_after_encoder': 9372.4013671875}, {'sweep': 38, 'loss_before': 9372.4013671875, 'loss_after_queries': 9374.4267578125, 'loss_after_encoder': 9373.6484375}, {'sweep': 39, 'loss_before': 9373.6484375, 'loss_after_queries': 9375.21484375, 'loss_after_encoder': 9372.71875}, {'sweep': 40, 'loss_before': 9372.71875, 'loss_after_queries': 9374.216796875, 'loss_after_encoder': 9371.0537109375}, {'sweep': 41, 'loss_before': 9371.0537109375, 'loss_after_queries': 9372.873046875, 'loss_after_encoder': 9371.203125}, {'sweep': 42, 'loss_before': 9371.203125, 'loss_after_queries': 9374.12890625, 'loss_after_encoder': 9371.68359375}, {'sweep': 43, 'loss_before': 9371.68359375, 'loss_after_queries': 9372.662109375, 'loss_after_encoder': 9370.873046875}, {'sweep': 44, 'loss_before': 9370.873046875, 'loss_after_queries': 9371.5478515625, 'loss_after_encoder': 9369.4423828125}, {'sweep': 45, 'loss_before': 9369.4423828125, 'loss_after_queries': 9373.14453125, 'loss_after_encoder': 9371.052734375}, {'sweep': 46, 'loss_before': 9371.052734375, 'loss_after_queries': 9370.517578125, 'loss_after_encoder': 9369.69921875}, {'sweep': 47, 'loss_before': 9369.69921875, 'loss_after_queries': 9370.5, 'loss_after_encoder': 9368.3701171875}, {'sweep': 48, 'loss_before': 9368.3701171875, 'loss_after_queries': 9371.2900390625, 'loss_after_encoder': 9369.431640625}, {'sweep': 49, 'loss_before': 9369.431640625, 'loss_after_queries': 9370.841796875, 'loss_after_encoder': 9369.2900390625}, {'sweep': 50, 'loss_before': 9369.2900390625, 'loss_after_queries': 9370.169921875, 'loss_after_encoder': 9368.3251953125}, {'sweep': 51, 'loss_before': 9368.3251953125, 'loss_after_queries': 9369.51171875, 'loss_after_encoder': 9367.4228515625}, {'sweep': 52, 'loss_before': 9367.4228515625, 'loss_after_queries': 9365.8203125, 'loss_after_encoder': 9364.5009765625}, {'sweep': 53, 'loss_before': 9364.5009765625, 'loss_after_queries': 9366.994140625, 'loss_after_encoder': 9365.2861328125}, {'sweep': 54, 'loss_before': 9365.2861328125, 'loss_after_queries': 9365.9267578125, 'loss_after_encoder': 9364.8037109375}, {'sweep': 55, 'loss_before': 9364.8037109375, 'loss_after_queries': 9366.45703125, 'loss_after_encoder': 9363.7802734375}, {'sweep': 56, 'loss_before': 9363.7802734375, 'loss_after_queries': 9364.6337890625, 'loss_after_encoder': 9362.513671875}, {'sweep': 57, 'loss_before': 9362.513671875, 'loss_after_queries': 9363.4375, 'loss_after_encoder': 9362.30859375}, {'sweep': 58, 'loss_before': 9362.30859375, 'loss_after_queries': 9362.8427734375, 'loss_after_encoder': 9361.0888671875}, {'sweep': 59, 'loss_before': 9361.0888671875, 'loss_after_queries': 9361.755859375, 'loss_after_encoder': 9359.4638671875}, {'sweep': 60, 'loss_before': 9359.4638671875, 'loss_after_queries': 9359.642578125, 'loss_after_encoder': 9358.501953125}], 'final_query_maximum_iterations': 50, 'final_query_maximum_relative_residual': 0.003294904949143529}}}
+    fit residual router base=16 rank=16
+Page-Fisher sweep 1/60: loss 22049.8 -> 11266.2
+Page-Fisher sweep 2/60: loss 11266.2 -> 9294.35
+Page-Fisher sweep 3/60: loss 9294.35 -> 8942.71
+Page-Fisher sweep 4/60: loss 8942.71 -> 8813.36
+Page-Fisher sweep 5/60: loss 8813.36 -> 8752.53
+Page-Fisher sweep 6/60: loss 8752.53 -> 8718.44
+Page-Fisher sweep 7/60: loss 8718.44 -> 8695.58
+Page-Fisher sweep 8/60: loss 8695.58 -> 8680.12
+Page-Fisher sweep 9/60: loss 8680.12 -> 8668.06
+Page-Fisher sweep 10/60: loss 8668.06 -> 8663.43
+Page-Fisher sweep 11/60: loss 8663.43 -> 8655.85
+Page-Fisher sweep 12/60: loss 8655.85 -> 8652.51
+Page-Fisher sweep 13/60: loss 8652.51 -> 8650.54
+Page-Fisher sweep 14/60: loss 8650.54 -> 8648
+Page-Fisher sweep 15/60: loss 8648 -> 8645.48
+Page-Fisher sweep 16/60: loss 8645.48 -> 8643.78
+Page-Fisher sweep 17/60: loss 8643.78 -> 8639.77
+Page-Fisher sweep 18/60: loss 8639.77 -> 8637.49
+Page-Fisher sweep 19/60: loss 8637.49 -> 8633.91
+Page-Fisher sweep 20/60: loss 8633.91 -> 8632.7
+Page-Fisher sweep 21/60: loss 8632.7 -> 8629.03
+Page-Fisher sweep 22/60: loss 8629.03 -> 8629.35
+Page-Fisher sweep 23/60: loss 8629.35 -> 8626.83
+Page-Fisher sweep 24/60: loss 8626.83 -> 8625.41
+Page-Fisher sweep 25/60: loss 8625.41 -> 8622.97
+Page-Fisher sweep 26/60: loss 8622.97 -> 8623.47
+Page-Fisher sweep 27/60: loss 8623.47 -> 8624.09
+Page-Fisher sweep 28/60: loss 8624.09 -> 8622.18
+Page-Fisher sweep 29/60: loss 8622.18 -> 8623.01
+Page-Fisher sweep 30/60: loss 8623.01 -> 8626.61
+Page-Fisher sweep 31/60: loss 8626.61 -> 8628.6
+Page-Fisher sweep 32/60: loss 8628.6 -> 8628.46
+Page-Fisher sweep 33/60: loss 8628.46 -> 8631
+Page-Fisher sweep 34/60: loss 8631 -> 8632.07
+Page-Fisher sweep 35/60: loss 8632.07 -> 8634.26
+Page-Fisher sweep 36/60: loss 8634.26 -> 8634.69
+Page-Fisher sweep 37/60: loss 8634.69 -> 8635.74
+Page-Fisher sweep 38/60: loss 8635.74 -> 8636.93
+Page-Fisher sweep 39/60: loss 8636.93 -> 8637.29
+Page-Fisher sweep 40/60: loss 8637.29 -> 8637.78
+Page-Fisher sweep 41/60: loss 8637.78 -> 8637.29
+Page-Fisher sweep 42/60: loss 8637.29 -> 8639.59
+Page-Fisher sweep 43/60: loss 8639.59 -> 8637.89
+Page-Fisher sweep 44/60: loss 8637.89 -> 8637.42
+Page-Fisher sweep 45/60: loss 8637.42 -> 8639.89
+Page-Fisher sweep 46/60: loss 8639.89 -> 8639.19
+Page-Fisher sweep 47/60: loss 8639.19 -> 8640.47
+Page-Fisher sweep 48/60: loss 8640.47 -> 8641.36
+Page-Fisher sweep 49/60: loss 8641.36 -> 8641.44
+Page-Fisher sweep 50/60: loss 8641.44 -> 8641.05
+Page-Fisher sweep 51/60: loss 8641.05 -> 8641.24
+Page-Fisher sweep 52/60: loss 8641.24 -> 8640.07
+Page-Fisher sweep 53/60: loss 8640.07 -> 8640.97
+Page-Fisher sweep 54/60: loss 8640.97 -> 8640.65
+Page-Fisher sweep 55/60: loss 8640.65 -> 8642.3
+Page-Fisher sweep 56/60: loss 8642.3 -> 8641.43
+Page-Fisher sweep 57/60: loss 8641.43 -> 8646.13
+Page-Fisher sweep 58/60: loss 8646.13 -> 8643.95
+Page-Fisher sweep 59/60: loss 8643.95 -> 8644.95
+Page-Fisher sweep 60/60: loss 8644.95 -> 8646.88
+{'stage': 'fit complete', 'layer': 21, 'losses': {'b16_r0': {'base_rank': 16, 'residual_rank': 0, 'fit_page_fisher_nmse': 1.0, 'validation_page_fisher_nmse': 1.0}, 'b16_r16': {'base_rank': 16, 'residual_rank': 16, 'fit_page_fisher_nmse': 0.028065317976721984, 'validation_page_fisher_nmse': 0.03364213088228341, 'sweeps': [{'sweep': 1, 'loss_before': 22049.75390625, 'loss_after_queries': 17437.833984375, 'loss_after_encoder': 11266.15625}, {'sweep': 2, 'loss_before': 11266.15625, 'loss_after_queries': 9785.6064453125, 'loss_after_encoder': 9294.3466796875}, {'sweep': 3, 'loss_before': 9294.3466796875, 'loss_after_queries': 9063.9296875, 'loss_after_encoder': 8942.7109375}, {'sweep': 4, 'loss_before': 8942.7109375, 'loss_after_queries': 8863.6826171875, 'loss_after_encoder': 8813.3642578125}, {'sweep': 5, 'loss_before': 8813.3642578125, 'loss_after_queries': 8776.7900390625, 'loss_after_encoder': 8752.529296875}, {'sweep': 6, 'loss_before': 8752.529296875, 'loss_after_queries': 8734.2529296875, 'loss_after_encoder': 8718.443359375}, {'sweep': 7, 'loss_before': 8718.443359375, 'loss_after_queries': 8705.53515625, 'loss_after_encoder': 8695.5810546875}, {'sweep': 8, 'loss_before': 8695.5810546875, 'loss_after_queries': 8686.384765625, 'loss_after_encoder': 8680.119140625}, {'sweep': 9, 'loss_before': 8680.119140625, 'loss_after_queries': 8674.404296875, 'loss_after_encoder': 8668.060546875}, {'sweep': 10, 'loss_before': 8668.060546875, 'loss_after_queries': 8666.40625, 'loss_after_encoder': 8663.427734375}, {'sweep': 11, 'loss_before': 8663.427734375, 'loss_after_queries': 8660.2919921875, 'loss_after_encoder': 8655.8466796875}, {'sweep': 12, 'loss_before': 8655.8466796875, 'loss_after_queries': 8655.5, 'loss_after_encoder': 8652.5146484375}, {'sweep': 13, 'loss_before': 8652.5146484375, 'loss_after_queries': 8652.365234375, 'loss_after_encoder': 8650.53515625}, {'sweep': 14, 'loss_before': 8650.53515625, 'loss_after_queries': 8649.5205078125, 'loss_after_encoder': 8647.99609375}, {'sweep': 15, 'loss_before': 8647.99609375, 'loss_after_queries': 8648.140625, 'loss_after_encoder': 8645.478515625}, {'sweep': 16, 'loss_before': 8645.478515625, 'loss_after_queries': 8645.3232421875, 'loss_after_encoder': 8643.7783203125}, {'sweep': 17, 'loss_before': 8643.7783203125, 'loss_after_queries': 8642.5439453125, 'loss_after_encoder': 8639.76953125}, {'sweep': 18, 'loss_before': 8639.76953125, 'loss_after_queries': 8638.482421875, 'loss_after_encoder': 8637.4892578125}, {'sweep': 19, 'loss_before': 8637.4892578125, 'loss_after_queries': 8637.541015625, 'loss_after_encoder': 8633.9091796875}, {'sweep': 20, 'loss_before': 8633.9091796875, 'loss_after_queries': 8634.318359375, 'loss_after_encoder': 8632.6953125}, {'sweep': 21, 'loss_before': 8632.6953125, 'loss_after_queries': 8633.310546875, 'loss_after_encoder': 8629.0283203125}, {'sweep': 22, 'loss_before': 8629.0283203125, 'loss_after_queries': 8630.306640625, 'loss_after_encoder': 8629.3525390625}, {'sweep': 23, 'loss_before': 8629.3525390625, 'loss_after_queries': 8629.2587890625, 'loss_after_encoder': 8626.8349609375}, {'sweep': 24, 'loss_before': 8626.8349609375, 'loss_after_queries': 8627.3828125, 'loss_after_encoder': 8625.40625}, {'sweep': 25, 'loss_before': 8625.40625, 'loss_after_queries': 8627.19921875, 'loss_after_encoder': 8622.96875}, {'sweep': 26, 'loss_before': 8622.96875, 'loss_after_queries': 8625.849609375, 'loss_after_encoder': 8623.4658203125}, {'sweep': 27, 'loss_before': 8623.4658203125, 'loss_after_queries': 8626.193359375, 'loss_after_encoder': 8624.0927734375}, {'sweep': 28, 'loss_before': 8624.0927734375, 'loss_after_queries': 8625.208984375, 'loss_after_encoder': 8622.1796875}, {'sweep': 29, 'loss_before': 8622.1796875, 'loss_after_queries': 8626.45703125, 'loss_after_encoder': 8623.0078125}, {'sweep': 30, 'loss_before': 8623.0078125, 'loss_after_queries': 8628.57421875, 'loss_after_encoder': 8626.6103515625}, {'sweep': 31, 'loss_before': 8626.6103515625, 'loss_after_queries': 8632.46875, 'loss_after_encoder': 8628.599609375}, {'sweep': 32, 'loss_before': 8628.599609375, 'loss_after_queries': 8632.291015625, 'loss_after_encoder': 8628.455078125}, {'sweep': 33, 'loss_before': 8628.455078125, 'loss_after_queries': 8634.3740234375, 'loss_after_encoder': 8631.0029296875}, {'sweep': 34, 'loss_before': 8631.0029296875, 'loss_after_queries': 8635.126953125, 'loss_after_encoder': 8632.0673828125}, {'sweep': 35, 'loss_before': 8632.0673828125, 'loss_after_queries': 8639.8447265625, 'loss_after_encoder': 8634.2587890625}, {'sweep': 36, 'loss_before': 8634.2587890625, 'loss_after_queries': 8637.4814453125, 'loss_after_encoder': 8634.685546875}, {'sweep': 37, 'loss_before': 8634.685546875, 'loss_after_queries': 8639.119140625, 'loss_after_encoder': 8635.7373046875}, {'sweep': 38, 'loss_before': 8635.7373046875, 'loss_after_queries': 8641.1259765625, 'loss_after_encoder': 8636.9296875}, {'sweep': 39, 'loss_before': 8636.9296875, 'loss_after_queries': 8640.763671875, 'loss_after_encoder': 8637.2919921875}, {'sweep': 40, 'loss_before': 8637.2919921875, 'loss_after_queries': 8641.455078125, 'loss_after_encoder': 8637.7802734375}, {'sweep': 41, 'loss_before': 8637.7802734375, 'loss_after_queries': 8641.34765625, 'loss_after_encoder': 8637.291015625}, {'sweep': 42, 'loss_before': 8637.291015625, 'loss_after_queries': 8641.8583984375, 'loss_after_encoder': 8639.5859375}, {'sweep': 43, 'loss_before': 8639.5859375, 'loss_after_queries': 8641.060546875, 'loss_after_encoder': 8637.892578125}, {'sweep': 44, 'loss_before': 8637.892578125, 'loss_after_queries': 8640.6591796875, 'loss_after_encoder': 8637.421875}, {'sweep': 45, 'loss_before': 8637.421875, 'loss_after_queries': 8641.0654296875, 'loss_after_encoder': 8639.888671875}, {'sweep': 46, 'loss_before': 8639.888671875, 'loss_after_queries': 8641.1611328125, 'loss_after_encoder': 8639.19140625}, {'sweep': 47, 'loss_before': 8639.19140625, 'loss_after_queries': 8642.62109375, 'loss_after_encoder': 8640.474609375}, {'sweep': 48, 'loss_before': 8640.474609375, 'loss_after_queries': 8643.607421875, 'loss_after_encoder': 8641.35546875}, {'sweep': 49, 'loss_before': 8641.35546875, 'loss_after_queries': 8642.2060546875, 'loss_after_encoder': 8641.4443359375}, {'sweep': 50, 'loss_before': 8641.4443359375, 'loss_after_queries': 8642.775390625, 'loss_after_encoder': 8641.052734375}, {'sweep': 51, 'loss_before': 8641.052734375, 'loss_after_queries': 8643.3935546875, 'loss_after_encoder': 8641.236328125}, {'sweep': 52, 'loss_before': 8641.236328125, 'loss_after_queries': 8643.3095703125, 'loss_after_encoder': 8640.0703125}, {'sweep': 53, 'loss_before': 8640.0703125, 'loss_after_queries': 8642.4375, 'loss_after_encoder': 8640.96875}, {'sweep': 54, 'loss_before': 8640.96875, 'loss_after_queries': 8642.21875, 'loss_after_encoder': 8640.65234375}, {'sweep': 55, 'loss_before': 8640.65234375, 'loss_after_queries': 8642.419921875, 'loss_after_encoder': 8642.302734375}, {'sweep': 56, 'loss_before': 8642.302734375, 'loss_after_queries': 8643.923828125, 'loss_after_encoder': 8641.4296875}, {'sweep': 57, 'loss_before': 8641.4296875, 'loss_after_queries': 8646.4619140625, 'loss_after_encoder': 8646.1318359375}, {'sweep': 58, 'loss_before': 8646.1318359375, 'loss_after_queries': 8645.2001953125, 'loss_after_encoder': 8643.953125}, {'sweep': 59, 'loss_before': 8643.953125, 'loss_after_queries': 8645.6591796875, 'loss_after_encoder': 8644.94921875}, {'sweep': 60, 'loss_before': 8644.94921875, 'loss_after_queries': 8648.3642578125, 'loss_after_encoder': 8646.880859375}], 'final_query_maximum_iterations': 50, 'final_query_maximum_relative_residual': 0.002029163995757699}}}
+    fit residual router base=16 rank=16
+Page-Fisher sweep 1/60: loss 22850.8 -> 11507.5
+Page-Fisher sweep 2/60: loss 11507.5 -> 10086.3
+Page-Fisher sweep 3/60: loss 10086.3 -> 9616.92
+Page-Fisher sweep 4/60: loss 9616.92 -> 9410.65
+Page-Fisher sweep 5/60: loss 9410.65 -> 9297.33
+Page-Fisher sweep 6/60: loss 9297.33 -> 9229.12
+Page-Fisher sweep 7/60: loss 9229.12 -> 9177.62
+Page-Fisher sweep 8/60: loss 9177.62 -> 9137.69
+Page-Fisher sweep 9/60: loss 9137.69 -> 9115.15
+Page-Fisher sweep 10/60: loss 9115.15 -> 9094.79
+Page-Fisher sweep 11/60: loss 9094.79 -> 9080.7
+Page-Fisher sweep 12/60: loss 9080.7 -> 9068.33
+Page-Fisher sweep 13/60: loss 9068.33 -> 9058.71
+Page-Fisher sweep 14/60: loss 9058.71 -> 9050.45
+Page-Fisher sweep 15/60: loss 9050.45 -> 9044.5
+Page-Fisher sweep 16/60: loss 9044.5 -> 9040.11
+Page-Fisher sweep 17/60: loss 9040.11 -> 9035.66
+Page-Fisher sweep 18/60: loss 9035.66 -> 9033.45
+Page-Fisher sweep 19/60: loss 9033.45 -> 9029.61
+Page-Fisher sweep 20/60: loss 9029.61 -> 9025.81
+Page-Fisher sweep 21/60: loss 9025.81 -> 9023.99
+Page-Fisher sweep 22/60: loss 9023.99 -> 9021.58
+Page-Fisher sweep 23/60: loss 9021.58 -> 9019.01
+Page-Fisher sweep 24/60: loss 9019.01 -> 9019.13
+Page-Fisher sweep 25/60: loss 9019.13 -> 9014.43
+Page-Fisher sweep 26/60: loss 9014.43 -> 9013.8
+Page-Fisher sweep 27/60: loss 9013.8 -> 9011.82
+Page-Fisher sweep 28/60: loss 9011.82 -> 9011.82
+Page-Fisher sweep 29/60: loss 9011.82 -> 9010.07
+Page-Fisher sweep 30/60: loss 9010.07 -> 9010.3
+Page-Fisher sweep 31/60: loss 9010.3 -> 9009.8
+Page-Fisher sweep 32/60: loss 9009.8 -> 9008.79
+Page-Fisher sweep 33/60: loss 9008.79 -> 9008.72
+Page-Fisher sweep 34/60: loss 9008.72 -> 9007.58
+Page-Fisher sweep 35/60: loss 9007.58 -> 9005.73
+Page-Fisher sweep 36/60: loss 9005.73 -> 9004.82
+Page-Fisher sweep 37/60: loss 9004.82 -> 9003.08
+Page-Fisher sweep 38/60: loss 9003.08 -> 9002.25
+Page-Fisher sweep 39/60: loss 9002.25 -> 9001.31
+Page-Fisher sweep 40/60: loss 9001.31 -> 9000.6
+Page-Fisher sweep 41/60: loss 9000.6 -> 8999.19
+Page-Fisher sweep 42/60: loss 8999.19 -> 8996.57
+Page-Fisher sweep 43/60: loss 8996.57 -> 8996
+Page-Fisher sweep 44/60: loss 8996 -> 8994.57
+Page-Fisher sweep 45/60: loss 8994.57 -> 8993.88
+Page-Fisher sweep 46/60: loss 8993.88 -> 8994.01
+Page-Fisher sweep 47/60: loss 8994.01 -> 8992.21
+Page-Fisher sweep 48/60: loss 8992.21 -> 8990.19
+Page-Fisher sweep 49/60: loss 8990.19 -> 8990.59
+Page-Fisher sweep 50/60: loss 8990.59 -> 8990.23
+Page-Fisher sweep 51/60: loss 8990.23 -> 8990.45
+Page-Fisher sweep 52/60: loss 8990.45 -> 8990.7
+Page-Fisher sweep 53/60: loss 8990.7 -> 8989.57
+Page-Fisher sweep 54/60: loss 8989.57 -> 8990.22
+Page-Fisher sweep 55/60: loss 8990.22 -> 8989.14
+Page-Fisher sweep 56/60: loss 8989.14 -> 8988.36
+Page-Fisher sweep 57/60: loss 8988.36 -> 8989.7
+Page-Fisher sweep 58/60: loss 8989.7 -> 8988.1
+Page-Fisher sweep 59/60: loss 8988.1 -> 8988.83
+Page-Fisher sweep 60/60: loss 8988.83 -> 8988.7
+{'stage': 'fit complete', 'layer': 22, 'losses': {'b16_r0': {'base_rank': 16, 'residual_rank': 0, 'fit_page_fisher_nmse': 1.0, 'validation_page_fisher_nmse': 1.0}, 'b16_r16': {'base_rank': 16, 'residual_rank': 16, 'fit_page_fisher_nmse': 0.02151888451825913, 'validation_page_fisher_nmse': 0.026392063919218473, 'sweeps': [{'sweep': 1, 'loss_before': 22850.8046875, 'loss_after_queries': 16403.39453125, 'loss_after_encoder': 11507.5087890625}, {'sweep': 2, 'loss_before': 11507.5087890625, 'loss_after_queries': 10504.0625, 'loss_after_encoder': 10086.263671875}, {'sweep': 3, 'loss_before': 10086.263671875, 'loss_after_queries': 9777.5458984375, 'loss_after_encoder': 9616.921875}, {'sweep': 4, 'loss_before': 9616.921875, 'loss_after_queries': 9488.8203125, 'loss_after_encoder': 9410.646484375}, {'sweep': 5, 'loss_before': 9410.646484375, 'loss_after_queries': 9346.318359375, 'loss_after_encoder': 9297.330078125}, {'sweep': 6, 'loss_before': 9297.330078125, 'loss_after_queries': 9265.0751953125, 'loss_after_encoder': 9229.119140625}, {'sweep': 7, 'loss_before': 9229.119140625, 'loss_after_queries': 9208.8984375, 'loss_after_encoder': 9177.615234375}, {'sweep': 8, 'loss_before': 9177.615234375, 'loss_after_queries': 9165.51171875, 'loss_after_encoder': 9137.689453125}, {'sweep': 9, 'loss_before': 9137.689453125, 'loss_after_queries': 9134.0546875, 'loss_after_encoder': 9115.146484375}, {'sweep': 10, 'loss_before': 9115.146484375, 'loss_after_queries': 9112.4189453125, 'loss_after_encoder': 9094.794921875}, {'sweep': 11, 'loss_before': 9094.794921875, 'loss_after_queries': 9093.7919921875, 'loss_after_encoder': 9080.6982421875}, {'sweep': 12, 'loss_before': 9080.6982421875, 'loss_after_queries': 9079.1669921875, 'loss_after_encoder': 9068.3291015625}, {'sweep': 13, 'loss_before': 9068.3291015625, 'loss_after_queries': 9068.65625, 'loss_after_encoder': 9058.7080078125}, {'sweep': 14, 'loss_before': 9058.7080078125, 'loss_after_queries': 9057.55078125, 'loss_after_encoder': 9050.4541015625}, {'sweep': 15, 'loss_before': 9050.4541015625, 'loss_after_queries': 9050.9990234375, 'loss_after_encoder': 9044.498046875}, {'sweep': 16, 'loss_before': 9044.498046875, 'loss_after_queries': 9044.337890625, 'loss_after_encoder': 9040.1083984375}, {'sweep': 17, 'loss_before': 9040.1083984375, 'loss_after_queries': 9039.775390625, 'loss_after_encoder': 9035.66015625}, {'sweep': 18, 'loss_before': 9035.66015625, 'loss_after_queries': 9037.205078125, 'loss_after_encoder': 9033.4501953125}, {'sweep': 19, 'loss_before': 9033.4501953125, 'loss_after_queries': 9033.4853515625, 'loss_after_encoder': 9029.61328125}, {'sweep': 20, 'loss_before': 9029.61328125, 'loss_after_queries': 9030.1806640625, 'loss_after_encoder': 9025.8076171875}, {'sweep': 21, 'loss_before': 9025.8076171875, 'loss_after_queries': 9027.123046875, 'loss_after_encoder': 9023.9853515625}, {'sweep': 22, 'loss_before': 9023.9853515625, 'loss_after_queries': 9025.279296875, 'loss_after_encoder': 9021.576171875}, {'sweep': 23, 'loss_before': 9021.576171875, 'loss_after_queries': 9022.482421875, 'loss_after_encoder': 9019.0087890625}, {'sweep': 24, 'loss_before': 9019.0087890625, 'loss_after_queries': 9021.330078125, 'loss_after_encoder': 9019.1318359375}, {'sweep': 25, 'loss_before': 9019.1318359375, 'loss_after_queries': 9018.875, 'loss_after_encoder': 9014.43359375}, {'sweep': 26, 'loss_before': 9014.43359375, 'loss_after_queries': 9015.349609375, 'loss_after_encoder': 9013.7978515625}, {'sweep': 27, 'loss_before': 9013.7978515625, 'loss_after_queries': 9014.51953125, 'loss_after_encoder': 9011.82421875}, {'sweep': 28, 'loss_before': 9011.82421875, 'loss_after_queries': 9012.5205078125, 'loss_after_encoder': 9011.8203125}, {'sweep': 29, 'loss_before': 9011.8203125, 'loss_after_queries': 9012.580078125, 'loss_after_encoder': 9010.068359375}, {'sweep': 30, 'loss_before': 9010.068359375, 'loss_after_queries': 9010.001953125, 'loss_after_encoder': 9010.30078125}, {'sweep': 31, 'loss_before': 9010.30078125, 'loss_after_queries': 9010.9296875, 'loss_after_encoder': 9009.796875}, {'sweep': 32, 'loss_before': 9009.796875, 'loss_after_queries': 9010.359375, 'loss_after_encoder': 9008.78515625}, {'sweep': 33, 'loss_before': 9008.78515625, 'loss_after_queries': 9009.6640625, 'loss_after_encoder': 9008.7177734375}, {'sweep': 34, 'loss_before': 9008.7177734375, 'loss_after_queries': 9008.23046875, 'loss_after_encoder': 9007.580078125}, {'sweep': 35, 'loss_before': 9007.580078125, 'loss_after_queries': 9007.361328125, 'loss_after_encoder': 9005.728515625}, {'sweep': 36, 'loss_before': 9005.728515625, 'loss_after_queries': 9006.6298828125, 'loss_after_encoder': 9004.822265625}, {'sweep': 37, 'loss_before': 9004.822265625, 'loss_after_queries': 9003.515625, 'loss_after_encoder': 9003.0751953125}, {'sweep': 38, 'loss_before': 9003.0751953125, 'loss_after_queries': 9003.8203125, 'loss_after_encoder': 9002.24609375}, {'sweep': 39, 'loss_before': 9002.24609375, 'loss_after_queries': 9003.326171875, 'loss_after_encoder': 9001.3076171875}, {'sweep': 40, 'loss_before': 9001.3076171875, 'loss_after_queries': 9002.4765625, 'loss_after_encoder': 9000.603515625}, {'sweep': 41, 'loss_before': 9000.603515625, 'loss_after_queries': 9001.705078125, 'loss_after_encoder': 8999.1875}, {'sweep': 42, 'loss_before': 8999.1875, 'loss_after_queries': 8998.53125, 'loss_after_encoder': 8996.5703125}, {'sweep': 43, 'loss_before': 8996.5703125, 'loss_after_queries': 8997.740234375, 'loss_after_encoder': 8996.0048828125}, {'sweep': 44, 'loss_before': 8996.0048828125, 'loss_after_queries': 8995.759765625, 'loss_after_encoder': 8994.568359375}, {'sweep': 45, 'loss_before': 8994.568359375, 'loss_after_queries': 8996.232421875, 'loss_after_encoder': 8993.87890625}, {'sweep': 46, 'loss_before': 8993.87890625, 'loss_after_queries': 8996.3134765625, 'loss_after_encoder': 8994.0107421875}, {'sweep': 47, 'loss_before': 8994.0107421875, 'loss_after_queries': 8994.4697265625, 'loss_after_encoder': 8992.2119140625}, {'sweep': 48, 'loss_before': 8992.2119140625, 'loss_after_queries': 8992.6865234375, 'loss_after_encoder': 8990.193359375}, {'sweep': 49, 'loss_before': 8990.193359375, 'loss_after_queries': 8992.38671875, 'loss_after_encoder': 8990.5859375}, {'sweep': 50, 'loss_before': 8990.5859375, 'loss_after_queries': 8992.482421875, 'loss_after_encoder': 8990.2333984375}, {'sweep': 51, 'loss_before': 8990.2333984375, 'loss_after_queries': 8991.357421875, 'loss_after_encoder': 8990.447265625}, {'sweep': 52, 'loss_before': 8990.447265625, 'loss_after_queries': 8992.255859375, 'loss_after_encoder': 8990.6953125}, {'sweep': 53, 'loss_before': 8990.6953125, 'loss_after_queries': 8992.5458984375, 'loss_after_encoder': 8989.5673828125}, {'sweep': 54, 'loss_before': 8989.5673828125, 'loss_after_queries': 8991.76953125, 'loss_after_encoder': 8990.216796875}, {'sweep': 55, 'loss_before': 8990.216796875, 'loss_after_queries': 8990.1650390625, 'loss_after_encoder': 8989.138671875}, {'sweep': 56, 'loss_before': 8989.138671875, 'loss_after_queries': 8990.8359375, 'loss_after_encoder': 8988.3583984375}, {'sweep': 57, 'loss_before': 8988.3583984375, 'loss_after_queries': 8989.896484375, 'loss_after_encoder': 8989.6962890625}, {'sweep': 58, 'loss_before': 8989.6962890625, 'loss_after_queries': 8990.38671875, 'loss_after_encoder': 8988.103515625}, {'sweep': 59, 'loss_before': 8988.103515625, 'loss_after_queries': 8988.5234375, 'loss_after_encoder': 8988.8291015625}, {'sweep': 60, 'loss_before': 8988.8291015625, 'loss_after_queries': 8990.109375, 'loss_after_encoder': 8988.703125}], 'final_query_maximum_iterations': 50, 'final_query_maximum_relative_residual': 0.002551441313698888}}}
+    fit residual router base=16 rank=16
+Page-Fisher sweep 1/60: loss 23719.6 -> 12265.6
+Page-Fisher sweep 2/60: loss 12265.6 -> 10241.9
+Page-Fisher sweep 3/60: loss 10241.9 -> 9796.3
+Page-Fisher sweep 4/60: loss 9796.3 -> 9614.96
+Page-Fisher sweep 5/60: loss 9614.96 -> 9511.08
+Page-Fisher sweep 6/60: loss 9511.08 -> 9442.88
+Page-Fisher sweep 7/60: loss 9442.88 -> 9390.96
+Page-Fisher sweep 8/60: loss 9390.96 -> 9353.32
+Page-Fisher sweep 9/60: loss 9353.32 -> 9325.99
+Page-Fisher sweep 10/60: loss 9325.99 -> 9301.29
+Page-Fisher sweep 11/60: loss 9301.29 -> 9281.22
+Page-Fisher sweep 12/60: loss 9281.22 -> 9261.97
+Page-Fisher sweep 13/60: loss 9261.97 -> 9248.77
+Page-Fisher sweep 14/60: loss 9248.77 -> 9236.81
+Page-Fisher sweep 15/60: loss 9236.81 -> 9226.01
+Page-Fisher sweep 16/60: loss 9226.01 -> 9218.88
+Page-Fisher sweep 17/60: loss 9218.88 -> 9212.39
+Page-Fisher sweep 18/60: loss 9212.39 -> 9208.58
+Page-Fisher sweep 19/60: loss 9208.58 -> 9202.76
+Page-Fisher sweep 20/60: loss 9202.76 -> 9198.07
+Page-Fisher sweep 21/60: loss 9198.07 -> 9195.82
+Page-Fisher sweep 22/60: loss 9195.82 -> 9190.84
+Page-Fisher sweep 23/60: loss 9190.84 -> 9188.52
+Page-Fisher sweep 24/60: loss 9188.52 -> 9186.28
+Page-Fisher sweep 25/60: loss 9186.28 -> 9183.95
+Page-Fisher sweep 26/60: loss 9183.95 -> 9182.33
+Page-Fisher sweep 27/60: loss 9182.33 -> 9179.76
+Page-Fisher sweep 28/60: loss 9179.76 -> 9177.87
+Page-Fisher sweep 29/60: loss 9177.87 -> 9176.55
+Page-Fisher sweep 30/60: loss 9176.55 -> 9173.86
+Page-Fisher sweep 31/60: loss 9173.86 -> 9173.67
+Page-Fisher sweep 32/60: loss 9173.67 -> 9171.51
+Page-Fisher sweep 33/60: loss 9171.51 -> 9170.5
+Page-Fisher sweep 34/60: loss 9170.5 -> 9170.41
+Page-Fisher sweep 35/60: loss 9170.41 -> 9170
+Page-Fisher sweep 36/60: loss 9170 -> 9168.38
+Page-Fisher sweep 37/60: loss 9168.38 -> 9167.98
+Page-Fisher sweep 38/60: loss 9167.98 -> 9166.83
+Page-Fisher sweep 39/60: loss 9166.83 -> 9166.44
+Page-Fisher sweep 40/60: loss 9166.44 -> 9166.12
+Page-Fisher sweep 41/60: loss 9166.12 -> 9164.78
+Page-Fisher sweep 42/60: loss 9164.78 -> 9163.47
+Page-Fisher sweep 43/60: loss 9163.47 -> 9162.6
+Page-Fisher sweep 44/60: loss 9162.6 -> 9161.58
+Page-Fisher sweep 45/60: loss 9161.58 -> 9161.53
+Page-Fisher sweep 46/60: loss 9161.53 -> 9159.68
+Page-Fisher sweep 47/60: loss 9159.68 -> 9157.3
+Page-Fisher sweep 48/60: loss 9157.3 -> 9155.81
+Page-Fisher sweep 49/60: loss 9155.81 -> 9156.08
+Page-Fisher sweep 50/60: loss 9156.08 -> 9156.42
+Page-Fisher sweep 51/60: loss 9156.42 -> 9154.79
+Page-Fisher sweep 52/60: loss 9154.79 -> 9154.76
+Page-Fisher sweep 53/60: loss 9154.76 -> 9153.43
+Page-Fisher sweep 54/60: loss 9153.43 -> 9154.72
+Page-Fisher sweep 55/60: loss 9154.72 -> 9154.25
+Page-Fisher sweep 56/60: loss 9154.25 -> 9153.34
+Page-Fisher sweep 57/60: loss 9153.34 -> 9155.94
+Page-Fisher sweep 58/60: loss 9155.94 -> 9156.1
+Page-Fisher sweep 59/60: loss 9156.1 -> 9156.76
+Page-Fisher sweep 60/60: loss 9156.76 -> 9156.2
+{'stage': 'fit complete', 'layer': 23, 'losses': {'b16_r0': {'base_rank': 16, 'residual_rank': 0, 'fit_page_fisher_nmse': 1.0, 'validation_page_fisher_nmse': 1.0}, 'b16_r16': {'base_rank': 16, 'residual_rank': 16, 'fit_page_fisher_nmse': 0.02324681540110699, 'validation_page_fisher_nmse': 0.029683135696512413, 'sweeps': [{'sweep': 1, 'loss_before': 23719.556640625, 'loss_after_queries': 17349.04296875, 'loss_after_encoder': 12265.5595703125}, {'sweep': 2, 'loss_before': 12265.5595703125, 'loss_after_queries': 10810.9921875, 'loss_after_encoder': 10241.91015625}, {'sweep': 3, 'loss_before': 10241.91015625, 'loss_after_queries': 9940.85546875, 'loss_after_encoder': 9796.2998046875}, {'sweep': 4, 'loss_before': 9796.2998046875, 'loss_after_queries': 9687.169921875, 'loss_after_encoder': 9614.9619140625}, {'sweep': 5, 'loss_before': 9614.9619140625, 'loss_after_queries': 9558.318359375, 'loss_after_encoder': 9511.08203125}, {'sweep': 6, 'loss_before': 9511.08203125, 'loss_after_queries': 9478.6455078125, 'loss_after_encoder': 9442.8798828125}, {'sweep': 7, 'loss_before': 9442.8798828125, 'loss_after_queries': 9420.9853515625, 'loss_after_encoder': 9390.962890625}, {'sweep': 8, 'loss_before': 9390.962890625, 'loss_after_queries': 9381.70703125, 'loss_after_encoder': 9353.3203125}, {'sweep': 9, 'loss_before': 9353.3203125, 'loss_after_queries': 9351.01171875, 'loss_after_encoder': 9325.9912109375}, {'sweep': 10, 'loss_before': 9325.9912109375, 'loss_after_queries': 9323.2626953125, 'loss_after_encoder': 9301.28515625}, {'sweep': 11, 'loss_before': 9301.28515625, 'loss_after_queries': 9299.8037109375, 'loss_after_encoder': 9281.2177734375}, {'sweep': 12, 'loss_before': 9281.2177734375, 'loss_after_queries': 9277.6875, 'loss_after_encoder': 9261.96875}, {'sweep': 13, 'loss_before': 9261.96875, 'loss_after_queries': 9261.212890625, 'loss_after_encoder': 9248.765625}, {'sweep': 14, 'loss_before': 9248.765625, 'loss_after_queries': 9247.89453125, 'loss_after_encoder': 9236.8115234375}, {'sweep': 15, 'loss_before': 9236.8115234375, 'loss_after_queries': 9234.7880859375, 'loss_after_encoder': 9226.013671875}, {'sweep': 16, 'loss_before': 9226.013671875, 'loss_after_queries': 9226.13671875, 'loss_after_encoder': 9218.87890625}, {'sweep': 17, 'loss_before': 9218.87890625, 'loss_after_queries': 9220.927734375, 'loss_after_encoder': 9212.388671875}, {'sweep': 18, 'loss_before': 9212.388671875, 'loss_after_queries': 9214.2119140625, 'loss_after_encoder': 9208.5771484375}, {'sweep': 19, 'loss_before': 9208.5771484375, 'loss_after_queries': 9208.16796875, 'loss_after_encoder': 9202.755859375}, {'sweep': 20, 'loss_before': 9202.755859375, 'loss_after_queries': 9203.44140625, 'loss_after_encoder': 9198.068359375}, {'sweep': 21, 'loss_before': 9198.068359375, 'loss_after_queries': 9200.4765625, 'loss_after_encoder': 9195.81640625}, {'sweep': 22, 'loss_before': 9195.81640625, 'loss_after_queries': 9195.076171875, 'loss_after_encoder': 9190.8408203125}, {'sweep': 23, 'loss_before': 9190.8408203125, 'loss_after_queries': 9193.15625, 'loss_after_encoder': 9188.5244140625}, {'sweep': 24, 'loss_before': 9188.5244140625, 'loss_after_queries': 9189.5341796875, 'loss_after_encoder': 9186.279296875}, {'sweep': 25, 'loss_before': 9186.279296875, 'loss_after_queries': 9187.5771484375, 'loss_after_encoder': 9183.9501953125}, {'sweep': 26, 'loss_before': 9183.9501953125, 'loss_after_queries': 9185.5703125, 'loss_after_encoder': 9182.3310546875}, {'sweep': 27, 'loss_before': 9182.3310546875, 'loss_after_queries': 9183.828125, 'loss_after_encoder': 9179.759765625}, {'sweep': 28, 'loss_before': 9179.759765625, 'loss_after_queries': 9181.15625, 'loss_after_encoder': 9177.87109375}, {'sweep': 29, 'loss_before': 9177.87109375, 'loss_after_queries': 9179.7529296875, 'loss_after_encoder': 9176.5458984375}, {'sweep': 30, 'loss_before': 9176.5458984375, 'loss_after_queries': 9177.3857421875, 'loss_after_encoder': 9173.8564453125}, {'sweep': 31, 'loss_before': 9173.8564453125, 'loss_after_queries': 9176.49609375, 'loss_after_encoder': 9173.6708984375}, {'sweep': 32, 'loss_before': 9173.6708984375, 'loss_after_queries': 9174.603515625, 'loss_after_encoder': 9171.51171875}, {'sweep': 33, 'loss_before': 9171.51171875, 'loss_after_queries': 9173.8984375, 'loss_after_encoder': 9170.4990234375}, {'sweep': 34, 'loss_before': 9170.4990234375, 'loss_after_queries': 9172.7734375, 'loss_after_encoder': 9170.40625}, {'sweep': 35, 'loss_before': 9170.40625, 'loss_after_queries': 9172.373046875, 'loss_after_encoder': 9169.9970703125}, {'sweep': 36, 'loss_before': 9169.9970703125, 'loss_after_queries': 9172.0693359375, 'loss_after_encoder': 9168.376953125}, {'sweep': 37, 'loss_before': 9168.376953125, 'loss_after_queries': 9170.783203125, 'loss_after_encoder': 9167.982421875}, {'sweep': 38, 'loss_before': 9167.982421875, 'loss_after_queries': 9170.01171875, 'loss_after_encoder': 9166.8251953125}, {'sweep': 39, 'loss_before': 9166.8251953125, 'loss_after_queries': 9170.025390625, 'loss_after_encoder': 9166.439453125}, {'sweep': 40, 'loss_before': 9166.439453125, 'loss_after_queries': 9168.8662109375, 'loss_after_encoder': 9166.12109375}, {'sweep': 41, 'loss_before': 9166.12109375, 'loss_after_queries': 9168.4189453125, 'loss_after_encoder': 9164.783203125}, {'sweep': 42, 'loss_before': 9164.783203125, 'loss_after_queries': 9166.201171875, 'loss_after_encoder': 9163.474609375}, {'sweep': 43, 'loss_before': 9163.474609375, 'loss_after_queries': 9165.2724609375, 'loss_after_encoder': 9162.59765625}, {'sweep': 44, 'loss_before': 9162.59765625, 'loss_after_queries': 9164.513671875, 'loss_after_encoder': 9161.583984375}, {'sweep': 45, 'loss_before': 9161.583984375, 'loss_after_queries': 9164.181640625, 'loss_after_encoder': 9161.52734375}, {'sweep': 46, 'loss_before': 9161.52734375, 'loss_after_queries': 9162.9013671875, 'loss_after_encoder': 9159.6767578125}, {'sweep': 47, 'loss_before': 9159.6767578125, 'loss_after_queries': 9159.8828125, 'loss_after_encoder': 9157.3046875}, {'sweep': 48, 'loss_before': 9157.3046875, 'loss_after_queries': 9158.6455078125, 'loss_after_encoder': 9155.8076171875}, {'sweep': 49, 'loss_before': 9155.8076171875, 'loss_after_queries': 9158.1455078125, 'loss_after_encoder': 9156.083984375}, {'sweep': 50, 'loss_before': 9156.083984375, 'loss_after_queries': 9159.14453125, 'loss_after_encoder': 9156.421875}, {'sweep': 51, 'loss_before': 9156.421875, 'loss_after_queries': 9156.92578125, 'loss_after_encoder': 9154.794921875}, {'sweep': 52, 'loss_before': 9154.794921875, 'loss_after_queries': 9156.826171875, 'loss_after_encoder': 9154.7568359375}, {'sweep': 53, 'loss_before': 9154.7568359375, 'loss_after_queries': 9155.6875, 'loss_after_encoder': 9153.431640625}, {'sweep': 54, 'loss_before': 9153.431640625, 'loss_after_queries': 9156.6826171875, 'loss_after_encoder': 9154.7177734375}, {'sweep': 55, 'loss_before': 9154.7177734375, 'loss_after_queries': 9156.3212890625, 'loss_after_encoder': 9154.2509765625}, {'sweep': 56, 'loss_before': 9154.2509765625, 'loss_after_queries': 9155.03515625, 'loss_after_encoder': 9153.3359375}, {'sweep': 57, 'loss_before': 9153.3359375, 'loss_after_queries': 9158.5576171875, 'loss_after_encoder': 9155.9375}, {'sweep': 58, 'loss_before': 9155.9375, 'loss_after_queries': 9157.947265625, 'loss_after_encoder': 9156.1005859375}, {'sweep': 59, 'loss_before': 9156.1005859375, 'loss_after_queries': 9158.875, 'loss_after_encoder': 9156.763671875}, {'sweep': 60, 'loss_before': 9156.763671875, 'loss_after_queries': 9158.4462890625, 'loss_after_encoder': 9156.19921875}], 'final_query_maximum_iterations': 50, 'final_query_maximum_relative_residual': 0.003484183456748724}}}
+FIT COMPLETE

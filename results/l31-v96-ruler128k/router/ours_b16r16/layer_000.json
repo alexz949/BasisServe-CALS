@@ -1,0 +1,471 @@
+{
+  "status": "complete",
+  "sha256": "a0580ea29de289cbc04b063605026a0be10826341770618c3305f7d9967e7340",
+  "protocol": {
+    "format": "basisserve.k_router.streaming.v2",
+    "model_config_sha256": "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+    "windows_sha256": "e72d506bf7d2cff99ff75fe359d9541c8b4b28c3fbc72babb2a19a44f0a51574",
+    "windows_manifest_sha256": "c1815826c29741a213622f57b36ada34bca5f412d869b243cc0f066e07329230",
+    "sequence_length": 131072,
+    "fit_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "diagnostic_ids": [
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47
+    ],
+    "fit_queries": 64,
+    "diagnostic_queries": 32,
+    "base_rank": 16,
+    "residual_rank": 16,
+    "page_size": 32,
+    "excluded_prefix_pages": 1,
+    "excluded_recent_tokens": 64,
+    "chunk_rows": 2048,
+    "deployment_page_budget_tokens": 2048,
+    "sink_tokens_within_page_budget": 32,
+    "recent_tokens_within_page_budget": 64,
+    "maximum_deployment_support_tokens": 2048,
+    "value_feature_mode": "C1 V96",
+    "smoke": false,
+    "teacher": "native dense BF16 SDPA, model.model, use_cache=False",
+    "base_moments": "FP64 raw moments and encoder transform; no bitwise claim versus projected FP32 accumulation",
+    "covariance": "FP32 chunked normalized o_proj input second moment",
+    "source_sha256": {
+      "evaluation/fit_k_routing_streaming.py": "d4ff779a460e2275fd2e0907fd85a4e032006bf62abf7df8689ed01f54cd3308",
+      "evaluation/streaming_k_statistics.py": "2b8a6f1aad6a680de93c67b3ea2060c4246e30e5d8da5958eb2e1a567902f509",
+      "evaluation/fit_qwen3_8b_q8_fisher_residual.py": "722457fa895e0ea3169c89da9bdecfa4220873aa04800ad292135f011b57d39a",
+      "basisserve/core/query_position_sampling.py": "f7aaaab96efa23714cc7fe4363db374addccb9e4f6d9add3477b21d9bd4b59d5",
+      "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c"
+    }
+  },
+  "layer": 0,
+  "v_rank": 96,
+  "identity_sha256": "3db1c684c8e356edf87218f65cad25a032433ec431ea3ad32ef492921ad14266",
+  "losses": {
+    "b16_r0": {
+      "base_rank": 16,
+      "residual_rank": 0,
+      "fit_page_fisher_nmse": 1.0,
+      "validation_page_fisher_nmse": 1.0
+    },
+    "b16_r16": {
+      "base_rank": 16,
+      "residual_rank": 16,
+      "fit_page_fisher_nmse": 0.05290149491900345,
+      "validation_page_fisher_nmse": 0.07122356108487733,
+      "sweeps": [
+        {
+          "sweep": 1,
+          "loss_before": 697.5704345703125,
+          "loss_after_queries": 444.58795166015625,
+          "loss_after_encoder": 308.1850891113281
+        },
+        {
+          "sweep": 2,
+          "loss_before": 308.1850891113281,
+          "loss_after_queries": 272.33734130859375,
+          "loss_after_encoder": 255.59420776367188
+        },
+        {
+          "sweep": 3,
+          "loss_before": 255.59420776367188,
+          "loss_after_queries": 244.50807189941406,
+          "loss_after_encoder": 237.24887084960938
+        },
+        {
+          "sweep": 4,
+          "loss_before": 237.24887084960938,
+          "loss_after_queries": 231.94735717773438,
+          "loss_after_encoder": 228.19866943359375
+        },
+        {
+          "sweep": 5,
+          "loss_before": 228.19866943359375,
+          "loss_after_queries": 225.3244171142578,
+          "loss_after_encoder": 223.2092742919922
+        },
+        {
+          "sweep": 6,
+          "loss_before": 223.2092742919922,
+          "loss_after_queries": 221.48019409179688,
+          "loss_after_encoder": 220.19610595703125
+        },
+        {
+          "sweep": 7,
+          "loss_before": 220.19610595703125,
+          "loss_after_queries": 219.07760620117188,
+          "loss_after_encoder": 218.2313690185547
+        },
+        {
+          "sweep": 8,
+          "loss_before": 218.2313690185547,
+          "loss_after_queries": 217.48486328125,
+          "loss_after_encoder": 216.9236602783203
+        },
+        {
+          "sweep": 9,
+          "loss_before": 216.9236602783203,
+          "loss_after_queries": 216.3668670654297,
+          "loss_after_encoder": 215.96592712402344
+        },
+        {
+          "sweep": 10,
+          "loss_before": 215.96592712402344,
+          "loss_after_queries": 215.56057739257812,
+          "loss_after_encoder": 215.26724243164062
+        },
+        {
+          "sweep": 11,
+          "loss_before": 215.26724243164062,
+          "loss_after_queries": 214.94070434570312,
+          "loss_after_encoder": 214.68490600585938
+        },
+        {
+          "sweep": 12,
+          "loss_before": 214.68490600585938,
+          "loss_after_queries": 214.42111206054688,
+          "loss_after_encoder": 214.22164916992188
+        },
+        {
+          "sweep": 13,
+          "loss_before": 214.22164916992188,
+          "loss_after_queries": 213.99896240234375,
+          "loss_after_encoder": 213.85382080078125
+        },
+        {
+          "sweep": 14,
+          "loss_before": 213.85382080078125,
+          "loss_after_queries": 213.681640625,
+          "loss_after_encoder": 213.5538330078125
+        },
+        {
+          "sweep": 15,
+          "loss_before": 213.5538330078125,
+          "loss_after_queries": 213.4093017578125,
+          "loss_after_encoder": 213.30223083496094
+        },
+        {
+          "sweep": 16,
+          "loss_before": 213.30223083496094,
+          "loss_after_queries": 213.16189575195312,
+          "loss_after_encoder": 213.0675811767578
+        },
+        {
+          "sweep": 17,
+          "loss_before": 213.0675811767578,
+          "loss_after_queries": 212.9385223388672,
+          "loss_after_encoder": 212.8649444580078
+        },
+        {
+          "sweep": 18,
+          "loss_before": 212.8649444580078,
+          "loss_after_queries": 212.7696533203125,
+          "loss_after_encoder": 212.7000274658203
+        },
+        {
+          "sweep": 19,
+          "loss_before": 212.7000274658203,
+          "loss_after_queries": 212.60487365722656,
+          "loss_after_encoder": 212.54269409179688
+        },
+        {
+          "sweep": 20,
+          "loss_before": 212.54269409179688,
+          "loss_after_queries": 212.44236755371094,
+          "loss_after_encoder": 212.3887481689453
+        },
+        {
+          "sweep": 21,
+          "loss_before": 212.3887481689453,
+          "loss_after_queries": 212.31407165527344,
+          "loss_after_encoder": 212.27040100097656
+        },
+        {
+          "sweep": 22,
+          "loss_before": 212.27040100097656,
+          "loss_after_queries": 212.20095825195312,
+          "loss_after_encoder": 212.16163635253906
+        },
+        {
+          "sweep": 23,
+          "loss_before": 212.16163635253906,
+          "loss_after_queries": 212.0972442626953,
+          "loss_after_encoder": 212.0580596923828
+        },
+        {
+          "sweep": 24,
+          "loss_before": 212.0580596923828,
+          "loss_after_queries": 212.00975036621094,
+          "loss_after_encoder": 211.99044799804688
+        },
+        {
+          "sweep": 25,
+          "loss_before": 211.99044799804688,
+          "loss_after_queries": 211.94290161132812,
+          "loss_after_encoder": 211.93267822265625
+        },
+        {
+          "sweep": 26,
+          "loss_before": 211.93267822265625,
+          "loss_after_queries": 211.89297485351562,
+          "loss_after_encoder": 211.88656616210938
+        },
+        {
+          "sweep": 27,
+          "loss_before": 211.88656616210938,
+          "loss_after_queries": 211.85079956054688,
+          "loss_after_encoder": 211.8477783203125
+        },
+        {
+          "sweep": 28,
+          "loss_before": 211.8477783203125,
+          "loss_after_queries": 211.81411743164062,
+          "loss_after_encoder": 211.80081176757812
+        },
+        {
+          "sweep": 29,
+          "loss_before": 211.80081176757812,
+          "loss_after_queries": 211.76724243164062,
+          "loss_after_encoder": 211.76463317871094
+        },
+        {
+          "sweep": 30,
+          "loss_before": 211.76463317871094,
+          "loss_after_queries": 211.75225830078125,
+          "loss_after_encoder": 211.7624053955078
+        },
+        {
+          "sweep": 31,
+          "loss_before": 211.7624053955078,
+          "loss_after_queries": 211.7513427734375,
+          "loss_after_encoder": 211.7532196044922
+        },
+        {
+          "sweep": 32,
+          "loss_before": 211.7532196044922,
+          "loss_after_queries": 211.71969604492188,
+          "loss_after_encoder": 211.71279907226562
+        },
+        {
+          "sweep": 33,
+          "loss_before": 211.71279907226562,
+          "loss_after_queries": 211.6965789794922,
+          "loss_after_encoder": 211.7025909423828
+        },
+        {
+          "sweep": 34,
+          "loss_before": 211.7025909423828,
+          "loss_after_queries": 211.6732940673828,
+          "loss_after_encoder": 211.66587829589844
+        },
+        {
+          "sweep": 35,
+          "loss_before": 211.66587829589844,
+          "loss_after_queries": 211.6520538330078,
+          "loss_after_encoder": 211.65208435058594
+        },
+        {
+          "sweep": 36,
+          "loss_before": 211.65208435058594,
+          "loss_after_queries": 211.64199829101562,
+          "loss_after_encoder": 211.6522216796875
+        },
+        {
+          "sweep": 37,
+          "loss_before": 211.6522216796875,
+          "loss_after_queries": 211.6458740234375,
+          "loss_after_encoder": 211.65304565429688
+        },
+        {
+          "sweep": 38,
+          "loss_before": 211.65304565429688,
+          "loss_after_queries": 211.6351776123047,
+          "loss_after_encoder": 211.63282775878906
+        },
+        {
+          "sweep": 39,
+          "loss_before": 211.63282775878906,
+          "loss_after_queries": 211.61688232421875,
+          "loss_after_encoder": 211.61846923828125
+        },
+        {
+          "sweep": 40,
+          "loss_before": 211.61846923828125,
+          "loss_after_queries": 211.6026611328125,
+          "loss_after_encoder": 211.62156677246094
+        },
+        {
+          "sweep": 41,
+          "loss_before": 211.62156677246094,
+          "loss_after_queries": 211.6090545654297,
+          "loss_after_encoder": 211.61508178710938
+        },
+        {
+          "sweep": 42,
+          "loss_before": 211.61508178710938,
+          "loss_after_queries": 211.6056671142578,
+          "loss_after_encoder": 211.60720825195312
+        },
+        {
+          "sweep": 43,
+          "loss_before": 211.60720825195312,
+          "loss_after_queries": 211.59805297851562,
+          "loss_after_encoder": 211.61221313476562
+        },
+        {
+          "sweep": 44,
+          "loss_before": 211.61221313476562,
+          "loss_after_queries": 211.60885620117188,
+          "loss_after_encoder": 211.60684204101562
+        },
+        {
+          "sweep": 45,
+          "loss_before": 211.60684204101562,
+          "loss_after_queries": 211.58888244628906,
+          "loss_after_encoder": 211.5936737060547
+        },
+        {
+          "sweep": 46,
+          "loss_before": 211.5936737060547,
+          "loss_after_queries": 211.59376525878906,
+          "loss_after_encoder": 211.59628295898438
+        },
+        {
+          "sweep": 47,
+          "loss_before": 211.59628295898438,
+          "loss_after_queries": 211.595458984375,
+          "loss_after_encoder": 211.60662841796875
+        },
+        {
+          "sweep": 48,
+          "loss_before": 211.60662841796875,
+          "loss_after_queries": 211.59385681152344,
+          "loss_after_encoder": 211.59860229492188
+        },
+        {
+          "sweep": 49,
+          "loss_before": 211.59860229492188,
+          "loss_after_queries": 211.58175659179688,
+          "loss_after_encoder": 211.58839416503906
+        },
+        {
+          "sweep": 50,
+          "loss_before": 211.58839416503906,
+          "loss_after_queries": 211.57635498046875,
+          "loss_after_encoder": 211.59820556640625
+        },
+        {
+          "sweep": 51,
+          "loss_before": 211.59820556640625,
+          "loss_after_queries": 211.59552001953125,
+          "loss_after_encoder": 211.60189819335938
+        },
+        {
+          "sweep": 52,
+          "loss_before": 211.60189819335938,
+          "loss_after_queries": 211.5994873046875,
+          "loss_after_encoder": 211.61831665039062
+        },
+        {
+          "sweep": 53,
+          "loss_before": 211.61831665039062,
+          "loss_after_queries": 211.6068115234375,
+          "loss_after_encoder": 211.6094970703125
+        },
+        {
+          "sweep": 54,
+          "loss_before": 211.6094970703125,
+          "loss_after_queries": 211.60198974609375,
+          "loss_after_encoder": 211.63462829589844
+        },
+        {
+          "sweep": 55,
+          "loss_before": 211.63462829589844,
+          "loss_after_queries": 211.6256103515625,
+          "loss_after_encoder": 211.61550903320312
+        },
+        {
+          "sweep": 56,
+          "loss_before": 211.61550903320312,
+          "loss_after_queries": 211.60609436035156,
+          "loss_after_encoder": 211.613525390625
+        },
+        {
+          "sweep": 57,
+          "loss_before": 211.613525390625,
+          "loss_after_queries": 211.61813354492188,
+          "loss_after_encoder": 211.6461181640625
+        },
+        {
+          "sweep": 58,
+          "loss_before": 211.6461181640625,
+          "loss_after_queries": 211.65602111816406,
+          "loss_after_encoder": 211.6546173095703
+        },
+        {
+          "sweep": 59,
+          "loss_before": 211.6546173095703,
+          "loss_after_queries": 211.64230346679688,
+          "loss_after_encoder": 211.66270446777344
+        },
+        {
+          "sweep": 60,
+          "loss_before": 211.66270446777344,
+          "loss_after_queries": 211.66934204101562,
+          "loss_after_encoder": 211.67892456054688
+        }
+      ],
+      "final_query_maximum_iterations": 50,
+      "final_query_maximum_relative_residual": 0.006902736611664295
+    }
+  },
+  "base_sha256": "6334c7ea3105534d16545cc69d6902a300a5ef25e0d097ad9a722441a6587755",
+  "sweeps": 60,
+  "pcg_iterations": 50
+}
