@@ -1,0 +1,129 @@
+{
+  "artifacts": {
+    "csv": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/long_context_calibration.csv",
+    "csv_sha256": "b4ab5cf54261c1f67bf214d0b8b2162540fe7dcafbd7752e534a92116b912603",
+    "document_csv": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/long_context_calibration_documents.csv",
+    "document_csv_sha256": "c013be538623ce5987bb5f5a99f5d2f1816d42bdd5a9ee37768c967fff2dded7",
+    "plot_pdf": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/plots/long_context_calibration.pdf",
+    "plot_png": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/plots/long_context_calibration.png"
+  },
+  "format": "basisserve.qwen3_8b.section3.long_context_summary.v1",
+  "protocol": {
+    "calibration_context_lengths": [
+      2048,
+      8192,
+      32768,
+      131072
+    ],
+    "calibration_tokens_per_condition": 1048576,
+    "dense_key_cache": true,
+    "evaluation_chunk_size": 128,
+    "evaluation_context_length": 131072,
+    "evaluation_documents": 8,
+    "full_dense_attention": true,
+    "heldout_tokens_per_condition": 262144,
+    "paired_document_standard_errors": true,
+    "position_buckets": [
+      "0_8k",
+      "8_32k",
+      "32_64k",
+      "64_128k"
+    ],
+    "ranks_per_physical_kv_head": [
+      64,
+      96
+    ],
+    "sampling_seed": 20260828,
+    "yarn_factor": 4.0
+  },
+  "source_results": [
+    {
+      "command": "evaluation/eval_qwen3_8b_section3_long_ppl.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method dense --windows results/section3_ablation/qwen3_8b_base/data/long_context/evaluation/128k/windows.safetensors --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/dense --yarn-factor 4 --chunk-size 128 --device cuda:0 --torch-num-threads 4",
+      "method": "Dense",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/dense/results.json",
+      "sha256": "a19aca3338968de9d9c9780bb602ed565761061c39c475577d454532db22bbb3",
+      "slurm_job_id": "8339145"
+    },
+    {
+      "calibration_context_length": 2048,
+      "checkpoint_sha256": "4d4c779ec43558362ffc706aa0c561c5e79cf96a996b19bfc006e7c7bf4bdaa4",
+      "command": "evaluation/eval_qwen3_8b_section3_long_ppl.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --factor-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/2k/c1/r64 --windows results/section3_ablation/qwen3_8b_base/data/long_context/evaluation/128k/windows.safetensors --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_2k_r64 --yarn-factor 4 --chunk-size 128 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_2k_r64/results.json",
+      "rank": 64,
+      "sha256": "cbd07f0a92d6fb31080b03724b8af3610d55dcfdeb8c20210712fe2356d1060d",
+      "slurm_job_id": "8339274"
+    },
+    {
+      "calibration_context_length": 2048,
+      "checkpoint_sha256": "0a6d3417fdffad292ec842248c28c10d6add2a7eefab477c48f62e14711ca470",
+      "command": "evaluation/eval_qwen3_8b_section3_long_ppl.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --factor-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/2k/c1/r96 --windows results/section3_ablation/qwen3_8b_base/data/long_context/evaluation/128k/windows.safetensors --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_2k_r96 --yarn-factor 4 --chunk-size 128 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_2k_r96/results.json",
+      "rank": 96,
+      "sha256": "c13c87520b1e35c343ecb7f739a7f49046a6a93b734e29989deb4dfbf2fc5dae",
+      "slurm_job_id": "8339275"
+    },
+    {
+      "calibration_context_length": 8192,
+      "checkpoint_sha256": "25864668e3992ece11711dcec43775d25708cfaf2fdc51cde742d0a756e419f5",
+      "command": "evaluation/eval_qwen3_8b_section3_long_ppl.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --factor-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/8k/c1/r64 --windows results/section3_ablation/qwen3_8b_base/data/long_context/evaluation/128k/windows.safetensors --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_8k_r64 --yarn-factor 4 --chunk-size 128 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_8k_r64/results.json",
+      "rank": 64,
+      "sha256": "de27d6e2fb7cd154ce9b044e5bd2b6063bbce37b91baf5aa746116dd09fa8843",
+      "slurm_job_id": "8339276"
+    },
+    {
+      "calibration_context_length": 8192,
+      "checkpoint_sha256": "8105f3e14d567d9b4a74eb7dc71417439c6e56808bfd586d16fb74b9e56e420a",
+      "command": "evaluation/eval_qwen3_8b_section3_long_ppl.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --factor-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/8k/c1/r96 --windows results/section3_ablation/qwen3_8b_base/data/long_context/evaluation/128k/windows.safetensors --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_8k_r96 --yarn-factor 4 --chunk-size 128 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_8k_r96/results.json",
+      "rank": 96,
+      "sha256": "4502d67408f2238a624cb36a73241b0cae478b7cd46425039926eb8aca99dd18",
+      "slurm_job_id": "8339277"
+    },
+    {
+      "calibration_context_length": 32768,
+      "checkpoint_sha256": "c9b00139dc214722cdc3c2919af4af98536d0380a744deee1ef29766e39cafed",
+      "command": "evaluation/eval_qwen3_8b_section3_long_ppl.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --factor-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/32k/c1/r64 --windows results/section3_ablation/qwen3_8b_base/data/long_context/evaluation/128k/windows.safetensors --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_32k_r64 --yarn-factor 4 --chunk-size 128 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_32k_r64/results.json",
+      "rank": 64,
+      "sha256": "88967182bc76470ef01a57ef733560128e2549060970b26d5d724ac3d6e91968",
+      "slurm_job_id": "8339554"
+    },
+    {
+      "calibration_context_length": 32768,
+      "checkpoint_sha256": "d884d2377231012c2c5cf830187511e78001d399d889cd285756f38880849581",
+      "command": "evaluation/eval_qwen3_8b_section3_long_ppl.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --factor-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/32k/c1/r96 --windows results/section3_ablation/qwen3_8b_base/data/long_context/evaluation/128k/windows.safetensors --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_32k_r96 --yarn-factor 4 --chunk-size 128 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_32k_r96/results.json",
+      "rank": 96,
+      "sha256": "dce3b0bcb9cfb972ffb99059407fbf86b9bd57e34320b2c60d4743fc872f19fd",
+      "slurm_job_id": "8339555"
+    },
+    {
+      "calibration_context_length": 131072,
+      "checkpoint_sha256": "8011c85cf84267d6ec5bf74a78c99f8b89f44a62a77a51cffb31374ec0d07f0e",
+      "command": "evaluation/eval_qwen3_8b_section3_long_ppl.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --factor-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/128k/c1/r64 --windows results/section3_ablation/qwen3_8b_base/data/long_context/evaluation/128k/windows.safetensors --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_128k_r64 --yarn-factor 4 --chunk-size 128 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_128k_r64/results.json",
+      "rank": 64,
+      "sha256": "913391e24a55f437093f441cc10df43b6cfe5b18f2684a2e57302fe2d3e9ae37",
+      "slurm_job_id": "8339560"
+    },
+    {
+      "calibration_context_length": 131072,
+      "checkpoint_sha256": "a4a510d733d6fee201daccd51a0c0d97deffe244035b9446f48e77bee5c0c4e3",
+      "command": "evaluation/eval_qwen3_8b_section3_long_ppl.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --factor-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/128k/c1/r96 --windows results/section3_ablation/qwen3_8b_base/data/long_context/evaluation/128k/windows.safetensors --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_128k_r96 --yarn-factor 4 --chunk-size 128 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/evaluation/c1_cal_128k_r96/results.json",
+      "rank": 96,
+      "sha256": "a0d4eb6ca4e612e4739b71128783875123a39984f22d25ec7a12463f5bf8d38c",
+      "slurm_job_id": "8339146"
+    }
+  ],
+  "status": "complete"
+}

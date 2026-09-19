@@ -1,0 +1,130 @@
+{
+  "artifacts": {
+    "csv": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/wt2_calibration.csv",
+    "csv_sha256": "912322c83e434b9848d7aac20253064320260156360c9881ff8ec8f27bbedb88"
+  },
+  "calibration": {
+    "dataset": {
+      "config": "wikitext-2-raw-v1",
+      "fit_split": "train",
+      "heldout_split": "validation",
+      "repo": "Salesforce/wikitext",
+      "requested_revision": "main",
+      "resolved_revision": "b08601e04326c79dfdd32d625aee71d232d685c3"
+    },
+    "fit_tokens": 262144,
+    "fit_windows": 128,
+    "heldout_windows": 32,
+    "seed": 20260918,
+    "sequence_length": 2048,
+    "source_manifest": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/data/wikitext2/manifest.json",
+    "source_manifest_sha256": "be36fa2142aaf890dfb7760c846c27d27efe5fe2c314ec691e1ad85b07764658",
+    "window_artifact_sha256": "9af045bc164fd574676f9b03d5e015804c640d050add2a979235f9fb379e2d88"
+  },
+  "evaluation": {
+    "dense_reference_reused": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/quality/Q3-8B-Dense/result.json",
+    "lm_eval_batch_size": 8,
+    "ppl_batch_size": 2,
+    "tasks": [
+      "arc_easy",
+      "arc_challenge",
+      "hellaswag",
+      "piqa",
+      "winogrande",
+      "boolq",
+      "openbookqa"
+    ]
+  },
+  "format": "basisserve.qwen3_8b.section3.wt2_calibration_summary.v1",
+  "model": {
+    "config_sha256": "3bd01d7ad7a2e203ecbbe84e24087a51c6d2a108ee4bcc42d0016bf49564983a",
+    "huggingface_repo": "Qwen/Qwen3-8B-Base",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "revision": "49e3418fbbbca6ecbdf9608b4d22e5a407081db4"
+  },
+  "rank_definition": {
+    "palu_g4_group_rank": "4 * rank",
+    "palu_g4_group_ranks": {
+      "64": 256,
+      "96": 384
+    },
+    "rank": "equivalent retained V rank per physical KV head"
+  },
+  "source_results": [
+    {
+      "command": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/eval_qwen3_8b_iclr_quality.py --run-id Q3-8B-Dense --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --checkpoint-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/checkpoints/Q3-8B-Dense --c4-windows /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/calibration/qwen3_8b_c4_validation_128x2048/windows.safetensors --output-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/quality/Q3-8B-Dense --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8",
+      "method": "Dense",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/quality/Q3-8B-Dense/result.json",
+      "reused_existing_result": true,
+      "sha256": "f2db27fdcc1fbc67d2904a822413f4272d4760327edeaad8f7b96ea83ec3d571",
+      "slurm_job_id": null
+    },
+    {
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/wt2/c1/r64 --output-dir results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/c1_r64 --tasks arc_easy,arc_challenge,hellaswag,piqa,winogrande,boolq,openbookqa --lm-eval-batch-size 8 --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "group_rank": 64,
+      "group_size": 1,
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/c1_r64/results.json",
+      "rank": 64,
+      "reused_existing_result": false,
+      "sha256": "f066e5e0ffe252e959f5d4be12cf4029cfc14f8f5ff85caf63ef8bbde9a2ac6e",
+      "slurm_job_id": "8339201"
+    },
+    {
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/wt2/c1/r96 --output-dir results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/c1_r96 --tasks arc_easy,arc_challenge,hellaswag,piqa,winogrande,boolq,openbookqa --lm-eval-batch-size 8 --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "group_rank": 96,
+      "group_size": 1,
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/c1_r96/results.json",
+      "rank": 96,
+      "reused_existing_result": false,
+      "sha256": "4e1fa5949d47392939a48e59700b3ccb83d3777d90fe6ad2b4431636ba4aa461",
+      "slurm_job_id": "8339202"
+    },
+    {
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method palu_m --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/wt2/palu/m/r64 --output-dir results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/palu_m_r64 --tasks arc_easy,arc_challenge,hellaswag,piqa,winogrande,boolq,openbookqa --lm-eval-batch-size 8 --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "group_rank": 64,
+      "group_size": 1,
+      "method": "PaLU M-LRD",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/palu_m_r64/results.json",
+      "rank": 64,
+      "reused_existing_result": false,
+      "sha256": "6b160ef7b8055e907fa1045e761c44c5fd6dc0e3c794f2900d32a97222132953",
+      "slurm_job_id": "8339203"
+    },
+    {
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method palu_m --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/wt2/palu/m/r96 --output-dir results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/palu_m_r96 --tasks arc_easy,arc_challenge,hellaswag,piqa,winogrande,boolq,openbookqa --lm-eval-batch-size 8 --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "group_rank": 96,
+      "group_size": 1,
+      "method": "PaLU M-LRD",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/palu_m_r96/results.json",
+      "rank": 96,
+      "reused_existing_result": false,
+      "sha256": "90e5040f39b35a3d8234ad105946e024e021af47536073f2488d12fb8f7c700a",
+      "slurm_job_id": "8339205"
+    },
+    {
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method palu_g4 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/wt2/palu/g4/r64 --output-dir results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/palu_g4_r64 --tasks arc_easy,arc_challenge,hellaswag,piqa,winogrande,boolq,openbookqa --lm-eval-batch-size 8 --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "group_rank": 256,
+      "group_size": 4,
+      "method": "PaLU G4-LRD",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/palu_g4_r64/results.json",
+      "rank": 64,
+      "reused_existing_result": false,
+      "sha256": "a48223cbb2fac9d7cfce2f52915de0a76abb61d32f4f00c264668e06802c2510",
+      "slurm_job_id": "8339206"
+    },
+    {
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method palu_g4 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/wt2/palu/g4/r96 --output-dir results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/palu_g4_r96 --tasks arc_easy,arc_challenge,hellaswag,piqa,winogrande,boolq,openbookqa --lm-eval-batch-size 8 --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "group_rank": 384,
+      "group_size": 4,
+      "method": "PaLU G4-LRD",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/wt2/evaluation/palu_g4_r96/results.json",
+      "rank": 96,
+      "reused_existing_result": false,
+      "sha256": "b1089fae6c35515adad8be1d795fc049ea0bc0b9cb195785ede9af916fd5ec83",
+      "slurm_job_id": "8339126"
+    }
+  ],
+  "status": "complete"
+}
