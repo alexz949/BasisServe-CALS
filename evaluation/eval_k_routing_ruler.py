@@ -32,6 +32,10 @@ from basisserve.kernels.compressed_v_decode_attention import (
 )
 
 ARMS = ('full','exact_sparse','lrqk','shadowkv','ours')
+DEFAULT_TASK_NAMES = (
+    'niah_single_1','niah_single_2','niah_single_3','niah_multikey_1',
+    'niah_multikey_2','niah_multiquery','niah_multivalue','vt','fwe','qa_1','qa_2',
+)
 
 
 def native_protocol(args, identity, config):
@@ -246,7 +250,7 @@ def install(model, checkpoint, manifest, arm, bank, *, dense_v=False):
     model.eval()
 
 
-def inputs(args, tokenizer):
+def inputs(args, tokenizer, *, task_names, samples_per_task):
     identity=read_json(args.identity)
     runtime_config=routing_config(identity,rope=args.rope,sequence_length=args.sequence_length)
     checkpoint=Path(identity['checkpoint'])
@@ -256,20 +260,21 @@ def inputs(args, tokenizer):
     for record in manifest['layers']:
         assert sha256(checkpoint/record['file'])==record['sha256']
     data=read_json(args.data/'manifest.json')
-    assert data['status']=='complete' and data['protocol']['samples_per_task']==8
+    task_names = tuple(task_names)
+    assert task_names and len(set(task_names)) == len(task_names)
+    assert samples_per_task > 0
+    assert data['status']=='complete' and data['protocol']['samples_per_task']==samples_per_task
     assert data['protocol']['sequence_length']==args.sequence_length
     assert data['tokenizer_config_sha256']==sha256(Path(identity['model'])/'tokenizer_config.json')
-    task_names=('niah_single_1','niah_single_2','niah_single_3','niah_multikey_1',
-        'niah_multikey_2','niah_multiquery','niah_multivalue','vt','fwe','qa_1','qa_2')
     assert set(task_names).issubset(data['protocol']['tasks'])
     tasks=parse_tasks(','.join(task_names))
-    assert len(tasks)==11
+    assert len(tasks)==len(task_names)
     rows=[]
     for task in tasks:
         path=args.data/task.name/'validation.jsonl'
         assert sha256(path)==data['artifacts'][task.name]['sha256']
         sources=[json.loads(line) for line in path.read_text().splitlines()]
-        assert len(sources)==8
+        assert len(sources)==samples_per_task
         for ordinal,source in enumerate(sources):
             if args.chat_template:
                 ids=tokenizer.apply_chat_template([{'role':'user','content':ruler_prompt(source)}],
@@ -287,17 +292,38 @@ def inputs(args, tokenizer):
             i=record['layer'];path=args.bank/f'layer_{i:03d}.safetensors'
             audit=read_json(path.with_suffix('.json'))
             assert audit['status']=='complete' and audit['layer']==i and audit['v_rank']==record['ranks'][0]
-            validate_residual_fisher_support(audit['protocol'], runtime_config.model_type)
+            protocol_format = audit['protocol']['format']
+            score_only_formats = (
+                'basisserve.section4.score_only_b16r16.v1',
+                'basisserve.section4.qgram_score_only_b16r16.v1',
+            )
+            if protocol_format not in score_only_formats:
+                validate_residual_fisher_support(audit['protocol'], runtime_config.model_type)
             if runtime_config.model_type == 'llama':
-                assert audit['protocol']['format'] == 'basisserve.k_router.streaming.v2'
+                assert protocol_format in (
+                    'basisserve.k_router.streaming.v1',
+                    'basisserve.k_router.streaming.v2',
+                    *score_only_formats,
+                )
                 assert audit['identity_sha256'] == sha256(args.identity)
                 assert audit['protocol']['sequence_length'] == 65536
                 assert not audit['protocol']['smoke']
-                assert audit['sweeps'] == 40 and audit['pcg_iterations'] == 100
+                if protocol_format in score_only_formats:
+                    expected = ('score_only' if protocol_format == score_only_formats[0]
+                                else 'qgram_score_only')
+                    assert audit['protocol']['objective'] == expected
+                    assert audit['protocol']['fisher_artifacts_read'] == []
+                residual_rank = int(audit['protocol']['residual_rank'])
+                if residual_rank == 0:
+                    assert audit['sweeps'] == 0 and audit['pcg_iterations'] == 0
+                else:
+                    assert audit['sweeps'] == 40 and audit['pcg_iterations'] == 100
             else:
                 assert audit['protocol']['v96_manifest_sha256']==identity['manifest_sha256']
-            assert audit['protocol']['fit_queries']==64 and audit['protocol']['diagnostic_queries']==32
-            assert audit['protocol']['fit_ids']==list(range(64)) and audit['protocol']['diagnostic_ids']==list(range(64,80))
+            heldout_queries = audit['protocol'].get('diagnostic_queries', audit['protocol'].get('heldout_queries'))
+            heldout_ids = audit['protocol'].get('diagnostic_ids', audit['protocol'].get('heldout_ids'))
+            assert audit['protocol']['fit_queries']==64 and heldout_queries==32
+            assert audit['protocol']['fit_ids']==list(range(64)) and heldout_ids==list(range(64,80))
             if runtime_config.model_type=='qwen3':
                 assert audit['protocol']['rope']==args.rope
                 assert audit['protocol']['runtime_config']['rope_parameters']==runtime_config.rope_parameters
@@ -309,7 +335,8 @@ def inputs(args, tokenizer):
         config_record['time_step_limit']=[str(x) if math.isinf(x) else x for x in runtime_config.time_step_limit]
     spec=dict(identity_sha256=sha256(args.identity),data_sha256=sha256(args.data/'manifest.json'),
         runtime_config=config_record,rope=args.rope,
-        sequence_length=args.sequence_length,samples=88,dtype='bfloat16',generation='greedy, native EOS, official caps',
+        sequence_length=args.sequence_length,samples=len(rows),samples_per_task=samples_per_task,
+        task_names=list(task_names),dtype='bfloat16',generation='greedy, native EOS, official caps',
         prefill=('full causal FlashAttention-2 on all arms' if args.dense_v else
                  'full causal FlashAttention-2 for equal QKV widths, C1 Triton for compact V'),rank_schedule=identity['layer_ranks'],
         exact_sparse='FP32 exact-QK normalized Page32 mass, GQA max, pinned page0 within B2048',
@@ -467,7 +494,9 @@ def main():
         assert args.arm in ARMS
     identity=read_json(args.identity)
     tokenizer=AutoTokenizer.from_pretrained(identity['model'],local_files_only=True)
-    identity,manifest,rows,bank,bank_hashes,spec=inputs(args,tokenizer)
+    identity,manifest,rows,bank,bank_hashes,spec=inputs(
+        args, tokenizer, task_names=DEFAULT_TASK_NAMES, samples_per_task=8
+    )
     if args.stage=='summarize':
         summarize(args,rows,spec,tokenizer,bank_hashes,identity)
         return
