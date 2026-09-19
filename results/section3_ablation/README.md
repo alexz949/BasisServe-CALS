@@ -148,6 +148,22 @@ formal result supports length-matched calibration most clearly at low rank and
 at long evaluation positions, without claiming that every small overall-PPL
 difference is statistically resolved.
 
+The eight long-calibration checkpoints were additionally evaluated on the
+standard WikiText-2 test set using ordinary 2048-token windows and the native
+pretrained RoPE configuration, without YaRN:
+
+| Calibration context | R64 WT2 PPL | R96 WT2 PPL |
+|---:|---:|---:|
+| 2K | 8.3075 | 7.2646 |
+| 8K | 8.3802 | **7.2295** |
+| 32K | 8.3411 | 7.2515 |
+| 128K | **8.1949** | 7.2815 |
+
+The Dense reference is `7.0025`. Longer calibration does not cause monotonic
+short-context degradation: 128K is best at R64, while the full R96 range is
+only `0.0520` PPL. These data support short-context robustness, not a claim
+that longer calibration necessarily improves WikiText-2.
+
 ## Phase 1 audit results
 
 - Rank-128 C1 dense identity: analytic exact endpoint with zero fit and held-out relative MSE; sweep-0 export is decoder closed.
@@ -168,6 +184,8 @@ The formal run populates:
 - `als_init_sweep.csv` and `als_init_sweep_layers.csv`
 - `long_context_calibration.csv`, paired document diagnostics, and
   `long_context_manifest.json`
+- `long_calibration_short_wt2.csv`, its manifest, and the two-panel
+  short-context robustness plot
 - `group_svd_vs_joint.csv` and `group_svd_vs_joint_layers.csv`
 - appendix plots derived from those CSVs
 
@@ -183,5 +201,8 @@ Formal Slurm chain:
 - Corrected R64 activation-aware Group-SVD build/evaluation: `8339135`, `8339136`; the completed R96 artifacts from `8339052`–`8339053` are reused. Initial build `8339112` exposed and fixed the obsolete `{60,96}` CLI rank restriction before producing artifacts.
 - WikiText-2 R64/R96 covariance/whitening/C1/PaLU/evaluation/summary: `8339121`–`8339127`.
 - Long-context R64/R96 capture/fitting/merge/summary: `8339128`–`8339134`. Dense 128K was moved from pending H200 job `8339132` to L40S; the 256-token chunk trial `8339137` reached 113K before a temporary-workspace OOM, so the locked chunk-128 Dense/C1 evaluations are `8339145`/`8339146`. Dense completed in `34:18`; the eight C1 L40S tasks completed successfully in `3:16:53`–`3:23:18` each, and the dependency-gated summary completed in `00:02`.
+- Standard short-context WikiText-2 replay of the eight long-calibration
+  checkpoints: L40S array `8340320`; all tasks completed with exit code `0:0`
+  in `00:45`–`00:47`.
 
 The machine-readable locked configuration and command templates are in `qwen3_8b_base/experiment_manifest.json`. Each checkpoint/evaluation result also records its fully expanded command, environment, hashes, runtime, and Slurm job ID.

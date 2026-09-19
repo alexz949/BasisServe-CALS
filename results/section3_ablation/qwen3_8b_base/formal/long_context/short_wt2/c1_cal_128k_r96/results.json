@@ -1,0 +1,779 @@
+{
+  "checkpoint": {
+    "checkpoint_format": "basisserve.qwen3_8b.gqa_c1_joint.v1",
+    "checkpoint_sha256": "a4a510d733d6fee201daccd51a0c0d97deffe244035b9446f48e77bee5c0c4e3",
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/128k/c1/r96",
+    "heldout_rel_mse": 0.05847753315730711,
+    "method": "c1",
+    "rank": 96
+  },
+  "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/128k/c1/r96 --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_128k_r96 --skip-mcq --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+  "elapsed_seconds": 37.19702323526144,
+  "environment": {
+    "conda_environment": "basis",
+    "datasets": "5.0.0",
+    "device": "NVIDIA L40S",
+    "lm_eval": "0.4.11",
+    "peak_cuda_allocated_bytes": 22611992576,
+    "python": "3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0]",
+    "slurm_job_id": "8340320",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.15.1"
+  },
+  "format": "basisserve.qwen3_8b.section3.short_quality.v1",
+  "installation": [
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.13748474419116974,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_000.safetensors",
+      "factor_sha256": "713b4c28e2f5d527aacfdf98fc24f61858a6ede659742b9c6f6d01fb92badd97",
+      "layer": 0,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.07036926597356796,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_001.safetensors",
+      "factor_sha256": "df5b48a718e8ee71f4dba38d909e020b1266a06c5c632427bbeea4ed442a4180",
+      "layer": 1,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.09412413835525513,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_002.safetensors",
+      "factor_sha256": "44e929aa0a64a95ebef68ed26bbba47e5b73081194f853fa527a65de96d2df33",
+      "layer": 2,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.07912429422140121,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_003.safetensors",
+      "factor_sha256": "3b14f9869c478f811d38480573a3b93b002b82a7ae66425403cc8629b7572230",
+      "layer": 3,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08124087750911713,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_004.safetensors",
+      "factor_sha256": "0bce4680fbe09d4c71794005346084231941135e46a24815e3c0adb19fcf2c42",
+      "layer": 4,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.10452664643526077,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_005.safetensors",
+      "factor_sha256": "0fec1cd7a3fdd20822fc3b8f15dce4f45c9c82c3b5dd9aaed3a23f728e5b64c0",
+      "layer": 5,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.09112951159477234,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_006.safetensors",
+      "factor_sha256": "135e14a02e9f85220e514b29fdec662fa6803a475c20df08d3a35d5a0a16fa82",
+      "layer": 6,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.07425883412361145,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_007.safetensors",
+      "factor_sha256": "0c25cb17df032e2d018f26b25757fde8a5c041cf1609527fb537c726264bf760",
+      "layer": 7,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.07778134196996689,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_008.safetensors",
+      "factor_sha256": "c73f9225365362233487c7107a18c0cc532c472873443eed0485a1622ecedab6",
+      "layer": 8,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08969684690237045,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_009.safetensors",
+      "factor_sha256": "789aba7c7c1488fde76579f82c657326b515cb88bce8747c015a7f7f842f2f8d",
+      "layer": 9,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08854895085096359,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_010.safetensors",
+      "factor_sha256": "dbd8ed822b17c7142acbf3b223e84b317b7571ab15f5e4a5562c60e453435ce1",
+      "layer": 10,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.07946392893791199,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_011.safetensors",
+      "factor_sha256": "6648f9c7049fecf96b1d6bad0582484010d832ea83ea4ae28286c403bf2f1da2",
+      "layer": 11,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08730898052453995,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_012.safetensors",
+      "factor_sha256": "68b1b7cf1d2e6968cd285cb20645506e9b4174aaa1e64c81e1198ee4d7549b07",
+      "layer": 12,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.09062200784683228,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_013.safetensors",
+      "factor_sha256": "a1fd78f9a19c1c2cc7c7f5915fab355001e2b68ce190dac5a8457374540f2c79",
+      "layer": 13,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.1015554815530777,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_014.safetensors",
+      "factor_sha256": "2597aee6f5a4b23d7540f0718662b987942b7718758dce4c39b223b4880b62b2",
+      "layer": 14,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.10090656578540802,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_015.safetensors",
+      "factor_sha256": "1c50ed42725716fd94fb05b01eba532c1ace91f26c9b15682d95729ac26f8957",
+      "layer": 15,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.07017707824707031,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_016.safetensors",
+      "factor_sha256": "bc9d5a947be01c55e9abd92f9fbd4db95a612c6afddc888473ad6b7d3136c289",
+      "layer": 16,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08321031928062439,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_017.safetensors",
+      "factor_sha256": "d69fc8107c372a7bd78e0a6ebe15d2b9fe50859e8be5d957d1d09189fc6244ff",
+      "layer": 17,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08318216353654861,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_018.safetensors",
+      "factor_sha256": "3e31395cdf4b7f2903dc8a1fc36928c2bcc587e9ffe2cd435ea9efe285e7b064",
+      "layer": 18,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08390608429908752,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_019.safetensors",
+      "factor_sha256": "8d81d129f2b1f3d7000f7aa8dbfdd9d9c573d474ea82f77a4d30522c843f5796",
+      "layer": 19,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08402267098426819,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_020.safetensors",
+      "factor_sha256": "f3bd2c4aa68d7018bbc0ef0c378a5982fa25681ad994ab7d84a00d2d3d50b556",
+      "layer": 20,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.0799599215388298,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_021.safetensors",
+      "factor_sha256": "e6ae3ef10dbdef724c5efbce2e2028c0141a66f1a7cc0c1d7d4d23ab2ab6e371",
+      "layer": 21,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.09206117689609528,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_022.safetensors",
+      "factor_sha256": "505b39eaddedf8551cd81d1c3d5a43e25717dd054f9ef0d5a76e6b21b82e7dd9",
+      "layer": 22,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.07913196086883545,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_023.safetensors",
+      "factor_sha256": "36bdf64a88c07bd38b677fe5790cf8057f7e30a2d364e7616bf43ce4d8ff3533",
+      "layer": 23,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08035196363925934,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_024.safetensors",
+      "factor_sha256": "83202cff4a21d754727b72d09139b46d26900b8c878937f1ed4cb9da7132b642",
+      "layer": 24,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08666437119245529,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_025.safetensors",
+      "factor_sha256": "39dcbc275625a9f760ee34a5e1af8afd5811d3989f4c4c940d702fda572a7c84",
+      "layer": 25,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08279826492071152,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_026.safetensors",
+      "factor_sha256": "6c59bc33cb74ccb03f016a5c432fae791c904aa4f4029e45c6c976ca1071ec7d",
+      "layer": 26,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.08475587517023087,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_027.safetensors",
+      "factor_sha256": "0b5e011efbd7bc1721c104db673ea71cbf14b3c36efdba26050cb8d3a0ef946c",
+      "layer": 27,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.06568609178066254,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_028.safetensors",
+      "factor_sha256": "f91121dc68e89d2803ba00d9e73af2ad1bca97a67d7b63112a2b48bb1fd0d0dc",
+      "layer": 28,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.06387670338153839,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_029.safetensors",
+      "factor_sha256": "1d909528917373ddddff62707d2f17910e729e3b2d9a0009ff52893dcc72d1ed",
+      "layer": 29,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.056264668703079224,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_030.safetensors",
+      "factor_sha256": "39d9cd23937abc601b699f1fb1b4bf0a39951f27e8790455d7405d8680094278",
+      "layer": 30,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.060696668922901154,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_031.safetensors",
+      "factor_sha256": "856361d3a693a9bdb7d14049f7e2fa54821f58ed64cb19b322d4a187e1a592cf",
+      "layer": 31,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.05212683230638504,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_032.safetensors",
+      "factor_sha256": "2aaa87079908b0f76dcb48e8a514ccfbdb1dcb73f9056459f191086d1bf61b13",
+      "layer": 32,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.05494273453950882,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_033.safetensors",
+      "factor_sha256": "dd1b900868910ad10dc3594d48c90e8481f4491b3d2019d6de17374ec4bff607",
+      "layer": 33,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.05855565518140793,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_034.safetensors",
+      "factor_sha256": "b8a26b02b140673a9ad469a0a2a3c1ffe0247fc7c754bc61e927c638a0f577ea",
+      "layer": 34,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    },
+    {
+      "cache_rank_per_physical_kv_head": 96,
+      "decoder_shape": [
+        32,
+        96,
+        4096
+      ],
+      "elapsed_seconds": 0.05761432647705078,
+      "encoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "factor_file": "layer_035.safetensors",
+      "factor_sha256": "96b30c1d038afe5c2a556d65d189c6d43248975bd503bf88512f090bf6cb27b1",
+      "layer": 35,
+      "maximum_dense_fold_error": 0.0,
+      "maximum_qr_product_error": 0.0,
+      "runtime": "rank-96 C1 coordinates padded into dense HF V/O slots"
+    }
+  ],
+  "mcq": null,
+  "method": "c1",
+  "model": {
+    "config_sha256": "3bd01d7ad7a2e203ecbbe84e24087a51c6d2a108ee4bcc42d0016bf49564983a",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4"
+  },
+  "protocol": {
+    "dense_k": true,
+    "full_dense_attention": true,
+    "limit": null,
+    "lm_eval_batch_size": 8,
+    "num_fewshot": 0,
+    "routing": false,
+    "tasks": [],
+    "uniform_value_rank": true,
+    "wikitext2_batch_size": 2,
+    "wikitext2_max_samples": null,
+    "wikitext2_sequence_length": 2048
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-19T05:24:51.984036+00:00",
+  "wikitext2": {
+    "batch_size": 2,
+    "chunks": 146,
+    "dataset": "wikitext2",
+    "elapsed_seconds": 30.655979871749878,
+    "loss_dtype": "float32",
+    "nll_sum": 593340.880859375,
+    "ppl": 7.28147877287521,
+    "seqlen": 2048,
+    "split": "test",
+    "tokens": 298862
+  }
+}

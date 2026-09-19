@@ -262,6 +262,33 @@ Uncertainty is the standard error over the eight paired evaluation documents.
   beyond their paired uncertainty. Increasing evaluation to 128 documents
   would cost approximately 16× more evaluation compute.
 
+### Short-context robustness after long-context calibration
+
+The same eight compressed checkpoints were also evaluated on the standard
+WikiText-2 test set with ordinary 2048-token windows and the pretrained RoPE
+configuration (`rope_scaling=None`). This evaluation does not use YaRN. Every
+condition scores the same 146 windows and 298,862 prediction tokens with PPL
+batch size 2. The Dense reference is `7.0025` under the same likelihood
+implementation.
+
+| Calibration length | R64 WT2 PPL ↓ | Δ vs. 2K | R96 WT2 PPL ↓ | Δ vs. 2K |
+|---:|---:|---:|---:|---:|
+| 2K | 8.3075 | 0 | 7.2646 | 0 |
+| 8K | 8.3802 | +0.0727 | **7.2295** | −0.0350 |
+| 32K | 8.3411 | +0.0336 | 7.2515 | −0.0131 |
+| 128K | **8.1949** | −0.1126 | 7.2815 | +0.0169 |
+
+![Short-context robustness after long calibration](plots/long_calibration_short_wt2.png)
+
+There is no monotonic short-context degradation as calibration length grows.
+At R64, 128K calibration is the best short-context result and improves PPL by
+`0.1126` over 2K calibration. At R96, all four results lie within `0.0520`
+PPL (`0.72%` of the minimum), with 8K best and 128K only `0.0169` above 2K.
+Thus the long-context gains reported above are not obtained by systematically
+sacrificing standard short-text likelihood. The small non-monotonic changes
+should be presented as robustness evidence, not as evidence that longer
+calibration inherently improves WikiText-2.
+
 ## 4. Per-KV-group SVD versus Joint C1
 
 ### Question
@@ -363,6 +390,7 @@ Summary commands:
 /home/zhangal/.conda/envs/basis/bin/python evaluation/summarize_qwen3_8b_section3.py --stage phase2
 /home/zhangal/.conda/envs/basis/bin/python evaluation/summarize_qwen3_8b_section3.py --stage wt2
 /home/zhangal/.conda/envs/basis/bin/python evaluation/summarize_qwen3_8b_section3.py --stage long
+/home/zhangal/.conda/envs/basis/bin/python evaluation/summarize_qwen3_8b_section3.py --stage long-short-wt2
 ```
 
 The fully expanded commands, exact paths, data hashes, environment metadata,
@@ -395,6 +423,11 @@ Evaluation tasks completed in `09:46–09:49`; all jobs exited with code `0:0`.
 - `long_context_calibration_documents.csv`: all 9 conditions × 8 documents.
 - `long_context_manifest.json`: hashes and provenance for the 128K evaluation.
 - `plots/long_context_calibration.{png,pdf}`: ΔNLL versus position bucket.
+- `long_calibration_short_wt2.csv` and
+  `long_calibration_short_wt2_manifest.json`: standard 2K WikiText-2 PPL for
+  all eight long-calibration checkpoints.
+- `plots/long_calibration_short_wt2.{png,pdf}`: short-context robustness by
+  calibration sequence length.
 - `group_svd_vs_joint.csv`: aggregate objective comparison.
 - `group_svd_vs_joint_layers.csv`: four compressed conditions × 36 layers.
 
@@ -407,9 +440,12 @@ Evaluation tasks completed in `09:46–09:49`; all jobs exited with code `0:0`.
   `5.0.0`, lm-eval `0.4.11`, PPL batch size 2, and MCQ batch size 8.
 - All nine long-context source JSON files contain eight documents, 1,048,568
   scored tokens, chunk size 128, Dense K, full dense attention, and no routing.
+- All eight short-context robustness results contain 146 WikiText-2 windows,
+  298,862 scored tokens, sequence length 2048, batch size 2, no YaRN, and were
+  evaluated on NVIDIA L40S by Slurm array `8340320`.
 - Every reported ΔNLL and paired-document standard error was independently
   recomputed from the document CSV.
 - Manifest artifact/source hashes match the current files.
-- Both plots were inspected visually.
+- All three plot families were inspected visually.
 - All eight experiment scripts pass `py_compile`; `git diff --check` passes.
 - `test_group_pooled_routed_svd_solves_damped_surrogate` passes.

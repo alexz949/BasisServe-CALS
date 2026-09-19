@@ -1,0 +1,129 @@
+{
+  "artifacts": {
+    "csv": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/long_calibration_short_wt2.csv",
+    "csv_sha256": "9ab277f8753f977907817951b2e4b3ff8592b6a37363ed2083290dad4e3ef413",
+    "plot_pdf": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/plots/long_calibration_short_wt2.pdf",
+    "plot_png": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/plots/long_calibration_short_wt2.png"
+  },
+  "format": "basisserve.qwen3_8b.section3.long_calibration_short_wt2.v1",
+  "protocol": {
+    "calibration_context_lengths": [
+      2048,
+      8192,
+      32768,
+      131072
+    ],
+    "calibration_tokens_per_condition": 1048576,
+    "dense_reference_ppl": 7.002509337166867,
+    "device": "NVIDIA L40S",
+    "evaluation_dataset": "WikiText-2",
+    "evaluation_sequence_length": 2048,
+    "evaluation_split": "test",
+    "evaluation_tokens": 298862,
+    "evaluation_windows": 146,
+    "ppl_batch_size": 2,
+    "ranks_per_physical_kv_head": [
+      64,
+      96
+    ],
+    "rope_scaling": null,
+    "slurm_job_id": "8340320"
+  },
+  "source_results": [
+    {
+      "method": "Dense",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/ICLR-results/qwen3-8b/quality/Q3-8B-Dense/result.json",
+      "reused_existing_result": true,
+      "sha256": "f2db27fdcc1fbc67d2904a822413f4272d4760327edeaad8f7b96ea83ec3d571"
+    },
+    {
+      "calibration_context_length": 2048,
+      "checkpoint_sha256": "4d4c779ec43558362ffc706aa0c561c5e79cf96a996b19bfc006e7c7bf4bdaa4",
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/2k/c1/r64 --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_2k_r64 --skip-mcq --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_2k_r64/results.json",
+      "rank": 64,
+      "reused_existing_result": false,
+      "sha256": "76e890c89f49b8e0a7855e67cb167f3a102d2175c87eaf3bc8dec91f17c33e2e",
+      "slurm_job_id": "8340321"
+    },
+    {
+      "calibration_context_length": 2048,
+      "checkpoint_sha256": "0a6d3417fdffad292ec842248c28c10d6add2a7eefab477c48f62e14711ca470",
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/2k/c1/r96 --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_2k_r96 --skip-mcq --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_2k_r96/results.json",
+      "rank": 96,
+      "reused_existing_result": false,
+      "sha256": "bf0e60325e70ec33f40b50f85b691c81423a5c0ab1be9d36ac003aee16e2f251",
+      "slurm_job_id": "8340322"
+    },
+    {
+      "calibration_context_length": 8192,
+      "checkpoint_sha256": "25864668e3992ece11711dcec43775d25708cfaf2fdc51cde742d0a756e419f5",
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/8k/c1/r64 --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_8k_r64 --skip-mcq --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_8k_r64/results.json",
+      "rank": 64,
+      "reused_existing_result": false,
+      "sha256": "97e4b1effaa8b7d7e0607a0491fc28e02fa5a29a0b696725924ff3cb21ff818b",
+      "slurm_job_id": "8340323"
+    },
+    {
+      "calibration_context_length": 8192,
+      "checkpoint_sha256": "8105f3e14d567d9b4a74eb7dc71417439c6e56808bfd586d16fb74b9e56e420a",
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/8k/c1/r96 --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_8k_r96 --skip-mcq --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_8k_r96/results.json",
+      "rank": 96,
+      "reused_existing_result": false,
+      "sha256": "ddee41870c172a15917b58b9462234045b01dd9c6d684787b1c89a82257349ff",
+      "slurm_job_id": "8340324"
+    },
+    {
+      "calibration_context_length": 32768,
+      "checkpoint_sha256": "c9b00139dc214722cdc3c2919af4af98536d0380a744deee1ef29766e39cafed",
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/32k/c1/r64 --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_32k_r64 --skip-mcq --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_32k_r64/results.json",
+      "rank": 64,
+      "reused_existing_result": false,
+      "sha256": "f2643691506477cc221aebc9b56d9eb214fa032c5676486a431a503e7a4ce1d3",
+      "slurm_job_id": "8340325"
+    },
+    {
+      "calibration_context_length": 32768,
+      "checkpoint_sha256": "d884d2377231012c2c5cf830187511e78001d399d889cd285756f38880849581",
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/32k/c1/r96 --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_32k_r96 --skip-mcq --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_32k_r96/results.json",
+      "rank": 96,
+      "reused_existing_result": false,
+      "sha256": "6397f10c996bd2643fa0ab74b8a4aaed8e82c76d063ac5386c3a85c0f0a49f79",
+      "slurm_job_id": "8340326"
+    },
+    {
+      "calibration_context_length": 131072,
+      "checkpoint_sha256": "8011c85cf84267d6ec5bf74a78c99f8b89f44a62a77a51cffb31374ec0d07f0e",
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/128k/c1/r64 --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_128k_r64 --skip-mcq --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_128k_r64/results.json",
+      "rank": 64,
+      "reused_existing_result": false,
+      "sha256": "e0b8e1e180f2cb0e4be7ba900ba4684b868d879af8d4e6f58fc0d109a7731f50",
+      "slurm_job_id": "8340327"
+    },
+    {
+      "calibration_context_length": 131072,
+      "checkpoint_sha256": "a4a510d733d6fee201daccd51a0c0d97deffe244035b9446f48e77bee5c0c4e3",
+      "command": "evaluation/eval_qwen3_8b_section3_short.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --method c1 --checkpoint-dir results/section3_ablation/qwen3_8b_base/formal/long_context/calibration/128k/c1/r96 --output-dir results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_128k_r96 --skip-mcq --ppl-batch-size 2 --device cuda:0 --torch-num-threads 4",
+      "method": "Joint C1",
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/section3_ablation/qwen3_8b_base/formal/long_context/short_wt2/c1_cal_128k_r96/results.json",
+      "rank": 96,
+      "reused_existing_result": false,
+      "sha256": "09952cd1d44dc93d5cef5b61cd32e7a07a7213b6dcca7a7a5b3babfdad6726c4",
+      "slurm_job_id": "8340320"
+    }
+  ],
+  "status": "complete"
+}

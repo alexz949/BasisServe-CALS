@@ -973,10 +973,230 @@ def summarize_long_context(model_root: Path, output_root: Path) -> int:
     return 0
 
 
+def _plot_long_calibration_short_wt2(
+    rows: Sequence[Mapping[str, Any]], output_root: Path
+) -> None:
+    labels = ("2K", "8K", "32K", "128K")
+    x = list(range(len(labels)))
+    dense_ppl = float(
+        next(row["ppl"] for row in rows if row["method"] == "Dense")
+    )
+    colors = {64: "#2ca02c", 96: "#d62728"}
+    fig, axes = plt.subplots(1, 2, figsize=(8.8, 3.5), constrained_layout=True)
+    for axis, rank in zip(axes, (64, 96)):
+        selected = sorted(
+            (
+                row
+                for row in rows
+                if row["method"] == "Joint C1" and int(row["rank"]) == rank
+            ),
+            key=lambda row: int(row["calibration_context"]),
+        )
+        axis.plot(
+            x,
+            [float(row["ppl"]) for row in selected],
+            color=colors[rank],
+            marker="o",
+            linewidth=1.8,
+            label=f"Joint C1 R{rank}",
+        )
+        axis.axhline(
+            dense_ppl,
+            color="#333333",
+            linestyle="--",
+            linewidth=1.2,
+            label=f"Dense ({dense_ppl:.4f})",
+        )
+        axis.set_xticks(x)
+        axis.set_xticklabels(labels)
+        axis.set_xlabel("Calibration sequence length")
+        axis.set_title(f"({'a' if rank == 64 else 'b'}) R{rank}")
+        axis.grid(alpha=0.25)
+        axis.legend(frameon=False, fontsize=8)
+    axes[0].set_ylabel("WikiText-2 PPL")
+    plot_dir = output_root / "plots"
+    plot_dir.mkdir(parents=True, exist_ok=True)
+    fig.savefig(
+        plot_dir / "long_calibration_short_wt2.pdf", bbox_inches="tight"
+    )
+    fig.savefig(
+        plot_dir / "long_calibration_short_wt2.png",
+        bbox_inches="tight",
+        dpi=300,
+    )
+    plt.close(fig)
+
+
+def summarize_long_calibration_short_wt2(
+    model_root: Path, output_root: Path
+) -> int:
+    dense = _load(DENSE_RESULT)
+    if dense is None:
+        return 2
+    dense_ppl, _, _ = _quality(dense)
+    long_root = model_root / "formal/long_context"
+    sequence_counts = {2048: 512, 8192: 128, 32768: 32, 131072: 8}
+    rows: list[dict[str, Any]] = [
+        {
+            "model": "Qwen3-8B-Base",
+            "method": "Dense",
+            "rank": 128,
+            "calibration_context": "",
+            "num_calibration_sequences": 0,
+            "calibration_tokens": 0,
+            "evaluation_dataset": "WikiText-2",
+            "evaluation_split": "test",
+            "evaluation_sequence_length": 2048,
+            "evaluation_windows": 146,
+            "evaluation_tokens": 298862,
+            "rope_scaling": "none",
+            "ppl": dense_ppl,
+            "delta_ppl_vs_dense": 0.0,
+            "delta_nll_vs_dense": 0.0,
+            "checkpoint_path": str(DENSE_RESULT.parent),
+            "evaluation_path": str(DENSE_RESULT),
+        }
+    ]
+    source_results: list[dict[str, Any]] = [
+        {
+            "method": "Dense",
+            "path": str(DENSE_RESULT),
+            "sha256": _sha256(DENSE_RESULT),
+            "reused_existing_result": True,
+        }
+    ]
+    for context_length, label in LONG_CONTEXTS:
+        for rank in (64, 96):
+            checkpoint_path = long_root / f"calibration/{label}/c1/r{rank}"
+            evaluation_path = (
+                long_root / f"short_wt2/c1_cal_{label}_r{rank}/results.json"
+            )
+            quality = _load(evaluation_path)
+            if quality is None:
+                return 2
+            metric = quality["wikitext2"]
+            protocol_ok = all(
+                (
+                    metric["dataset"] == "wikitext2",
+                    metric["split"] == "test",
+                    int(metric["seqlen"]) == 2048,
+                    int(metric["batch_size"]) == 2,
+                    int(metric["chunks"]) == 146,
+                    int(metric["tokens"]) == 298862,
+                    quality["environment"]["device"] == "NVIDIA L40S",
+                )
+            )
+            if not _check(protocol_ok, f"protocol mismatch for {label} R{rank}"):
+                return 2
+            ppl = float(metric["ppl"])
+            rows.append(
+                {
+                    "model": "Qwen3-8B-Base",
+                    "method": "Joint C1",
+                    "rank": rank,
+                    "calibration_context": context_length,
+                    "num_calibration_sequences": sequence_counts[context_length],
+                    "calibration_tokens": 1048576,
+                    "evaluation_dataset": "WikiText-2",
+                    "evaluation_split": "test",
+                    "evaluation_sequence_length": 2048,
+                    "evaluation_windows": int(metric["chunks"]),
+                    "evaluation_tokens": int(metric["tokens"]),
+                    "rope_scaling": "none",
+                    "ppl": ppl,
+                    "delta_ppl_vs_dense": ppl - dense_ppl,
+                    "delta_nll_vs_dense": math.log(ppl) - math.log(dense_ppl),
+                    "checkpoint_path": str(checkpoint_path),
+                    "evaluation_path": str(evaluation_path),
+                }
+            )
+            source_results.append(
+                {
+                    "method": "Joint C1",
+                    "rank": rank,
+                    "calibration_context_length": context_length,
+                    "checkpoint_sha256": _sha256(checkpoint_path / "results.json"),
+                    "path": str(evaluation_path),
+                    "sha256": _sha256(evaluation_path),
+                    "slurm_job_id": quality["environment"].get("slurm_job_id"),
+                    "command": quality.get("command"),
+                    "reused_existing_result": False,
+                }
+            )
+    csv_path = output_root / "long_calibration_short_wt2.csv"
+    _write_csv(
+        csv_path,
+        rows,
+        (
+            "model",
+            "method",
+            "rank",
+            "calibration_context",
+            "num_calibration_sequences",
+            "calibration_tokens",
+            "evaluation_dataset",
+            "evaluation_split",
+            "evaluation_sequence_length",
+            "evaluation_windows",
+            "evaluation_tokens",
+            "rope_scaling",
+            "ppl",
+            "delta_ppl_vs_dense",
+            "delta_nll_vs_dense",
+            "checkpoint_path",
+            "evaluation_path",
+        ),
+    )
+    _plot_long_calibration_short_wt2(rows, output_root)
+    manifest_path = output_root / "long_calibration_short_wt2_manifest.json"
+    _write_json(
+        manifest_path,
+        {
+            "format": "basisserve.qwen3_8b.section3.long_calibration_short_wt2.v1",
+            "status": "complete",
+            "protocol": {
+                "calibration_context_lengths": [
+                    context for context, _ in LONG_CONTEXTS
+                ],
+                "ranks_per_physical_kv_head": [64, 96],
+                "calibration_tokens_per_condition": 1048576,
+                "evaluation_dataset": "WikiText-2",
+                "evaluation_split": "test",
+                "evaluation_sequence_length": 2048,
+                "evaluation_windows": 146,
+                "evaluation_tokens": 298862,
+                "ppl_batch_size": 2,
+                "rope_scaling": None,
+                "dense_reference_ppl": dense_ppl,
+                "slurm_job_id": "8340320",
+                "device": "NVIDIA L40S",
+            },
+            "source_results": source_results,
+            "artifacts": {
+                "csv": str(csv_path),
+                "csv_sha256": _sha256(csv_path),
+                "plot_pdf": str(
+                    output_root / "plots/long_calibration_short_wt2.pdf"
+                ),
+                "plot_png": str(
+                    output_root / "plots/long_calibration_short_wt2.png"
+                ),
+            },
+        },
+    )
+    print(
+        f"[Complete] Short-context robustness CSV, manifest, and plots under {output_root}",
+        flush=True,
+    )
+    return 0
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--stage", choices=("phase2", "wt2", "long"), default="phase2"
+        "--stage",
+        choices=("phase2", "wt2", "long", "long-short-wt2"),
+        default="phase2",
     )
     parser.add_argument("--model-root", type=Path, default=DEFAULT_MODEL_ROOT)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
@@ -991,8 +1211,10 @@ def main() -> None:
         status = summarize_phase2(model_root, output_root)
     elif args.stage == "wt2":
         status = summarize_wt2(model_root, output_root)
-    else:
+    elif args.stage == "long":
         status = summarize_long_context(model_root, output_root)
+    else:
+        status = summarize_long_calibration_short_wt2(model_root, output_root)
     if status:
         sys.exit(status)
 
