@@ -1,0 +1,121 @@
+{
+  "status": "complete",
+  "model": {
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Base-8K/snapshots/94ea861e008c2dfced3e8e1302094024077aa04e",
+    "config_sha256": "81e822f85d6471312bcc0ccd34cc62789075376ecedca7fde0e451584943368b",
+    "safetensors_index_sha256": "2a6b20ccb9b00a4034d79714ef24ae1817eaf4dc3541198542aa25c7cf140f51"
+  },
+  "compression": {
+    "method": "c1-two-sided-kl",
+    "allocation": "two_sided_factorized_terminal_kl_alpha1",
+    "equivalent_rank_target": 96,
+    "layer_ranks": [
+      [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112
+      ]
+    ]
+  },
+  "layers": [
+    {
+      "layer": 7,
+      "file": "layer_007.safetensors",
+      "ranks": [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      "sha256": "6d6c2d2858fb1d6ab101c195009411d7b3de0123f31eb4d4c2ff3b71ef96f7e2"
+    },
+    {
+      "layer": 18,
+      "file": "layer_018.safetensors",
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "sha256": "7fb1f53897128bd22266f2802bb636bb239d5c5f6e7c12e9f170604fec1d84bc"
+    },
+    {
+      "layer": 29,
+      "file": "layer_029.safetensors",
+      "ranks": [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      "sha256": "bdddb52b4e5a490f473f31f8aced0f2332308935a1b48a7bc0d4993b88be1a5c"
+    },
+    {
+      "layer": 40,
+      "file": "layer_040.safetensors",
+      "ranks": [
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112
+      ],
+      "sha256": "e91b7459c9600e3ca18498a985ed946712e666658af40279b31fe49f07b2ab5a"
+    }
+  ],
+  "artifact": {
+    "file": "results.json",
+    "sha256": "bb5d21195eb092252e8ba33886b34025d5ce31b7c69914420957f5bcfe01b14e"
+  }
+}

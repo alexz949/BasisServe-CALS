@@ -87,6 +87,10 @@ def main():
     assert all(p.device.type == 'cuda' for p in model.parameters())
     assert install_mamba_device_guards(model) == smoke['guarded_mamba_layers']
     targets = discover_nemotron_h_c1_targets(model)
+    config = model.config
+    head_dim = int(getattr(config, 'attention_head_dim', 0)
+        or getattr(config, 'head_dim', 0)
+        or config.hidden_size // config.num_attention_heads)
     if args.layers is not None:
         selected = {int(i) for i in args.layers.split(',')}
         assert selected <= {t.layer_index for t in targets}
@@ -140,8 +144,10 @@ def main():
             protocol=protocol,
             layer_kind=kind, layers=list(capture.modules), artifacts=artifacts,
             model=dict(path=str(model_path), config_sha256=audit['config_sha256'], model_type='nemotron_h',
-                attention_type='gqa', hidden_size=8192, num_hidden_layers=98,
-                num_attention_heads=64, num_key_value_heads=8, head_dim=128),
+                attention_type='gqa', hidden_size=config.hidden_size,
+                num_hidden_layers=config.num_hidden_layers,
+                num_attention_heads=config.num_attention_heads,
+                num_key_value_heads=config.num_key_value_heads, head_dim=head_dim),
             calibration=dict(storage='normalized_covariance_sufficient_statistics',
                 window_count=len(ids), fit_windows=args.fit_windows, heldout_windows=args.heldout_windows,
                 sequence_length=args.sequence_length, positions_per_window=args.sequence_length,

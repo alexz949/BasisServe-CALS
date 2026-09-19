@@ -1,4 +1,4 @@
-"""Fit the seven-rank Nemotron attention V bank with ALS12 and fixed CG16."""
+"""Fit a Nemotron-H attention V bank with configurable ALS and fixed CG16."""
 import argparse
 from pathlib import Path
 import sys
@@ -33,11 +33,19 @@ def main():
     assert sha256(model_path / 'config.json') == audit['config_sha256']
     config = read_json(model_path / 'config.json')
     head_dim = config.get('head_dim') or config['hidden_size'] // config['num_attention_heads']
-    assert (config['model_type'], config['num_hidden_layers'], config['hidden_size'],
-        config['num_attention_heads'], config['num_key_value_heads'], head_dim) == (
-            'nemotron_h', 98, 8192, 64, 8, 128)
+    assert config['model_type'] == 'nemotron_h'
+    assert head_dim == 128 and config['num_key_value_heads'] == 8
     layers = [row['layer'] for row in audit['layers'] if row['kind'] == 'full_attention']
-    fitter.activate_nemotron_h_profile(layers)
+    fitter.activate_nemotron_h_profile(
+        layers,
+        num_layers=config['num_hidden_layers'],
+        hidden_size=config['hidden_size'],
+        num_heads=config['num_attention_heads'],
+        num_kv_heads=config['num_key_value_heads'],
+        head_dim=head_dim,
+        encoder_sweeps=6,
+        model_label=Path(model_path).parents[1].name.replace('models--nvidia--', ''),
+    )
     assert set(fitter._parse_layers(args.layers)) <= set(layers)
     if args.command_name == 'fit-shard':
         snapshot = read_json(Path(args.snapshot_dir) / 'manifest.json')

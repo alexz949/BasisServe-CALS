@@ -4,8 +4,10 @@ import pytest
 import torch
 
 from evaluation.allocate_nemotron_h_v96 import (
-    LAYERS, RANKS, allocate, close_candidate, _fold_ragged_to_padded_weights,
+    RANKS, allocate, close_candidate, _fold_ragged_to_padded_weights,
 )
+
+LAYERS=(7,18,29,40)
 
 
 def test_closed_candidate_preserves_subspaces_and_improves_deployed_reconstruction():
@@ -54,13 +56,14 @@ def test_allocation_is_attention_only_exact_mean96_and_global_minimum():
         fit_config=dict(cache_rank_per_head=rank),
         heldout=dict(factor_dtype_relative_mse=(128 - rank) / 128)) for layer in LAYERS])
         for rank in RANKS}
-    result = allocate(results, [0.1, 0.2, 0.3, 0.4, 0.5], [-0.5, -0.4, -0.3, -0.2, -0.1])
+    result = allocate(results, [0.1, 0.2, 0.3, 0.4], [-0.5, -0.4, -0.3, -0.2],
+        layers=LAYERS,target_mean_rank=96)
     selected = result['layer_ranks']
-    assert len(selected) == 5 and sum(selected) == 5 * 96
+    assert len(selected) == 4 and sum(selected) == 4 * 96
     curves = result['predicted_costs']
     minimum = min(sum(curve[rank] for curve, rank in zip(curves, ranks))
-        for ranks in itertools.product(RANKS, repeat=5) if sum(ranks) == 480)
+        for ranks in itertools.product(RANKS, repeat=4) if sum(ranks) == 384)
     assert result['predicted_cost'] == pytest.approx(minimum)
     results[32]['records'][0]['layer'] = 0
     with pytest.raises(AssertionError):
-        allocate(results, [0.1] * 5, [-0.1] * 5)
+        allocate(results, [0.1] * 4, [-0.1] * 4,layers=LAYERS,target_mean_rank=96)

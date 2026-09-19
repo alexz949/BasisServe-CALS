@@ -1,0 +1,242 @@
+{
+  "status": "complete",
+  "format": "basisserve.nemotron_h.palu_v_only_fisher.v1",
+  "model": {
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Base-8K/snapshots/94ea861e008c2dfced3e8e1302094024077aa04e",
+    "config_sha256": "81e822f85d6471312bcc0ccd34cc62789075376ecedca7fde0e451584943368b",
+    "index_sha256": "2a6b20ccb9b00a4034d79714ef24ae1817eaf4dc3541198542aa25c7cf140f51",
+    "revision": "94ea861e008c2dfced3e8e1302094024077aa04e"
+  },
+  "compression": {
+    "target": "full_attention_value_cache_only",
+    "method": "PaLU M-LRD",
+    "method_slug": "mlrd",
+    "allocation": "palu_fisher_exact_block_budget",
+    "rank_block_size": 32,
+    "num_query_heads": 32,
+    "num_physical_kv_heads": 8,
+    "head_dim": 128,
+    "head_group_size": 1,
+    "groups": 8,
+    "group_width": 128,
+    "equivalent_mean_rank_per_head": 64,
+    "requested_retained_v_ratio": 0.5,
+    "realized_retained_v_ratio": 0.5,
+    "layer_ranks": [
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ]
+    ],
+    "full_attention_layers": [
+      7,
+      18,
+      29,
+      40
+    ],
+    "attention_o_proj": "dense_unchanged",
+    "mamba2_wo": "dense_unchanged",
+    "stored_factor_dtype": "torch.bfloat16",
+    "factorization": "PaLU activation-aware balanced SVD from W C W^T in float64"
+  },
+  "calibration": {
+    "dataset": "allenai/c4 train",
+    "fit_windows": 256,
+    "heldout_windows": 64,
+    "sequence_length": 2048,
+    "windows_sha256": "eb1927793098ea9fb324105a0c53ca695649995024322c15e2ca1b5893697322",
+    "covariance_manifest_sha256": "261d4bf0a26e752eff4eeb8fd75b378c2a7e1cb004b74cc8b998a754fade5ff5",
+    "fisher_result": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/nemotron_h_8b/palu/fisher.json",
+    "fisher_sha256": "848e109b6e81a3f605db0318932a8824581369f380f51203e205f37856265957",
+    "fisher_loss": "official PaLU shifted-input/shifted-label HF causal-LM loss"
+  },
+  "artifact": {
+    "file": "palu_v_factors.safetensors",
+    "sha256": "8c99e3a95f5b763a4b4b2f392786009d910223d05cb6c8d26aec1eb5d8a46811",
+    "tensor_count": 8,
+    "bytes": 17302296
+  },
+  "layers": [
+    {
+      "layer": 7,
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "writer_shape": [
+        512,
+        4096
+      ],
+      "decoder_shape": [
+        8,
+        128,
+        64
+      ],
+      "quantized_fit_relative_error": 0.4758082797985765,
+      "quantized_heldout_relative_error": 0.4796214098831098
+    },
+    {
+      "layer": 18,
+      "ranks": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      "writer_shape": [
+        768,
+        4096
+      ],
+      "decoder_shape": [
+        8,
+        128,
+        96
+      ],
+      "quantized_fit_relative_error": 0.3500389256775423,
+      "quantized_heldout_relative_error": 0.35336323347000603
+    },
+    {
+      "layer": 29,
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "writer_shape": [
+        512,
+        4096
+      ],
+      "decoder_shape": [
+        8,
+        128,
+        64
+      ],
+      "quantized_fit_relative_error": 0.5544233370967322,
+      "quantized_heldout_relative_error": 0.5584086592841369
+    },
+    {
+      "layer": 40,
+      "ranks": [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      "writer_shape": [
+        256,
+        4096
+      ],
+      "decoder_shape": [
+        8,
+        128,
+        32
+      ],
+      "quantized_fit_relative_error": 0.7742799021693619,
+      "quantized_heldout_relative_error": 0.7742230157948595
+    }
+  ],
+  "architecture": {
+    "full_attention_layers": [
+      7,
+      18,
+      29,
+      40
+    ],
+    "mamba_layers": [
+      0,
+      2,
+      4,
+      6,
+      9,
+      11,
+      13,
+      15,
+      17,
+      20,
+      22,
+      24,
+      26,
+      28,
+      31,
+      33,
+      35,
+      37,
+      39,
+      42,
+      44,
+      46,
+      48,
+      50
+    ]
+  },
+  "provenance": {
+    "native_audit_sha256": "6746b0eb26ae041053456d758eff2626cb45bd5806a0c55aee1c1ef015579c54",
+    "full_smoke_sha256": "545d25e7cd14757f5b8e88d72d5b0d492cbe7b04328dce2e9a2df8b996b8e120",
+    "official_palu_commit": "bb22666e2ef96707e8dd21d93fc00146c2e0d615",
+    "source_sha256": "b5120d48b4dd394733d207dce97069f734c8af9e7d3dd979b2ec92dd72ac1288",
+    "source_files": {
+      "evaluation/reproduce_palu_paper_llama2_distributed.py": "57fbcfc721d876c012e0a15a397166975c8ca3f403055271bcd2616ca12dd254",
+      "evaluation/collect_gqa_palu_fisher.py": "de09ab0fcb073089eeaceb41147b30cd1bbb8d9ab8b122312c9bdcbc7b59e63c"
+    }
+  },
+  "command": "evaluation/nemotron_h_palu.py build --audit results/nemotron_h_8b/manifests/native_audit.json --full-smoke results/nemotron_h_8b/manifests/full_smoke.json --windows results/nemotron_h_8b/calibration/windows.safetensors --fisher results/nemotron_h_8b/palu/fisher.json --covariances results/nemotron_h_8b/palu/v_covariances --output results/nemotron_h_8b/palu/checkpoints --device cuda:0",
+  "environment": {
+    "conda_environment": null
+  },
+  "seconds": 3.1763812005519867
+}

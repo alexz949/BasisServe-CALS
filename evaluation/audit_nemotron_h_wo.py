@@ -1,4 +1,4 @@
-"""Audit all 45 fitted Mamba Wo artifacts before paired RULER evaluation."""
+"""Audit every fitted Nemotron-H Mamba Wo artifact."""
 import argparse
 import math
 from pathlib import Path
@@ -6,11 +6,11 @@ import sys
 
 import torch
 from safetensors import safe_open
+from transformers import AutoConfig
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from evaluation.v96kl_common import configure, read_json, write_json, sha256
-from evaluation.k_routing_config import routing_config
 from evaluation.install_nemotron_h_wo import audit_nemotron_h_wo
 
 
@@ -21,7 +21,8 @@ def main():
     args=parser.parse_args()
     configure()
     identity=read_json(args.identity)
-    config=routing_config(identity,rope='native',sequence_length=65536)
+    config=AutoConfig.from_pretrained(identity['model'],local_files_only=True,
+        trust_remote_code=False)
     report=audit_nemotron_h_wo(config,args.identity,args.audit,args.bank)
     protocol=report['protocol']
     covariance_path=args.covariances/'manifest.json'
@@ -32,8 +33,9 @@ def main():
     assert covariance['calibration']['fit_windows']==256
     assert covariance['calibration']['heldout_windows']==64
     assert covariance['calibration']['sequence_length']==2048
-    assert protocol['fit']['encoder_sweeps']==protocol['fit']['minimum_encoder_sweeps']==12
-    assert protocol['tp']==4 and protocol['source_rank']==1536
+    assert protocol['fit']['encoder_sweeps']==protocol['fit']['minimum_encoder_sweeps']==6
+    assert protocol['fit']['encoder_cg_iterations']==16
+    assert protocol['tp']==4
     expected={int(key) for key in report['layers']}
     seen=set()
     for shard in range(4):
@@ -48,13 +50,17 @@ def main():
         path=args.bank/f'layer_{layer:03d}.json'
         record=read_json(path)
         assert record['covariance_sha256']==covariance['artifacts'][str(layer)]['sha256']
-        assert record['diagnostics']['encoder_sweeps_completed']==12
-        assert 0<=record['selected_sweep']<=12
+        assert record['diagnostics']['encoder_sweeps_completed']==6
+        assert 0<=record['selected_sweep']<=6
         values={name:record[name] for name in ('fit_relative_mse','heldout_relative_mse',
             'quantized_fit_relative_mse','quantized_heldout_relative_mse')}
         assert all(math.isfinite(value) and value>=0 for value in values.values())
         with safe_open(str(path.with_suffix('.safetensors')),framework='pt',device='cpu') as tensors:
-            shapes={'source_encoders':(4,4096,1536),'source_decoders':(4,1536,8192)}
+            target=next(row for row in read_json(args.audit)['layers'] if row['layer']==layer)
+            source_width=target['input_width']//protocol['tp']
+            source_rank=protocol['source_rank']
+            shapes={'source_encoders':(protocol['tp'],source_width,source_rank),
+                'source_decoders':(protocol['tp'],source_rank,target['output_width'])}
             assert set(tensors.keys())==set(shapes)
             for name,shape in shapes.items():
                 tensor=tensors.get_tensor(name)
@@ -63,7 +69,7 @@ def main():
                 del tensor
         metrics[str(layer)]=values
         print('VERIFIED MAMBA WO',layer,values,flush=True)
-    write_json(args.output,dict(status='complete',verified_layers=45,wo=report,metrics=metrics,
+    write_json(args.output,dict(status='complete',verified_layers=len(expected),wo=report,metrics=metrics,
         source_sha256=sha256(__file__)))
 
 

@@ -1,0 +1,1004 @@
+{
+  "status": "complete",
+  "format": "basisserve.nemotron_h.palu_quality_summary.v1",
+  "label": "Nemotron-H-56B-Base-8K",
+  "protocol": {
+    "calibration": "allenai/c4 train, 256x2048 Fisher and V-input covariance fit + 64x2048 covariance heldout",
+    "allocation": "PaLU double-shift Fisher weighting with an exact global mean-rank budget in blocks of 32",
+    "factorization": "PaLU activation-aware balanced whitened SVD, BF16 factors",
+    "targets": "full-attention V only; attention o_proj and Mamba2 Wo dense",
+    "quality": {
+      "c4": "128 document-disjoint validation windows, 2048 tokens, FP32 loss",
+      "max_length": 4096,
+      "metric_selection": "acc_norm when present, otherwise acc",
+      "num_fewshot": 0,
+      "tasks": [
+        "arc_easy",
+        "arc_challenge",
+        "hellaswag",
+        "piqa",
+        "winogrande",
+        "boolq",
+        "openbookqa"
+      ],
+      "wikitext2": "full test corpus, 2048-token windows, FP32 loss"
+    }
+  },
+  "dense": {
+    "average_accuracy": 0.764692439397224,
+    "c4_validation_128_ppl": 7.013512697415575,
+    "task_accuracy": [
+      {
+        "metric": "acc_norm",
+        "task": "arc_easy",
+        "value": 0.851010101010101
+      },
+      {
+        "metric": "acc_norm",
+        "task": "arc_challenge",
+        "value": 0.636518771331058
+      },
+      {
+        "metric": "acc_norm",
+        "task": "hellaswag",
+        "value": 0.8702449711212906
+      },
+      {
+        "metric": "acc_norm",
+        "task": "piqa",
+        "value": 0.85310119695321
+      },
+      {
+        "metric": "acc",
+        "task": "winogrande",
+        "value": 0.8145224940805051
+      },
+      {
+        "metric": "acc",
+        "task": "boolq",
+        "value": 0.8394495412844036
+      },
+      {
+        "metric": "acc_norm",
+        "task": "openbookqa",
+        "value": 0.488
+      }
+    ],
+    "wikitext2_ppl": 3.6508686611881602
+  },
+  "quality": {
+    "mlrd_r64": {
+      "wikitext2_ppl": 4.0546602844210256,
+      "wikitext2_relative_change": 0.11060151999591605,
+      "c4_ppl": 7.35166828729241,
+      "c4_relative_change": 0.04821486813611142,
+      "mcq_average": 0.7595497103947515,
+      "mcq_point_change": -0.5142729002472479,
+      "tasks": [
+        {
+          "metric": "acc_norm",
+          "task": "arc_easy",
+          "value": 0.8535353535353535
+        },
+        {
+          "metric": "acc_norm",
+          "task": "arc_challenge",
+          "value": 0.6237201365187713
+        },
+        {
+          "metric": "acc_norm",
+          "task": "hellaswag",
+          "value": 0.8628759211312488
+        },
+        {
+          "metric": "acc_norm",
+          "task": "piqa",
+          "value": 0.8520130576713819
+        },
+        {
+          "metric": "acc",
+          "task": "winogrande",
+          "value": 0.8074191002367798
+        },
+        {
+          "metric": "acc",
+          "task": "boolq",
+          "value": 0.8412844036697248
+        },
+        {
+          "metric": "acc_norm",
+          "task": "openbookqa",
+          "value": 0.476
+        }
+      ],
+      "seconds": 4993.307059243321
+    },
+    "mlrd_r96": {
+      "wikitext2_ppl": 3.741140190606863,
+      "wikitext2_relative_change": 0.02472604133322176,
+      "c4_ppl": 7.08735429941674,
+      "c4_relative_change": 0.010528476269583864,
+      "mcq_average": 0.7649161909556834,
+      "mcq_point_change": 0.02237515584594396,
+      "tasks": [
+        {
+          "metric": "acc_norm",
+          "task": "arc_easy",
+          "value": 0.8556397306397306
+        },
+        {
+          "metric": "acc_norm",
+          "task": "arc_challenge",
+          "value": 0.636518771331058
+        },
+        {
+          "metric": "acc_norm",
+          "task": "hellaswag",
+          "value": 0.8692491535550687
+        },
+        {
+          "metric": "acc_norm",
+          "task": "piqa",
+          "value": 0.8536452665941241
+        },
+        {
+          "metric": "acc",
+          "task": "winogrande",
+          "value": 0.8145224940805051
+        },
+        {
+          "metric": "acc",
+          "task": "boolq",
+          "value": 0.8388379204892966
+        },
+        {
+          "metric": "acc_norm",
+          "task": "openbookqa",
+          "value": 0.486
+        }
+      ],
+      "seconds": 4991.018874697387
+    },
+    "glrd4_r64": {
+      "wikitext2_ppl": 3.8371889215130826,
+      "wikitext2_relative_change": 0.05103450099579465,
+      "c4_ppl": 7.155668860487824,
+      "c4_relative_change": 0.020268896515241552,
+      "mcq_average": 0.7590896891781576,
+      "mcq_point_change": -0.5602750219066421,
+      "tasks": [
+        {
+          "metric": "acc_norm",
+          "task": "arc_easy",
+          "value": 0.8493265993265994
+        },
+        {
+          "metric": "acc_norm",
+          "task": "arc_challenge",
+          "value": 0.6237201365187713
+        },
+        {
+          "metric": "acc_norm",
+          "task": "hellaswag",
+          "value": 0.8669587731527584
+        },
+        {
+          "metric": "acc_norm",
+          "task": "piqa",
+          "value": 0.85310119695321
+        },
+        {
+          "metric": "acc",
+          "task": "winogrande",
+          "value": 0.8105761641673244
+        },
+        {
+          "metric": "acc",
+          "task": "boolq",
+          "value": 0.8339449541284404
+        },
+        {
+          "metric": "acc_norm",
+          "task": "openbookqa",
+          "value": 0.476
+        }
+      ],
+      "seconds": 4990.12204143405
+    },
+    "glrd4_r96": {
+      "wikitext2_ppl": 3.687037773205325,
+      "wikitext2_relative_change": 0.009906988000328187,
+      "c4_ppl": 7.036523365678325,
+      "c4_relative_change": 0.003280904912488447,
+      "mcq_average": 0.7641842194222505,
+      "mcq_point_change": -0.05082199749735228,
+      "tasks": [
+        {
+          "metric": "acc_norm",
+          "task": "arc_easy",
+          "value": 0.851010101010101
+        },
+        {
+          "metric": "acc_norm",
+          "task": "arc_challenge",
+          "value": 0.6339590443686007
+        },
+        {
+          "metric": "acc_norm",
+          "task": "hellaswag",
+          "value": 0.8691495717984465
+        },
+        {
+          "metric": "acc_norm",
+          "task": "piqa",
+          "value": 0.8536452665941241
+        },
+        {
+          "metric": "acc",
+          "task": "winogrande",
+          "value": 0.8145224940805051
+        },
+        {
+          "metric": "acc",
+          "task": "boolq",
+          "value": 0.8370030581039756
+        },
+        {
+          "metric": "acc_norm",
+          "task": "openbookqa",
+          "value": 0.49
+        }
+      ],
+      "seconds": 4993.4180708527565
+    }
+  },
+  "fit_diagnostics": {
+    "mlrd_r64": {
+      "layer_ranks": [
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      ],
+      "realized_retained_v_ratio": 0.5,
+      "mean_fit_relative_error": 0.4977776711028242,
+      "mean_heldout_relative_error": 0.49878957206403324
+    },
+    "mlrd_r96": {
+      "layer_ranks": [
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      ],
+      "realized_retained_v_ratio": 0.75,
+      "mean_fit_relative_error": 0.293268654506987,
+      "mean_heldout_relative_error": 0.2945424718735405
+    },
+    "glrd4_r64": {
+      "layer_ranks": [
+        [
+          128,
+          128
+        ],
+        [
+          480,
+          480
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          352,
+          352
+        ],
+        [
+          224,
+          224
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          96,
+          96
+        ]
+      ],
+      "realized_retained_v_ratio": 0.5,
+      "mean_fit_relative_error": 0.3662968708814315,
+      "mean_heldout_relative_error": 0.3673252922050031
+    },
+    "glrd4_r96": {
+      "layer_ranks": [
+        [
+          320,
+          320
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          448,
+          448
+        ],
+        [
+          320,
+          320
+        ],
+        [
+          224,
+          224
+        ],
+        [
+          224,
+          224
+        ],
+        [
+          256,
+          256
+        ]
+      ],
+      "realized_retained_v_ratio": 0.75,
+      "mean_fit_relative_error": 0.13985096245250178,
+      "mean_heldout_relative_error": 0.14182964668364484
+    }
+  },
+  "compression": {
+    "mlrd_r64": {
+      "target": "full_attention_value_cache_only",
+      "method": "PaLU M-LRD",
+      "method_slug": "mlrd",
+      "allocation": "palu_fisher_exact_block_budget",
+      "rank_block_size": 32,
+      "num_query_heads": 64,
+      "num_physical_kv_heads": 8,
+      "head_dim": 128,
+      "head_group_size": 1,
+      "groups": 8,
+      "group_width": 128,
+      "equivalent_mean_rank_per_head": 64,
+      "requested_retained_v_ratio": 0.5,
+      "realized_retained_v_ratio": 0.5,
+      "layer_ranks": [
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      ],
+      "full_attention_layers": [
+        7,
+        18,
+        29,
+        40,
+        51,
+        62,
+        73,
+        84,
+        95,
+        106
+      ],
+      "attention_o_proj": "dense_unchanged",
+      "mamba2_wo": "dense_unchanged",
+      "stored_factor_dtype": "torch.bfloat16",
+      "factorization": "PaLU activation-aware balanced SVD from W C W^T in float64"
+    },
+    "mlrd_r96": {
+      "target": "full_attention_value_cache_only",
+      "method": "PaLU M-LRD",
+      "method_slug": "mlrd",
+      "allocation": "palu_fisher_exact_block_budget",
+      "rank_block_size": 32,
+      "num_query_heads": 64,
+      "num_physical_kv_heads": 8,
+      "head_dim": 128,
+      "head_group_size": 1,
+      "groups": 8,
+      "group_width": 128,
+      "equivalent_mean_rank_per_head": 96,
+      "requested_retained_v_ratio": 0.75,
+      "realized_retained_v_ratio": 0.75,
+      "layer_ranks": [
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      ],
+      "full_attention_layers": [
+        7,
+        18,
+        29,
+        40,
+        51,
+        62,
+        73,
+        84,
+        95,
+        106
+      ],
+      "attention_o_proj": "dense_unchanged",
+      "mamba2_wo": "dense_unchanged",
+      "stored_factor_dtype": "torch.bfloat16",
+      "factorization": "PaLU activation-aware balanced SVD from W C W^T in float64"
+    },
+    "glrd4_r64": {
+      "target": "full_attention_value_cache_only",
+      "method": "PaLU G-LRD4",
+      "method_slug": "glrd4",
+      "allocation": "palu_fisher_exact_block_budget",
+      "rank_block_size": 32,
+      "num_query_heads": 64,
+      "num_physical_kv_heads": 8,
+      "head_dim": 128,
+      "head_group_size": 4,
+      "groups": 2,
+      "group_width": 512,
+      "equivalent_mean_rank_per_head": 64,
+      "requested_retained_v_ratio": 0.5,
+      "realized_retained_v_ratio": 0.5,
+      "layer_ranks": [
+        [
+          128,
+          128
+        ],
+        [
+          480,
+          480
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          352,
+          352
+        ],
+        [
+          224,
+          224
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          96,
+          96
+        ]
+      ],
+      "full_attention_layers": [
+        7,
+        18,
+        29,
+        40,
+        51,
+        62,
+        73,
+        84,
+        95,
+        106
+      ],
+      "attention_o_proj": "dense_unchanged",
+      "mamba2_wo": "dense_unchanged",
+      "stored_factor_dtype": "torch.bfloat16",
+      "factorization": "PaLU activation-aware balanced SVD from W C W^T in float64"
+    },
+    "glrd4_r96": {
+      "target": "full_attention_value_cache_only",
+      "method": "PaLU G-LRD4",
+      "method_slug": "glrd4",
+      "allocation": "palu_fisher_exact_block_budget",
+      "rank_block_size": 32,
+      "num_query_heads": 64,
+      "num_physical_kv_heads": 8,
+      "head_dim": 128,
+      "head_group_size": 4,
+      "groups": 2,
+      "group_width": 512,
+      "equivalent_mean_rank_per_head": 96,
+      "requested_retained_v_ratio": 0.75,
+      "realized_retained_v_ratio": 0.75,
+      "layer_ranks": [
+        [
+          320,
+          320
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          448,
+          448
+        ],
+        [
+          320,
+          320
+        ],
+        [
+          224,
+          224
+        ],
+        [
+          224,
+          224
+        ],
+        [
+          256,
+          256
+        ]
+      ],
+      "full_attention_layers": [
+        7,
+        18,
+        29,
+        40,
+        51,
+        62,
+        73,
+        84,
+        95,
+        106
+      ],
+      "attention_o_proj": "dense_unchanged",
+      "mamba2_wo": "dense_unchanged",
+      "stored_factor_dtype": "torch.bfloat16",
+      "factorization": "PaLU activation-aware balanced SVD from W C W^T in float64"
+    }
+  },
+  "inputs": {
+    "quality/NH56-Dense/result.json": "e76e91a5d7128f69549130a4a3bf334882508c59b137471b7653200b7ebb8031",
+    "palu/fisher.json": "6b89ccbdf0bfc8293e3486c829a061d2475ebab26ee8b6de7e6e51bed10e8391",
+    "palu/v_covariances/manifest.json": "32edf6731076119af8e73835a81290e20809ad3711cf5585f035a57bca921039",
+    "palu/checkpoints/mlrd_r64/manifest.json": "021de551f196589b228689ca0cbc9583416a954fd323d47ef679ac168c451c94",
+    "palu/checkpoints/mlrd_r64/palu_v_factors.safetensors": "7c1bc4c07a2d7337a453d4dce9819b346e8440ba775449bc8e8337a7a7f2cdf9",
+    "palu/quality/NH56-PaLU-MLRD-R64/smoke.json": "c834884b15ab3c2083f5b078cc885ff51dfae41101a6751364fe6e84318f6feb",
+    "palu/quality/NH56-PaLU-MLRD-R64/result.json": "c65d1ff98448fd9f3eb7b87f438d7e72821ad754c3f0d052f039907ac5ed41eb",
+    "palu/checkpoints/mlrd_r96/manifest.json": "b247857a4be9848ee8c7a8156914d136e75fb5dee32c7b8598bd74854a726f98",
+    "palu/checkpoints/mlrd_r96/palu_v_factors.safetensors": "35f19dafb262cc38e9951fdd2818208f156898673f0f05c3bb54d4671ad01207",
+    "palu/quality/NH56-PaLU-MLRD-R96/smoke.json": "e897978c2812a274168f54a71d39f3cb728c9a8600076d7f6296083422b6cb89",
+    "palu/quality/NH56-PaLU-MLRD-R96/result.json": "7df2d851e03b5b483562239a7f1c4721f2ad336263010934be882fee79492a41",
+    "palu/checkpoints/glrd4_r64/manifest.json": "4264ad03533cd36714b4e45ef86683971aa19f6eb05a9041dc8af5fb2228c3aa",
+    "palu/checkpoints/glrd4_r64/palu_v_factors.safetensors": "668ae3961b4cf716963bfc6971550a403121136ba98be3c94d4f766327105a73",
+    "palu/quality/NH56-PaLU-GLRD4-R64/smoke.json": "acd2f18059f52cd5b63ebdacaf0d32353481d56a405322b7b4ebc72e20ee2558",
+    "palu/quality/NH56-PaLU-GLRD4-R64/result.json": "426ba896c35166741155a12b0fc742d4297d53afe3f276620127cf8b89d0766d",
+    "palu/checkpoints/glrd4_r96/manifest.json": "2072a4b1d83b0068037e7b045a2108a9fc2a2d968a1da7b0c1162eab63fb97e0",
+    "palu/checkpoints/glrd4_r96/palu_v_factors.safetensors": "8839a06252a01d3c3c5c57b1e850e6269864ccc9d6ab107c2b2fffa72820ff94",
+    "palu/quality/NH56-PaLU-GLRD4-R96/smoke.json": "f1803cd218f383f0affaeab7c1909e4b9d607516276ed6330da893912922d50d",
+    "palu/quality/NH56-PaLU-GLRD4-R96/result.json": "d635fc8c9518580358949e666a64c794c64cd4e1c5c8aa927c02fd4e915ff2d1"
+  }
+}

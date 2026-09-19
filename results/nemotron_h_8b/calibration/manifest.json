@@ -1,0 +1,3397 @@
+{
+  "status": "complete",
+  "protocol": {
+    "audit_sha256": "6746b0eb26ae041053456d758eff2626cb45bd5806a0c55aee1c1ef015579c54",
+    "model": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Base-8K/snapshots/94ea861e008c2dfced3e8e1302094024077aa04e",
+    "model_config_sha256": "81e822f85d6471312bcc0ccd34cc62789075376ecedca7fde0e451584943368b",
+    "dataset": "allenai/c4",
+    "config": "en",
+    "split": "train",
+    "revision": "1588ec454efa1a09f29cd18ddd04fe05fc8653a2",
+    "seed": 20260821,
+    "shuffle_buffer": 10000,
+    "sequence_length": 2048,
+    "fit_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      137,
+      138,
+      139,
+      140,
+      141,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      152,
+      153,
+      154,
+      155,
+      156,
+      157,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188,
+      189,
+      190,
+      191,
+      192,
+      193,
+      194,
+      195,
+      196,
+      197,
+      198,
+      199,
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      223,
+      224,
+      225,
+      226,
+      227,
+      228,
+      229,
+      230,
+      231,
+      232,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255
+    ],
+    "heldout_ids": [
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267,
+      268,
+      269,
+      270,
+      271,
+      272,
+      273,
+      274,
+      275,
+      276,
+      277,
+      278,
+      279,
+      280,
+      281,
+      282,
+      283,
+      284,
+      285,
+      286,
+      287,
+      288,
+      289,
+      290,
+      291,
+      292,
+      293,
+      294,
+      295,
+      296,
+      297,
+      298,
+      299,
+      300,
+      301,
+      302,
+      303,
+      304,
+      305,
+      306,
+      307,
+      308,
+      309,
+      310,
+      311,
+      312,
+      313,
+      314,
+      315,
+      316,
+      317,
+      318,
+      319
+    ],
+    "profile_ids": [
+      320,
+      321,
+      322,
+      323,
+      324,
+      325,
+      326,
+      327
+    ],
+    "confirmation_ids": [
+      328,
+      329,
+      330,
+      331,
+      332,
+      333,
+      334,
+      335
+    ],
+    "source_sha256": "22ebeee2bcab9f962d7c6ced5b555a5fa9029df6ac7155e22f2cea053df06796",
+    "document_identity_source_sha256": "609e77c4a0e329d8521d900313cb27e6ef10b1f4f75f4d7c6af529e5bfbb879f"
+  },
+  "records": [
+    {
+      "index": 0,
+      "document_id": "url:https://open.library.ubc.ca/collections/bcnewspapers/advance/items/1.0347697",
+      "document_sha256": "e4c1a6707d04bf66769ad99c8c8ecc6e7747ef148b2d67d380d01679e96ae26a",
+      "stream_index": 21,
+      "token_start": 9,
+      "document_token_count": 2154,
+      "input_ids_sha256": "cf21c896dcf2342e9c4d19f2a415c48269978e8f826679fd62b52a3869ba93f7"
+    },
+    {
+      "index": 1,
+      "document_id": "url:http://bestbehaviourpets.weebly.com/dogblog",
+      "document_sha256": "29ad2036917d905f5c50aa5bb5784daa070f8cccd76c3ebb07ca4dfd770d6e1a",
+      "stream_index": 44,
+      "token_start": 463,
+      "document_token_count": 2913,
+      "input_ids_sha256": "d0fa9edb3775b6506c1f0bf283cefced9e54b1acef0e79b8cadecda7edd091bf"
+    },
+    {
+      "index": 2,
+      "document_id": "url:http://piercing-rosenheim.de/assets/pdf/Endlich-wieder-frei-atmen%21/",
+      "document_sha256": "d022c24190fcbdb882878527fae1eb5277b4732ed405e05e11ceb87eab687bc6",
+      "stream_index": 103,
+      "token_start": 2279,
+      "document_token_count": 8381,
+      "input_ids_sha256": "7ee737dd10edfe3ca088eb407e39cf054c918c166b2572790205ebe7c4fe80ff"
+    },
+    {
+      "index": 3,
+      "document_id": "url:http://parsiranco.com/category-Glass-Coffee-Table/1603-Save%20Money-ruhl-salterton-coffee-table-bywilla-arlo-interiors.html?pid=UD6XEI8WMO",
+      "document_sha256": "aada0a61fa61754d755a504fa85dc1402226e3de76d3de2bad0a28c0729df96e",
+      "stream_index": 190,
+      "token_start": 230,
+      "document_token_count": 2392,
+      "input_ids_sha256": "f02da9fc422989a373a34279cd56bfc824938191e3201c9c869001e11949d2c7"
+    },
+    {
+      "index": 4,
+      "document_id": "url:http://teamcore.usc.edu/tambe/steam/steam.html",
+      "document_sha256": "fa81d4460beb6bb128c32c044ecd332d860df1ee9892e8de7bbc5255e8697ea2",
+      "stream_index": 198,
+      "token_start": 1151,
+      "document_token_count": 3247,
+      "input_ids_sha256": "17a9fbd519e1165eed8b8e87c83990f8bf38ff1aa372eb57a197f865c6b12270"
+    },
+    {
+      "index": 5,
+      "document_id": "url:http://www.whatifknits.com/2017/12/",
+      "document_sha256": "18f13b0f72a585bd0f8a6fbd806362f63078bc2e8a7c88f65febfdcf4a9b7263",
+      "stream_index": 270,
+      "token_start": 304,
+      "document_token_count": 2924,
+      "input_ids_sha256": "6518400f19c76d054a37db337136d26cc5546c72881a42cf7476f07c04896555"
+    },
+    {
+      "index": 6,
+      "document_id": "url:http://djibestdrones.com/dji-mavic-pro-vs-phantom-4-pro/",
+      "document_sha256": "76fefae71aeaa4779f867729fd658a78e5d17ae00b3075d285dc347c5b562fe0",
+      "stream_index": 296,
+      "token_start": 270,
+      "document_token_count": 2641,
+      "input_ids_sha256": "da5452047b25e3303cf93b292a900baa2ec121752f61592cef6a0b70aa58955a"
+    },
+    {
+      "index": 7,
+      "document_id": "url:https://www.milsurps.com/misc.php?s=7e80917e4c583a4500dfabafaa014589&do=showrules",
+      "document_sha256": "f4b4c683f3e82c65dbd85945598268ea81f91a220efa3e62badf2074e6c1ec2c",
+      "stream_index": 301,
+      "token_start": 1356,
+      "document_token_count": 3470,
+      "input_ids_sha256": "a8819764c736e24f767005f923d25c0e476075219227ec8de6446fdbd992239d"
+    },
+    {
+      "index": 8,
+      "document_id": "url:https://www.motorcycle.com/manufacturer/bmw/bmw-r1200/2019-bmw-r1250-gs-r1250-gs-adventure-first-ride-review.html",
+      "document_sha256": "c5cdc37b1d16700a938649c3d7d3bd6a7d60d93bfa9755cda98e5d245731e1b6",
+      "stream_index": 309,
+      "token_start": 189,
+      "document_token_count": 2576,
+      "input_ids_sha256": "9f83d422c669510c731f68db8355c9a63591627a3ec60b43abfecc759295f160"
+    },
+    {
+      "index": 9,
+      "document_id": "url:https://remediestinnitus.com/category/health/page/2/",
+      "document_sha256": "d6267f3cf2a650bce6d66219f7020e41571853a292dea6aeae9ce21c73182e7b",
+      "stream_index": 342,
+      "token_start": 5882,
+      "document_token_count": 8766,
+      "input_ids_sha256": "a4a5c87e49295cd0c8e21bb5563a78500cb1f7cfabfa65148e23099074c962a1"
+    },
+    {
+      "index": 10,
+      "document_id": "url:https://www.foodbloggersofcanada.com/those-are-my-images-on-my-blog-ask-me-for-permission-before-using-them/",
+      "document_sha256": "6068998d7318a88bc5859e0b6d3683b620aed7ac681613c01d71e89fd95670ed",
+      "stream_index": 370,
+      "token_start": 69,
+      "document_token_count": 2226,
+      "input_ids_sha256": "f7772d6402f6ffc21ecdbf4486ffbc96691038a1bc9e958327e84adf6d4e0ddd"
+    },
+    {
+      "index": 11,
+      "document_id": "url:https://wikimili.com/en/Los_Angeles_Kings",
+      "document_sha256": "9320f6ba4d64de1ca5da6aa764947551d125d8530e3cf50bcfd949633a30ad08",
+      "stream_index": 373,
+      "token_start": 3411,
+      "document_token_count": 9512,
+      "input_ids_sha256": "f947dbca08078a5f75029f03cf235343b62683d963041915e4b745ed6980e6e8"
+    },
+    {
+      "index": 12,
+      "document_id": "url:http://napilapcsoport.hu/ebook.php?q=download-domus-bolezlai-values-and-social-identity-in-dynastic-traditions-of-medieval-poland-c966-1138-east-central-and-eastern-europe-in-the-middle-ages-450-1450-2010/",
+      "document_sha256": "48a3f5d72845cfaced8f97ce50a3b0abc07584148ed9978c14eb8c2f512a21a9",
+      "stream_index": 431,
+      "token_start": 5417,
+      "document_token_count": 12016,
+      "input_ids_sha256": "21e209ccd64e6ec4291bddff1f52fc6e3f801fb0e81b812ca868a19611c0da08"
+    },
+    {
+      "index": 13,
+      "document_id": "url:https://www.nsf.gov/pubs/2005/nsf05552/nsf05552.htm",
+      "document_sha256": "9df53e58e0f139b039f1f9586054a9083da1fa04c1d5c7943d0c7100972b80ce",
+      "stream_index": 486,
+      "token_start": 725,
+      "document_token_count": 5885,
+      "input_ids_sha256": "6919c1fb6f97061fb754dc12ef196a09586ff463c6f94b8b569c059048066219"
+    },
+    {
+      "index": 14,
+      "document_id": "url:https://woolyblissfeltmaking.wordpress.com/2012/04/",
+      "document_sha256": "63982b571aa1dfda81b44f4366dc9db847d7b8149d0ddf8e1eed549a12961896",
+      "stream_index": 597,
+      "token_start": 54,
+      "document_token_count": 2469,
+      "input_ids_sha256": "d42a31827c119cd78505d232c9aafb1210eab2f7ab2fd34accfb9a716d6fcf3a"
+    },
+    {
+      "index": 15,
+      "document_id": "url:https://denvercatholic.org/st-jose-de-jesus-sanchez-del-rio-boy-died-love-christ-king/",
+      "document_sha256": "82e22b3abc35b532c2d401f356de28ff15bf4e210de72a101e07a84d446e5ae4",
+      "stream_index": 613,
+      "token_start": 125,
+      "document_token_count": 2234,
+      "input_ids_sha256": "a88d290e90afb6f9d437340acc6b5a732e0fdc73e38b2275a397b26d60d7b5c9"
+    },
+    {
+      "index": 16,
+      "document_id": "url:https://sba.thehartford.com/podcast/recruit-young-talent/",
+      "document_sha256": "eb7963e5ccca54dd2031db18fa4d33523314d7c8465eca8c3adab518c0927864",
+      "stream_index": 653,
+      "token_start": 1438,
+      "document_token_count": 4520,
+      "input_ids_sha256": "9ea00954005bb840f178f2aecc3a347623db86aa8110eaef9b516edbb38261c3"
+    },
+    {
+      "index": 17,
+      "document_id": "url:http://www.smartbizmart.com/2019/04/10/shopping-for-a-laptop-computer-these-four-easy-steps-will-assist-you-choose-the-proper-one/",
+      "document_sha256": "3c51539ff8fc3eb2d0c84a05178cb29aa90cf90c3b2de2a97b025807ec91c069",
+      "stream_index": 674,
+      "token_start": 216,
+      "document_token_count": 2449,
+      "input_ids_sha256": "19ef676ee2b21b48469aa16d0678fa5e504520d7e07e21e54b546264c919a93a"
+    },
+    {
+      "index": 18,
+      "document_id": "url:http://peshtigotimes.net/index.php?id=33547",
+      "document_sha256": "6ea5f8e5ade44e1cad8ad1c3fc7a3752aa22e68579578f7f01a349c11852dad0",
+      "stream_index": 685,
+      "token_start": 116,
+      "document_token_count": 3059,
+      "input_ids_sha256": "bdf642eca59a59bab2311b9578e12396f58907276f9bbca75642859e6a94f3a9"
+    },
+    {
+      "index": 19,
+      "document_id": "url:https://www.achievement.org/achiever/tony-fadell/",
+      "document_sha256": "b612558bfcc7e1930b2dfbf6cee9e70962f435c1a66d182e2ae4a350a5f0581e",
+      "stream_index": 694,
+      "token_start": 15511,
+      "document_token_count": 19951,
+      "input_ids_sha256": "0a4eabb4cdef74bcbed94f764690fb8d14bc8459263e66216ea656b2e7571193"
+    },
+    {
+      "index": 20,
+      "document_id": "url:https://environmentalmicrobiome.biomedcentral.com/articles/10.4056/sigs.2545743",
+      "document_sha256": "f6a5b90a1e8cb54ba2e8c32a91fd616151599de7849c31194e9cc2a68e5f998c",
+      "stream_index": 720,
+      "token_start": 2497,
+      "document_token_count": 4617,
+      "input_ids_sha256": "74f04e65cd316e66a59be2795c93ea376141d6d8f8df30f0c288eb41d0cd9c58"
+    },
+    {
+      "index": 21,
+      "document_id": "url:https://www.getitforpc.com/acer-aspire-e-15-full-review/",
+      "document_sha256": "7e031719713f3a39d9e35338971df90b1c46cc07b92ffd9df0bd003612ea58ec",
+      "stream_index": 766,
+      "token_start": 166,
+      "document_token_count": 2406,
+      "input_ids_sha256": "b7994f9cba6b7675912ce7d3e6f0a2bee4f4a8f967d29d1f31bd40374f255547"
+    },
+    {
+      "index": 22,
+      "document_id": "url:https://feldmanarchitecture.com/category/third-thursdays/",
+      "document_sha256": "fe2d6ba6e8e8335edf9af494c88cb5fa7d8cedcab9c43695fd1b9b2defaa9a52",
+      "stream_index": 821,
+      "token_start": 593,
+      "document_token_count": 4431,
+      "input_ids_sha256": "95f010223b9e4909e7259f240ab9d6f22c18aab05799a7d053e556830d8b8abd"
+    },
+    {
+      "index": 23,
+      "document_id": "url:http://www.zmetravel.com/destinations/europe-destinations/mediterranean/porto-budget-traveling-4797",
+      "document_sha256": "b608c29c5017456f9d37a323f1e2b2ab3027b69c3071c855ba82cc1a5f9983f7",
+      "stream_index": 855,
+      "token_start": 473,
+      "document_token_count": 2569,
+      "input_ids_sha256": "9a697ce24d91a0de9c428fc0bae3c194a46174b6fee44b8137938339b9c90db6"
+    },
+    {
+      "index": 24,
+      "document_id": "url:https://simplywall.st/stocks/de/tech/fra-419/quantenna-communications-shares",
+      "document_sha256": "199f63fee00a8d437cedb6e7da94c7399321b0aa85e3977e1c57f8dead0e0425",
+      "stream_index": 909,
+      "token_start": 34,
+      "document_token_count": 2098,
+      "input_ids_sha256": "173f88c47eacf10a401f09a3f9736c05ffceb5905b0e5bb9e2974973026aa931"
+    },
+    {
+      "index": 25,
+      "document_id": "url:https://www.etherblue.org/whitepaper",
+      "document_sha256": "a2b4ba44916de1adf89e93f72c5dc2a3773c7f27ef97a59ea133d1e2fdce4e4a",
+      "stream_index": 926,
+      "token_start": 1277,
+      "document_token_count": 3453,
+      "input_ids_sha256": "9d4974966a901403bf84f4e379a6c2325023ab4755482ab21d3e5155da5f60d3"
+    },
+    {
+      "index": 26,
+      "document_id": "url:https://www.agedcare.org.au/positioning-pillows-for-elderly/",
+      "document_sha256": "9910ce2ac21734c518a24e4b6b1281b979507e51057a0f5608551817b16716ad",
+      "stream_index": 960,
+      "token_start": 3216,
+      "document_token_count": 5306,
+      "input_ids_sha256": "1ac738d4e67d1efd96f7a4e669ab923c3a7414e2ca08d0e1c6f4ba3772eabffa"
+    },
+    {
+      "index": 27,
+      "document_id": "url:http://missglobeinternational.com/-the-rules-conditions/",
+      "document_sha256": "05d2e0f4a9f393e9fd9eaf848c8cc3e806a5f80b3d9aff95e84950e82e687f9a",
+      "stream_index": 964,
+      "token_start": 9,
+      "document_token_count": 2082,
+      "input_ids_sha256": "1347b29cf2ac4d2ac8d72e2bb5bcb76ff4434aa0cada464d04caed0e5adeed8d"
+    },
+    {
+      "index": 28,
+      "document_id": "url:https://www.samm.com/what-is-raspberry-pi",
+      "document_sha256": "be81bfb3827d84725fc23bde45f87a521d3f0d2624f0eecd404f8a0ae3e8facc",
+      "stream_index": 987,
+      "token_start": 1581,
+      "document_token_count": 5176,
+      "input_ids_sha256": "b48e9afeaed7f2af8b34e3d470fa51fd38c6642ee7c0119d75368a4a8b2c179a"
+    },
+    {
+      "index": 29,
+      "document_id": "url:https://support.pureclarity.com/hc/en-us/articles/115002695133-Rule-Conditions",
+      "document_sha256": "b6a6482cb6805b6d8a7cc86c0575dd09dda960134d7a859e2b88489cb01115c7",
+      "stream_index": 1014,
+      "token_start": 209,
+      "document_token_count": 3071,
+      "input_ids_sha256": "9ff1977419874c6055090cab49cb7f2b1925008a2690b210109332dd8c61ca2a"
+    },
+    {
+      "index": 30,
+      "document_id": "url:https://www.testbankster.com/category/book-reading/",
+      "document_sha256": "6de2200e80223528d57a141022af7da8503c16c6c8cf491151ce6216ddc37881",
+      "stream_index": 1048,
+      "token_start": 2886,
+      "document_token_count": 5336,
+      "input_ids_sha256": "637a8b6bad3b1b143a367948f216a029f3a2aa40e9a4c7250b82746d63663d86"
+    },
+    {
+      "index": 31,
+      "document_id": "url:https://www.progressivegardening.com/biological-control/screening-of-potential-leads-from-diverse-microbial-sources.html",
+      "document_sha256": "65a8ca0e074c1c49281b4285e86958c3971c86cdae3cbf4c09ed27bdb8a23790",
+      "stream_index": 1053,
+      "token_start": 8,
+      "document_token_count": 2125,
+      "input_ids_sha256": "c983669bd8a343420d94f3924ae0092f7fce10dfdf402e17bd049bf1ecd3dd5c"
+    },
+    {
+      "index": 32,
+      "document_id": "url:http://scarycast.com/",
+      "document_sha256": "9406e94d1841776867271a42ad09b477c0b2a6e9ef82f58768983cfaf0400a38",
+      "stream_index": 1054,
+      "token_start": 224,
+      "document_token_count": 4413,
+      "input_ids_sha256": "74e832dcbda5fbb9de788ed30a52e2f44fd3052190638de14c84cc7abae0e777"
+    },
+    {
+      "index": 33,
+      "document_id": "url:https://www.flightdelayclaims4u.com/overbooked-flight-compensation",
+      "document_sha256": "fe2a806f6cb8e8eacccd730484126382ab4821d399afa19a9a883bb79ccd92b9",
+      "stream_index": 1078,
+      "token_start": 1072,
+      "document_token_count": 4217,
+      "input_ids_sha256": "52d97902d0434022be924ff9db11c52fff78bdcae07bf580a0ca6ea8d0f9ec9d"
+    },
+    {
+      "index": 34,
+      "document_id": "url:http://jouyamanzali.info/?tag=supercomputers",
+      "document_sha256": "4daa0c0b1e7ec55f8219729a7798ae1f67c880feb25c3a4b14b0a4f0de0c55e6",
+      "stream_index": 1122,
+      "token_start": 3393,
+      "document_token_count": 5912,
+      "input_ids_sha256": "82c17013d4bfa70048ba708d8d09257dc7b87a70854d39124e587649bac7af89"
+    },
+    {
+      "index": 35,
+      "document_id": "url:https://bikehistory.org/catalogs/1986.html",
+      "document_sha256": "1df76d677dd4ba94061381532d381352e09d893bde04b6050ddda1ccee0bd329",
+      "stream_index": 1134,
+      "token_start": 53,
+      "document_token_count": 3671,
+      "input_ids_sha256": "a7c766103447c8eccd2ec08a472258dbb9db01b27f307a92dd46c0bc40d32bd0"
+    },
+    {
+      "index": 36,
+      "document_id": "url:http://www.bahamasb2b.com/news/wmview.php?ArtID=3247",
+      "document_sha256": "e2567ef401fcf3d579b6df886ee1ac1577d7d00fd816453614506619bd7a80ed",
+      "stream_index": 1137,
+      "token_start": 331,
+      "document_token_count": 3070,
+      "input_ids_sha256": "98db3f4322e0d0a8016f687e9d69b52c6ad9c6f7770ab3ed0d65d11bdfee81f4"
+    },
+    {
+      "index": 37,
+      "document_id": "url:http://www.chipstapleton.com/",
+      "document_sha256": "c6e19024cecb2d4b769f8ad56e7cecba5adc851f71dd0474254ff09386efdae9",
+      "stream_index": 1180,
+      "token_start": 81,
+      "document_token_count": 2156,
+      "input_ids_sha256": "6884e995cdf2bbf7281d00eb5726930d67a7c404c1a71f6ffaf4c09fa798e9e1"
+    },
+    {
+      "index": 38,
+      "document_id": "url:https://www.hometoys.com/the-cedia-expo-2013-is-coming/",
+      "document_sha256": "2613162845f180fa1b012d4271623d7bbadf30896cb49939f4ddb1286c131834",
+      "stream_index": 1206,
+      "token_start": 31,
+      "document_token_count": 2412,
+      "input_ids_sha256": "12f5c7c9aadc0ed458820de89e4c23653a0c2b459918a8d02291cfadd12b28b1"
+    },
+    {
+      "index": 39,
+      "document_id": "url:http://logeg.svadba-uude.ru/research/iq-5865.php",
+      "document_sha256": "a6b2dd21d3faca06275acdbfd3f656bb3f5dbe39be3893260cb862aef13864db",
+      "stream_index": 1229,
+      "token_start": 81,
+      "document_token_count": 2685,
+      "input_ids_sha256": "f2da7bb8dd95497e6acc8c843cb5afe6d61960033fe630c6f3218c6836408c78"
+    },
+    {
+      "index": 40,
+      "document_id": "url:https://www.gamerswithjobs.com/node/1299108?page=12",
+      "document_sha256": "d93dfa32ef7fbd7f719d27619ff19e977040459777ce092d7fd0b70b3baced0c",
+      "stream_index": 1338,
+      "token_start": 383,
+      "document_token_count": 3346,
+      "input_ids_sha256": "7168b8c4d39d1d594c4d21f7b9ae3d7e82adcdf1ad6e1fe1fa5e7912d3834597"
+    },
+    {
+      "index": 41,
+      "document_id": "url:https://dumpsterchoice.com/illinois/10-yard-dumpster-for-rent-woodridge-il/",
+      "document_sha256": "4a29fab12fbabe628568b5161271858e51d7e9dca686625589356701d2e938e1",
+      "stream_index": 1344,
+      "token_start": 53,
+      "document_token_count": 2277,
+      "input_ids_sha256": "3d41ff84e681839fc47082a922e9b17cce00cb3faf8a305b3808e503d7382358"
+    },
+    {
+      "index": 42,
+      "document_id": "url:http://seedslondon.com/main/season-2",
+      "document_sha256": "a9fe42187f0fb724a26115dc50e6b009b37246fed7715cebd387b2c0c369db1b",
+      "stream_index": 1393,
+      "token_start": 310,
+      "document_token_count": 2713,
+      "input_ids_sha256": "f50d7553969507f567b15417e4efbf2a02a74b6ee86f7b607e91b9995edf599d"
+    },
+    {
+      "index": 43,
+      "document_id": "url:https://redempi.wordpress.com/",
+      "document_sha256": "dd8be961683bae75d505dbe2e73b027227723a99ec445769f3a978e1c76a60a3",
+      "stream_index": 1427,
+      "token_start": 3673,
+      "document_token_count": 6008,
+      "input_ids_sha256": "979b35ae17199ac9538a55bf5154d6c4c3f0926bf758589ff6e137968bc0c807"
+    },
+    {
+      "index": 44,
+      "document_id": "url:http://pvamag.com/pn/article/8410/meet_the_candidates",
+      "document_sha256": "717624e4754147e5129a1a66087ea25fb731d06fc219a59c9892893ef44d5522",
+      "stream_index": 1443,
+      "token_start": 1142,
+      "document_token_count": 4006,
+      "input_ids_sha256": "1b4ab04953cde5ae26a4b36b55cd9d876faf2ed9b01d758a48ca58e9f262c095"
+    },
+    {
+      "index": 45,
+      "document_id": "url:https://agroupofstahrs.com/category/random/page/2/",
+      "document_sha256": "8c06b4459db16872d654b65f57ec2c9d7e5884d5ff392daa497ea09ae2db919d",
+      "stream_index": 1474,
+      "token_start": 119,
+      "document_token_count": 2970,
+      "input_ids_sha256": "b4dc8c0a9832744e1db868ffa1a7d1a3fec8ae1016c62006bc61f9586ab78319"
+    },
+    {
+      "index": 46,
+      "document_id": "url:https://ecommerce-platforms.com/articles/what-every-designer-should-know-about-spec-work",
+      "document_sha256": "d3120ecf2a3ac3f8ba1f266bd5f8202a3eafa990ffa3c5e0e5c03dc034f1d5e4",
+      "stream_index": 1502,
+      "token_start": 15,
+      "document_token_count": 2274,
+      "input_ids_sha256": "2d969c7f39cdb2a62f1cdfc385516c86b3ffa9c1a368268bce5449315a4d8f3c"
+    },
+    {
+      "index": 47,
+      "document_id": "url:http://donthorpe.com/blog.htm",
+      "document_sha256": "e0914f7e7638114a1238e5e9044ac261ae70bdbcc9a79370dcb4df8206d4e854",
+      "stream_index": 1580,
+      "token_start": 2122,
+      "document_token_count": 5198,
+      "input_ids_sha256": "b0b9be662fc21f999bdc481e9592617d3ea0da9f68344449761fddbdf3afce67"
+    },
+    {
+      "index": 48,
+      "document_id": "url:https://www.oldjewstellingjokesonstage.com/buy-price-euro/",
+      "document_sha256": "a1d04c5765c30763a2ebde1a8f186accbaf37ba71d1103d694d5ae047199a216",
+      "stream_index": 1631,
+      "token_start": 92,
+      "document_token_count": 2427,
+      "input_ids_sha256": "2b2295259e510e3fd4ca3b77d1d92298b0e1873a687de94ab144e5e9ece58b9a"
+    },
+    {
+      "index": 49,
+      "document_id": "url:http://www.katespadehandbags.net.co/2017/11/",
+      "document_sha256": "a09ea5ef0f05326cdc6d881b18cb62e181146d465eaefab7edfe13ac45da6a3a",
+      "stream_index": 1663,
+      "token_start": 211,
+      "document_token_count": 2365,
+      "input_ids_sha256": "60298dd73bb387e78c0f4fb73d3f802b1871e150e90e03499e4b89a4cad7780e"
+    },
+    {
+      "index": 50,
+      "document_id": "url:https://civilizedcaveman.com/recipes/beef/best-burger-recipe/",
+      "document_sha256": "9ff4e01e203b2cdd0e3e424a3ab48744d9af4d6fb41ebb9c63df87106b4050b0",
+      "stream_index": 1708,
+      "token_start": 273,
+      "document_token_count": 2441,
+      "input_ids_sha256": "80a14723e4962932a5e93a6d0e5728ce299704b038697415d4ddefa2fde3802c"
+    },
+    {
+      "index": 51,
+      "document_id": "url:https://u.osu.edu/stepinternships17/2017/12/",
+      "document_sha256": "48979b488c39b4f9297fd86ee70f2546c0813bb93b647208df96b6f7dbbac0cb",
+      "stream_index": 1739,
+      "token_start": 5228,
+      "document_token_count": 7303,
+      "input_ids_sha256": "8b74603184fa0d757f86ac95eac696f29029e699a260530d636b5d7dd9d42171"
+    },
+    {
+      "index": 52,
+      "document_id": "url:https://www.homeaway.com/vacation-rental/p183796vb",
+      "document_sha256": "14236687f7c9dbc9d40998b9f74e5102b7519cbd0bc7f186b29c00c6fb33e73d",
+      "stream_index": 1745,
+      "token_start": 21,
+      "document_token_count": 2416,
+      "input_ids_sha256": "2ab4e802ae51196a63bada899e55db8fab61d563ac59f405f61dfb1a0eb87412"
+    },
+    {
+      "index": 53,
+      "document_id": "url:http://tm3am.com/2018/08/14/chip-znuff-goes-it-alone/",
+      "document_sha256": "472bf85d5460db4f617fbcce5c9fc15c135e3944f9d1d8de6dc95dd9b03d45b6",
+      "stream_index": 1747,
+      "token_start": 24,
+      "document_token_count": 2092,
+      "input_ids_sha256": "440947a646835ff112290d1e5a45e4beed8b1c5a5b9024a6a371f5a1eb5a55d0"
+    },
+    {
+      "index": 54,
+      "document_id": "url:https://reelwithstyle.com/best-fishing-reel/",
+      "document_sha256": "f0c0a696febaa3fda97f6baaddc325a5820e89e106716150292a29d1154efdfb",
+      "stream_index": 1757,
+      "token_start": 664,
+      "document_token_count": 2992,
+      "input_ids_sha256": "62443f332d5760d941fdd362fd273c6d37d024e00da3747ea0077f9a2f23999d"
+    },
+    {
+      "index": 55,
+      "document_id": "url:http://baarswestside.blogspot.com/2013/07/",
+      "document_sha256": "b1f743d549af90f70595aac1d807fc85890d1c1c043fa4286df3ad5d5c8ade66",
+      "stream_index": 1818,
+      "token_start": 1618,
+      "document_token_count": 4356,
+      "input_ids_sha256": "2ea32beaac34bb6ca2a1324c282708208417d8fd7cf35bff6519dfec17d7659d"
+    },
+    {
+      "index": 56,
+      "document_id": "url:https://lait.dairy-journal.org/articles/lait/ref/2005/02/L0426/L0426.html",
+      "document_sha256": "b9d3b08eead547aa2061755e84574af8fe4d604e405a322b8c2d32fe6523a342",
+      "stream_index": 1830,
+      "token_start": 499,
+      "document_token_count": 2742,
+      "input_ids_sha256": "a5cc067707cb15541e5d6b421df461951db33bf225acf39a6bcb258e5f56b003"
+    },
+    {
+      "index": 57,
+      "document_id": "url:https://www.mastersdegree.net/distance-learning-for-students-with-disabilities/",
+      "document_sha256": "908bec7c6882e982b3be0b4b7f8f1a0f12a1d6743273200c21879d2bafdbbcc9",
+      "stream_index": 1892,
+      "token_start": 34,
+      "document_token_count": 2114,
+      "input_ids_sha256": "68c8f1728696f2df30f46719cf0699c0b0df3c91c6950808d12515940ccb9c1a"
+    },
+    {
+      "index": 58,
+      "document_id": "url:http://www.dumpsteroid.com/arkansas/rent-construction-dumpster-in-hot-springs-national-park-ar/",
+      "document_sha256": "18cff27e785a3756d559fc353de30ccbbecebcea56d72378c12c399dd3737843",
+      "stream_index": 2006,
+      "token_start": 106,
+      "document_token_count": 3272,
+      "input_ids_sha256": "e1245c24a6370d99dfc6ceea5f68a3c27860c245dbf8883e4f2f7623885192d6"
+    },
+    {
+      "index": 59,
+      "document_id": "url:https://www.backpacking.net/forum/ubbthreads.php?ubb=showflat&Number=99509",
+      "document_sha256": "497cfb0b2aa6f47dad6603f957e01de479c2de65d16a35b957844f6d30d1818a",
+      "stream_index": 2040,
+      "token_start": 10,
+      "document_token_count": 2318,
+      "input_ids_sha256": "72e47c67f866ddacef4bf9bad06ab6f9a6be5d5a716a8c3f6d47d8285e4080ad"
+    },
+    {
+      "index": 60,
+      "document_id": "url:https://kingmengi.wordpress.com/2015/10/",
+      "document_sha256": "745365268a6e9e982ca73b29b43dedcfab4d65e70f5149eddbaa36c12f587cd9",
+      "stream_index": 2043,
+      "token_start": 4792,
+      "document_token_count": 8313,
+      "input_ids_sha256": "0383ea967196762413d0136c80f2104fd4a33d7d71a7c78233e057de88a012b1"
+    },
+    {
+      "index": 61,
+      "document_id": "url:http://www.kaylieschiari.com/2012/09/",
+      "document_sha256": "ccb18afd6fdfbaf963a25599fdcff1b9fd1387acec9d87140b879ce2625fff76",
+      "stream_index": 2053,
+      "token_start": 129,
+      "document_token_count": 2322,
+      "input_ids_sha256": "22f5b11254ac45ed14d070e5a881533745866eb0f8b9381aea2ba824e5516aec"
+    },
+    {
+      "index": 62,
+      "document_id": "url:https://chuckwarnockblog.wordpress.com/tag/joshua/",
+      "document_sha256": "460e90120ab96642f928ce025e4ee074b12712022ea950655939bf234db4acf3",
+      "stream_index": 2085,
+      "token_start": 532,
+      "document_token_count": 2730,
+      "input_ids_sha256": "1c1e754034cce5c8066cec7a311df9decb113c56d53d3bd480218c1b434e3840"
+    },
+    {
+      "index": 63,
+      "document_id": "url:https://www.raiseyourgarden.com/home/forbidden-fruit-stealing-produce-from-the-neighbors-garden",
+      "document_sha256": "13918cfb06648cf559a170a879ae7da70fc62573df5c958a31be477873d06183",
+      "stream_index": 2126,
+      "token_start": 28,
+      "document_token_count": 2610,
+      "input_ids_sha256": "38370c861b1d43508f96c280119df4df03b8ab1e4eafd8171e333cdd4c90d768"
+    },
+    {
+      "index": 64,
+      "document_id": "url:http://jces.ua.edu/broadening-perspectives-a-multidisciplinary-collaborative-teaching-and-learning-experience/",
+      "document_sha256": "4d690bb92d9f3cc840c9d5841f4ba290cc381ab5f213473fbda4ce8c10ace46a",
+      "stream_index": 2143,
+      "token_start": 4552,
+      "document_token_count": 6836,
+      "input_ids_sha256": "04dee1a45f94491dbacccd03bb262e0ce7ed21caa830e770b997dcc2d9400d8b"
+    },
+    {
+      "index": 65,
+      "document_id": "url:https://melioguide.com/osteoporosis-exercise-equipment/best-weighted-vest-for-osteoporosis/",
+      "document_sha256": "e71f20f7045cc5374022a3c5c803e96e85cce8d6fff67227ed179f844ce920ea",
+      "stream_index": 2236,
+      "token_start": 2735,
+      "document_token_count": 5344,
+      "input_ids_sha256": "534dd21011e5a31322c756ed21df0ca9c6f1ffa14e70c455a5b44b8138e691a3"
+    },
+    {
+      "index": 66,
+      "document_id": "url:https://essaylead.com/the-history-of-the-tacit-knowledge-essay-information-technology-essay-1124/",
+      "document_sha256": "262a13da1b5f1b4640613f543babe10d58ef1ba4acea207e3a923aba45ec2772",
+      "stream_index": 2353,
+      "token_start": 251,
+      "document_token_count": 3080,
+      "input_ids_sha256": "505ae60f5179f1648c8eae10695547f1e5cb00e8bb5ffe5fe66fb26c0f5a1c12"
+    },
+    {
+      "index": 67,
+      "document_id": "url:https://ultimatelooks.com/blogs/news/7-hairstyles-that-will-take-decades-off-your-look",
+      "document_sha256": "f31c0746748f7371a235d788231524a639d97ce537e8dd7cfbbb47fb59e1f4ee",
+      "stream_index": 2415,
+      "token_start": 17,
+      "document_token_count": 2102,
+      "input_ids_sha256": "c861c9d9d4928977a964d4669388cf2477c65724b7bee085171a7ced02a364ad"
+    },
+    {
+      "index": 68,
+      "document_id": "url:http://www.stantonwickactiongroup.org/category/press-release/",
+      "document_sha256": "06c9a3522192978f51e42d18034bb7975c4af9ac59c8a33b3e312cd1682a413f",
+      "stream_index": 2429,
+      "token_start": 17,
+      "document_token_count": 2257,
+      "input_ids_sha256": "d3e84255d26ad3001fa458b62e0a718d2a3cea62ae328eda085f7f676425ef08"
+    },
+    {
+      "index": 69,
+      "document_id": "url:https://www.centredaily.com/entertainment/this-weekend/article42852573.html",
+      "document_sha256": "a89cdc8d1f20fa20750994ef465d1346e4a561cf23e826cd36cdaa98bddd0b81",
+      "stream_index": 2440,
+      "token_start": 1598,
+      "document_token_count": 5711,
+      "input_ids_sha256": "3979dc34e5f0e5f25aaec7439cc80a40b2e9b574172400ff72dbe67892d3c6f8"
+    },
+    {
+      "index": 70,
+      "document_id": "url:http://globalwanderer.net/main/tag/lacarpio",
+      "document_sha256": "acd344981aa2251c748692468dc7677ebeb8e5d2f55aa0c91b65079a1f675b06",
+      "stream_index": 2469,
+      "token_start": 4071,
+      "document_token_count": 6592,
+      "input_ids_sha256": "f0b4b5dc26c82d83a7d56764be38556dc66e9e3fd179ed42cdc395d8185d9eda"
+    },
+    {
+      "index": 71,
+      "document_id": "url:http://www.idoj.in/article.asp?issn=2229-5178;year=2016;volume=7;issue=4;spage=244;epage=254;aulast=Singh",
+      "document_sha256": "9bd9f17fb44f53569382bf9d03291d653977180997edcc2e970c395770cd820d",
+      "stream_index": 2541,
+      "token_start": 5688,
+      "document_token_count": 8155,
+      "input_ids_sha256": "298b7431718d825261370fa7240f105b9936003ec4a14d50caa9a4652451420d"
+    },
+    {
+      "index": 72,
+      "document_id": "url:http://languagehat.com/as-such/",
+      "document_sha256": "eef4bd06bac90daaa43789e335c2f403af4ee35fcf1ae1038e1f6bc1c3bf870e",
+      "stream_index": 2554,
+      "token_start": 1414,
+      "document_token_count": 4743,
+      "input_ids_sha256": "40480d7aeeff9146d32ffd64282435c57b8e4459eb3b7a8e23c2d971d17f4fca"
+    },
+    {
+      "index": 73,
+      "document_id": "url:http://www.womensbasketball247.com/tag/korea/",
+      "document_sha256": "c417eabc737e0d847d1bd530a0f47f0959cf5af4ee94581ca95fda69d57fc34b",
+      "stream_index": 2566,
+      "token_start": 502,
+      "document_token_count": 3088,
+      "input_ids_sha256": "1089e18e9563e8e0799dd5aa82fbec68db0a171f4c65f4936174561cee9166cf"
+    },
+    {
+      "index": 74,
+      "document_id": "url:https://www.phonescoop.com/articles/tag.php?t=12",
+      "document_sha256": "ee3027a29a1dc4ca4db646ad9994fc25a61b9bcfe97d270c8d1fce06a55a5a21",
+      "stream_index": 2670,
+      "token_start": 1685,
+      "document_token_count": 6646,
+      "input_ids_sha256": "5a23f5214b6659fffd78e3313f3db8635d34d2917c4f3a4243a9998a5c4d3199"
+    },
+    {
+      "index": 75,
+      "document_id": "url:http://missouri-k.com/?page_id=818",
+      "document_sha256": "360de879613f104d9524ffc5fb65eaae3d3dc98833b6bf43a442ff6f27b87ad1",
+      "stream_index": 2735,
+      "token_start": 1252,
+      "document_token_count": 3336,
+      "input_ids_sha256": "c76b57d5d3291498819bace15908872d81ed659dcb6dcd2d200edec5034aea52"
+    },
+    {
+      "index": 76,
+      "document_id": "url:http://ipmall.info/content/patent-history-materials-index-short-account-origin-steamboats-william-thornton",
+      "document_sha256": "f13ecee33be5ffda5550fd95da25cc5c3ce8f7859dbec6e58e761cb3f310c2c7",
+      "stream_index": 2860,
+      "token_start": 2585,
+      "document_token_count": 5297,
+      "input_ids_sha256": "30af0051f5009d3f6a0c4f44b105a8c70cebff93f8ace42d98a1e10d2eab26d5"
+    },
+    {
+      "index": 77,
+      "document_id": "url:https://www.proformative.com/questions/health-savings-account",
+      "document_sha256": "0c558825d80a573be2fb625d8f6fddb400a286723dbbc33e8ffd23439d1c7c25",
+      "stream_index": 2880,
+      "token_start": 1982,
+      "document_token_count": 6342,
+      "input_ids_sha256": "34ddb6d82fb333dfbfb12d64cd2f30cdf76d567f834f547cf312af1de17d4cc2"
+    },
+    {
+      "index": 78,
+      "document_id": "url:https://acasignups.net/16/07/01/west-virginia-sues-federal-government-trusting-west-virginia",
+      "document_sha256": "543a5762d4bc3fe3bc2d0e744261995f44d3cf26cf83da9a909c60c1dee630c1",
+      "stream_index": 2918,
+      "token_start": 474,
+      "document_token_count": 2607,
+      "input_ids_sha256": "7f8b124a1207da38618ca1b30ca8aa202d6f668428a3ce12c1050ebcb36fee53"
+    },
+    {
+      "index": 79,
+      "document_id": "url:https://philmckinney.com/army-rotc-scholarship-essay-help/",
+      "document_sha256": "abb34dc51530c497f0315940e82dc4b950073920d30622dcdcd83629c932055b",
+      "stream_index": 2958,
+      "token_start": 151,
+      "document_token_count": 2292,
+      "input_ids_sha256": "c83bdd45c1a0b0717322775357d766e1c82e328a88f34a94a1217db8956db210"
+    },
+    {
+      "index": 80,
+      "document_id": "url:https://www.cbsnews.com/pictures/carnival-mardi-gras-2012/68/",
+      "document_sha256": "aae2ba952b99598e54e0440271d164235189d2baaa71fbf27dafc5478d321624",
+      "stream_index": 2987,
+      "token_start": 1036,
+      "document_token_count": 4039,
+      "input_ids_sha256": "ad5b9f514d284e0705db7a70fc396872c73755160907351d2922b05ab99a5244"
+    },
+    {
+      "index": 81,
+      "document_id": "url:https://thisismystic.com/blog/dining/travel-the-mystic-burger-trail/",
+      "document_sha256": "1cb5a363c035fc3a8037abf605d1fabfd7e0d4772865d0d2ec4b6d3fb3a17f90",
+      "stream_index": 3041,
+      "token_start": 888,
+      "document_token_count": 3317,
+      "input_ids_sha256": "0983ae70a9941d7dc89482025a5ef9262f8227e20cc5240be4420072b485abce"
+    },
+    {
+      "index": 82,
+      "document_id": "url:https://www.ntu.ac.uk/research/groups-and-centres/groups/medical-engineering-design-research-group",
+      "document_sha256": "b5d5fd60f7152d5a6e022832a8ca71225e37113807b0b2839399b8309b708331",
+      "stream_index": 3107,
+      "token_start": 1117,
+      "document_token_count": 3838,
+      "input_ids_sha256": "b04fade764c0d8d54d3c1c52852e72e56ece95bc2d67c7bfb5db69ba7377d839"
+    },
+    {
+      "index": 83,
+      "document_id": "url:https://www.ukessays.com/essays/biology/structure-factors-central-nervous-2514.php",
+      "document_sha256": "ce5e18d712693a39c165b4bb14bbbd596febeddbe5200352b429d3092c55fdad",
+      "stream_index": 3135,
+      "token_start": 2,
+      "document_token_count": 2123,
+      "input_ids_sha256": "01e7c940948ee5ee17bf19e8b917e06974977e28621be2ca82934a48e1f6a616"
+    },
+    {
+      "index": 84,
+      "document_id": "url:https://snowflakedesigns.co.uk/terms-conditions",
+      "document_sha256": "257481710801c4b9bd64a07a7db4ae65bb19f3ae4d9a760e01859c8fecff93d9",
+      "stream_index": 3136,
+      "token_start": 407,
+      "document_token_count": 3947,
+      "input_ids_sha256": "99a98da7bace6639e4a70ebe120e29d7563004f081e2c47a2d8b3bf7a5bb9aab"
+    },
+    {
+      "index": 85,
+      "document_id": "url:http://www.tabletsmanual.com/wiki/read/remedies_for_high_pressure",
+      "document_sha256": "8ac49268c5b6798b17cbec94309383e46c2bffd6af154d11046cab77902ad3ac",
+      "stream_index": 3177,
+      "token_start": 247,
+      "document_token_count": 2641,
+      "input_ids_sha256": "61822505fe973331e11b8dd0e1afb8615f718e37f8755eafa70c4c9655c24aba"
+    },
+    {
+      "index": 86,
+      "document_id": "url:https://anthraciteunite.com/2018/03/20/linking-histories-of-resistance/?like_comment=86",
+      "document_sha256": "d2b90f8ac32ae4ef82325eb65115b44fb6a71e771d12cd6eeaa14bd856d8dd74",
+      "stream_index": 3197,
+      "token_start": 148,
+      "document_token_count": 2536,
+      "input_ids_sha256": "cee1776f95046675c78dbb0df644f45afa0bc2c72af2fb4edfb186eaeb23f987"
+    },
+    {
+      "index": 87,
+      "document_id": "url:https://hobbylark.com/party-games/trivia-questions-2",
+      "document_sha256": "6c66127139a1cd3eff88790d964bf0126dd68d36a3af7d20b9485e849d163d0d",
+      "stream_index": 3251,
+      "token_start": 922,
+      "document_token_count": 3808,
+      "input_ids_sha256": "8b509ee82b4dee1130fb5e621f6a80f622c39da8e1f4ef33f027fe00922f3bdf"
+    },
+    {
+      "index": 88,
+      "document_id": "url:http://thereedcenter.com/blog/wp-content/plugins/book/epub-Joint-Disease-in-the-Horse%2C-2e/",
+      "document_sha256": "00a882f43b758812b7d3af0863eedf6562bbd0e8686eab7a64d9cb599aca2593",
+      "stream_index": 3313,
+      "token_start": 1560,
+      "document_token_count": 3756,
+      "input_ids_sha256": "e4a1bff39c7a82b28f41a3a1338e5c01161842f264a60a4ec1cccb4c3dd409cf"
+    },
+    {
+      "index": 89,
+      "document_id": "url:https://en.wikipedia.org/wiki/List_of_Bulgarian_monarchs",
+      "document_sha256": "8b8e35955adf1b9d0aae6e45f2d33ae6500ce5e1880b47e0bc332ecf0d16432d",
+      "stream_index": 3338,
+      "token_start": 1578,
+      "document_token_count": 3976,
+      "input_ids_sha256": "0cfdddaf4ab888be3cb256f9f80a8a15c81a234605802fd0d24ac6ecc3300fc8"
+    },
+    {
+      "index": 90,
+      "document_id": "url:http://www.cumpanzos.it/metformin-brand-names-australia/",
+      "document_sha256": "2cbb452edf159f34674c5a87d8e45273848c8b43f8bafce67db2a98d7e6eeb0e",
+      "stream_index": 3377,
+      "token_start": 94,
+      "document_token_count": 2357,
+      "input_ids_sha256": "ce751929eaa2b2134c90a60aae0d8ef87cc9d26610f8036de1e4f150ffeed1b8"
+    },
+    {
+      "index": 91,
+      "document_id": "url:https://gulfnews.com/uae/health/listen-are-baby-care-products-harming-your-childs-health-1.63099802",
+      "document_sha256": "fd22592290a51fe625a333c3af3d06be03656e3e8d6b885a6ee52efa2909ee06",
+      "stream_index": 3391,
+      "token_start": 79,
+      "document_token_count": 2355,
+      "input_ids_sha256": "e58fa3f35c9e85299614a6fff0b91c175697a532a09566c11e7858c50d97c9ec"
+    },
+    {
+      "index": 92,
+      "document_id": "url:https://k8s.thedetail.tv/articles/another-failure-by-a-system-not-fit-for-purpose",
+      "document_sha256": "7a251914856e01348d2ac91de72e15dbcb9760120caf77bcad3c1293c3ad18ce",
+      "stream_index": 3436,
+      "token_start": 193,
+      "document_token_count": 2300,
+      "input_ids_sha256": "ae615b52b9fe1ee83ee54215a3098eebb8a9dc0bd8afe95b3cd349dc04acad72"
+    },
+    {
+      "index": 93,
+      "document_id": "url:http://rabidreads.ca/2014/05/question-have-you-ever-reached-out-to-an-author.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+RabidReads+%28Rabid+Reads%29",
+      "document_sha256": "ed60f05c1cad8400afee38337b1e3b14e93051fc6b270256f9fb4c4efe76d08f",
+      "stream_index": 3442,
+      "token_start": 598,
+      "document_token_count": 2791,
+      "input_ids_sha256": "12a20d7ed42ca3b6d3053e4bdad859a0252e04909ffd4b9f8031248905be8114"
+    },
+    {
+      "index": 94,
+      "document_id": "url:https://tasctest.com/tasc-test-center-spotlight-coal-creek-adult-education-center/",
+      "document_sha256": "a3eb78a947aff919ee75c60c4331d81c5df65d1fb85c6bc792702a018cc5eadd",
+      "stream_index": 3506,
+      "token_start": 688,
+      "document_token_count": 3087,
+      "input_ids_sha256": "056ed7a5f708b8b6645b3b3bc75b72b83c0f7cf0e4043db2d5022a29a218193e"
+    },
+    {
+      "index": 95,
+      "document_id": "url:https://www.advocatekhoj.com/library/judgments/announcement.php?WID=7162",
+      "document_sha256": "05468c7cf5ad74f27d8bcb7572be4d0dbe7291673b4c420e0babce7ffad7f72b",
+      "stream_index": 3516,
+      "token_start": 9374,
+      "document_token_count": 22073,
+      "input_ids_sha256": "e6663005c1ef49202d8a4ca78f037848389523f087c83a35b43318f2d4a51aa0"
+    },
+    {
+      "index": 96,
+      "document_id": "url:https://www.steelaweigh.com/terms-and-conditions.php",
+      "document_sha256": "f5bed7fe934ae425666459d98d04d18672f6330c8338c7b35c115711867037be",
+      "stream_index": 3533,
+      "token_start": 518,
+      "document_token_count": 2775,
+      "input_ids_sha256": "0992712d7926f3da2db1a719f341adfce9ea0945e7ae8ab9dba383d83a45247b"
+    },
+    {
+      "index": 97,
+      "document_id": "url:https://domaingang.com/domain-law/reverse-domain-name-hijacking-decision-in-manorpark-com-udrp/",
+      "document_sha256": "1e044521e6357c26734b272490ac7aec982b57d18b9a93939a034183188a8999",
+      "stream_index": 3667,
+      "token_start": 130,
+      "document_token_count": 2210,
+      "input_ids_sha256": "4ad968509d244015794744b56b940b9059775a8974dca512dc125a82bece33eb"
+    },
+    {
+      "index": 98,
+      "document_id": "url:http://all-essays.com/social-issues/122-describe-the-expected-pattern-of-children-and-young-peoples-development-from-birth-to-19-years.html",
+      "document_sha256": "4826bfb08d4d5281c73fd686cb5eca1a4debb9c8c6b99f115cec7181e110fbf0",
+      "stream_index": 3676,
+      "token_start": 79,
+      "document_token_count": 2247,
+      "input_ids_sha256": "6f5405099e989c458c3c37073f7e98b89b549a46c40b7d4a49eaf32cf9ee01b7"
+    },
+    {
+      "index": 99,
+      "document_id": "url:http://moneycoin.info/lucij/par-koerse-cpwd-giti.php",
+      "document_sha256": "f6de6535efd996cc8313909f5e07c77465095b7d9adfc1cb90c65f3102629215",
+      "stream_index": 3701,
+      "token_start": 247,
+      "document_token_count": 2824,
+      "input_ids_sha256": "16dc58e563db2ef8ce1fbea5edbb276a6ac3bbf3c3e4376ce7ca41bc4af1259a"
+    },
+    {
+      "index": 100,
+      "document_id": "url:https://www.yachtmollymawk.com/2009/11/led-anchor-lights/?replytocom=8173",
+      "document_sha256": "731c71b2bf19a4702ce26e992df55911bdd9712a67e84d5c4550165e0030ad18",
+      "stream_index": 3711,
+      "token_start": 943,
+      "document_token_count": 3810,
+      "input_ids_sha256": "0d7761860cbe1a63dcf9f593080b064e0fbacbf9c56367c2ce09acb3ffc7413c"
+    },
+    {
+      "index": 101,
+      "document_id": "url:https://mslacat.wordpress.com/2010/04/",
+      "document_sha256": "c95bd20d1c42f7100eeec772157f3f952e9b7ce476b21015aec1bad5428901f5",
+      "stream_index": 3717,
+      "token_start": 49,
+      "document_token_count": 2115,
+      "input_ids_sha256": "88206a322e68fbd1f67fbeca96736d7ae2c189136d1e8de94b44a20b17c04d26"
+    },
+    {
+      "index": 102,
+      "document_id": "url:http://w.rangitoto.org/newsletters/Aug08.htm",
+      "document_sha256": "3c317ed8f64334236a3e45a370ddde4e273ad822e98eb7d8fad792350f16ab25",
+      "stream_index": 3718,
+      "token_start": 165,
+      "document_token_count": 2453,
+      "input_ids_sha256": "a8cb53f3d19c67e267eb92a2c0815e6aded6f0c1a595e0fc1e853e70a4532651"
+    },
+    {
+      "index": 103,
+      "document_id": "url:https://avalleyofhope.wordpress.com/2013/08/23/more-thoughts-on-discipline/",
+      "document_sha256": "c43bb2c0b8851b05b04218d905fbf9bac65c3fdbdff78f63733fe6ee00faa0cf",
+      "stream_index": 3722,
+      "token_start": 213,
+      "document_token_count": 3077,
+      "input_ids_sha256": "89533248b91c10246d9efcafa6316c493e500e5fade9b48b6397f45ddc9d4dbf"
+    },
+    {
+      "index": 104,
+      "document_id": "url:http://www.godsmessagetoday.com/mondays-blessing-blog/archives/07-2014",
+      "document_sha256": "51232809d1cb09cd18753052e87f8cc747177c5f8d75c1015db140a7455cb1a4",
+      "stream_index": 3763,
+      "token_start": 11,
+      "document_token_count": 2204,
+      "input_ids_sha256": "2f4f23a137dee2cbe486d3854c73b3e24789f03940402874095d5394c73807e2"
+    },
+    {
+      "index": 105,
+      "document_id": "url:http://library.kiwix.org/wikipedia_en_all_nopic_2018-09/A/Johann_Gottlieb_Fichte.html",
+      "document_sha256": "87447776043d5b73c80d6923ca4f0f0ac91170e5f3bbd350837f9397f6e9a0c2",
+      "stream_index": 3859,
+      "token_start": 210,
+      "document_token_count": 3569,
+      "input_ids_sha256": "454f11c035d878b573cd5758fcabdd1f2b9dbb629d0826cc7281cb658f996807"
+    },
+    {
+      "index": 106,
+      "document_id": "url:https://katrawat.wordpress.com/category/economics/",
+      "document_sha256": "2f4ef8031483464be2393ed8db1b939463253dc26b7f317954e0ca6b19181d96",
+      "stream_index": 3886,
+      "token_start": 319,
+      "document_token_count": 2762,
+      "input_ids_sha256": "0fd41a13e66e545a28499c22b019f75c7499ecd8c007b1b154618bcf7f39a488"
+    },
+    {
+      "index": 107,
+      "document_id": "url:https://stampinantics.blogspot.com/2010/",
+      "document_sha256": "15c8884b6d6aa6fc53b808aac97b9d3d114555bc16280aa10ff309a9f00878d6",
+      "stream_index": 3962,
+      "token_start": 1945,
+      "document_token_count": 5238,
+      "input_ids_sha256": "57a48e24b35c6136bf800af8a0dc58134e4a96c5348dfe10f3373c75afbe5955"
+    },
+    {
+      "index": 108,
+      "document_id": "url:https://www.eyeonspain.com/blogs/ianandspain.aspx?month=20184",
+      "document_sha256": "a3984a7d3594d590b2a0a700ae527d5e7cfa0ff77d264cea3563c485dddd690a",
+      "stream_index": 3968,
+      "token_start": 164,
+      "document_token_count": 2939,
+      "input_ids_sha256": "c888a5b1388996af42a18c89a52966e7223dd76940fff54a78d173badbc2e591"
+    },
+    {
+      "index": 109,
+      "document_id": "url:http://bobbimurray.com/business.html",
+      "document_sha256": "f30d75fe9dabf251f748694456d571f7dc8f301cc90766f19a5a812cf2dce6a0",
+      "stream_index": 4123,
+      "token_start": 187,
+      "document_token_count": 2590,
+      "input_ids_sha256": "4aa4074c01dc24060c2b3484c6b41c0b9d9b8b8be21999dca7668d80a6ff3ea1"
+    },
+    {
+      "index": 110,
+      "document_id": "url:http://wiki.whitneygen.org/wrg/index.php/Family:Whitney,_Joseph_(1802-1878)",
+      "document_sha256": "41feb5bee387c07fce45ceb6fd7d395533db7eda0a71c1798f8d8cf76ddf49ca",
+      "stream_index": 4127,
+      "token_start": 2,
+      "document_token_count": 2195,
+      "input_ids_sha256": "42bc6a5a0267d95881d95ae2159f65e6889b89a407143eadea1340bc2d4ba6ea"
+    },
+    {
+      "index": 111,
+      "document_id": "url:https://paperity.org/p/86169703/melanin-embedded-materials-effectively-remove-hexavalent-chromium-crvi-from-aqueous",
+      "document_sha256": "871549980df312e8251e6fc3862148147870cce044cc7a5a79a2e1883deb7218",
+      "stream_index": 4139,
+      "token_start": 1564,
+      "document_token_count": 8456,
+      "input_ids_sha256": "f8c109a7e60e9a79c4bba123633dac3b5638f7df9c7686268f70b1406976b613"
+    },
+    {
+      "index": 112,
+      "document_id": "url:https://www.westonaprice.org/health-topics/health-issues/interview-gerald-pollack/",
+      "document_sha256": "ab33ea8ae06f211aea4e3a4ee413ea9b0ce4e1c6a8d45df3e4c35285f72de36c",
+      "stream_index": 4149,
+      "token_start": 996,
+      "document_token_count": 4937,
+      "input_ids_sha256": "806c3fa7180729aa6e62e85a75ac71f71e77f2987100f0a23d37f32bdc323564"
+    },
+    {
+      "index": 113,
+      "document_id": "url:https://www.port80software.com/products/httpzip/docs",
+      "document_sha256": "9b4dd047bf4cd73b099e6ecc5436f57bf87b2d7d1ee6bda97994ba2e800fa697",
+      "stream_index": 4179,
+      "token_start": 3198,
+      "document_token_count": 5535,
+      "input_ids_sha256": "70e706ca180c4e7d64aab7855901892fe36f32a8c78640b18af63c63426e69de"
+    },
+    {
+      "index": 114,
+      "document_id": "url:https://www.birdguides.com/information/faq/",
+      "document_sha256": "564d3fab87780bc4fb18bd1806dfb4a06fbdaddcbd9c4b1f6db6a987295b4457",
+      "stream_index": 4181,
+      "token_start": 2690,
+      "document_token_count": 5120,
+      "input_ids_sha256": "03c36c2ae3e65ca5038839c95d4dbf111c7af2b96c5f22b60bc17cf1f4a31e74"
+    },
+    {
+      "index": 115,
+      "document_id": "url:https://benchlifesports.com/2016/04/01/2016-toronto-blue-jays-batting-over-under-predictions/",
+      "document_sha256": "d9f170dd461e0e3dc295cb257b5f1e616afd92b5e1a554fe6cb3139c17cbcbe2",
+      "stream_index": 4235,
+      "token_start": 4,
+      "document_token_count": 2058,
+      "input_ids_sha256": "0cdf4c853c7946358bc61105bcd638e13cde4936a66e87683e1ff5e4c93bf990"
+    },
+    {
+      "index": 116,
+      "document_id": "url:https://www.lyfemarketing.com/blog/selling-on-social-media-social-selling/",
+      "document_sha256": "d4f751e76de0965a76f00ae03ded8b1384d5fb271313706b9a0a5e9a33a0b019",
+      "stream_index": 4260,
+      "token_start": 780,
+      "document_token_count": 3407,
+      "input_ids_sha256": "73f34fb9288c1566190af7ca303f28339bdff6133a1a07640739cf64992f76a2"
+    },
+    {
+      "index": 117,
+      "document_id": "url:https://www.ashrare.com/irish_poetry.html",
+      "document_sha256": "95f5737a489764f3b8c3a5b55f06efba7f159700ecda77c1d30e9951d323880a",
+      "stream_index": 4293,
+      "token_start": 49,
+      "document_token_count": 2190,
+      "input_ids_sha256": "bf1a954eb20a3f5f3ad72a1f580e2bcb909b2684e5404114bb2ebcd93ee4f0c4"
+    },
+    {
+      "index": 118,
+      "document_id": "url:https://www.thecreonetwork.com/blog/23-featured-articles/79-what-higher-ed-can-learn-from-healthcare",
+      "document_sha256": "b5c31ea84bb1ec5691f156f78687fc6ce383560e66c6dbb5afc90d7f0f61020b",
+      "stream_index": 4423,
+      "token_start": 415,
+      "document_token_count": 4232,
+      "input_ids_sha256": "e04d1e97c07922ddbbb7d9c539129b26f291cc10271a3a7a7ae1f8ac62119706"
+    },
+    {
+      "index": 119,
+      "document_id": "url:http://brianaarnoldlaw.blogspot.com/2018/",
+      "document_sha256": "3b965997f42a3b1f0302d790e57340c5d5d1dad8d4b741d68a877c8418a39d5f",
+      "stream_index": 4456,
+      "token_start": 350,
+      "document_token_count": 2475,
+      "input_ids_sha256": "e1c512933262d469d480d75ffb3586f4f89712a9e4104694b527d9d88841f5fd"
+    },
+    {
+      "index": 120,
+      "document_id": "url:https://www.newton.ac.uk/event/bprw01/timetable",
+      "document_sha256": "4ce104cefc6ecbecc5510d4a1bb7d2a36a08c199722d4f01c8a73bb87601e8f2",
+      "stream_index": 4467,
+      "token_start": 1025,
+      "document_token_count": 3853,
+      "input_ids_sha256": "6ec817b80eba1c9b2c48bf10af2009c1decf6847edc7232f3c3f2535db455518"
+    },
+    {
+      "index": 121,
+      "document_id": "url:http://www.brendaknows.org/resources/archives/11-2017",
+      "document_sha256": "d8681fc3a15c7add2a66372e1d58c9c0a6dc093313f21b5e7607643a69f43729",
+      "stream_index": 4509,
+      "token_start": 141,
+      "document_token_count": 2271,
+      "input_ids_sha256": "e33b209ec8c334d7a12eee058a12e50de4f06087681e8a3f46d1bc32a3897982"
+    },
+    {
+      "index": 122,
+      "document_id": "url:https://www.adamfaik.com/blog/Accent-Chairs/check-out-fleischman-swivel-balloon-chair-by-brayden-studio-2019-04-17-07-39-55pm/8-m4kb6pg8xklfqoi6s4mh.dhtml",
+      "document_sha256": "d54c0b037431bd5c0f5ca85893f8074063a7dfeaeea54ed35df154de236e4846",
+      "stream_index": 4528,
+      "token_start": 8,
+      "document_token_count": 2118,
+      "input_ids_sha256": "ee841467e2cb7c02016836f4815a5837b366be7c2e6c6c78a1cff43cb6c34a93"
+    },
+    {
+      "index": 123,
+      "document_id": "url:https://wastereviews.com/north-carolina/rent-a-bin-chadbourn-nc/",
+      "document_sha256": "f012588a6ee4c939bdb27db8560c6a11434ece1fae332c3053341df6bd43d781",
+      "stream_index": 4534,
+      "token_start": 29,
+      "document_token_count": 2363,
+      "input_ids_sha256": "8968dc1b86a0e816346b93bb238ddfbc9f6d7bb8a405141edc91a436ec38abb0"
+    },
+    {
+      "index": 124,
+      "document_id": "url:http://www.amandafilipacchi.com/my-strange-addiction-wikipedia/",
+      "document_sha256": "5c5a90e4750701ab1e609000a5269b9c92b1b6ea5c818a07fc8060033ab73582",
+      "stream_index": 4540,
+      "token_start": 16,
+      "document_token_count": 3353,
+      "input_ids_sha256": "f6c04fa437c72a43012df41d416233d5e09765ad118e23afeab4e74eab4a05b3"
+    },
+    {
+      "index": 125,
+      "document_id": "url:https://www.montsepenarroya.com/en/category/articulos/investigacion/",
+      "document_sha256": "881c2106a19e4af61fe3ef039f2141f48f318e5cede218c30e8320d5cdec77fb",
+      "stream_index": 4553,
+      "token_start": 344,
+      "document_token_count": 2551,
+      "input_ids_sha256": "cc6f4425557c40b47e4d5270e2a130ccc186f5bfa181a922df91dabac187e343"
+    },
+    {
+      "index": 126,
+      "document_id": "url:https://everydaylivingness.com/claiming-back-the-courtyard/comment-page-1/",
+      "document_sha256": "61362b593e91262546e76f5d747320fff1f611498be18e9e65d6901e7f738e32",
+      "stream_index": 4571,
+      "token_start": 567,
+      "document_token_count": 4384,
+      "input_ids_sha256": "dc815892fb2e8a817eff621ce1d377230dcdbfb762aba63e8ff12f08e42276ab"
+    },
+    {
+      "index": 127,
+      "document_id": "url:https://www.jpaul.me/2017/01/ubiquitis-new-unifi-elite-offering/",
+      "document_sha256": "1d355b05d1a5329d76293c4dd9c9133e73f5d70f6ebc752858861096ad3ba911",
+      "stream_index": 4580,
+      "token_start": 73,
+      "document_token_count": 2498,
+      "input_ids_sha256": "e73eed8ea27b117e4134b3092b5a465e0252ed19abdc65fe73a477e3620ad9a2"
+    },
+    {
+      "index": 128,
+      "document_id": "url:https://holycrosspublications.net/2017/02/19/fourth-sunday-in-honor-of-st-thomas-of-aquinas/",
+      "document_sha256": "ae1f867f87540f0c678499256c311858356d8447787c2d87874a5d08b7604a7d",
+      "stream_index": 4636,
+      "token_start": 46,
+      "document_token_count": 2263,
+      "input_ids_sha256": "38baf719f99a466a05ffa55fbca5a17f0a2507daae0473df21a0eeb0638c4d0a"
+    },
+    {
+      "index": 129,
+      "document_id": "url:https://www.wsc.co.uk/the-archive/14-Diary/3124-september-2001",
+      "document_sha256": "accf8d80a9ed41a493f1ccc17f76db1c67a1a3afedaca436cba725e178f10d70",
+      "stream_index": 4650,
+      "token_start": 23,
+      "document_token_count": 4027,
+      "input_ids_sha256": "c2a31cb0cbadeec552ad96ebf9950ff98c8ce242f5471b9eef8af7477ae8e9cd"
+    },
+    {
+      "index": 130,
+      "document_id": "url:https://camplify.co.uk/terms-conditions-owners",
+      "document_sha256": "eb69c51aa4bf782c216e3fc935b74c97cd2ac9e6daad538e0fc15f6065aa5f07",
+      "stream_index": 4718,
+      "token_start": 269,
+      "document_token_count": 3309,
+      "input_ids_sha256": "93140ad032ca8de375296a23ad43906a36de5f2cc58db6b3320c542122bebc79"
+    },
+    {
+      "index": 131,
+      "document_id": "url:http://www.makeup-pixi3.com/2014/06/",
+      "document_sha256": "7e9affafe275b5b11dad772710b9f69bbfcb0fcde0063d4c67c605025ac6b2a7",
+      "stream_index": 4826,
+      "token_start": 2498,
+      "document_token_count": 4667,
+      "input_ids_sha256": "b8d98d0742f11b5d7a8318bfca7c6810fcf1b57489738cca1a76496972391485"
+    },
+    {
+      "index": 132,
+      "document_id": "url:https://personal.natwest.com/personal/current-accounts/reward_platinum_account.html",
+      "document_sha256": "98b82c8790a0097b8aea18a1174a7139cd60ac5f06fbbdec8f2d3a17b7c5fba6",
+      "stream_index": 4869,
+      "token_start": 316,
+      "document_token_count": 2544,
+      "input_ids_sha256": "5e805dacb9b47cd561d7eb037417922e9b860b1b2161b34153c0ea1ff5cd8b8b"
+    },
+    {
+      "index": 133,
+      "document_id": "url:https://donnamerrilltribe.com/2013/04/11-limiting-beliefs/",
+      "document_sha256": "922aac1b4624381dfdee0c471edf0b85f892004379cb1ed98c218ec89dc5f07b",
+      "stream_index": 4872,
+      "token_start": 3341,
+      "document_token_count": 5607,
+      "input_ids_sha256": "bc4e03479de06414fa0de63c96baa73cbbfe8be58c9b38d67d9aaf11d58b8cd5"
+    },
+    {
+      "index": 134,
+      "document_id": "url:https://www.inkitt.com/stories/scifi/27147/chapters/11",
+      "document_sha256": "2eecb847e5234750a3458064dfc607ccc6a490c4f4fbfdea6621914b40e1f0b1",
+      "stream_index": 4913,
+      "token_start": 184,
+      "document_token_count": 2549,
+      "input_ids_sha256": "a417796daad3bd1ac42998ca76689ee2f8a3ebdc7f1dc7c526365866a49d99e9"
+    },
+    {
+      "index": 135,
+      "document_id": "url:https://www.thedailymba.com/2011/02/07/writing-and-delivering-great-speeches/",
+      "document_sha256": "2db3d3bf02457e4096cc88ad28312b11e0c296a3eec300d08ce02ea05da37aca",
+      "stream_index": 4980,
+      "token_start": 56,
+      "document_token_count": 2430,
+      "input_ids_sha256": "ef66d42ee753bbffa98d5bb86c86227dfae844d69feb7724ec75e66811787cf5"
+    },
+    {
+      "index": 136,
+      "document_id": "url:https://www.rit.edu/academicaffairs/global/essential-questions-faq",
+      "document_sha256": "016ee3e0e6e3a78419c4932ff2facf8ca159ff21f0cd2bdbdc2a36b326c6d407",
+      "stream_index": 4987,
+      "token_start": 341,
+      "document_token_count": 3359,
+      "input_ids_sha256": "5e1609ee27354c4d75dffc4f79ca915d9b92d815a619b00e3c5a52f88a90fabc"
+    },
+    {
+      "index": 137,
+      "document_id": "url:https://milanodezign.com/in/sykesville/",
+      "document_sha256": "8c135241326c671b6b2a6c4fd0cf578e08cd67b48540ad9bc2950fff74cd0b1a",
+      "stream_index": 4998,
+      "token_start": 1560,
+      "document_token_count": 4133,
+      "input_ids_sha256": "512eb656d32883e49fe9b846f903ac784148f434351f69e13afa14742157d258"
+    },
+    {
+      "index": 138,
+      "document_id": "url:http://hargamurahumroh.com/?75mg-lyrica-side-effects",
+      "document_sha256": "fff1c17a6804d16bc2ffa8f0b4b3cb28e6f7def366ac3ff22715b4596c40bac5",
+      "stream_index": 5019,
+      "token_start": 60,
+      "document_token_count": 2834,
+      "input_ids_sha256": "926b47461c6577b323aad35116efaf89b7d905e6862503743156691724bcbf0c"
+    },
+    {
+      "index": 139,
+      "document_id": "url:http://www.factbites.com/topics/1964-World-Series",
+      "document_sha256": "ccd804ea9d65ee8c452591fe069015a41f94f3ff0cff169d19480131ecc038ac",
+      "stream_index": 5058,
+      "token_start": 17,
+      "document_token_count": 2075,
+      "input_ids_sha256": "8c05c2acdb373401fe3d4beab3511c02111318810c4168cf5fe8551fad8097a5"
+    },
+    {
+      "index": 140,
+      "document_id": "url:http://www.n7un.com/p/my-projects.html",
+      "document_sha256": "3dc4e7bd89e8fc66925e4e92e1ba22c51d662fc1f0a99c27257a38f6653289dd",
+      "stream_index": 5092,
+      "token_start": 32,
+      "document_token_count": 2188,
+      "input_ids_sha256": "943b65d281ac3eb8c605885bd573830981b58a6a3b4c25f7deeb35522883dc33"
+    },
+    {
+      "index": 141,
+      "document_id": "url:https://ministeriumverbidivini.com/category/matthew/",
+      "document_sha256": "23ba35080b75d7e48fd0d529a2d7b7729c7fabf2e80459ac6a116a11e43d2a71",
+      "stream_index": 5122,
+      "token_start": 1582,
+      "document_token_count": 4162,
+      "input_ids_sha256": "ef2e0639f2e9a43d3496f13e2e97d2d729ab7b41c3864887af4d158b6a123269"
+    },
+    {
+      "index": 142,
+      "document_id": "url:http://vkool.com/single-parenting-tips/",
+      "document_sha256": "43b603eec7735d51735efdad49ad49c58ba941d4729c7b5c0a3afdec35e91f5b",
+      "stream_index": 5141,
+      "token_start": 233,
+      "document_token_count": 2384,
+      "input_ids_sha256": "c636ca17f82eb19a1793c98a2f1703907ab394e81121e6fdf2fa8c669c9df079"
+    },
+    {
+      "index": 143,
+      "document_id": "url:https://schalfkogelbig.firebaseapp.com/IPEVO-Ziggi-HD-USB-Document-Camera-.html",
+      "document_sha256": "e2f94dbafc5050c245615158b5751588c47d2d933f0523497425a2acc130d73c",
+      "stream_index": 5243,
+      "token_start": 12,
+      "document_token_count": 2374,
+      "input_ids_sha256": "1d3007fc7e84467e3ca633caba96c02ca5e2d5b1e89e6ab5a152a7a9be2392e7"
+    },
+    {
+      "index": 144,
+      "document_id": "url:http://swcomsvc.com/css/pdf.php?q=online-Systemanalyse-und-Modellaufbau%3A-Grundlagen-der-Simulationstechnik-1985.html",
+      "document_sha256": "0d8f300e73d5dd139ad4314aca8cfb095ee925095980a98fa9b43442b27540ae",
+      "stream_index": 5321,
+      "token_start": 27,
+      "document_token_count": 2080,
+      "input_ids_sha256": "1c0b22fdcb7985570be53d8e43ed7e2b0cdd00e4c20e0da5bc2ce8abec3fb7d4"
+    },
+    {
+      "index": 145,
+      "document_id": "url:https://profiles.bu.edu/Kerrie.Nelson",
+      "document_sha256": "54718c43cc48a80a070ee087b2561c47b955f3b6195f0742fa7a393134fac4de",
+      "stream_index": 5347,
+      "token_start": 676,
+      "document_token_count": 2821,
+      "input_ids_sha256": "8e8ec689620ac084c5a839fa001bf0da2df4dcfe3167ee901089c3856028111a"
+    },
+    {
+      "index": 146,
+      "document_id": "url:http://eh.net/page/22/?s=institutional+change+and+American",
+      "document_sha256": "221be5104d8f8d261a982ec264263a0fa177876622d65c192a213ab75dcff353",
+      "stream_index": 5351,
+      "token_start": 2225,
+      "document_token_count": 14131,
+      "input_ids_sha256": "f9bb02fac19a498a65223d1bce3f5e71e0c96d6ad974c8ffec4477085ace3ca5"
+    },
+    {
+      "index": 147,
+      "document_id": "url:http://classics.uchicago.edu/courses/grad-2009-2010",
+      "document_sha256": "ed6c38c6762c1189cc5a13a1b7c25942c7b09fa44fb5576bf2e90a6caff2e32c",
+      "stream_index": 5376,
+      "token_start": 3340,
+      "document_token_count": 5801,
+      "input_ids_sha256": "19f20958544be7e1be286960beadd08c21dbdea215cff153413f0ff443d6e6dc"
+    },
+    {
+      "index": 148,
+      "document_id": "url:https://www.urban-pathways.org/kochi.html",
+      "document_sha256": "7847ae71df995ff004e717f4f70a03fdecf8d8ea08813e8a0a89d2bcf3bfb97f",
+      "stream_index": 5405,
+      "token_start": 993,
+      "document_token_count": 3166,
+      "input_ids_sha256": "6f9bdf15a244a55888bd57605169ddeb5260a76c836a1a5ff0f0ad482054c165"
+    },
+    {
+      "index": 149,
+      "document_id": "url:https://corporate.findlaw.com/finance/asset-protection-planning.html",
+      "document_sha256": "62f9984d359312969886e0f59f6f5b11de412da732828b619e6246f2b8578883",
+      "stream_index": 5451,
+      "token_start": 8277,
+      "document_token_count": 10419,
+      "input_ids_sha256": "5aa9331d385cbce71ca1a49e1354d62aab83411443902e5d8ebee0b38d2966a3"
+    },
+    {
+      "index": 150,
+      "document_id": "url:https://radio.foxnews.com/2018/08/01/ceo-of-twitter-jack-dorsey-on-shadow-banning-allegations-its-not-acceptable-for-us-to-create-a-culture-like-that/",
+      "document_sha256": "dff13fef35ddfc2c3fbf8db3fdfdd95eac6746d2a953cd21a9f932dbf7171a97",
+      "stream_index": 5461,
+      "token_start": 649,
+      "document_token_count": 2871,
+      "input_ids_sha256": "02b259358e8382732fbde21adca59fc149a193ad9f5bb5857320cf54e9b59f71"
+    },
+    {
+      "index": 151,
+      "document_id": "url:https://rekroom.wordpress.com/",
+      "document_sha256": "258220ea18b9bc48a41b6fcfd4ef9429047ec1d963ab5d7c6a8079f8d0e2e80e",
+      "stream_index": 5578,
+      "token_start": 1611,
+      "document_token_count": 6746,
+      "input_ids_sha256": "70e3ec5b60f9896ae8f2c436f23b94d5ee73b077065e2e39adb991f684b8f9e2"
+    },
+    {
+      "index": 152,
+      "document_id": "url:http://goopuram.blogspot.com/2011/06/normal-0-false-false-false.html",
+      "document_sha256": "c1defcc402670040e2e2cca87a41ae76817efb7c820ef570fc94b0a27eddbaaa",
+      "stream_index": 5588,
+      "token_start": 167,
+      "document_token_count": 7726,
+      "input_ids_sha256": "5d6ee6c990fbb98577030bd6d6362991f297d0cdf557d36c2b6b6bdbc5eb058c"
+    },
+    {
+      "index": 153,
+      "document_id": "url:http://section47.proboards.com/thread/5605/mission-28-xallac?page=2",
+      "document_sha256": "c3e34679e402defda08d0323bbffb8cf2e7a132b88562a8d93c642b7b9d12a5c",
+      "stream_index": 5607,
+      "token_start": 8314,
+      "document_token_count": 29630,
+      "input_ids_sha256": "ac476d1c4cd01a294a6f14d34bd93c78f9841e85f13c9c2c0ad6650f54ac31c2"
+    },
+    {
+      "index": 154,
+      "document_id": "url:http://www.acrwebsite.org/volumes/9415/volumes/v05/NA-05",
+      "document_sha256": "9a6eb27570582e60e2c510de2507ad00f05043fac648c86929e6783dc6ae1877",
+      "stream_index": 5647,
+      "token_start": 1368,
+      "document_token_count": 4125,
+      "input_ids_sha256": "bed7811dfc043605b770144da990cb1137d211cc2d1dd9a2bb4b64c739a52b9c"
+    },
+    {
+      "index": 155,
+      "document_id": "url:https://forums.theregister.co.uk/user/5650/28",
+      "document_sha256": "afd2cdaa8c6425306e11c9d193e93a00beda1132f5fd4ea7daafa5f9fa39039f",
+      "stream_index": 5690,
+      "token_start": 814,
+      "document_token_count": 3286,
+      "input_ids_sha256": "5797fe2f192a3a83c1645b323bd11fdb4da41a588d0e5df4557c543c54cb0d3f"
+    },
+    {
+      "index": 156,
+      "document_id": "url:https://www.electricscotland.com/mackenzie/donald_mackenzie2.htm",
+      "document_sha256": "6027a935bcac779615d8428fe42c1be58cb100966e3d63a896da6c7ed15567be",
+      "stream_index": 5708,
+      "token_start": 2564,
+      "document_token_count": 12915,
+      "input_ids_sha256": "392eb20a0d68d14cc29ed7fe8483746f6c040c96fca87b74039f856cc63caefe"
+    },
+    {
+      "index": 157,
+      "document_id": "url:http://coolred38.blogspot.com/2008/10/so-sort-me-out-all-readywould-ya.html",
+      "document_sha256": "5109c39d044bb74168e5fc55f8ea3a7246572ed2d51271f3a2ed0db077fc3ba8",
+      "stream_index": 5857,
+      "token_start": 408,
+      "document_token_count": 2716,
+      "input_ids_sha256": "75422a31a45ea26acf003ed04dd8618496dd952f3b312ecfd85c52fe18816d04"
+    },
+    {
+      "index": 158,
+      "document_id": "url:http://investor.seaspine.com/corporate-governance/management",
+      "document_sha256": "1ba88dac2203931e3df78202554a90fc8a78e6b979767c154f7baba6e734c0cb",
+      "stream_index": 5879,
+      "token_start": 17,
+      "document_token_count": 2323,
+      "input_ids_sha256": "555378dc946ef61705e0102ba3a30841fa856ba8674fb6ba1c8021fc160c82a6"
+    },
+    {
+      "index": 159,
+      "document_id": "url:https://www.filmscanner.info/en/ReflectaMF5000.html",
+      "document_sha256": "c3a18aac91ff6f8c0c6d9bdb9e84e55cde6d4caf2e4a935e7a1b6f6f04ac3040",
+      "stream_index": 5923,
+      "token_start": 434,
+      "document_token_count": 7716,
+      "input_ids_sha256": "5f8e1fa84ab4e0e60a6ff9915e30e88fe85f020e0610b71fd13e290b78f72f89"
+    },
+    {
+      "index": 160,
+      "document_id": "url:https://www.storeurstuff.com.au/category/other/",
+      "document_sha256": "89bdff7c65f7c0ae1f62c2072409ad41066ba2aade3a995f2b8ff5d609ddad06",
+      "stream_index": 5925,
+      "token_start": 147,
+      "document_token_count": 2467,
+      "input_ids_sha256": "99843d010f0d24d1802a446f1e4e8066f1b248658efd9851be90276a0eefe054"
+    },
+    {
+      "index": 161,
+      "document_id": "url:https://ismailignosis.com/2014/10/02/who-succeeded-imam-jafar-al-sadiq-seven-proofs-for-the-imamat-of-imam-ismail-ibn-jafar/",
+      "document_sha256": "a5481248ea808bf577539db85e2b1dff0043e3a4e7721daf125b64ab723434d6",
+      "stream_index": 5996,
+      "token_start": 2951,
+      "document_token_count": 11641,
+      "input_ids_sha256": "90f1e3153ebb68f07b5ab22e72edd4f97463222f8bb2e99e2f9afab1a2988173"
+    },
+    {
+      "index": 162,
+      "document_id": "url:https://www.dailymaverick.co.za/article/2015-11-15-weighing-up-nutrition-feeding-transformation/",
+      "document_sha256": "1d9504bb29c4219d02094b598ef583015c04bff5a56fca016b336f8be7620988",
+      "stream_index": 6025,
+      "token_start": 715,
+      "document_token_count": 3180,
+      "input_ids_sha256": "146fbf3a48939e4b62a6fc889106c59982bcb5e218fe6ffc728d14b5cb448479"
+    },
+    {
+      "index": 163,
+      "document_id": "url:http://ajaxtechinc.com/question/how-do-i-conduct-public-folder-migration-in-office-365-hybrid-environment/",
+      "document_sha256": "66fc5990194eec15b136c2288f9b18a268e8004c5297366ca8497854d4d8fc3f",
+      "stream_index": 6037,
+      "token_start": 1358,
+      "document_token_count": 4225,
+      "input_ids_sha256": "19e4b88cbd29f2ddb6f22ab671786ba3ee3ec179a5c73db0dec87bb13c08360c"
+    },
+    {
+      "index": 164,
+      "document_id": "url:https://www.tribuneindia.com/2012/20120217/asrtrib.htm",
+      "document_sha256": "b1cec38b874655e06df114ff07ec98ceaa7c1b165805be2519962fc38de3917f",
+      "stream_index": 6043,
+      "token_start": 745,
+      "document_token_count": 3965,
+      "input_ids_sha256": "a5969fb0bb17aaaed69b59c6c51e677021c91641a0805c8eabb2c702773ec585"
+    },
+    {
+      "index": 165,
+      "document_id": "url:http://www.uky.edu/~kiernan/iconic/iconic.htm",
+      "document_sha256": "ae044afefc8f497b960ee2e1d6bd6ed7d7732f782a6219ea770bf78fd9fff88e",
+      "stream_index": 6075,
+      "token_start": 1197,
+      "document_token_count": 7747,
+      "input_ids_sha256": "681ef82c0304b3d998f7573fc952b230314f1334b39a3a64f3363b9087e3dd07"
+    },
+    {
+      "index": 166,
+      "document_id": "url:http://www.rcuniverse.com/forum/beginners-85/3439708-pay-forward-build-thread-sig-lt-40-build-34.html",
+      "document_sha256": "3ea96abb08841540ae64772f7ff5b11c2b1e01da8ae23511659e0c6cb129a8db",
+      "stream_index": 6090,
+      "token_start": 57,
+      "document_token_count": 2155,
+      "input_ids_sha256": "8f7a38aa46a97a75ad449c022307e75a86753401e737880128210ce12fe984df"
+    },
+    {
+      "index": 167,
+      "document_id": "url:http://exhaustsystems24.co.uk/echappement/lada/48",
+      "document_sha256": "8eb1e561f272cbf59503ec5951f614766af16ed3a661138c1cb0194155178c62",
+      "stream_index": 6127,
+      "token_start": 35,
+      "document_token_count": 2478,
+      "input_ids_sha256": "ff076ec1fee8198016255691238e00c240e546a42fff96de3ddec9a499ebfd34"
+    },
+    {
+      "index": 168,
+      "document_id": "url:https://andrewskurka.com/adventures/iceland-traverse/",
+      "document_sha256": "88f99e609487445946bbc4d0082d63185d2690cde84b13d9fff93f71341ed264",
+      "stream_index": 6154,
+      "token_start": 36,
+      "document_token_count": 5045,
+      "input_ids_sha256": "10f29837756a6a2ec071159a4757bcf12fba882ce4edca8e42db78db03ef9c50"
+    },
+    {
+      "index": 169,
+      "document_id": "url:https://machinelearningmastery.com/deep-learning-for-developers/",
+      "document_sha256": "4700d9c4690edfdd46aa1b14b5a2712ffbf60e121ffc318afcd1f3b680883a02",
+      "stream_index": 6179,
+      "token_start": 162,
+      "document_token_count": 3689,
+      "input_ids_sha256": "478617da622daa2f5719d6a35da1bb3e76afad7131d32448a53e25aac564fb93"
+    },
+    {
+      "index": 170,
+      "document_id": "url:http://www.curbsideclassic.com/blog/my-1972-ford-ltd-is-for-sale-really/",
+      "document_sha256": "eef69e8d06707ffa5e1282e14a8660a68838c310d7d8f20b4b7f39a3e9d66a64",
+      "stream_index": 6184,
+      "token_start": 637,
+      "document_token_count": 3796,
+      "input_ids_sha256": "a208d57692f88fe266ce87002df03d40dde00b29bf5034e90a6133968be984f0"
+    },
+    {
+      "index": 171,
+      "document_id": "url:https://isp.org.my/v2/index.php?option=com_content&view=article&id=23&Itemid=54",
+      "document_sha256": "11a814d91ff17c9ea4768b66b181b1f7909dfb480a248e5e4f359879cbe7717d",
+      "stream_index": 6189,
+      "token_start": 900,
+      "document_token_count": 3173,
+      "input_ids_sha256": "ba835b0948d2b3292ad4ce06306934df5eb772a95aba9072c1a6e0a4aa548aaa"
+    },
+    {
+      "index": 172,
+      "document_id": "url:https://christianblogs.christianet.com/1309540593.htm",
+      "document_sha256": "6404c9eadbebc202d6c6ec69ee184d5d4e3d745153e74dae872d71edd0fbe3f0",
+      "stream_index": 6211,
+      "token_start": 145,
+      "document_token_count": 2519,
+      "input_ids_sha256": "bd41e2ebe8c5b2a9c1edf3b980a4936ac29289160d400d075c8e98b6f51fb043"
+    },
+    {
+      "index": 173,
+      "document_id": "url:https://forums.phoenixrising.me/threads/new-exercise-study-brings-both-illumination-and-questions.32105/page-3",
+      "document_sha256": "3feb68b319eacc4258f70b3060f888932439dcb1237376d52cbf6eea0f9076b8",
+      "stream_index": 6226,
+      "token_start": 3023,
+      "document_token_count": 6286,
+      "input_ids_sha256": "495475bcdbb240e60db212adb47c71cdd24c051e4716178b7ff4778582cf813d"
+    },
+    {
+      "index": 174,
+      "document_id": "url:http://alqolam.tk/casino-iguazu-telefono.html",
+      "document_sha256": "ce7130d6f5dc8abd3205914a040b4e8bfd5e0506a5c56737c6b05a3237dfb27b",
+      "stream_index": 6298,
+      "token_start": 577,
+      "document_token_count": 4119,
+      "input_ids_sha256": "9c3e87a9ca3bd3630fd2f6528981537b083cc8593660255b70d27b4ac2fb45c7"
+    },
+    {
+      "index": 175,
+      "document_id": "url:https://everydaysystems.com/bb/viewtopic.php?p=190659",
+      "document_sha256": "1f3eaa0a51c0a79bf68b3731617d22adbaacd2a0013944a28498724e0a6d679a",
+      "stream_index": 6312,
+      "token_start": 3,
+      "document_token_count": 9898,
+      "input_ids_sha256": "b2d178e20e3e239a010de213862900f47fbbcc51f243a6ac5fb405c03d9f895c"
+    },
+    {
+      "index": 176,
+      "document_id": "url:http://www.onseahouse.com/text/?tag=luxury",
+      "document_sha256": "e28b4bd5ab7d87ba3b87880cdf51102b1403f50895e04a8dedab7f65b580e6b1",
+      "stream_index": 6325,
+      "token_start": 450,
+      "document_token_count": 2740,
+      "input_ids_sha256": "8cfbee4b3cd4c043c669e08b6d7b8b9fd2fd6f50e1c77784600b32307c6a01f8"
+    },
+    {
+      "index": 177,
+      "document_id": "url:http://www.theprt.com/",
+      "document_sha256": "d76ff5d20fa18ee727678c3840c0f4e58286ce82b8df906328378fa2453a6bd6",
+      "stream_index": 6329,
+      "token_start": 150,
+      "document_token_count": 2700,
+      "input_ids_sha256": "ce5c6581f89797364d917fe6ac4926aa54058fe3832f817ba6a0c46efbff2377"
+    },
+    {
+      "index": 178,
+      "document_id": "url:http://www.matrixgames.com/forums/tm.asp?m=4559535&mpage=1&key=",
+      "document_sha256": "2f5e518a567b420c8143afc5f1dd94ec5e09760adc84127b3395d9c2c860cbdf",
+      "stream_index": 6347,
+      "token_start": 107,
+      "document_token_count": 2203,
+      "input_ids_sha256": "0134fbefc2774e6249306755a20166f04cbe2ff4e5e53b6b87dbb6fb09eac488"
+    },
+    {
+      "index": 179,
+      "document_id": "url:http://floridaparcels.com/property/69/lookup/21S/30E/7",
+      "document_sha256": "969d751f2c9e644a15d49c2d862362bc86e71e4370574555e2db26766b9a692a",
+      "stream_index": 6398,
+      "token_start": 116,
+      "document_token_count": 8102,
+      "input_ids_sha256": "865a860491d418b78c50ea12694ab500ef92194ed1ddeb67b72f91ff99541a48"
+    },
+    {
+      "index": 180,
+      "document_id": "url:http://rongholland.com/2018/11/fancy-label-vector/golden-ribbon-banner-label-vector-background/",
+      "document_sha256": "d502b1619f98a04b2ddcb62ed1600291d76c57825ec591744d5f9b071d874896",
+      "stream_index": 6496,
+      "token_start": 243,
+      "document_token_count": 2685,
+      "input_ids_sha256": "751ddde550d65223041b82ae76994d0a57c21b2c211965bd709d60f9647404f5"
+    },
+    {
+      "index": 181,
+      "document_id": "url:https://www.salon.com/1997/11/13/pass_39/",
+      "document_sha256": "e7c1b4a141264313c28ba8dbb8de1d36af3069122f6080cc082aedccf53871a8",
+      "stream_index": 6516,
+      "token_start": 146,
+      "document_token_count": 3199,
+      "input_ids_sha256": "d8cd4ec4a55909e47cc7affa023acfe8151cc6633890ceabf7730a85b8ed4591"
+    },
+    {
+      "index": 182,
+      "document_id": "url:https://anhonestclimatedebate.wordpress.com/2009/06/26/scientist-hits-out-at-emissions-bill/",
+      "document_sha256": "20a4a85c9e97c7b90e782773af0229bb03d44fc97ede665c56f7df8dd9e9df03",
+      "stream_index": 6521,
+      "token_start": 78,
+      "document_token_count": 2147,
+      "input_ids_sha256": "34f7b3df214b8816ee5b8c1704e93645c8a6ee45e1381b597a2c988d578ee878"
+    },
+    {
+      "index": 183,
+      "document_id": "url:https://diaryofacountrymother.wordpress.com/",
+      "document_sha256": "8b83b52e696ab6c332a381652ff174a53fe2afa53aa7ea3ea87487175fea21fe",
+      "stream_index": 6536,
+      "token_start": 150,
+      "document_token_count": 3026,
+      "input_ids_sha256": "a862845294b26f60e1de0384399f0ff3ca3393a67b966281859b7b403b753555"
+    },
+    {
+      "index": 184,
+      "document_id": "url:https://law.justia.com/cases/federal/appellate-courts/F3/440/970/477887/",
+      "document_sha256": "9cccd0bc0ee3cbed81aa7a4883f5a3757edac15ff3854034c478880e80b92861",
+      "stream_index": 6564,
+      "token_start": 1481,
+      "document_token_count": 5563,
+      "input_ids_sha256": "402bcb28f6591b4d8efb265613e543a75d034babfc746580573d64d2080c3b00"
+    },
+    {
+      "index": 185,
+      "document_id": "url:https://www.cntraveller.com/article/travel-guide-hamburg",
+      "document_sha256": "6dbab1e73819c6195229258eb491cdd8ba5054e48e690e7684784576df94bfcb",
+      "stream_index": 6580,
+      "token_start": 98,
+      "document_token_count": 2168,
+      "input_ids_sha256": "d9a24c0b13adc9797e302d19aa70ce2702ff4af0f946381eb19b79a8bf20474c"
+    },
+    {
+      "index": 186,
+      "document_id": "url:http://www.paulwmartin.ca/blog/?m=200611",
+      "document_sha256": "034ce49558aed2a654e6ec53896afe98453a4728b1d13331dce7bfe6329e3100",
+      "stream_index": 6648,
+      "token_start": 16,
+      "document_token_count": 2081,
+      "input_ids_sha256": "ea92a9459597f4ff4d24f3ad4a370bf8b3856d02c6405da302884ff1f1dde8fd"
+    },
+    {
+      "index": 187,
+      "document_id": "url:https://www.a-1homeplans.com/dream-cloud-mattress-topper/",
+      "document_sha256": "a4238c45964a07b646bf369eb21e399595667db0d825eb9f083a215a2a05c75c",
+      "stream_index": 6714,
+      "token_start": 33,
+      "document_token_count": 2225,
+      "input_ids_sha256": "a6b57c28e5f3f81f03e6226f68c5b0fdec17543b1622d3f83a82685cee910d89"
+    },
+    {
+      "index": 188,
+      "document_id": "url:http://www.peanutbutterandpeppers.com/2012/04/27/my-skinny-mexican-dinner-comes-together-giveaway/",
+      "document_sha256": "791a68eda93404768b0d223c37e7efc2cf2d769762f27eaabaed8251fe698c22",
+      "stream_index": 6715,
+      "token_start": 82,
+      "document_token_count": 2184,
+      "input_ids_sha256": "47f9804a5dbaa13843ea5dded7e1140272844a9e8d7ef1b82d9900ea2a1e41cc"
+    },
+    {
+      "index": 189,
+      "document_id": "url:https://publications.parliament.uk/pa/ld201011/ldhansrd/text/101028-0001.htm",
+      "document_sha256": "ff42806518315830048109d50f61393f846c8dd1c1a66e97b3ce91ada653d893",
+      "stream_index": 6725,
+      "token_start": 15954,
+      "document_token_count": 27587,
+      "input_ids_sha256": "413fc950b9f726e4a9f407e35eb4574f13cc587586a84b87f0d5258fd9081d7a"
+    },
+    {
+      "index": 190,
+      "document_id": "url:https://www.pcgamer.com/towers-is-a-survival-game-with-big-monsters-and-bigger-ambitions/",
+      "document_sha256": "07fa1e3be58ccf8255ca4a1ef7a45807d8980258ac5566b2e77ce87057d3b654",
+      "stream_index": 6772,
+      "token_start": 7,
+      "document_token_count": 2197,
+      "input_ids_sha256": "56bda9e5ba2c90cdea673abf9930f7e747f8bea89cc3224e2aec8a6283775f4e"
+    },
+    {
+      "index": 191,
+      "document_id": "url:http://seanspickoftheday.com/2016/01/page/2/",
+      "document_sha256": "522577db2e2e5cd3e2435e787ee326a1b7d629aad794f7732a645c5421a2040c",
+      "stream_index": 6784,
+      "token_start": 263,
+      "document_token_count": 2427,
+      "input_ids_sha256": "1e484e8537019077e62c50f7b0cdd072acf1856539c4ebf7e11340db237910d5"
+    },
+    {
+      "index": 192,
+      "document_id": "url:https://www.wired.com/2009/05/fretlight/",
+      "document_sha256": "7af9deb15ecd8bd17d5ec2eff5fb95144b63529a5a085d742fd0f126f7799274",
+      "stream_index": 6817,
+      "token_start": 65,
+      "document_token_count": 2214,
+      "input_ids_sha256": "0471ebbc3ee185fcc456a4cf6314f98f5e80346f81668816939a25730e5b5d0c"
+    },
+    {
+      "index": 193,
+      "document_id": "url:http://www.zahlis.com/index.php/articles",
+      "document_sha256": "8b0d256a15e6c3e5f2c9fd3d824f6d3986d554ec26f8a723a390252506d8797e",
+      "stream_index": 6843,
+      "token_start": 424,
+      "document_token_count": 2915,
+      "input_ids_sha256": "524bebd9966efb6bb7acf85b02d7c79ab8f0327542830ec6792cb32582257bcb"
+    },
+    {
+      "index": 194,
+      "document_id": "url:http://ubiquis.co.uk/category/etl/",
+      "document_sha256": "8ffb551b88c40448876372a4dbe68f1dd9ca0f4e73f04c17b02ae31f054acb76",
+      "stream_index": 6912,
+      "token_start": 117,
+      "document_token_count": 2577,
+      "input_ids_sha256": "c434dbc9cce06df2a3a5b28932e3b62059d0887b502ac0243b7c347d086eb32f"
+    },
+    {
+      "index": 195,
+      "document_id": "url:https://www.1057thepoint.com/rizzuto-show/the-cone-of-solitude/",
+      "document_sha256": "7bea4fe024dd515b450a4d046eb4eb577976dab1b0bfffbded2c178348f6e96e",
+      "stream_index": 6986,
+      "token_start": 320,
+      "document_token_count": 2870,
+      "input_ids_sha256": "3f3010a60c833fdc6cd89e0fd359c79ee6709d5468b03b19ecc9f65f613912c6"
+    },
+    {
+      "index": 196,
+      "document_id": "url:https://www.peanutallergy.com/boards/concerns-about-when-to-use-the-epipen",
+      "document_sha256": "3ac3096e8464de7ec60ef93d181f4ac586ebe3fdaea77296017957c5043f0258",
+      "stream_index": 6992,
+      "token_start": 645,
+      "document_token_count": 3593,
+      "input_ids_sha256": "459f22e5f01eff51e0d3a8a64d9dd6fd9ca722fbde63c8a389bfae13d4ea24c4"
+    },
+    {
+      "index": 197,
+      "document_id": "url:http://googlesystem.blogspot.com/2013/07/",
+      "document_sha256": "62d4fdc1a6a05b793c441957fea95a8fdc88bd633749476b75bb54ca9b8b1e5a",
+      "stream_index": 7005,
+      "token_start": 424,
+      "document_token_count": 5318,
+      "input_ids_sha256": "12ce634461522ed05ba034dd9bceed1d9e09c7a4077625f0a1c42e32c4673254"
+    },
+    {
+      "index": 198,
+      "document_id": "url:https://bestreviews.com/best-cotton-candy-machines",
+      "document_sha256": "95d628e3adc43fc28c260fe3bb4f781d922eb85ca1ce45b028ac1fb58f816ed7",
+      "stream_index": 7016,
+      "token_start": 220,
+      "document_token_count": 2344,
+      "input_ids_sha256": "aee16382dadd16266d2f7d4591dd151661a6d0e4badb9fd99583e063e4751334"
+    },
+    {
+      "index": 199,
+      "document_id": "url:https://www.energytrend.com/knowledge/20110721-1713.html",
+      "document_sha256": "b0752cf01e7027d7c1044d3dccbb3db450cebc61e45aeeb2a95888b3b6a62587",
+      "stream_index": 7018,
+      "token_start": 403,
+      "document_token_count": 2531,
+      "input_ids_sha256": "e5c02d0b6168acdadb9737d4fe55030110107faaa1516092404040621fc94fdc"
+    },
+    {
+      "index": 200,
+      "document_id": "url:http://www.woundedtimes.org/2011/03/",
+      "document_sha256": "de15a21344fd68c6dc8608bfb489b7a57cabaca2a2c2f5267c46b7c72cfb96ed",
+      "stream_index": 7058,
+      "token_start": 2900,
+      "document_token_count": 14204,
+      "input_ids_sha256": "693b59477992f7c3a32636411bc6a04867246d0a8fa51c2699a2a8c67073c852"
+    },
+    {
+      "index": 201,
+      "document_id": "url:http://www.kpubs.org/article/articleMain.kpubs?articleANo=HKSOBF_2015_v46n3_208",
+      "document_sha256": "61d4231ec6eef0364488979159a4f17236f4d7f71fb230e9ab227158c3577213",
+      "stream_index": 7059,
+      "token_start": 988,
+      "document_token_count": 3208,
+      "input_ids_sha256": "7ce0d0281a5c01bdd6370e58c4ddb545ff4a5ed89b33c689f62ea8d5120bd7f9"
+    },
+    {
+      "index": 202,
+      "document_id": "url:http://japan-vehicle.com/",
+      "document_sha256": "445023181945406cf948c6a637515cbd49771741ce89400a1e27f323e7963056",
+      "stream_index": 7060,
+      "token_start": 8932,
+      "document_token_count": 26054,
+      "input_ids_sha256": "9d546ea6a03b372dc3001e0381aec62f326dc968bf6c8d3db50bc5b1457b6302"
+    },
+    {
+      "index": 203,
+      "document_id": "url:https://www.powerliving.com.au/blog/journey-modern-yogi-project/",
+      "document_sha256": "05da3c8fe732b8aaf3ebc59366b23725545d210121d261d667f68b484aa9e875",
+      "stream_index": 7084,
+      "token_start": 224,
+      "document_token_count": 2752,
+      "input_ids_sha256": "2ddf54f3160274dbfffd6325bab3e91924a115d929f532eafc613d0fd011d547"
+    },
+    {
+      "index": 204,
+      "document_id": "url:http://www.kickasspoker.com/online-casino/games/baccarat/",
+      "document_sha256": "7fdb8c25163869432576aee3baf00c5dfda49796d04745aa711e2d7d7780d03c",
+      "stream_index": 7110,
+      "token_start": 345,
+      "document_token_count": 4993,
+      "input_ids_sha256": "789ec65134dc1e750fd993ca7424f9d0493ecf967584dccacb34818c8bd99f06"
+    },
+    {
+      "index": 205,
+      "document_id": "url:http://www.halcyondays.com/tng/register.php?personID=I11406&tree=Tree1&generations=4",
+      "document_sha256": "5d4387886c4c437de00be73018ab0f55e2f3d3882137c892cc561143c2941916",
+      "stream_index": 7168,
+      "token_start": 829,
+      "document_token_count": 6604,
+      "input_ids_sha256": "3ec25950fd15db7bb8ae24a7f99f1148a9744c16613f6dd7256fdf67847031bd"
+    },
+    {
+      "index": 206,
+      "document_id": "url:http://litchickshow.com/buy-one-get-one-free-wp-engine/",
+      "document_sha256": "3d649e721f8f92ee856183dfcb56e574b0e3337e4b712714bf390c1cafdf387f",
+      "stream_index": 7222,
+      "token_start": 315,
+      "document_token_count": 3136,
+      "input_ids_sha256": "4d9cd44a4733dd61dae1b4b061ae22628d77bf1ffbfa6fb3f14a5e10fe74e7c3"
+    },
+    {
+      "index": 207,
+      "document_id": "url:http://www.vintagedoublehose.com/forum/viewtopic.php?p=73599",
+      "document_sha256": "57e3eb517e720ab00b019fac967a79feaf6f1848e71ab165b997df2d72d5a9f7",
+      "stream_index": 7247,
+      "token_start": 78,
+      "document_token_count": 3586,
+      "input_ids_sha256": "db8d4ef2c8016d935cb83361ce3f756197067d4c9820478c1efb97191d4938d2"
+    },
+    {
+      "index": 208,
+      "document_id": "url:https://cstarleague.com/csgo/news_articles/413",
+      "document_sha256": "8f96dd1278b44a30631053c14a6c8858c896e80c4a6eca21eb765cc74b5b1c5e",
+      "stream_index": 7371,
+      "token_start": 164,
+      "document_token_count": 2247,
+      "input_ids_sha256": "1959c25d5bea8fd79e0fecbfe356afce5e67197dcecad135647fea23bfa2b294"
+    },
+    {
+      "index": 209,
+      "document_id": "url:https://www.ialotteryblog.com/lottery-retailers/",
+      "document_sha256": "a2e798ccd124d6cea614d2d89c36823f988601593fddbecdac91ae33f8766f3f",
+      "stream_index": 7412,
+      "token_start": 1708,
+      "document_token_count": 5225,
+      "input_ids_sha256": "3bb0981e7355ec301380a99e4637f0a332f5b55c57b6e88fd294def69a00e821"
+    },
+    {
+      "index": 210,
+      "document_id": "url:https://bmcresnotes.biomedcentral.com/articles/10.1186/s13104-017-3039-1",
+      "document_sha256": "7ac1f7c1b1922014f594a3735a04d2432942ad245b53455fe0c314da0f781964",
+      "stream_index": 7427,
+      "token_start": 1177,
+      "document_token_count": 3367,
+      "input_ids_sha256": "0dca86aed41f763dd097a3f10929bf87bfc32e9284f2d77d32098251fa65df58"
+    },
+    {
+      "index": 211,
+      "document_id": "url:http://www.ecelebrity.eu/en/content/3-terms-and-conditions-of-use",
+      "document_sha256": "f2f4aef6024c8bdaf03e6b3dc9ff2a6558e28823ffec0b3099749c5a10bf7178",
+      "stream_index": 7475,
+      "token_start": 677,
+      "document_token_count": 5304,
+      "input_ids_sha256": "ddf83e9911c6c04f2be757e334dfce8e815bee5cfade0e33227dbd4f3144517a"
+    },
+    {
+      "index": 212,
+      "document_id": "url:http://housingpanic.blogspot.com/2008/01/open-thread-to-talk-about-bernankes.html?showComment=1201736220000",
+      "document_sha256": "c511771884624244b4d36b2ce1a7f3cb8c7f9d3d07a63e4c8d3430184deb0f5c",
+      "stream_index": 7643,
+      "token_start": 2994,
+      "document_token_count": 5200,
+      "input_ids_sha256": "b08559c4cddde05f87ab8ad03aff3bc327af7254a6ccd46f6397858889b36701"
+    },
+    {
+      "index": 213,
+      "document_id": "url:https://www.manifest-tech.com/blog/2008/10/",
+      "document_sha256": "137c03b50c74b502c0bdbbba398a7c63f88aae743a3ea6fcec12e75cbceb0769",
+      "stream_index": 7676,
+      "token_start": 155,
+      "document_token_count": 2564,
+      "input_ids_sha256": "da4a43906125054b2be4114b0066b44812173854a735b5609fcbd8a59e239d3c"
+    },
+    {
+      "index": 214,
+      "document_id": "url:https://theoldmoneybook.com/2018/11/20/old-money-and-screen-time/",
+      "document_sha256": "1d6d509ffea28868068b62718fc664d3dbe7d5b2c82fbd433525daa1ad94b4ec",
+      "stream_index": 7691,
+      "token_start": 371,
+      "document_token_count": 2551,
+      "input_ids_sha256": "4329129a79fdbf9a85a21d65516a8858224663132f12c8a7dc950405f55677d9"
+    },
+    {
+      "index": 215,
+      "document_id": "url:https://wastereviews.com/iowa/rent-a-bin-clio-ia/",
+      "document_sha256": "b6229d9c23c54ac6a9c868c492cd28601d218757b4715a7a0e4f7933f44d2913",
+      "stream_index": 7740,
+      "token_start": 0,
+      "document_token_count": 2117,
+      "input_ids_sha256": "1677b13ca245251b6db0b25af1a0ebe716fe4ebc565ab18308fbf820938a8990"
+    },
+    {
+      "index": 216,
+      "document_id": "url:https://houston.bintheredumpthatusa.com/ourservices",
+      "document_sha256": "a3b27c1b82c9cf8791a173337662105ce9dcd932e951e55235b515e8ae602180",
+      "stream_index": 7877,
+      "token_start": 192,
+      "document_token_count": 2879,
+      "input_ids_sha256": "84a69654b5e9dff7db53136df7a60bad4742e3802a893d4495f09337d05cd8a5"
+    },
+    {
+      "index": 217,
+      "document_id": "url:http://eubylon.ch/en/imprint/",
+      "document_sha256": "a0fe103ae09312e599739583935de14a093a0ad303489b07584b6b80e3270f0b",
+      "stream_index": 7894,
+      "token_start": 29,
+      "document_token_count": 2369,
+      "input_ids_sha256": "b4bf4e32f24d9dfe5d06bab8b3c2ec5020d51ebe68c9d78b0a1e4dc329461aa8"
+    },
+    {
+      "index": 218,
+      "document_id": "url:http://affiliate.konga.com/terms-conditions/",
+      "document_sha256": "ce3f387369ef6d22b2174cda8a2284a446313971d1ac4ddf02ce2f3b40fda75b",
+      "stream_index": 7935,
+      "token_start": 60,
+      "document_token_count": 2393,
+      "input_ids_sha256": "03cdea2895cd005ac24c635a896ca730eb6b01482810de2198c5281bfb91941e"
+    },
+    {
+      "index": 219,
+      "document_id": "url:https://www.abc.net.au/health/features/stories/2009/03/18/2420265.htm",
+      "document_sha256": "1ddfffc64176653617ab2ef33a977e8e2ffd653768c24f1e9fcf7e284d31c48a",
+      "stream_index": 7962,
+      "token_start": 100,
+      "document_token_count": 2246,
+      "input_ids_sha256": "45a584cb138730f5e29c56ed7c4c03c40b2cb19260413a012a5c12999796631f"
+    },
+    {
+      "index": 220,
+      "document_id": "url:https://www.jewishhistory.org/the-1850s/",
+      "document_sha256": "9c52b5ad8c1b0a9a35d4f6634da2765a1d61185c69a1208b012b9c6441c40970",
+      "stream_index": 7985,
+      "token_start": 304,
+      "document_token_count": 2840,
+      "input_ids_sha256": "df3990643b3453ee82f5155d2e7af1379e99441d43cfaa31a41ddfe81881a119"
+    },
+    {
+      "index": 221,
+      "document_id": "url:https://www.notebookcheck.net/Honor-Magic-2-Smartphone-Review.387316.0.html",
+      "document_sha256": "182684b3eb7d213478a6eabc68bff146fc9da1636faa79b7772efaa1ab752055",
+      "stream_index": 8010,
+      "token_start": 5,
+      "document_token_count": 3592,
+      "input_ids_sha256": "481eb742dd02680f9421ad8b0b786be16d4e77f44ec08e591a1b9fc408572e2b"
+    },
+    {
+      "index": 222,
+      "document_id": "url:https://www.streetplus.net/news/?offset=1518289719790",
+      "document_sha256": "5660f7b1c3fbd7059926b08e548f27e956087bb0852c7c9a25e200235c6c9db2",
+      "stream_index": 8017,
+      "token_start": 67,
+      "document_token_count": 3015,
+      "input_ids_sha256": "2807ab536f6542d11bad763385d475466d66e9e5108a000bc188cd97d9969050"
+    },
+    {
+      "index": 223,
+      "document_id": "url:http://www.boxingmonthly.com/stories/a-date-for-forget-for-honeyghan/",
+      "document_sha256": "6c541ab329993a7bcf7d5908caf561d69fb290f5a0b5112c544895c2dac7e2cb",
+      "stream_index": 8039,
+      "token_start": 33,
+      "document_token_count": 2145,
+      "input_ids_sha256": "e5be3cc5e730b5d371f04595d137c0927cafbfd701d9425ece9bf7f25ecd00bf"
+    },
+    {
+      "index": 224,
+      "document_id": "url:http://reidsfrance.com/places/paris/interest/market",
+      "document_sha256": "78998fd5633b7dfb9d2e3ed71ed7fbac4e538e402ccec53c67122e5226b5b1f9",
+      "stream_index": 8131,
+      "token_start": 549,
+      "document_token_count": 5189,
+      "input_ids_sha256": "4357fc1e4954670bb8b95a7e088a59989581e091c8d7a7f3db6edff3bb16fe7e"
+    },
+    {
+      "index": 225,
+      "document_id": "url:https://www.scirp.org/journal/PaperInformation.aspx?PaperID=76167",
+      "document_sha256": "515a13361fb1ff4efccc0d88576acf525eb90ee12f3dac6538b11d45fb2a02ec",
+      "stream_index": 8161,
+      "token_start": 70,
+      "document_token_count": 3113,
+      "input_ids_sha256": "8435723478f7c359af271e565d8e7abff5450831a81630f5e0134e07ac7eefd8"
+    },
+    {
+      "index": 226,
+      "document_id": "url:http://www.welfare.ie/en/Pages/DAO-Bulletin-Issue-No-3-Issued-August-1997.aspx",
+      "document_sha256": "a9111abb8e36614a7785135bdcb5c4bdaa4a0fae397235019dd1e33f43779d95",
+      "stream_index": 8166,
+      "token_start": 1658,
+      "document_token_count": 3729,
+      "input_ids_sha256": "5309383ec2f6e6e2fe4a4c432a5e1c7fa732d56c53b6c4a471b016954eba0879"
+    },
+    {
+      "index": 227,
+      "document_id": "url:https://bmcgeriatr.biomedcentral.com/articles/10.1186/1471-2318-3-2",
+      "document_sha256": "8ef59d7cde2f982caef0287315f9e9f42c648da12f6de87cf7342e1195b51254",
+      "stream_index": 8299,
+      "token_start": 2504,
+      "document_token_count": 5296,
+      "input_ids_sha256": "a655a4e342e9a472c2fb0127843b2c9ed8ab272b094f47a2d5ca680b5daa3c62"
+    },
+    {
+      "index": 228,
+      "document_id": "url:https://www.powershow.com/search/presentations/ppt/buy_pregabalin_300_mg_cheap",
+      "document_sha256": "6207233bf1401c30dfc522de33940db4af2bada41437b1639454eaf145d83bb7",
+      "stream_index": 8334,
+      "token_start": 275,
+      "document_token_count": 2911,
+      "input_ids_sha256": "912725c06d61638487f1f878da8170514607e7786fa75222e7ab4ccd923abe4b"
+    },
+    {
+      "index": 229,
+      "document_id": "url:http://www.ttdfonts.com/2017/11/",
+      "document_sha256": "65529152706cabceb665436d7802ca1a6516a6a1e26ad99a36fbeab2d3648075",
+      "stream_index": 8339,
+      "token_start": 523,
+      "document_token_count": 2918,
+      "input_ids_sha256": "8d419cb57c4db5e6112be21cf3b931cf68c8ddf5796b091f16702fa818e91ee2"
+    },
+    {
+      "index": 230,
+      "document_id": "url:https://morningdevotion.wordpress.com/2011/07/",
+      "document_sha256": "16bba84b57a9e54a4835d3ef976b9c250db971ff90589e3fdfbde28c6075ba57",
+      "stream_index": 8356,
+      "token_start": 28,
+      "document_token_count": 3478,
+      "input_ids_sha256": "69988c23bed43e4dbde52b465aa6b1c7fe9a6de4a0ad6a654e9b932a573ece7e"
+    },
+    {
+      "index": 231,
+      "document_id": "url:https://www.evaperated.com/products/steaped-dreams",
+      "document_sha256": "868fc976571e6fa9f4dc5e255c2dd622824e5de3c4e44f33807ccb102f792ff0",
+      "stream_index": 8357,
+      "token_start": 416,
+      "document_token_count": 2464,
+      "input_ids_sha256": "16e52a1462b346cf3546a8597ad379153f0c580c858114a1da7faa19d1ed9c5f"
+    },
+    {
+      "index": 232,
+      "document_id": "url:https://www.dangerous-business.com/2016/01/christmas-markets-with-viking-river-cruises-whats-it-really-like/",
+      "document_sha256": "42592144eed31d63b604208e3ec8e4a5d40956578d6d2da5a81e778e8b9236c4",
+      "stream_index": 8375,
+      "token_start": 2769,
+      "document_token_count": 6941,
+      "input_ids_sha256": "0f64e3dc5461efba871069415c5060f3f362f4d6e2117579f3a2d65702d10ec6"
+    },
+    {
+      "index": 233,
+      "document_id": "url:https://secure.communist-party.org.uk/handbook-guidelines",
+      "document_sha256": "1f0ecb9989a3ed01d7cbfe2ce64190e359fb6f0b927a230625c328fbddda40b1",
+      "stream_index": 8414,
+      "token_start": 2501,
+      "document_token_count": 5059,
+      "input_ids_sha256": "ed23c754679a065fb89386bf2dd381c46d7a1dbe29c01dd210dd7f5dbaf54bfd"
+    },
+    {
+      "index": 234,
+      "document_id": "url:https://boards.cruisecritic.co.uk/topic/907920-crown-amp-anchor-program-revisions-join-the-merged-discussions-here/page/171/",
+      "document_sha256": "1cd701cf46a11c3c3a7030dbd566cb0cb5ca32a5cafffe23382e83506f01dd7e",
+      "stream_index": 8473,
+      "token_start": 569,
+      "document_token_count": 2636,
+      "input_ids_sha256": "d2cf7f4e06ec8bf6d229d669f3e0565289601c77efa0fe0cf40a6b5286997c20"
+    },
+    {
+      "index": 235,
+      "document_id": "url:http://patents.com/us-10102145.html",
+      "document_sha256": "bf36e1645238b215f96b6fb9ac74870304e577cdc5859fdbbc8638552e721ada",
+      "stream_index": 8475,
+      "token_start": 3072,
+      "document_token_count": 11453,
+      "input_ids_sha256": "1bc369cf71f2466bf493e46880ae61b00b637679b889fbd2411d557024eaec75"
+    },
+    {
+      "index": 236,
+      "document_id": "url:https://www.autoaccessoriesgarage.com/Bumpers/Front",
+      "document_sha256": "0323d7767ed0ccc41fadb1b3875b3904f8f5e5f84520a7f4118cb85f8d05b995",
+      "stream_index": 8571,
+      "token_start": 320,
+      "document_token_count": 2518,
+      "input_ids_sha256": "1c8883452e74a41f798ae2c756d9716a2aaf080647c54c1dc8cda53b8ef7ad9d"
+    },
+    {
+      "index": 237,
+      "document_id": "url:https://www.sensory-processing-disorder.com/The_SPD_Companion-Floortime-And-SPD.html",
+      "document_sha256": "de8c3caf0a0760fe13002d3870e82a224afab2d027cf24e2f1f89151cef5c998",
+      "stream_index": 8583,
+      "token_start": 412,
+      "document_token_count": 2466,
+      "input_ids_sha256": "e7cb7c1b36d21fbd0bcf91ed92a4cf8f53992c88a44f363f1263da85f4dc891b"
+    },
+    {
+      "index": 238,
+      "document_id": "url:https://jcoss.org/the6thform/key-stage-5-curriculum",
+      "document_sha256": "92db14ee77b7fc597520b74c9f22f4776ae1cb503cc1f4a93f97148648281d01",
+      "stream_index": 8621,
+      "token_start": 229,
+      "document_token_count": 12099,
+      "input_ids_sha256": "8a0e4ed2b363d6cae32993587908c37371a9393e81a2f35a76df5cfcd63f908b"
+    },
+    {
+      "index": 239,
+      "document_id": "url:http://www.ganssle.com/tem/tem257.html",
+      "document_sha256": "06bb7a35ad6b4b5b4e23bc86228f3e7b76c1d753b74b8028f83b978eb6418612",
+      "stream_index": 8652,
+      "token_start": 1392,
+      "document_token_count": 3704,
+      "input_ids_sha256": "a2e38476390dbc0f23ab34d145aa0e3a3e026fa0ceddf2a00c14f5d4851ec475"
+    },
+    {
+      "index": 240,
+      "document_id": "url:https://siam.org/Publications/SIURO/Volume-3",
+      "document_sha256": "2d5047d525cc073ac93cef638824cd9f15c66bef5d05f0cbd71ff15f9ee1bcdd",
+      "stream_index": 8654,
+      "token_start": 32,
+      "document_token_count": 2083,
+      "input_ids_sha256": "e5c1438d131ad12f645bb29e76b715b05de09aceb5313a654bdef33399b6992d"
+    },
+    {
+      "index": 241,
+      "document_id": "url:https://patents.google.com/patent/US20070010415A1/en",
+      "document_sha256": "f10edd0707662f127368c45a3ca4d3432355e9a261a806a145e73d3471272844",
+      "stream_index": 8669,
+      "token_start": 8486,
+      "document_token_count": 11697,
+      "input_ids_sha256": "e67d754f41a644726851a7b3e46fac345922f944fe165f6d4b007e818668c408"
+    },
+    {
+      "index": 242,
+      "document_id": "url:https://ipfs.io/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/wiki/Indian_gooseberry.html",
+      "document_sha256": "69387835679d2088cc27d3127247d995b3ee1b0a88c813fa706b1dd566e2f887",
+      "stream_index": 8673,
+      "token_start": 278,
+      "document_token_count": 3798,
+      "input_ids_sha256": "f479cbd7a6273079d0e8183edf3e90fe66e40f3d7ba7a75e0a555dc5da7dcd06"
+    },
+    {
+      "index": 243,
+      "document_id": "url:https://karlenepetitt.blogspot.com/2017/02/",
+      "document_sha256": "98a3d43a8af9af58bb887fb1b917dc11777831f9e0ca583850e6953e5f66cc05",
+      "stream_index": 8694,
+      "token_start": 446,
+      "document_token_count": 2790,
+      "input_ids_sha256": "2c1f11e35bbdd337e8877ab080f0305053768b3e9363f4bb5a897a2369874b8d"
+    },
+    {
+      "index": 244,
+      "document_id": "url:http://spec.org/web2005/docs/faq.html",
+      "document_sha256": "5fbe1ec4568039acfcb7cdd10098e6597dc033ef746003b84b76f61c3b034fdc",
+      "stream_index": 8785,
+      "token_start": 335,
+      "document_token_count": 2406,
+      "input_ids_sha256": "12f78c686519ef245b723610dbe80b52d89c74652e7b2cb0d20f7711d91506f8"
+    },
+    {
+      "index": 245,
+      "document_id": "url:http://allmen.tk/new-orleans-casino-boat.html",
+      "document_sha256": "532e008e8ff15f9eea0e086fa4cc103c3532bcc063e3c606a93f3fd41997ab5e",
+      "stream_index": 8872,
+      "token_start": 7,
+      "document_token_count": 2208,
+      "input_ids_sha256": "a27ac60e3d9e45a582cdcdf72b7b4f56901ce86848f0a5361bdb247878191110"
+    },
+    {
+      "index": 246,
+      "document_id": "url:https://plantmethods.biomedcentral.com/articles/10.1186/1746-4811-8-3",
+      "document_sha256": "cf02ebc6526f4f3e13d1eb9477ee47bb4d60addf855d808e71b6be1fa241bd40",
+      "stream_index": 8888,
+      "token_start": 1313,
+      "document_token_count": 7864,
+      "input_ids_sha256": "32a85018dd68d67899e6f631a721872abe6112c6b32e63b520d8d776505a37de"
+    },
+    {
+      "index": 247,
+      "document_id": "url:http://staudoens.ie/school-info/policies/child-protection-policy/",
+      "document_sha256": "114f667f13e14971f95c6b9990deb73198d8aff3dfa8599d30343fb689a7668a",
+      "stream_index": 8941,
+      "token_start": 415,
+      "document_token_count": 2677,
+      "input_ids_sha256": "aec34c031b502095bd05e7f227fc06e98942babaea84136c1100bb4ba2b8ec42"
+    },
+    {
+      "index": 248,
+      "document_id": "url:http://www.depts.ttu.edu/cs/department/news/index.php",
+      "document_sha256": "d5232ffcff6dd6c7961c77d11912fbce1df80fb95ab698858ef9f5bbb0448954",
+      "stream_index": 8953,
+      "token_start": 1023,
+      "document_token_count": 4139,
+      "input_ids_sha256": "a003f6c23d7e9db0480dfc7be45de1898eca6c026158531705bae0fcccc1e396"
+    },
+    {
+      "index": 249,
+      "document_id": "url:http://lutalivre-academy.de/publications/articles/the-history-of-wrestling-before-the-development-of-luta-livre",
+      "document_sha256": "ee7cdf59753700dda75258238ed01d49d574af9032b267571d4153943df0ca85",
+      "stream_index": 8964,
+      "token_start": 567,
+      "document_token_count": 3790,
+      "input_ids_sha256": "272909b8f3089ffeac437aa55cd94db38b036ef93d311c977d018cd1bb34843f"
+    },
+    {
+      "index": 250,
+      "document_id": "url:https://myproject.com.ng/products/impact-of-multiple-taxation-on-small-and-medium-scale-businesses/",
+      "document_sha256": "f52413872090d60dd18ced1bb20bc5e7e4c0013a43738cec93f3a07b852d0784",
+      "stream_index": 8968,
+      "token_start": 26,
+      "document_token_count": 2176,
+      "input_ids_sha256": "01afa96dfa740e07e83c418a5bf198decdab69bb142f9e80b34a09af3c4ddffb"
+    },
+    {
+      "index": 251,
+      "document_id": "url:https://www.restaurantlistings.com/HI/Kamuela",
+      "document_sha256": "96013c3ffc9ed404b0514b286e30d3e0bc53919a658ecf7abe4599d3174609d9",
+      "stream_index": 9028,
+      "token_start": 176,
+      "document_token_count": 3412,
+      "input_ids_sha256": "61050ca5a92bc19918ff8a46dbe4b373d32c6de0691a6b0f2c74c633a28502ec"
+    },
+    {
+      "index": 252,
+      "document_id": "url:https://www.robots.com/articles/yaskawa-motoman-robot-history",
+      "document_sha256": "115a6546644b29e237480df6e8aa8e234b20e2f73d99e3e4ce7be41a1c3c4482",
+      "stream_index": 9043,
+      "token_start": 25,
+      "document_token_count": 2207,
+      "input_ids_sha256": "87141e7c7ffb7ea8cde6d0ea636955a2527f27fd0aae44541294a0f46fc19b4d"
+    },
+    {
+      "index": 253,
+      "document_id": "url:https://dereksmusicblog.com/2017/03/17/janka-nabay-and-the-bubu-gang-build-music/",
+      "document_sha256": "d3dacfcd8fd51d813aa5d17bf3a5035d6478e6e2a69cf48ef97afcd77f3fd0cb",
+      "stream_index": 9051,
+      "token_start": 841,
+      "document_token_count": 3270,
+      "input_ids_sha256": "965a6d72aa05746e79380d78e60f14f5410eb0176be9f90324ac017ac6185e57"
+    },
+    {
+      "index": 254,
+      "document_id": "url:http://awate.com/dear-friends-and-readers-of-awate-com/",
+      "document_sha256": "a5e30039aa29ffd8de5a25ac385bfe15882754018a399229477dd8aa25ed5ec1",
+      "stream_index": 9097,
+      "token_start": 4698,
+      "document_token_count": 7306,
+      "input_ids_sha256": "9ffe99fb94159589028f4adabdc9bba93ed0ee166903d0f4035ffc3befdbffe2"
+    },
+    {
+      "index": 255,
+      "document_id": "url:https://www.touchbirmingham.co.uk/business/dr-it-seo-services/19087176",
+      "document_sha256": "736af57f1dc3d9787347429da8722c9cb0adcc785f1e9705719761a4212ed71a",
+      "stream_index": 9143,
+      "token_start": 197,
+      "document_token_count": 2347,
+      "input_ids_sha256": "7ec39b85a7d65f45ada0a77b8217e67cce39265176ec6d3ce23674c6c1a7f9d8"
+    },
+    {
+      "index": 256,
+      "document_id": "url:https://www.instyle.com/fashion/september-deals-steals-10",
+      "document_sha256": "113e8074753d0620b99633762e0ac019eb39fb3f8612d132b80a04f0078480d1",
+      "stream_index": 9165,
+      "token_start": 234,
+      "document_token_count": 2439,
+      "input_ids_sha256": "6fb70d3e1794960d77e7672109d57115df02eac5f6b83ce50ba74abe6600729c"
+    },
+    {
+      "index": 257,
+      "document_id": "url:https://lippincottteam.com/2017/06/",
+      "document_sha256": "7b00fae97c4ecf9277aceecd2ae2c526be6437607bd62177785400f98298410b",
+      "stream_index": 9193,
+      "token_start": 998,
+      "document_token_count": 3093,
+      "input_ids_sha256": "f18cd6a9c840b03401bd6de2cf238dbee5bac8b62bbacb708b2f8cc1174058dd"
+    },
+    {
+      "index": 258,
+      "document_id": "url:http://www.dumpstruction.com/michigan/construction-dumpster-in-loretto-mi/",
+      "document_sha256": "b15faef221fac228997181018a6de55c3e26923b571a4a47fa823f451b21c31f",
+      "stream_index": 9202,
+      "token_start": 627,
+      "document_token_count": 2833,
+      "input_ids_sha256": "c899cc2174377c7e219cea2aead7989cafcef1863220c8e984b224d01f7f2d4a"
+    },
+    {
+      "index": 259,
+      "document_id": "url:https://blog.rojadirecta.me/",
+      "document_sha256": "9d104425fce4aa76d4902d5dcc3e051ba30b7c65438159a9d6b86d5bea126764",
+      "stream_index": 9234,
+      "token_start": 16,
+      "document_token_count": 2668,
+      "input_ids_sha256": "7e26d21cd9595a9cee3f32c85af621064585c0927fd63079727a16e5c4dd4e3e"
+    },
+    {
+      "index": 260,
+      "document_id": "url:https://qualpolicomm.wordpress.com/2014/02/",
+      "document_sha256": "546ad2cb8868e4e74d82cf07420f05bb3a2ca052df0d0b0094b0552ae9e56263",
+      "stream_index": 9408,
+      "token_start": 570,
+      "document_token_count": 4613,
+      "input_ids_sha256": "a1431b0fce8fc5dfb82d287ae3496a3c778ea5f20a4bf641c9c19ee12f84d343"
+    },
+    {
+      "index": 261,
+      "document_id": "url:https://www.brandnewvegan.com/recipes/medieval-pottage-stew",
+      "document_sha256": "d48ff1a67f7802263a109d918a418b92788c0c69aa6b8b2a5baba313f10dbcc9",
+      "stream_index": 9441,
+      "token_start": 649,
+      "document_token_count": 2762,
+      "input_ids_sha256": "f1f5c86b726c851b9af5c49cb1df467c3daad353889dc5ca98d8b962e09df91a"
+    },
+    {
+      "index": 262,
+      "document_id": "url:https://www.ravedigital.co.uk/blog/magento/",
+      "document_sha256": "8110610eecb3b69857f88c09776f3341d73b3d57ba3d30c479d900a20d3640cf",
+      "stream_index": 9543,
+      "token_start": 41,
+      "document_token_count": 2156,
+      "input_ids_sha256": "62b4338ee524d654c8c0811e12d00e91f7c903a3273fe145d8015df4679d1ba6"
+    },
+    {
+      "index": 263,
+      "document_id": "url:https://marybethbutler.typepad.com/terrapin_station/enneagram/",
+      "document_sha256": "4c9d88ac2eb4f8d20cf2eff9097c0208eff93344afacad34b235ec7a55dd1612",
+      "stream_index": 9564,
+      "token_start": 347,
+      "document_token_count": 2688,
+      "input_ids_sha256": "0d369b28033f7f296d74b792ef44bc817f3fa880c688927b74f0e394b202f010"
+    },
+    {
+      "index": 264,
+      "document_id": "url:https://ipfs.io/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/wiki/New_York_Yankees_minor_league_players.html",
+      "document_sha256": "f17999ac226dfb3a8b05435976c85217d6403646cc1fef25eb5a6b65c2780ceb",
+      "stream_index": 9678,
+      "token_start": 4408,
+      "document_token_count": 11495,
+      "input_ids_sha256": "617654e6e56b986ff887e6e7e09d96fa6f123890e982793361523fdc614f62b4"
+    },
+    {
+      "index": 265,
+      "document_id": "url:https://claims.prolificworks.com/gg/32HQWgPTe1yYxiLa4uLY",
+      "document_sha256": "e93b4bf64f70b5fe2c19e860ef7659014cd70ed7d4f679dfbac3c4c52d33bc2b",
+      "stream_index": 9687,
+      "token_start": 785,
+      "document_token_count": 2886,
+      "input_ids_sha256": "55cffa22e48b68eb97af723d9057d657cb8b806780a03909db1a7624beb30fa3"
+    },
+    {
+      "index": 266,
+      "document_id": "url:https://sbcvoices.com/talk-amongst-yourselves-what-is-going-on-in-the-sbc/",
+      "document_sha256": "1dd77dc3476951471649d6995e7c52749a424ceef1c256a3bb2299ba9049c059",
+      "stream_index": 9690,
+      "token_start": 5624,
+      "document_token_count": 11536,
+      "input_ids_sha256": "7d39ccc8999d5640657c507011c3886bffaaaafa3429b5a858a726ef4117d53e"
+    },
+    {
+      "index": 267,
+      "document_id": "url:https://herdingcats.typepad.com/my_weblog/2019/03/vietnam-war-veterans-day-a-real-story.html",
+      "document_sha256": "33efbbefd9de642c258d31da0294d739e08167a1c2223b4d36f81b1538907772",
+      "stream_index": 9768,
+      "token_start": 328,
+      "document_token_count": 4466,
+      "input_ids_sha256": "f17252c54518836430ec03788b43f938f138b4e005f49ffa7858289a61214a1c"
+    },
+    {
+      "index": 268,
+      "document_id": "url:http://www.southernfriedscience.com/does-shark-week-portrayal-of-sharks-matter/?shared=email&msg=fail",
+      "document_sha256": "68c5a1c577cb27078e3eb70c3ed7fd27459e63dfbf3cb22604539033b8d06ee5",
+      "stream_index": 9787,
+      "token_start": 17,
+      "document_token_count": 2067,
+      "input_ids_sha256": "e2d72865767ff13acef246de6818d9895c2e2d76dad5cfe09eb7cd7dc335b43e"
+    },
+    {
+      "index": 269,
+      "document_id": "url:http://sharongodoy.freeiz.com/?leva=monday-tuesday-wenesday-mp3",
+      "document_sha256": "6c14b19f05c0f0a7dd1665d2ce20c7c2ee84f4d516629f29f0d8a4d1e1f55938",
+      "stream_index": 9790,
+      "token_start": 18,
+      "document_token_count": 2073,
+      "input_ids_sha256": "f55d23d36eb92d9198d894ec2dd4d0a803334ccc11567df65d997b851bb576a4"
+    },
+    {
+      "index": 270,
+      "document_id": "url:https://www.positive-parenting-ally.com/about.html",
+      "document_sha256": "165d0bc433db6a38bebe52680e6b04912399e1a19df54c945f62b8027811afcf",
+      "stream_index": 9806,
+      "token_start": 19,
+      "document_token_count": 2074,
+      "input_ids_sha256": "4b763bcd2f00c6ec75429d705724363a08b6b30fdaf95ae77700c003e4814259"
+    },
+    {
+      "index": 271,
+      "document_id": "url:https://www.icho.edu.pl/jurczak/",
+      "document_sha256": "aff9eb0f975d7efbda81f89031f22ba57ee044d3aa129aecd32a48c87e891dce",
+      "stream_index": 9816,
+      "token_start": 89,
+      "document_token_count": 2840,
+      "input_ids_sha256": "aa52854878cf0f161f25c87f07499ed4d9de120a2b0aba05b41efd2742c69426"
+    },
+    {
+      "index": 272,
+      "document_id": "url:http://www.mysonabsalom.com/2017/08/",
+      "document_sha256": "479fab45eb3505179ce76cbef4e4f1ce76c1872ad1e17617efcbce42b89a3841",
+      "stream_index": 9914,
+      "token_start": 787,
+      "document_token_count": 3938,
+      "input_ids_sha256": "a3707253f797fa0351b18c3161dac39a5593d448b65103ee25727ccaae4d4120"
+    },
+    {
+      "index": 273,
+      "document_id": "url:http://lifeinmathews.blogspot.com/2013/03/",
+      "document_sha256": "26817ae39962e6ff6bf7f47def5c26d6ae71fadbec748751325560286694a41e",
+      "stream_index": 9929,
+      "token_start": 27,
+      "document_token_count": 2098,
+      "input_ids_sha256": "1f63c1dd2f3ba3924f87167724341829907e22c72820f4344948bfaae691fee6"
+    },
+    {
+      "index": 274,
+      "document_id": "url:https://marmarismarine.com/destinations-2/",
+      "document_sha256": "7dde81abc7ad1ba04b0886381928eb6c9b238d385c566ea36f2b92118fa04e6d",
+      "stream_index": 9931,
+      "token_start": 916,
+      "document_token_count": 2976,
+      "input_ids_sha256": "0e0960f3822095d13d13c4e0395f3b256a1238ac8fcc06f0722527f9d6219101"
+    },
+    {
+      "index": 275,
+      "document_id": "url:https://blogs.n1zyy.com/n1zyy/2007/08/",
+      "document_sha256": "2a4603d10e0ef1836bcd119114608ba0845367cfacfe2f2003a27be5e69da77b",
+      "stream_index": 9980,
+      "token_start": 268,
+      "document_token_count": 3158,
+      "input_ids_sha256": "2d504511c448cde9b3dbb22c8feeccb80df144f250ffac792782430363cc893c"
+    },
+    {
+      "index": 276,
+      "document_id": "url:http://dffwic.wikidot.com/w-ren",
+      "document_sha256": "2b0f63abe5639c634f074ab97ce54ffc05846cf923e32e6e5676ad700c93762c",
+      "stream_index": 10076,
+      "token_start": 715,
+      "document_token_count": 2940,
+      "input_ids_sha256": "43530078453fd883b709a1a7c2cebfbc155324ffb803d511003dfb4224fc4e54"
+    },
+    {
+      "index": 277,
+      "document_id": "url:http://thehealthyplanet.com/2016/06/healthy-planet-happenings-51/?utm_source=rss&utm_medium=rss&utm_campaign=healthy-planet-happenings-51",
+      "document_sha256": "c9be0449c3a47f009214f4183e4a16cfd13f6cd8c7404bfd3b64e558b681af59",
+      "stream_index": 10087,
+      "token_start": 303,
+      "document_token_count": 3040,
+      "input_ids_sha256": "e98b409a968d621c507c3f21fcfd43163664f2d8a20a8ff1cbc3447d3adb2678"
+    },
+    {
+      "index": 278,
+      "document_id": "url:https://support.immunet.com/index.html/faqs/faq-frequently-asked-questions/",
+      "document_sha256": "8ad02bf0513c06924e1a304f904ecaa9bf5d97c88db31a1c2f5534012c578ee9",
+      "stream_index": 10095,
+      "token_start": 790,
+      "document_token_count": 3181,
+      "input_ids_sha256": "d4f27f73f8ca2ba9eb501631e4f15c8a1aa8003727c92362472bd1ba40c13521"
+    },
+    {
+      "index": 279,
+      "document_id": "url:http://griequity.astraea.net/review/2005/review20050630.html",
+      "document_sha256": "d157a4948e578ab5245413ffa61baddf1704134b55de2671693f8834b6656a1c",
+      "stream_index": 10106,
+      "token_start": 2950,
+      "document_token_count": 5739,
+      "input_ids_sha256": "0e681905b394f805fd8811fb9f48ea665c55a1f7a1ebc7b7bddfdfa35e1f2ec3"
+    },
+    {
+      "index": 280,
+      "document_id": "url:http://www.newco-tech.com/2015/12/",
+      "document_sha256": "a8364183c748dd3854101ae4fe5eb105d32266282759dfa279819a78c9e951e1",
+      "stream_index": 10126,
+      "token_start": 2735,
+      "document_token_count": 5492,
+      "input_ids_sha256": "9c879b00d8808d3778933caa7c3eba4319469d053c8cdb53f116e97d97f90164"
+    },
+    {
+      "index": 281,
+      "document_id": "url:http://www.vindy.com/news/2013/apr/28/landowners-face-challenges-new-leasing-rules/",
+      "document_sha256": "b40d930892e19ae859a412db6111b68f88a96748ab1b4fce976f300839085109",
+      "stream_index": 10135,
+      "token_start": 81,
+      "document_token_count": 2512,
+      "input_ids_sha256": "0c3dd8e76b56cdfbdd76d8cc8f77f2c5a3b7755422ab69deaf34eb855e5f11e5"
+    },
+    {
+      "index": 282,
+      "document_id": "url:http://achemoz.blogspot.com/",
+      "document_sha256": "be794e8be16204690a5db56ca2f7e6594bb1f9571fe0513d08ff4b425350c637",
+      "stream_index": 10142,
+      "token_start": 198,
+      "document_token_count": 4389,
+      "input_ids_sha256": "ad56f73794157a32b6955fb12d1b5a00e0a33205e216a2b771a56c41a9912ea1"
+    },
+    {
+      "index": 283,
+      "document_id": "url:https://www.citejournal.org/volume-17/issue-2-17/science/using-personal-science-story-podcasts-to-reflect-on-language-and-connections-to-science/",
+      "document_sha256": "60718e3ef40394dde7007ead514c8817c05714bad2b5966045d6f93e46fa5220",
+      "stream_index": 10200,
+      "token_start": 1306,
+      "document_token_count": 9579,
+      "input_ids_sha256": "948fad0e616e96143fb98742f48aff9785cee44cb6c0bf847f459fcea8e4cf59"
+    },
+    {
+      "index": 284,
+      "document_id": "url:http://www.temple.edu/bulletin/archive/webarchive/bulletin2002/ugradbulletin/tuition.htm",
+      "document_sha256": "80e790b077638909730879d18417b957e6d1c68ee8965242583d39df18cb4b3b",
+      "stream_index": 10269,
+      "token_start": 145,
+      "document_token_count": 2224,
+      "input_ids_sha256": "615e82c80003119224ae77ee05f088b61b609c7f1e0a0822cd81963ff5d1ec6c"
+    },
+    {
+      "index": 285,
+      "document_id": "url:http://reboot.pro/topic/13546-installing-server-2003-into-an-img-file-with-firadisk-or-winvblock/",
+      "document_sha256": "93f27f52f7e13a4086bb5b4963a611ec23ec16a3dea14115275488b35a863ee9",
+      "stream_index": 10295,
+      "token_start": 362,
+      "document_token_count": 2962,
+      "input_ids_sha256": "2a6901830abede7ec58bf7b3d07a957caa9e690d9ed92e8d25c99e4272e14431"
+    },
+    {
+      "index": 286,
+      "document_id": "url:http://www.javert.com/2009/09/",
+      "document_sha256": "a2fb68845cff5ce97b34d407146f58b3182ae6068011065268944c4b32e9e887",
+      "stream_index": 10306,
+      "token_start": 10,
+      "document_token_count": 2141,
+      "input_ids_sha256": "524367e43349c94a37eb8b41ce24e3150a2a5082bc33be6dc9370dc1db47be29"
+    },
+    {
+      "index": 287,
+      "document_id": "url:http://b-townblog.com/2013/08/09/hanbleceya-and-its-leaders-fined-for-investment-law-violations/",
+      "document_sha256": "295a294559cb4178305c8de033a2abd47e8d792158298e8a683e9ac784689f77",
+      "stream_index": 10405,
+      "token_start": 233,
+      "document_token_count": 2966,
+      "input_ids_sha256": "32daf0d889c71476bf685bf62edfe2113807f0e25903ac0b9518a0fe816e9984"
+    },
+    {
+      "index": 288,
+      "document_id": "url:https://tomothinks.com/feeling-stressed-12-ways-to-reduce-stress/",
+      "document_sha256": "e0b3e14bbd0e02bca63c96cc15b68f7b78978aef334ee40002ff025708ac3fc6",
+      "stream_index": 10440,
+      "token_start": 15,
+      "document_token_count": 2558,
+      "input_ids_sha256": "8c9ea7a9b4fc90e6367f6674394c5f0e7fc6a37b2a81272b6d989460a70bf933"
+    },
+    {
+      "index": 289,
+      "document_id": "url:https://fireemblem.gamepress.gg/hero/sothe",
+      "document_sha256": "8b154172bc7080307a317c15afb8a2f64468fe20ce70a610f1ab6f2a1134cdbe",
+      "stream_index": 10454,
+      "token_start": 136,
+      "document_token_count": 3046,
+      "input_ids_sha256": "cb8961fda76cfbd70be75439a6c79e9eab8120a98787594ba3e5dcc1982b38c4"
+    },
+    {
+      "index": 290,
+      "document_id": "url:https://sailingauklet.com/2014/08/07/masthead-fittings/",
+      "document_sha256": "e052d0814397d89a321df1cce7cb8dbb6cfe278b72f82b6774360c2ad7cb41d2",
+      "stream_index": 10517,
+      "token_start": 21,
+      "document_token_count": 2072,
+      "input_ids_sha256": "8dd3e5e4de199030e1799da1551a52b0afa56706f2ad2fc3364b74c0513e19f5"
+    },
+    {
+      "index": 291,
+      "document_id": "url:https://7heavenvacation.com/vacation-rentals/",
+      "document_sha256": "0ec446fa9409e13d572ecac2808925e35693ea313ad5c1ba0df51f76adb1cd66",
+      "stream_index": 10540,
+      "token_start": 404,
+      "document_token_count": 3840,
+      "input_ids_sha256": "e5378bc6c55810cc6cd8e36fa5a29c81a5ed9ccb57304726fc707e96a58610ac"
+    },
+    {
+      "index": 292,
+      "document_id": "url:https://www.alpinebuildingsupply.com/category_s/1661.htm",
+      "document_sha256": "e6cc5021ab7364153eccb7c2898308dbcce783f365a52531977a4b4b77f89e59",
+      "stream_index": 10562,
+      "token_start": 1706,
+      "document_token_count": 4012,
+      "input_ids_sha256": "70f349ef601129399ec2d774e2badf9d45ea43261557e884433556a87bbf95df"
+    },
+    {
+      "index": 293,
+      "document_id": "url:http://www.fbsmalta.com/malta-citizenship/",
+      "document_sha256": "88dd8c2e1831bbc5819bae9adc4efe02a8ce2b9691d1bd6f93c26b9adf46a1eb",
+      "stream_index": 10578,
+      "token_start": 698,
+      "document_token_count": 2822,
+      "input_ids_sha256": "50c91fdd3239ad568921c91f9b78d4a64eea6fc762a9defd09849dce274267c5"
+    },
+    {
+      "index": 294,
+      "document_id": "url:https://ipfs.io/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/wiki/Albert_Sabin.html",
+      "document_sha256": "71e4942dc6a215431f5f758c7164508ec238232d92b0eada1c7ead63fb73d28c",
+      "stream_index": 10663,
+      "token_start": 147,
+      "document_token_count": 2946,
+      "input_ids_sha256": "00a996072165df13fdbe56fbbd3f8b556deeba563cace77dacd86d86cb42fe20"
+    },
+    {
+      "index": 295,
+      "document_id": "url:https://www.paatasaala.in/2017/05/ap-polycet-counselling-dates-web-options-certificate-verification-seat-allotment-polycetap.nic.in.html",
+      "document_sha256": "8d706c24c5821270280fd7fdf8512c45a8047bb8a16171259a39e7f0602223ea",
+      "stream_index": 10671,
+      "token_start": 48,
+      "document_token_count": 2137,
+      "input_ids_sha256": "62009fdcfb415e49039036cf0c9dcb077fe34486c3c600ab5bba3dbef960df58"
+    },
+    {
+      "index": 296,
+      "document_id": "url:https://theteacerebration.wordpress.com/tag/death/",
+      "document_sha256": "261bf8c63db08a462df30f67c46f7b02192d98b44de63a20650c2f4e4114ab82",
+      "stream_index": 10693,
+      "token_start": 930,
+      "document_token_count": 3996,
+      "input_ids_sha256": "3e29c64d6dfaff11658f6e662faa2a18377d2ebe3eb284fe3524ff45044aa1a8"
+    },
+    {
+      "index": 297,
+      "document_id": "url:https://forum.openoffice.org/en/forum/viewtopic.php?p=396295&amp",
+      "document_sha256": "3abba05a446ffaf9b062e8568ea4461705e18ea0365dac9af3cf5f9b299f0917",
+      "stream_index": 10694,
+      "token_start": 501,
+      "document_token_count": 3099,
+      "input_ids_sha256": "a977a29aecefef7677fec8d1b23519f83d856f2a9826585bef44a300376278ef"
+    },
+    {
+      "index": 298,
+      "document_id": "url:http://www.kelleytown.com/rants.html",
+      "document_sha256": "088a66c52c7a4973fbf86c6733e24dc7a3870f0f9dbc51cd37e1b3dd408ea7e0",
+      "stream_index": 10745,
+      "token_start": 10,
+      "document_token_count": 4286,
+      "input_ids_sha256": "b4305a6b7d686831a4934337d5be24684022ca770fd4f83fa2bc814a66bf787b"
+    },
+    {
+      "index": 299,
+      "document_id": "url:http://highscalability.com/blog/2016/6/15/the-image-optimization-technology-that-serves-millions-of-re.html",
+      "document_sha256": "02b50834dc19b574e03092e51a4f87a01b7f3869ac83038b5896af633fa1b396",
+      "stream_index": 10777,
+      "token_start": 441,
+      "document_token_count": 2915,
+      "input_ids_sha256": "b8f0fd2c537f8178b5f2ceb7724f4e193cd4b8ac5688dafc1a160b9c736cd5a7"
+    },
+    {
+      "index": 300,
+      "document_id": "url:http://www.capsulecomputers.com.au/blazblue-continuum-shift-extend-review/",
+      "document_sha256": "cdf9861ea692513fcf20e07b04dd4a66d90aaebaf8711d4f2b9af44b541966e0",
+      "stream_index": 10825,
+      "token_start": 331,
+      "document_token_count": 2495,
+      "input_ids_sha256": "779546404505c29d9055424ce716353c3daa971f24529fe2e534af24d4935c8f"
+    },
+    {
+      "index": 301,
+      "document_id": "url:http://findholidaydestination.com/2017/12/",
+      "document_sha256": "99f25cb68273669ea4bbdc7fffa7f7137d4c7364b4f0da52e1835b129ca770b0",
+      "stream_index": 10885,
+      "token_start": 1128,
+      "document_token_count": 10658,
+      "input_ids_sha256": "782e6458e5e16b9cc6483fac52177b8c72c6f4aa14e45244469db28b65c55df3"
+    },
+    {
+      "index": 302,
+      "document_id": "url:https://people.freedesktop.org/~cbrill/dri-log/index.php?channel=nouveau&date=2017-11-05",
+      "document_sha256": "3aede9f42ef89733aced956fb8e66713b93e6cedcc238ab13437223ad28ed2d6",
+      "stream_index": 10946,
+      "token_start": 77,
+      "document_token_count": 2370,
+      "input_ids_sha256": "e8f7558bc28f5aec8c3ed13584ce70de4a8a02a03fdb1e5e9080f51cfb02961f"
+    },
+    {
+      "index": 303,
+      "document_id": "url:http://www.autorepairservicesaustintexas.com/brake_repair.html",
+      "document_sha256": "e295371f7ac81ea44274748cfe8d18f12db065ff43ad02fa524109e4e93b5d5d",
+      "stream_index": 10955,
+      "token_start": 6780,
+      "document_token_count": 9142,
+      "input_ids_sha256": "92234fb049f915b1bbcfe833fa1040c2ba7617030d2200466a11e010a28ed599"
+    },
+    {
+      "index": 304,
+      "document_id": "url:http://edition.cnn.com/TRANSCRIPTS/1604/12/ath.02.html",
+      "document_sha256": "dfc64deb6b8f30208c37283cf93b4e42343aa356bc5932544a6086eb9b7c14a9",
+      "stream_index": 10977,
+      "token_start": 17,
+      "document_token_count": 4379,
+      "input_ids_sha256": "208665cce5619ce3276f09605dcf39d33a5aef4532472a8fafdf7f9dd714604b"
+    },
+    {
+      "index": 305,
+      "document_id": "url:https://flvoters.com/pages/c112640.html",
+      "document_sha256": "0fc60f88bffaf339ff270e6bc53f67abff0626f61fcf6f9aed6c672fafb44af4",
+      "stream_index": 11010,
+      "token_start": 7011,
+      "document_token_count": 12957,
+      "input_ids_sha256": "c8c1b64e546b66fcea3c82d32f86f5ef897a730b9dcae88783d5fe8a5d5d9c3a"
+    },
+    {
+      "index": 306,
+      "document_id": "url:http://wikien4.appspot.com/wiki/Joan_Van_Ark",
+      "document_sha256": "951364624d159dadb5a4ae991d5abcaca20b733a7f1de731101a9466b8efabbb",
+      "stream_index": 11046,
+      "token_start": 2,
+      "document_token_count": 2366,
+      "input_ids_sha256": "2ba142288dea5f7aaa98117cc125792ad6bfe4fc3fc86a5c1d6de6d468adf056"
+    },
+    {
+      "index": 307,
+      "document_id": "url:https://10000milesandmore.wordpress.com/tag/travel/",
+      "document_sha256": "ebe67b78506ac05dcdd93a5621de7440d0c8e58adef6ff930603d08076f4798e",
+      "stream_index": 11053,
+      "token_start": 778,
+      "document_token_count": 5770,
+      "input_ids_sha256": "a12e993f0305d9e25d4d426252386b03226648e33cbc41e1478a3e302d278c1d"
+    },
+    {
+      "index": 308,
+      "document_id": "url:http://www.zamm.com/articles/movie-mania/q-and-a/q-and-a-with-producer-director-grant-heslov.html",
+      "document_sha256": "3687c0a27231069b535895adf6fce1ea2f2a4bb4ae8b0c5f2acaaab4825a850e",
+      "stream_index": 11080,
+      "token_start": 1077,
+      "document_token_count": 3454,
+      "input_ids_sha256": "fa825f0fd4e2bd90c1b552ce4451fac0ab3c6b24123ba4037aed9c9f211fddf2"
+    },
+    {
+      "index": 309,
+      "document_id": "url:https://www.globalhealingcenter.com/natural-health/iodine-guide-to-health-benefits/",
+      "document_sha256": "5d973909a70ca8e490264933726443c84a6b7264f15398f40c7ed07eaaba7611",
+      "stream_index": 11081,
+      "token_start": 598,
+      "document_token_count": 5630,
+      "input_ids_sha256": "e415c0374aa7666e555bb57cc2cb3d549f3d6a59002e5dc1555ad62f8e25b05f"
+    },
+    {
+      "index": 310,
+      "document_id": "url:https://www.ronitbaras.com/family-matters/parenting-family/is-my-kid-color-blind/",
+      "document_sha256": "2cf234c14ca6c832f03dfcb055f8a98d2fa0280fbac6c3a288563fee2b4ccc0c",
+      "stream_index": 11117,
+      "token_start": 347,
+      "document_token_count": 2655,
+      "input_ids_sha256": "9949e061e70a2ca4c21fb6b6965ba2b66c68e5febeddd8a498ee221b40e0bb56"
+    },
+    {
+      "index": 311,
+      "document_id": "url:http://www.cricketnetwork.co.uk/boards/read/s59.htm?60,16087024,16087043",
+      "document_sha256": "39cc79d0e3966e69b53415bad4581a37736cebb97e7e98100b2c8e922e1c7f1a",
+      "stream_index": 11141,
+      "token_start": 646,
+      "document_token_count": 2708,
+      "input_ids_sha256": "7ff5dbd4ae10ab2db3b22cc0852e4363fb56149110a65f1b7d43f0dc24deb3a4"
+    },
+    {
+      "index": 312,
+      "document_id": "url:https://fridaymagazine.ae/life-culture/people-profiles/4-uae-couples-give-us-the-secrets-to-a-happy-marriage-1.2281936",
+      "document_sha256": "ef582c63c464bfa3cd6860cb29b9f78ee5b924256b1ee9a8a4a0e27374edd26e",
+      "stream_index": 11159,
+      "token_start": 190,
+      "document_token_count": 2311,
+      "input_ids_sha256": "1906dbf7a89d47ce92766b737ba0334c89ef0068a9dd5512f2214563ad9e4fff"
+    },
+    {
+      "index": 313,
+      "document_id": "url:https://captaindude.wordpress.com/2004/09/",
+      "document_sha256": "1857c968f912bffdfc4fc5d857e5202e98d1cdedc722c736327d3a2ccca5f32b",
+      "stream_index": 11222,
+      "token_start": 16,
+      "document_token_count": 2066,
+      "input_ids_sha256": "d6f1dc5e73176fd0e548975a7daf31d907a3374bc741172c6a290559ed0f2ba9"
+    },
+    {
+      "index": 314,
+      "document_id": "url:http://derinsular.tk/microstrip-slot-antenna-theory.html",
+      "document_sha256": "3425ebdb73b2a1c98fed14bfaa1794ea1f9686e68216a3e74b784e13758c5860",
+      "stream_index": 11270,
+      "token_start": 534,
+      "document_token_count": 2754,
+      "input_ids_sha256": "d5e7bc2e37e37ff8d8ec888a2ae233766730d189bd5e99731583ba7dbbc5e935"
+    },
+    {
+      "index": 315,
+      "document_id": "url:http://www.pmc.aut.ac.nz/pacific-media-watch/nz-how-christchurch-mosque-assault-has-made-mark-media-10313",
+      "document_sha256": "1d7bfa3cbdb8c0819a39554dfb6533ab3d116ab41abbf7fd79ff12ece91b8fc1",
+      "stream_index": 11282,
+      "token_start": 113,
+      "document_token_count": 2188,
+      "input_ids_sha256": "40df7018d07dee6934df8d773ce4bfc363b175877ba5c3e7fec64e4705393117"
+    },
+    {
+      "index": 316,
+      "document_id": "url:https://www.brainygamer.com/the_brainy_gamer/2013/01/index.html",
+      "document_sha256": "6cde169dddc85cab7febd91df02555f62e44c1ea8faa917b3f96745160f319ed",
+      "stream_index": 11323,
+      "token_start": 549,
+      "document_token_count": 3403,
+      "input_ids_sha256": "32669021ebcc6137e778d1fcd95faaa4984ca18518f1617133f0ccb3ace373e0"
+    },
+    {
+      "index": 317,
+      "document_id": "url:https://www.ebay.ie/b/Chainsaw-Carburetors/85915/bn_27195188",
+      "document_sha256": "d28a98c566aaeab082fe870d41faf33efd11a4d7623062f214947bee6c0cfc9b",
+      "stream_index": 11332,
+      "token_start": 355,
+      "document_token_count": 2416,
+      "input_ids_sha256": "bd938a6cb42b686e12f6472fc7685422e9a2cc11daf7b3b7472fd47a31b15cc3"
+    },
+    {
+      "index": 318,
+      "document_id": "url:http://travellerspeaks.blogspot.com/2014/",
+      "document_sha256": "009ba9d2d945d4feef3e1bc728096a03ef6c1f0adf911d774d7e41e1efad58c7",
+      "stream_index": 11335,
+      "token_start": 915,
+      "document_token_count": 3094,
+      "input_ids_sha256": "9d6c3c00c88d5573b82737e6c09a4b043ec45d5b59fa3849c3bcc16020be97e0"
+    },
+    {
+      "index": 319,
+      "document_id": "url:http://8w.forix.com/fiasco-79-80.html",
+      "document_sha256": "cfc0c687766dbd1806d7053a8a30b3dcbdf67338762f262da1fcfac260b55eb5",
+      "stream_index": 11394,
+      "token_start": 1530,
+      "document_token_count": 8496,
+      "input_ids_sha256": "ad997cb16312abc20df25426890c5613670c969b254bf760717b839221c222ce"
+    },
+    {
+      "index": 320,
+      "document_id": "url:https://www.toptradersunplugged.com/crisis-alpha-explained/",
+      "document_sha256": "2ea6190706498c72c212d74263a18cd1fe148486bbc3ddc90063b80853b019d4",
+      "stream_index": 11416,
+      "token_start": 71,
+      "document_token_count": 2345,
+      "input_ids_sha256": "756c4f60ceb5db91b89bc00be794d5a7dba68f17b1f5b0093cbc92766abee269"
+    },
+    {
+      "index": 321,
+      "document_id": "url:https://mbostrom2.com/category/feasts-of-the-lord/shemitah-year/",
+      "document_sha256": "659253cf908eef148f2dfeba71ed366e493c543f659a65ad1b9656b316718019",
+      "stream_index": 11434,
+      "token_start": 19,
+      "document_token_count": 2521,
+      "input_ids_sha256": "7f6f3829808309e184b3eca880e7d737db8465a4e18a440aea9f9eb7a32616bb"
+    },
+    {
+      "index": 322,
+      "document_id": "url:https://noellevignola.com/2015/08/",
+      "document_sha256": "ad4a7a9b748b921ae6858a39044481a727ef6a4481ef52ea793afb87883f9679",
+      "stream_index": 11493,
+      "token_start": 313,
+      "document_token_count": 2568,
+      "input_ids_sha256": "0a95b141452af47971c433c68c70c1677d0225d4e37b5a0c9df6719d8708d9ba"
+    },
+    {
+      "index": 323,
+      "document_id": "url:https://www.mynutritionmagic.com/weight-loss/best-fat-burner-for-women/",
+      "document_sha256": "bfe36d68f6feed2e8d751a48f87f6e92ab341198ed8d1fe621b67ec439d8adb2",
+      "stream_index": 11539,
+      "token_start": 76,
+      "document_token_count": 3155,
+      "input_ids_sha256": "8583c978339596606ce10ba1928a780870e0db978e64b85318cc5e606253477a"
+    },
+    {
+      "index": 324,
+      "document_id": "url:https://denverite.com/2017/06/19/readers-choice-stories-denver-selected/",
+      "document_sha256": "1e17090270c79f74f760dd1cf162454492880d0ee98b45332a54c9df2e953a0f",
+      "stream_index": 11553,
+      "token_start": 524,
+      "document_token_count": 2747,
+      "input_ids_sha256": "b8859f380483703a9c1f48026633ebf98b71f42fce156c750257e4e6551cd20c"
+    },
+    {
+      "index": 325,
+      "document_id": "url:https://bmcpulmmed.biomedcentral.com/articles/10.1186/s12890-016-0178-4",
+      "document_sha256": "28ca349d2932ddc1575f86148a7766fea620677f6f5684cab9863703ead97a51",
+      "stream_index": 11584,
+      "token_start": 3868,
+      "document_token_count": 8481,
+      "input_ids_sha256": "45256fbb1c84e400d7bbad3388915db4326613359d274f1d5753a59e91c2ae66"
+    },
+    {
+      "index": 326,
+      "document_id": "url:http://www.globalcoalitions.org/chapter-3",
+      "document_sha256": "e8ddead79917bfd1e3b1bd678287c52d57f6576f236da1ab1e14790963c80507",
+      "stream_index": 11601,
+      "token_start": 2189,
+      "document_token_count": 5847,
+      "input_ids_sha256": "76d72b2009572f0b963fdc98cf73330422cfdfb1192fb9f8f80787e075e3f205"
+    },
+    {
+      "index": 327,
+      "document_id": "url:http://www.earncome.com/bonuses-that-convert/",
+      "document_sha256": "7151cc4aa6179069cd35d669f0697ee23fcf443063885a826f7015558537bca7",
+      "stream_index": 11613,
+      "token_start": 583,
+      "document_token_count": 3089,
+      "input_ids_sha256": "5e9b26430c32042ed7d308e426e3aeefb7d41a25ca7be6e6fce357b4d8b85454"
+    },
+    {
+      "index": 328,
+      "document_id": "url:http://www.sacred-texts.com/cla/hh/hh9010.htm",
+      "document_sha256": "e8d157b636b5b3037fbb86be51833f3fe293bfb2e184a42ccf6d36171257f8a6",
+      "stream_index": 11640,
+      "token_start": 1681,
+      "document_token_count": 6957,
+      "input_ids_sha256": "9c61bdd6429a1ac83fefeef1c6d4e28b626ebfe876d66b06bee69a8e33b13fe0"
+    },
+    {
+      "index": 329,
+      "document_id": "url:http://jrkapz.com/jrblog/?m=200912",
+      "document_sha256": "e015ce6d1690889c50674c2e7b7e39d126e0bdbab03bef865a2ed0ac789823f5",
+      "stream_index": 11676,
+      "token_start": 119,
+      "document_token_count": 2186,
+      "input_ids_sha256": "fb7452efb2e6d6bf50a4f2757b694466c443e22cef26d5b936fde69471b3b10f"
+    },
+    {
+      "index": 330,
+      "document_id": "url:https://gist.github.com/anonymous/68d581eeda3abd8beba72915de82d640",
+      "document_sha256": "ef29edfa221d951bc9fce08af45811ce438b8ae0daf497d6259db482a652d386",
+      "stream_index": 11743,
+      "token_start": 82,
+      "document_token_count": 2494,
+      "input_ids_sha256": "20510101b4631e6e6997019ff2e72b638e8100eee2a642edc017ebca8ee885de"
+    },
+    {
+      "index": 331,
+      "document_id": "url:http://blog.cpgb-ml.org/tag/david-cameron/",
+      "document_sha256": "c7feba65f057d9bed86864d8083fa1c97982af7efaf7a3330065abd03c07c298",
+      "stream_index": 11792,
+      "token_start": 458,
+      "document_token_count": 4740,
+      "input_ids_sha256": "53c0c71d58e2e33f4a6d709a14a904030b8006edb6d204b63664e9dc5574d394"
+    },
+    {
+      "index": 332,
+      "document_id": "url:http://aetomatic.com/micromax-canvas-knight-review/",
+      "document_sha256": "33d38ffa92d41915d689288b1355fb12e13595c277964fc2159b678060cab24d",
+      "stream_index": 11793,
+      "token_start": 594,
+      "document_token_count": 2877,
+      "input_ids_sha256": "125e02f887eaeae94ed1d36c0eb3c775a9ed96ccb2a22b69137a0229689826c5"
+    },
+    {
+      "index": 333,
+      "document_id": "url:http://nmpoliticalreport.com/2018/10/06/new-mexico-bears-the-brunt-of-d-c-s-environment-decisions/",
+      "document_sha256": "b2495b0345ec0fed01d21c1422169dc0b6cbc2de32fc5fb8d7f3ba6637968692",
+      "stream_index": 11798,
+      "token_start": 29,
+      "document_token_count": 2288,
+      "input_ids_sha256": "532d821c8340bbca81e8be5fc8e294cacef4829e5c3701373428b582c15be3ea"
+    },
+    {
+      "index": 334,
+      "document_id": "url:http://japanesenostalgiccar.com/omedetou-shinkansen-the-bullet-train-turns-50/",
+      "document_sha256": "5b4febca1374ee5e714e1565f4ec62549aad760be5c222b4e79e42e4ef160ee4",
+      "stream_index": 11805,
+      "token_start": 249,
+      "document_token_count": 3126,
+      "input_ids_sha256": "c287f600ae5a59c18bcc50bab5a931f5e2aeea0c97d78e64185cb2664add4a0e"
+    },
+    {
+      "index": 335,
+      "document_id": "url:https://lareviewofbooks.org/article/eating-off-grid/",
+      "document_sha256": "6ad6f99f283992f1712bbf4ab5fb3419228e83204354a704da5df9e7db45e4ad",
+      "stream_index": 11817,
+      "token_start": 1191,
+      "document_token_count": 3269,
+      "input_ids_sha256": "ca1d1a306a84cd6a7a7b07806e2466b6ed007c1f6a33341b8cbd1b720a5fe024"
+    }
+  ],
+  "sha256": "eb1927793098ea9fb324105a0c53ca695649995024322c15e2ca1b5893697322",
+  "shape": [
+    336,
+    2048
+  ],
+  "command": "evaluation/prepare_nemotron_c1_windows.py --audit results/nemotron_h_8b/manifests/native_audit.json --output results/nemotron_h_8b/calibration",
+  "python": "/home/zhangal/.conda/envs/basis/bin/python",
+  "document_disjoint": true,
+  "duplicate_text_excluded": true,
+  "sampling": "one contiguous uniform-start excerpt per document; no special tokens"
+}

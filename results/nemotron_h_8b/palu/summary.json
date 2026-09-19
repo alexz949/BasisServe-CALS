@@ -1,0 +1,644 @@
+{
+  "status": "complete",
+  "format": "basisserve.nemotron_h.palu_quality_summary.v1",
+  "label": "Nemotron-H-8B-Base-8K",
+  "protocol": {
+    "calibration": "allenai/c4 train, 256x2048 Fisher and V-input covariance fit + 64x2048 covariance heldout",
+    "allocation": "PaLU double-shift Fisher weighting with an exact global mean-rank budget in blocks of 32",
+    "factorization": "PaLU activation-aware balanced whitened SVD, BF16 factors",
+    "targets": "full-attention V only; attention o_proj and Mamba2 Wo dense",
+    "quality": {
+      "c4": "128 document-disjoint validation windows, 2048 tokens, FP32 loss",
+      "max_length": 4096,
+      "metric_selection": "acc_norm when present, otherwise acc",
+      "num_fewshot": 0,
+      "tasks": [
+        "arc_easy",
+        "arc_challenge",
+        "hellaswag",
+        "piqa",
+        "winogrande",
+        "boolq",
+        "openbookqa"
+      ],
+      "wikitext2": "full test corpus, 2048-token windows, FP32 loss"
+    }
+  },
+  "dense": {
+    "average_accuracy": 0.7369189031419692,
+    "c4_validation_128_ppl": 9.360031423423322,
+    "task_accuracy": [
+      {
+        "metric": "acc_norm",
+        "task": "arc_easy",
+        "value": 0.8362794612794613
+      },
+      {
+        "metric": "acc_norm",
+        "task": "arc_challenge",
+        "value": 0.6023890784982935
+      },
+      {
+        "metric": "acc_norm",
+        "task": "hellaswag",
+        "value": 0.8106950806612229
+      },
+      {
+        "metric": "acc_norm",
+        "task": "piqa",
+        "value": 0.8226332970620239
+      },
+      {
+        "metric": "acc",
+        "task": "winogrande",
+        "value": 0.7576953433307024
+      },
+      {
+        "metric": "acc",
+        "task": "boolq",
+        "value": 0.8547400611620795
+      },
+      {
+        "metric": "acc_norm",
+        "task": "openbookqa",
+        "value": 0.474
+      }
+    ],
+    "wikitext2_ppl": 6.099848989465012
+  },
+  "quality": {
+    "mlrd_r64": {
+      "wikitext2_ppl": 6.568104559852657,
+      "wikitext2_relative_change": 0.07676510864389674,
+      "c4_ppl": 9.655747895506654,
+      "c4_relative_change": 0.031593534113924626,
+      "mcq_average": 0.7299814754874363,
+      "mcq_point_change": -0.6937427654532868,
+      "tasks": [
+        {
+          "metric": "acc_norm",
+          "task": "arc_easy",
+          "value": 0.8312289562289562
+        },
+        {
+          "metric": "acc_norm",
+          "task": "arc_challenge",
+          "value": 0.5955631399317406
+        },
+        {
+          "metric": "acc_norm",
+          "task": "hellaswag",
+          "value": 0.8036247759410476
+        },
+        {
+          "metric": "acc_norm",
+          "task": "piqa",
+          "value": 0.8188248095756256
+        },
+        {
+          "metric": "acc",
+          "task": "winogrande",
+          "value": 0.7505919494869772
+        },
+        {
+          "metric": "acc",
+          "task": "boolq",
+          "value": 0.8440366972477065
+        },
+        {
+          "metric": "acc_norm",
+          "task": "openbookqa",
+          "value": 0.466
+        }
+      ],
+      "seconds": 657.5661123991013
+    },
+    "mlrd_r96": {
+      "wikitext2_ppl": 6.252133887590485,
+      "wikitext2_relative_change": 0.02496535543559908,
+      "c4_ppl": 9.456698652017765,
+      "c4_relative_change": 0.010327660690597096,
+      "mcq_average": 0.735554057364553,
+      "mcq_point_change": -0.1364845777416135,
+      "tasks": [
+        {
+          "metric": "acc_norm",
+          "task": "arc_easy",
+          "value": 0.8358585858585859
+        },
+        {
+          "metric": "acc_norm",
+          "task": "arc_challenge",
+          "value": 0.5989761092150171
+        },
+        {
+          "metric": "acc_norm",
+          "task": "hellaswag",
+          "value": 0.8111929894443338
+        },
+        {
+          "metric": "acc_norm",
+          "task": "piqa",
+          "value": 0.8220892274211099
+        },
+        {
+          "metric": "acc",
+          "task": "winogrande",
+          "value": 0.7632202052091555
+        },
+        {
+          "metric": "acc",
+          "task": "boolq",
+          "value": 0.8495412844036697
+        },
+        {
+          "metric": "acc_norm",
+          "task": "openbookqa",
+          "value": 0.468
+        }
+      ],
+      "seconds": 658.3006685301661
+    },
+    "glrd4_r64": {
+      "wikitext2_ppl": 6.340837341803439,
+      "wikitext2_relative_change": 0.03950726530355686,
+      "c4_ppl": 9.516172431351086,
+      "c4_relative_change": 0.01668167561243683,
+      "mcq_average": 0.7316944908132726,
+      "mcq_point_change": -0.5224412328696526,
+      "tasks": [
+        {
+          "metric": "acc_norm",
+          "task": "arc_easy",
+          "value": 0.835016835016835
+        },
+        {
+          "metric": "acc_norm",
+          "task": "arc_challenge",
+          "value": 0.5878839590443686
+        },
+        {
+          "metric": "acc_norm",
+          "task": "hellaswag",
+          "value": 0.8092013543118901
+        },
+        {
+          "metric": "acc_norm",
+          "task": "piqa",
+          "value": 0.823721436343852
+        },
+        {
+          "metric": "acc",
+          "task": "winogrande",
+          "value": 0.7576953433307024
+        },
+        {
+          "metric": "acc",
+          "task": "boolq",
+          "value": 0.84434250764526
+        },
+        {
+          "metric": "acc_norm",
+          "task": "openbookqa",
+          "value": 0.464
+        }
+      ],
+      "seconds": 656.1322272196412
+    },
+    "glrd4_r96": {
+      "wikitext2_ppl": 6.195243983258199,
+      "wikitext2_relative_change": 0.01563891072679713,
+      "c4_ppl": 9.417483300082989,
+      "c4_relative_change": 0.006138000404132482,
+      "mcq_average": 0.7342215144824289,
+      "mcq_point_change": -0.26973886595402785,
+      "tasks": [
+        {
+          "metric": "acc_norm",
+          "task": "arc_easy",
+          "value": 0.8388047138047138
+        },
+        {
+          "metric": "acc_norm",
+          "task": "arc_challenge",
+          "value": 0.5878839590443686
+        },
+        {
+          "metric": "acc_norm",
+          "task": "hellaswag",
+          "value": 0.811790479984067
+        },
+        {
+          "metric": "acc_norm",
+          "task": "piqa",
+          "value": 0.8215451577801959
+        },
+        {
+          "metric": "acc",
+          "task": "winogrande",
+          "value": 0.7640094711917916
+        },
+        {
+          "metric": "acc",
+          "task": "boolq",
+          "value": 0.8535168195718654
+        },
+        {
+          "metric": "acc_norm",
+          "task": "openbookqa",
+          "value": 0.462
+        }
+      ],
+      "seconds": 655.3088505417109
+    }
+  },
+  "fit_diagnostics": {
+    "mlrd_r64": {
+      "layer_ranks": [
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      ],
+      "realized_retained_v_ratio": 0.5,
+      "mean_fit_relative_error": 0.5386376111855532,
+      "mean_heldout_relative_error": 0.541404079608028
+    },
+    "mlrd_r96": {
+      "layer_ranks": [
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      ],
+      "realized_retained_v_ratio": 0.75,
+      "mean_fit_relative_error": 0.31583392865946674,
+      "mean_heldout_relative_error": 0.31754092441213183
+    },
+    "glrd4_r64": {
+      "layer_ranks": [
+        [
+          288,
+          288
+        ],
+        [
+          384,
+          384
+        ],
+        [
+          256,
+          256
+        ],
+        [
+          96,
+          96
+        ]
+      ],
+      "realized_retained_v_ratio": 0.5,
+      "mean_fit_relative_error": 0.37245730468355964,
+      "mean_heldout_relative_error": 0.3750779691598596
+    },
+    "glrd4_r96": {
+      "layer_ranks": [
+        [
+          416,
+          416
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          416,
+          416
+        ],
+        [
+          192,
+          192
+        ]
+      ],
+      "realized_retained_v_ratio": 0.75,
+      "mean_fit_relative_error": 0.18002903337988124,
+      "mean_heldout_relative_error": 0.1812980692388157
+    }
+  },
+  "compression": {
+    "mlrd_r64": {
+      "target": "full_attention_value_cache_only",
+      "method": "PaLU M-LRD",
+      "method_slug": "mlrd",
+      "allocation": "palu_fisher_exact_block_budget",
+      "rank_block_size": 32,
+      "num_query_heads": 32,
+      "num_physical_kv_heads": 8,
+      "head_dim": 128,
+      "head_group_size": 1,
+      "groups": 8,
+      "group_width": 128,
+      "equivalent_mean_rank_per_head": 64,
+      "requested_retained_v_ratio": 0.5,
+      "realized_retained_v_ratio": 0.5,
+      "layer_ranks": [
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      ],
+      "full_attention_layers": [
+        7,
+        18,
+        29,
+        40
+      ],
+      "attention_o_proj": "dense_unchanged",
+      "mamba2_wo": "dense_unchanged",
+      "stored_factor_dtype": "torch.bfloat16",
+      "factorization": "PaLU activation-aware balanced SVD from W C W^T in float64"
+    },
+    "mlrd_r96": {
+      "target": "full_attention_value_cache_only",
+      "method": "PaLU M-LRD",
+      "method_slug": "mlrd",
+      "allocation": "palu_fisher_exact_block_budget",
+      "rank_block_size": 32,
+      "num_query_heads": 32,
+      "num_physical_kv_heads": 8,
+      "head_dim": 128,
+      "head_group_size": 1,
+      "groups": 8,
+      "group_width": 128,
+      "equivalent_mean_rank_per_head": 96,
+      "requested_retained_v_ratio": 0.75,
+      "realized_retained_v_ratio": 0.75,
+      "layer_ranks": [
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      ],
+      "full_attention_layers": [
+        7,
+        18,
+        29,
+        40
+      ],
+      "attention_o_proj": "dense_unchanged",
+      "mamba2_wo": "dense_unchanged",
+      "stored_factor_dtype": "torch.bfloat16",
+      "factorization": "PaLU activation-aware balanced SVD from W C W^T in float64"
+    },
+    "glrd4_r64": {
+      "target": "full_attention_value_cache_only",
+      "method": "PaLU G-LRD4",
+      "method_slug": "glrd4",
+      "allocation": "palu_fisher_exact_block_budget",
+      "rank_block_size": 32,
+      "num_query_heads": 32,
+      "num_physical_kv_heads": 8,
+      "head_dim": 128,
+      "head_group_size": 4,
+      "groups": 2,
+      "group_width": 512,
+      "equivalent_mean_rank_per_head": 64,
+      "requested_retained_v_ratio": 0.5,
+      "realized_retained_v_ratio": 0.5,
+      "layer_ranks": [
+        [
+          288,
+          288
+        ],
+        [
+          384,
+          384
+        ],
+        [
+          256,
+          256
+        ],
+        [
+          96,
+          96
+        ]
+      ],
+      "full_attention_layers": [
+        7,
+        18,
+        29,
+        40
+      ],
+      "attention_o_proj": "dense_unchanged",
+      "mamba2_wo": "dense_unchanged",
+      "stored_factor_dtype": "torch.bfloat16",
+      "factorization": "PaLU activation-aware balanced SVD from W C W^T in float64"
+    },
+    "glrd4_r96": {
+      "target": "full_attention_value_cache_only",
+      "method": "PaLU G-LRD4",
+      "method_slug": "glrd4",
+      "allocation": "palu_fisher_exact_block_budget",
+      "rank_block_size": 32,
+      "num_query_heads": 32,
+      "num_physical_kv_heads": 8,
+      "head_dim": 128,
+      "head_group_size": 4,
+      "groups": 2,
+      "group_width": 512,
+      "equivalent_mean_rank_per_head": 96,
+      "requested_retained_v_ratio": 0.75,
+      "realized_retained_v_ratio": 0.75,
+      "layer_ranks": [
+        [
+          416,
+          416
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          416,
+          416
+        ],
+        [
+          192,
+          192
+        ]
+      ],
+      "full_attention_layers": [
+        7,
+        18,
+        29,
+        40
+      ],
+      "attention_o_proj": "dense_unchanged",
+      "mamba2_wo": "dense_unchanged",
+      "stored_factor_dtype": "torch.bfloat16",
+      "factorization": "PaLU activation-aware balanced SVD from W C W^T in float64"
+    }
+  },
+  "inputs": {
+    "quality/NH8-Dense/result.json": "6593d7f57a162ff514ca5aa50a7f57afd334a7e26e017093c8cfe92d31705692",
+    "palu/fisher.json": "848e109b6e81a3f605db0318932a8824581369f380f51203e205f37856265957",
+    "palu/v_covariances/manifest.json": "261d4bf0a26e752eff4eeb8fd75b378c2a7e1cb004b74cc8b998a754fade5ff5",
+    "palu/checkpoints/mlrd_r64/manifest.json": "e4deba8527d8da139f5f9c70810351929d88c8d94202d157a784cc0a349fe558",
+    "palu/checkpoints/mlrd_r64/palu_v_factors.safetensors": "8c99e3a95f5b763a4b4b2f392786009d910223d05cb6c8d26aec1eb5d8a46811",
+    "palu/quality/NH8-PaLU-MLRD-R64/smoke.json": "fb7fdb7513921427ff7e4d74ce216e8a5340bb0dbc3a2a290175b3541f6e5448",
+    "palu/quality/NH8-PaLU-MLRD-R64/result.json": "e584a869d3a4a61f9f3f1a7db229d6962b110a3b3b18c734fb19acdf2cce10b5",
+    "palu/checkpoints/mlrd_r96/manifest.json": "e4feb040086b6b3633a865d70f38e77fe893afdb6456b866c024f4ef9c25875a",
+    "palu/checkpoints/mlrd_r96/palu_v_factors.safetensors": "4a4d5e6d5d4c0325c8659683721d749830592207e5a7ac17a2ebf30c25c22dfd",
+    "palu/quality/NH8-PaLU-MLRD-R96/smoke.json": "ebb8fb109dd92adcaa8fa616b70fe6ac7f954ef7a10f4295a4a21ea2a4543779",
+    "palu/quality/NH8-PaLU-MLRD-R96/result.json": "8bffd44faee9f86099bf7153dd3fef14fd5dc49ff06f62af7ba04efb76d78a1e",
+    "palu/checkpoints/glrd4_r64/manifest.json": "04b829c5d23b4a2211c45675fe989943634960e208104bf9903c51a17bc841c7",
+    "palu/checkpoints/glrd4_r64/palu_v_factors.safetensors": "25950604dced85968c6b72ff685a2079dc955a9814be018c838f2ef50b40ee9d",
+    "palu/quality/NH8-PaLU-GLRD4-R64/smoke.json": "ae5a4845073c480b1ebcbef412f0c52469cbffe9cf335ec4d6b54b803be013da",
+    "palu/quality/NH8-PaLU-GLRD4-R64/result.json": "c9d2a630d85505cf539a053eda9d17646a67c5bdfb34d157cc10f52972f45c46",
+    "palu/checkpoints/glrd4_r96/manifest.json": "048ae1c3497bf14221cd536b52e952cc55309fce5123f3fbaa69df5adc49df08",
+    "palu/checkpoints/glrd4_r96/palu_v_factors.safetensors": "fa280367b174e789d1ba8fef83472ef3fbefda8902715759ddb40a6964d28aa9",
+    "palu/quality/NH8-PaLU-GLRD4-R96/smoke.json": "3524f4e7a2df6e5c3d75bade4ddbcc36b632da0fc7f759cad8c50ca83782198b",
+    "palu/quality/NH8-PaLU-GLRD4-R96/result.json": "f3e3ec6f53d136e3026f081594220349f812c8de9cebb80616018299ecbd1a6e"
+  }
+}

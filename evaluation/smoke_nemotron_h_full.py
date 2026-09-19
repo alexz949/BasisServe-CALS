@@ -25,6 +25,7 @@ def main():
     parser.add_argument('--audit', type=Path, required=True)
     parser.add_argument('--block-smoke', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--cache-relative-rmse-limit', type=float, default=0.05)
     args = parser.parse_args()
     configure()
     torch.manual_seed(20260828)
@@ -122,7 +123,7 @@ def main():
             seconds=time.monotonic() - start)
         reports.append(record)
         print('CACHE COMPARISON', record, flush=True)
-        assert relative_rmse < 0.05, record
+        assert relative_rmse < args.cache_relative_rmse_limit, record
         del full, last, prefix, cached, ids
     write_json(args.output, dict(status='complete', reports=reports, layer_checks=layer_checks,
         verified_tensor_count=checked, device_map=model.hf_device_map,
@@ -130,6 +131,7 @@ def main():
         audit_sha256=sha256(args.audit), block_smoke_sha256=sha256(args.block_smoke),
         source_sha256=sha256(__file__), full_model_tested=True,
         guarded_mamba_layers=guarded_layers,
+        cache_relative_rmse_limit=args.cache_relative_rmse_limit,
         device_guard_sha256=sha256(ROOT / 'evaluation/nemotron_h_runtime.py'),
         long_context_quality_tested=False, original_remote_implementation_compared=False,
         seconds=time.monotonic() - started))

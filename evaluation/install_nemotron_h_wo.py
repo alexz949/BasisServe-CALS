@@ -27,10 +27,10 @@ def audit_nemotron_h_wo(config, identity_path, audit_path, directory):
     assert identity['status'] == audit['status'] == 'complete'
     assert config.model_type == 'nemotron_h'
     assert identity['model_config_sha256'] == audit['config_sha256']
-    assert identity['mean_rank'] == 96
+    assert identity['mean_rank'] in (64, 96)
     expected = [i for i, kind in enumerate(config.layers_block_type) if kind == 'linear_attention']
     assert expected == [row['layer'] for row in audit['layers'] if row['kind'] == 'linear_attention']
-    assert len(expected) == 45
+    assert expected
     assert {p.name for p in directory.glob('layer_*.json')} == {f'layer_{i:03d}.json' for i in expected}
     records, common = {}, None
     for layer in expected:
@@ -43,13 +43,15 @@ def audit_nemotron_h_wo(config, identity_path, audit_path, directory):
         assert protocol == common
         assert protocol['identity_sha256'] == sha256(identity_path)
         assert protocol['audit_sha256'] == sha256(audit_path)
-        assert protocol['total_rank'] == identity['hq'] * identity['mean_rank'] == 6144
-        assert protocol['factor_dtype'] == 'bfloat16' and protocol['work_dtype'] == 'float64'
-        layout = TPSourceWOLayout(input_width=16384, output_width=8192,
+        assert protocol['total_rank'] == identity['hq'] * identity['mean_rank']
+        assert protocol['factor_dtype'] == 'bfloat16' and protocol['work_dtype'] == 'float32'
+        target = audit['layers'][layer]
+        layout = TPSourceWOLayout(input_width=target['input_width'],
+            output_width=target['output_width'],
             tp_size=protocol['tp'], source_rank=protocol['source_rank'])
         assert layout.accounting() == record['layout']
-        assert layout.gathered_width == 6144
-        assert layout.reduction_vs_dense_allreduce == protocol['attention_reference']['reduction_vs_dense_allreduce']
+        assert layout.retained_ratio_vs_dense_allgather == protocol['retained_ratio']
+        assert layout.accounting() == protocol['mamba_reference']
         tensor_path = path.with_suffix('.safetensors')
         assert sha256(tensor_path) == record['sha256']
         records[str(layer)] = dict(manifest_sha256=sha256(path), factors_sha256=record['sha256'])
@@ -61,14 +63,16 @@ def audit_nemotron_h_wo(config, identity_path, audit_path, directory):
 def install_nemotron_h_wo(model, identity_path, audit_path, directory):
     report = audit_nemotron_h_wo(model.config, identity_path, audit_path, directory)
     protocol = report['protocol']
-    layout = TPSourceWOLayout(input_width=16384, output_width=8192,
-        tp_size=protocol['tp'], source_rank=protocol['source_rank'])
     for key, record in report['layers'].items():
         layer = int(key)
+        projection = model.model.layers[layer].mixer.out_proj
+        layout = TPSourceWOLayout(input_width=projection.in_features,
+            output_width=projection.out_features,
+            tp_size=protocol['tp'], source_rank=protocol['source_rank'])
         path = Path(directory) / f'layer_{layer:03d}.safetensors'
         assert sha256(path) == record['factors_sha256']
         factors = load_file(str(path))
         assert all(t.dtype == torch.bfloat16 for t in factors.values())
-        fold_into_projection(model.model.layers[layer].mixer.out_proj, factors, layout)
+        fold_into_projection(projection, factors, layout)
         print('INSTALLED FOLDED MAMBA WO', layer, flush=True)
     return report

@@ -1,0 +1,316 @@
+{
+  "status": "complete",
+  "format": "basisserve.nemotron_h.c1_quality_summary.v1",
+  "label": "Nemotron-H-8B-Base-8K",
+  "protocol": {
+    "calibration": "allenai/c4 train, 256x2048 fit + 64x2048 heldout",
+    "attention_fit": "ALS6, fixed encoder CG16, BF16 factors",
+    "allocation": "two-sided terminal-KL, seven-rank bank 32:16:128",
+    "mamba_wo_fit": "same retained ratio as full attention, ALS6, fixed encoder CG16",
+    "quality": {
+      "c4": "128 document-disjoint validation windows, 2048 tokens, FP32 loss",
+      "max_length": 4096,
+      "metric_selection": "acc_norm when present, otherwise acc",
+      "num_fewshot": 0,
+      "tasks": [
+        "arc_easy",
+        "arc_challenge",
+        "hellaswag",
+        "piqa",
+        "winogrande",
+        "boolq",
+        "openbookqa"
+      ],
+      "wikitext2": "full test corpus, 2048-token windows, FP32 loss"
+    }
+  },
+  "quality": {
+    "Dense": {
+      "wikitext2_ppl": 6.099848989465012,
+      "wikitext2_relative_change": 0.0,
+      "c4_ppl": 9.360031423423322,
+      "c4_relative_change": 0.0,
+      "mcq_average": 0.7369189031419692,
+      "mcq_point_change": 0.0,
+      "tasks": [
+        {
+          "metric": "acc_norm",
+          "task": "arc_easy",
+          "value": 0.8362794612794613
+        },
+        {
+          "metric": "acc_norm",
+          "task": "arc_challenge",
+          "value": 0.6023890784982935
+        },
+        {
+          "metric": "acc_norm",
+          "task": "hellaswag",
+          "value": 0.8106950806612229
+        },
+        {
+          "metric": "acc_norm",
+          "task": "piqa",
+          "value": 0.8226332970620239
+        },
+        {
+          "metric": "acc",
+          "task": "winogrande",
+          "value": 0.7576953433307024
+        },
+        {
+          "metric": "acc",
+          "task": "boolq",
+          "value": 0.8547400611620795
+        },
+        {
+          "metric": "acc_norm",
+          "task": "openbookqa",
+          "value": 0.474
+        }
+      ],
+      "seconds": 670.8130413964391
+    },
+    "C1-R64": {
+      "wikitext2_ppl": 6.675828299302386,
+      "wikitext2_relative_change": 0.0944251752514107,
+      "c4_ppl": 9.84595561331735,
+      "c4_relative_change": 0.05191480326422959,
+      "mcq_average": 0.7233688686535195,
+      "mcq_point_change": -1.3550034488449714,
+      "tasks": [
+        {
+          "metric": "acc_norm",
+          "task": "arc_easy",
+          "value": 0.8287037037037037
+        },
+        {
+          "metric": "acc_norm",
+          "task": "arc_challenge",
+          "value": 0.591296928327645
+        },
+        {
+          "metric": "acc_norm",
+          "task": "hellaswag",
+          "value": 0.7933678550089623
+        },
+        {
+          "metric": "acc_norm",
+          "task": "piqa",
+          "value": 0.8220892274211099
+        },
+        {
+          "metric": "acc",
+          "task": "winogrande",
+          "value": 0.7426992896606156
+        },
+        {
+          "metric": "acc",
+          "task": "boolq",
+          "value": 0.8434250764525993
+        },
+        {
+          "metric": "acc_norm",
+          "task": "openbookqa",
+          "value": 0.442
+        }
+      ],
+      "seconds": 682.4248259961605
+    },
+    "C1-R96": {
+      "wikitext2_ppl": 6.218765001248654,
+      "wikitext2_relative_change": 0.01949491077386023,
+      "c4_ppl": 9.451837402185332,
+      "c4_relative_change": 0.009808298135865812,
+      "mcq_average": 0.7376791166905055,
+      "mcq_point_change": 0.07602135485362815,
+      "tasks": [
+        {
+          "metric": "acc_norm",
+          "task": "arc_easy",
+          "value": 0.8438552188552189
+        },
+        {
+          "metric": "acc_norm",
+          "task": "arc_challenge",
+          "value": 0.6092150170648464
+        },
+        {
+          "metric": "acc_norm",
+          "task": "hellaswag",
+          "value": 0.8099980083648676
+        },
+        {
+          "metric": "acc_norm",
+          "task": "piqa",
+          "value": 0.8204570184983678
+        },
+        {
+          "metric": "acc",
+          "task": "winogrande",
+          "value": 0.760852407261247
+        },
+        {
+          "metric": "acc",
+          "task": "boolq",
+          "value": 0.8513761467889909
+        },
+        {
+          "metric": "acc_norm",
+          "task": "openbookqa",
+          "value": 0.468
+        }
+      ],
+      "seconds": 678.7930633351207
+    }
+  },
+  "fit_diagnostics": {
+    "64": {
+      "attention_layer_ranks": [
+        32,
+        64,
+        96,
+        64
+      ],
+      "attention_uniform_heldout_relative_mse": 0.1030248104039066,
+      "terminal_kl_uniform": 0.018819801322143902,
+      "terminal_kl_selected": 0.015067162639660051,
+      "mamba_wo_mean_quantized_heldout_relative_mse": 0.04965108586171588,
+      "mamba_wo_min_quantized_heldout_relative_mse": 0.00042988315590863154,
+      "mamba_wo_max_quantized_heldout_relative_mse": 0.07268685441143853
+    },
+    "96": {
+      "attention_layer_ranks": [
+        48,
+        96,
+        128,
+        112
+      ],
+      "attention_uniform_heldout_relative_mse": 0.042217340143097574,
+      "terminal_kl_uniform": 0.007001681917380572,
+      "terminal_kl_selected": 0.005877043686147076,
+      "mamba_wo_mean_quantized_heldout_relative_mse": 0.011372372962710086,
+      "mamba_wo_min_quantized_heldout_relative_mse": 0.00011792568414472189,
+      "mamba_wo_max_quantized_heldout_relative_mse": 0.017485071096980324
+    }
+  },
+  "compression": {
+    "64": {
+      "method": "C1",
+      "v_retained_ratio": 0.5,
+      "v_equivalent_mean_rank": 64,
+      "v_layer_ranks": [
+        32,
+        64,
+        96,
+        64
+      ],
+      "attention_layers": [
+        7,
+        18,
+        29,
+        40
+      ],
+      "mamba_wo_tp": 4,
+      "mamba_wo_source_rank": 1024,
+      "full_attention_allgather": {
+        "collective": "private_allgather",
+        "input_width": 4096,
+        "output_width": 4096,
+        "tp_size": 4,
+        "source_width": 1024,
+        "source_rank": 512,
+        "gathered_width": 2048,
+        "dtype_bytes": 2,
+        "dense_allgather_ring_bytes_per_rank": 6144,
+        "compressed_allgather_ring_bytes_per_rank": 3072,
+        "dense_allreduce_ring_bytes_per_rank": 12288,
+        "reduction_vs_dense_allgather": 0.5,
+        "reduction_vs_dense_allreduce": 0.75,
+        "kv_cache_compression": "none"
+      },
+      "mamba_matches_attention_retained_ratio": true,
+      "mamba_wo_allgather": {
+        "collective": "private_allgather",
+        "input_width": 8192,
+        "output_width": 4096,
+        "tp_size": 4,
+        "source_width": 2048,
+        "source_rank": 1024,
+        "gathered_width": 4096,
+        "dtype_bytes": 2,
+        "dense_allgather_ring_bytes_per_rank": 12288,
+        "compressed_allgather_ring_bytes_per_rank": 6144,
+        "dense_allreduce_ring_bytes_per_rank": 12288,
+        "reduction_vs_dense_allgather": 0.5,
+        "reduction_vs_dense_allreduce": 0.5,
+        "kv_cache_compression": "none"
+      },
+      "mamba_wo_dense_allreduce_reduction": 0.5
+    },
+    "96": {
+      "method": "C1",
+      "v_retained_ratio": 0.75,
+      "v_equivalent_mean_rank": 96,
+      "v_layer_ranks": [
+        48,
+        96,
+        128,
+        112
+      ],
+      "attention_layers": [
+        7,
+        18,
+        29,
+        40
+      ],
+      "mamba_wo_tp": 4,
+      "mamba_wo_source_rank": 1536,
+      "full_attention_allgather": {
+        "collective": "private_allgather",
+        "input_width": 4096,
+        "output_width": 4096,
+        "tp_size": 4,
+        "source_width": 1024,
+        "source_rank": 768,
+        "gathered_width": 3072,
+        "dtype_bytes": 2,
+        "dense_allgather_ring_bytes_per_rank": 6144,
+        "compressed_allgather_ring_bytes_per_rank": 4608,
+        "dense_allreduce_ring_bytes_per_rank": 12288,
+        "reduction_vs_dense_allgather": 0.25,
+        "reduction_vs_dense_allreduce": 0.625,
+        "kv_cache_compression": "none"
+      },
+      "mamba_matches_attention_retained_ratio": true,
+      "mamba_wo_allgather": {
+        "collective": "private_allgather",
+        "input_width": 8192,
+        "output_width": 4096,
+        "tp_size": 4,
+        "source_width": 2048,
+        "source_rank": 1536,
+        "gathered_width": 6144,
+        "dtype_bytes": 2,
+        "dense_allgather_ring_bytes_per_rank": 12288,
+        "compressed_allgather_ring_bytes_per_rank": 9216,
+        "dense_allreduce_ring_bytes_per_rank": 12288,
+        "reduction_vs_dense_allgather": 0.25,
+        "reduction_vs_dense_allreduce": 0.25,
+        "kv_cache_compression": "none"
+      },
+      "mamba_wo_dense_allreduce_reduction": 0.25
+    }
+  },
+  "inputs": {
+    "quality/NH8-Dense/result.json": "6593d7f57a162ff514ca5aa50a7f57afd334a7e26e017093c8cfe92d31705692",
+    "quality/NH8-C1-R64/result.json": "263566ebc75964bee35806bfefb2e1b7cae0b147a816ed9b0e4e7c304cf65ae0",
+    "quality/NH8-C1-R96/result.json": "a02a6665fe01f088b2c4501bf16262481f120f7b5702ccbac3087c4c20c701e3",
+    "checkpoints/r64/manifest.json": "76045de472c94a38fecdd8192c33d188346da1de11df2cad5ee792a8d62f50ed",
+    "v64/results.json": "4e7969d2d7091d0be13a097338003417b1336325ec8cd6002e47aeed183f4984",
+    "manifests/wo_fp32_r64_audit.json": "b3d8843cadbc437a166099aac4eb3882ccc564feca425708c36cbba5198704ce",
+    "checkpoints/r96/manifest.json": "8416359d264f168303cb0f8ee9df80ce079de27336c9f6a4610d996a2003ac5c",
+    "v96/results.json": "bb5d21195eb092252e8ba33886b34025d5ce31b7c69914420957f5bcfe01b14e",
+    "manifests/wo_fp32_r96_audit.json": "6d77d6d883fe139c1c07c148fa9edc9deb1783da67b8592393334f5adc72e944"
+  }
+}

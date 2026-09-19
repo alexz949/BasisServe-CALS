@@ -1,4 +1,4 @@
-"""Allocate attention-only Nemotron V96 using native full-forward two-sided KL."""
+"""Allocate Nemotron-H attention V ranks using native full-forward two-sided KL."""
 import argparse
 import inspect
 from pathlib import Path
@@ -24,7 +24,6 @@ from basisserve.core.gqa_routed_ov_joint import covariance_with_trace_damping, q
 from basisserve.core.decoder_closed_rank_candidates import close_ragged_decoder_with_fixed_encoders
 from evaluation.nemotron_h_runtime import install_mamba_device_guards
 
-LAYERS = (17, 38, 49, 60, 86)
 RANKS = (32, 48, 64, 80, 96, 112, 128)
 
 
@@ -64,18 +63,18 @@ def close_candidate(A, D, covariance, weight, *, anchor_rank=64):
     return A.to(device='cpu', dtype=torch.bfloat16), D.to(device='cpu', dtype=torch.bfloat16), diagnostic
 
 
-def allocate(results, compression, expansion):
+def allocate(results, compression, expansion, *, layers, target_mean_rank):
     for rank in RANKS:
-        assert results[rank]['layers'] == list(LAYERS)
-        assert [row['layer'] for row in results[rank]['records']] == list(LAYERS)
+        assert results[rank]['layers'] == list(layers)
+        assert [row['layer'] for row in results[rank]['records']] == list(layers)
     curves = local_error_curves_from_factor_results(results, candidate_ranks=RANKS,
-        error_split='heldout', num_layers=len(LAYERS), head_dim=128)
+        error_split='heldout', num_layers=len(layers), head_dim=128)
     costs, left, right = predict_two_sided_factorized_costs(curves, compression, expansion,
         candidate_ranks=RANKS, anchor_rank=64, compression_probe_rank=32,
         expansion_probe_rank=96, exponent=1.0)
     ranks, cost = allocate_layer_schedule(costs, candidate_ranks=RANKS,
-        anchor_rank=64, target_average_rank=96)
-    assert len(ranks) == 5 and sum(ranks) == 480
+        anchor_rank=64, target_average_rank=target_mean_rank)
+    assert len(ranks) == len(layers) and sum(ranks) == target_mean_rank * len(layers)
     return dict(layer_ranks=list(ranks), predicted_cost=cost,
         local_errors=curves, predicted_costs=costs,
         compression_sensitivities=left, expansion_sensitivities=right)
@@ -89,11 +88,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('audit', 'full-smoke', 'windows', 'snapshots', 'bank', 'output', 'identity-output'):
         parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--target-mean-rank', type=int, choices=(64, 96), required=True)
     args = parser.parse_args()
     configure()
     audit, smoke = read_json(args.audit), read_json(args.full_smoke)
     assert audit['status'] == smoke['status'] == 'complete'
-    assert smoke['full_model_tested'] and smoke['verified_tensor_count'] == 577
+    assert smoke['full_model_tested'] and smoke['verified_tensor_count'] == audit['tensor_count']
     assert smoke['audit_sha256'] == sha256(args.audit)
     assert smoke['device_guard_sha256'] == sha256(ROOT / 'evaluation/nemotron_h_runtime.py')
     assert sha256(inspect.getfile(native.NemotronHForCausalLM)) == audit['implementation_sha256']
@@ -104,7 +104,14 @@ def main():
         implementation = inspect.getclosurevars(getattr(native, name)).nonlocals['implementation']
         assert implementation.__module__.startswith(package)
         implementations[name] = implementation.__module__ + '.' + implementation.__name__
-    assert tuple(row['layer'] for row in audit['layers'] if row['kind'] == 'full_attention') == LAYERS
+    layers = tuple(row['layer'] for row in audit['layers'] if row['kind'] == 'full_attention')
+    assert layers
+    config_metadata = read_json(Path(audit['model']) / 'config.json')
+    hq = int(config_metadata['num_attention_heads'])
+    hkv = int(config_metadata['num_key_value_heads'])
+    hidden = int(config_metadata['hidden_size'])
+    head_dim = int(config_metadata.get('attention_head_dim', 0)
+        or config_metadata.get('head_dim', 0) or hidden // hq)
     model_path = Path(audit['model'])
     assert sha256(model_path / 'config.json') == audit['config_sha256']
     assert sha256(model_path / 'model.safetensors.index.json') == audit['index_sha256']
@@ -116,19 +123,19 @@ def main():
     assert windows_manifest['protocol']['confirmation_ids'] == list(range(328, 336))
     snapshots = read_json(args.snapshots / 'manifest.json')
     assert snapshots['status'] == 'complete' and snapshots['dense_teacher']
-    assert snapshots['layers'] == list(LAYERS) and snapshots['layer_kind'] == 'full_attention'
+    assert snapshots['layers'] == list(layers) and snapshots['layer_kind'] == 'full_attention'
     assert snapshots['audit_sha256'] == sha256(args.audit)
     results, inputs = {}, {}
     for rank in RANKS:
         directory = args.bank / f'r{rank}'
         result_path = directory / 'results.json'
         result = read_json(result_path)
-        assert result['status'] == 'complete' and result['layers'] == list(LAYERS)
+        assert result['status'] == 'complete' and result['layers'] == list(layers)
         config = result['fit_config']
         assert config['model_config_sha256'] == audit['config_sha256']
         assert config['cache_rank_per_head'] == rank
         assert config['fit_windows'] == 256 and config['validation_windows'] == 64
-        assert config['encoder_sweeps'] == 12 and config['encoder_cg_mode'] == 'fixed'
+        assert config['encoder_sweeps'] == 6 and config['encoder_cg_mode'] == 'fixed'
         assert config['encoder_cg_fixed_iterations'] == 16
         assert Path(config['snapshot_dir']).resolve() == args.snapshots.resolve()
         results[rank] = result
@@ -137,8 +144,8 @@ def main():
         implementations=implementations,
         windows_sha256=sha256(args.windows), windows_manifest_sha256=sha256(args.windows.parent / 'manifest.json'),
         snapshots_sha256=sha256(args.snapshots / 'manifest.json'), factor_sources=inputs,
-        attention_layers=list(LAYERS), anchor_rank=64, compression_probe_rank=32,
-        expansion_probe_rank=96, exponent=1.0, target_mean_rank=96,
+        attention_layers=list(layers), anchor_rank=64, compression_probe_rank=32,
+        expansion_probe_rank=96, exponent=1.0, target_mean_rank=args.target_mean_rank,
         profile_ids=list(range(320, 328)), confirmation_ids=list(range(328, 336)),
         backend='native_full_forward_padded_c1', prediction_positions_per_window=2047,
         vocabulary='full', mamba='dense_unchanged_during_attention_allocation',
@@ -160,7 +167,7 @@ def main():
         assert manifest['artifact']['sha256'] == sha256(args.output / manifest['artifact']['file'])
         for entry in manifest['layers']:
             assert entry['sha256'] == sha256(args.output / entry['file'])
-        print('ATTENTION V96 VERIFIED', identity['layer_ranks'], flush=True)
+        print('ATTENTION V VERIFIED', identity['mean_rank'], identity['layer_ranks'], flush=True)
         return
     assert torch.cuda.device_count() == 4
     memory = {i: torch.cuda.get_device_properties(i).total_memory - 12 * 2**30 for i in range(4)}
@@ -170,7 +177,7 @@ def main():
     assert all(p.device.type == 'cuda' for p in model.parameters())
     assert model.config.model_type == 'nemotron_h'
     assert install_mamba_device_guards(model) == smoke['guarded_mamba_layers']
-    dense_v = {layer: model.model.layers[layer].mixer.v_proj.weight.detach().cpu().clone() for layer in LAYERS}
+    dense_v = {layer: model.model.layers[layer].mixer.v_proj.weight.detach().cpu().clone() for layer in layers}
     tokens = load_file(str(args.windows))['input_ids'].long()
     assert tokens.shape == (336, 2048)
     teachers = {split: _capture_teacher(model, tokens[ids], batch_size=1,
@@ -193,7 +200,7 @@ def main():
             A, D, diagnostic = close_candidate(bank['value_coordinate_encoders'].to(device),
                 bank['head_output_decoders'].to(device), snapshot['fit_covariance'].to(device),
                 snapshot['weight'].to(device))
-            assert A.shape == (8, 128, rank) and D.shape == (64, rank, 8192)
+            assert A.shape == (hkv, head_dim, rank) and D.shape == (hq, rank, hidden)
             cache[key] = (A, D)
             closures[f'{layer}:{rank}'] = diagnostic
             print('CLOSED', layer, rank, diagnostic, flush=True)
@@ -203,7 +210,7 @@ def main():
         mixer = model.model.layers[layer].mixer
         A, D = factors(layer, rank)
         v, o = _fold_ragged_to_padded_weights(dense_v_weight=dense_v[layer].to(mixer.v_proj.weight.device),
-            A=A, D=D, source_ranks=(rank,) * 8)
+            A=A, D=D, source_ranks=(rank,) * hkv)
         mixer.v_proj.weight.copy_(v)
         mixer.o_proj.weight.copy_(o)
 
@@ -219,13 +226,13 @@ def main():
         print('MEASURED', name, metrics['terminal_kl']['mean'], flush=True)
         return metrics
 
-    for layer in LAYERS:
+    for layer in layers:
         install(layer, 64)
     anchor = measure('anchor64_profile', 'profile')
     anchor_confirmation = measure('anchor64_confirmation', 'confirmation')
     deltas = {32: [], 96: []}
     probes = {}
-    for layer in LAYERS:
+    for layer in layers:
         for rank in (32, 96):
             install(layer, rank)
             metrics = measure(f'layer_{layer:03d}_r{rank}', 'profile')
@@ -233,42 +240,44 @@ def main():
             deltas[rank].append(delta['terminal_kl']['mean'])
             probes[f'{layer}:{rank}'] = dict(metrics=metrics, delta=delta)
         install(layer, 64)
-    allocation = allocate(results, deltas[32], deltas[96])
+    allocation = allocate(results, deltas[32], deltas[96], layers=layers,
+        target_mean_rank=args.target_mean_rank)
     write_json(args.output / 'allocation.json', allocation)
-    for layer in LAYERS:
-        install(layer, 96)
-    uniform = measure('uniform96_confirmation', 'confirmation')
-    for layer, rank in zip(LAYERS, allocation['layer_ranks'], strict=True):
+    for layer in layers:
+        install(layer, args.target_mean_rank)
+    uniform = measure(f'uniform{args.target_mean_rank}_confirmation', 'confirmation')
+    for layer, rank in zip(layers, allocation['layer_ranks'], strict=True):
         install(layer, rank)
     selected = measure('selected_confirmation', 'confirmation')
-    schedule = [[rank] * 8 for rank in allocation['layer_ranks']]
+    schedule = [[rank] * hkv for rank in allocation['layer_ranks']]
     result = dict(status='complete', protocol=protocol, allocation=allocation, probes=probes,
         selection=dict(selected_candidate='two_sided_factorized_kl',
             factorized_method=dict(exponent=1.0), selected_schedule=schedule),
-        confirmation=dict(anchor64=anchor_confirmation, uniform96=uniform, selected=selected,
-            selected_minus_uniform96=_paired_delta(selected, uniform)),
+        confirmation=dict(anchor64=anchor_confirmation, uniform=uniform, selected=selected,
+            selected_minus_uniform=_paired_delta(selected, uniform)),
         closures=closures, command=shlex.join(sys.argv), python=sys.executable,
         device_map=model.hf_device_map,
         peak_gib=[torch.cuda.max_memory_allocated(i) / 2**30 for i in range(4)])
     write_json(args.output / 'results.json', result)
     entries = []
-    for layer, rank in zip(LAYERS, allocation['layer_ranks'], strict=True):
+    for layer, rank in zip(layers, allocation['layer_ranks'], strict=True):
         A, D = factors(layer, rank)
         path = args.output / f'layer_{layer:03d}.safetensors'
         save_tensors(path, dict(value_coordinate_encoders=A, head_output_decoders=D,
-            source_ranks=torch.tensor([rank] * 8, dtype=torch.int64)))
-        entries.append(dict(layer=layer, file=path.name, ranks=[rank] * 8, sha256=sha256(path)))
+            source_ranks=torch.tensor([rank] * hkv, dtype=torch.int64)))
+        entries.append(dict(layer=layer, file=path.name, ranks=[rank] * hkv, sha256=sha256(path)))
     manifest = dict(status='complete', model=dict(path=str(model_path), config_sha256=audit['config_sha256'],
         safetensors_index_sha256=audit['index_sha256']),
         compression=dict(method='c1-two-sided-kl', allocation='two_sided_factorized_terminal_kl_alpha1',
-            equivalent_rank_target=96, layer_ranks=schedule), layers=entries,
+            equivalent_rank_target=args.target_mean_rank, layer_ranks=schedule), layers=entries,
         artifact=dict(file='results.json', sha256=sha256(args.output / 'results.json')))
     write_json(args.output / 'manifest.json', manifest)
     write_json(args.identity_output, dict(status='complete', checkpoint=str(args.output.resolve()),
         model=str(model_path), manifest_sha256=sha256(args.output / 'manifest.json'),
-        model_config_sha256=audit['config_sha256'], attention_layers=list(LAYERS),
-        layer_ranks=allocation['layer_ranks'], mean_rank=96, hq=64, hkv=8, head_dim=128, hidden_size=8192))
-    print('ATTENTION V96 EXPORTED', allocation['layer_ranks'], flush=True)
+        model_config_sha256=audit['config_sha256'], attention_layers=list(layers),
+        layer_ranks=allocation['layer_ranks'], mean_rank=args.target_mean_rank,
+        hq=hq, hkv=hkv, head_dim=head_dim, hidden_size=hidden))
+    print('ATTENTION V EXPORTED', args.target_mean_rank, allocation['layer_ranks'], flush=True)
 
 
 if __name__ == '__main__':

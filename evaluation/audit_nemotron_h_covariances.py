@@ -20,14 +20,18 @@ def main():
     audit = read_json(args.audit)
     assert audit['status'] == 'complete'
     common, verified = None, {}
-    for kind, count, width in [('full_attention', 5, 8192), ('linear_attention', 45, 16384)]:
+    for kind in ('full_attention', 'linear_attention'):
         directory = args.snapshots / kind
         manifest_path = directory / 'manifest.json'
         manifest = read_json(manifest_path)
         assert manifest['status'] == 'complete' and manifest['dense_teacher']
         assert manifest['audit_sha256'] == sha256(args.audit)
         layers = [row['layer'] for row in audit['layers'] if row['kind'] == kind]
-        assert len(layers) == count and manifest['layers'] == layers
+        assert layers and manifest['layers'] == layers
+        widths = {row['input_width'] for row in audit['layers'] if row['kind'] == kind}
+        output_widths = {row['output_width'] for row in audit['layers'] if row['kind'] == kind}
+        assert len(widths) == len(output_widths) == 1
+        width, output_width = widths.pop(), output_widths.pop()
         assert set(manifest['artifacts']) == {str(layer) for layer in layers}
         protocol = manifest['protocol']
         if common is None:
@@ -46,14 +50,15 @@ def main():
                 assert set(tensors.keys()) == {'fit_covariance', 'heldout_covariance', 'weight'}
                 for name in tensors.keys():
                     tensor = tensors.get_tensor(name)
-                    expected = (8192, width) if name == 'weight' else (width, width)
+                    expected = (output_width, width) if name == 'weight' else (width, width)
                     assert tuple(tensor.shape) == expected
                     assert tensor.dtype == (torch.bfloat16 if name == 'weight' else torch.float32)
                     assert torch.isfinite(tensor).all()
                     del tensor
             print('VERIFIED COVARIANCE', kind, layer, flush=True)
         verified[kind] = dict(layers=layers, manifest_sha256=sha256(manifest_path))
-    write_json(args.output, dict(status='complete', artifacts=50, verified=verified,
+    write_json(args.output, dict(status='complete', artifacts=sum(
+        len(value['layers']) for value in verified.values()), verified=verified,
         protocol=common, audit_sha256=sha256(args.audit), source_sha256=sha256(__file__)))
 
 

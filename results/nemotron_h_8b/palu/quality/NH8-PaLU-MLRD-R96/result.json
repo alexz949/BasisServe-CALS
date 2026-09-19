@@ -1,0 +1,970 @@
+{
+  "checkpoint": {
+    "compression": {
+      "allocation": "palu_fisher_exact_block_budget",
+      "attention_o_proj": "dense_unchanged",
+      "equivalent_mean_rank_per_head": 96,
+      "factorization": "PaLU activation-aware balanced SVD from W C W^T in float64",
+      "full_attention_layers": [
+        7,
+        18,
+        29,
+        40
+      ],
+      "group_width": 128,
+      "groups": 8,
+      "head_dim": 128,
+      "head_group_size": 1,
+      "layer_ranks": [
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      ],
+      "mamba2_wo": "dense_unchanged",
+      "method": "PaLU M-LRD",
+      "method_slug": "mlrd",
+      "num_physical_kv_heads": 8,
+      "num_query_heads": 32,
+      "rank_block_size": 32,
+      "realized_retained_v_ratio": 0.75,
+      "requested_retained_v_ratio": 0.75,
+      "stored_factor_dtype": "torch.bfloat16",
+      "target": "full_attention_value_cache_only"
+    },
+    "manifest_sha256": "e4feb040086b6b3633a865d70f38e77fe893afdb6456b866c024f4ef9c25875a",
+    "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/nemotron_h_8b/palu/checkpoints/mlrd_r96"
+  },
+  "command": "evaluation/eval_nemotron_h_palu_quality.py --run-id NH8-PaLU-MLRD-R96 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Base-8K/snapshots/94ea861e008c2dfced3e8e1302094024077aa04e --checkpoint results/nemotron_h_8b/palu/checkpoints/mlrd_r96 --c4-windows results/nemotron_h_8b/quality_c4/windows.safetensors --output results/nemotron_h_8b/palu/quality/NH8-PaLU-MLRD-R96/result.json --batch-size 2 --lm-eval-batch-size 8 --expected-gpu-count 1",
+  "details": {
+    "attention_o_proj": "dense_unchanged",
+    "c4": {
+      "document_nll": {
+        "mean": 2.246723342454061,
+        "one_standard_error_ucb": 2.2995606153134953,
+        "paired_standard_error": 0.052837272859434445,
+        "values": [
+          2.6007843017578125,
+          2.5230891704559326,
+          2.393033027648926,
+          2.219529628753662,
+          2.3516225814819336,
+          0.8816688656806946,
+          2.3782742023468018,
+          2.8471646308898926,
+          2.58144474029541,
+          1.4985042810440063,
+          2.698547601699829,
+          2.3410632610321045,
+          2.591810703277588,
+          2.777421236038208,
+          2.7514851093292236,
+          2.151012659072876,
+          1.9371486902236938,
+          1.0391477346420288,
+          2.0673418045043945,
+          2.724944829940796,
+          2.305077314376831,
+          2.7191052436828613,
+          2.3830020427703857,
+          0.6441508531570435,
+          2.021981716156006,
+          2.668941020965576,
+          2.423945188522339,
+          2.7298340797424316,
+          2.951040267944336,
+          0.9897953271865845,
+          2.353740692138672,
+          4.329830646514893,
+          0.8469987511634827,
+          2.364784002304077,
+          2.274437427520752,
+          2.343324899673462,
+          2.488508939743042,
+          2.8466458320617676,
+          0.6305732727050781,
+          2.5952093601226807,
+          1.9373314380645752,
+          3.188706874847412,
+          2.4840247631073,
+          2.052753448486328,
+          1.926785945892334,
+          2.035703420639038,
+          2.844841480255127,
+          1.843072533607483,
+          1.7075319290161133,
+          2.122408151626587,
+          2.3761816024780273,
+          1.8889427185058594,
+          2.209242105484009,
+          2.441399097442627,
+          1.973449945449829,
+          2.304316282272339,
+          1.6868349313735962,
+          2.410335063934326,
+          2.372485876083374,
+          2.905780076980591,
+          2.686213254928589,
+          4.337010860443115,
+          2.0782907009124756,
+          2.59639573097229,
+          2.3584794998168945,
+          1.5217727422714233,
+          2.0829038619995117,
+          1.8147743940353394,
+          0.2785048186779022,
+          2.157834053039551,
+          2.443660020828247,
+          1.7883917093276978,
+          2.7284293174743652,
+          2.170713424682617,
+          2.2969064712524414,
+          2.155452251434326,
+          2.927846908569336,
+          2.2651946544647217,
+          1.6809228658676147,
+          2.184170722961426,
+          2.603515625,
+          2.2916111946105957,
+          2.4345285892486572,
+          2.8233273029327393,
+          0.8883185386657715,
+          2.2228968143463135,
+          2.8455536365509033,
+          1.9003770351409912,
+          2.4148154258728027,
+          2.346644401550293,
+          2.4366345405578613,
+          2.135284662246704,
+          2.2063724994659424,
+          2.01039719581604,
+          2.9145925045013428,
+          2.942925214767456,
+          2.7363176345825195,
+          1.3485157489776611,
+          2.5959415435791016,
+          1.757890224456787,
+          2.0287270545959473,
+          2.1858651638031006,
+          1.5199079513549805,
+          1.844507098197937,
+          1.788027048110962,
+          1.6132135391235352,
+          2.4049861431121826,
+          2.4994308948516846,
+          1.458736538887024,
+          2.065861940383911,
+          2.385230779647827,
+          2.4969897270202637,
+          2.125622510910034,
+          2.559427261352539,
+          2.267483711242676,
+          2.3980600833892822,
+          2.4170961380004883,
+          2.106365203857422,
+          3.1890227794647217,
+          2.293139934539795,
+          2.253208875656128,
+          2.3400464057922363,
+          1.783072590827942,
+          2.209470272064209,
+          1.5037750005722046,
+          2.351292610168457,
+          2.6655473709106445,
+          3.4380509853363037
+        ]
+      },
+      "documents": 128,
+      "loss_dtype": "float32",
+      "mean_nll": 2.246723342454061,
+      "nll_sum": 588677.4632964432,
+      "ppl": 9.456698652017765,
+      "tokens": 262016
+    },
+    "c4_windows": {
+      "manifest_sha256": "e3fa68b80e5bdc0481b640a07bb82840cfd97d71bbe0f06c5c8e58e9851a8530",
+      "path": "results/nemotron_h_8b/quality_c4/windows.safetensors",
+      "protocol": {
+        "audit_sha256": "6746b0eb26ae041053456d758eff2626cb45bd5806a0c55aee1c1ef015579c54",
+        "config": "en",
+        "dataset": "allenai/c4",
+        "document_identity_source_sha256": "609e77c4a0e329d8521d900313cb27e6ef10b1f4f75f4d7c6af529e5bfbb879f",
+        "model": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Base-8K/snapshots/94ea861e008c2dfced3e8e1302094024077aa04e",
+        "model_config_sha256": "81e822f85d6471312bcc0ccd34cc62789075376ecedca7fde0e451584943368b",
+        "revision": "1588ec454efa1a09f29cd18ddd04fe05fc8653a2",
+        "samples": 128,
+        "seed": 20260824,
+        "sequence_length": 2048,
+        "shuffle_buffer": 10000,
+        "source_sha256": "8eaeda0d1b8646f43548fdf11eb6cc6bc644931b8c5304af8c2a4bd49aa4b9a2",
+        "split": "validation"
+      },
+      "sha256": "69352979ebd4a4f4a825e0d8fbc0728261c1cda7d66371d71a35a7eb90792890"
+    },
+    "commonsense": {
+      "config": {
+        "batch_size": null,
+        "batch_sizes": [],
+        "bootstrap_iters": 100000,
+        "device": null,
+        "fewshot_seed": 1234,
+        "gen_kwargs": null,
+        "limit": null,
+        "model": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Base-8K/snapshots/94ea861e008c2dfced3e8e1302094024077aa04e",
+        "model_args": null,
+        "model_dtype": "torch.bfloat16",
+        "model_num_parameters": 8097051648,
+        "model_revision": "main",
+        "model_sha": "",
+        "numpy_seed": 1234,
+        "random_seed": 0,
+        "torch_seed": 1234,
+        "use_cache": null
+      },
+      "configs": {
+        "arc_challenge": {
+          "dataset_name": "ARC-Challenge",
+          "dataset_path": "allenai/ai2_arc",
+          "description": "",
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": "{{choices.text}}",
+            "doc_to_target": "{{choices.label.index(answerKey)}}",
+            "doc_to_text": "Question: {{question}}\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "tag": [
+            "ai2_arc"
+          ],
+          "target_delimiter": " ",
+          "task": "arc_challenge",
+          "test_split": "test",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "arc_easy": {
+          "dataset_name": "ARC-Easy",
+          "dataset_path": "allenai/ai2_arc",
+          "description": "",
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": "{{choices.text}}",
+            "doc_to_target": "{{choices.label.index(answerKey)}}",
+            "doc_to_text": "Question: {{question}}\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "tag": [
+            "ai2_arc"
+          ],
+          "target_delimiter": " ",
+          "task": "arc_easy",
+          "test_split": "test",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "boolq": {
+          "dataset_name": "boolq",
+          "dataset_path": "aps/super_glue",
+          "description": "",
+          "doc_to_choice": [
+            "no",
+            "yes"
+          ],
+          "doc_to_decontamination_query": "passage",
+          "doc_to_target": "label",
+          "doc_to_text": "{{passage}}\nQuestion: {{question}}?\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": [
+              "no",
+              "yes"
+            ],
+            "doc_to_target": "label",
+            "doc_to_text": "{{passage}}\nQuestion: {{question}}?\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 2.0
+          },
+          "metric_list": [
+            {
+              "metric": "acc"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "tag": [
+            "super-glue-lm-eval-v1"
+          ],
+          "target_delimiter": " ",
+          "task": "boolq",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "hellaswag": {
+          "dataset_path": "Rowan/hellaswag",
+          "description": "",
+          "doc_to_choice": "choices",
+          "doc_to_target": "{{label}}",
+          "doc_to_text": "{{query}}",
+          "fewshot_config": {
+            "doc_to_choice": "choices",
+            "doc_to_target": "{{label}}",
+            "doc_to_text": "{{query}}",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": "<function process_docs at 0x7fe92c608180>",
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc):\n        ctx = doc[\"ctx_a\"] + \" \" + doc[\"ctx_b\"].capitalize()\n        out_doc = {\n            \"query\": preprocess(doc[\"activity_label\"] + \": \" + ctx),\n            \"choices\": [preprocess(ending) for ending in doc[\"endings\"]],\n            \"gold\": int(doc[\"label\"]),\n        }\n        return out_doc\n\n    return dataset.map(_process_doc)\n",
+          "repeats": 1,
+          "should_decontaminate": false,
+          "tag": [
+            "multiple_choice"
+          ],
+          "target_delimiter": " ",
+          "task": "hellaswag",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "openbookqa": {
+          "dataset_name": "main",
+          "dataset_path": "allenai/openbookqa",
+          "description": "",
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_decontamination_query": "question_stem",
+          "doc_to_target": "{{choices.label.index(answerKey.lstrip())}}",
+          "doc_to_text": "question_stem",
+          "fewshot_config": {
+            "doc_to_choice": "{{choices.text}}",
+            "doc_to_target": "{{choices.label.index(answerKey.lstrip())}}",
+            "doc_to_text": "question_stem",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "target_delimiter": " ",
+          "task": "openbookqa",
+          "test_split": "test",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "piqa": {
+          "dataset_path": "baber/piqa",
+          "description": "",
+          "doc_to_choice": "{{[sol1, sol2]}}",
+          "doc_to_decontamination_query": "goal",
+          "doc_to_target": "label",
+          "doc_to_text": "Question: {{goal}}\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": "{{[sol1, sol2]}}",
+            "doc_to_target": "label",
+            "doc_to_text": "Question: {{goal}}\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "target_delimiter": " ",
+          "task": "piqa",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "winogrande": {
+          "dataset_name": "winogrande_xl",
+          "dataset_path": "allenai/winogrande",
+          "description": "",
+          "doc_to_choice": "def doc_to_choice(doc):\n    idx = doc[\"sentence\"].index(\"_\")\n    options = [doc[\"option1\"], doc[\"option2\"]]\n    return [doc[\"sentence\"][:idx] + opt for opt in options]\n",
+          "doc_to_decontamination_query": "sentence",
+          "doc_to_target": "def doc_to_target(doc):\n    idx = doc[\"sentence\"].index(\"_\") + 1\n    return doc[\"sentence\"][idx:].strip()\n",
+          "doc_to_text": "def doc_to_text(doc):\n    answer_to_num = {\"1\": 0, \"2\": 1}\n    return answer_to_num[doc[\"answer\"]]\n",
+          "fewshot_config": {
+            "doc_to_choice": "<function doc_to_choice at 0x7fe3088d47c0>",
+            "doc_to_target": "<function doc_to_target at 0x7fe3088d4400>",
+            "doc_to_text": "<function doc_to_text at 0x7fe3088d4040>",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "target_delimiter": " ",
+          "task": "winogrande",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        }
+      },
+      "date": 1789596530.894136,
+      "eot_token_id": 2,
+      "git_hash": "7db091e",
+      "group_subtasks": {
+        "arc_challenge": [],
+        "arc_easy": [],
+        "boolq": [],
+        "hellaswag": [],
+        "openbookqa": [],
+        "piqa": [],
+        "winogrande": []
+      },
+      "higher_is_better": {
+        "arc_challenge": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "arc_easy": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "boolq": {
+          "acc": true
+        },
+        "hellaswag": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "openbookqa": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "piqa": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "winogrande": {
+          "acc": true
+        }
+      },
+      "lm_eval_version": "0.4.11",
+      "max_length": 4096,
+      "n-samples": {
+        "arc_challenge": {
+          "effective": 1172,
+          "original": 1172
+        },
+        "arc_easy": {
+          "effective": 2376,
+          "original": 2376
+        },
+        "boolq": {
+          "effective": 3270,
+          "original": 3270
+        },
+        "hellaswag": {
+          "effective": 10042,
+          "original": 10042
+        },
+        "openbookqa": {
+          "effective": 500,
+          "original": 500
+        },
+        "piqa": {
+          "effective": 1838,
+          "original": 1838
+        },
+        "winogrande": {
+          "effective": 1267,
+          "original": 1267
+        }
+      },
+      "n-shot": {
+        "arc_challenge": 0,
+        "arc_easy": 0,
+        "boolq": 0,
+        "hellaswag": 0,
+        "openbookqa": 0,
+        "piqa": 0,
+        "winogrande": 0
+      },
+      "pretty_env_info": "PyTorch version: 2.6.0+cu124\nIs debug build: False\nCUDA used to build PyTorch: 12.4\nROCM used to build PyTorch: N/A\n\nOS: Rocky Linux 9.4 (Blue Onyx) (x86_64)\nGCC version: (GCC) 11.4.1 20231218 (Red Hat 11.4.1-3)\nClang version: Could not collect\nCMake version: version 3.26.5\nLibc version: glibc-2.34\n\nPython version: 3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0] (64-bit runtime)\nPython platform: Linux-5.14.0-427.33.1.el9_4.x86_64-x86_64-with-glibc2.34\nIs CUDA available: True\nCUDA runtime version: Could not collect\nCUDA_MODULE_LOADING set to: LAZY\nGPU models and configuration: \nGPU 0: NVIDIA L40S\nGPU 1: NVIDIA L40S\nGPU 2: NVIDIA L40S\nGPU 3: NVIDIA L40S\n\nNvidia driver version: 550.54.15\ncuDNN version: Could not collect\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: True\n\nCPU:\nArchitecture:                       x86_64\nCPU op-mode(s):                     32-bit, 64-bit\nAddress sizes:                      52 bits physical, 57 bits virtual\nByte Order:                         Little Endian\nCPU(s):                             64\nOn-line CPU(s) list:                0-63\nVendor ID:                          AuthenticAMD\nModel name:                         AMD EPYC 9334 32-Core Processor\nCPU family:                         25\nModel:                              17\nThread(s) per core:                 1\nCore(s) per socket:                 32\nSocket(s):                          2\nStepping:                           1\nFrequency boost:                    enabled\nCPU(s) scaling MHz:                 72%\nCPU max MHz:                        3910.2529\nCPU min MHz:                        1500.0000\nBogoMIPS:                           5400.61\nFlags:                              fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid overflow_recov succor smca fsrm flush_l1d debug_swap\nVirtualization:                     AMD-V\nL1d cache:                          2 MiB (64 instances)\nL1i cache:                          2 MiB (64 instances)\nL2 cache:                           64 MiB (64 instances)\nL3 cache:                           256 MiB (8 instances)\nNUMA node(s):                       2\nNUMA node0 CPU(s):                  0-31\nNUMA node1 CPU(s):                  32-63\nVulnerability Gather data sampling: Not affected\nVulnerability Itlb multihit:        Not affected\nVulnerability L1tf:                 Not affected\nVulnerability Mds:                  Not affected\nVulnerability Meltdown:             Not affected\nVulnerability Mmio stale data:      Not affected\nVulnerability Retbleed:             Not affected\nVulnerability Spec rstack overflow: Mitigation; Safe RET\nVulnerability Spec store bypass:    Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:           Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:           Mitigation; Enhanced / Automatic IBRS, IBPB conditional, STIBP disabled, RSB filling, PBRSB-eIBRS Not affected\nVulnerability Srbds:                Not affected\nVulnerability Tsx async abort:      Not affected\n\nVersions of relevant libraries:\n[pip3] numpy==2.2.6\n[pip3] nvidia-cublas-cu12==12.4.5.8\n[pip3] nvidia-cuda-cupti-cu12==12.4.127\n[pip3] nvidia-cuda-nvrtc-cu12==12.4.127\n[pip3] nvidia-cuda-runtime-cu12==12.4.127\n[pip3] nvidia-cudnn-cu12==9.1.0.70\n[pip3] nvidia-cufft-cu12==11.2.1.3\n[pip3] nvidia-curand-cu12==10.3.5.147\n[pip3] nvidia-cusolver-cu12==11.6.1.9\n[pip3] nvidia-cusparse-cu12==12.3.1.170\n[pip3] nvidia-cusparselt-cu12==0.6.2\n[pip3] nvidia-nccl-cu12==2.21.5\n[pip3] nvidia-nvjitlink-cu12==12.4.127\n[pip3] nvidia-nvtx-cu12==12.4.127\n[pip3] torch==2.6.0+cu124\n[pip3] torchaudio==2.6.0\n[pip3] torchvision==0.21.0\n[pip3] triton==3.2.0\n[conda] Could not collect",
+      "results": {
+        "arc_challenge": {
+          "acc,none": 0.560580204778157,
+          "acc_norm,none": 0.5989761092150171,
+          "acc_norm_stderr,none": 0.014322255790719872,
+          "acc_stderr,none": 0.014503747823580125,
+          "alias": "arc_challenge"
+        },
+        "arc_easy": {
+          "acc,none": 0.8493265993265994,
+          "acc_norm,none": 0.8358585858585859,
+          "acc_norm_stderr,none": 0.007600526583005699,
+          "acc_stderr,none": 0.007340469711140681,
+          "alias": "arc_easy"
+        },
+        "boolq": {
+          "acc,none": 0.8495412844036697,
+          "acc_stderr,none": 0.006253072429211772,
+          "alias": "boolq"
+        },
+        "hellaswag": {
+          "acc,none": 0.617805218084047,
+          "acc_norm,none": 0.8111929894443338,
+          "acc_norm_stderr,none": 0.003905554196574596,
+          "acc_stderr,none": 0.0048493069987278125,
+          "alias": "hellaswag"
+        },
+        "openbookqa": {
+          "acc,none": 0.35,
+          "acc_norm,none": 0.468,
+          "acc_norm_stderr,none": 0.0223371864790443,
+          "acc_stderr,none": 0.0213520917862231,
+          "alias": "openbookqa"
+        },
+        "piqa": {
+          "acc,none": 0.8150163220892275,
+          "acc_norm,none": 0.8220892274211099,
+          "acc_norm_stderr,none": 0.00892289994808559,
+          "acc_stderr,none": 0.009059313316508652,
+          "alias": "piqa"
+        },
+        "winogrande": {
+          "acc,none": 0.7632202052091555,
+          "acc_stderr,none": 0.011947592365207389,
+          "alias": "winogrande"
+        }
+      },
+      "tokenizer_bos_token": [
+        "<s>",
+        "1"
+      ],
+      "tokenizer_eos_token": [
+        "</s>",
+        "2"
+      ],
+      "tokenizer_pad_token": [
+        "<unk>",
+        "0"
+      ],
+      "transformers_version": "5.15.1",
+      "upper_git_hash": null,
+      "versions": {
+        "arc_challenge": 1.0,
+        "arc_easy": 1.0,
+        "boolq": 2.0,
+        "hellaswag": 1.0,
+        "openbookqa": 1.0,
+        "piqa": 1.0,
+        "winogrande": 1.0
+      }
+    },
+    "fast_implementations": {
+      "causal_conv1d_fn": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+      "causal_conv1d_update": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+      "mamba2_chunk_scan": "mamba_ssm.ops.triton.ssd_combined.mamba_chunk_scan_combined",
+      "mamba2_selective_state_update": "mamba_ssm.ops.triton.selective_state_update.selective_state_update"
+    },
+    "guarded_mamba_layers": [
+      0,
+      2,
+      4,
+      6,
+      9,
+      11,
+      13,
+      15,
+      17,
+      20,
+      22,
+      24,
+      26,
+      28,
+      31,
+      33,
+      35,
+      37,
+      39,
+      42,
+      44,
+      46,
+      48,
+      50
+    ],
+    "installed": [
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "groups": 8,
+        "layer": 7,
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          128
+        ],
+        "groups": 8,
+        "layer": 18,
+        "ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ],
+        "writer_shape": [
+          1024,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          96
+        ],
+        "groups": 8,
+        "layer": 29,
+        "ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ],
+        "writer_shape": [
+          768,
+          4096
+        ]
+      },
+      {
+        "decoder_shape": [
+          8,
+          128,
+          64
+        ],
+        "groups": 8,
+        "layer": 40,
+        "ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ],
+        "writer_shape": [
+          512,
+          4096
+        ]
+      }
+    ],
+    "mamba_wo": "dense_unchanged",
+    "wikitext2": {
+      "batch_size": 2,
+      "chunks": 147,
+      "dataset": "wikitext2",
+      "loss_dtype": "float32",
+      "nll_sum": 551542.9750976562,
+      "ppl": 6.252133887590485,
+      "seqlen": 2048,
+      "split": "test",
+      "tokens": 300909
+    }
+  },
+  "environment": {
+    "conda_environment": null,
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ],
+    "datasets": "5.0.0",
+    "lm_eval": "0.4.11",
+    "peak_cuda_allocated_bytes": {
+      "0": 26998952960
+    },
+    "python": "3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0]",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.15.1"
+  },
+  "format": "basisserve.nemotron_h.palu_quality.v1",
+  "metrics": {
+    "average_accuracy": 0.735554057364553,
+    "c4_validation_128_ppl": 9.456698652017765,
+    "task_accuracy": [
+      {
+        "metric": "acc_norm",
+        "task": "arc_easy",
+        "value": 0.8358585858585859
+      },
+      {
+        "metric": "acc_norm",
+        "task": "arc_challenge",
+        "value": 0.5989761092150171
+      },
+      {
+        "metric": "acc_norm",
+        "task": "hellaswag",
+        "value": 0.8111929894443338
+      },
+      {
+        "metric": "acc_norm",
+        "task": "piqa",
+        "value": 0.8220892274211099
+      },
+      {
+        "metric": "acc",
+        "task": "winogrande",
+        "value": 0.7632202052091555
+      },
+      {
+        "metric": "acc",
+        "task": "boolq",
+        "value": 0.8495412844036697
+      },
+      {
+        "metric": "acc_norm",
+        "task": "openbookqa",
+        "value": 0.468
+      }
+    ],
+    "wikitext2_ppl": 6.252133887590485
+  },
+  "model": {
+    "config_sha256": "81e822f85d6471312bcc0ccd34cc62789075376ecedca7fde0e451584943368b",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Base-8K/snapshots/94ea861e008c2dfced3e8e1302094024077aa04e"
+  },
+  "protocol": {
+    "c4": "128 document-disjoint validation windows, 2048 tokens, FP32 loss",
+    "max_length": 4096,
+    "metric_selection": "acc_norm when present, otherwise acc",
+    "num_fewshot": 0,
+    "tasks": [
+      "arc_easy",
+      "arc_challenge",
+      "hellaswag",
+      "piqa",
+      "winogrande",
+      "boolq",
+      "openbookqa"
+    ],
+    "wikitext2": "full test corpus, 2048-token windows, FP32 loss"
+  },
+  "run_id": "NH8-PaLU-MLRD-R96",
+  "seconds": 658.3006685301661,
+  "status": "complete"
+}

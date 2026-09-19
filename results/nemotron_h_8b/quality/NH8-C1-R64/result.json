@@ -1,0 +1,999 @@
+{
+  "checkpoint": {
+    "compression": {
+      "attention_layers": [
+        7,
+        18,
+        29,
+        40
+      ],
+      "full_attention_allgather": {
+        "collective": "private_allgather",
+        "compressed_allgather_ring_bytes_per_rank": 3072,
+        "dense_allgather_ring_bytes_per_rank": 6144,
+        "dense_allreduce_ring_bytes_per_rank": 12288,
+        "dtype_bytes": 2,
+        "gathered_width": 2048,
+        "input_width": 4096,
+        "kv_cache_compression": "none",
+        "output_width": 4096,
+        "reduction_vs_dense_allgather": 0.5,
+        "reduction_vs_dense_allreduce": 0.75,
+        "source_rank": 512,
+        "source_width": 1024,
+        "tp_size": 4
+      },
+      "mamba_matches_attention_retained_ratio": true,
+      "mamba_wo_allgather": {
+        "collective": "private_allgather",
+        "compressed_allgather_ring_bytes_per_rank": 6144,
+        "dense_allgather_ring_bytes_per_rank": 12288,
+        "dense_allreduce_ring_bytes_per_rank": 12288,
+        "dtype_bytes": 2,
+        "gathered_width": 4096,
+        "input_width": 8192,
+        "kv_cache_compression": "none",
+        "output_width": 4096,
+        "reduction_vs_dense_allgather": 0.5,
+        "reduction_vs_dense_allreduce": 0.5,
+        "source_rank": 1024,
+        "source_width": 2048,
+        "tp_size": 4
+      },
+      "mamba_wo_dense_allreduce_reduction": 0.5,
+      "mamba_wo_source_rank": 1024,
+      "mamba_wo_tp": 4,
+      "method": "C1",
+      "v_equivalent_mean_rank": 64,
+      "v_layer_ranks": [
+        32,
+        64,
+        96,
+        64
+      ],
+      "v_retained_ratio": 0.5
+    },
+    "manifest_sha256": "76045de472c94a38fecdd8192c33d188346da1de11df2cad5ee792a8d62f50ed",
+    "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/nemotron_h_8b/checkpoints/r64"
+  },
+  "command": "evaluation/eval_nemotron_h_8b_quality.py --run-id NH8-C1-R64 --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Base-8K/snapshots/94ea861e008c2dfced3e8e1302094024077aa04e --checkpoint results/nemotron_h_8b/checkpoints/r64 --c4-windows results/nemotron_h_8b/quality_c4/windows.safetensors --output results/nemotron_h_8b/quality/NH8-C1-R64/result.json --batch-size 2 --lm-eval-batch-size 8 --expected-gpu-count 1",
+  "details": {
+    "c4": {
+      "document_nll": {
+        "mean": 2.2870607732329518,
+        "one_standard_error_ucb": 2.33877297499914,
+        "paired_standard_error": 0.0517122017661882,
+        "values": [
+          2.615234375,
+          2.5495948791503906,
+          2.4192559719085693,
+          2.2364518642425537,
+          2.372206211090088,
+          1.467332363128662,
+          2.41253924369812,
+          2.8640522956848145,
+          2.6059110164642334,
+          1.5166425704956055,
+          2.7220354080200195,
+          2.3646481037139893,
+          2.6314735412597656,
+          2.7961935997009277,
+          2.78195858001709,
+          2.1755242347717285,
+          1.9747976064682007,
+          1.1811717748641968,
+          2.085082530975342,
+          2.752664804458618,
+          2.3293299674987793,
+          2.7931067943573,
+          2.4066760540008545,
+          0.6707997918128967,
+          2.0559542179107666,
+          2.7029452323913574,
+          2.44316029548645,
+          2.7480077743530273,
+          2.943852186203003,
+          1.1934314966201782,
+          2.3796448707580566,
+          4.436563014984131,
+          0.9962815046310425,
+          2.423656463623047,
+          2.290804147720337,
+          2.4183943271636963,
+          2.502875328063965,
+          2.875218391418457,
+          0.643498420715332,
+          2.6255290508270264,
+          1.9682668447494507,
+          3.1939117908477783,
+          2.5253913402557373,
+          2.1431565284729004,
+          1.9505585432052612,
+          2.0722570419311523,
+          2.88566255569458,
+          1.8696784973144531,
+          1.7431647777557373,
+          2.179067373275757,
+          2.397521495819092,
+          1.9417530298233032,
+          2.2281224727630615,
+          2.4657230377197266,
+          2.0444135665893555,
+          2.362048625946045,
+          1.739551305770874,
+          2.447439670562744,
+          2.418062448501587,
+          2.9305856227874756,
+          2.722966432571411,
+          4.394938945770264,
+          2.1013243198394775,
+          2.6285555362701416,
+          2.383812665939331,
+          1.533677339553833,
+          2.119040012359619,
+          1.980116605758667,
+          0.3199569284915924,
+          2.1865382194519043,
+          2.4668779373168945,
+          1.8402233123779297,
+          2.7476541996002197,
+          2.1952223777770996,
+          2.3299813270568848,
+          2.1786508560180664,
+          2.9642670154571533,
+          2.2951507568359375,
+          1.704948902130127,
+          2.2223703861236572,
+          2.626063823699951,
+          2.319713830947876,
+          2.459949493408203,
+          2.8733150959014893,
+          0.9202221035957336,
+          2.2777655124664307,
+          2.865422010421753,
+          1.923709750175476,
+          2.4469902515411377,
+          2.391453504562378,
+          2.4764394760131836,
+          2.1653645038604736,
+          2.236319065093994,
+          2.0359299182891846,
+          2.920822858810425,
+          2.9477460384368896,
+          2.7557177543640137,
+          1.3876001834869385,
+          2.618708372116089,
+          1.816717505455017,
+          2.0631115436553955,
+          2.200698137283325,
+          1.5481510162353516,
+          1.855405569076538,
+          1.8201227188110352,
+          1.634706735610962,
+          2.423999786376953,
+          2.5117766857147217,
+          1.4679423570632935,
+          2.091054677963257,
+          2.3983912467956543,
+          2.5257480144500732,
+          2.1919119358062744,
+          2.5997672080993652,
+          2.2770168781280518,
+          2.4396238327026367,
+          2.4334702491760254,
+          2.161123514175415,
+          3.2662410736083984,
+          2.3215296268463135,
+          2.2819533348083496,
+          2.364314556121826,
+          1.8222804069519043,
+          2.2417774200439453,
+          1.5282108783721924,
+          2.3929688930511475,
+          2.6990857124328613,
+          3.4883129596710205
+        ]
+      },
+      "documents": 128,
+      "loss_dtype": "float32",
+      "mean_nll": 2.2870607732329518,
+      "nll_sum": 599246.5155594051,
+      "ppl": 9.84595561331735,
+      "tokens": 262016
+    },
+    "c4_windows": {
+      "manifest_sha256": "e3fa68b80e5bdc0481b640a07bb82840cfd97d71bbe0f06c5c8e58e9851a8530",
+      "path": "results/nemotron_h_8b/quality_c4/windows.safetensors",
+      "protocol": {
+        "audit_sha256": "6746b0eb26ae041053456d758eff2626cb45bd5806a0c55aee1c1ef015579c54",
+        "config": "en",
+        "dataset": "allenai/c4",
+        "document_identity_source_sha256": "609e77c4a0e329d8521d900313cb27e6ef10b1f4f75f4d7c6af529e5bfbb879f",
+        "model": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Base-8K/snapshots/94ea861e008c2dfced3e8e1302094024077aa04e",
+        "model_config_sha256": "81e822f85d6471312bcc0ccd34cc62789075376ecedca7fde0e451584943368b",
+        "revision": "1588ec454efa1a09f29cd18ddd04fe05fc8653a2",
+        "samples": 128,
+        "seed": 20260824,
+        "sequence_length": 2048,
+        "shuffle_buffer": 10000,
+        "source_sha256": "8eaeda0d1b8646f43548fdf11eb6cc6bc644931b8c5304af8c2a4bd49aa4b9a2",
+        "split": "validation"
+      },
+      "sha256": "69352979ebd4a4f4a825e0d8fbc0728261c1cda7d66371d71a35a7eb90792890"
+    },
+    "commonsense": {
+      "config": {
+        "batch_size": null,
+        "batch_sizes": [],
+        "bootstrap_iters": 100000,
+        "device": null,
+        "fewshot_seed": 1234,
+        "gen_kwargs": null,
+        "limit": null,
+        "model": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Base-8K/snapshots/94ea861e008c2dfced3e8e1302094024077aa04e",
+        "model_args": null,
+        "model_dtype": "torch.bfloat16",
+        "model_num_parameters": 8058909696,
+        "model_revision": "main",
+        "model_sha": "",
+        "numpy_seed": 1234,
+        "random_seed": 0,
+        "torch_seed": 1234,
+        "use_cache": null
+      },
+      "configs": {
+        "arc_challenge": {
+          "dataset_name": "ARC-Challenge",
+          "dataset_path": "allenai/ai2_arc",
+          "description": "",
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": "{{choices.text}}",
+            "doc_to_target": "{{choices.label.index(answerKey)}}",
+            "doc_to_text": "Question: {{question}}\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "tag": [
+            "ai2_arc"
+          ],
+          "target_delimiter": " ",
+          "task": "arc_challenge",
+          "test_split": "test",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "arc_easy": {
+          "dataset_name": "ARC-Easy",
+          "dataset_path": "allenai/ai2_arc",
+          "description": "",
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": "{{choices.text}}",
+            "doc_to_target": "{{choices.label.index(answerKey)}}",
+            "doc_to_text": "Question: {{question}}\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "tag": [
+            "ai2_arc"
+          ],
+          "target_delimiter": " ",
+          "task": "arc_easy",
+          "test_split": "test",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "boolq": {
+          "dataset_name": "boolq",
+          "dataset_path": "aps/super_glue",
+          "description": "",
+          "doc_to_choice": [
+            "no",
+            "yes"
+          ],
+          "doc_to_decontamination_query": "passage",
+          "doc_to_target": "label",
+          "doc_to_text": "{{passage}}\nQuestion: {{question}}?\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": [
+              "no",
+              "yes"
+            ],
+            "doc_to_target": "label",
+            "doc_to_text": "{{passage}}\nQuestion: {{question}}?\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 2.0
+          },
+          "metric_list": [
+            {
+              "metric": "acc"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "tag": [
+            "super-glue-lm-eval-v1"
+          ],
+          "target_delimiter": " ",
+          "task": "boolq",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "hellaswag": {
+          "dataset_path": "Rowan/hellaswag",
+          "description": "",
+          "doc_to_choice": "choices",
+          "doc_to_target": "{{label}}",
+          "doc_to_text": "{{query}}",
+          "fewshot_config": {
+            "doc_to_choice": "choices",
+            "doc_to_target": "{{label}}",
+            "doc_to_text": "{{query}}",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": "<function process_docs at 0x7f34f5da54e0>",
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc):\n        ctx = doc[\"ctx_a\"] + \" \" + doc[\"ctx_b\"].capitalize()\n        out_doc = {\n            \"query\": preprocess(doc[\"activity_label\"] + \": \" + ctx),\n            \"choices\": [preprocess(ending) for ending in doc[\"endings\"]],\n            \"gold\": int(doc[\"label\"]),\n        }\n        return out_doc\n\n    return dataset.map(_process_doc)\n",
+          "repeats": 1,
+          "should_decontaminate": false,
+          "tag": [
+            "multiple_choice"
+          ],
+          "target_delimiter": " ",
+          "task": "hellaswag",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "openbookqa": {
+          "dataset_name": "main",
+          "dataset_path": "allenai/openbookqa",
+          "description": "",
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_decontamination_query": "question_stem",
+          "doc_to_target": "{{choices.label.index(answerKey.lstrip())}}",
+          "doc_to_text": "question_stem",
+          "fewshot_config": {
+            "doc_to_choice": "{{choices.text}}",
+            "doc_to_target": "{{choices.label.index(answerKey.lstrip())}}",
+            "doc_to_text": "question_stem",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "target_delimiter": " ",
+          "task": "openbookqa",
+          "test_split": "test",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "piqa": {
+          "dataset_path": "baber/piqa",
+          "description": "",
+          "doc_to_choice": "{{[sol1, sol2]}}",
+          "doc_to_decontamination_query": "goal",
+          "doc_to_target": "label",
+          "doc_to_text": "Question: {{goal}}\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": "{{[sol1, sol2]}}",
+            "doc_to_target": "label",
+            "doc_to_text": "Question: {{goal}}\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "target_delimiter": " ",
+          "task": "piqa",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "winogrande": {
+          "dataset_name": "winogrande_xl",
+          "dataset_path": "allenai/winogrande",
+          "description": "",
+          "doc_to_choice": "def doc_to_choice(doc):\n    idx = doc[\"sentence\"].index(\"_\")\n    options = [doc[\"option1\"], doc[\"option2\"]]\n    return [doc[\"sentence\"][:idx] + opt for opt in options]\n",
+          "doc_to_decontamination_query": "sentence",
+          "doc_to_target": "def doc_to_target(doc):\n    idx = doc[\"sentence\"].index(\"_\") + 1\n    return doc[\"sentence\"][idx:].strip()\n",
+          "doc_to_text": "def doc_to_text(doc):\n    answer_to_num = {\"1\": 0, \"2\": 1}\n    return answer_to_num[doc[\"answer\"]]\n",
+          "fewshot_config": {
+            "doc_to_choice": "<function doc_to_choice at 0x7f32709fa2a0>",
+            "doc_to_target": "<function doc_to_target at 0x7f32709f9ee0>",
+            "doc_to_text": "<function doc_to_text at 0x7f32709f9b20>",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "target_delimiter": " ",
+          "task": "winogrande",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        }
+      },
+      "date": 1789555022.3703313,
+      "eot_token_id": 2,
+      "git_hash": "7db091e",
+      "group_subtasks": {
+        "arc_challenge": [],
+        "arc_easy": [],
+        "boolq": [],
+        "hellaswag": [],
+        "openbookqa": [],
+        "piqa": [],
+        "winogrande": []
+      },
+      "higher_is_better": {
+        "arc_challenge": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "arc_easy": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "boolq": {
+          "acc": true
+        },
+        "hellaswag": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "openbookqa": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "piqa": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "winogrande": {
+          "acc": true
+        }
+      },
+      "lm_eval_version": "0.4.11",
+      "max_length": 4096,
+      "n-samples": {
+        "arc_challenge": {
+          "effective": 1172,
+          "original": 1172
+        },
+        "arc_easy": {
+          "effective": 2376,
+          "original": 2376
+        },
+        "boolq": {
+          "effective": 3270,
+          "original": 3270
+        },
+        "hellaswag": {
+          "effective": 10042,
+          "original": 10042
+        },
+        "openbookqa": {
+          "effective": 500,
+          "original": 500
+        },
+        "piqa": {
+          "effective": 1838,
+          "original": 1838
+        },
+        "winogrande": {
+          "effective": 1267,
+          "original": 1267
+        }
+      },
+      "n-shot": {
+        "arc_challenge": 0,
+        "arc_easy": 0,
+        "boolq": 0,
+        "hellaswag": 0,
+        "openbookqa": 0,
+        "piqa": 0,
+        "winogrande": 0
+      },
+      "pretty_env_info": "PyTorch version: 2.6.0+cu124\nIs debug build: False\nCUDA used to build PyTorch: 12.4\nROCM used to build PyTorch: N/A\n\nOS: Rocky Linux 9.4 (Blue Onyx) (x86_64)\nGCC version: (GCC) 11.4.1 20231218 (Red Hat 11.4.1-3)\nClang version: Could not collect\nCMake version: version 3.26.5\nLibc version: glibc-2.34\n\nPython version: 3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0] (64-bit runtime)\nPython platform: Linux-5.14.0-427.33.1.el9_4.x86_64-x86_64-with-glibc2.34\nIs CUDA available: True\nCUDA runtime version: Could not collect\nCUDA_MODULE_LOADING set to: LAZY\nGPU models and configuration: \nGPU 0: NVIDIA L40S\nGPU 1: NVIDIA L40S\nGPU 2: NVIDIA L40S\nGPU 3: NVIDIA L40S\n\nNvidia driver version: 550.54.15\ncuDNN version: Could not collect\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: True\n\nCPU:\nArchitecture:                       x86_64\nCPU op-mode(s):                     32-bit, 64-bit\nAddress sizes:                      52 bits physical, 57 bits virtual\nByte Order:                         Little Endian\nCPU(s):                             64\nOn-line CPU(s) list:                0-63\nVendor ID:                          AuthenticAMD\nModel name:                         AMD EPYC 9334 32-Core Processor\nCPU family:                         25\nModel:                              17\nThread(s) per core:                 1\nCore(s) per socket:                 32\nSocket(s):                          2\nStepping:                           1\nFrequency boost:                    enabled\nCPU(s) scaling MHz:                 72%\nCPU max MHz:                        3910.2529\nCPU min MHz:                        1500.0000\nBogoMIPS:                           5400.61\nFlags:                              fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid overflow_recov succor smca fsrm flush_l1d debug_swap\nVirtualization:                     AMD-V\nL1d cache:                          2 MiB (64 instances)\nL1i cache:                          2 MiB (64 instances)\nL2 cache:                           64 MiB (64 instances)\nL3 cache:                           256 MiB (8 instances)\nNUMA node(s):                       2\nNUMA node0 CPU(s):                  0-31\nNUMA node1 CPU(s):                  32-63\nVulnerability Gather data sampling: Not affected\nVulnerability Itlb multihit:        Not affected\nVulnerability L1tf:                 Not affected\nVulnerability Mds:                  Not affected\nVulnerability Meltdown:             Not affected\nVulnerability Mmio stale data:      Not affected\nVulnerability Retbleed:             Not affected\nVulnerability Spec rstack overflow: Mitigation; Safe RET\nVulnerability Spec store bypass:    Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:           Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:           Mitigation; Enhanced / Automatic IBRS, IBPB conditional, STIBP disabled, RSB filling, PBRSB-eIBRS Not affected\nVulnerability Srbds:                Not affected\nVulnerability Tsx async abort:      Not affected\n\nVersions of relevant libraries:\n[pip3] numpy==2.2.6\n[pip3] nvidia-cublas-cu12==12.4.5.8\n[pip3] nvidia-cuda-cupti-cu12==12.4.127\n[pip3] nvidia-cuda-nvrtc-cu12==12.4.127\n[pip3] nvidia-cuda-runtime-cu12==12.4.127\n[pip3] nvidia-cudnn-cu12==9.1.0.70\n[pip3] nvidia-cufft-cu12==11.2.1.3\n[pip3] nvidia-curand-cu12==10.3.5.147\n[pip3] nvidia-cusolver-cu12==11.6.1.9\n[pip3] nvidia-cusparse-cu12==12.3.1.170\n[pip3] nvidia-cusparselt-cu12==0.6.2\n[pip3] nvidia-nccl-cu12==2.21.5\n[pip3] nvidia-nvjitlink-cu12==12.4.127\n[pip3] nvidia-nvtx-cu12==12.4.127\n[pip3] torch==2.6.0+cu124\n[pip3] torchaudio==2.6.0\n[pip3] torchvision==0.21.0\n[pip3] triton==3.3.1\n[conda] Could not collect",
+      "results": {
+        "arc_challenge": {
+          "acc,none": 0.5563139931740614,
+          "acc_norm,none": 0.591296928327645,
+          "acc_norm_stderr,none": 0.014365750345427008,
+          "acc_stderr,none": 0.014518421825670454,
+          "alias": "arc_challenge"
+        },
+        "arc_easy": {
+          "acc,none": 0.8316498316498316,
+          "acc_norm,none": 0.8287037037037037,
+          "acc_norm_stderr,none": 0.007731109409636976,
+          "acc_stderr,none": 0.007677948990566535,
+          "alias": "arc_easy"
+        },
+        "boolq": {
+          "acc,none": 0.8434250764525993,
+          "acc_stderr,none": 0.0063558976994183185,
+          "alias": "boolq"
+        },
+        "hellaswag": {
+          "acc,none": 0.5978888667596096,
+          "acc_norm,none": 0.7933678550089623,
+          "acc_norm_stderr,none": 0.004040617668260884,
+          "acc_stderr,none": 0.004893220635011798,
+          "alias": "hellaswag"
+        },
+        "openbookqa": {
+          "acc,none": 0.348,
+          "acc_norm,none": 0.442,
+          "acc_norm_stderr,none": 0.02223197069632112,
+          "acc_stderr,none": 0.021323728632807498,
+          "alias": "openbookqa"
+        },
+        "piqa": {
+          "acc,none": 0.8079434167573449,
+          "acc_norm,none": 0.8220892274211099,
+          "acc_norm_stderr,none": 0.00892289994808559,
+          "acc_stderr,none": 0.009190740295126478,
+          "alias": "piqa"
+        },
+        "winogrande": {
+          "acc,none": 0.7426992896606156,
+          "acc_stderr,none": 0.012285989618865702,
+          "alias": "winogrande"
+        }
+      },
+      "tokenizer_bos_token": [
+        "<s>",
+        "1"
+      ],
+      "tokenizer_eos_token": [
+        "</s>",
+        "2"
+      ],
+      "tokenizer_pad_token": [
+        "<unk>",
+        "0"
+      ],
+      "transformers_version": "5.15.1",
+      "upper_git_hash": null,
+      "versions": {
+        "arc_challenge": 1.0,
+        "arc_easy": 1.0,
+        "boolq": 2.0,
+        "hellaswag": 1.0,
+        "openbookqa": 1.0,
+        "piqa": 1.0,
+        "winogrande": 1.0
+      }
+    },
+    "guarded_mamba_layers": [
+      0,
+      2,
+      4,
+      6,
+      9,
+      11,
+      13,
+      15,
+      17,
+      20,
+      22,
+      24,
+      26,
+      28,
+      31,
+      33,
+      35,
+      37,
+      39,
+      42,
+      44,
+      46,
+      48,
+      50
+    ],
+    "installed": [
+      {
+        "file": "mamba_wo/layer_000.safetensors",
+        "kind": "linear_attention",
+        "layer": 0
+      },
+      {
+        "file": "mamba_wo/layer_002.safetensors",
+        "kind": "linear_attention",
+        "layer": 2
+      },
+      {
+        "file": "mamba_wo/layer_004.safetensors",
+        "kind": "linear_attention",
+        "layer": 4
+      },
+      {
+        "file": "mamba_wo/layer_006.safetensors",
+        "kind": "linear_attention",
+        "layer": 6
+      },
+      {
+        "file": "mamba_wo/layer_009.safetensors",
+        "kind": "linear_attention",
+        "layer": 9
+      },
+      {
+        "file": "mamba_wo/layer_011.safetensors",
+        "kind": "linear_attention",
+        "layer": 11
+      },
+      {
+        "file": "mamba_wo/layer_013.safetensors",
+        "kind": "linear_attention",
+        "layer": 13
+      },
+      {
+        "file": "mamba_wo/layer_015.safetensors",
+        "kind": "linear_attention",
+        "layer": 15
+      },
+      {
+        "file": "mamba_wo/layer_017.safetensors",
+        "kind": "linear_attention",
+        "layer": 17
+      },
+      {
+        "file": "mamba_wo/layer_020.safetensors",
+        "kind": "linear_attention",
+        "layer": 20
+      },
+      {
+        "file": "mamba_wo/layer_022.safetensors",
+        "kind": "linear_attention",
+        "layer": 22
+      },
+      {
+        "file": "mamba_wo/layer_024.safetensors",
+        "kind": "linear_attention",
+        "layer": 24
+      },
+      {
+        "file": "mamba_wo/layer_026.safetensors",
+        "kind": "linear_attention",
+        "layer": 26
+      },
+      {
+        "file": "mamba_wo/layer_028.safetensors",
+        "kind": "linear_attention",
+        "layer": 28
+      },
+      {
+        "file": "mamba_wo/layer_031.safetensors",
+        "kind": "linear_attention",
+        "layer": 31
+      },
+      {
+        "file": "mamba_wo/layer_033.safetensors",
+        "kind": "linear_attention",
+        "layer": 33
+      },
+      {
+        "file": "mamba_wo/layer_035.safetensors",
+        "kind": "linear_attention",
+        "layer": 35
+      },
+      {
+        "file": "mamba_wo/layer_037.safetensors",
+        "kind": "linear_attention",
+        "layer": 37
+      },
+      {
+        "file": "mamba_wo/layer_039.safetensors",
+        "kind": "linear_attention",
+        "layer": 39
+      },
+      {
+        "file": "mamba_wo/layer_042.safetensors",
+        "kind": "linear_attention",
+        "layer": 42
+      },
+      {
+        "file": "mamba_wo/layer_044.safetensors",
+        "kind": "linear_attention",
+        "layer": 44
+      },
+      {
+        "file": "mamba_wo/layer_046.safetensors",
+        "kind": "linear_attention",
+        "layer": 46
+      },
+      {
+        "file": "mamba_wo/layer_048.safetensors",
+        "kind": "linear_attention",
+        "layer": 48
+      },
+      {
+        "file": "mamba_wo/layer_050.safetensors",
+        "kind": "linear_attention",
+        "layer": 50
+      },
+      {
+        "file": "attention/layer_007.safetensors",
+        "kind": "full_attention",
+        "layer": 7,
+        "rank": 32
+      },
+      {
+        "file": "attention/layer_018.safetensors",
+        "kind": "full_attention",
+        "layer": 18,
+        "rank": 64
+      },
+      {
+        "file": "attention/layer_029.safetensors",
+        "kind": "full_attention",
+        "layer": 29,
+        "rank": 96
+      },
+      {
+        "file": "attention/layer_040.safetensors",
+        "kind": "full_attention",
+        "layer": 40,
+        "rank": 64
+      }
+    ],
+    "wikitext2": {
+      "batch_size": 2,
+      "chunks": 147,
+      "dataset": "wikitext2",
+      "loss_dtype": "float32",
+      "nll_sum": 571273.7163085938,
+      "ppl": 6.675828299302386,
+      "seqlen": 2048,
+      "split": "test",
+      "tokens": 300909
+    }
+  },
+  "environment": {
+    "conda_environment": "basis",
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ],
+    "datasets": "5.0.0",
+    "lm_eval": "0.4.11",
+    "peak_cuda_allocated_bytes": {
+      "0": 26923193344
+    },
+    "python": "3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0]",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.15.1"
+  },
+  "format": "basisserve.nemotron_h.quality.v1",
+  "metrics": {
+    "average_accuracy": 0.7233688686535195,
+    "c4_validation_128_ppl": 9.84595561331735,
+    "task_accuracy": [
+      {
+        "metric": "acc_norm",
+        "task": "arc_easy",
+        "value": 0.8287037037037037
+      },
+      {
+        "metric": "acc_norm",
+        "task": "arc_challenge",
+        "value": 0.591296928327645
+      },
+      {
+        "metric": "acc_norm",
+        "task": "hellaswag",
+        "value": 0.7933678550089623
+      },
+      {
+        "metric": "acc_norm",
+        "task": "piqa",
+        "value": 0.8220892274211099
+      },
+      {
+        "metric": "acc",
+        "task": "winogrande",
+        "value": 0.7426992896606156
+      },
+      {
+        "metric": "acc",
+        "task": "boolq",
+        "value": 0.8434250764525993
+      },
+      {
+        "metric": "acc_norm",
+        "task": "openbookqa",
+        "value": 0.442
+      }
+    ],
+    "wikitext2_ppl": 6.675828299302386
+  },
+  "model": {
+    "config_sha256": "81e822f85d6471312bcc0ccd34cc62789075376ecedca7fde0e451584943368b",
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Base-8K/snapshots/94ea861e008c2dfced3e8e1302094024077aa04e"
+  },
+  "protocol": {
+    "c4": "128 document-disjoint validation windows, 2048 tokens, FP32 loss",
+    "max_length": 4096,
+    "metric_selection": "acc_norm when present, otherwise acc",
+    "num_fewshot": 0,
+    "tasks": [
+      "arc_easy",
+      "arc_challenge",
+      "hellaswag",
+      "piqa",
+      "winogrande",
+      "boolq",
+      "openbookqa"
+    ],
+    "wikitext2": "full test corpus, 2048-token windows, FP32 loss"
+  },
+  "run_id": "NH8-C1-R64",
+  "seconds": 682.4248259961605,
+  "status": "complete"
+}
