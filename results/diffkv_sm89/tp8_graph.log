@@ -1,0 +1,704 @@
+INFO 09-20 09:18:57 [api_utils.py:286] non-default args: {'dtype': 'bfloat16', 'max_model_len': 32648, 'tensor_parallel_size': 8, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.5, 'max_num_batched_tokens': 8192, 'max_num_seqs': 8, 'hf_overrides': {'architectures': ['BasisServeQwen3_8BC1ForCausalLM'], 'basisserve_c1_factor_dir': '/workspace/.cache/huggingface/hub/models--alexz949--BasisServe-CALS/snapshots/0872566b1da66eb4c813d7a1cb3313325f22b287/ICLR-results/qwen3-8b/c1/factor-banks/R64-S6', 'basisserve_c1_result_sha256': '66e38669d248b0013e44f61fadec9cefb3d8180fb0b532675f2a6ec49ea0b510'}, 'enable_chunked_prefill': True, 'compilation_config': {'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': [], 'ir_enable_torch_wrap': None, 'splitting_ops': None, 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': None, 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_DECODE_ONLY: (2, 0)>, 'cudagraph_num_of_warmups': 2, 'cudagraph_capture_sizes': [1, 2, 4, 8], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': None, 'pass_config': {}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': None, 'static_all_moe_layers': []}, 'worker_extension_cls': 'basisserve.vllm.worker_extension.BasisServeWorkerExtension', 'async_scheduling': False, 'model': '/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4'}
+INFO 09-20 09:19:05 [model.py:684] Resolved architecture: BasisServeQwen3_8BC1ForCausalLM
+INFO 09-20 09:19:05 [model.py:2021] Using max model len 32648
+INFO 09-20 09:19:05 [scheduler.py:277] Chunked prefill is enabled with max_num_batched_tokens=8192.
+WARNING 09-20 09:19:05 [vllm.py:1406] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 09-20 09:19:05 [kernel.py:369] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+INFO 09-20 09:19:05 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+(EngineCore pid=48680) INFO 09-20 09:19:13 [core.py:123] Initializing a V1 LLM engine (v0.29.0) with config: model='/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4', speculative_config=None, tokenizer='/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=32648, download_dir=None, load_format=auto, tensor_parallel_size=8, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [8192], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_DECODE_ONLY: (2, 0)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 8, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=48680) INFO 09-20 09:19:13 [multiproc_executor.py:153] DP group leader: node_rank=0, node_rank_within_dp=0, master_addr=127.0.0.1, mq_connect_ip=172.18.0.2 (local), world_size=8, local_world_size=8
+INFO 09-20 09:19:22 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:19:22 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:19:22 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:19:22 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:19:22 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:19:22 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:19:22 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:19:22 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+(Worker pid=48691) INFO 09-20 09:19:23 [parallel_state.py:1775] world_size=8 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_abe3ca7557f346b2aa3bc71bdd0bc19c backend=nccl
+(Worker pid=48697) INFO 09-20 09:19:24 [parallel_state.py:1775] world_size=8 rank=6 local_rank=6 distributed_init_method=file:///tmp/vllm_dist_abe3ca7557f346b2aa3bc71bdd0bc19c backend=nccl
+(Worker pid=48692) INFO 09-20 09:19:24 [parallel_state.py:1775] world_size=8 rank=1 local_rank=1 distributed_init_method=file:///tmp/vllm_dist_abe3ca7557f346b2aa3bc71bdd0bc19c backend=nccl
+(Worker pid=48696) INFO 09-20 09:19:24 [parallel_state.py:1775] world_size=8 rank=5 local_rank=5 distributed_init_method=file:///tmp/vllm_dist_abe3ca7557f346b2aa3bc71bdd0bc19c backend=nccl
+(Worker pid=48698) INFO 09-20 09:19:24 [parallel_state.py:1775] world_size=8 rank=7 local_rank=7 distributed_init_method=file:///tmp/vllm_dist_abe3ca7557f346b2aa3bc71bdd0bc19c backend=nccl
+(Worker pid=48693) INFO 09-20 09:19:24 [parallel_state.py:1775] world_size=8 rank=2 local_rank=2 distributed_init_method=file:///tmp/vllm_dist_abe3ca7557f346b2aa3bc71bdd0bc19c backend=nccl
+(Worker pid=48694) INFO 09-20 09:19:24 [parallel_state.py:1775] world_size=8 rank=3 local_rank=3 distributed_init_method=file:///tmp/vllm_dist_abe3ca7557f346b2aa3bc71bdd0bc19c backend=nccl
+(Worker pid=48695) INFO 09-20 09:19:24 [parallel_state.py:1775] world_size=8 rank=4 local_rank=4 distributed_init_method=file:///tmp/vllm_dist_abe3ca7557f346b2aa3bc71bdd0bc19c backend=nccl
+(Worker pid=48691) INFO 09-20 09:19:25 [pynccl.py:113] vLLM is using nccl==2.29.7
+(Worker pid=48697) WARNING 09-20 09:19:26 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=48696) WARNING 09-20 09:19:26 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=48694) WARNING 09-20 09:19:26 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=48698) (Worker pid=48693) WARNING 09-20 09:19:26 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+WARNING 09-20 09:19:26 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=48695) WARNING 09-20 09:19:26 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=48691) WARNING 09-20 09:19:26 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=48692) WARNING 09-20 09:19:26 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=48697) WARNING 09-20 09:19:26 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=48696) WARNING 09-20 09:19:26 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=48698) WARNING 09-20 09:19:26 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=48694) WARNING 09-20 09:19:26 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=48695) WARNING 09-20 09:19:26 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=48693) WARNING 09-20 09:19:26 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=48692) WARNING 09-20 09:19:26 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=48691) WARNING 09-20 09:19:26 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=48698) WARNING 09-20 09:19:26 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=48697) WARNING 09-20 09:19:26 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=48692) WARNING 09-20 09:19:26 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=48693) WARNING 09-20 09:19:26 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=48696) WARNING 09-20 09:19:26 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=48694) WARNING 09-20 09:19:26 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=48695) WARNING 09-20 09:19:26 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=48691) WARNING 09-20 09:19:26 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=48691) INFO 09-20 09:19:26 [cuda_communicator.py:269] Using ['PYNCCL'] all-reduce backends (in dispatch order) for group 'tp:0' out of potential backends: ['FLASHINFER', 'NCCL_SYMM_MEM', 'QUICK_REDUCE', 'AITER_CUSTOM', 'CUSTOM', 'SYMM_MEM', 'PYNCCL'].
+(Worker pid=48691) INFO 09-20 09:19:26 [parallel_state.py:2119] rank 0 in world size 8 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+(Worker pid=48691) INFO 09-20 09:19:26 [gpu_worker.py:429] Using V2 Model Runner
+(Worker_TP0 pid=48691) INFO 09-20 09:19:27 [model_runner.py:382] Loading model from scratch...
+(Worker_TP0 pid=48691) INFO 09-20 09:19:27 [cuda.py:492] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(Worker_TP0 pid=48691) INFO 09-20 09:19:27 [flash_attn.py:897] Using FlashAttention version 2
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944] WorkerProc failed to start.
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944] Traceback (most recent call last):
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 911, in worker_main
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     worker = WorkerProc(*args, **kwargs)
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 680, in __init__
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.worker.load_model()
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 495, in load_model
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.model_runner.load_model(load_dummy_weights=load_dummy_weights)
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 384, in load_model
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.model = model_loader.load_model(
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                  ^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/base_loader.py", line 55, in load_model
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     model = initialize_model(
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/utils.py", line 59, in initialize_model
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     model = model_class(vllm_config=vllm_config, prefix=prefix)
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/qwen3_8b_c1.py", line 113, in __init__
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.c1_boundary = PreparedC1Output(
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                        ^^^^^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/prepared_c1_output.py", line 23, in __init__
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.communicator = FeatureRaggedCommunicator.from_distributed(group, device=device)
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 371, in from_distributed
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     extension = _load_extension()
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                 ^^^^^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 135, in _load_extension
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return cpp_extension.load(
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 1927, in load
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return _jit_compile(
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2382, in _jit_compile
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     _write_ninja_file_and_build_library(
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2496, in _write_ninja_file_and_build_library
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     verify_ninja_availability()
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2562, in verify_ninja_availability
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     raise RuntimeError("Ninja is required to load C++ extensions (pip install ninja to get it)")
+(Worker_TP6 pid=48697) ERROR 09-20 09:19:27 [multiproc_executor.py:944] RuntimeError: Ninja is required to load C++ extensions (pip install ninja to get it)
+(EngineCore pid=48680) INFO 09-20 09:19:27 [multiproc_executor.py:472] [shutdown] Executor: waiting for worker exit count=8
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944] WorkerProc failed to start.
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944] Traceback (most recent call last):
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 911, in worker_main
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     worker = WorkerProc(*args, **kwargs)
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 680, in __init__
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.worker.load_model()
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 495, in load_model
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.model_runner.load_model(load_dummy_weights=load_dummy_weights)
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 384, in load_model
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.model = model_loader.load_model(
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                  ^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/base_loader.py", line 55, in load_model
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     model = initialize_model(
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/utils.py", line 59, in initialize_model
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     model = model_class(vllm_config=vllm_config, prefix=prefix)
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/qwen3_8b_c1.py", line 113, in __init__
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.c1_boundary = PreparedC1Output(
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                        ^^^^^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/prepared_c1_output.py", line 23, in __init__
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.communicator = FeatureRaggedCommunicator.from_distributed(group, device=device)
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 371, in from_distributed
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     extension = _load_extension()
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                 ^^^^^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 135, in _load_extension
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return cpp_extension.load(
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 1927, in load
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return _jit_compile(
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2382, in _jit_compile
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     _write_ninja_file_and_build_library(
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2496, in _write_ninja_file_and_build_library
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     verify_ninja_availability()
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2562, in verify_ninja_availability
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     raise RuntimeError("Ninja is required to load C++ extensions (pip install ninja to get it)")
+(Worker_TP3 pid=48694) ERROR 09-20 09:19:27 [multiproc_executor.py:944] RuntimeError: Ninja is required to load C++ extensions (pip install ninja to get it)
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944] WorkerProc failed to start.
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944] Traceback (most recent call last):
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 911, in worker_main
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     worker = WorkerProc(*args, **kwargs)
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 680, in __init__
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.worker.load_model()
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 495, in load_model
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.model_runner.load_model(load_dummy_weights=load_dummy_weights)
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 384, in load_model
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.model = model_loader.load_model(
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                  ^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/base_loader.py", line 55, in load_model
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     model = initialize_model(
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/utils.py", line 59, in initialize_model
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     model = model_class(vllm_config=vllm_config, prefix=prefix)
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/qwen3_8b_c1.py", line 113, in __init__
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.c1_boundary = PreparedC1Output(
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                        ^^^^^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/prepared_c1_output.py", line 23, in __init__
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.communicator = FeatureRaggedCommunicator.from_distributed(group, device=device)
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 371, in from_distributed
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     extension = _load_extension()
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                 ^^^^^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 135, in _load_extension
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return cpp_extension.load(
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 1927, in load
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return _jit_compile(
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2382, in _jit_compile
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     _write_ninja_file_and_build_library(
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2496, in _write_ninja_file_and_build_library
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     verify_ninja_availability()
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2562, in verify_ninja_availability
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     raise RuntimeError("Ninja is required to load C++ extensions (pip install ninja to get it)")
+(Worker_TP7 pid=48698) ERROR 09-20 09:19:27 [multiproc_executor.py:944] RuntimeError: Ninja is required to load C++ extensions (pip install ninja to get it)
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944] WorkerProc failed to start.
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944] Traceback (most recent call last):
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 911, in worker_main
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     worker = WorkerProc(*args, **kwargs)
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 680, in __init__
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.worker.load_model()
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 495, in load_model
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.model_runner.load_model(load_dummy_weights=load_dummy_weights)
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 384, in load_model
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.model = model_loader.load_model(
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                  ^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/base_loader.py", line 55, in load_model
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     model = initialize_model(
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/utils.py", line 59, in initialize_model
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     model = model_class(vllm_config=vllm_config, prefix=prefix)
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/qwen3_8b_c1.py", line 113, in __init__
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.c1_boundary = PreparedC1Output(
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                        ^^^^^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/prepared_c1_output.py", line 23, in __init__
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     self.communicator = FeatureRaggedCommunicator.from_distributed(group, device=device)
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 371, in from_distributed
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     extension = _load_extension()
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]                 ^^^^^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 135, in _load_extension
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return cpp_extension.load(
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 1927, in load
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     return _jit_compile(
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]            ^^^^^^^^^^^^^
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2382, in _jit_compile
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     _write_ninja_file_and_build_library(
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2496, in _write_ninja_file_and_build_library
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     verify_ninja_availability()
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2562, in verify_ninja_availability
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944]     raise RuntimeError("Ninja is required to load C++ extensions (pip install ninja to get it)")
+(Worker_TP5 pid=48696) ERROR 09-20 09:19:27 [multiproc_executor.py:944] RuntimeError: Ninja is required to load C++ extensions (pip install ninja to get it)
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944] WorkerProc failed to start.
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944] Traceback (most recent call last):
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 911, in worker_main
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     worker = WorkerProc(*args, **kwargs)
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 680, in __init__
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.worker.load_model()
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 495, in load_model
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.model_runner.load_model(load_dummy_weights=load_dummy_weights)
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 384, in load_model
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.model = model_loader.load_model(
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                  ^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/base_loader.py", line 55, in load_model
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     model = initialize_model(
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/utils.py", line 59, in initialize_model
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     model = model_class(vllm_config=vllm_config, prefix=prefix)
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/qwen3_8b_c1.py", line 113, in __init__
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.c1_boundary = PreparedC1Output(
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                        ^^^^^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/prepared_c1_output.py", line 23, in __init__
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.communicator = FeatureRaggedCommunicator.from_distributed(group, device=device)
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 371, in from_distributed
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     extension = _load_extension()
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                 ^^^^^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 135, in _load_extension
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return cpp_extension.load(
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 1927, in load
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return _jit_compile(
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2382, in _jit_compile
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     _write_ninja_file_and_build_library(
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2496, in _write_ninja_file_and_build_library
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     verify_ninja_availability()
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2562, in verify_ninja_availability
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     raise RuntimeError("Ninja is required to load C++ extensions (pip install ninja to get it)")
+(Worker_TP0 pid=48691) ERROR 09-20 09:19:28 [multiproc_executor.py:944] RuntimeError: Ninja is required to load C++ extensions (pip install ninja to get it)
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944] WorkerProc failed to start.
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944] Traceback (most recent call last):
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 911, in worker_main
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     worker = WorkerProc(*args, **kwargs)
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 680, in __init__
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.worker.load_model()
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 495, in load_model
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.model_runner.load_model(load_dummy_weights=load_dummy_weights)
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 384, in load_model
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.model = model_loader.load_model(
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                  ^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/base_loader.py", line 55, in load_model
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     model = initialize_model(
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/utils.py", line 59, in initialize_model
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     model = model_class(vllm_config=vllm_config, prefix=prefix)
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/qwen3_8b_c1.py", line 113, in __init__
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.c1_boundary = PreparedC1Output(
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                        ^^^^^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/prepared_c1_output.py", line 23, in __init__
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.communicator = FeatureRaggedCommunicator.from_distributed(group, device=device)
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 371, in from_distributed
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     extension = _load_extension()
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                 ^^^^^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 135, in _load_extension
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return cpp_extension.load(
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 1927, in load
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return _jit_compile(
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2382, in _jit_compile
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     _write_ninja_file_and_build_library(
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2496, in _write_ninja_file_and_build_library
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     verify_ninja_availability()
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2562, in verify_ninja_availability
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     raise RuntimeError("Ninja is required to load C++ extensions (pip install ninja to get it)")
+(Worker_TP2 pid=48693) ERROR 09-20 09:19:28 [multiproc_executor.py:944] RuntimeError: Ninja is required to load C++ extensions (pip install ninja to get it)
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944] WorkerProc failed to start.
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944] Traceback (most recent call last):
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 911, in worker_main
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     worker = WorkerProc(*args, **kwargs)
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 680, in __init__
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.worker.load_model()
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 495, in load_model
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.model_runner.load_model(load_dummy_weights=load_dummy_weights)
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 384, in load_model
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.model = model_loader.load_model(
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                  ^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/base_loader.py", line 55, in load_model
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     model = initialize_model(
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/utils.py", line 59, in initialize_model
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     model = model_class(vllm_config=vllm_config, prefix=prefix)
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/qwen3_8b_c1.py", line 113, in __init__
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.c1_boundary = PreparedC1Output(
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                        ^^^^^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/prepared_c1_output.py", line 23, in __init__
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.communicator = FeatureRaggedCommunicator.from_distributed(group, device=device)
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 371, in from_distributed
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     extension = _load_extension()
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                 ^^^^^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 135, in _load_extension
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return cpp_extension.load(
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 1927, in load
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return _jit_compile(
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2382, in _jit_compile
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     _write_ninja_file_and_build_library(
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2496, in _write_ninja_file_and_build_library
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     verify_ninja_availability()
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2562, in verify_ninja_availability
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     raise RuntimeError("Ninja is required to load C++ extensions (pip install ninja to get it)")
+(Worker_TP1 pid=48692) ERROR 09-20 09:19:28 [multiproc_executor.py:944] RuntimeError: Ninja is required to load C++ extensions (pip install ninja to get it)
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944] WorkerProc failed to start.
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944] Traceback (most recent call last):
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 911, in worker_main
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     worker = WorkerProc(*args, **kwargs)
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 680, in __init__
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.worker.load_model()
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 495, in load_model
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.model_runner.load_model(load_dummy_weights=load_dummy_weights)
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 384, in load_model
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.model = model_loader.load_model(
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                  ^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/base_loader.py", line 55, in load_model
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     model = initialize_model(
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return func(*args, **kwargs)
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/model_executor/model_loader/utils.py", line 59, in initialize_model
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     model = model_class(vllm_config=vllm_config, prefix=prefix)
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/qwen3_8b_c1.py", line 113, in __init__
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.c1_boundary = PreparedC1Output(
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                        ^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/vllm/prepared_c1_output.py", line 23, in __init__
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     self.communicator = FeatureRaggedCommunicator.from_distributed(group, device=device)
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 371, in from_distributed
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     extension = _load_extension()
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]                 ^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/BasisServe-CALS/basisserve/kernels/feature_ragged_allgather.py", line 135, in _load_extension
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return cpp_extension.load(
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 1927, in load
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     return _jit_compile(
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]            ^^^^^^^^^^^^^
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2382, in _jit_compile
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     _write_ninja_file_and_build_library(
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2496, in _write_ninja_file_and_build_library
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     verify_ninja_availability()
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/utils/cpp_extension.py", line 2562, in verify_ninja_availability
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944]     raise RuntimeError("Ninja is required to load C++ extensions (pip install ninja to get it)")
+(Worker_TP4 pid=48695) ERROR 09-20 09:19:28 [multiproc_executor.py:944] RuntimeError: Ninja is required to load C++ extensions (pip install ninja to get it)
+[rank0]:[W920 09:19:29.073655425 ProcessGroupNCCL.cpp:1624] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+(EngineCore pid=48680) INFO 09-20 09:19:31 [multiproc_executor.py:479] [shutdown] Executor: all workers exited gracefully
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374] EngineCore failed to start.
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374] Traceback (most recent call last):
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1336, in run_engine_core
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]     engine_core = EngineCoreProc(*args, engine_index=dp_rank, **kwargs)
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]     return func(*args, **kwargs)
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1093, in __init__
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]     super().__init__(
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 134, in __init__
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]     self.model_executor = executor_class(vllm_config)
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 116, in __init__
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]     super().__init__(vllm_config)
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]     return func(*args, **kwargs)
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/abstract.py", line 110, in __init__
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]     self._init_executor()
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 214, in _init_executor
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]     self.workers = WorkerProc.wait_for_ready(unready_workers)
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 808, in wait_for_ready
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374]     raise e from None
+(EngineCore pid=48680) ERROR 09-20 09:19:31 [core.py:1374] Exception: WorkerProc initialization failed due to an exception in a background process. See stack trace for root cause.
+(EngineCore pid=48680) Process EngineCore:
+(EngineCore pid=48680) Traceback (most recent call last):
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+(EngineCore pid=48680)     self.run()
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/multiprocessing/process.py", line 108, in run
+(EngineCore pid=48680)     self._target(*self._args, **self._kwargs)
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1378, in run_engine_core
+(EngineCore pid=48680)     raise e
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1336, in run_engine_core
+(EngineCore pid=48680)     engine_core = EngineCoreProc(*args, engine_index=dp_rank, **kwargs)
+(EngineCore pid=48680)                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=48680)     return func(*args, **kwargs)
+(EngineCore pid=48680)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1093, in __init__
+(EngineCore pid=48680)     super().__init__(
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 134, in __init__
+(EngineCore pid=48680)     self.model_executor = executor_class(vllm_config)
+(EngineCore pid=48680)                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 116, in __init__
+(EngineCore pid=48680)     super().__init__(vllm_config)
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=48680)     return func(*args, **kwargs)
+(EngineCore pid=48680)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/abstract.py", line 110, in __init__
+(EngineCore pid=48680)     self._init_executor()
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 214, in _init_executor
+(EngineCore pid=48680)     self.workers = WorkerProc.wait_for_ready(unready_workers)
+(EngineCore pid=48680)                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=48680)   File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 808, in wait_for_ready
+(EngineCore pid=48680)     raise e from None
+(EngineCore pid=48680) Exception: WorkerProc initialization failed due to an exception in a background process. See stack trace for root cause.
+INFO 09-20 09:19:32 [utils.py:620] [shutdown] Process manager: send sigterm to process EngineCore
+Traceback (most recent call last):
+  File "/workspace/BasisServe-CALS/evaluation/smoke_vllm_qwen3_8b_c1.py", line 85, in <module>
+    main()
+  File "/workspace/BasisServe-CALS/evaluation/smoke_vllm_qwen3_8b_c1.py", line 41, in main
+    llm = LLM(
+          ^^^^
+  File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/entrypoints/llm.py", line 343, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 179, in from_engine_args
+    return cls(
+           ^^^^
+  File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 105, in __init__
+    self.engine_core = EngineCoreClient.make_client(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 110, in make_client
+    return SyncMPClient(vllm_config, executor_class, log_stats)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 813, in __init__
+    super().__init__(
+  File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 609, in __init__
+    with launch_core_engines(
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/miniforge3/envs/basis/lib/python3.12/contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1240, in launch_core_engines
+    wait_for_engine_startup(
+  File "/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1320, in wait_for_engine_startup
+    raise RuntimeError(
+RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+/workspace/miniforge3/envs/basis/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+INFO 09-20 09:20:26 [api_utils.py:286] non-default args: {'dtype': 'bfloat16', 'max_model_len': 32648, 'tensor_parallel_size': 8, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.5, 'max_num_batched_tokens': 8192, 'max_num_seqs': 8, 'hf_overrides': {'architectures': ['BasisServeQwen3_8BC1ForCausalLM'], 'basisserve_c1_factor_dir': '/workspace/.cache/huggingface/hub/models--alexz949--BasisServe-CALS/snapshots/0872566b1da66eb4c813d7a1cb3313325f22b287/ICLR-results/qwen3-8b/c1/factor-banks/R64-S6', 'basisserve_c1_result_sha256': '66e38669d248b0013e44f61fadec9cefb3d8180fb0b532675f2a6ec49ea0b510'}, 'enable_chunked_prefill': True, 'compilation_config': {'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': [], 'ir_enable_torch_wrap': None, 'splitting_ops': None, 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': None, 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_DECODE_ONLY: (2, 0)>, 'cudagraph_num_of_warmups': 2, 'cudagraph_capture_sizes': [1, 2, 4, 8], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': None, 'pass_config': {}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': None, 'static_all_moe_layers': []}, 'worker_extension_cls': 'basisserve.vllm.worker_extension.BasisServeWorkerExtension', 'async_scheduling': False, 'model': '/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4'}
+INFO 09-20 09:20:26 [model.py:684] Resolved architecture: BasisServeQwen3_8BC1ForCausalLM
+INFO 09-20 09:20:26 [model.py:2021] Using max model len 32648
+INFO 09-20 09:20:26 [scheduler.py:277] Chunked prefill is enabled with max_num_batched_tokens=8192.
+WARNING 09-20 09:20:26 [vllm.py:1406] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 09-20 09:20:26 [kernel.py:369] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+INFO 09-20 09:20:26 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+(EngineCore pid=49517) INFO 09-20 09:20:34 [core.py:123] Initializing a V1 LLM engine (v0.29.0) with config: model='/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4', speculative_config=None, tokenizer='/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=32648, download_dir=None, load_format=auto, tensor_parallel_size=8, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [8192], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_DECODE_ONLY: (2, 0)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 8, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=49517) INFO 09-20 09:20:34 [multiproc_executor.py:153] DP group leader: node_rank=0, node_rank_within_dp=0, master_addr=127.0.0.1, mq_connect_ip=172.18.0.2 (local), world_size=8, local_world_size=8
+INFO 09-20 09:20:43 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:20:43 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:20:43 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:20:43 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:20:43 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:20:43 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:20:43 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-20 09:20:43 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+(Worker pid=49751) INFO 09-20 09:20:45 [parallel_state.py:1775] world_size=8 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_e5d2dccf871643e4a1300802360e87f2 backend=nccl
+(Worker pid=49752) INFO 09-20 09:20:45 [parallel_state.py:1775] world_size=8 rank=1 local_rank=1 distributed_init_method=file:///tmp/vllm_dist_e5d2dccf871643e4a1300802360e87f2 backend=nccl
+(Worker pid=49755) INFO 09-20 09:20:45 [parallel_state.py:1775] world_size=8 rank=4 local_rank=4 distributed_init_method=file:///tmp/vllm_dist_e5d2dccf871643e4a1300802360e87f2 backend=nccl
+(Worker pid=49753) INFO 09-20 09:20:45 [parallel_state.py:1775] world_size=8 rank=2 local_rank=2 distributed_init_method=file:///tmp/vllm_dist_e5d2dccf871643e4a1300802360e87f2 backend=nccl
+(Worker pid=49757) INFO 09-20 09:20:45 [parallel_state.py:1775] world_size=8 rank=6 local_rank=6 distributed_init_method=file:///tmp/vllm_dist_e5d2dccf871643e4a1300802360e87f2 backend=nccl
+(Worker pid=49754) INFO 09-20 09:20:45 [parallel_state.py:1775] world_size=8 rank=3 local_rank=3 distributed_init_method=file:///tmp/vllm_dist_e5d2dccf871643e4a1300802360e87f2 backend=nccl
+(Worker pid=49758) INFO 09-20 09:20:45 [parallel_state.py:1775] world_size=8 rank=7 local_rank=7 distributed_init_method=file:///tmp/vllm_dist_e5d2dccf871643e4a1300802360e87f2 backend=nccl
+(Worker pid=49756) INFO 09-20 09:20:45 [parallel_state.py:1775] world_size=8 rank=5 local_rank=5 distributed_init_method=file:///tmp/vllm_dist_e5d2dccf871643e4a1300802360e87f2 backend=nccl
+(Worker pid=49751) INFO 09-20 09:20:46 [pynccl.py:113] vLLM is using nccl==2.29.7
+(Worker pid=49751) WARNING 09-20 09:20:47 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=49755) (Worker pid=49757) WARNING 09-20 09:20:47 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+WARNING 09-20 09:20:47 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=49758) WARNING 09-20 09:20:47 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=49756) WARNING 09-20 09:20:47 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=49753) (Worker pid=49752) WARNING 09-20 09:20:47 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+WARNING 09-20 09:20:47 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=49754) WARNING 09-20 09:20:47 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=49755) WARNING 09-20 09:20:47 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=49757) WARNING 09-20 09:20:47 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=49756) WARNING 09-20 09:20:47 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=49758) WARNING 09-20 09:20:47 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=49753) WARNING 09-20 09:20:47 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=49752) WARNING 09-20 09:20:47 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=49754) WARNING 09-20 09:20:47 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=49751) WARNING 09-20 09:20:47 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=49751) WARNING 09-20 09:20:47 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=49753) WARNING 09-20 09:20:47 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=49751) INFO 09-20 09:20:47 [cuda_communicator.py:269] Using ['PYNCCL'] all-reduce backends (in dispatch order) for group 'tp:0' out of potential backends: ['FLASHINFER', 'NCCL_SYMM_MEM', 'QUICK_REDUCE', 'AITER_CUSTOM', 'CUSTOM', 'SYMM_MEM', 'PYNCCL'].
+(Worker pid=49758) WARNING 09-20 09:20:47 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=49755) WARNING 09-20 09:20:47 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=49757) WARNING 09-20 09:20:47 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=49756) WARNING 09-20 09:20:47 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=49752) WARNING 09-20 09:20:47 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=49754) WARNING 09-20 09:20:47 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=49751) INFO 09-20 09:20:47 [parallel_state.py:2119] rank 0 in world size 8 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+(Worker pid=49751) INFO 09-20 09:20:47 [gpu_worker.py:429] Using V2 Model Runner
+(Worker_TP0 pid=49751) INFO 09-20 09:20:48 [model_runner.py:382] Loading model from scratch...
+(Worker_TP0 pid=49751) INFO 09-20 09:20:48 [cuda.py:492] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(Worker_TP0 pid=49751) INFO 09-20 09:20:48 [flash_attn.py:897] Using FlashAttention version 2
+(Worker_TP0 pid=49751) INFO 09-20 09:20:49 [weight_utils.py:863] Filesystem type for checkpoints: XFS. Checkpoint size: 15.26 GiB. Available RAM: 565.95 GiB.
+(Worker_TP0 pid=49751) INFO 09-20 09:20:49 [weight_utils.py:886] Auto-prefetch is disabled because the filesystem (XFS) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(Worker_TP0 pid=49751) Loading safetensors checkpoint shards:   0% Completed | 0/5 [00:00<?, ?it/s]
+(Worker_TP0 pid=49751) Loading safetensors checkpoint shards:  40% Completed | 2/5 [00:00<00:00, 11.13it/s]
+(Worker_TP0 pid=49751) Loading safetensors checkpoint shards:  80% Completed | 4/5 [00:00<00:00,  8.62it/s]
+(Worker_TP0 pid=49751) Loading safetensors checkpoint shards: 100% Completed | 5/5 [00:00<00:00, 10.05it/s]
+(Worker_TP0 pid=49751) 
+(Worker_TP0 pid=49751) INFO 09-20 09:20:49 [default_loader.py:430] Loading weights took 0.50 seconds
+(Worker_TP6 pid=49757) INFO 09-20 09:20:50 [model_runner.py:404] Model loading took 2.36 GiB memory and 3.132635 seconds
+(Worker_TP4 pid=49755) INFO 09-20 09:20:50 [model_runner.py:404] Model loading took 2.36 GiB memory and 3.175471 seconds
+(Worker_TP2 pid=49753) INFO 09-20 09:20:50 [model_runner.py:404] Model loading took 2.36 GiB memory and 3.138788 seconds
+(Worker_TP1 pid=49752) INFO 09-20 09:20:50 [model_runner.py:404] Model loading took 2.36 GiB memory and 3.194674 seconds
+(Worker_TP3 pid=49754) INFO 09-20 09:20:50 [model_runner.py:404] Model loading took 2.36 GiB memory and 3.250207 seconds
+(Worker_TP0 pid=49751) INFO 09-20 09:20:50 [model_runner.py:404] Model loading took 2.36 GiB memory and 3.219968 seconds
+(Worker_TP0 pid=49751) INFO 09-20 09:20:50 [topk_topp_sampler.py:62] Using FlashInfer for top-p & top-k sampling.
+(Worker_TP7 pid=49758) INFO 09-20 09:20:50 [model_runner.py:404] Model loading took 2.36 GiB memory and 3.278771 seconds
+(Worker_TP5 pid=49756) INFO 09-20 09:20:50 [model_runner.py:404] Model loading took 2.36 GiB memory and 3.341279 seconds
+(EngineCore pid=49517) INFO 09-20 09:20:50 [utils.py:306] Using LBNHC KV cache layout.
+(Worker_TP0 pid=49751) Capturing CUDA graphs (FULL):   0%|          | 0/2 [00:00<?, ?it/s](Worker_TP6 pid=49757) INFO 09-20 09:20:54 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP4 pid=49755) INFO 09-20 09:20:54 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP5 pid=49756) INFO 09-20 09:20:54 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP2 pid=49753) INFO 09-20 09:20:54 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP7 pid=49758) INFO 09-20 09:20:54 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP1 pid=49752) Capturing CUDA graphs (FULL): 100%|██████████| 2/2 [00:00<00:00, 16.13it/s]INFO 09-20 09:20:54 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+Capturing CUDA graphs (FULL): 100%|██████████| 2/2 [00:00<00:00, 16.10it/s]
+(Worker_TP3 pid=49754) INFO 09-20 09:20:54 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP0 pid=49751) INFO 09-20 09:20:54 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP6 pid=49757) INFO 09-20 09:20:54 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.5000 is equivalent to --gpu-memory-utilization=0.4982 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.5018. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP4 pid=49755) INFO 09-20 09:20:54 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.5000 is equivalent to --gpu-memory-utilization=0.4982 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.5018. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP5 pid=49756) INFO 09-20 09:20:54 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.5000 is equivalent to --gpu-memory-utilization=0.4982 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.5018. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP3 pid=49754) INFO 09-20 09:20:54 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.5000 is equivalent to --gpu-memory-utilization=0.4982 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.5018. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP2 pid=49753) INFO 09-20 09:20:54 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.5000 is equivalent to --gpu-memory-utilization=0.4982 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.5018. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP1 pid=49752) INFO 09-20 09:20:54 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.5000 is equivalent to --gpu-memory-utilization=0.4982 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.5018. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP7 pid=49758) INFO 09-20 09:20:54 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.5000 is equivalent to --gpu-memory-utilization=0.4982 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.5018. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP0 pid=49751) INFO 09-20 09:20:54 [gpu_worker.py:625] Available KV cache memory: 19.24 GiB
+(Worker_TP0 pid=49751) INFO 09-20 09:20:54 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.5000 is equivalent to --gpu-memory-utilization=0.4982 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.5018. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=49517) INFO 09-20 09:20:54 [kv_cache_utils.py:2032] GPU KV cache size: 1,491,538 tokens, Maximum concurrency for 32,648 tokens per request: 45.69x
+(Worker_TP4 pid=49755) INFO 09-20 09:20:54 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP6 pid=49757) INFO 09-20 09:20:54 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP4 pid=49755) INFO 09-20 09:20:54 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP6 pid=49757) INFO 09-20 09:20:54 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP3 pid=49754) INFO 09-20 09:20:54 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP0 pid=49751) (Worker_TP2 pid=49753) INFO 09-20 09:20:54 [kernel_warmup.py:124] JIT kernel warmup starting.
+INFO 09-20 09:20:54 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP0 pid=49751) INFO 09-20 09:20:54 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP3 pid=49754) INFO 09-20 09:20:54 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP5 pid=49756) INFO 09-20 09:20:54 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP1 pid=49752) INFO 09-20 09:20:54 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP2 pid=49753) INFO 09-20 09:20:54 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP5 pid=49756) INFO 09-20 09:20:54 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP1 pid=49752) INFO 09-20 09:20:54 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP7 pid=49758) INFO 09-20 09:20:54 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP7 pid=49758) INFO 09-20 09:20:54 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP0 pid=49751) Capturing CUDA graphs (FULL):   0%|          | 0/4 [00:00<?, ?it/s]Capturing CUDA graphs (FULL):  75%|███████▌  | 3/4 [00:00<00:00, 23.19it/s](Worker_TP6 pid=49757) INFO 09-20 09:20:55 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP6 pid=49757) INFO 09-20 09:20:55 [gpu_worker.py:797] CUDA graph pool memory: 0.05 GiB (actual), 0.08 GiB (estimated), difference: 0.03 GiB (53.8%).
+(Worker_TP6 pid=49757) INFO 09-20 09:20:55 [gpu_worker.py:860] Free memory on device (43.75/44.39 GiB) on startup. Desired GPU memory utilization is (0.5, 22.2 GiB). Actual usage is 2.5 GiB for consumed memory (weights + non-torch), 0.46 GiB for peak activation, and 0.05 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=20445952000` (19.04 GiB) to fit into requested memory, or `--kv-cache-memory=43590612992` (40.6 GiB) to fully utilize gpu memory. Current kv cache memory in use is 19.24 GiB.
+(Worker_TP5 pid=49756) INFO 09-20 09:20:55 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+Capturing CUDA graphs (FULL): 100%|██████████| 4/4 [00:00<00:00, 21.75it/s](Worker_TP5 pid=49756) 
+INFO 09-20 09:20:55 [gpu_worker.py:797] CUDA graph pool memory: 0.05 GiB (actual), 0.08 GiB (estimated), difference: 0.03 GiB (53.8%).
+(Worker_TP3 pid=49754) INFO 09-20 09:20:55 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP5 pid=49756) INFO 09-20 09:20:55 [gpu_worker.py:860] Free memory on device (43.74/44.39 GiB) on startup. Desired GPU memory utilization is (0.5, 22.2 GiB). Actual usage is 2.53 GiB for consumed memory (weights + non-torch), 0.46 GiB for peak activation, and 0.05 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=20412397568` (19.01 GiB) to fit into requested memory, or `--kv-cache-memory=43540281344` (40.55 GiB) to fully utilize gpu memory. Current kv cache memory in use is 19.21 GiB.
+(Worker_TP3 pid=49754) INFO 09-20 09:20:55 [gpu_worker.py:797] CUDA graph pool memory: 0.05 GiB (actual), 0.08 GiB (estimated), difference: 0.03 GiB (53.8%).
+(Worker_TP3 pid=49754) INFO 09-20 09:20:55 [gpu_worker.py:860] Free memory on device (43.74/44.39 GiB) on startup. Desired GPU memory utilization is (0.5, 22.2 GiB). Actual usage is 2.53 GiB for consumed memory (weights + non-torch), 0.46 GiB for peak activation, and 0.05 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=20412397568` (19.01 GiB) to fit into requested memory, or `--kv-cache-memory=43540281344` (40.55 GiB) to fully utilize gpu memory. Current kv cache memory in use is 19.21 GiB.
+(Worker_TP0 pid=49751) INFO 09-20 09:20:55 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP1 pid=49752) INFO 09-20 09:20:55 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP0 pid=49751) INFO 09-20 09:20:55 [gpu_worker.py:797] CUDA graph pool memory: 0.05 GiB (actual), 0.08 GiB (estimated), difference: 0.03 GiB (53.8%).
+(Worker_TP1 pid=49752) (Worker_TP0 pid=49751) INFO 09-20 09:20:55 [gpu_worker.py:797] CUDA graph pool memory: 0.05 GiB (actual), 0.08 GiB (estimated), difference: 0.03 GiB (53.8%).
+INFO 09-20 09:20:55 [gpu_worker.py:860] Free memory on device (43.75/44.39 GiB) on startup. Desired GPU memory utilization is (0.5, 22.2 GiB). Actual usage is 2.5 GiB for consumed memory (weights + non-torch), 0.46 GiB for peak activation, and 0.05 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=20445952000` (19.04 GiB) to fit into requested memory, or `--kv-cache-memory=43590612992` (40.6 GiB) to fully utilize gpu memory. Current kv cache memory in use is 19.24 GiB.
+(Worker_TP1 pid=49752) INFO 09-20 09:20:55 [gpu_worker.py:860] Free memory on device (43.74/44.39 GiB) on startup. Desired GPU memory utilization is (0.5, 22.2 GiB). Actual usage is 2.53 GiB for consumed memory (weights + non-torch), 0.46 GiB for peak activation, and 0.05 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=20412397568` (19.01 GiB) to fit into requested memory, or `--kv-cache-memory=43540281344` (40.55 GiB) to fully utilize gpu memory. Current kv cache memory in use is 19.21 GiB.
+(Worker_TP7 pid=49758) INFO 09-20 09:20:55 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+(Worker_TP7 pid=49758) INFO 09-20 09:20:55 [gpu_worker.py:797] CUDA graph pool memory: 0.05 GiB (actual), 0.08 GiB (estimated), difference: 0.03 GiB (53.8%).
+(Worker_TP4 pid=49755) (Worker_TP2 pid=49753) (Worker_TP7 pid=49758) INFO 09-20 09:20:55 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+INFO 09-20 09:20:55 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.05 GiB
+INFO 09-20 09:20:55 [gpu_worker.py:860] Free memory on device (43.74/44.39 GiB) on startup. Desired GPU memory utilization is (0.5, 22.2 GiB). Actual usage is 2.53 GiB for consumed memory (weights + non-torch), 0.46 GiB for peak activation, and 0.05 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=20412397568` (19.01 GiB) to fit into requested memory, or `--kv-cache-memory=43540281344` (40.55 GiB) to fully utilize gpu memory. Current kv cache memory in use is 19.21 GiB.
+(Worker_TP4 pid=49755) INFO 09-20 09:20:55 [gpu_worker.py:797] CUDA graph pool memory: 0.05 GiB (actual), 0.08 GiB (estimated), difference: 0.03 GiB (53.8%).
+(Worker_TP2 pid=49753) INFO 09-20 09:20:55 [gpu_worker.py:797] CUDA graph pool memory: 0.05 GiB (actual), 0.08 GiB (estimated), difference: 0.03 GiB (53.8%).
+(Worker_TP4 pid=49755) INFO 09-20 09:20:55 [gpu_worker.py:860] Free memory on device (43.75/44.39 GiB) on startup. Desired GPU memory utilization is (0.5, 22.2 GiB). Actual usage is 2.5 GiB for consumed memory (weights + non-torch), 0.46 GiB for peak activation, and 0.05 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=20445952000` (19.04 GiB) to fit into requested memory, or `--kv-cache-memory=43590612992` (40.6 GiB) to fully utilize gpu memory. Current kv cache memory in use is 19.24 GiB.
+(Worker_TP2 pid=49753) INFO 09-20 09:20:55 [gpu_worker.py:860] Free memory on device (43.75/44.39 GiB) on startup. Desired GPU memory utilization is (0.5, 22.2 GiB). Actual usage is 2.5 GiB for consumed memory (weights + non-torch), 0.46 GiB for peak activation, and 0.05 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=20445952000` (19.04 GiB) to fit into requested memory, or `--kv-cache-memory=43590612992` (40.6 GiB) to fully utilize gpu memory. Current kv cache memory in use is 19.24 GiB.
+(Worker_TP4 pid=49755) INFO 09-20 09:20:57 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP5 pid=49756) INFO 09-20 09:20:57 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP7 pid=49758) INFO 09-20 09:20:57 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP1 pid=49752) INFO 09-20 09:20:57 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP6 pid=49757) INFO 09-20 09:20:57 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP3 pid=49754) INFO 09-20 09:20:57 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP0 pid=49751) INFO 09-20 09:20:57 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP2 pid=49753) INFO 09-20 09:20:57 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(EngineCore pid=49517) INFO 09-20 09:20:57 [core.py:368] init engine (profile, create kv cache, warmup model) took 6.67 s
+(EngineCore pid=49517) WARNING 09-20 09:20:58 [vllm.py:1406] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore pid=49517) INFO 09-20 09:20:58 [kernel.py:369] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+(EngineCore pid=49517) INFO 09-20 09:20:58 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+INFO 09-20 09:20:58 [hf.py:547] Detected the chat template content format to be 'string'. You can set `--chat-template-content-format` to override this.
+(Worker_TP0 pid=49751) WARNING 09-20 09:20:58 [jit_monitor.py:141] Triton kernel JIT compilation during inference: kernel_diffkv_prefill_sm89. This causes a latency spike; consider extending warmup to cover this shape/config.
+{"status": "passed", "command": "/workspace/miniforge3/envs/basis/bin/python evaluation/smoke_vllm_qwen3_8b_c1.py --model /workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --factor-dir /workspace/.cache/huggingface/hub/models--alexz949--BasisServe-CALS/snapshots/0872566b1da66eb4c813d7a1cb3313325f22b287/ICLR-results/qwen3-8b/c1/factor-banks/R64-S6 --execution-mode cuda_graph --prefill-tokens 32640 --decode-tokens 8 --max-num-batched-tokens 8192 --output-json results/diffkv_sm89/tp8_graph.json", "torch": "2.13.0+cu130", "vllm": "0.29.0", "factor_sha256": "66e38669d248b0013e44f61fadec9cefb3d8180fb0b532675f2a6ec49ea0b510", "execution_mode": "cuda_graph", "prefill_tokens": 32640, "decode_tokens": 8, "max_num_batched_tokens": 8192, "runs": [{"batch": 1, "output_tokens": [[576, 6722, 315, 9625, 374, 12095, 13, 26036]], "seconds": 1.874157798010856}, {"batch": 3, "output_tokens": [[576, 6722, 315, 9625, 374, 12095, 13, 26036], [95735, 264, 1614, 3941, 70403, 13, 220, 576], [9625, 374, 12095, 13, 26036, 15279, 2142, 95735]], "seconds": 5.491760199889541}], "workers": [{"peak_cuda_allocated_bytes": 23587514880, "cuda_device": "NVIDIA L40S", "backend": "uniform_nccl", "decoder_gemms": 1, "capture_calls": 216, "eager_calls": 864, "prepared_shapes": [1, 2, 4, 8, 16, 7798, 8064, 8192], "loaded_value_layers": 36, "attention_backend": "TRITON_ATTN_DIFFKV", "attention_impl": "C1DiffKVImpl", "prefill_specialization": "sm89_qk128_v64", "key_head_size": 128, "value_head_size": 64}, {"peak_cuda_allocated_bytes": 23587514880, "cuda_device": "NVIDIA L40S", "backend": "uniform_nccl", "decoder_gemms": 1, "capture_calls": 216, "eager_calls": 864, "prepared_shapes": [1, 2, 4, 8, 16, 7798, 8064, 8192], "loaded_value_layers": 36, "attention_backend": "TRITON_ATTN_DIFFKV", "attention_impl": "C1DiffKVImpl", "prefill_specialization": "sm89_qk128_v64", "key_head_size": 128, "value_head_size": 64}, {"peak_cuda_allocated_bytes": 23587514880, "cuda_device": "NVIDIA L40S", "backend": "uniform_nccl", "decoder_gemms": 1, "capture_calls": 216, "eager_calls": 864, "prepared_shapes": [1, 2, 4, 8, 16, 7798, 8064, 8192], "loaded_value_layers": 36, "attention_backend": "TRITON_ATTN_DIFFKV", "attention_impl": "C1DiffKVImpl", "prefill_specialization": "sm89_qk128_v64", "key_head_size": 128, "value_head_size": 64}, {"peak_cuda_allocated_bytes": 23587514880, "cuda_device": "NVIDIA L40S", "backend": "uniform_nccl", "decoder_gemms": 1, "capture_calls": 216, "eager_calls": 864, "prepared_shapes": [1, 2, 4, 8, 16, 7798, 8064, 8192], "loaded_value_layers": 36, "attention_backend": "TRITON_ATTN_DIFFKV", "attention_impl": "C1DiffKVImpl", "prefill_specialization": "sm89_qk128_v64", "key_head_size": 128, "value_head_size": 64}, {"peak_cuda_allocated_bytes": 23587514880, "cuda_device": "NVIDIA L40S", "backend": "uniform_nccl", "decoder_gemms": 1, "capture_calls": 216, "eager_calls": 864, "prepared_shapes": [1, 2, 4, 8, 16, 7798, 8064, 8192], "loaded_value_layers": 36, "attention_backend": "TRITON_ATTN_DIFFKV", "attention_impl": "C1DiffKVImpl", "prefill_specialization": "sm89_qk128_v64", "key_head_size": 128, "value_head_size": 64}, {"peak_cuda_allocated_bytes": 23587514880, "cuda_device": "NVIDIA L40S", "backend": "uniform_nccl", "decoder_gemms": 1, "capture_calls": 216, "eager_calls": 864, "prepared_shapes": [1, 2, 4, 8, 16, 7798, 8064, 8192], "loaded_value_layers": 36, "attention_backend": "TRITON_ATTN_DIFFKV", "attention_impl": "C1DiffKVImpl", "prefill_specialization": "sm89_qk128_v64", "key_head_size": 128, "value_head_size": 64}, {"peak_cuda_allocated_bytes": 23587514880, "cuda_device": "NVIDIA L40S", "backend": "uniform_nccl", "decoder_gemms": 1, "capture_calls": 216, "eager_calls": 864, "prepared_shapes": [1, 2, 4, 8, 16, 7798, 8064, 8192], "loaded_value_layers": 36, "attention_backend": "TRITON_ATTN_DIFFKV", "attention_impl": "C1DiffKVImpl", "prefill_specialization": "sm89_qk128_v64", "key_head_size": 128, "value_head_size": 64}, {"peak_cuda_allocated_bytes": 23587514880, "cuda_device": "NVIDIA L40S", "backend": "uniform_nccl", "decoder_gemms": 1, "capture_calls": 216, "eager_calls": 864, "prepared_shapes": [1, 2, 4, 8, 16, 7798, 8064, 8192], "loaded_value_layers": 36, "attention_backend": "TRITON_ATTN_DIFFKV", "attention_impl": "C1DiffKVImpl", "prefill_specialization": "sm89_qk128_v64", "key_head_size": 128, "value_head_size": 64}]}
+INFO 09-20 09:21:06 [utils.py:620] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=49517) INFO 09-20 09:21:06 [core.py:1350] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=49517) INFO 09-20 09:21:06 [core.py:1501] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=49517) INFO 09-20 09:21:06 [core.py:1532] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=49517) INFO 09-20 09:21:06 [core.py:1363] [shutdown] EngineCore: exiting busy loop
+(Worker_TP0 pid=49751) INFO 09-20 09:21:06 [multiproc_executor.py:836] Parent process exited, terminating worker queues
+(EngineCore pid=49517) INFO 09-20 09:21:06 [multiproc_executor.py:472] [shutdown] Executor: waiting for worker exit count=8
+(EngineCore pid=49517) INFO 09-20 09:21:10 [multiproc_executor.py:479] [shutdown] Executor: all workers exited gracefully
+WARNING 09-20 09:21:11 [utils.py:640] [shutdown] Process manager: force killing remaining processes count=1
+WARNING 09-20 09:21:11 [utils.py:645] [shutdown] Process manager: force killing remaining process EngineCore pid 49517

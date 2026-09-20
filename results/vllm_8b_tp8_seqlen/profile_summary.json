@@ -1,0 +1,642 @@
+[
+  {
+    "profile": "c1_s16384",
+    "total_kernel_ms": 31409.319925999855,
+    "category_ms": {
+      "allreduce": 14914.686971999952,
+      "attention": 4823.708544000335,
+      "gemm_gemv": 5838.6683299997185,
+      "allgather": 3896.0173289998756,
+      "other": 1936.2387509999717
+    },
+    "category_percent": {
+      "allreduce": 47.48490896058512,
+      "attention": 15.357570795435748,
+      "gemm_gemv": 18.58896768142571,
+      "allgather": 12.404016827422137,
+      "other": 6.164535735131283
+    },
+    "top_kernels": [
+      {
+        "kernel": "ncclDevKernel_AllReduce_Sum_bf16_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "7104",
+        "total_us": "14914686.971999953",
+        "mean_us": "2099.4773327702637"
+      },
+      {
+        "kernel": "kernel_unified_attention_diffkv",
+        "count": "6912",
+        "total_us": "4812353.131000306",
+        "mean_us": "696.231645109998"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8::Params)",
+        "count": "6912",
+        "total_us": "3952323.744000015",
+        "mean_us": "571.8060972222244"
+      },
+      {
+        "kernel": "ncclDevKernel_AllGather_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "7104",
+        "total_us": "3896017.3289998756",
+        "mean_us": "548.4258627533609"
+      },
+      {
+        "kernel": "std::enable_if<(((8)>(0)))&&vllm::_typeConvert<c10::BFloat16>::exists, void>::type vllm::fused_add_rms_norm_kernel<c10::BFloat16, 8, true>(c10::BFloat16*, long, c10::BFloat16*, c10::BFloat16 const*, float, int, int, long)",
+        "count": "13824",
+        "total_us": "1528352.7150001284",
+        "mean_us": "110.55792209202318"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nt_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nt_align8::Params)",
+        "count": "2304",
+        "total_us": "1394350.3589999857",
+        "mean_us": "605.1867877604104"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+        "count": "10260",
+        "total_us": "231849.1399997808",
+        "mean_us": "22.597382066255438"
+      },
+      {
+        "kernel": "void vllm::act_and_mul_kernel<c10::BFloat16, __nv_bfloat162, &(c10::BFloat16 vllm::silu_kernel<c10::BFloat16>(c10::BFloat16 const&, float)), &(__nv_bfloat162 vllm::packed_silu_kernel<__nv_bfloat162>(__nv_bfloat162 const&, float)), true, true, false, false>(c10::BFloat16*, c10::BFloat16 const*, int, float, float, float)",
+        "count": "6912",
+        "total_us": "141801.83900012294",
+        "mean_us": "20.515312355341862"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_nt_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_nt_align8::Params)",
+        "count": "3996",
+        "total_us": "102657.98899998143",
+        "mean_us": "25.69018743743279"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8::Params)",
+        "count": "3300",
+        "total_us": "89606.23100000783",
+        "mean_us": "27.153403333335707"
+      }
+    ]
+  },
+  {
+    "profile": "c1_s32640",
+    "total_kernel_ms": 68270.15544399832,
+    "category_ms": {
+      "allreduce": 29288.54281399999,
+      "attention": 16583.397033999805,
+      "gemm_gemv": 11045.92789199942,
+      "allgather": 7577.318633000096,
+      "other": 3774.96907099902
+    },
+    "category_percent": {
+      "allreduce": 42.900946428963735,
+      "attention": 24.290844112114385,
+      "gemm_gemv": 16.179731568152558,
+      "allgather": 11.099020624342556,
+      "other": 5.529457266426775
+    },
+    "top_kernels": [
+      {
+        "kernel": "ncclDevKernel_AllReduce_Sum_bf16_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "9435",
+        "total_us": "29288542.81399999",
+        "mean_us": "3104.244071436141"
+      },
+      {
+        "kernel": "kernel_unified_attention_diffkv",
+        "count": "9180",
+        "total_us": "16572513.42500018",
+        "mean_us": "1805.2846868191916"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8::Params)",
+        "count": "13788",
+        "total_us": "7788376.15599988",
+        "mean_us": "564.8662718305686"
+      },
+      {
+        "kernel": "ncclDevKernel_AllGather_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "9435",
+        "total_us": "7577318.633000096",
+        "mean_us": "803.1074332803494"
+      },
+      {
+        "kernel": "std::enable_if<(((8)>(0)))&&vllm::_typeConvert<c10::BFloat16>::exists, void>::type vllm::fused_add_rms_norm_kernel<c10::BFloat16, 8, true>(c10::BFloat16*, long, c10::BFloat16*, c10::BFloat16 const*, float, int, int, long)",
+        "count": "18360",
+        "total_us": "3025932.8769996483",
+        "mean_us": "164.81115887797648"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nt_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nt_align8::Params)",
+        "count": "4608",
+        "total_us": "2751828.6679999633",
+        "mean_us": "597.1850407986032"
+      },
+      {
+        "kernel": "void vllm::act_and_mul_kernel<c10::BFloat16, __nv_bfloat162, &(c10::BFloat16 vllm::silu_kernel<c10::BFloat16>(c10::BFloat16 const&, float)), &(__nv_bfloat162 vllm::packed_silu_kernel<__nv_bfloat162>(__nv_bfloat162 const&, float)), true, true, false, false>(c10::BFloat16*, c10::BFloat16 const*, int, float, float, float)",
+        "count": "9180",
+        "total_us": "275935.0549994228",
+        "mean_us": "30.058284858324924"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8::Params)",
+        "count": "6600",
+        "total_us": "177737.16799989156",
+        "mean_us": "26.92987393937751"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+        "count": "6804",
+        "total_us": "153732.7349997759",
+        "mean_us": "22.594464285681347"
+      },
+      {
+        "kernel": "void vllm::rms_norm_kernel<c10::BFloat16, 8, 3, true>(c10::BFloat16*, c10::BFloat16 const*, long, long, long, long, long, c10::BFloat16 const*, long, float, int, int)",
+        "count": "18360",
+        "total_us": "133727.74399976846",
+        "mean_us": "7.2836461873512235"
+      }
+    ]
+  },
+  {
+    "profile": "c1_s4096",
+    "total_kernel_ms": 8129.39000399994,
+    "category_ms": {
+      "allreduce": 4034.3780000000042,
+      "allgather": 1117.8222339999932,
+      "gemm_gemv": 1826.7870289999842,
+      "attention": 603.9098390000146,
+      "other": 546.4929019999439
+    },
+    "category_percent": {
+      "allreduce": 49.627069165275024,
+      "allgather": 13.75038266647296,
+      "gemm_gemv": 22.471391188036765,
+      "attention": 7.428722680334811,
+      "other": 6.72243429988044
+    },
+    "top_kernels": [
+      {
+        "kernel": "ncclDevKernel_AllReduce_Sum_bf16_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "5328",
+        "total_us": "4034378.000000004",
+        "mean_us": "757.2030780780789"
+      },
+      {
+        "kernel": "ncclDevKernel_AllGather_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "5328",
+        "total_us": "1117822.2339999932",
+        "mean_us": "209.80147034534406"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8::Params)",
+        "count": "1728",
+        "total_us": "986757.661999984",
+        "mean_us": "571.0403136573981"
+      },
+      {
+        "kernel": "kernel_unified_attention_diffkv",
+        "count": "5184",
+        "total_us": "594617.8929999862",
+        "mean_us": "114.70252565586154"
+      },
+      {
+        "kernel": "std::enable_if<(((8)>(0)))&&vllm::_typeConvert<c10::BFloat16>::exists, void>::type vllm::fused_add_rms_norm_kernel<c10::BFloat16, 8, true>(c10::BFloat16*, long, c10::BFloat16*, c10::BFloat16 const*, float, int, int, long)",
+        "count": "10368",
+        "total_us": "396045.4530000169",
+        "mean_us": "38.198828414353486"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nt_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nt_align8::Params)",
+        "count": "576",
+        "total_us": "349875.91400000063",
+        "mean_us": "607.4234618055566"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+        "count": "12852",
+        "total_us": "307458.51499999035",
+        "mean_us": "23.92300925925851"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_nt_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_nt_align8::Params)",
+        "count": "4428",
+        "total_us": "116105.15400001314",
+        "mean_us": "26.220676151764483"
+      },
+      {
+        "kernel": "void vllm::act_and_mul_kernel<c10::BFloat16, __nv_bfloat162, &(c10::BFloat16 vllm::silu_kernel<c10::BFloat16>(c10::BFloat16 const&, float)), &(__nv_bfloat162 vllm::packed_silu_kernel<__nv_bfloat162>(__nv_bfloat162 const&, float)), true, true, false, false>(c10::BFloat16*, c10::BFloat16 const*, int, float, float, float)",
+        "count": "5184",
+        "total_us": "40408.52499995912",
+        "mean_us": "7.794854359560015"
+      },
+      {
+        "kernel": "ampere_bf16_s16816gemm_bf16_64x128_ldg8_f2f_stages_32x6_tn",
+        "count": "128",
+        "total_us": "33463.77900000196",
+        "mean_us": "261.4357734375153"
+      }
+    ]
+  },
+  {
+    "profile": "c1_s512",
+    "total_kernel_ms": 2011.5446719999234,
+    "category_ms": {
+      "allreduce": 847.649942999993,
+      "gemm_gemv": 644.8335519999686,
+      "allgather": 305.2997649999955,
+      "other": 139.75766999997788,
+      "attention": 74.00374199998848
+    },
+    "category_percent": {
+      "allreduce": 42.13925521013859,
+      "gemm_gemv": 32.05663592640279,
+      "allgather": 15.177379316983275,
+      "other": 6.947778587538283,
+      "attention": 3.6789509589370577
+    },
+    "top_kernels": [
+      {
+        "kernel": "ncclDevKernel_AllReduce_Sum_bf16_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "4810",
+        "total_us": "847649.942999993",
+        "mean_us": "176.2265993762979"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+        "count": "13608",
+        "total_us": "317410.44499997643",
+        "mean_us": "23.325282554378045"
+      },
+      {
+        "kernel": "ncclDevKernel_AllGather_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "4810",
+        "total_us": "305299.7649999955",
+        "mean_us": "63.47188461538367"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8::Params)",
+        "count": "216",
+        "total_us": "123106.60799999983",
+        "mean_us": "569.9379999999992"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_nt_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_nt_align8::Params)",
+        "count": "4536",
+        "total_us": "120285.74699999532",
+        "mean_us": "26.518021825395792"
+      },
+      {
+        "kernel": "std::enable_if<(((8)>(0)))&&vllm::_typeConvert<c10::BFloat16>::exists, void>::type vllm::fused_add_rms_norm_kernel<c10::BFloat16, 8, true>(c10::BFloat16*, long, c10::BFloat16*, c10::BFloat16 const*, float, int, int, long)",
+        "count": "9360",
+        "total_us": "66193.54499999045",
+        "mean_us": "7.071959935896416"
+      },
+      {
+        "kernel": "kernel_unified_attention_diffkv",
+        "count": "4680",
+        "total_us": "64724.83500000128",
+        "mean_us": "13.830092948718223"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nt_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nt_align8::Params)",
+        "count": "72",
+        "total_us": "43670.73499999997",
+        "mean_us": "606.5379861111107"
+      },
+      {
+        "kernel": "ampere_bf16_s16816gemm_bf16_64x128_ldg8_f2f_stages_32x6_tn",
+        "count": "127",
+        "total_us": "32798.42600000056",
+        "mean_us": "258.2553228346501"
+      },
+      {
+        "kernel": "void vllm::rms_norm_kernel<c10::BFloat16, 8, 3, true>(c10::BFloat16*, c10::BFloat16 const*, long, long, long, long, long, c10::BFloat16 const*, long, float, int, int)",
+        "count": "9360",
+        "total_us": "17762.119999995855",
+        "mean_us": "1.8976623931619503"
+      }
+    ]
+  },
+  {
+    "profile": "dense_s16384",
+    "total_kernel_ms": 39840.03937700061,
+    "category_ms": {
+      "allreduce": 29272.735317000057,
+      "gemm_gemv": 4752.982274999976,
+      "attention": 3946.356133000699,
+      "other": 1794.3954089999306,
+      "allgather": 73.57024299994762
+    },
+    "category_percent": {
+      "allreduce": 73.47566863575695,
+      "gemm_gemv": 11.930164601553685,
+      "attention": 9.905502591643783,
+      "other": 4.504000089005491,
+      "allgather": 0.18466408204008763
+    },
+    "top_kernels": [
+      {
+        "kernel": "ncclDevKernel_AllReduce_Sum_bf16_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "14016",
+        "total_us": "29272735.317000058",
+        "mean_us": "2088.5227823202094"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8::Params)",
+        "count": "6912",
+        "total_us": "3898156.3939998117",
+        "mean_us": "563.9693857059913"
+      },
+      {
+        "kernel": "void flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<128, 64, 128, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<128, 64, 128, 4, cutlass::bfloat16_t> >, true, false, false, false, true, false, false, false>(flash::Flash_fwd_params)",
+        "count": "2340",
+        "total_us": "2623882.864000065",
+        "mean_us": "1121.3174632478908"
+      },
+      {
+        "kernel": "std::enable_if<(((8)>(0)))&&vllm::_typeConvert<c10::BFloat16>::exists, void>::type vllm::fused_add_rms_norm_kernel<c10::BFloat16, 8, true>(c10::BFloat16*, long, c10::BFloat16*, c10::BFloat16 const*, float, int, int, long)",
+        "count": "13824",
+        "total_us": "1469440.406000074",
+        "mean_us": "106.29632566551462"
+      },
+      {
+        "kernel": "void flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<128, 64, 128, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<128, 64, 128, 4, cutlass::bfloat16_t> >, false, false, false, false, true, false, true, false>(flash::Flash_fwd_params)",
+        "count": "4572",
+        "total_us": "1295974.1130001545",
+        "mean_us": "283.45890485567685"
+      },
+      {
+        "kernel": "ampere_bf16_s1688gemm_bf16_128x128_ldg8_f2f_tn",
+        "count": "2304",
+        "total_us": "444165.9990000994",
+        "mean_us": "192.7803815104598"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+        "count": "13752",
+        "total_us": "261915.82700024545",
+        "mean_us": "19.045653504962583"
+      },
+      {
+        "kernel": "void vllm::act_and_mul_kernel<c10::BFloat16, __nv_bfloat162, &(c10::BFloat16 vllm::silu_kernel<c10::BFloat16>(c10::BFloat16 const&, float)), &(__nv_bfloat162 vllm::packed_silu_kernel<__nv_bfloat162>(__nv_bfloat162 const&, float)), true, true, false, false>(c10::BFloat16*, c10::BFloat16 const*, int, float, float, float)",
+        "count": "6912",
+        "total_us": "141013.70999997185",
+        "mean_us": "20.401289062495927"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8::Params)",
+        "count": "3300",
+        "total_us": "90518.5819998756",
+        "mean_us": "27.42987333329564"
+      },
+      {
+        "kernel": "void vllm::rms_norm_kernel<c10::BFloat16, 8, 3, true>(c10::BFloat16*, c10::BFloat16 const*, long, long, long, long, long, c10::BFloat16 const*, long, float, int, int)",
+        "count": "13824",
+        "total_us": "75516.0880003633",
+        "mean_us": "5.462679976878133"
+      }
+    ]
+  },
+  {
+    "profile": "dense_s32640",
+    "total_kernel_ms": 82666.64341900083,
+    "category_ms": {
+      "allreduce": 57674.66385200008,
+      "attention": 12268.957805000264,
+      "gemm_gemv": 9145.216280000319,
+      "other": 3489.931268000154,
+      "allgather": 87.87421400001459
+    },
+    "category_percent": {
+      "allreduce": 69.76775815085729,
+      "attention": 14.84148538947483,
+      "gemm_gemv": 11.06276474012286,
+      "other": 4.221692237231925,
+      "allgather": 0.10629948231310042
+    },
+    "top_kernels": [
+      {
+        "kernel": "ncclDevKernel_AllReduce_Sum_bf16_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "18615",
+        "total_us": "57674663.85200008",
+        "mean_us": "3098.289758366913"
+      },
+      {
+        "kernel": "void flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<128, 64, 128, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<128, 64, 128, 4, cutlass::bfloat16_t> >, true, false, false, false, true, false, false, false>(flash::Flash_fwd_params)",
+        "count": "4608",
+        "total_us": "10493624.442999873",
+        "mean_us": "2277.262248914903"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8::Params)",
+        "count": "13788",
+        "total_us": "7833684.979999764",
+        "mean_us": "568.1523774296319"
+      },
+      {
+        "kernel": "std::enable_if<(((8)>(0)))&&vllm::_typeConvert<c10::BFloat16>::exists, void>::type vllm::fused_add_rms_norm_kernel<c10::BFloat16, 8, true>(c10::BFloat16*, long, c10::BFloat16*, c10::BFloat16 const*, float, int, int, long)",
+        "count": "18360",
+        "total_us": "2907543.797000634",
+        "mean_us": "158.3629519063526"
+      },
+      {
+        "kernel": "void flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<128, 64, 128, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<128, 64, 128, 4, cutlass::bfloat16_t> >, false, false, false, false, true, false, true, false>(flash::Flash_fwd_params)",
+        "count": "4572",
+        "total_us": "1744792.636000201",
+        "mean_us": "381.6256859143047"
+      },
+      {
+        "kernel": "ampere_bf16_s1688gemm_bf16_128x128_ldg8_f2f_tn",
+        "count": "4608",
+        "total_us": "882988.5790001849",
+        "mean_us": "191.62078537330402"
+      },
+      {
+        "kernel": "void vllm::act_and_mul_kernel<c10::BFloat16, __nv_bfloat162, &(c10::BFloat16 vllm::silu_kernel<c10::BFloat16>(c10::BFloat16 const&, float)), &(__nv_bfloat162 vllm::packed_silu_kernel<__nv_bfloat162>(__nv_bfloat162 const&, float)), true, true, false, false>(c10::BFloat16*, c10::BFloat16 const*, int, float, float, float)",
+        "count": "9180",
+        "total_us": "274378.88099947764",
+        "mean_us": "29.88876699340715"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8::Params)",
+        "count": "6600",
+        "total_us": "179578.77600090439",
+        "mean_us": "27.208905454682483"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+        "count": "9216",
+        "total_us": "174494.6210000366",
+        "mean_us": "18.93387814670536"
+      },
+      {
+        "kernel": "void vllm::rms_norm_kernel<c10::BFloat16, 8, 3, true>(c10::BFloat16*, c10::BFloat16 const*, long, long, long, long, long, c10::BFloat16 const*, long, float, int, int)",
+        "count": "18360",
+        "total_us": "134330.95199953814",
+        "mean_us": "7.316500653569616"
+      }
+    ]
+  },
+  {
+    "profile": "dense_s4096",
+    "total_kernel_ms": 10546.142104999679,
+    "category_ms": {
+      "allreduce": 7876.839477000019,
+      "gemm_gemv": 1495.7904100000833,
+      "attention": 596.9043709999861,
+      "other": 510.9596439995883,
+      "allgather": 65.64820300000254
+    },
+    "category_percent": {
+      "allreduce": 74.68929774107437,
+      "gemm_gemv": 14.183294659863952,
+      "attention": 5.659931044519187,
+      "other": 4.844991077423036,
+      "allgather": 0.6224854771194508
+    },
+    "top_kernels": [
+      {
+        "kernel": "ncclDevKernel_AllReduce_Sum_bf16_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "10512",
+        "total_us": "7876839.477000019",
+        "mean_us": "749.3188239155269"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8::Params)",
+        "count": "1728",
+        "total_us": "972679.3850000025",
+        "mean_us": "562.8931626157422"
+      },
+      {
+        "kernel": "void flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<128, 64, 128, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<128, 64, 128, 4, cutlass::bfloat16_t> >, false, false, false, false, true, false, true, false>(flash::Flash_fwd_params)",
+        "count": "4572",
+        "total_us": "413534.0430000257",
+        "mean_us": "90.4492657480371"
+      },
+      {
+        "kernel": "std::enable_if<(((8)>(0)))&&vllm::_typeConvert<c10::BFloat16>::exists, void>::type vllm::fused_add_rms_norm_kernel<c10::BFloat16, 8, true>(c10::BFloat16*, long, c10::BFloat16*, c10::BFloat16 const*, float, int, int, long)",
+        "count": "10368",
+        "total_us": "381636.2569998676",
+        "mean_us": "36.80905256557365"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+        "count": "17172",
+        "total_us": "343370.7220000867",
+        "mean_us": "19.995965641747418"
+      },
+      {
+        "kernel": "void flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<128, 64, 128, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<128, 64, 128, 4, cutlass::bfloat16_t> >, true, false, false, false, true, false, false, false>(flash::Flash_fwd_params)",
+        "count": "612",
+        "total_us": "164723.98000000577",
+        "mean_us": "269.1568300653689"
+      },
+      {
+        "kernel": "ampere_bf16_s1688gemm_bf16_128x128_ldg8_f2f_tn",
+        "count": "576",
+        "total_us": "116231.79300000548",
+        "mean_us": "201.79130729167616"
+      },
+      {
+        "kernel": "ncclDevKernel_AllGather_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "144",
+        "total_us": "65648.20300000254",
+        "mean_us": "455.89029861112874"
+      },
+      {
+        "kernel": "void vllm::act_and_mul_kernel<c10::BFloat16, __nv_bfloat162, &(c10::BFloat16 vllm::silu_kernel<c10::BFloat16>(c10::BFloat16 const&, float)), &(__nv_bfloat162 vllm::packed_silu_kernel<__nv_bfloat162>(__nv_bfloat162 const&, float)), true, true, false, false>(c10::BFloat16*, c10::BFloat16 const*, int, float, float, float)",
+        "count": "5184",
+        "total_us": "40176.14199994675",
+        "mean_us": "7.750027391965036"
+      },
+      {
+        "kernel": "ampere_bf16_s16816gemm_bf16_64x128_ldg8_f2f_stages_32x6_tn",
+        "count": "128",
+        "total_us": "33206.48299998138",
+        "mean_us": "259.42564843735454"
+      }
+    ]
+  },
+  {
+    "profile": "dense_s512",
+    "total_kernel_ms": 2451.7254239999556,
+    "category_ms": {
+      "allreduce": 1620.7134640000174,
+      "gemm_gemv": 534.3217610000227,
+      "attention": 98.46605899999392,
+      "other": 134.38429999992024,
+      "allgather": 63.83984000000137
+    },
+    "category_percent": {
+      "allreduce": 66.10501519194781,
+      "gemm_gemv": 21.793703151647556,
+      "attention": 4.016194392573861,
+      "other": 5.4812132991905,
+      "allgather": 2.60387396464028
+    },
+    "top_kernels": [
+      {
+        "kernel": "ncclDevKernel_AllReduce_Sum_bf16_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "9490",
+        "total_us": "1620713.4640000174",
+        "mean_us": "170.78118693361617"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+        "count": "18180",
+        "total_us": "359824.9850000194",
+        "mean_us": "19.792353410342102"
+      },
+      {
+        "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8::Params)",
+        "count": "216",
+        "total_us": "122033.01699999961",
+        "mean_us": "564.9676712962945"
+      },
+      {
+        "kernel": "void flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<128, 64, 128, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<128, 64, 128, 4, cutlass::bfloat16_t> >, false, false, false, false, true, false, true, false>(flash::Flash_fwd_params)",
+        "count": "4572",
+        "total_us": "76545.597000001",
+        "mean_us": "16.74225656168001"
+      },
+      {
+        "kernel": "std::enable_if<(((8)>(0)))&&vllm::_typeConvert<c10::BFloat16>::exists, void>::type vllm::fused_add_rms_norm_kernel<c10::BFloat16, 8, true>(c10::BFloat16*, long, c10::BFloat16*, c10::BFloat16 const*, float, int, int, long)",
+        "count": "9360",
+        "total_us": "64526.71499998687",
+        "mean_us": "6.893879807690905"
+      },
+      {
+        "kernel": "ncclDevKernel_AllGather_RING_LL(ncclDevKernelArgsStorage<4096ul>)",
+        "count": "130",
+        "total_us": "63839.840000001364",
+        "mean_us": "491.0756923077028"
+      },
+      {
+        "kernel": "ampere_bf16_s16816gemm_bf16_64x128_ldg8_f2f_stages_32x6_tn",
+        "count": "127",
+        "total_us": "32721.43200000166",
+        "mean_us": "257.6490708661548"
+      },
+      {
+        "kernel": "void vllm::rms_norm_kernel<c10::BFloat16, 8, 3, true>(c10::BFloat16*, c10::BFloat16 const*, long, long, long, long, long, c10::BFloat16 const*, long, float, int, int)",
+        "count": "9360",
+        "total_us": "17905.675999969015",
+        "mean_us": "1.9129995726462623"
+      },
+      {
+        "kernel": "void flash::flash_fwd_splitkv_combine_kernel<Flash_fwd_kernel_traits<128, 64, 128, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<128, 64, 128, 4, cutlass::bfloat16_t> >, 4, 3, true>(flash::Flash_fwd_params)",
+        "count": "4500",
+        "total_us": "17054.667999993544",
+        "mean_us": "3.7899262222207875"
+      },
+      {
+        "kernel": "ampere_bf16_s1688gemm_bf16_128x128_ldg8_f2f_tn",
+        "count": "72",
+        "total_us": "13689.404999999955",
+        "mean_us": "190.13062499999938"
+      }
+    ]
+  }
+]
