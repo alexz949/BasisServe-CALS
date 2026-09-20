@@ -1,0 +1,259 @@
+{
+  "status": "passed",
+  "command": "/workspace/miniforge3/envs/basis/bin/python evaluation/smoke_vllm_qwen3_8b_c1.py --model /workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --factor-dir /workspace/.cache/huggingface/hub/models--alexz949--BasisServe-CALS/snapshots/0872566b1da66eb4c813d7a1cb3313325f22b287/ICLR-results/qwen3-8b/c1/factor-banks/R64-S6 --execution-mode cuda_graph --prefill-tokens 32640 --decode-tokens 8 --max-num-batched-tokens 8192 --output-json results/diffkv_sm89/tp8_graph.json",
+  "torch": "2.13.0+cu130",
+  "vllm": "0.29.0",
+  "factor_sha256": "66e38669d248b0013e44f61fadec9cefb3d8180fb0b532675f2a6ec49ea0b510",
+  "execution_mode": "cuda_graph",
+  "prefill_tokens": 32640,
+  "decode_tokens": 8,
+  "max_num_batched_tokens": 8192,
+  "runs": [
+    {
+      "batch": 1,
+      "output_tokens": [
+        [
+          576,
+          6722,
+          315,
+          9625,
+          374,
+          12095,
+          13,
+          26036
+        ]
+      ],
+      "seconds": 1.874157798010856
+    },
+    {
+      "batch": 3,
+      "output_tokens": [
+        [
+          576,
+          6722,
+          315,
+          9625,
+          374,
+          12095,
+          13,
+          26036
+        ],
+        [
+          95735,
+          264,
+          1614,
+          3941,
+          70403,
+          13,
+          220,
+          576
+        ],
+        [
+          9625,
+          374,
+          12095,
+          13,
+          26036,
+          15279,
+          2142,
+          95735
+        ]
+      ],
+      "seconds": 5.491760199889541
+    }
+  ],
+  "workers": [
+    {
+      "peak_cuda_allocated_bytes": 23587514880,
+      "cuda_device": "NVIDIA L40S",
+      "backend": "uniform_nccl",
+      "decoder_gemms": 1,
+      "capture_calls": 216,
+      "eager_calls": 864,
+      "prepared_shapes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        7798,
+        8064,
+        8192
+      ],
+      "loaded_value_layers": 36,
+      "attention_backend": "TRITON_ATTN_DIFFKV",
+      "attention_impl": "C1DiffKVImpl",
+      "prefill_specialization": "sm89_qk128_v64",
+      "key_head_size": 128,
+      "value_head_size": 64
+    },
+    {
+      "peak_cuda_allocated_bytes": 23587514880,
+      "cuda_device": "NVIDIA L40S",
+      "backend": "uniform_nccl",
+      "decoder_gemms": 1,
+      "capture_calls": 216,
+      "eager_calls": 864,
+      "prepared_shapes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        7798,
+        8064,
+        8192
+      ],
+      "loaded_value_layers": 36,
+      "attention_backend": "TRITON_ATTN_DIFFKV",
+      "attention_impl": "C1DiffKVImpl",
+      "prefill_specialization": "sm89_qk128_v64",
+      "key_head_size": 128,
+      "value_head_size": 64
+    },
+    {
+      "peak_cuda_allocated_bytes": 23587514880,
+      "cuda_device": "NVIDIA L40S",
+      "backend": "uniform_nccl",
+      "decoder_gemms": 1,
+      "capture_calls": 216,
+      "eager_calls": 864,
+      "prepared_shapes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        7798,
+        8064,
+        8192
+      ],
+      "loaded_value_layers": 36,
+      "attention_backend": "TRITON_ATTN_DIFFKV",
+      "attention_impl": "C1DiffKVImpl",
+      "prefill_specialization": "sm89_qk128_v64",
+      "key_head_size": 128,
+      "value_head_size": 64
+    },
+    {
+      "peak_cuda_allocated_bytes": 23587514880,
+      "cuda_device": "NVIDIA L40S",
+      "backend": "uniform_nccl",
+      "decoder_gemms": 1,
+      "capture_calls": 216,
+      "eager_calls": 864,
+      "prepared_shapes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        7798,
+        8064,
+        8192
+      ],
+      "loaded_value_layers": 36,
+      "attention_backend": "TRITON_ATTN_DIFFKV",
+      "attention_impl": "C1DiffKVImpl",
+      "prefill_specialization": "sm89_qk128_v64",
+      "key_head_size": 128,
+      "value_head_size": 64
+    },
+    {
+      "peak_cuda_allocated_bytes": 23587514880,
+      "cuda_device": "NVIDIA L40S",
+      "backend": "uniform_nccl",
+      "decoder_gemms": 1,
+      "capture_calls": 216,
+      "eager_calls": 864,
+      "prepared_shapes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        7798,
+        8064,
+        8192
+      ],
+      "loaded_value_layers": 36,
+      "attention_backend": "TRITON_ATTN_DIFFKV",
+      "attention_impl": "C1DiffKVImpl",
+      "prefill_specialization": "sm89_qk128_v64",
+      "key_head_size": 128,
+      "value_head_size": 64
+    },
+    {
+      "peak_cuda_allocated_bytes": 23587514880,
+      "cuda_device": "NVIDIA L40S",
+      "backend": "uniform_nccl",
+      "decoder_gemms": 1,
+      "capture_calls": 216,
+      "eager_calls": 864,
+      "prepared_shapes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        7798,
+        8064,
+        8192
+      ],
+      "loaded_value_layers": 36,
+      "attention_backend": "TRITON_ATTN_DIFFKV",
+      "attention_impl": "C1DiffKVImpl",
+      "prefill_specialization": "sm89_qk128_v64",
+      "key_head_size": 128,
+      "value_head_size": 64
+    },
+    {
+      "peak_cuda_allocated_bytes": 23587514880,
+      "cuda_device": "NVIDIA L40S",
+      "backend": "uniform_nccl",
+      "decoder_gemms": 1,
+      "capture_calls": 216,
+      "eager_calls": 864,
+      "prepared_shapes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        7798,
+        8064,
+        8192
+      ],
+      "loaded_value_layers": 36,
+      "attention_backend": "TRITON_ATTN_DIFFKV",
+      "attention_impl": "C1DiffKVImpl",
+      "prefill_specialization": "sm89_qk128_v64",
+      "key_head_size": 128,
+      "value_head_size": 64
+    },
+    {
+      "peak_cuda_allocated_bytes": 23587514880,
+      "cuda_device": "NVIDIA L40S",
+      "backend": "uniform_nccl",
+      "decoder_gemms": 1,
+      "capture_calls": 216,
+      "eager_calls": 864,
+      "prepared_shapes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        7798,
+        8064,
+        8192
+      ],
+      "loaded_value_layers": 36,
+      "attention_backend": "TRITON_ATTN_DIFFKV",
+      "attention_impl": "C1DiffKVImpl",
+      "prefill_specialization": "sm89_qk128_v64",
+      "key_head_size": 128,
+      "value_head_size": 64
+    }
+  ]
+}

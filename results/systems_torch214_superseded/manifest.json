@@ -1,0 +1,56 @@
+{
+  "suite": "basiskv_section5_systems",
+  "git_commit": "2c2960ab8ce531d46742e1890b84071a7238b2f1",
+  "host": "8x NVIDIA L40S, 2 NUMA nodes, no NVLink, cross-group SYS",
+  "model": "Qwen/Qwen3-8B-Base@49e3418fbbbc",
+  "c1_checkpoint": "Q3-8B-C1U-R64 (uniform rank 64)",
+  "tp_size": 8,
+  "local_query_heads": 4,
+  "local_kv_heads": 1,
+  "kv_partition_mode": "sharded",
+  "phases": {
+    "phase0_audit": "complete",
+    "phase1_tp8_collective": "complete",
+    "phase2_router": "not benchmarked: ours_b16r16 factor bank unavailable",
+    "phase3_sparse_attention": "not benchmarked: ours_b16r16 factor bank unavailable",
+    "phase4_memory_traffic": "not benchmarked",
+    "phase5_e2e": "blocked: serving runtime hardcodes TP4",
+    "phase6_nsight": "blocked: nsys absent, only ncu available",
+    "phase7_quantization": "not benchmarked",
+    "phase8_gh200": "no hardware"
+  },
+  "files": {
+    "README.md": {
+      "bytes": 8339,
+      "sha256": "1c2700cf93cfd3599d0ddbf0cce8dfe3958bdc2c439b13e94b7ee81dade3af1c"
+    },
+    "hardware.json": {
+      "bytes": 252666,
+      "sha256": "a6c2f552c434c2fe9b8e5588e231edaeaaf8bcac55d9684426088ab96fd0c788"
+    },
+    "hardware.txt": {
+      "bytes": 117997,
+      "sha256": "b3e9b9fff04c9ae45f0a838f58ed3550a6f57b9acaeca74f22d910ca97b58b4d"
+    },
+    "nccl_baseline.json": {
+      "bytes": 100430,
+      "sha256": "a2ac2839d8a3c8e58234f6e031a242d1a64cca796cc5d9f9a2cd3f6117c74c2f"
+    },
+    "software.json": {
+      "bytes": 131662,
+      "sha256": "05629b1ec0e35a377d7fb2f73b1bdc36a23ea6cebb403510ea9c4a797b42e544"
+    },
+    "topology.txt": {
+      "bytes": 1211,
+      "sha256": "67f219c81843287e428ac90470925e9c543e643f0d414eb65cbe88a9cad5ce92"
+    },
+    "tp8_collective.csv": {
+      "bytes": 253419,
+      "sha256": "b0bd122ede665c18ec04d7cbabb190cb825281dc2d3ac309f693932c68ec190d"
+    },
+    "tp8_collective.json": {
+      "bytes": 7702240,
+      "sha256": "9ae669b6500e80ddd24c168d79734adbf9078761dd6914bb240bd211495c4dcb"
+    }
+  }
+}
