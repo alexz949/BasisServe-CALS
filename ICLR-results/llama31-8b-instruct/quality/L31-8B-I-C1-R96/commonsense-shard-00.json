@@ -1,0 +1,1122 @@
+{
+  "average_accuracy": 0.7757418840868353,
+  "checkpoint": {
+    "artifact_sha256": "4b04f1231749b687fb504d83c67346083027c10b0b45f86c8e21060c12b40fad",
+    "directory": "/workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/c1/two-sided-kl/R96-D0-S8",
+    "format": "basisserve.llama31_8b_instruct.iclr_v_factors.v1",
+    "manifest_sha256": "c3e0951aeec9284d4e210e9faac7bcbb9220e35ae6a5b3b2bea1fea75fddd534"
+  },
+  "command": "evaluation/eval_llama31_8b_instruct_iclr_quality.py --run-id L31-8B-I-C1-R96 --model /workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659 --checkpoint-dir /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/c1/two-sided-kl/R96-D0-S8 --c4-windows /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/calibration/c4_validation_128x2048/windows.safetensors --output-dir /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/quality/L31-8B-I-C1-R96 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8 --expected-gpu-count 1 --quality-shard-index 0 --quality-shard-count 4 --stages wikitext2,c4,commonsense --tasks hellaswag",
+  "compression": {
+    "allocation": "two_sided_factorized_terminal_kl_alpha1",
+    "candidate_ranks": [
+      32,
+      48,
+      64,
+      80,
+      96,
+      112,
+      128
+    ],
+    "checkpoint_policy": "fixed decoder-refitted endpoint after encoder sweep 6",
+    "decoder_objective": "full_layer",
+    "dense_rank_sum_across_layers": 32768,
+    "encoder_initialization": "activation-weighted-svd",
+    "encoder_sweeps": 6,
+    "equivalent_rank_target": 96,
+    "head_dim": 128,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ],
+      [
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112
+      ],
+      [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ]
+    ],
+    "method": "c1-two-sided-kl",
+    "method_label": "C1 + Two-Sided KL",
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "profiling_anchor_rank": 64,
+    "projection": "joint_v_o",
+    "rank_sum_across_layers": 24576,
+    "realized_retained_v_ratio": 0.75,
+    "realized_v_cache_compression_ratio": 0.25,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds": 380.36113970400766,
+  "environment": {
+    "conda_environment": "basis",
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ],
+    "cuda_visible_devices": "4",
+    "datasets": "5.0.0",
+    "lm_eval": "0.4.11",
+    "python": "3.12.14 (main, Sep  2 2026, 23:27:36) [GCC 15.3.0]",
+    "slurm_array_task_id": null,
+    "slurm_job_id": null,
+    "torch": "2.13.0+cu130",
+    "transformers": "5.17.0"
+  },
+  "evaluation": {
+    "config": {
+      "batch_size": null,
+      "batch_sizes": [],
+      "bootstrap_iters": 100000,
+      "device": null,
+      "fewshot_seed": 1234,
+      "gen_kwargs": null,
+      "limit": null,
+      "model": "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+      "model_args": null,
+      "model_dtype": "torch.bfloat16",
+      "model_num_parameters": 8030261248,
+      "model_revision": "main",
+      "model_sha": "",
+      "numpy_seed": 1234,
+      "random_seed": 0,
+      "torch_seed": 1234,
+      "use_cache": null
+    },
+    "configs": {
+      "hellaswag": {
+        "dataset_path": "Rowan/hellaswag",
+        "description": "",
+        "doc_to_choice": "choices",
+        "doc_to_target": "{{label}}",
+        "doc_to_text": "{{query}}",
+        "fewshot_config": {
+          "doc_to_choice": "choices",
+          "doc_to_target": "{{label}}",
+          "doc_to_text": "{{query}}",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": "<function process_docs at 0x79c66cac9080>",
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc):\n        ctx = doc[\"ctx_a\"] + \" \" + doc[\"ctx_b\"].capitalize()\n        out_doc = {\n            \"query\": preprocess(doc[\"activity_label\"] + \": \" + ctx),\n            \"choices\": [preprocess(ending) for ending in doc[\"endings\"]],\n            \"gold\": int(doc[\"label\"]),\n        }\n        return out_doc\n\n    return dataset.map(_process_doc)\n",
+        "repeats": 1,
+        "should_decontaminate": false,
+        "tag": [
+          "multiple_choice"
+        ],
+        "target_delimiter": " ",
+        "task": "hellaswag",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      }
+    },
+    "date": 1789899277.8929887,
+    "eot_token_id": 128009,
+    "git_hash": "8fd0c91",
+    "group_subtasks": {
+      "hellaswag": []
+    },
+    "higher_is_better": {
+      "hellaswag": {
+        "acc": true,
+        "acc_norm": true
+      }
+    },
+    "lm_eval_version": "0.4.11",
+    "max_length": 4096,
+    "n-samples": {
+      "hellaswag": {
+        "effective": 10042,
+        "original": 10042
+      }
+    },
+    "n-shot": {
+      "hellaswag": 0
+    },
+    "pretty_env_info": "PyTorch version: 2.13.0+cu130\nIs debug build: False\nCUDA used to build PyTorch: 13.0\nROCM used to build PyTorch: N/A\n\nOS: Ubuntu 24.04.3 LTS (x86_64)\nGCC version: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\nClang version: Could not collect\nCMake version: version 3.28.3\nLibc version: glibc-2.39\n\nPython version: 3.12.14 (main, Sep  2 2026, 23:27:36) [GCC 15.3.0] (64-bit runtime)\nPython platform: Linux-6.8.0-134-generic-x86_64-with-glibc2.39\nIs CUDA available: True\nCUDA runtime version: 12.8.93\nCUDA_MODULE_LOADING set to: \nGPU models and configuration: \nGPU 0: NVIDIA L40S\nGPU 1: NVIDIA L40S\nGPU 2: NVIDIA L40S\nGPU 3: NVIDIA L40S\nGPU 4: NVIDIA L40S\nGPU 5: NVIDIA L40S\nGPU 6: NVIDIA L40S\nGPU 7: NVIDIA L40S\n\nNvidia driver version: 580.178.04\ncuDNN version: Probably one of the following:\n/usr/lib/x86_64-linux-gnu/libcudnn.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_adv.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_cnn.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_engines_precompiled.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_engines_runtime_compiled.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_graph.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_heuristic.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_ops.so.9.8.0\nIs XPU available: False\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: False\nCaching allocator config: N/A\n\nCPU:\nArchitecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           52 bits physical, 57 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  128\nOn-line CPU(s) list:                     0-127\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9354 32-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      32\nSocket(s):                               2\nStepping:                                1\nBogoMIPS:                                6489.78\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc amd_ibpb_ret arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid overflow_recov succor smca fsrm flush_l1d debug_swap ibpb_exit_to_user\nVirtualization:                          AMD-V\nL1d cache:                               2 MiB (64 instances)\nL1i cache:                               2 MiB (64 instances)\nL2 cache:                                64 MiB (64 instances)\nL3 cache:                                512 MiB (16 instances)\nNUMA node(s):                            2\nNUMA node0 CPU(s):                       0-31,64-95\nNUMA node1 CPU(s):                       32-63,96-127\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Mitigation; Safe RET\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; STIBP always-on; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: Clear CPU buffers attempted, no microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Mitigation; IBPB before exit to userspace\n\nVersions of relevant libraries:\n[pip3] nccl4py==0.5.0\n[pip3] numpy==2.3.5\n[pip3] nvidia-cublas==13.1.1.3\n[pip3] nvidia-cuda-cupti==13.0.85\n[pip3] nvidia-cuda-nvrtc==13.0.88\n[pip3] nvidia-cuda-runtime==13.0.96\n[pip3] nvidia-cudnn-cu13==9.20.0.48\n[pip3] nvidia-cudnn-frontend==1.29.0\n[pip3] nvidia-cufft==12.0.0.61\n[pip3] nvidia-curand==10.4.0.35\n[pip3] nvidia-cusolver==12.0.4.66\n[pip3] nvidia-cusparse==12.6.3.3\n[pip3] nvidia-cusparselt-cu13==0.8.1\n[pip3] nvidia-nccl-cu13==2.29.7\n[pip3] nvidia-nvjitlink==13.4.92\n[pip3] nvidia-nvtx==13.0.85\n[pip3] nvtx==0.2.15\n[pip3] tokenspeed-triton==3.8.10.post20260906\n[pip3] torch==2.13.0\n[pip3] torch_c_dlpack_ext==0.1.5\n[pip3] torchaudio==2.11.0\n[pip3] torchcodec==0.16.0\n[pip3] torchvision==0.28.0\n[pip3] triton==3.7.1\n[conda] Could not collect",
+    "results": {
+      "hellaswag": {
+        "acc,none": 0.5768771161123282,
+        "acc_norm,none": 0.7757418840868353,
+        "acc_norm_stderr,none": 0.004162403914805635,
+        "acc_stderr,none": 0.004930448527146583,
+        "alias": "hellaswag"
+      }
+    },
+    "tokenizer_bos_token": [
+      "<|begin_of_text|>",
+      "128000"
+    ],
+    "tokenizer_eos_token": [
+      "<|eot_id|>",
+      "128009"
+    ],
+    "tokenizer_pad_token": [
+      "<|eot_id|>",
+      "128009"
+    ],
+    "transformers_version": "5.17.0",
+    "upper_git_hash": null,
+    "versions": {
+      "hellaswag": 1.0
+    }
+  },
+  "format": "basisserve.llama31_8b_instruct.iclr_quality.commonsense.v1",
+  "model": {
+    "config_sha256": "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+    "huggingface_repo": "meta-llama/Llama-3.1-8B-Instruct",
+    "path": "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "safetensors_index_sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+  },
+  "protocol": {
+    "apply_chat_template": false,
+    "batch_size": 8,
+    "max_length": 4096,
+    "metric_selection": "acc_norm when present, otherwise acc",
+    "num_fewshot": 0,
+    "quality_shard_count": 4,
+    "quality_shard_index": 0,
+    "tasks": [
+      "hellaswag"
+    ]
+  },
+  "run_id": "L31-8B-I-C1-R96",
+  "runtime": {
+    "attention_implementation": "sdpa",
+    "cuda_device_names": [
+      "NVIDIA L40S"
+    ],
+    "cuda_devices_used": [
+      0
+    ],
+    "device_map": "balanced",
+    "installation": [
+      {
+        "elapsed_seconds": 0.07611142238602042,
+        "factor_file": "selected_factors/layer_000.safetensors",
+        "factor_sha256": "ae64073f80d11e67a9763d376d6b8eb7e198e5fa9aef4648020a12a1044f75c4",
+        "layer": 0,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.039743748027831316,
+        "factor_file": "selected_factors/layer_001.safetensors",
+        "factor_sha256": "c456436a97603051d9785c583bb21cda43551d36c8fb967c849ecd032b891b83",
+        "layer": 1,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.039733231998980045,
+        "factor_file": "selected_factors/layer_002.safetensors",
+        "factor_sha256": "982648026552bfa5e111a9a3c22e0df0e10d3ce365298bff362453f6562bf884",
+        "layer": 2,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03844898007810116,
+        "factor_file": "selected_factors/layer_003.safetensors",
+        "factor_sha256": "f876c9996834e3c6e04f4c59f874285b77c3f0c4e29ddc944f83039e46c9c766",
+        "layer": 3,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03850562358275056,
+        "factor_file": "selected_factors/layer_004.safetensors",
+        "factor_sha256": "efe49a14dda7cc15e3ef7b9a69f64588db267bb32eb2bbac587df8fee0365119",
+        "layer": 4,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.047159068286418915,
+        "factor_file": "selected_factors/layer_005.safetensors",
+        "factor_sha256": "e64e57201d6917cbc351613e514f6abeab47d505f41fc6727bf3952783af2337",
+        "layer": 5,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.04074470605701208,
+        "factor_file": "selected_factors/layer_006.safetensors",
+        "factor_sha256": "758ecb59f15472ef0f0c13e2e593e163e955a3a4252b4ec7f58c5c99af91593a",
+        "layer": 6,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.040653049014508724,
+        "factor_file": "selected_factors/layer_007.safetensors",
+        "factor_sha256": "8bc89c4b5b96f41b3300de67520a08b5bf1f644f311cc9224e7bcff594143231",
+        "layer": 7,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.039626472163945436,
+        "factor_file": "selected_factors/layer_008.safetensors",
+        "factor_sha256": "7ca54054442848d9aa0e6224874c5a132849480b1b7f8eb85d8a95ce8a72a8c2",
+        "layer": 8,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.0386436409316957,
+        "factor_file": "selected_factors/layer_009.safetensors",
+        "factor_sha256": "9e6cd29d00a70d2e46d664a6d518829ae39c3281467976531b9d7021be0c5d22",
+        "layer": 9,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.04466941114515066,
+        "factor_file": "selected_factors/layer_010.safetensors",
+        "factor_sha256": "49491f0ba61d3adb1fb1f9e920139e09fc9d6a993a6997a01bf5404c78f5da92",
+        "layer": 10,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.052828074898570776,
+        "factor_file": "selected_factors/layer_011.safetensors",
+        "factor_sha256": "07583de5e206ed8d44a8b1e976e9b5b0010d3bdff109d2c02f7d10a4976f6815",
+        "layer": 11,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.04057144606485963,
+        "factor_file": "selected_factors/layer_012.safetensors",
+        "factor_sha256": "b6f60a3a0781a98863c27fa46f86256ecce581c8d0ebf29791a0acc29a2bdb40",
+        "layer": 12,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.038374328054487705,
+        "factor_file": "selected_factors/layer_013.safetensors",
+        "factor_sha256": "5451f45d0de8e55f19d4abe8d043a4f9e8f8b777b786c5c55f1dddaa4f330349",
+        "layer": 13,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03816442331299186,
+        "factor_file": "selected_factors/layer_014.safetensors",
+        "factor_sha256": "aa9f072201eacaa4e721e738318b266aa655287c8c9bc9e686918e607fd85737",
+        "layer": 14,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03835570998489857,
+        "factor_file": "selected_factors/layer_015.safetensors",
+        "factor_sha256": "e3f68718b8606297f56fd4dae143738354dbc65457d89dc36976f947b53c1cb7",
+        "layer": 15,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03973852004855871,
+        "factor_file": "selected_factors/layer_016.safetensors",
+        "factor_sha256": "a9081e990dea22fa3d4938522d70857b89e32d32de735d68a900273dc2fe3565",
+        "layer": 16,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.04050577897578478,
+        "factor_file": "selected_factors/layer_017.safetensors",
+        "factor_sha256": "4efe559fbfb3a379eb871a058fed68cf5b6dac74dbad165384da818a8e86f224",
+        "layer": 17,
+        "maximum_padded_rank": 128,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128,
+          128
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03614679304882884,
+        "factor_file": "selected_factors/layer_018.safetensors",
+        "factor_sha256": "d84b625e429f62c679d094fa79e19922e8864f47bb6feed84ea1958982f59088",
+        "layer": 18,
+        "maximum_padded_rank": 112,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112
+        ]
+      },
+      {
+        "elapsed_seconds": 0.012507563922554255,
+        "factor_file": "selected_factors/layer_019.safetensors",
+        "factor_sha256": "4a78a1d3efe3a4126667f150e966fbc7ff731759e1f9c92d38882c2152d84572",
+        "layer": 19,
+        "maximum_padded_rank": 48,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01187421614304185,
+        "factor_file": "selected_factors/layer_020.safetensors",
+        "factor_sha256": "32a9bcfe0d60a752dd629080d3434d75687c5c0bd68e08a0b3e7e9c2febd49dd",
+        "layer": 20,
+        "maximum_padded_rank": 48,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02982270484790206,
+        "factor_file": "selected_factors/layer_021.safetensors",
+        "factor_sha256": "669f02701d244fbf2528ce33846982d95049b2f3c25b77ab8b080d19cd453def",
+        "layer": 21,
+        "maximum_padded_rank": 96,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01155946496874094,
+        "factor_file": "selected_factors/layer_022.safetensors",
+        "factor_sha256": "f6f27b1e12672235f88876ca9c271caec4ab42b809ff1fa0ffa0edf78fc26ce9",
+        "layer": 22,
+        "maximum_padded_rank": 48,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01161629008129239,
+        "factor_file": "selected_factors/layer_023.safetensors",
+        "factor_sha256": "b1d887e6182ef40f8207d910a833e988e30fa51465c3c7fe224ea1be00b9a7b6",
+        "layer": 23,
+        "maximum_padded_rank": 48,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01141014089807868,
+        "factor_file": "selected_factors/layer_024.safetensors",
+        "factor_sha256": "b457561421c65b954874801149c527ffd00d45202c92b300f92c8c4d9b77645e",
+        "layer": 24,
+        "maximum_padded_rank": 48,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.011293346993625164,
+        "factor_file": "selected_factors/layer_025.safetensors",
+        "factor_sha256": "c96560332a8117894d16cc345b2ef1bc952cbba16fc61ad712306a9449b3892c",
+        "layer": 25,
+        "maximum_padded_rank": 48,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.008150171022862196,
+        "factor_file": "selected_factors/layer_026.safetensors",
+        "factor_sha256": "43571c876af15847a95eba405b9146de3456c7e7b89a2b9dc152f837a524ee49",
+        "layer": 26,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.011105334851890802,
+        "factor_file": "selected_factors/layer_027.safetensors",
+        "factor_sha256": "a887457e053294553854fd416dbcd7c1a11f4f00d565e47759513139e5519f54",
+        "layer": 27,
+        "maximum_padded_rank": 48,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "elapsed_seconds": 0.007939395029097795,
+        "factor_file": "selected_factors/layer_028.safetensors",
+        "factor_sha256": "c149e3c07f4e76931009f14f34cf692663a38917413f59bb1a18c0e799e5722b",
+        "layer": 28,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.007921808864921331,
+        "factor_file": "selected_factors/layer_029.safetensors",
+        "factor_sha256": "e9639a3ad7cfd07d4eb6a0b6f22106a78f24fe14b2da4f6027bdded10b39dd12",
+        "layer": 29,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.01875140191987157,
+        "factor_file": "selected_factors/layer_030.safetensors",
+        "factor_sha256": "8478e698db0c8711a74311ffa1345616078fea20175b40c6fd13f24772f56c25",
+        "layer": 30,
+        "maximum_padded_rank": 64,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.020763724111020565,
+        "factor_file": "selected_factors/layer_031.safetensors",
+        "factor_sha256": "6f3941b627767dc5ae64751500fed348bc7cf03eea9034435a8043367ca88925",
+        "layer": 31,
+        "maximum_padded_rank": 64,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      }
+    ],
+    "model_dtype": "torch.bfloat16",
+    "quality_shard_count": 4,
+    "quality_shard_index": 0
+  },
+  "status": "complete",
+  "task_accuracy": [
+    {
+      "metric": "acc_norm",
+      "task": "hellaswag",
+      "value": 0.7757418840868353
+    }
+  ],
+  "timestamp_utc": "2026-09-20T10:20:56.064976+00:00"
+}

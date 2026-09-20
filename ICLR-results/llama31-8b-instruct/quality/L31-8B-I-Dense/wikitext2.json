@@ -1,0 +1,79 @@
+{
+  "checkpoint": {
+    "artifact_sha256": null,
+    "directory": "/workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/checkpoints/L31-8B-I-Dense",
+    "format": "basisserve.llama31_8b_instruct.iclr_v_factors.v1",
+    "manifest_sha256": "659147ef08b19a98597b26c5a9c5b4e6d6765389c01839551c59ef03a9dc8726"
+  },
+  "command": "evaluation/eval_llama31_8b_instruct_iclr_quality.py --run-id L31-8B-I-Dense --model /workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659 --checkpoint-dir /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/checkpoints/L31-8B-I-Dense --c4-windows /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/calibration/c4_validation_128x2048/windows.safetensors --output-dir /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/quality/L31-8B-I-Dense --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8 --expected-gpu-count 1",
+  "compression": {
+    "dense_rank_sum_across_layers": 32768,
+    "head_dim": 128,
+    "key_cache": "dense",
+    "method": "dense",
+    "method_label": "Dense",
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "projection": null,
+    "rank_sum_across_layers": 32768,
+    "realized_retained_v_ratio": 1.0,
+    "realized_v_cache_compression_ratio": 0.0,
+    "target": "dense_kv_cache",
+    "value_cache": "dense"
+  },
+  "elapsed_seconds": 40.47588788205758,
+  "environment": {
+    "conda_environment": "basis",
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ],
+    "cuda_visible_devices": "0",
+    "datasets": "5.0.0",
+    "lm_eval": "0.4.11",
+    "python": "3.12.14 (main, Sep  2 2026, 23:27:36) [GCC 15.3.0]",
+    "slurm_array_task_id": null,
+    "slurm_job_id": null,
+    "torch": "2.13.0+cu130",
+    "transformers": "5.17.0"
+  },
+  "format": "basisserve.llama31_8b_instruct.iclr_quality.wikitext2.v1",
+  "metrics": {
+    "batch_size": 2,
+    "chunks": 141,
+    "dataset": "wikitext2",
+    "loss_dtype": "float32",
+    "nll_sum": 570430.046875,
+    "ppl": 7.216407051043828,
+    "seqlen": 2048,
+    "split": "test",
+    "tokens": 288627
+  },
+  "model": {
+    "config_sha256": "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+    "huggingface_repo": "meta-llama/Llama-3.1-8B-Instruct",
+    "path": "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "safetensors_index_sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+  },
+  "protocol": {
+    "full_test_corpus": true,
+    "loss_dtype": "float32"
+  },
+  "run_id": "L31-8B-I-Dense",
+  "runtime": {
+    "attention_implementation": "sdpa",
+    "cuda_device_names": [
+      "NVIDIA L40S"
+    ],
+    "cuda_devices_used": [
+      0
+    ],
+    "device_map": "balanced",
+    "installation": [],
+    "model_dtype": "torch.bfloat16",
+    "quality_shard_count": 1,
+    "quality_shard_index": 0
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-20T10:02:30.277403+00:00"
+}

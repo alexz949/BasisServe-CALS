@@ -1,0 +1,1547 @@
+{
+  "average_accuracy": 0.6730597887437548,
+  "checkpoint": {
+    "artifact_sha256": "5140b1b8d0626f9dd21beec2fc563fe59a55c48336b608c777be618377388b6d",
+    "directory": "/workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/c1/two-sided-kl/R64-D0-S8",
+    "format": "basisserve.llama31_8b_instruct.iclr_v_factors.v1",
+    "manifest_sha256": "142a9d81764fc23d4274509e0d741791455db62a1aa6837df504d35294bffcb7"
+  },
+  "command": "evaluation/eval_llama31_8b_instruct_iclr_quality.py --run-id L31-8B-I-C1-R64 --model /workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659 --checkpoint-dir /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/c1/two-sided-kl/R64-D0-S8 --c4-windows /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/calibration/c4_validation_128x2048/windows.safetensors --output-dir /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/quality/L31-8B-I-C1-R64 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8 --expected-gpu-count 1",
+  "compression": {
+    "allocation": "two_sided_factorized_terminal_kl_alpha1",
+    "candidate_ranks": [
+      32,
+      48,
+      64,
+      80,
+      96,
+      112,
+      128
+    ],
+    "checkpoint_policy": "fixed decoder-refitted endpoint after encoder sweep 6",
+    "decoder_objective": "full_layer",
+    "dense_rank_sum_across_layers": 32768,
+    "encoder_initialization": "activation-weighted-svd",
+    "encoder_sweeps": 6,
+    "equivalent_rank_target": 64,
+    "head_dim": 128,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      [
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112
+      ],
+      [
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112
+      ],
+      [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      [
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      [
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112
+      ],
+      [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        96
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ]
+    ],
+    "method": "c1-two-sided-kl",
+    "method_label": "C1 + Two-Sided KL",
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "profiling_anchor_rank": 64,
+    "projection": "joint_v_o",
+    "rank_sum_across_layers": 16384,
+    "realized_retained_v_ratio": 0.5,
+    "realized_v_cache_compression_ratio": 0.5,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds": 610.033913647756,
+  "environment": {
+    "conda_environment": "basis",
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ],
+    "cuda_visible_devices": "7",
+    "datasets": "5.0.0",
+    "lm_eval": "0.4.11",
+    "python": "3.12.14 (main, Sep  2 2026, 23:27:36) [GCC 15.3.0]",
+    "slurm_array_task_id": null,
+    "slurm_job_id": null,
+    "torch": "2.13.0+cu130",
+    "transformers": "5.17.0"
+  },
+  "evaluation": {
+    "config": {
+      "batch_size": null,
+      "batch_sizes": [],
+      "bootstrap_iters": 100000,
+      "device": null,
+      "fewshot_seed": 1234,
+      "gen_kwargs": null,
+      "limit": null,
+      "model": "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+      "model_args": null,
+      "model_dtype": "torch.bfloat16",
+      "model_num_parameters": 8030261248,
+      "model_revision": "main",
+      "model_sha": "",
+      "numpy_seed": 1234,
+      "random_seed": 0,
+      "torch_seed": 1234,
+      "use_cache": null
+    },
+    "configs": {
+      "arc_challenge": {
+        "dataset_name": "ARC-Challenge",
+        "dataset_path": "allenai/ai2_arc",
+        "description": "",
+        "doc_to_choice": "{{choices.text}}",
+        "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+        "doc_to_target": "{{choices.label.index(answerKey)}}",
+        "doc_to_text": "Question: {{question}}\nAnswer:",
+        "fewshot_config": {
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "tag": [
+          "ai2_arc"
+        ],
+        "target_delimiter": " ",
+        "task": "arc_challenge",
+        "test_split": "test",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "arc_easy": {
+        "dataset_name": "ARC-Easy",
+        "dataset_path": "allenai/ai2_arc",
+        "description": "",
+        "doc_to_choice": "{{choices.text}}",
+        "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+        "doc_to_target": "{{choices.label.index(answerKey)}}",
+        "doc_to_text": "Question: {{question}}\nAnswer:",
+        "fewshot_config": {
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "tag": [
+          "ai2_arc"
+        ],
+        "target_delimiter": " ",
+        "task": "arc_easy",
+        "test_split": "test",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "boolq": {
+        "dataset_name": "boolq",
+        "dataset_path": "aps/super_glue",
+        "description": "",
+        "doc_to_choice": [
+          "no",
+          "yes"
+        ],
+        "doc_to_decontamination_query": "passage",
+        "doc_to_target": "label",
+        "doc_to_text": "{{passage}}\nQuestion: {{question}}?\nAnswer:",
+        "fewshot_config": {
+          "doc_to_choice": [
+            "no",
+            "yes"
+          ],
+          "doc_to_target": "label",
+          "doc_to_text": "{{passage}}\nQuestion: {{question}}?\nAnswer:",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 2.0
+        },
+        "metric_list": [
+          {
+            "metric": "acc"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "tag": [
+          "super-glue-lm-eval-v1"
+        ],
+        "target_delimiter": " ",
+        "task": "boolq",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "hellaswag": {
+        "dataset_path": "Rowan/hellaswag",
+        "description": "",
+        "doc_to_choice": "choices",
+        "doc_to_target": "{{label}}",
+        "doc_to_text": "{{query}}",
+        "fewshot_config": {
+          "doc_to_choice": "choices",
+          "doc_to_target": "{{label}}",
+          "doc_to_text": "{{query}}",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": "<function process_docs at 0x7f38501ce520>",
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc):\n        ctx = doc[\"ctx_a\"] + \" \" + doc[\"ctx_b\"].capitalize()\n        out_doc = {\n            \"query\": preprocess(doc[\"activity_label\"] + \": \" + ctx),\n            \"choices\": [preprocess(ending) for ending in doc[\"endings\"]],\n            \"gold\": int(doc[\"label\"]),\n        }\n        return out_doc\n\n    return dataset.map(_process_doc)\n",
+        "repeats": 1,
+        "should_decontaminate": false,
+        "tag": [
+          "multiple_choice"
+        ],
+        "target_delimiter": " ",
+        "task": "hellaswag",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "openbookqa": {
+        "dataset_name": "main",
+        "dataset_path": "allenai/openbookqa",
+        "description": "",
+        "doc_to_choice": "{{choices.text}}",
+        "doc_to_decontamination_query": "question_stem",
+        "doc_to_target": "{{choices.label.index(answerKey.lstrip())}}",
+        "doc_to_text": "question_stem",
+        "fewshot_config": {
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_target": "{{choices.label.index(answerKey.lstrip())}}",
+          "doc_to_text": "question_stem",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "target_delimiter": " ",
+        "task": "openbookqa",
+        "test_split": "test",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "piqa": {
+        "dataset_path": "baber/piqa",
+        "description": "",
+        "doc_to_choice": "{{[sol1, sol2]}}",
+        "doc_to_decontamination_query": "goal",
+        "doc_to_target": "label",
+        "doc_to_text": "Question: {{goal}}\nAnswer:",
+        "fewshot_config": {
+          "doc_to_choice": "{{[sol1, sol2]}}",
+          "doc_to_target": "label",
+          "doc_to_text": "Question: {{goal}}\nAnswer:",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          },
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc_norm"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "target_delimiter": " ",
+        "task": "piqa",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      },
+      "winogrande": {
+        "dataset_name": "winogrande_xl",
+        "dataset_path": "allenai/winogrande",
+        "description": "",
+        "doc_to_choice": "def doc_to_choice(doc):\n    idx = doc[\"sentence\"].index(\"_\")\n    options = [doc[\"option1\"], doc[\"option2\"]]\n    return [doc[\"sentence\"][:idx] + opt for opt in options]\n",
+        "doc_to_decontamination_query": "sentence",
+        "doc_to_target": "def doc_to_target(doc):\n    idx = doc[\"sentence\"].index(\"_\") + 1\n    return doc[\"sentence\"][idx:].strip()\n",
+        "doc_to_text": "def doc_to_text(doc):\n    answer_to_num = {\"1\": 0, \"2\": 1}\n    return answer_to_num[doc[\"answer\"]]\n",
+        "fewshot_config": {
+          "doc_to_choice": "<function doc_to_choice at 0x7f37b363cfe0>",
+          "doc_to_target": "<function doc_to_target at 0x7f37b363cc20>",
+          "doc_to_text": "<function doc_to_text at 0x7f37b363c860>",
+          "fewshot_delimiter": "\n\n",
+          "fewshot_indices": null,
+          "gen_prefix": null,
+          "process_docs": null,
+          "sampler": "default",
+          "samples": null,
+          "split": null,
+          "target_delimiter": " "
+        },
+        "fewshot_delimiter": "\n\n",
+        "metadata": {
+          "version": 1.0
+        },
+        "metric_list": [
+          {
+            "aggregation": "mean",
+            "higher_is_better": true,
+            "metric": "acc"
+          }
+        ],
+        "num_fewshot": 0,
+        "output_type": "multiple_choice",
+        "repeats": 1,
+        "should_decontaminate": true,
+        "target_delimiter": " ",
+        "task": "winogrande",
+        "training_split": "train",
+        "unsafe_code": false,
+        "validation_split": "validation"
+      }
+    },
+    "date": 1789898577.495841,
+    "eot_token_id": 128009,
+    "git_hash": "8fd0c91",
+    "group_subtasks": {
+      "arc_challenge": [],
+      "arc_easy": [],
+      "boolq": [],
+      "hellaswag": [],
+      "openbookqa": [],
+      "piqa": [],
+      "winogrande": []
+    },
+    "higher_is_better": {
+      "arc_challenge": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "arc_easy": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "boolq": {
+        "acc": true
+      },
+      "hellaswag": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "openbookqa": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "piqa": {
+        "acc": true,
+        "acc_norm": true
+      },
+      "winogrande": {
+        "acc": true
+      }
+    },
+    "lm_eval_version": "0.4.11",
+    "max_length": 4096,
+    "n-samples": {
+      "arc_challenge": {
+        "effective": 1172,
+        "original": 1172
+      },
+      "arc_easy": {
+        "effective": 2376,
+        "original": 2376
+      },
+      "boolq": {
+        "effective": 3270,
+        "original": 3270
+      },
+      "hellaswag": {
+        "effective": 10042,
+        "original": 10042
+      },
+      "openbookqa": {
+        "effective": 500,
+        "original": 500
+      },
+      "piqa": {
+        "effective": 1838,
+        "original": 1838
+      },
+      "winogrande": {
+        "effective": 1267,
+        "original": 1267
+      }
+    },
+    "n-shot": {
+      "arc_challenge": 0,
+      "arc_easy": 0,
+      "boolq": 0,
+      "hellaswag": 0,
+      "openbookqa": 0,
+      "piqa": 0,
+      "winogrande": 0
+    },
+    "pretty_env_info": "PyTorch version: 2.13.0+cu130\nIs debug build: False\nCUDA used to build PyTorch: 13.0\nROCM used to build PyTorch: N/A\n\nOS: Ubuntu 24.04.3 LTS (x86_64)\nGCC version: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\nClang version: Could not collect\nCMake version: version 3.28.3\nLibc version: glibc-2.39\n\nPython version: 3.12.14 (main, Sep  2 2026, 23:27:36) [GCC 15.3.0] (64-bit runtime)\nPython platform: Linux-6.8.0-134-generic-x86_64-with-glibc2.39\nIs CUDA available: True\nCUDA runtime version: 12.8.93\nCUDA_MODULE_LOADING set to: \nGPU models and configuration: \nGPU 0: NVIDIA L40S\nGPU 1: NVIDIA L40S\nGPU 2: NVIDIA L40S\nGPU 3: NVIDIA L40S\nGPU 4: NVIDIA L40S\nGPU 5: NVIDIA L40S\nGPU 6: NVIDIA L40S\nGPU 7: NVIDIA L40S\n\nNvidia driver version: 580.178.04\ncuDNN version: Probably one of the following:\n/usr/lib/x86_64-linux-gnu/libcudnn.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_adv.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_cnn.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_engines_precompiled.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_engines_runtime_compiled.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_graph.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_heuristic.so.9.8.0\n/usr/lib/x86_64-linux-gnu/libcudnn_ops.so.9.8.0\nIs XPU available: False\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: False\nCaching allocator config: N/A\n\nCPU:\nArchitecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           52 bits physical, 57 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  128\nOn-line CPU(s) list:                     0-127\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9354 32-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      32\nSocket(s):                               2\nStepping:                                1\nBogoMIPS:                                6489.78\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc amd_ibpb_ret arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid overflow_recov succor smca fsrm flush_l1d debug_swap ibpb_exit_to_user\nVirtualization:                          AMD-V\nL1d cache:                               2 MiB (64 instances)\nL1i cache:                               2 MiB (64 instances)\nL2 cache:                                64 MiB (64 instances)\nL3 cache:                                512 MiB (16 instances)\nNUMA node(s):                            2\nNUMA node0 CPU(s):                       0-31,64-95\nNUMA node1 CPU(s):                       32-63,96-127\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Mitigation; Safe RET\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; STIBP always-on; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: Clear CPU buffers attempted, no microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Mitigation; IBPB before exit to userspace\n\nVersions of relevant libraries:\n[pip3] nccl4py==0.5.0\n[pip3] numpy==2.3.5\n[pip3] nvidia-cublas==13.1.1.3\n[pip3] nvidia-cuda-cupti==13.0.85\n[pip3] nvidia-cuda-nvrtc==13.0.88\n[pip3] nvidia-cuda-runtime==13.0.96\n[pip3] nvidia-cudnn-cu13==9.20.0.48\n[pip3] nvidia-cudnn-frontend==1.29.0\n[pip3] nvidia-cufft==12.0.0.61\n[pip3] nvidia-curand==10.4.0.35\n[pip3] nvidia-cusolver==12.0.4.66\n[pip3] nvidia-cusparse==12.6.3.3\n[pip3] nvidia-cusparselt-cu13==0.8.1\n[pip3] nvidia-nccl-cu13==2.29.7\n[pip3] nvidia-nvjitlink==13.4.92\n[pip3] nvidia-nvtx==13.0.85\n[pip3] nvtx==0.2.15\n[pip3] tokenspeed-triton==3.8.10.post20260906\n[pip3] torch==2.13.0\n[pip3] torch_c_dlpack_ext==0.1.5\n[pip3] torchaudio==2.11.0\n[pip3] torchcodec==0.16.0\n[pip3] torchvision==0.28.0\n[pip3] triton==3.7.1\n[conda] Could not collect",
+    "results": {
+      "arc_challenge": {
+        "acc,none": 0.44197952218430037,
+        "acc_norm,none": 0.48976109215017066,
+        "acc_norm_stderr,none": 0.014608326906285005,
+        "acc_stderr,none": 0.014512682523128238,
+        "alias": "arc_challenge"
+      },
+      "arc_easy": {
+        "acc,none": 0.765993265993266,
+        "acc_norm,none": 0.7352693602693603,
+        "acc_norm_stderr,none": 0.009053021086174166,
+        "acc_stderr,none": 0.008687500578023108,
+        "alias": "arc_easy"
+      },
+      "boolq": {
+        "acc,none": 0.8305810397553517,
+        "acc_stderr,none": 0.006560917129050213,
+        "alias": "boolq"
+      },
+      "hellaswag": {
+        "acc,none": 0.5396335391356304,
+        "acc_norm,none": 0.7392949611631149,
+        "acc_norm_stderr,none": 0.004381220409641032,
+        "acc_stderr,none": 0.004974080638364335,
+        "alias": "hellaswag"
+      },
+      "openbookqa": {
+        "acc,none": 0.296,
+        "acc_norm,none": 0.422,
+        "acc_norm_stderr,none": 0.022109039310618563,
+        "acc_stderr,none": 0.020435342091896222,
+        "alias": "openbookqa"
+      },
+      "piqa": {
+        "acc,none": 0.7769314472252449,
+        "acc_norm,none": 0.7731229597388466,
+        "acc_norm_stderr,none": 0.009771584259215295,
+        "acc_stderr,none": 0.009713057213018484,
+        "alias": "piqa"
+      },
+      "winogrande": {
+        "acc,none": 0.7213891081294396,
+        "acc_stderr,none": 0.012599896649493741,
+        "alias": "winogrande"
+      }
+    },
+    "tokenizer_bos_token": [
+      "<|begin_of_text|>",
+      "128000"
+    ],
+    "tokenizer_eos_token": [
+      "<|eot_id|>",
+      "128009"
+    ],
+    "tokenizer_pad_token": [
+      "<|eot_id|>",
+      "128009"
+    ],
+    "transformers_version": "5.17.0",
+    "upper_git_hash": null,
+    "versions": {
+      "arc_challenge": 1.0,
+      "arc_easy": 1.0,
+      "boolq": 2.0,
+      "hellaswag": 1.0,
+      "openbookqa": 1.0,
+      "piqa": 1.0,
+      "winogrande": 1.0
+    }
+  },
+  "format": "basisserve.llama31_8b_instruct.iclr_quality.commonsense.v1",
+  "model": {
+    "config_sha256": "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+    "huggingface_repo": "meta-llama/Llama-3.1-8B-Instruct",
+    "path": "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "safetensors_index_sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+  },
+  "protocol": {
+    "apply_chat_template": false,
+    "batch_size": 8,
+    "max_length": 4096,
+    "metric_selection": "acc_norm when present, otherwise acc",
+    "num_fewshot": 0,
+    "quality_shard_count": 1,
+    "quality_shard_index": 0,
+    "tasks": [
+      "arc_easy",
+      "arc_challenge",
+      "hellaswag",
+      "piqa",
+      "winogrande",
+      "boolq",
+      "openbookqa"
+    ]
+  },
+  "run_id": "L31-8B-I-C1-R64",
+  "runtime": {
+    "attention_implementation": "sdpa",
+    "cuda_device_names": [
+      "NVIDIA L40S"
+    ],
+    "cuda_devices_used": [
+      0
+    ],
+    "device_map": "balanced",
+    "installation": [
+      {
+        "elapsed_seconds": 0.05835438892245293,
+        "factor_file": "selected_factors/layer_000.safetensors",
+        "factor_sha256": "aee053cbe0ac7033d704a461e7bdb1a66e0a43d57afd943b7919cd0025ee3111",
+        "layer": 0,
+        "maximum_padded_rank": 96,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.0322863538749516,
+        "factor_file": "selected_factors/layer_001.safetensors",
+        "factor_sha256": "f32c8116c6c988fe03e2e3008d7428e821f01e020f26eb3b641034b67c3caaf9",
+        "layer": 1,
+        "maximum_padded_rank": 96,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02463726280257106,
+        "factor_file": "selected_factors/layer_002.safetensors",
+        "factor_sha256": "8c458e8a6e70ff0bcc10f83229443e26a6e10961d8f2038751c42a5caa179e97",
+        "layer": 2,
+        "maximum_padded_rank": 80,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.033376434817910194,
+        "factor_file": "selected_factors/layer_003.safetensors",
+        "factor_sha256": "fccc53e0862f7474268f74802461f1b41b802190be379c21cc96b7039d36424f",
+        "layer": 3,
+        "maximum_padded_rank": 112,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03414322296157479,
+        "factor_file": "selected_factors/layer_004.safetensors",
+        "factor_sha256": "0e7c32aa1d2221b8eb5f95bdecec44d93f3402ff9df2c1de713d17e93130356a",
+        "layer": 4,
+        "maximum_padded_rank": 112,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112
+        ]
+      },
+      {
+        "elapsed_seconds": 0.024535059928894043,
+        "factor_file": "selected_factors/layer_005.safetensors",
+        "factor_sha256": "49d02db6c7294fb0ee7f7a68fe6672e67003e3a4baed01b3332c0a8522949f2e",
+        "layer": 5,
+        "maximum_padded_rank": 80,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.032594624906778336,
+        "factor_file": "selected_factors/layer_006.safetensors",
+        "factor_sha256": "5ff1ec1f761e7648f0548659dc61a1ca485081c7fb63d895c47991b8650f573f",
+        "layer": 6,
+        "maximum_padded_rank": 112,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112
+        ]
+      },
+      {
+        "elapsed_seconds": 0.029215727001428604,
+        "factor_file": "selected_factors/layer_007.safetensors",
+        "factor_sha256": "879b6d8e27c26f66aac0735f9e02e81fb0360c63615bc1a67d50ec3bc8f2664f",
+        "layer": 7,
+        "maximum_padded_rank": 96,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.024179857689887285,
+        "factor_file": "selected_factors/layer_008.safetensors",
+        "factor_sha256": "88e96eae2d32672ca8864f53f68ddc36ba853da9ad1662b8cb2f9bcf2b11366f",
+        "layer": 8,
+        "maximum_padded_rank": 80,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.014610021840780973,
+        "factor_file": "selected_factors/layer_009.safetensors",
+        "factor_sha256": "e9d0d915b20f7c34d2ba75585161004a9d0d64ff0547a123d203e5f70749e8ed",
+        "layer": 9,
+        "maximum_padded_rank": 64,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.014539666008204222,
+        "factor_file": "selected_factors/layer_010.safetensors",
+        "factor_sha256": "c51290b227d5178b0be55da9b1fcff4987f207e89757caa20db8e5b8d1ff8205",
+        "layer": 10,
+        "maximum_padded_rank": 64,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.014451934956014156,
+        "factor_file": "selected_factors/layer_011.safetensors",
+        "factor_sha256": "17bede3ba7d00abef7721351e198d70f469407ed1e7e077f8802c8af6196e047",
+        "layer": 11,
+        "maximum_padded_rank": 64,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.019074474927037954,
+        "factor_file": "selected_factors/layer_012.safetensors",
+        "factor_sha256": "ccb4d897e8e1a856ebcf5944e420e068fbba0efb77f2789e6f48abefae82dea7",
+        "layer": 12,
+        "maximum_padded_rank": 64,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.029123038053512573,
+        "factor_file": "selected_factors/layer_013.safetensors",
+        "factor_sha256": "001a0fb838af14a714bfe438182cd076a13abb718b8c1c4285db0642f4769aa5",
+        "layer": 13,
+        "maximum_padded_rank": 80,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.026913610752671957,
+        "factor_file": "selected_factors/layer_014.safetensors",
+        "factor_sha256": "b57bcd7c4090aeee2cad52223490f771f26f390b3e82ee2332c09d3dd91f118d",
+        "layer": 14,
+        "maximum_padded_rank": 80,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.03317529521882534,
+        "factor_file": "selected_factors/layer_015.safetensors",
+        "factor_sha256": "80d7a762cac89ceac215eaa51d0b7f99037184f0e4dfff3d23337723eb06bee7",
+        "layer": 15,
+        "maximum_padded_rank": 112,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112,
+          112
+        ]
+      },
+      {
+        "elapsed_seconds": 0.024624994955956936,
+        "factor_file": "selected_factors/layer_016.safetensors",
+        "factor_sha256": "5a43d6a7a78896133d26b079f93e2dc50cd8cc383bd401d45eb62c86e0e6a92a",
+        "layer": 16,
+        "maximum_padded_rank": 80,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80,
+          80
+        ]
+      },
+      {
+        "elapsed_seconds": 0.02858621533960104,
+        "factor_file": "selected_factors/layer_017.safetensors",
+        "factor_sha256": "9af6fc0064992012690d58b44891f756f6c50720f4a07939551f2ecea323df59",
+        "layer": 17,
+        "maximum_padded_rank": 96,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96
+        ]
+      },
+      {
+        "elapsed_seconds": 0.014532165136188269,
+        "factor_file": "selected_factors/layer_018.safetensors",
+        "factor_sha256": "3ee29eaacbcaf724ecca0a71d42fcf0750d36d9419078d294b12c1cf3ea3ccd4",
+        "layer": 18,
+        "maximum_padded_rank": 64,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64
+        ]
+      },
+      {
+        "elapsed_seconds": 0.008326274808496237,
+        "factor_file": "selected_factors/layer_019.safetensors",
+        "factor_sha256": "67fda6803e405e59af2a8d38ca210b1a25ef03b9b70754db7ecc69b2a82110ce",
+        "layer": 19,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.007892795838415623,
+        "factor_file": "selected_factors/layer_020.safetensors",
+        "factor_sha256": "41b9e6473a7f6438e1e72364d0f24b7f1b5905e4ab8e3dd5849df009fbb5330c",
+        "layer": 20,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.007910982705652714,
+        "factor_file": "selected_factors/layer_021.safetensors",
+        "factor_sha256": "75fdd83d5cc33c3312f832fc9ea2234c073ff9616f2c8b605a4a8c3451ccef56",
+        "layer": 21,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.007751763798296452,
+        "factor_file": "selected_factors/layer_022.safetensors",
+        "factor_sha256": "8634de6649591f32cbbc1d48ca101dadfec244e254442979b015ff2e720b03a8",
+        "layer": 22,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.008553195279091597,
+        "factor_file": "selected_factors/layer_023.safetensors",
+        "factor_sha256": "cf746fd8a4c523a3642bcdd5b77a835a636f82c33c17c2df10a83a581d1be37b",
+        "layer": 23,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.007782651111483574,
+        "factor_file": "selected_factors/layer_024.safetensors",
+        "factor_sha256": "7f01569228cf5673c378c9c0e4676ba7c0b5214db5ffcaddb80fda42ab53d2db",
+        "layer": 24,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.007773677818477154,
+        "factor_file": "selected_factors/layer_025.safetensors",
+        "factor_sha256": "b70cfa419c2ee9ce02859421ee4a0d752564b6d55c30917db4d96364ccd1f0a1",
+        "layer": 25,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.008289368823170662,
+        "factor_file": "selected_factors/layer_026.safetensors",
+        "factor_sha256": "43571c876af15847a95eba405b9146de3456c7e7b89a2b9dc152f837a524ee49",
+        "layer": 26,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.007762120105326176,
+        "factor_file": "selected_factors/layer_027.safetensors",
+        "factor_sha256": "9e15056df2e6cc9edfc36be5303471d76b95c2782d3855d314f26532b7cad942",
+        "layer": 27,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.007733968086540699,
+        "factor_file": "selected_factors/layer_028.safetensors",
+        "factor_sha256": "c149e3c07f4e76931009f14f34cf692663a38917413f59bb1a18c0e799e5722b",
+        "layer": 28,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.008678031153976917,
+        "factor_file": "selected_factors/layer_029.safetensors",
+        "factor_sha256": "e9639a3ad7cfd07d4eb6a0b6f22106a78f24fe14b2da4f6027bdded10b39dd12",
+        "layer": 29,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.008075499907135963,
+        "factor_file": "selected_factors/layer_030.safetensors",
+        "factor_sha256": "0c36d133f95d9e850925a290c5358bf2a85ade12aa05316a09f1710e9028b6bb",
+        "layer": 30,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      {
+        "elapsed_seconds": 0.008016221225261688,
+        "factor_file": "selected_factors/layer_031.safetensors",
+        "factor_sha256": "9b3e19b8bcb1a2c221bf90f190265a8f45f0905713c56e2949d0499c7c8163a4",
+        "layer": 31,
+        "maximum_padded_rank": 32,
+        "runtime": "C1 coordinates zero-padded into dense HF V/O slots",
+        "source_ranks": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    ],
+    "model_dtype": "torch.bfloat16",
+    "quality_shard_count": 1,
+    "quality_shard_index": 0
+  },
+  "status": "complete",
+  "task_accuracy": [
+    {
+      "metric": "acc_norm",
+      "task": "arc_easy",
+      "value": 0.7352693602693603
+    },
+    {
+      "metric": "acc_norm",
+      "task": "arc_challenge",
+      "value": 0.48976109215017066
+    },
+    {
+      "metric": "acc_norm",
+      "task": "hellaswag",
+      "value": 0.7392949611631149
+    },
+    {
+      "metric": "acc_norm",
+      "task": "piqa",
+      "value": 0.7731229597388466
+    },
+    {
+      "metric": "acc",
+      "task": "winogrande",
+      "value": 0.7213891081294396
+    },
+    {
+      "metric": "acc",
+      "task": "boolq",
+      "value": 0.8305810397553517
+    },
+    {
+      "metric": "acc_norm",
+      "task": "openbookqa",
+      "value": 0.422
+    }
+  ],
+  "timestamp_utc": "2026-09-20T10:13:04.942414+00:00"
+}

@@ -1,0 +1,249 @@
+{
+  "checkpoint": {
+    "artifact_sha256": "8e0c3377515cc04d774794e76afae4b914be16ab6cfb3cc4bba4eb13985f18ca",
+    "directory": "/workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/checkpoints/L31-8B-I-PALUG4-R96",
+    "format": "basisserve.llama31_8b_instruct.iclr_v_factors.v1",
+    "manifest_sha256": "a8618a44bb6173e980eecb161c0f90e228993427969c170196a5546f6701319b"
+  },
+  "command": "evaluation/eval_llama31_8b_instruct_iclr_quality.py --run-id L31-8B-I-PALUG4-R96 --model /workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659 --checkpoint-dir /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/checkpoints/L31-8B-I-PALUG4-R96 --c4-windows /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/calibration/c4_validation_128x2048/windows.safetensors --output-dir /workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/quality/L31-8B-I-PALUG4-R96 --batch-size 2 --lm-eval-batch-size 8 --max-memory-per-gpu-gib 44 --torch-num-threads 8 --expected-gpu-count 1",
+  "compression": {
+    "allocation": "official_palu_fisher_uniform",
+    "dense_rank_sum_across_layers": 32768,
+    "equivalent_rank_target": 96,
+    "factorization_work_device": "cpu",
+    "factorization_work_dtype": "torch.float64",
+    "group_width": 512,
+    "groups": 2,
+    "head_dim": 128,
+    "head_group_size": 4,
+    "key_cache": "dense",
+    "layer_ranks": [
+      [
+        512,
+        512
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        480,
+        480
+      ],
+      [
+        416,
+        416
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        480,
+        480
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        480,
+        480
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        448,
+        448
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        224,
+        224
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        320,
+        320
+      ],
+      [
+        256,
+        256
+      ],
+      [
+        288,
+        288
+      ],
+      [
+        256,
+        256
+      ]
+    ],
+    "method": "palu-fisher",
+    "method_label": "PaLU G-LRD4",
+    "nominal_group_rank": 384,
+    "nominal_retained_v_ratio": 0.75,
+    "nominal_v_cache_compression_ratio": 0.25,
+    "num_physical_kv_heads": 8,
+    "num_query_heads": 32,
+    "projection": "v",
+    "rank_block_size": 32,
+    "rank_sum_across_layers": 24576,
+    "realized_retained_v_ratio": 0.75,
+    "realized_v_cache_compression_ratio": 0.25,
+    "stored_factor_dtype": "torch.bfloat16",
+    "target": "value_cache_only",
+    "value_cache": "low_rank"
+  },
+  "elapsed_seconds_this_attempt": 673.6511415182613,
+  "environment": {
+    "conda_environment": "basis",
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ],
+    "datasets": "5.0.0",
+    "lm_eval": "0.4.11",
+    "peak_cuda_allocated_bytes": {
+      "0": 21293131264
+    },
+    "python": "3.12.14 (main, Sep  2 2026, 23:27:36) [GCC 15.3.0]",
+    "torch": "2.13.0+cu130",
+    "torch_num_threads": 8,
+    "transformers": "5.17.0"
+  },
+  "format": "basisserve.llama31_8b_instruct.iclr_quality.v1",
+  "metrics": {
+    "average_accuracy": 0.6977968309075145,
+    "c4_validation_128_ppl": 10.655474267301473,
+    "task_accuracy": [
+      {
+        "metric": "acc_norm",
+        "task": "arc_easy",
+        "value": 0.7790404040404041
+      },
+      {
+        "metric": "acc_norm",
+        "task": "arc_challenge",
+        "value": 0.5290102389078498
+      },
+      {
+        "metric": "acc_norm",
+        "task": "hellaswag",
+        "value": 0.7815176259709221
+      },
+      {
+        "metric": "acc_norm",
+        "task": "piqa",
+        "value": 0.7916213275299239
+      },
+      {
+        "metric": "acc",
+        "task": "winogrande",
+        "value": 0.7363851617995264
+      },
+      {
+        "metric": "acc",
+        "task": "boolq",
+        "value": 0.8370030581039756
+      },
+      {
+        "metric": "acc_norm",
+        "task": "openbookqa",
+        "value": 0.43
+      }
+    ],
+    "wikitext2_ppl": 7.982196386645625
+  },
+  "model": {
+    "config_sha256": "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+    "huggingface_repo": "meta-llama/Llama-3.1-8B-Instruct",
+    "path": "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "safetensors_index_sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+  },
+  "run_id": "L31-8B-I-PALUG4-R96",
+  "stages": {
+    "c4": {
+      "file": "c4.json",
+      "sha256": "6975ef0ace0b0af7f6c239ac2735e5a79d185802ccd31a4210f8081507b856bb"
+    },
+    "commonsense": {
+      "file": "commonsense.json",
+      "sha256": "49688a8439e5fbf813254068afba35ea28ddb5a66ab69a3b39440289256b9f72"
+    },
+    "wikitext2": {
+      "file": "wikitext2.json",
+      "sha256": "9b847940c57064731f1cc9dd11002f9a1829cd76222edb906bd227e48bfdd076"
+    }
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-20T10:13:02.402258+00:00"
+}
