@@ -73,17 +73,24 @@ class C1ShadowKVState:
         return torch.cat((rotated,pre[...,width:]),dim=-1)
 
     @torch.inference_mode()
-    def decode(self,query,current_key,resident_value,scale):
-        assert current_key.shape[2]==1 and resident_value.shape[2]==self.length+1
+    def route(self,query,current_key):
+        assert current_key.shape[2]==1
         self.generated_key=torch.cat((self.generated_key,current_key),2)
         self.length+=1;self.steps+=1
         routed=self.select(query)
         reconstructed=self.reconstruct(routed)
-        b,h=resident_value.shape[:2]
+        b,h=current_key.shape[:2]
         generated=torch.arange(self.prompt_length,self.length,device=query.device).view(1,1,-1).expand(b,h,-1)
         self.selected_ids=torch.cat((self.fixed_ids,routed,generated),-1)
         key=torch.cat((self.fixed_key,reconstructed,self.generated_key),2)
-        value=gather_group(resident_value,self.selected_ids)
+        return key,self.selected_ids
+
+    @torch.inference_mode()
+    def decode(self,query,current_key,resident_value,scale):
+        assert resident_value.shape[2]==self.length+1
+        key,selected_ids=self.route(query,current_key)
+        value=gather_group(resident_value,selected_ids)
+        h=resident_value.shape[1]
         groups=query.shape[1]//h
         assert torch.isfinite(key).all() and key.dtype==value.dtype==query.dtype
         if query.is_cuda and query.dtype in (torch.float16,torch.bfloat16) and value.shape[-1]<=query.shape[-1]:
