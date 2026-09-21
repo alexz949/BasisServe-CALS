@@ -1,0 +1,10 @@
+status=running
+{"context": 8192, "gpu": "NVIDIA L40S", "measure_steps": 4, "mode": "optimized", "status": "starting", "storage": "offload", "warmup_steps": 0}
+{"status": "extensions_ready"}
+{"allocated_gib": 15.614878177642822, "host_exact_key_gib": 0.500244140625, "status": "model_ready"}
+{"peak_allocated_gib": 16.095530033111572, "prefill_ms": 1379.00439453125, "status": "prefill_complete"}
+{"argmax": 11, "cuda_ms": 351.028076171875, "finite": true, "measured": true, "status": "decode_step", "step": 0, "wall_ms": 351.02149192243814}
+{"argmax": 13, "cuda_ms": 31.8887996673584, "finite": true, "measured": true, "status": "decode_step", "step": 1, "wall_ms": 31.906581949442625}
+{"argmax": 9259, "cuda_ms": 31.692768096923828, "finite": true, "measured": true, "status": "decode_step", "step": 2, "wall_ms": 31.71013994142413}
+{"argmax": 7876, "cuda_ms": 31.66054344177246, "finite": true, "measured": true, "status": "decode_step", "step": 3, "wall_ms": 31.680654734373093}
+{"decode_cuda_median_ms": 31.790783882141113, "decode_wall_median_ms": 31.808360945433378, "result": "results/system_benchmarks/tp1_sparse_full_v6/smoke_optimized_offload_t8192_r0/benchmark.json", "status": "complete", "validated_layers": 32}

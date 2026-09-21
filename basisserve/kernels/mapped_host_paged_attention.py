@@ -13,10 +13,11 @@ import torch
 from torch import Tensor
 
 
-_EXTENSION_BASENAME = "basisserve_mapped_host_paged_attention_v5"
+_EXTENSION_BASENAME = "basisserve_mapped_host_paged_attention_v6"
 _QK_DIM = 128
 _DEFAULT_SPLITS = 32
 _MAX_SPLITS = 128
+_MAPPED_POINTER_ATTRIBUTE = "_basisserve_mapped_device_pointer"
 
 
 @lru_cache(maxsize=None)
@@ -207,6 +208,8 @@ def conditional_router_append_decode(
     rope_sin_cache: Tensor,
     start: int,
     write_rope: bool,
+    mapped_host_key: Tensor | None = None,
+    mapped_host_key_device_pointer: int | None = None,
 ) -> None:
     """Append one C1 routing token with one shape-specialized CUDA kernel."""
 
@@ -240,7 +243,8 @@ def conditional_router_append_decode(
         capacity,
         residual_rank,
     )
-    assert tuple(rope_cos_cache.shape) == (capacity, _QK_DIM // 2)
+    expected_rope_rows = capacity if write_rope else 1
+    assert tuple(rope_cos_cache.shape) == (expected_rope_rows, _QK_DIM // 2)
     assert tuple(rope_sin_cache.shape) == tuple(rope_cos_cache.shape)
     tensors = (
         key,
@@ -265,6 +269,26 @@ def conditional_router_append_decode(
     assert base_bias.is_contiguous() and residual_encoder.is_contiguous()
     assert 0 <= int(start) < capacity
     assert torch.cuda.get_device_capability(key.device)[0] >= 8
+    if mapped_host_key is None:
+        assert mapped_host_key_device_pointer is None
+        mapped_pointer = 0
+        mapped_capacity = 0
+    else:
+        assert mapped_host_key.device.type == "cpu"
+        assert mapped_host_key.dtype == torch.bfloat16
+        assert mapped_host_key.is_contiguous()
+        assert tuple(mapped_host_key.shape) == (
+            batch,
+            kv_heads,
+            capacity,
+            _QK_DIM,
+        )
+        mapped_pointer = (
+            mapped_host_device_pointer(mapped_host_key)
+            if mapped_host_key_device_pointer is None
+            else int(mapped_host_key_device_pointer)
+        )
+        mapped_capacity = capacity
     _load_extension(value_dim=value_dim, base_rank=base_rank, residual_rank=residual_rank).conditional_router_append_decode(
         key,
         value,
@@ -281,6 +305,8 @@ def conditional_router_append_decode(
         rope_sin_cache,
         int(start),
         bool(write_rope),
+        mapped_pointer,
+        mapped_capacity,
     )
 
 
@@ -337,12 +363,19 @@ def mapped_host_bf16_empty(
 
     assert batch > 0 and kv_heads > 0 and capacity > 0
     assert head_dim == _QK_DIM
-    return _load_extension().mapped_host_bf16_empty(
+    extension = _load_extension()
+    host_key = extension.mapped_host_bf16_empty(
         int(batch),
         int(kv_heads),
         int(capacity),
         int(head_dim),
     )
+    setattr(
+        host_key,
+        _MAPPED_POINTER_ATTRIBUTE,
+        int(extension.device_pointer(host_key)),
+    )
+    return host_key
 
 
 def append_mapped_host_key(host_key: Tensor, key: Tensor, *, start: int) -> Tensor:
@@ -358,7 +391,11 @@ def mapped_host_device_pointer(host_key: Tensor) -> int:
     """Return the stable device alias of a CUDA-mapped host allocation."""
 
     assert host_key.device.type == "cpu" and host_key.dtype == torch.bfloat16
-    return int(_load_extension().device_pointer(host_key))
+    pointer = getattr(host_key, _MAPPED_POINTER_ATTRIBUTE, None)
+    if pointer is None:
+        pointer = int(_load_extension().device_pointer(host_key))
+        setattr(host_key, _MAPPED_POINTER_ATTRIBUTE, pointer)
+    return int(pointer)
 
 
 def mapped_host_paged_attention(

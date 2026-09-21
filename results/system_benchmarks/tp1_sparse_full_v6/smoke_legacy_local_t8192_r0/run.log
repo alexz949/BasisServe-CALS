@@ -1,0 +1,10 @@
+status=running
+{"context": 8192, "gpu": "NVIDIA L40S", "measure_steps": 4, "mode": "legacy", "status": "starting", "storage": "local", "warmup_steps": 0}
+{"status": "extensions_ready"}
+{"allocated_gib": 16.115122318267822, "host_exact_key_gib": 0.0, "status": "model_ready"}
+{"peak_allocated_gib": 16.595774173736572, "prefill_ms": 1367.7227783203125, "status": "prefill_complete"}
+{"argmax": 11, "cuda_ms": 216.95933532714844, "finite": true, "measured": true, "status": "decode_step", "step": 0, "wall_ms": 216.9693480245769}
+{"argmax": 13, "cuda_ms": 30.16147232055664, "finite": true, "measured": true, "status": "decode_step", "step": 1, "wall_ms": 30.17623722553253}
+{"argmax": 9259, "cuda_ms": 29.860544204711914, "finite": true, "measured": true, "status": "decode_step", "step": 2, "wall_ms": 29.87518720328808}
+{"argmax": 7876, "cuda_ms": 29.872095108032227, "finite": true, "measured": true, "status": "decode_step", "step": 3, "wall_ms": 29.887596145272255}
+{"decode_cuda_median_ms": 30.016783714294434, "decode_wall_median_ms": 30.031916685402393, "result": "results/system_benchmarks/tp1_sparse_full_v6/smoke_legacy_local_t8192_r0/benchmark.json", "status": "complete", "validated_layers": 32}

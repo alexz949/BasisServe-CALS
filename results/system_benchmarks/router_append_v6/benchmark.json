@@ -1,0 +1,243 @@
+{
+  "status": "complete",
+  "environment": "basis",
+  "gpu": "NVIDIA L40S",
+  "compute_capability": [
+    8,
+    9
+  ],
+  "configuration": {
+    "batch": 1,
+    "kv_heads": 8,
+    "queries_per_kv": 4,
+    "page_size": 32,
+    "base_rank": 16,
+    "residual_rank": 16,
+    "value_dim": 128,
+    "warmup": 20,
+    "iterations": 200
+  },
+  "router": [
+    {
+      "length": 16384,
+      "pages": 512,
+      "baseline": {
+        "cuda_ms": 0.07265151977539062,
+        "wall_ms": 0.072704809717834
+      },
+      "optimized": {
+        "cuda_ms": 0.05838047981262207,
+        "wall_ms": 0.058434184174984694
+      },
+      "cuda_speedup": 1.2444488296186134,
+      "cuda_reduction_percent": 19.643140304413297,
+      "projected_32_layer_saving_ms": 0.45667327880859365,
+      "max_abs": 0.00011110305786132812,
+      "selected_pages_equal": true,
+      "pipeline": {
+        "dense_local": {
+          "cuda_ms": 0.21696128845214843,
+          "wall_ms": 0.21704638609662652
+        },
+        "dense_offload": {
+          "cuda_ms": 1.2658502197265624,
+          "wall_ms": 1.265971043612808
+        },
+        "baseline_sparse_local": {
+          "cuda_ms": 0.1273680019378662,
+          "wall_ms": 0.1274346560239792
+        },
+        "optimized_sparse_local": {
+          "cuda_ms": 0.11162896156311035,
+          "wall_ms": 0.111686319578439
+        },
+        "baseline_sparse_offload": {
+          "cuda_ms": 0.26335935592651366,
+          "wall_ms": 0.2634654613211751
+        },
+        "optimized_sparse_offload": {
+          "cuda_ms": 0.24678367614746094,
+          "wall_ms": 0.24686084361746907
+        },
+        "local_reduction_percent": 12.357138476925956,
+        "offload_reduction_percent": 6.293939974427154,
+        "optimized_sparse_over_dense_local": 0.514510963497207,
+        "dense_over_sparse_offload_speedup": 5.129392022550865,
+        "selected_pages": 64,
+        "selected_tokens": 2048,
+        "outputs_exact": true
+      }
+    },
+    {
+      "length": 32768,
+      "pages": 1024,
+      "baseline": {
+        "cuda_ms": 0.14011551856994628,
+        "wall_ms": 0.14018470887094736
+      },
+      "optimized": {
+        "cuda_ms": 0.10771151542663575,
+        "wall_ms": 0.10777267394587398
+      },
+      "cuda_speedup": 1.300840657704621,
+      "cuda_reduction_percent": 23.126633990320144,
+      "projected_32_layer_saving_ms": 1.036928100585937,
+      "max_abs": 0.00011110305786132812,
+      "selected_pages_equal": true,
+      "pipeline": {
+        "dense_local": {
+          "cuda_ms": 0.6194196701049804,
+          "wall_ms": 0.6195371248759329
+        },
+        "dense_offload": {
+          "cuda_ms": 2.5153533935546877,
+          "wall_ms": 2.5158804398961365
+        },
+        "baseline_sparse_local": {
+          "cuda_ms": 0.19660415649414062,
+          "wall_ms": 0.1966830505989492
+        },
+        "optimized_sparse_local": {
+          "cuda_ms": 0.1612171173095703,
+          "wall_ms": 0.16128083923831582
+        },
+        "baseline_sparse_offload": {
+          "cuda_ms": 0.331702880859375,
+          "wall_ms": 0.331796333193779
+        },
+        "optimized_sparse_offload": {
+          "cuda_ms": 0.2963254356384277,
+          "wall_ms": 0.2964162058196962
+        },
+        "local_reduction_percent": 17.999130748603964,
+        "offload_reduction_percent": 10.66540185882362,
+        "optimized_sparse_over_dense_local": 0.26027122658576035,
+        "dense_over_sparse_offload_speedup": 8.488482901021996,
+        "selected_pages": 64,
+        "selected_tokens": 2048,
+        "outputs_exact": true
+      }
+    },
+    {
+      "length": 65536,
+      "pages": 2048,
+      "baseline": {
+        "cuda_ms": 0.28065568923950196,
+        "wall_ms": 0.28073687106370926
+      },
+      "optimized": {
+        "cuda_ms": 0.20087936401367187,
+        "wall_ms": 0.2009581890888512
+      },
+      "cuda_speedup": 1.3971354928244422,
+      "cuda_reduction_percent": 28.424980602389184,
+      "projected_32_layer_saving_ms": 2.5528424072265627,
+      "max_abs": 0.00011110305786132812,
+      "selected_pages_equal": true,
+      "pipeline": {
+        "dense_local": {
+          "cuda_ms": 1.2230193328857422,
+          "wall_ms": 1.2231328198686242
+        },
+        "dense_offload": {
+          "cuda_ms": 5.008170776367187,
+          "wall_ms": 5.009062299504876
+        },
+        "baseline_sparse_local": {
+          "cuda_ms": 0.3314539337158203,
+          "wall_ms": 0.3315470600500703
+        },
+        "optimized_sparse_local": {
+          "cuda_ms": 0.25143119812011716,
+          "wall_ms": 0.251513400580734
+        },
+        "baseline_sparse_offload": {
+          "cuda_ms": 0.4684415817260742,
+          "wall_ms": 0.4685614351183176
+        },
+        "optimized_sparse_offload": {
+          "cuda_ms": 0.3875115203857422,
+          "wall_ms": 0.3876552195288241
+        },
+        "local_reduction_percent": 24.142943394454473,
+        "offload_reduction_percent": 17.276446946090417,
+        "optimized_sparse_over_dense_local": 0.20558235782492454,
+        "dense_over_sparse_offload_speedup": 12.92392745222615,
+        "selected_pages": 64,
+        "selected_tokens": 2048,
+        "outputs_exact": true
+      }
+    },
+    {
+      "length": 131072,
+      "pages": 4096,
+      "baseline": {
+        "cuda_ms": 0.5801118469238281,
+        "wall_ms": 0.5802307790145278
+      },
+      "optimized": {
+        "cuda_ms": 0.3921023941040039,
+        "wall_ms": 0.39220126112923026
+      },
+      "cuda_speedup": 1.4794907035685054,
+      "cuda_reduction_percent": 32.409173130455116,
+      "projected_32_layer_saving_ms": 6.016302490234375,
+      "max_abs": 0.00017523765563964844,
+      "selected_pages_equal": true,
+      "pipeline": {
+        "dense_local": {
+          "cuda_ms": 2.430375061035156,
+          "wall_ms": 2.4310391396284103
+        },
+        "dense_offload": {
+          "cuda_ms": 9.990865478515625,
+          "wall_ms": 9.991275519132614
+        },
+        "baseline_sparse_local": {
+          "cuda_ms": 0.6531192016601562,
+          "wall_ms": 0.6532508111558855
+        },
+        "optimized_sparse_local": {
+          "cuda_ms": 0.4629241561889648,
+          "wall_ms": 0.46304308576509356
+        },
+        "baseline_sparse_offload": {
+          "cuda_ms": 0.7595065307617187,
+          "wall_ms": 0.759666501544416
+        },
+        "optimized_sparse_offload": {
+          "cuda_ms": 0.5775812911987305,
+          "wall_ms": 0.5777111160568893
+        },
+        "local_reduction_percent": 29.12103104421625,
+        "offload_reduction_percent": 23.95308429810776,
+        "optimized_sparse_over_dense_local": 0.1904743690020396,
+        "dense_over_sparse_offload_speedup": 17.297765060534193,
+        "selected_pages": 64,
+        "selected_tokens": 2048,
+        "outputs_exact": true
+      }
+    }
+  ],
+  "append": {
+    "baseline": {
+      "cuda_ms": 0.018531359434127807,
+      "wall_ms": 0.01856644405052066
+    },
+    "optimized": {
+      "cuda_ms": 0.006050080060958862,
+      "wall_ms": 0.00608488917350769
+    },
+    "cuda_speedup": 3.062994083947844,
+    "cuda_reduction_percent": 67.35220595949973,
+    "projected_32_layer_saving_ms": 0.39940093994140624,
+    "mapped_key_exact": true
+  },
+  "sources": {
+    "basisserve/kernels/csrc/conditional_router_page32.cu": "1392e6f991ca1681798289db01f0f5b6c0dd33b491053af214129fe49598cf9e",
+    "basisserve/kernels/csrc/mapped_host_paged_attention.cpp": "07d6166937bf9b511251c6930ca2a9b01d8e2a48c567a536a6175d5d1e38c9be",
+    "basisserve/kernels/mapped_host_paged_attention.py": "a07fd17a1763982ee99b92593af28d1967359c9e5ad3d17b99aede203e205ed6",
+    "/workspace/BasisServe-CALS/benchmarks/system/bench_router_append_v6.py": "74553b3ad26134ef5177f5c8a4c23ea9fff315854364e87dbc563cd625fb6d49"
+  },
+  "scope": "Matched synthetic single-layer CUDA benchmark. Projected 32-layer savings are arithmetic projections, not end-to-end measurements."
+}

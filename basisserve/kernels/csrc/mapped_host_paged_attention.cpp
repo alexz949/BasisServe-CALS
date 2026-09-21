@@ -57,7 +57,9 @@ void conditional_router_append_decode_cuda(
     const at::Tensor& rope_cos_cache,
     const at::Tensor& rope_sin_cache,
     int64_t start,
-    bool write_rope);
+    bool write_rope,
+    int64_t mapped_key_device_pointer,
+    int64_t mapped_key_capacity);
 
 at::Tensor select_fixed_group_max_pages_cuda(
     const at::Tensor& page_log_mass,
@@ -133,7 +135,9 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, module) {
       pybind11::arg("rope_cos_cache"),
       pybind11::arg("rope_sin_cache"),
       pybind11::arg("start"),
-      pybind11::arg("write_rope"));
+      pybind11::arg("write_rope"),
+      pybind11::arg("mapped_key_device_pointer"),
+      pybind11::arg("mapped_key_capacity"));
   module.def(
       "select_fixed_group_max_pages",
       &select_fixed_group_max_pages_cuda,

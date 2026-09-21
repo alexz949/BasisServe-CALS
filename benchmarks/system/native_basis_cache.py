@@ -1,11 +1,14 @@
 """Dense-V Basis K offload inside the upstream ShadowKV Llama runtime."""
+import math
 from pathlib import Path
 import torch
 from safetensors.torch import load_file
 from flash_attn import flash_attn_with_kvcache
 from basisserve.kernels.mapped_host_paged_attention import (
-    mapped_host_bf16_empty,append_mapped_host_key,mapped_host_paged_attention,
-    conditional_router_page_lse,select_fixed_group_max_pages_cuda)
+    mapped_host_bf16_empty,append_mapped_host_key,mapped_host_device_pointer,
+    mapped_host_paged_attention,
+    conditional_router_append_decode,conditional_router_page_lse,
+    select_fixed_group_max_pages_cuda)
 
 
 class BasisCache:
@@ -26,6 +29,14 @@ class BasisCache:
             f['query']=f['residual_query_b16_r16'][...,:width].contiguous()
             f['encoder']=f['residual_encoder_b16_r16'][...,:width].contiguous()
         self.workspace=torch.empty(b*32,32,130,device='cuda',dtype=torch.float32)
+        self.key_pointers=[mapped_host_device_pointer(key) for key in self.keys]
+        self.query_code=torch.empty(b,8,4,width,device='cuda',dtype=torch.bfloat16)
+        self.page_logs=torch.empty(b,8,4,math.ceil(t/32),device='cuda',dtype=torch.float32)
+        self.selected_pages=torch.empty(b,8,62,device='cuda',dtype=torch.long)
+        self.selected_ids=torch.empty(b,8,2048,device='cuda',dtype=torch.long)
+        self.page_offsets=torch.arange(32,device='cuda')
+        self.token_ids=torch.arange(t,device='cuda')
+        self.attention_output=torch.empty(b,32,1,128,device='cuda',dtype=torch.bfloat16)
 
     def clear(self):self.length=0
     def get_kv_len(self):return self.length
@@ -52,23 +63,43 @@ class BasisCache:
     def attention(self,q,k,v,layer,positions):
         n=q.shape[2];start=self.length;end=start+n;r=self.width
         assert n==1 or start==0
-        append_mapped_host_key(self.keys[layer],k,start=start)
-        self.append_codes(k,v,layer)
         f=self.factors[layer]
+        if n==1:
+            conditional_router_append_decode(k,v,
+                base_left=f['base_left_b16'],base_right=f['base_right_b16'],
+                base_bias=f['base_bias_b16'],residual_encoder=f['encoder'],
+                rope_cos=self.cos[start:start+1],rope_sin=self.sin[start:start+1],
+                value_cache=self.values[layer],base_cache=self.bases[layer],
+                residual_cache=self.residuals[layer],rope_cos_cache=self.cos[start:start+1],
+                rope_sin_cache=self.sin[start:start+1],start=start,write_rope=False,
+                mapped_host_key=self.keys[layer],
+                mapped_host_key_device_pointer=self.key_pointers[layer])
+        else:
+            append_mapped_host_key(self.keys[layer],k,start=start)
+            self.append_codes(k,v,layer)
         if n>1:
             out=flash_attn_with_kvcache(q=q.transpose(1,2),k_cache=k.transpose(1,2),v_cache=v.transpose(1,2),causal=True)
         else:
             historical=end-64
-            logs=conditional_router_page_lse(q,self.bases[layer][:,:,:historical],self.residuals[layer][:,:,:historical],
+            page_count=math.ceil(historical/32);selected_count=min(62,page_count)
+            logs=self.page_logs[...,:page_count]
+            conditional_router_page_lse(q,self.bases[layer][:,:,:historical],self.residuals[layer][:,:,:historical],
                 base_right=f['right'],base_bias=f['base_bias_b16'],
                 residual_query=f['query'],
-                rope_cos=self.cos[:historical],rope_sin=self.sin[:historical],scale=128**-.5)
-            pages=select_fixed_group_max_pages_cuda(logs,pages_per_kv_head=62,pinned_prefix_pages=1,force_current_page=False)
-            ids=(pages[...,None]*32+torch.arange(32,device='cuda')).flatten(-2)
-            ids=ids.masked_fill(ids>=historical,-1)
-            ids=torch.cat((ids,torch.arange(historical,end,device='cuda').expand(q.shape[0],8,-1)),-1)
+                rope_cos=self.cos[:historical],rope_sin=self.sin[:historical],scale=128**-.5,
+                query_code=self.query_code,output=logs)
+            pages=self.selected_pages[...,:selected_count]
+            select_fixed_group_max_pages_cuda(logs,pages_per_kv_head=selected_count,
+                pinned_prefix_pages=1,force_current_page=False,output=pages)
+            historical_count=selected_count*32
+            historical_ids=self.selected_ids[...,:historical_count].view(*pages.shape,32)
+            torch.add(pages[...,None]*32,self.page_offsets,out=historical_ids)
+            historical_ids.masked_fill_(historical_ids>=historical,-1)
+            ids=self.selected_ids[...,:historical_count+64]
+            ids[...,historical_count:].copy_(self.token_ids[historical:end])
             out=mapped_host_paged_attention(self.keys[layer],q,self.values[layer],ids,sequence_length=end,page_size=1,
-                splits=32,workspace=self.workspace,scale=128**-.5).transpose(1,2)
+                splits=32,host_key_device_pointer=self.key_pointers[layer],workspace=self.workspace,
+                output=self.attention_output,scale=128**-.5).transpose(1,2)
         if n==1 and self.validate and layer not in self.validated:
             index=ids.clamp_min(0)[...,None].expand(-1,-1,-1,128)
             selected_k=self.keys[layer].gather(2,index.cpu()).cuda()
