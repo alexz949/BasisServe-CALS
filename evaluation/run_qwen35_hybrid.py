@@ -86,7 +86,7 @@ def smoke(args):
         decode_error = float((decoded.last_hidden_state.float() - uncached[:, -1:].float()).square().sum() / uncached[:, -1:].float().square().sum())
         assert decode_error < 1e-3, decode_error
         cache = decoded.past_key_values
-        shapes = {'key': list(cache.key_cache[index].shape), 'value': list(cache.value_cache[index].shape)}
+        shapes = {'key': list(cache.layers[index].keys.shape), 'value': list(cache.layers[index].values.shape)}
         assert shapes['value'] == [1, groups, 64, 64]
     report = {'status': 'passed', 'layer': index, 'identity_relative_mse': relative,
         'cached_decode_relative_mse': decode_error, 'cache_shapes': shapes, 'solver': fitted['history'],

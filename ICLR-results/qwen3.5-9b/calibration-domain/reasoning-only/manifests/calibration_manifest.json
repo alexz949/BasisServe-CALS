@@ -1,0 +1,2965 @@
+{
+  "format": "basisserve.qwen35_9b.reasoning_only_calibration.v1.windows",
+  "status": "complete",
+  "timestamp_utc": "2026-09-21T00:59:21.043702+00:00",
+  "command": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/evaluation/prepare_qwen35_mixed_reasoning_calibration.py reasoning-windows --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a --rollout-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_mixed_v128_wo/formal/rollouts --mixed-data /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_mixed_v128_wo/formal/data --output-dir /deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_reasoning_v128_wo/formal/data --sequence-length 2048 --fit-reasoning-per-domain 128 --heldout-c4 64 --seed 20260920",
+  "sequence_length": 2048,
+  "composition": {
+    "fit": {
+      "math": 128,
+      "code": 128
+    },
+    "heldout": {
+      "c4": 64
+    }
+  },
+  "controls": {
+    "target_model_self_rollout": true,
+    "teacher_answers_used": false,
+    "heldout_is_identical_to_mixed_c4_heldout": true,
+    "mixed_reasoning_fit_is_exact_nested_subset": true,
+    "rank_schedule_is_frozen_from_c4": true,
+    "reasoning_position_strata": [
+      "early",
+      "middle",
+      "late"
+    ]
+  },
+  "selection_audit": {
+    "target_per_domain": 128,
+    "target_strata_per_domain": {
+      "early": 43,
+      "middle": 43,
+      "late": 42
+    },
+    "nested_mixed_windows_per_domain": {
+      "math": 64,
+      "code": 64
+    },
+    "extension_counts": {
+      "math": {
+        "early": 21,
+        "middle": 22,
+        "late": 21
+      },
+      "code": {
+        "early": 21,
+        "middle": 22,
+        "late": 21
+      }
+    },
+    "eligible_rollouts": {
+      "math": 115,
+      "code": 119
+    }
+  },
+  "counts": {
+    "fit": [
+      256,
+      2048
+    ],
+    "heldout": [
+      64,
+      2048
+    ]
+  },
+  "records": {
+    "fit": [
+      {
+        "id": "math-0110",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 1318,
+        "rollout_tokens": 6260,
+        "input_ids_sha256": "2de70e4e15cd6ba2d58f3206fc9edd8e7bb341aaa6c0343d0152e493e04da96e",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0070",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 507,
+        "rollout_tokens": 6376,
+        "input_ids_sha256": "1e7b44fe46982ad9a8b9cb0724cad36434413fa3a39790a1e9abe7e7123d6db7",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0022",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 249,
+        "rollout_tokens": 6237,
+        "input_ids_sha256": "2c75ab536701beda3c2bc0bb894c182e7d42c2beb0dfb209a6c35453c06f9545",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0027",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 495,
+        "rollout_tokens": 6246,
+        "input_ids_sha256": "221c1d4088c0d5f76ad93a0ef4cabc03755393c18eecf43791c143b516e4f410",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0082",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 582,
+        "rollout_tokens": 6269,
+        "input_ids_sha256": "92f32836e6b0f77a2bccaadfd28326733ba19d266f067e9fae438c90bce999eb",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0091",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 260,
+        "rollout_tokens": 6292,
+        "input_ids_sha256": "d696734f97108483b1951105b7af4c0909fb51df637b8ac2c86d302b81bba7b7",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0114",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 36,
+        "rollout_tokens": 6237,
+        "input_ids_sha256": "a318f96c95d7dddbe71eee3fa28f64c8946dcb3a62fd0f42f01d6f23231a96ee",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0083",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 606,
+        "rollout_tokens": 6212,
+        "input_ids_sha256": "fa1a5d1663a1aae2ead6d4e5eeab5431b8980495b786ae909ccb185fcbf2720c",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0066",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 988,
+        "rollout_tokens": 6465,
+        "input_ids_sha256": "be0acb4d9776410403d3d2e61574bc5f8734cf97e5307ef193d958d53ae52447",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0069",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 293,
+        "rollout_tokens": 6217,
+        "input_ids_sha256": "bea6d54ef99df5234ba43cf0c24437f746f9c8b479749d301f74fc894689a40e",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0063",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 373,
+        "rollout_tokens": 6248,
+        "input_ids_sha256": "303871c85418dfc2357f57d5ab389ff829c8b532e89fe75b9e0d3d08d40f7d78",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0112",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 22,
+        "rollout_tokens": 6306,
+        "input_ids_sha256": "e8ecb78f1769b2f0b8add4a3c5ca91ea1815945bb47e5ff563836f3d64006497",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0036",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 779,
+        "rollout_tokens": 6236,
+        "input_ids_sha256": "7d1b9a8b0919b0d5d13877a1de59ca0141d41fb91693bfec73c8cf6ad9367b72",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0100",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 800,
+        "rollout_tokens": 6216,
+        "input_ids_sha256": "60a2fff94122b8b94b73c6437de2a77f3b6d998fa2259a73e93bf46e7b829c9e",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0116",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 636,
+        "rollout_tokens": 6239,
+        "input_ids_sha256": "7b00d9d20be3bf44cf1eec928352119d75532a1e44fdf08739e3b941680c61dc",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0065",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 378,
+        "rollout_tokens": 6315,
+        "input_ids_sha256": "3d110e15a01cf4ba0886cc98434630dbb32a332fbbdfea792ddbd4e87af909aa",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0019",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 760,
+        "rollout_tokens": 6244,
+        "input_ids_sha256": "27a89c25862318649cd669f77c661abb62a498a999179a3539ea6c6fb700290b",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0107",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 1022,
+        "rollout_tokens": 6274,
+        "input_ids_sha256": "7b33a02c1d71d0026a9c311e9fea502bd9d988de41ea09e30166060605336bcf",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0048",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 323,
+        "rollout_tokens": 6268,
+        "input_ids_sha256": "1b8d318b6b8b630e13eb2f9f9b1cca294daf44427a546127c2ef6f2515d63269",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0044",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 499,
+        "rollout_tokens": 6217,
+        "input_ids_sha256": "61d6a72428831c68f46ca170223cc22c8424aa03dcbd5f92dba4bb2945ac941c",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0013",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 999,
+        "rollout_tokens": 5545,
+        "input_ids_sha256": "779bb42f8858062bb0fbeb2c8cc03e5abc7139d389397570801aac6330492da3",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0040",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 627,
+        "rollout_tokens": 6299,
+        "input_ids_sha256": "9b8f961c5d02b0266f91b96893970d07e5513b6ffa7b14efea1f5d60b72f4320",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0056",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 1035,
+        "rollout_tokens": 6237,
+        "input_ids_sha256": "3e9ef9886803d84db1edc7efcbd52f7707939fcb7cd55976bc7a69e3186dc55a",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0011",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 1357,
+        "rollout_tokens": 6224,
+        "input_ids_sha256": "486e7299870e1be38f337eddc8e885481eb3e7546b5a5bf4ca0bf3733dc3a7f0",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0034",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 510,
+        "rollout_tokens": 6280,
+        "input_ids_sha256": "4a9b4ca65ea2fa6d1267826b887d726a4cec21d0a1265cc7bf2d92941d282e34",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0057",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 150,
+        "rollout_tokens": 6260,
+        "input_ids_sha256": "72b4ec20ad46c0d7d275c4909cd2e92523fa0a046adb7ba5ac74933135e3752d",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0103",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 1161,
+        "rollout_tokens": 6251,
+        "input_ids_sha256": "166f496a31ec85d0d50e185e52e619d54ad393432f8594a8728109f9eb1c9de2",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0043",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 770,
+        "rollout_tokens": 6234,
+        "input_ids_sha256": "7032957f19a1cf51c4cc60b653c5899aa787f9b5ff901c9020a603b2a3b4669b",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0111",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 1117,
+        "rollout_tokens": 6219,
+        "input_ids_sha256": "d1bc2cfa719dd4dc71034e1f816b6290a13f00c32e5eb88b683a23eb064df9ce",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0090",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 20,
+        "rollout_tokens": 6260,
+        "input_ids_sha256": "d38a8fdef2392f3c2603380164e9af7cdf03706b877ee4d0afc8f68ce8ed02b4",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0042",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 1333,
+        "rollout_tokens": 6235,
+        "input_ids_sha256": "5ef554a62f2e8c8c45090fc9a7c3e382a195a3bb55a5e0511bc8d86137b5880b",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0119",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 887,
+        "rollout_tokens": 6254,
+        "input_ids_sha256": "699b79ef015b18d8865bbd20ca830bc20993e3a9c24a8ad1e525686656b503f7",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0096",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 1394,
+        "rollout_tokens": 6273,
+        "input_ids_sha256": "7f7ca7d730ed8074dc5cd239c1f8380c52e09a16bfcf42ade93a2f4ccc05413d",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0089",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 1232,
+        "rollout_tokens": 6215,
+        "input_ids_sha256": "a76dc333f6615e300d4254914fe940e130027369fb8a1f418c96d7bf0dd8340c",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0018",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 507,
+        "rollout_tokens": 6249,
+        "input_ids_sha256": "b34c6ccea8b79324d1e1243ba81380800ed2437d3e35244b739825d73c40ac42",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0050",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 186,
+        "rollout_tokens": 6230,
+        "input_ids_sha256": "d6dddb8b4f9e0c55017f53f87eeaac2b5a2b7869c0d7dd4a1e749a21154fdafc",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0015",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 439,
+        "rollout_tokens": 6216,
+        "input_ids_sha256": "ba67a56824f76b6ff136cf2fbbcfa7ee94bf26fbc3dc1b278bee1560246a623b",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0068",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 784,
+        "rollout_tokens": 6583,
+        "input_ids_sha256": "e980e500bbf20410f7049cc8125a1fa6ffab5c3b6af3e4b6d1e0e20c34152f85",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0084",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 1341,
+        "rollout_tokens": 6268,
+        "input_ids_sha256": "5930e6502d025f48bcb6ef206ebd9b4adbe7974b0153ee961ef458f810f33957",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0106",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 854,
+        "rollout_tokens": 6257,
+        "input_ids_sha256": "f572a13676ca9e63701ac517c557aa5010634d358259308622762f48fb5bb6f8",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0025",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 869,
+        "rollout_tokens": 6251,
+        "input_ids_sha256": "1ef8bf916d0b2ccf00e015b5b5c61ddda38338d49ca7e26450fca65df8f56529",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0081",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 1114,
+        "rollout_tokens": 6276,
+        "input_ids_sha256": "40b33bf1f4821c4fbc74af00eaf2c05fab2c3da23b996009280616c32f124bde",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0037",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "early",
+        "token_start": 857,
+        "rollout_tokens": 6217,
+        "input_ids_sha256": "96ce50d301bf7dfb5e279c1b05a87daafd8f1e0f19692acd418b33b02fdbf5d2",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0068",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2607,
+        "rollout_tokens": 6583,
+        "input_ids_sha256": "44971faa1c98ab1e6224b960ec4fdb9180e713046bd2946542d0858c0341b443",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0094",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1402,
+        "rollout_tokens": 6238,
+        "input_ids_sha256": "6403f628326bb7404c0c6979be6d426343616890c8b2c06993b1ccf3456f11bb",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0108",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1612,
+        "rollout_tokens": 6264,
+        "input_ids_sha256": "cda3fad25ed02ed7f2c75065a9b4e655238d01b295eb50e964be8a4c755abc48",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0024",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1652,
+        "rollout_tokens": 6214,
+        "input_ids_sha256": "da44597eddc6f9614b05a30f606d6a691161746647c7433cf054345bcce92d6b",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0046",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1476,
+        "rollout_tokens": 6211,
+        "input_ids_sha256": "7478c911f9994072ffaefc133ba2385db41dbdcf32bc29f4a7f75ec65f21f6ef",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0106",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2777,
+        "rollout_tokens": 6257,
+        "input_ids_sha256": "6ac4048051da8800d9207d61e8b02a8bf1495ff27d3a72e799e952f2fb37789e",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0030",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2789,
+        "rollout_tokens": 6282,
+        "input_ids_sha256": "70dcad8b49186411a9f11403d579545e4b7fd0814e167713b2ff67f07873360e",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0113",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1769,
+        "rollout_tokens": 6209,
+        "input_ids_sha256": "562b5cd6ad99306e2340e457f047121d741a3d58ffcb060067eef3193d85e524",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0079",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1755,
+        "rollout_tokens": 6276,
+        "input_ids_sha256": "75966928269fa2131a102a3073ce483ae2a0e1a0da87b72ac091804ab9137a4d",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0018",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1593,
+        "rollout_tokens": 6249,
+        "input_ids_sha256": "fd2b4a27af63c28ecb0fefb842824754f40d8d1c95f2e84588e77c7ad3eb55cd",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0117",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2000,
+        "rollout_tokens": 6262,
+        "input_ids_sha256": "5a6bea5f1969bd26733decd4d463391a40805f15b3a1959d86a2dfc3c133e562",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0072",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2431,
+        "rollout_tokens": 6246,
+        "input_ids_sha256": "010e2606095b6d353f9cefd45e1ca0b70daf05979a460b1d15b28243914c945d",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0052",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1901,
+        "rollout_tokens": 6289,
+        "input_ids_sha256": "4a87f173030edc5435b45f93493772ed2c4bcc4e89d2396305b421c80fa9ccab",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0053",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 982,
+        "rollout_tokens": 3696,
+        "input_ids_sha256": "2a58ea1e348c549642e455ab93c7aea31fdf3661b24915289ef1ada43c6ab87a",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0043",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2425,
+        "rollout_tokens": 6234,
+        "input_ids_sha256": "e1d4e1102ec661abce9d3aa0e658ec7bd64031c9284ab916729d2ae2354b994c",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0001",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2770,
+        "rollout_tokens": 6209,
+        "input_ids_sha256": "7e91bef774cc7afc683bf25a1bc87cb5334cd8b690995b43596b9c9abbe5fa33",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0104",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2268,
+        "rollout_tokens": 6230,
+        "input_ids_sha256": "078b0662589a54d5ef648764938fb283c5765750d53eb736b67ff2d0af602e73",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0077",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2510,
+        "rollout_tokens": 6209,
+        "input_ids_sha256": "63dfb11a3a0c55aba094e1a5ae329df0994f532de9ad8ae68b82be9d9a0b3aa7",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0015",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1616,
+        "rollout_tokens": 6216,
+        "input_ids_sha256": "9efa15c410a1c47003a0902683ae312573485dcbc7af54a6d92ba29b181b223c",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0102",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2440,
+        "rollout_tokens": 6225,
+        "input_ids_sha256": "70e5d514c2d2935f028006b91aea8c9e9c2b6e3e4576b79f561399a30c3d41a4",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0115",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1513,
+        "rollout_tokens": 6271,
+        "input_ids_sha256": "3d1847c9a5a049118c14fa5eccb42b46cc137eec25a50a53beb72b6074114f81",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0119",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2764,
+        "rollout_tokens": 6254,
+        "input_ids_sha256": "39f75e53a7e72ae139bf67abdfed2e3f09fbbeb960d2698bb047e49fccf5f125",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0110",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1786,
+        "rollout_tokens": 6260,
+        "input_ids_sha256": "163d7b958a09f202a347f05728d0476cc5cbd11c859d9aa66044a754379a7456",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0054",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2607,
+        "rollout_tokens": 6232,
+        "input_ids_sha256": "797c049c837732ae761196093bec4daa6142e6aea625de60050bf9cb1763c281",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0057",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2097,
+        "rollout_tokens": 6260,
+        "input_ids_sha256": "6267d33bacf44037516f92e7ae8c7d2baeb1575a739e309055d5f349e4f87687",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0066",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2703,
+        "rollout_tokens": 6465,
+        "input_ids_sha256": "545c08f20eaede638d45d2b907753ebd69b293516e60bff6afcfc1800e79c461",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0023",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1898,
+        "rollout_tokens": 6491,
+        "input_ids_sha256": "ec1d9dd5203c440e99f02863bcb065ff1a813ce90d9665aac0a5d743776e6395",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0103",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1853,
+        "rollout_tokens": 6251,
+        "input_ids_sha256": "a6625b6bc10becd55ecec49fa3ff95173a23f85ef15742111f481cd59bf8e457",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0065",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2332,
+        "rollout_tokens": 6315,
+        "input_ids_sha256": "9fa48af2a63b563b5f0caede228bd3178db8de1159328fa30a1f402125a07b4f",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0042",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2670,
+        "rollout_tokens": 6235,
+        "input_ids_sha256": "2fd77783c14e84f0621f394ffb9ee7c291a8a15ad1ddab382e8e4c34152f5de6",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0035",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2060,
+        "rollout_tokens": 6226,
+        "input_ids_sha256": "50f6b2c478ba46a563b6687e4b8bbb64d580e264bbe67c61c34df4e8218879da",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0093",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1458,
+        "rollout_tokens": 6242,
+        "input_ids_sha256": "726296e1ead328eed3a58ea99af2db9137de932acc22edcc15b09092db850fd1",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0114",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1469,
+        "rollout_tokens": 6237,
+        "input_ids_sha256": "42303aa06f51887ce19d1e84a85b6cf70dffb4bc0825d98f26715174e1ba44f3",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0070",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2171,
+        "rollout_tokens": 6376,
+        "input_ids_sha256": "8f93c9971c22cc599cc3e94c5bb950011c9500419d56470df5935ce9054d4a82",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0062",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2758,
+        "rollout_tokens": 6243,
+        "input_ids_sha256": "59c1aaf9520648a91d95053246e1c008fdb0a07335f75d0c6acf6aef15eb330e",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0032",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1421,
+        "rollout_tokens": 6248,
+        "input_ids_sha256": "3123dd1834696bfc2a1da033a743ba50d756954acc17b69924fb1b80c6f2c6ce",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0040",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2460,
+        "rollout_tokens": 6299,
+        "input_ids_sha256": "0d46c42d82a4e73696aa52a4581388c1acce125c488827cc366819d01c8d322a",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0071",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2569,
+        "rollout_tokens": 6243,
+        "input_ids_sha256": "3359447599e2b4c97801c86bc46aa7acd37da563d46444dbc03cfb909b492ac1",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0055",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1738,
+        "rollout_tokens": 6232,
+        "input_ids_sha256": "4b5fa84cc3eac971c9b86a60d585162a0d9526388668d56794a4c0f08e5345a8",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0069",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 1835,
+        "rollout_tokens": 6217,
+        "input_ids_sha256": "ea60fa3cb0e0b55dcec5c3f15090b466f2c2219abe75bf99f442c66ceaca955d",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0092",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2502,
+        "rollout_tokens": 6209,
+        "input_ids_sha256": "224485c639d860dc7ca2a95f01efae1862bfe69c0f6fb3b6b849cd1998f1dc40",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0067",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2680,
+        "rollout_tokens": 6237,
+        "input_ids_sha256": "849e71b4a5a1d249d0087923357aa561b67b6382528c195464dc37c2a67770c9",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0033",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "middle",
+        "token_start": 2338,
+        "rollout_tokens": 6225,
+        "input_ids_sha256": "05df83ff9af469aec1ba39f42e7a6706753760b00ffd1055ef4ad8ed143e8817",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0073",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 2821,
+        "rollout_tokens": 6254,
+        "input_ids_sha256": "7032418ca00f34b50f5689bd5cded2dbbf35df1f654ab023e177c8e1c4981c14",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0054",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3276,
+        "rollout_tokens": 6232,
+        "input_ids_sha256": "1b211b700b9a8be8e2682d63e66def430c72f458c05831f216dea439afdeb967",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0047",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3615,
+        "rollout_tokens": 6267,
+        "input_ids_sha256": "54176a2aef845607ad2a6bf258b71c87fdf3b3947e904bc6a33b4485395d7d10",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0029",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3921,
+        "rollout_tokens": 6242,
+        "input_ids_sha256": "b2b10c65b92123c3df04d6b721410613d35e73c7505cfb401cfca154eb534742",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0010",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3274,
+        "rollout_tokens": 6292,
+        "input_ids_sha256": "3f241281fa6a401036afffac45d33ba773071fcbaa3fab3747e36e4deaa38aac",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0105",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3707,
+        "rollout_tokens": 6300,
+        "input_ids_sha256": "aa4cdf7fe4b6869964128bcd6f1db54ba3929dc4bf1188f594e5f73b2f79ce56",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0038",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3619,
+        "rollout_tokens": 6249,
+        "input_ids_sha256": "fa956aae7f2fefbd29e9de70d5a49ec8c5e80a2ad0dd91c7e050b4a5a3424829",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0097",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 2806,
+        "rollout_tokens": 6254,
+        "input_ids_sha256": "92d5c2b2077e6d257b960899d419881ad9d7c704ca3f2dc0b227edb0d72b1dc5",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0085",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 2882,
+        "rollout_tokens": 6248,
+        "input_ids_sha256": "6495cd43aa90ded2caaef6143ab06a588ca68b892a81ba8081a1d264843e8aab",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0075",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 4141,
+        "rollout_tokens": 6369,
+        "input_ids_sha256": "15268f95340c35578a89460a19ac5fc403c4777e2d54fb9bf61e7454848eb513",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0058",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3981,
+        "rollout_tokens": 6285,
+        "input_ids_sha256": "f0f56a850d37f93eca3a6d6a36a80d1f0c509e819057943032d0d8fb11540ee6",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0020",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3717,
+        "rollout_tokens": 6222,
+        "input_ids_sha256": "25a9961e40a974a09d553fa7efc6145753499cd67b8a62ca6c8da6e0f80c4877",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0095",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3591,
+        "rollout_tokens": 6212,
+        "input_ids_sha256": "033ff4bdc68c6139abbe2e32aa03a87b69ed02b2390477a07b5941bb99c501cc",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0049",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3425,
+        "rollout_tokens": 6242,
+        "input_ids_sha256": "963cf8a58fd9dea6ce4d63f515328c4615bc6037cf9bfcae36bb2720b04a0a0e",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0093",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3854,
+        "rollout_tokens": 6242,
+        "input_ids_sha256": "abe3193d47184713f659761b2f55e64d7ec186f591b9bfdd90b4306ba0703f5f",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0039",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 2907,
+        "rollout_tokens": 6219,
+        "input_ids_sha256": "57a556b5699b8bc5393a95898b3d9eb0cfc3fd610c27270633acea660366a755",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0084",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 4156,
+        "rollout_tokens": 6268,
+        "input_ids_sha256": "562f032e12051d17ee8dfc683ed5625361fb3a4ee01e3c1a527aeeaeb8f23a2c",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0056",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3653,
+        "rollout_tokens": 6237,
+        "input_ids_sha256": "bd15ad6cd6338914b8e9040d1052d606c003844963783e818b430a33886cfe6f",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0078",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3059,
+        "rollout_tokens": 6281,
+        "input_ids_sha256": "80fc509174d08cc58de0fdd0bd458d9c0c888c1bd7d9ce821a57f35a6f677163",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0008",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3204,
+        "rollout_tokens": 6276,
+        "input_ids_sha256": "ec0c4a417e41113c1095405b52d904bc02a2f19384d3611dd042179b8975760c",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0088",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3426,
+        "rollout_tokens": 6213,
+        "input_ids_sha256": "bdccf7011f145921769b1ba1045de1b7cd71ca7a6cd659b89485667a793ab2f7",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "math-0037",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 2903,
+        "rollout_tokens": 6217,
+        "input_ids_sha256": "5d2e83147a8faca60653145c9e0205c5df6c2badf2c39e236ae6d376930128dd",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0011",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3841,
+        "rollout_tokens": 6224,
+        "input_ids_sha256": "ed6759e3bf79a023844388cbdd2b94429de33707fa13c2711dff539cfc98aff8",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0111",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3646,
+        "rollout_tokens": 6219,
+        "input_ids_sha256": "75f76f3e28496fc92cc668c7eab6d8d6798c6cb8b32dec8b5c6880467bf3bfbf",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0115",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 4066,
+        "rollout_tokens": 6271,
+        "input_ids_sha256": "d24990c8e2cae2c15191bbf060a41ec6cff9520ce264374dfde726f61a336ae6",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0018",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3450,
+        "rollout_tokens": 6249,
+        "input_ids_sha256": "4a87d3bea4476bf936a0360fcc9ed4dd110756a3bea9c8d7d66263d5c7c70852",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0119",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3457,
+        "rollout_tokens": 6254,
+        "input_ids_sha256": "e78256b335fa074a7a2292609ce8ddc4a7d6ea2786a10de72de14dbfb1c4f6af",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0022",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3409,
+        "rollout_tokens": 6237,
+        "input_ids_sha256": "a1512512bfb45756c814da3220f3a61955490d9a91437c68eccadb5512061745",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0090",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3458,
+        "rollout_tokens": 6260,
+        "input_ids_sha256": "fbb4ae0f419baa68774718631976fe0d5ab7307ad5717ef0f852eede736a7bfc",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0002",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3708,
+        "rollout_tokens": 6357,
+        "input_ids_sha256": "b06bccfdfe0348b08536ff0eac63e8c2e9cd0d14bd15357b0fcf823e34453972",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0033",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 4004,
+        "rollout_tokens": 6225,
+        "input_ids_sha256": "929fe9fa3c40b330a1da8d6f203f3babfb61c3a0d9bb4641c37cc467192ad671",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0070",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3889,
+        "rollout_tokens": 6376,
+        "input_ids_sha256": "71aeb0d2b89e252eee6f564da1129adb2ceb9b4eeb7fac69613917714e61fa14",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0072",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3970,
+        "rollout_tokens": 6246,
+        "input_ids_sha256": "6463e053261debad4614ee785aa93a8571b123eb6e440e58fbb411bcb87ee354",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0077",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 2907,
+        "rollout_tokens": 6209,
+        "input_ids_sha256": "16a5cfcae834d48264f843850e21c424f1fec89162f73072f7b918367b6861b9",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0021",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3363,
+        "rollout_tokens": 6295,
+        "input_ids_sha256": "f314a0d512be74a6b2fedb9b87357a9e33461ef405e16af40d542fc03e5ba348",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0015",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3240,
+        "rollout_tokens": 6216,
+        "input_ids_sha256": "5093ed7845fc08b683b9881445741b200b1999f152cd48fe1cf743212a1c0be5",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0117",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3738,
+        "rollout_tokens": 6262,
+        "input_ids_sha256": "57bf94cd9bf51b02cb16105444f8e940991be4f24d295ad8c3ba57fe547e0fc2",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0006",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3041,
+        "rollout_tokens": 6217,
+        "input_ids_sha256": "803831a482bc4826632279d2c6323012d5a69e3b8293ba889eaf2ba30eb4b777",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0017",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 2837,
+        "rollout_tokens": 6220,
+        "input_ids_sha256": "bb32f713fbd8a2c1f057396f28532dfa533138dc7a87236d217c06c05b8265c5",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0081",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3882,
+        "rollout_tokens": 6276,
+        "input_ids_sha256": "1bf44fc52a9a0890421393ae6660872b70e61412db9a3a47fb1487a360d231d4",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0103",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 3441,
+        "rollout_tokens": 6251,
+        "input_ids_sha256": "99af3c1721b6b386098a4c43ffbb11c75cf4c605ff949687390e3bd95a8080fc",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "math-0067",
+        "domain": "math",
+        "source": "ai2-adapt-dev/openmath-2-math",
+        "stratum": "late",
+        "token_start": 2827,
+        "rollout_tokens": 6237,
+        "input_ids_sha256": "f61959fb0f96813630d238cf2a1b29f12d926e9ad32c82f9587806c334e16fec",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0117",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 443,
+        "rollout_tokens": 6656,
+        "input_ids_sha256": "aaa93acf50c46b117fcc1890a6934e48f660124574a3fd1255f15b44324309ef",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0056",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1168,
+        "rollout_tokens": 6851,
+        "input_ids_sha256": "6eb0cc49d3d7a564cd361ad68f6445e2102c206236e5428efb512f52dae41d5a",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0034",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 237,
+        "rollout_tokens": 6623,
+        "input_ids_sha256": "0a8db8c06bccd9cc0cfb35d1f16ce32360d8bb9bb507a770d7fc9d562922cdd2",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0067",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 856,
+        "rollout_tokens": 6438,
+        "input_ids_sha256": "6a09b95d66ed1d21806096687871f159c4b05b7924b640913622f1cba7fbd110",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0051",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 594,
+        "rollout_tokens": 7347,
+        "input_ids_sha256": "5b8e8695adb948d26669d654a517b37f881bd4c5ed5f8a7b9a763939f985b744",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0046",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 421,
+        "rollout_tokens": 6759,
+        "input_ids_sha256": "3d7bc838a452408d0546dcb9c350eefe379f0771124829fc3fe967357af01584",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0063",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 66,
+        "rollout_tokens": 7304,
+        "input_ids_sha256": "830ab5e4f3337ea7c5b566e9c963144ff23796ff496651318aff7a2d99c196c0",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0116",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 189,
+        "rollout_tokens": 7200,
+        "input_ids_sha256": "1651651ad4e54af13c991d9c52b05e304cbdc5bbb0d705d0a8df7826d3e1ea34",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0070",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1247,
+        "rollout_tokens": 6872,
+        "input_ids_sha256": "c399703df867985ea8da5513ffda2844203db30560fd426ad70d4006430209df",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0115",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1291,
+        "rollout_tokens": 6644,
+        "input_ids_sha256": "246c367be37f2120f937a6feb68195b25a6ca4c016ee8c3df222eda743a1a273",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0008",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1363,
+        "rollout_tokens": 6954,
+        "input_ids_sha256": "ab4feeab9ba7313e509d605ccae757874b12ee586cb063deb4e6f82e885478cc",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0045",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1074,
+        "rollout_tokens": 6554,
+        "input_ids_sha256": "7a0925f562f87d53f81e14798a05f8ae50366034b7674fa2faff5015803fc3e4",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0013",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 19,
+        "rollout_tokens": 6646,
+        "input_ids_sha256": "bd4aceacae14ef0a24f2d370151003cd6de00499afeae334d38710462fe22127",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0110",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1503,
+        "rollout_tokens": 6609,
+        "input_ids_sha256": "013364f661baed0d181205fd05e65d77200b9886fc80e9f85c7b3ebc45cbaf2c",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0096",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 173,
+        "rollout_tokens": 6573,
+        "input_ids_sha256": "e095b235716129059e47f34335f75135c32aa9b493e9d1561996a33255200bf9",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0113",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1361,
+        "rollout_tokens": 6696,
+        "input_ids_sha256": "6e49177ba402bdd99e27c5359e33d9bc12b1d281eeaffa2a9f1d2dfbb972df09",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0119",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1384,
+        "rollout_tokens": 6596,
+        "input_ids_sha256": "eed064aa46c72ce3a6c5135cea6439af700840574fd2f5a9eb1c1f5d5e61cda2",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0022",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 40,
+        "rollout_tokens": 6473,
+        "input_ids_sha256": "b7d765ba23317e0ce448c4c1195c6dffa4bb8b3931e8af1386093dad261362fd",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0093",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 212,
+        "rollout_tokens": 6952,
+        "input_ids_sha256": "be531f22dcfd6e453aa0607ec37fbcd5fa456911263869e7426cae1ec3a146ba",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0010",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1282,
+        "rollout_tokens": 6662,
+        "input_ids_sha256": "1c8ba729b439153f99e39b63edbc6a2641889a30d63d15251015cfa841986edc",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0052",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1131,
+        "rollout_tokens": 7067,
+        "input_ids_sha256": "2f3ede91277b68465207c8532a926545ee0052faa085e95e1405f1397f85034a",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0082",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1219,
+        "rollout_tokens": 6698,
+        "input_ids_sha256": "7472c17480b461ebad4047a00def5b987bad2e0d1e677605997e7d70a090fc75",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0001",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 483,
+        "rollout_tokens": 6918,
+        "input_ids_sha256": "a9135b7e3074e816fc2cfd27d12a132958e15ef675a90f551f20f0bfe777bd9c",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0058",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 125,
+        "rollout_tokens": 6662,
+        "input_ids_sha256": "c6fb83ca64349de1788fda6cc445dfd13e992168e6a01de2af5cf48552f87bc6",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0049",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 105,
+        "rollout_tokens": 6519,
+        "input_ids_sha256": "7888cb2e14197c76bf86eea27edfb90a9dcd17917506e7a220acedf2780d6005",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0019",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 378,
+        "rollout_tokens": 6633,
+        "input_ids_sha256": "31a23de6895a9b7f3d98131a6cd2e66a59648a5533e7564e2cff532cbf1af747",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0005",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 867,
+        "rollout_tokens": 6746,
+        "input_ids_sha256": "91ab60de55ddf5111452b3657c55141891ddcd413d3d6b642048e6940fa6e993",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0011",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 893,
+        "rollout_tokens": 6500,
+        "input_ids_sha256": "ce7a03405cf9f18b89f8c416abf53d52ffb778a2040546a4a34e6f2574bc926e",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0104",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 601,
+        "rollout_tokens": 6944,
+        "input_ids_sha256": "11a738a54bd587c7d27fc2fa26428b1cae7d49fe619ce3af78aff3848e5e3ee8",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0064",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 926,
+        "rollout_tokens": 6959,
+        "input_ids_sha256": "dbc62da65b2bf4774efb8805c287c751e0d2884e848c90e147b425f48776754c",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0029",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1310,
+        "rollout_tokens": 6833,
+        "input_ids_sha256": "d00b311b96dbd79c1ec8cbd747e7a17b6b1a729762d0b3c5b78e7abfc8bb01df",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0065",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 399,
+        "rollout_tokens": 6668,
+        "input_ids_sha256": "c65512fdc33815179750373644c2352323934805d26cea8f66cae9f6ec3d8c4c",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0089",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 43,
+        "rollout_tokens": 2271,
+        "input_ids_sha256": "79370721ba541f0abf16e71df05a87701a499f030de6bc39202fa9c0db7c234b",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0061",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1385,
+        "rollout_tokens": 6474,
+        "input_ids_sha256": "3e4ad237c8cc6869524ff3d2669e6d62ae1d9857abbc2e93a4d1f0a6dde3f13b",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0033",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 895,
+        "rollout_tokens": 6632,
+        "input_ids_sha256": "399f57e0e803f93ca590b3b892088bf8e1e392a4c070a2556ab5cf5114d00df2",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0075",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1522,
+        "rollout_tokens": 6672,
+        "input_ids_sha256": "cadab6660edb4ece836bedbaf6bf14d9ca0dadeb8b4b33fdcd2d0b4f930feac6",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0053",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 644,
+        "rollout_tokens": 6723,
+        "input_ids_sha256": "bbd28285909f093f859dba9e75cb7bee9d74cc9481bfbcc9631d083d371270c2",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0099",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 159,
+        "rollout_tokens": 4928,
+        "input_ids_sha256": "febfd043ffce3267fadffd5b2ae7a6ef7b8cb4e035c63f3df06acf9c30c9b0b8",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0000",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 952,
+        "rollout_tokens": 6667,
+        "input_ids_sha256": "2b84d9bb8c9c7714934518fc5592690fff25b5762db4800f9ed45c9c3e0b49b9",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0095",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 883,
+        "rollout_tokens": 6516,
+        "input_ids_sha256": "83461b72bda4724726fac68b23184325eeba889a1f15e902a1f61c739ce1dde8",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0039",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 1321,
+        "rollout_tokens": 6810,
+        "input_ids_sha256": "767924ef724e53fc53c4b228b0f060815a5832c26a80866524346ae1b912f607",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0009",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 716,
+        "rollout_tokens": 6638,
+        "input_ids_sha256": "008f0a7803718f0ffeb77997ab6f2bb1cf97307a7e3e5556492e4c53189923c9",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0004",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "early",
+        "token_start": 589,
+        "rollout_tokens": 6776,
+        "input_ids_sha256": "77626015c94cd41b6c032b945df972b8cec797ec28f2d1bb976fdadb15a9e1ee",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0083",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2904,
+        "rollout_tokens": 6972,
+        "input_ids_sha256": "81e5a39870ff18683eb529f7ab6cb39cc583988151703fc9a51f9f6c65d2f636",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0102",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2389,
+        "rollout_tokens": 6556,
+        "input_ids_sha256": "37b4da900a7326b53ea6033a4c8efa5ad1e009ead8f226ab26d50c9f4ee64df5",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0085",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1548,
+        "rollout_tokens": 6614,
+        "input_ids_sha256": "f07f317888280c4cb8b9c000f1ab3b4a426cf51f48fb6df6db2444ff72c13409",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0077",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2565,
+        "rollout_tokens": 6486,
+        "input_ids_sha256": "31b320caf257cb7fd7d9faf536d69dca7bb8e26a39f27d479a24522b6363ef60",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0007",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2873,
+        "rollout_tokens": 6787,
+        "input_ids_sha256": "8ec2a811be8445ab8cf107e35717f9c81068a01eff91de71ba43a27e242a5bf0",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0038",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2831,
+        "rollout_tokens": 6785,
+        "input_ids_sha256": "ca332ad7732679608e75f02fcd4257a4e06647551515ccddb84bfe81f0f2441c",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0001",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1683,
+        "rollout_tokens": 6918,
+        "input_ids_sha256": "914c70b1d9232c87a4e565830131517e13c2bba6d32690762bf6f1855bd44343",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0059",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 3099,
+        "rollout_tokens": 6805,
+        "input_ids_sha256": "b6601fb27880227b9032ffcebabd6b94510e6ba29354fe5fc0107ba949a9fd12",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0050",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2396,
+        "rollout_tokens": 6956,
+        "input_ids_sha256": "da6ab06cd77818308647828be33f4ec89b785ad580f4977e604dafc6ab99794a",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0044",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1658,
+        "rollout_tokens": 6612,
+        "input_ids_sha256": "19650e0d7c337ab71b5d43799d94e4dc487a389ccb3105d572be32520a01fda6",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0058",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 3016,
+        "rollout_tokens": 6662,
+        "input_ids_sha256": "500371fe5108f2d75eae41fca0d4576b6a77e0a1c5fdf6f4d630edd1d3e908d2",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0108",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2888,
+        "rollout_tokens": 6592,
+        "input_ids_sha256": "a4154e1dbe031dd27865d59c1781b959a0f6b77a238477655bf462519f936841",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0035",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 3108,
+        "rollout_tokens": 6763,
+        "input_ids_sha256": "9d127b803bfc8de2002a89ba873ea5b57dd2699422a7c63f2c83271b5c73f966",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0090",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2200,
+        "rollout_tokens": 6602,
+        "input_ids_sha256": "40c1525fa73ae578942c344d2d3775de9198366d8f20b5f6f7007b9531e83d02",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0047",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1880,
+        "rollout_tokens": 6546,
+        "input_ids_sha256": "820784f4dc66c38aa0271d4b323b8b0f28842b1a02a09b6b209a099c733f60e1",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0091",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2790,
+        "rollout_tokens": 6988,
+        "input_ids_sha256": "8ac65f58acd500059f271e394aeb08a1aaf32af0e82d61b80648b9e766b89f67",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0103",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2235,
+        "rollout_tokens": 6595,
+        "input_ids_sha256": "b38c9b15ba4d66bb2889de08a42bff2e2bea005156e6ee8298a5c6e8320e9d89",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0024",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 3107,
+        "rollout_tokens": 6825,
+        "input_ids_sha256": "f6767adfc0afe13607a0685fde8b6acf228f4a84c25a87960874db7355c1aaa7",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0023",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1806,
+        "rollout_tokens": 6588,
+        "input_ids_sha256": "3149857b32a1258b5fad335ba4001b805c5bb71aa9c29808716cfffb7d1bce24",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0088",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1502,
+        "rollout_tokens": 5163,
+        "input_ids_sha256": "5edf89718f97c3fb9068f58a120b81aa16d9ce0dcc61b3c0796ffe3d688fc7f2",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0048",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2523,
+        "rollout_tokens": 6467,
+        "input_ids_sha256": "daa5dbe52df3a4fb65553185349bf8b583a8667d70f055e76c01f01add957c3f",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0097",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1615,
+        "rollout_tokens": 6698,
+        "input_ids_sha256": "accd25e261301b27172a885a02830c6b74b6127a78bb17f07d1960daf75a6895",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0055",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1532,
+        "rollout_tokens": 6449,
+        "input_ids_sha256": "75b780c6eb02e0a916e523f13ec2d93a192ec023202318c9f537db533ba77a51",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0045",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1716,
+        "rollout_tokens": 6554,
+        "input_ids_sha256": "8cc681f2f964d6432bc0784e94ba2a297882365dcbefb3a408d787eb1c43e18d",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0092",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1833,
+        "rollout_tokens": 6638,
+        "input_ids_sha256": "a4ca02c1c45c2bda0c216f7ffb590a5b239a295ab75ba6ca0d487d2cc296ffe5",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0082",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2492,
+        "rollout_tokens": 6698,
+        "input_ids_sha256": "e2486b89159ab00f82fc39a039d15032980e79643f1b8b098f1feafcb8f69069",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0111",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2975,
+        "rollout_tokens": 6576,
+        "input_ids_sha256": "12782d752fbebb0999b490ce4904c59117abeeddc3c057ff0bb2cb1400b4a4a9",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0049",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1875,
+        "rollout_tokens": 6519,
+        "input_ids_sha256": "2fc75862b8181d04b84effa0a79ba505da53a20cf103349de47bbc8eaa31ceec",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0015",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1708,
+        "rollout_tokens": 6892,
+        "input_ids_sha256": "13ac5043b76ff1330e31c24958e44710d1cb2ca32c5939b49d52b1cab5be43fc",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0095",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1796,
+        "rollout_tokens": 6516,
+        "input_ids_sha256": "e6f1345bfb6376ae6d94b2ce5a2beed6bdbde16e3c3ed44e83e49f7ed6bbe602",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0110",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1818,
+        "rollout_tokens": 6609,
+        "input_ids_sha256": "eec99507ad066bb7fe0079b33e3ad80f9d81451316c19288a2af880f0621af66",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0101",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2510,
+        "rollout_tokens": 6584,
+        "input_ids_sha256": "9aabd405f2a00903aa1f1d70cdb53c06ce9c5b9b9e981a1eab608dcd440bf726",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0032",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2928,
+        "rollout_tokens": 6567,
+        "input_ids_sha256": "6155efd8050fb6e06d404f0a0517cb57529ffb03111a3fa24fa0a214a8d7ccdf",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0041",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2360,
+        "rollout_tokens": 6598,
+        "input_ids_sha256": "b293c94757670ecfb93ba7c02d4919d092f4c9e923bfe9a0707701552623b76c",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0063",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 3120,
+        "rollout_tokens": 7304,
+        "input_ids_sha256": "c8b6fe7473d304776da735f356d4955038c4ce70948dc627cf625dfb6e238093",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0016",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2140,
+        "rollout_tokens": 6441,
+        "input_ids_sha256": "240856c1834512618640e1be84f71f68ddd249899921461f0a50e004adff7bf9",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0081",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2902,
+        "rollout_tokens": 6766,
+        "input_ids_sha256": "bb93947f1b48b81cc4c6c9fcc5ce887ed4e616a9c033a9e2fec8d59aa3f9fc3d",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0034",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2910,
+        "rollout_tokens": 6623,
+        "input_ids_sha256": "26fc93846e2654c3c6ae45d0928754a4fc165510e63db702860f41fa116223ed",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0079",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 3174,
+        "rollout_tokens": 7488,
+        "input_ids_sha256": "0bf124cf2000da4d44e0e47409bf75705bdae12585533675b2d1ccfff4c0f48c",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0010",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 3047,
+        "rollout_tokens": 6662,
+        "input_ids_sha256": "8e8e2efb597dd3b8bb84a3fe41fec42b37b0ffb7b475899ccd7d6d78be3c58c0",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0026",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 814,
+        "rollout_tokens": 3873,
+        "input_ids_sha256": "59aa04f0d2c69a5843c016496447d6034cebced805217b969d1e958bbf828a09",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0012",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 2560,
+        "rollout_tokens": 6867,
+        "input_ids_sha256": "aaf902468e3cd799af860a551bc5084c998185fc948fea59e69512e4ccade22f",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0013",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "middle",
+        "token_start": 1687,
+        "rollout_tokens": 6646,
+        "input_ids_sha256": "0d5926fcb0a8ff2af93216f151a1ec7022a98e6accd5518ff79ed23ccfefa047",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0071",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 2943,
+        "rollout_tokens": 6399,
+        "input_ids_sha256": "5e66cd42a910369f3ccad99c94ed9bb7aff1d2b8d56712aea73b36de0b606111",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0030",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4845,
+        "rollout_tokens": 6971,
+        "input_ids_sha256": "0f4805177e5261ee64cb0218d9eed046b9a60d8b4fc703406e5c052de3df8c3b",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0060",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3947,
+        "rollout_tokens": 6578,
+        "input_ids_sha256": "fe039eb4f35b122cf5d824ed7b756efb2a039d68f2adb23d3abd54dd595732a7",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0099",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 2619,
+        "rollout_tokens": 4928,
+        "input_ids_sha256": "7b68ead98a581a65cbbc742cd76f27ed9e1d88949726812eab156bdfaa4cf1b6",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0003",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4336,
+        "rollout_tokens": 6767,
+        "input_ids_sha256": "a11f82db2beef031d6fca38b50d883e4298684a589ae15ea4d3f0b7a8e41c0e1",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0100",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4466,
+        "rollout_tokens": 6717,
+        "input_ids_sha256": "0db473d6bfa9b35cba4a4b802e245e8c93087968ab97bfaf651774281596deab",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0086",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3116,
+        "rollout_tokens": 6531,
+        "input_ids_sha256": "a1947429cf74f58227f594e8ca103e01a0213edacaacb226a3d48ec06163de05",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0002",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4035,
+        "rollout_tokens": 6894,
+        "input_ids_sha256": "d39c3b6f1499c7292f2445ebb3ddd3d41977d36a8b0ac02f1c86e5769511f9bb",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0080",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4209,
+        "rollout_tokens": 6710,
+        "input_ids_sha256": "15c00d866e2b211965542e8b76ab9d30113d1b7f075034ca19400ad9058b9520",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0064",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4249,
+        "rollout_tokens": 6959,
+        "input_ids_sha256": "0200c14c724e20b25e3946e706b6cfee15717d80e876374e91c36f3b4060121d",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0095",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3823,
+        "rollout_tokens": 6516,
+        "input_ids_sha256": "c7f9efe3c3bdf9a4d0f5fe7409ae047e404ffbe8b5336c1e364e6ab13ab95270",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0057",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4035,
+        "rollout_tokens": 6682,
+        "input_ids_sha256": "3f182b7a8ee4499c1f177a7f26208f8ff4605d6de5fd0b30f688b468daef9447",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0014",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3853,
+        "rollout_tokens": 6679,
+        "input_ids_sha256": "1a70c7b7c6ee7b666acd9d5b3a71bebebdfd57f1ae867e2d62c477631e126823",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0017",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3746,
+        "rollout_tokens": 6747,
+        "input_ids_sha256": "7fbc7e241b2534e8070461c5ae225c74c209ef7f650bb9cce30b9ce5dd7db3bb",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0029",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3940,
+        "rollout_tokens": 6833,
+        "input_ids_sha256": "bfd80179141a1004038dd84b2e3cb8ff766f2cb12c108fbb037927f41203a8c3",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0073",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3797,
+        "rollout_tokens": 6838,
+        "input_ids_sha256": "c76901dbff98a3de9ae771affa09142201596bfa2a04aa19fe034bcd6d5ec528",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0000",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3298,
+        "rollout_tokens": 6667,
+        "input_ids_sha256": "23f6ba4dc2dec341f561573f55723af202cb09c0a0cc9f41ba8d7b85bdc8c856",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0079",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4133,
+        "rollout_tokens": 7488,
+        "input_ids_sha256": "787beeb46db7f73bcba75b882e0b03b3e96641c7fc6149a9fd660b6046d23272",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0043",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3334,
+        "rollout_tokens": 6623,
+        "input_ids_sha256": "5f5378a2b766cafe11404383fe4b7000af3064d20643e9f54abacbbd8f7d4cc6",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0012",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3957,
+        "rollout_tokens": 6867,
+        "input_ids_sha256": "5d3665e46a491929093c153a92eb6ef42358726fe8d7ea4643482127e76dbccc",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0062",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3818,
+        "rollout_tokens": 7628,
+        "input_ids_sha256": "06f4e560224dbffe67d05a7a3cf9dceb2139ce46f42f0bebe2e32d48acc87f45",
+        "selection_origin": "nested_mixed_fit"
+      },
+      {
+        "id": "code-0038",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3487,
+        "rollout_tokens": 6785,
+        "input_ids_sha256": "b66233375da6c7ece49cefb81cb97779cfc106cd99704558afcecd7f29d962cd",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0075",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3285,
+        "rollout_tokens": 6672,
+        "input_ids_sha256": "2d9477d6dbb3ad782b6447012ec875741afdba981e477f9dc5e882983ba8d218",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0114",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4516,
+        "rollout_tokens": 6639,
+        "input_ids_sha256": "127d7af7b1f393659eef1f8da1f6109e82b608746733f5691dcade09ded30e35",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0118",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 5111,
+        "rollout_tokens": 7246,
+        "input_ids_sha256": "078051c461fec99e87f921b12c1e7596b36e37bf1155aa79b0a0a5d5455c029f",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0063",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4651,
+        "rollout_tokens": 7304,
+        "input_ids_sha256": "13849896636ada030b753244397be35364f84241d93e7d37f81ad43881245e14",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0001",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4488,
+        "rollout_tokens": 6918,
+        "input_ids_sha256": "0d96c7c9c8a47b6f7d9b62493cd2bc1c48ca2d54ba09737ff0c6fd61b6414166",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0102",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4292,
+        "rollout_tokens": 6556,
+        "input_ids_sha256": "a6fd5e872b25c4fa57743d703bbf2ef4578066f1e4c4f3144764b1b89a4f7b7c",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0033",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3100,
+        "rollout_tokens": 6632,
+        "input_ids_sha256": "7d5d0a7e4bb78691223a7bfca53612518e60ea560be14d0a222d2295fd1b68a3",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0115",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4360,
+        "rollout_tokens": 6644,
+        "input_ids_sha256": "b3b83febd5a84421f575c1b152eee20be83f3fed7c4111b451771a21f60e22d4",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0021",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3513,
+        "rollout_tokens": 6719,
+        "input_ids_sha256": "77c85147ab1f9ad29392a9565a1fcc3e26903a28ba6e53bde5a2b189cc2200ed",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0040",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3870,
+        "rollout_tokens": 6552,
+        "input_ids_sha256": "0198854cc13e84414fa9d4cd17431b20737fd7c060f79acb39734c2b4db377f7",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0087",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3435,
+        "rollout_tokens": 6827,
+        "input_ids_sha256": "20e4876b2b0551811e77d91dc0228420bad98c3503fa5f4dd870c93810bea88e",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0117",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3832,
+        "rollout_tokens": 6656,
+        "input_ids_sha256": "39e043a1b1cb7d99ea16cd7d0237584c9b7c3c16ebf85f3fe25b0e759f02de9a",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0058",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3394,
+        "rollout_tokens": 6662,
+        "input_ids_sha256": "ae597a05a642041e348912cc86b222889e147828405324aacd1699e1ecf65403",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0016",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4072,
+        "rollout_tokens": 6441,
+        "input_ids_sha256": "5a126851898d8a6f64fa9a1be35dad662baa05910578d450c049ebe94c3aa7c6",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0044",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3925,
+        "rollout_tokens": 6612,
+        "input_ids_sha256": "c92664ea011a49ac1774d4a29af999342f9560e6cc6bdd314f9bc48aa1cf4183",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0092",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3482,
+        "rollout_tokens": 6638,
+        "input_ids_sha256": "7061ab2a57a6378bf8f9247595e4fe30b1c4384f097dca6becb00a07fe06daac",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0098",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 3402,
+        "rollout_tokens": 6616,
+        "input_ids_sha256": "0d93e254c0f1331777bdf2c51488225552235be4116af906b9e417fb0ad920b9",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0028",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4569,
+        "rollout_tokens": 7016,
+        "input_ids_sha256": "ab5e9c46f8f775898e8f9151856158b6a5665a68ff4fcc3c265c678a6e7a34cf",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0056",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4451,
+        "rollout_tokens": 6851,
+        "input_ids_sha256": "128565fb39c88068fa1f09ca6ef7f9b58def4ea6e7816ed2ff5b97c8211f6529",
+        "selection_origin": "reasoning_only_extension"
+      },
+      {
+        "id": "code-0093",
+        "domain": "code",
+        "source": "nvidia/OpenCodeReasoning",
+        "stratum": "late",
+        "token_start": 4205,
+        "rollout_tokens": 6952,
+        "input_ids_sha256": "328ff439ed81e73f2462de992c1d6da1d87d68b450488a478a964bb7c97957b5",
+        "selection_origin": "reasoning_only_extension"
+      }
+    ],
+    "heldout": [
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 256
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 257
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 258
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 259
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 260
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 261
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 262
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 263
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 264
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 265
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 266
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 267
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 268
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 269
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 270
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 271
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 272
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 273
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 274
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 275
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 276
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 277
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 278
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 279
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 280
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 281
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 282
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 283
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 284
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 285
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 286
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 287
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 288
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 289
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 290
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 291
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 292
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 293
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 294
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 295
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 296
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 297
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 298
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 299
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 300
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 301
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 302
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 303
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 304
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 305
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 306
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 307
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 308
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 309
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 310
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 311
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 312
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 313
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 314
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 315
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 316
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 317
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 318
+      },
+      {
+        "domain": "c4",
+        "source_split": "heldout",
+        "source_index": 319
+      }
+    ]
+  },
+  "sources": {
+    "rollout_result": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_mixed_v128_wo/formal/rollouts/result.json",
+    "rollout_result_sha256": "b191871dfc50f44b23e10ce0941e3adebe3dfa42cfc4804fa78b0fd01e307bb4",
+    "mixed_manifest": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_mixed_v128_wo/formal/data/manifest.json",
+    "mixed_manifest_sha256": "0aefc2b41d6f6e838a505c184e87fc3ecd6e0f57f5605ee03ce82f2800fdeb5b",
+    "mixed_windows": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_mixed_v128_wo/formal/data/windows.pt",
+    "mixed_windows_sha256": "ef07c5c80c7f98dffcb6065c839bec836f7f112df04224d24b04b06862b041a2"
+  },
+  "artifact": {
+    "file": "windows.pt",
+    "sha256": "fdad88828acde5154cc1bc1428028879a046b749a7ad2ba4d4c5cdf4a9c1db20",
+    "bytes": 5899608
+  }
+}

@@ -108,7 +108,8 @@ def main():
                        default_max_gen_toks=a.max_new_tokens)
     result = {'command': sys.argv, 'args': vars(a), 'provenance': provenance,
               'versions': {k: importlib.metadata.version(k) for k in ('torch', 'vllm', 'transformers', 'lm_eval')},
-              'environment': 'lowrankarena', 'thinking': False,
+              'environment': os.environ.get('CONDA_DEFAULT_ENV'), 'python': sys.executable,
+              'thinking': False,
               'cache_scope': 'latent V in standard-width zero-padded cache; no cache-memory reduction claim',
               'wo_scope': 'four logical source encoders and joint decoder on TP1; no distributed collective'}
     if a.task != 'gsm8k':
