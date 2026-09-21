@@ -1,0 +1,5 @@
+context_tokens,path,repeats,samples,decode_cuda_median_ms,decode_cuda_mean_ms,decode_cuda_p95_ms,decode_cuda_max_ms,decode_wall_median_ms,throughput_tokens_per_second,prefill_median_ms,peak_allocated_gib,last_step_key_hit_fraction,all_logits_finite,repeat_argmax_match
+65536,full,2,256,37.291489,37.299015,37.446590,38.459743,37.312785,26.795573,12466.112793,23.827757,,true,true
+65536,two-stage-reuse,2,256,31.264976,31.314700,31.942017,32.207455,31.281016,31.918422,12428.803711,24.279612,0.528830,true,true
+131072,full,2,256,43.576752,43.618487,43.961346,44.208767,43.596735,22.915491,36878.218750,32.671217,,true,true
+131072,two-stage-reuse,2,256,31.943920,31.995600,32.587807,32.736351,31.961339,31.224279,36773.658203,33.427759,0.557973,true,true

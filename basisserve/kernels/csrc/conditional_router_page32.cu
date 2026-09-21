@@ -519,7 +519,13 @@ __global__ void conditional_router_append_decode_kernel(
     c10::BFloat16* __restrict__ rope_cos_cache,
     c10::BFloat16* __restrict__ rope_sin_cache,
     c10::BFloat16* __restrict__ mapped_key,
+    c10::BFloat16* __restrict__ metadata_minimum,
+    c10::BFloat16* __restrict__ metadata_maximum,
+    c10::BFloat16* __restrict__ metadata_ring,
     int64_t mapped_key_capacity,
+    int64_t metadata_page_capacity,
+    int64_t metadata_position,
+    int64_t metadata_slot,
     int64_t kv_heads,
     int64_t start,
     int64_t key_stride_batch,
@@ -536,7 +542,8 @@ __global__ void conditional_router_append_decode_kernel(
     int64_t residual_cache_stride_head,
     int64_t residual_cache_stride_token,
     int64_t rope_cache_stride_token,
-    bool write_rope) {
+    bool write_rope,
+    bool update_metadata) {
   __shared__ __align__(16) __nv_bfloat16 shared_value[kValueRank];
   __shared__ __align__(16) __nv_bfloat16 shared_base[kBaseRank > 0 ? kBaseRank : 1];
   __shared__ __align__(16) __nv_bfloat16 shared_residual[kQueryKeyDim];
@@ -551,6 +558,28 @@ __global__ void conditional_router_append_decode_kernel(
       batch * value_stride_batch + kv_head * value_stride_head;
   const int64_t key_input_base =
       batch * key_stride_batch + kv_head * key_stride_head;
+
+  if (update_metadata && thread < kQueryKeyDim) {
+    const int64_t ring_offset =
+        ((row * 64 + metadata_slot) * kQueryKeyDim) + thread;
+    const int64_t metadata_offset =
+        ((row * metadata_page_capacity + metadata_position / kPageSize) *
+             kQueryKeyDim) +
+        thread;
+    const float displaced = static_cast<float>(metadata_ring[ring_offset]);
+    if (metadata_position % kPageSize == 0) {
+      metadata_minimum[metadata_offset] =
+          static_cast<c10::BFloat16>(displaced);
+      metadata_maximum[metadata_offset] =
+          static_cast<c10::BFloat16>(displaced);
+    } else {
+      metadata_minimum[metadata_offset] = static_cast<c10::BFloat16>(
+          fminf(static_cast<float>(metadata_minimum[metadata_offset]), displaced));
+      metadata_maximum[metadata_offset] = static_cast<c10::BFloat16>(
+          fmaxf(static_cast<float>(metadata_maximum[metadata_offset]), displaced));
+    }
+    metadata_ring[ring_offset] = key[key_input_base + thread];
+  }
 
   if (mapped_key != nullptr && thread < kQueryKeyDim / 8) {
     const auto* source = reinterpret_cast<const uint4*>(
@@ -1016,7 +1045,13 @@ void conditional_router_append_decode_cuda(
     int64_t start,
     bool write_rope,
     int64_t mapped_key_device_pointer,
-    int64_t mapped_key_capacity) {
+    int64_t mapped_key_capacity,
+    const at::Tensor& metadata_minimum,
+    const at::Tensor& metadata_maximum,
+    const at::Tensor& metadata_ring,
+    int64_t metadata_position,
+    int64_t metadata_slot,
+    bool update_metadata) {
   assert(key.is_cuda() && value.is_cuda());
   assert(base_left.is_cuda() && base_right.is_cuda() && base_bias.is_cuda());
   assert(residual_encoder.is_cuda() && rope_cos.is_cuda() && rope_sin.is_cuda());
@@ -1065,6 +1100,24 @@ void conditional_router_append_decode_cuda(
   assert(rope_sin_cache.sizes() == rope_cos_cache.sizes());
   assert(start >= 0 && start < capacity);
   assert(mapped_key_device_pointer == 0 || mapped_key_capacity == capacity);
+  if (update_metadata) {
+    assert(metadata_minimum.is_cuda() && metadata_maximum.is_cuda() &&
+           metadata_ring.is_cuda());
+    assert(metadata_minimum.scalar_type() == at::kBFloat16 &&
+           metadata_maximum.scalar_type() == at::kBFloat16 &&
+           metadata_ring.scalar_type() == at::kBFloat16);
+    assert(metadata_minimum.sizes() == metadata_maximum.sizes());
+    assert(metadata_minimum.size(0) == key.size(0) &&
+           metadata_minimum.size(1) == key.size(1) &&
+           metadata_minimum.size(3) == kQueryKeyDim);
+    assert(metadata_ring.sizes() ==
+           at::IntArrayRef({key.size(0), key.size(1), 64, kQueryKeyDim}));
+    assert(metadata_minimum.is_contiguous() && metadata_maximum.is_contiguous() &&
+           metadata_ring.is_contiguous());
+    assert(metadata_position >= 0 &&
+           metadata_position / kPageSize < metadata_minimum.size(2));
+    assert(metadata_slot >= 0 && metadata_slot < 64);
+  }
   assert(key.stride(3) == 1 && value.stride(3) == 1);
   assert(value_cache.stride(3) == 1 && base_cache.stride(3) == 1);
   assert(residual_cache.stride(3) == 1);
@@ -1095,7 +1148,13 @@ void conditional_router_append_decode_cuda(
           rope_cos_cache.mutable_data_ptr<c10::BFloat16>(),
           rope_sin_cache.mutable_data_ptr<c10::BFloat16>(),
           reinterpret_cast<c10::BFloat16*>(mapped_key_device_pointer),
+          metadata_minimum.mutable_data_ptr<c10::BFloat16>(),
+          metadata_maximum.mutable_data_ptr<c10::BFloat16>(),
+          metadata_ring.mutable_data_ptr<c10::BFloat16>(),
           mapped_key_capacity,
+          metadata_minimum.dim() == 4 ? metadata_minimum.size(2) : 0,
+          metadata_position,
+          metadata_slot,
           key.size(1),
           start,
           key.stride(0),
@@ -1112,7 +1171,8 @@ void conditional_router_append_decode_cuda(
           residual_cache.stride(1),
           residual_cache.stride(2),
           rope_cos_cache.stride(0),
-          write_rope);
+          write_rope,
+          update_metadata);
   assert(cudaGetLastError() == cudaSuccess);
 }
 

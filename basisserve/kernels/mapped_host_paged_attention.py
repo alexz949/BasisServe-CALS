@@ -210,6 +210,11 @@ def conditional_router_append_decode(
     write_rope: bool,
     mapped_host_key: Tensor | None = None,
     mapped_host_key_device_pointer: int | None = None,
+    metadata_minimum: Tensor | None = None,
+    metadata_maximum: Tensor | None = None,
+    metadata_ring: Tensor | None = None,
+    metadata_position: int = 0,
+    metadata_slot: int = 0,
 ) -> None:
     """Append one C1 routing token with one shape-specialized CUDA kernel."""
 
@@ -289,6 +294,17 @@ def conditional_router_append_decode(
             else int(mapped_host_key_device_pointer)
         )
         mapped_capacity = capacity
+    update_metadata = metadata_minimum is not None
+    if update_metadata:
+        assert metadata_maximum is not None and metadata_ring is not None
+        metadata_tensors = (metadata_minimum, metadata_maximum, metadata_ring)
+        assert all(tensor.is_cuda and tensor.dtype == torch.bfloat16 for tensor in metadata_tensors)
+        assert all(tensor.is_contiguous() for tensor in metadata_tensors)
+    else:
+        assert metadata_maximum is None and metadata_ring is None
+        metadata_minimum = rope_cos_cache
+        metadata_maximum = rope_cos_cache
+        metadata_ring = rope_cos_cache
     _load_extension(value_dim=value_dim, base_rank=base_rank, residual_rank=residual_rank).conditional_router_append_decode(
         key,
         value,
@@ -307,6 +323,12 @@ def conditional_router_append_decode(
         bool(write_rope),
         mapped_pointer,
         mapped_capacity,
+        metadata_minimum,
+        metadata_maximum,
+        metadata_ring,
+        int(metadata_position),
+        int(metadata_slot),
+        update_metadata,
     )
 
 

@@ -4,8 +4,8 @@ import triton as tr
 import triton.language as tl
 
 
-@tr.jit
-def _select(U,OUT,P:tl.constexpr,TAIL:tl.constexpr,B:tl.constexpr):
+@tr.jit(do_not_specialize_on_alignment=["P", "TAIL"])
+def _select(U,OUT,P,TAIL,B:tl.constexpr):
     row=tl.program_id(0);p=tl.arange(0,B);h=tl.arange(0,4)
     x=tl.load(U+(row*4+h[:,None])*P+p[None,:],p[None,:]<P,other=-float('inf'))
     eligible=(p>0)&(p<TAIL)&(p<P)
@@ -31,9 +31,9 @@ def _select(U,OUT,P:tl.constexpr,TAIL:tl.constexpr,B:tl.constexpr):
     tl.store(OUT+row*512+index,p.to(tl.int64),chosen)
 
 
-def candidates(scores,historical):
+def candidates(scores,historical,output=None):
     b,h,_,p=scores.shape
     if p<=512:return torch.arange(p,device=scores.device).expand(b,h,p).contiguous()
-    ids=torch.empty(b,h,512,device=scores.device,dtype=torch.int64)
+    ids=output if output is not None else torch.empty(b,h,512,device=scores.device,dtype=torch.int64)
     _select[(b*h,)](scores,ids,p,historical//32,tr.next_power_of_2(p),num_warps=8)
     return ids

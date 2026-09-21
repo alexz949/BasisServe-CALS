@@ -34,8 +34,8 @@ def _advance(K,RING,MN,MX,H:tl.constexpr,CAP:tl.constexpr,POS,SLOT,
     tl.store(RING+addr,new)
 
 
-@tr.jit
-def _coarse(Q,MN,MX,U,H:tl.constexpr,CAP:tl.constexpr,P:tl.constexpr,N,
+@tr.jit(do_not_specialize_on_alignment=["P", "N"])
+def _coarse(Q,MN,MX,U,H:tl.constexpr,CAP:tl.constexpr,P,N,
             Q0:tl.constexpr,Q1:tl.constexpr):
     head=tl.program_id(0);row=head//4
     p=tl.program_id(1)*16+tl.arange(0,16);d=tl.arange(0,128)
@@ -48,8 +48,8 @@ def _coarse(Q,MN,MX,U,H:tl.constexpr,CAP:tl.constexpr,P:tl.constexpr,N,
     tl.store(U+head*P+p,tl.where(valid,x,-float('inf')),p<P)
 
 
-@tr.jit
-def _group(U,G,P:tl.constexpr,TAIL:tl.constexpr,B:tl.constexpr):
+@tr.jit(do_not_specialize_on_alignment=["P", "TAIL"])
+def _group(U,G,P,TAIL,B:tl.constexpr):
     row=tl.program_id(0);p=tl.arange(0,B);h=tl.arange(0,4)
     x=tl.load(U+(row*4+h[:,None])*P+p[None,:],p[None,:]<P,other=-float('inf'))
     eligible=(p>0)&(p<TAIL)&(p<P)
@@ -69,6 +69,8 @@ class Metadata:
         _summary[(b*h,tr.cdiv(self.n,32))](k,self.minimum,self.maximum,self.n,h,self.cap,*k.stride()[:3])
     def advance(self,k):
         _advance[(k.shape[0]*self.h,)](k,self.ring,self.minimum,self.maximum,self.h,self.cap,self.n,self.slot,*k.stride()[:2])
+        self.commit_advance()
+    def commit_advance(self):
         self.n+=1;self.slot=(self.slot+1)%64
     def scores(self,q):
         p=tr.cdiv(self.n+64,32)
@@ -103,7 +105,7 @@ def compile_fine(root):
     text=text[:left]+body+text[right:]
     text=text.replace('double scale, bool query_code_prepared) {','double scale, bool query_code_prepared, const at::Tensor& ids) {')
     text=text.replace('(base_code.size(2) + kPageSize - 1) / kPageSize;','ids.size(2);')
-    text=text.replace('static_cast<float>(scale));','static_cast<float>(scale), ids.data_ptr<int64_t>());',1)
+    text=text.replace('static_cast<float>(scale));','static_cast<float>(scale), ids.data_ptr<int64_t>());')
     write_source(folder/'conditional_router_page32.cu',text)
     cpp=(src/'mapped_host_paged_attention.cpp').read_text()
     cpp=cpp.replace('double scale, bool query_code_prepared);','double scale, bool query_code_prepared, const at::Tensor& ids);')
@@ -111,5 +113,5 @@ def compile_fine(root):
     write_source(folder/'mapped_host_paged_attention.cpp',cpp)
     write_source(folder/'mapped_host_paged_attention.cu',(src/'mapped_host_paged_attention.cu').read_text())
     digest=hashlib.sha256((text+cpp).encode()).hexdigest()[:10]
-    fine=load(name=f'two_stage_{digest}',sources=[str(folder/n) for n in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','-DBASIS_VALUE_DIM=80','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32','-DBASIS_BASE_RANK=16','-DBASIS_RESIDUAL_RANK=16','-DREGISTER_WARPS=8'])
+    fine=load(name=f'two_stage_{digest}',sources=[str(folder/n) for n in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','-DBASIS_VALUE_DIM=128','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32','-DBASIS_BASE_RANK=16','-DBASIS_RESIDUAL_RANK=16','-DREGISTER_WARPS=8','-DBASIS_DISABLE_REGISTER_ROUTER'])
     return full,fine

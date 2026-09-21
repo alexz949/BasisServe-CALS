@@ -116,6 +116,12 @@ def _append_call(extension, tensors, *, pointer: int, capacity: int) -> None:
         False,
         pointer,
         capacity,
+        tensors["append_cos"],
+        tensors["append_cos"],
+        tensors["append_cos"],
+        0,
+        0,
+        False,
     )
 
 
