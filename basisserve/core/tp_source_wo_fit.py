@@ -9,7 +9,6 @@ import torch
 from torch import Tensor
 
 from basisserve.core.gqa_routed_ov_joint import (
-    SeparableEncoderSolver,
     covariance_with_trace_damping,
     evaluate_quadratic,
     fit_routed_ov_joint,
@@ -34,6 +33,7 @@ class TPSourceWOFitConfig:
     encoder_relative_tolerance: float = 1.0e-5
     encoder_patience: int = 1
     maximum_backtracks: int = 8
+    encoder_cg_iterations: int = 16
 
     def validate(self) -> None:
         if self.encoder_sweeps < 0 or not 0 <= self.minimum_encoder_sweeps <= self.encoder_sweeps:
@@ -46,6 +46,7 @@ class TPSourceWOFitConfig:
         if min(
             self.encoder_patience,
             self.maximum_backtracks,
+            self.encoder_cg_iterations,
         ) <= 0:
             raise ValueError("C1 iteration controls must be positive")
 
@@ -217,11 +218,8 @@ def fit_tp_source_wo_c1(
         final_decoder_solve=True,
         group_ranks=ranks,
         checkpoint_callback=selector,
-        encoder_direction_solver=SeparableEncoderSolver(
-            left_relative_damping=0.0,
-            right_relative_damping=0.0,
-            name="exact_single_source_two_sided_cholesky",
-        ),
+        cg_max_iterations=config.encoder_cg_iterations,
+        cg_fixed_iterations=True,
         decoder_stationarity_override=lambda *_: 0.0,
         work_dtype=work_dtype,
         work_device=device,
@@ -250,25 +248,10 @@ def fit_tp_source_wo_c1(
         {
             "sweep": int(sweep.sweep),
             "source": int(step.group_index),
-            "solver": (
-                step.direction.solver_name
-                if step.direction is not None
-                else "unknown"
-            ),
-            "relative_residual": (
-                float(step.direction.exact_hessian_relative_residual)
-                if step.direction is not None
-                else float("nan")
-            ),
-            "two_sided_solve_relative_residual": (
-                float(
-                    step.direction.solver_diagnostics[
-                        "two_sided_solve_relative_residual"
-                    ]
-                )
-                if step.direction is not None
-                else float("nan")
-            ),
+            "solver": "fixed_iteration_conjugate_gradient",
+            "cg_iterations": int(step.cg.iterations),
+            "relative_residual": float(step.cg.relative_residual),
+            "two_sided_solve_relative_residual": None,
             "accepted_scale": float(step.accepted_scale),
             "backtracks": int(step.retries),
             "old_loss": float(step.old_loss),
@@ -283,7 +266,7 @@ def fit_tp_source_wo_c1(
     diagnostics = {
         "method": (
             "activation_weighted_initialization_plus_joint_c1_als_with_"
-            "exact_single_source_two_sided_encoder_solves"
+            "fixed_iteration_conjugate_gradient_encoder_solves"
         ),
         "absolute_covariance_damping": absolute_damping,
         "encoder_sweeps_completed": len(solved.sweeps),

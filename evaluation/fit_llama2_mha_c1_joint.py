@@ -242,20 +242,32 @@ def _atomic_safetensors(path: Path, payload: Mapping[str, Tensor]) -> None:
     os.replace(temporary, path)
 
 
-def activate_nemotron_h_profile(attention_layers: Sequence[int]) -> None:
-    """Select the pinned 47B geometry using layers discovered by native audit."""
+def activate_nemotron_h_profile(
+    attention_layers: Sequence[int],
+    *,
+    num_layers: int = 98,
+    hidden_size: int = 8192,
+    num_heads: int = 64,
+    num_kv_heads: int = 8,
+    head_dim: int = 128,
+    encoder_sweeps: int = 12,
+    model_label: str = "Nemotron-H",
+) -> None:
+    """Select a Nemotron-H geometry using layers discovered by native audit."""
     global FORMAT, LAYER_FORMAT, MODEL_LABEL, MODEL_TYPE, ATTENTION_TYPE
     global NUM_LAYERS, NUM_HEADS, NUM_KV_HEADS, HEAD_DIM, HIDDEN_SIZE
     global ATTENTION_LAYERS, FORMAL_ENCODER_SWEEPS
     layers = tuple(map(int, attention_layers))
-    assert len(layers) == 5 and layers == tuple(sorted(set(layers)))
-    assert min(layers) >= 0 and max(layers) < 98
-    FORMAT = 'basisserve.nemotron_h_47b.gqa_c1_joint.v1'
-    LAYER_FORMAT = 'basisserve.nemotron_h_47b.gqa_c1_joint.layer.v1'
-    MODEL_LABEL, MODEL_TYPE, ATTENTION_TYPE = 'Nemotron-H-47B-Reasoning-128K', 'nemotron_h', 'gqa'
-    NUM_LAYERS, NUM_HEADS, NUM_KV_HEADS, HEAD_DIM, HIDDEN_SIZE = 98, 64, 8, 128, 8192
+    assert layers and layers == tuple(sorted(set(layers)))
+    assert min(layers) >= 0 and max(layers) < num_layers
+    FORMAT = 'basisserve.nemotron_h.gqa_c1_joint.v2'
+    LAYER_FORMAT = 'basisserve.nemotron_h.gqa_c1_joint.layer.v2'
+    MODEL_LABEL, MODEL_TYPE, ATTENTION_TYPE = model_label, 'nemotron_h', 'gqa'
+    NUM_LAYERS, NUM_HEADS, NUM_KV_HEADS, HEAD_DIM, HIDDEN_SIZE = (
+        num_layers, num_heads, num_kv_heads, head_dim, hidden_size
+    )
     ATTENTION_LAYERS = layers
-    FORMAL_ENCODER_SWEEPS = 12
+    FORMAL_ENCODER_SWEEPS = encoder_sweeps
 
 
 def _attention_layers() -> tuple[int, ...]:
@@ -282,6 +294,20 @@ def _parse_layers(raw: str) -> tuple[int, ...]:
         raise ValueError(f"selected layers are outside {MODEL_LABEL}")
     assert set(selected) <= set(_attention_layers())
     return selected
+
+
+def _parse_checkpoint_sweeps(raw: str | None, maximum: int) -> tuple[int, ...]:
+    if raw is None or not raw.strip():
+        return ()
+    sweeps = tuple(sorted({int(piece.strip()) for piece in raw.split(",") if piece.strip()}))
+    if any(sweep < 0 or sweep > maximum for sweep in sweeps):
+        print(
+            f"[Error] checkpoint export sweeps must lie in [0, {maximum}]",
+            file=sys.stderr,
+            flush=True,
+        )
+        return ()
+    return sweeps
 
 
 def _dtype(name: str) -> torch.dtype:
@@ -562,7 +588,13 @@ def _fit_config(
         "encoder_initialization": args.encoder_initialization,
         "encoder_initialization_seed": args.encoder_initialization_seed,
         "covariance_damping": args.covariance_damping,
-        "encoder_sweeps": FORMAL_ENCODER_SWEEPS,
+        "encoder_sweeps": args.encoder_sweeps,
+        "export_checkpoint_sweeps": list(
+            _parse_checkpoint_sweeps(
+                args.export_checkpoint_sweeps,
+                args.encoder_sweeps,
+            )
+        ),
         "encoder_cg_mode": args.encoder_cg_mode,
         "encoder_cg_relative_tolerance": args.encoder_cg_relative_tolerance,
         "encoder_cg_max_iterations": cg_max_iterations,
@@ -570,9 +602,14 @@ def _fit_config(
             cg_max_iterations if args.encoder_cg_mode == "fixed" else None
         ),
         "covariance_row_chunk_size": args.covariance_row_chunk_size,
+        "stored_covariance_psd_policy": (
+            "fp64-cholesky-check-then-negative-eigenvalue-clip"
+            if manifest.get("format") == COVARIANCE_SNAPSHOT_FORMAT
+            else None
+        ),
         "decoder_objective": args.decoder_objective,
         "checkpoint_policy": (
-            "fixed decoder-refitted endpoint after encoder sweep 6"
+            f"fixed decoder-refitted endpoint after encoder sweep {args.encoder_sweeps}"
         ),
         "objective": (
             "full-layer attention-output MSE with cross-head covariance"
@@ -679,6 +716,44 @@ def _covariance_matrix_to_blocks(
 
 
 @torch.no_grad()
+def _repair_stored_covariance_psd(
+    covariance: Tensor, *, device: torch.device
+) -> tuple[Tensor, dict[str, Any]]:
+    """Remove finite-precision negative spectrum from a stored Gram matrix."""
+
+    work = covariance.to(device=device, dtype=torch.float64)
+    work = 0.5 * (work + work.T)
+    cholesky, info = torch.linalg.cholesky_ex(work, check_errors=False)
+    if int(info.max()) == 0:
+        del cholesky
+        return work, {
+            "applied": False,
+            "method": "fp64_cholesky_psd_check",
+            "negative_eigenvalue_count": 0,
+        }
+    del cholesky
+    eigenvalues, eigenvectors = torch.linalg.eigh(work)
+    negative = eigenvalues < 0
+    clipped = eigenvalues.clamp_min(0)
+    repaired = (eigenvectors * clipped.unsqueeze(0)) @ eigenvectors.T
+    repaired = 0.5 * (repaired + repaired.T)
+    negative_norm = torch.linalg.vector_norm(eigenvalues[negative])
+    total_norm = torch.linalg.vector_norm(eigenvalues)
+    diagnostics = {
+        "applied": True,
+        "method": "fp64_symmetric_eigendecomposition_negative_clip",
+        "minimum_eigenvalue_before": float(eigenvalues[0]),
+        "maximum_eigenvalue_before": float(eigenvalues[-1]),
+        "negative_eigenvalue_count": int(negative.sum()),
+        "relative_spectral_correction_frobenius": float(
+            negative_norm / total_norm.clamp_min(torch.finfo(torch.float64).tiny)
+        ),
+    }
+    del work, eigenvalues, eigenvectors, negative, clipped
+    return repaired, diagnostics
+
+
+@torch.no_grad()
 def _activation_covariance_blocks(
     activation: Tensor,
     *,
@@ -735,12 +810,24 @@ def _relative_loss(loss: float, constant: Tensor) -> float:
 class _CheckpointRecorder:
     def __init__(
         self,
+        fit_objective: Any,
         validation_objective: Any,
         mapping: Tensor,
+        *,
+        export_sweeps: Sequence[int] = (),
+        export_root: Path | None = None,
+        layer: int | None = None,
+        factor_dtype: torch.dtype | None = None,
     ) -> None:
+        self.fit_objective = fit_objective
         self.validation_objective = validation_objective
         self.mapping = mapping
+        self.export_sweeps = frozenset(map(int, export_sweeps))
+        self.export_root = export_root
+        self.layer = layer
+        self.factor_dtype = factor_dtype
         self.records: list[dict[str, Any]] = []
+        self.exports: dict[int, dict[str, Any]] = {}
 
     def __call__(self, checkpoint: Any, A: Tensor, D: Tensor) -> None:
         heldout = evaluate_quadratic(
@@ -759,6 +846,69 @@ class _CheckpointRecorder:
             ),
         }
         self.records.append(row)
+        decoder_closed = checkpoint.boundary in {"decoder_only", "after_redecoder"}
+        sweep = int(checkpoint.sweep)
+        if not decoder_closed or sweep not in self.export_sweeps:
+            return
+        if (
+            self.export_root is None
+            or self.layer is None
+            or self.factor_dtype is None
+        ):
+            return
+        export_dir = self.export_root / f"sweep_{sweep:03d}"
+        export_dir.mkdir(parents=True, exist_ok=True)
+        artifact_path = export_dir / f"layer_{self.layer:03d}.safetensors"
+        artifact_A = A.detach().to(device="cpu", dtype=self.factor_dtype).contiguous()
+        artifact_D = D.detach().to(device="cpu", dtype=self.factor_dtype).contiguous()
+        _atomic_safetensors(
+            artifact_path,
+            {
+                "value_coordinate_encoders": artifact_A,
+                "head_output_decoders": artifact_D,
+            },
+        )
+        device = self.fit_objective.covariance.device
+        work_dtype = self.fit_objective.covariance.dtype
+        quantized_A = artifact_A.to(device=device, dtype=work_dtype)
+        quantized_D = artifact_D.to(device=device, dtype=work_dtype)
+        fit_loss = evaluate_quadratic(
+            self.fit_objective,
+            quantized_A,
+            quantized_D,
+            self.mapping,
+        )
+        heldout_dtype = self.validation_objective.covariance.dtype
+        heldout_loss = evaluate_quadratic(
+            self.validation_objective,
+            artifact_A.to(device=device, dtype=heldout_dtype),
+            artifact_D.to(device=device, dtype=heldout_dtype),
+            self.mapping,
+        )
+        self.exports[sweep] = {
+            "boundary": str(checkpoint.boundary),
+            "sweep": sweep,
+            "artifact": {
+                "file": artifact_path.name,
+                "sha256": _sha256(artifact_path),
+                "tensors": {
+                    "value_coordinate_encoders": {
+                        "shape": list(artifact_A.shape),
+                        "dtype": str(artifact_A.dtype),
+                    },
+                    "head_output_decoders": {
+                        "shape": list(artifact_D.shape),
+                        "dtype": str(artifact_D.dtype),
+                    },
+                },
+            },
+            "fit_factor_dtype_relative_mse": _relative_loss(
+                fit_loss, self.fit_objective.constant
+            ),
+            "heldout_factor_dtype_relative_mse": _relative_loss(
+                heldout_loss, self.validation_objective.constant
+            ),
+        }
 
 
 def _verified_prior(path: Path, artifact: Path, layer: int, fit_config: Mapping[str, Any]) -> dict[str, Any] | None:
@@ -808,6 +958,30 @@ def _write_exact_full_rank_layer(
         "head_output_decoders": artifact_D,
     }
     _atomic_safetensors(artifact_path, artifact_tensors)
+    artifact_metadata = {
+        "file": artifact_path.name,
+        "sha256": _sha256(artifact_path),
+        "tensors": {
+            key: {"shape": list(value.shape), "dtype": str(value.dtype)}
+            for key, value in artifact_tensors.items()
+        },
+    }
+    checkpoint_exports: dict[str, Any] = {}
+    if 0 in map(int, fit_config.get("export_checkpoint_sweeps", ())):
+        export_dir = artifact_path.parent / "sweep_000"
+        export_dir.mkdir(parents=True, exist_ok=True)
+        export_artifact_path = export_dir / artifact_path.name
+        _atomic_safetensors(export_artifact_path, artifact_tensors)
+        checkpoint_exports["0"] = {
+            "boundary": "exact_dense_endpoint",
+            "sweep": 0,
+            "artifact": {
+                **artifact_metadata,
+                "sha256": _sha256(export_artifact_path),
+            },
+            "fit_factor_dtype_relative_mse": 0.0,
+            "heldout_factor_dtype_relative_mse": 0.0,
+        }
     checkpoint = {
         "boundary": "exact_dense_endpoint",
         "sweep": 0,
@@ -842,20 +1016,14 @@ def _write_exact_full_rank_layer(
             "fit": dict(fit_source),
             "validation": dict(validation_source),
         },
-        "artifact": {
-            "file": artifact_path.name,
-            "sha256": _sha256(artifact_path),
-            "tensors": {
-                key: {"shape": list(value.shape), "dtype": str(value.dtype)}
-                for key, value in artifact_tensors.items()
-            },
-        },
+        "artifact": artifact_metadata,
         "checkpoint": {
             "policy": "exact dense endpoint",
             "boundary": "exact_dense_endpoint",
             "sweep": 0,
             "checkpoints": [checkpoint],
         },
+        "checkpoint_exports": checkpoint_exports,
         "fit": {"relative_mse": 0.0, "factor_dtype_relative_mse": 0.0},
         "heldout": {"relative_mse": 0.0, "factor_dtype_relative_mse": 0.0},
         "covariance": {
@@ -1002,7 +1170,24 @@ def _fit_layer(
         f"{'sufficient_statistics' if covariance_snapshot else 'activations'}",
         flush=True,
     )
+    covariance_psd_repair: dict[str, Any] | None = None
     if covariance_snapshot:
+        fit_matrix, fit_psd_diagnostics = _repair_stored_covariance_psd(
+            fit_matrix, device=device
+        )
+        validation_matrix, heldout_psd_diagnostics = _repair_stored_covariance_psd(
+            validation_matrix, device=device
+        )
+        covariance_psd_repair = {
+            "fit": fit_psd_diagnostics,
+            "heldout": heldout_psd_diagnostics,
+        }
+        if fit_psd_diagnostics["applied"] or heldout_psd_diagnostics["applied"]:
+            print(
+                f"[{MODEL_LABEL} C1] layer={layer} covariance_psd_repair="
+                f"{covariance_psd_repair}",
+                flush=True,
+            )
         fit_raw = _covariance_matrix_to_blocks(
             fit_matrix, device=device, dtype=work_dtype
         )
@@ -1146,8 +1331,16 @@ def _fit_layer(
         dtype=work_dtype,
     )
     recorder = _CheckpointRecorder(
+        fit_evaluation_objective,
         validation_objective,
         mapping,
+        export_sweeps=_parse_checkpoint_sweeps(
+            args.export_checkpoint_sweeps,
+            args.encoder_sweeps,
+        ),
+        export_root=output_dir,
+        layer=layer,
+        factor_dtype=factor_dtype,
     )
     print(
         f"[{MODEL_LABEL} C1] layer={layer} "
@@ -1162,8 +1355,8 @@ def _fit_layer(
         initial_D=initial_D,
         head_to_kv_group=mapping,
         coupling_mode=decoder_coupling_mode,
-        maximum_sweeps=FORMAL_ENCODER_SWEEPS,
-        minimum_sweeps=FORMAL_ENCODER_SWEEPS,
+        maximum_sweeps=args.encoder_sweeps,
+        minimum_sweeps=args.encoder_sweeps,
         relative_objective_tolerance=0.0,
         patience=1,
         decoder_relative_jitter=0.0,
@@ -1185,8 +1378,9 @@ def _fit_layer(
     selected_A = result.A_unique.to(device=device, dtype=work_dtype)
     selected_D = result.D_heads.to(device=device, dtype=work_dtype)
     endpoint = result.checkpoints[-1]
-    assert endpoint.boundary == "after_redecoder"
-    assert endpoint.sweep == FORMAL_ENCODER_SWEEPS
+    expected_boundary = "decoder_only" if args.encoder_sweeps == 0 else "after_redecoder"
+    assert endpoint.boundary == expected_boundary
+    assert endpoint.sweep == args.encoder_sweeps
     fit_loss = evaluate_quadratic(
         fit_evaluation_objective, selected_A, selected_D, mapping
     )
@@ -1229,10 +1423,13 @@ def _fit_layer(
             },
         },
         "checkpoint": {
-            "policy": "fixed decoder-refitted endpoint after encoder sweep 6",
+            "policy": fit_config["checkpoint_policy"],
             "boundary": endpoint.boundary,
             "sweep": endpoint.sweep,
             "checkpoints": recorder.records,
+        },
+        "checkpoint_exports": {
+            str(sweep): export for sweep, export in sorted(recorder.exports.items())
         },
         "fit": {
             "relative_mse": _relative_loss(fit_loss, fit_objective.constant),
@@ -1251,6 +1448,7 @@ def _fit_layer(
         "covariance": {
             "fit_absolute_trace_damping": absolute_damping,
             "heldout_regularized": False,
+            "stored_gram_psd_repair": covariance_psd_repair,
         },
         "initialization": initialization_groups,
         "initialization_summary": {
@@ -1440,6 +1638,102 @@ def _summary(records: Sequence[Mapping[str, Any]], config: Mapping[str, Any]) ->
     return "\n".join(lines)
 
 
+def _merge_exported_checkpoints(
+    *,
+    output_dir: Path,
+    records: Sequence[Mapping[str, Any]],
+    fit_config: Mapping[str, Any],
+    parent_result_path: Path,
+) -> None:
+    requested = tuple(map(int, fit_config.get("export_checkpoint_sweeps", ())))
+    if not requested:
+        return
+    parent_sha256 = _sha256(parent_result_path)
+    for sweep in requested:
+        export_dir = output_dir / f"sweep_{sweep:03d}"
+        exported_records = []
+        for source in records:
+            layer = int(source["layer"])
+            exported = source["checkpoint_exports"][str(sweep)]
+            checkpoint_config = dict(fit_config)
+            checkpoint_config["encoder_sweeps"] = sweep
+            checkpoint_config["checkpoint_policy"] = (
+                "initialization decoder closure with zero encoder sweeps"
+                if sweep == 0
+                else f"fixed decoder-refitted endpoint after encoder sweep {sweep}"
+            )
+            record = {
+                "format": LAYER_FORMAT,
+                "layer": layer,
+                "fit_config": checkpoint_config,
+                "source_snapshot": source["source_snapshot"],
+                "artifact": exported["artifact"],
+                "checkpoint": {
+                    "policy": checkpoint_config["checkpoint_policy"],
+                    "boundary": exported["boundary"],
+                    "sweep": sweep,
+                },
+                "fit": {
+                    "factor_dtype_relative_mse": exported[
+                        "fit_factor_dtype_relative_mse"
+                    ]
+                },
+                "heldout": {
+                    "factor_dtype_relative_mse": exported[
+                        "heldout_factor_dtype_relative_mse"
+                    ]
+                },
+                "initialization": source["initialization"],
+                "initialization_summary": source["initialization_summary"],
+                "source_run": {
+                    "results": str(parent_result_path),
+                    "results_sha256": parent_sha256,
+                },
+            }
+            _atomic_json(export_dir / f"layer_{layer:03d}.json", record)
+            exported_records.append(record)
+        checkpoint_config = dict(exported_records[0]["fit_config"])
+        payload = {
+            "format": FORMAT,
+            "status": "complete",
+            "command": shlex.join(sys.argv),
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+            "layers": [int(row["layer"]) for row in exported_records],
+            "fit_config": checkpoint_config,
+            "artifacts": {
+                str(row["layer"]): row["artifact"] for row in exported_records
+            },
+            "records": exported_records,
+            "aggregate": {
+                "mean_fit_factor_dtype_relative_mse": sum(
+                    float(row["fit"]["factor_dtype_relative_mse"])
+                    for row in exported_records
+                )
+                / len(exported_records),
+                "mean_heldout_factor_dtype_relative_mse": sum(
+                    float(row["heldout"]["factor_dtype_relative_mse"])
+                    for row in exported_records
+                )
+                / len(exported_records),
+            },
+            "source_run": {
+                "results": str(parent_result_path),
+                "results_sha256": parent_sha256,
+            },
+        }
+        result_path = export_dir / "results.json"
+        _atomic_json(result_path, payload)
+        (export_dir / "summary.md").write_text(
+            _summary(exported_records, checkpoint_config),
+            encoding="utf-8",
+        )
+        print(
+            f"[{MODEL_LABEL} C1] exported decoder-closed sweep={sweep} "
+            f"to {result_path}",
+            flush=True,
+        )
+
+
 def _merge(args: argparse.Namespace) -> None:
     output_dir = Path(args.output_dir).expanduser().resolve()
     if not output_dir.is_dir():
@@ -1490,6 +1784,12 @@ def _merge(args: argparse.Namespace) -> None:
     (output_dir / "summary.md").write_text(
         _summary(records, fit_config), encoding="utf-8"
     )
+    _merge_exported_checkpoints(
+        output_dir=output_dir,
+        records=records,
+        fit_config=fit_config,
+        parent_result_path=result_path,
+    )
     print(f"[{MODEL_LABEL} C1] merged {len(records)} layers into {result_path}", flush=True)
 
 
@@ -1539,6 +1839,21 @@ def _add_common(parser: argparse.ArgumentParser) -> None:
         help=(
             "Base seed for random-orthogonal initialization; the effective "
             "seed is deterministically offset by layer"
+        ),
+    )
+    parser.add_argument(
+        "--encoder-sweeps",
+        type=int,
+        choices=range(0, 129),
+        default=FORMAL_ENCODER_SWEEPS,
+        metavar="N",
+        help="Exact number of full encoder/decoder ALS sweeps",
+    )
+    parser.add_argument(
+        "--export-checkpoint-sweeps",
+        help=(
+            "Comma-separated decoder-closed sweep endpoints to export as "
+            "complete factor banks; sweep 0 is the initialization decoder closure"
         ),
     )
     parser.add_argument("--covariance-damping", type=float, default=1.0e-7)
