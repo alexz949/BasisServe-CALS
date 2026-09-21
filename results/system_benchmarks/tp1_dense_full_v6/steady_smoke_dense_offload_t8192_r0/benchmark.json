@@ -1,0 +1,97 @@
+{
+  "all_logits_finite": true,
+  "argmax_tokens": [
+    11,
+    13,
+    9259,
+    7876,
+    11,
+    315,
+    7658,
+    323
+  ],
+  "components": {
+    "attention_block_ms": {
+      "mean_ms": 42.310088127851486,
+      "median_ms": 42.304528176784515,
+      "samples_ms": [
+        42.34787213802338,
+        42.32038414478302,
+        42.28342401981354,
+        42.28867220878601
+      ]
+    },
+    "cache_append_ms": {
+      "mean_ms": 0.8983359974808991,
+      "median_ms": 0.8980799969285727,
+      "samples_ms": [
+        0.9174399953335524,
+        0.9040639959275723,
+        0.8797440007328987,
+        0.8920959979295731
+      ]
+    },
+    "dense_attention_ms": {
+      "mean_ms": 0.9667199966497719,
+      "median_ms": 0.9689119951799512,
+      "samples_ms": [
+        0.9665599968284369,
+        0.9762240033596754,
+        0.9712639935314655,
+        0.9528319928795099
+      ]
+    },
+    "host_to_gpu_ms": {
+      "mean_ms": 40.17057603597641,
+      "median_ms": 40.1663361787796,
+      "samples_ms": [
+        40.19196808338165,
+        40.16300821304321,
+        40.15766370296478,
+        40.16966414451599
+      ]
+    }
+  },
+  "context_tokens": 8192,
+  "decode_backend": "torch-flash-sdpa",
+  "decode_cuda_mean_ms": 66.38363265991211,
+  "decode_cuda_median_ms": 66.36022567749023,
+  "decode_cuda_ms": [
+    66.3716812133789,
+    66.34877014160156,
+    66.49139404296875,
+    66.32268524169922
+  ],
+  "decode_cuda_p95_ms": 66.49139404296875,
+  "decode_wall_median_ms": 66.39208574779332,
+  "decode_wall_ms": [
+    66.39983737841249,
+    66.38433411717415,
+    66.51714211329818,
+    66.34782906621695
+  ],
+  "exact_kv_bytes": 1074790400,
+  "exact_kv_bytes_at_context": 1073741824,
+  "gpu": "NVIDIA L40S",
+  "gpu_resident_kv_bytes": 33587200,
+  "host_resident_kv_bytes": 1074790400,
+  "host_to_gpu_bytes_per_decode_token": 1074790400,
+  "measured_steps": 4,
+  "method": "dense-offload",
+  "model_path": "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+  "peak_allocated_gib": 15.469491481781006,
+  "prefill_backend": "torch-flash-sdpa",
+  "prefill_ms": 1857.98486328125,
+  "profile_components": true,
+  "repeat": 0,
+  "schema": "tp1-dense-full-v6",
+  "source_sha256": {
+    "benchmarks/system/bench_tp1_dense_full_v6.py": "4b3e3ebf6abe537ac1402f3724016e16b64eb81f605ce9be11c5c29ade20cb37"
+  },
+  "storage": "offload",
+  "throughput_tokens_per_second": 15.057454956262143,
+  "tokens_path": "/workspace/runs/l31-cal128/calibration/windows.safetensors",
+  "torch": "2.13.0+cu130",
+  "validated_layers": 32,
+  "warmup_steps": 4
+}

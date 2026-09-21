@@ -1,0 +1,7 @@
+status=running
+{"context": 8192, "gpu": "NVIDIA L40S", "measure_steps": 2, "profile_components": true, "status": "starting", "storage": "offload", "warmup_steps": 0}
+{"allocated_gib": 14.988816738128662, "exact_kv_gib": 1.000244140625, "gpu_staging_gib": 0.03125762939453125, "host_exact_kv_gib": 1.000244140625, "status": "model_ready"}
+{"peak_allocated_gib": 15.469468593597412, "prefill_ms": 1843.6700439453125, "status": "prefill_complete"}
+{"argmax": 11, "components": {"attention_block_ms": 48.522143483161926, "cache_append_ms": 1.002944003790617, "dense_attention_ms": 7.117056168615818, "host_to_gpu_ms": 40.115936160087585}, "cuda_ms": 606.221435546875, "finite": true, "measured": true, "status": "decode_step", "step": 0, "wall_ms": 606.2364019453526}
+{"argmax": 13, "components": {"attention_block_ms": 42.374208092689514, "cache_append_ms": 0.9523200076073408, "dense_attention_ms": 0.9759360030293465, "host_to_gpu_ms": 40.174304246902466}, "cuda_ms": 66.550048828125, "finite": true, "measured": true, "status": "decode_step", "step": 1, "wall_ms": 66.57542940229177}
+{"decode_cuda_median_ms": 336.3857421875, "decode_wall_median_ms": 336.40591567382216, "result": "results/system_benchmarks/tp1_dense_full_v6/cache_audit_smoke_dense_offload_t8192_r0/benchmark.json", "status": "complete", "validated_layers": 32}

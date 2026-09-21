@@ -1,0 +1,10 @@
+status=running
+{"context": 8192, "gpu": "NVIDIA L40S", "measure_steps": 4, "mode": "optimized", "profile_components": true, "status": "starting", "storage": "local", "warmup_steps": 0}
+{"status": "extensions_ready"}
+{"allocated_gib": 16.115122318267822, "host_exact_key_gib": 0.0, "status": "model_ready"}
+{"peak_allocated_gib": 16.595774173736572, "prefill_ms": 1349.2674560546875, "status": "prefill_complete"}
+{"argmax": 11, "components": {"attention_block_ms": 148.6107188463211, "cache_append_ms": 33.42137749027461, "page_selection_ms": 6.667935911566019, "router_scan_ms": 1.373408004641533, "sparse_attention_ms": 3.9579199329018593}, "cuda_ms": 229.66217041015625, "finite": true, "measured": true, "status": "decode_step", "step": 0, "wall_ms": 229.67462707310915}
+{"argmax": 13, "components": {"attention_block_ms": 5.429311960935593, "cache_append_ms": 0.3907200042158365, "page_selection_ms": 0.9071360025554895, "router_scan_ms": 1.3157759867608547, "sparse_attention_ms": 2.472479984164238}, "cuda_ms": 29.690719604492188, "finite": true, "measured": true, "status": "decode_step", "step": 1, "wall_ms": 29.710001777857542}
+{"argmax": 9259, "components": {"attention_block_ms": 5.433984026312828, "cache_append_ms": 0.4158720001578331, "page_selection_ms": 0.9010879974812269, "router_scan_ms": 1.30579200014472, "sparse_attention_ms": 2.4706879928708076}, "cuda_ms": 29.390207290649414, "finite": true, "measured": true, "status": "decode_step", "step": 2, "wall_ms": 29.40271282568574}
+{"argmax": 7876, "components": {"attention_block_ms": 5.4296959936618805, "cache_append_ms": 0.39135999977588654, "page_selection_ms": 0.9154879990965128, "router_scan_ms": 1.3055999986827374, "sparse_attention_ms": 2.472063973546028}, "cuda_ms": 29.397951126098633, "finite": true, "measured": true, "status": "decode_step", "step": 3, "wall_ms": 29.41327914595604}
+{"decode_cuda_median_ms": 29.54433536529541, "decode_wall_median_ms": 29.56164046190679, "result": "results/system_benchmarks/tp1_sparse_full_v6/breakdown_smoke_optimized_local_t8192_r0/benchmark.json", "status": "complete", "validated_layers": 32}

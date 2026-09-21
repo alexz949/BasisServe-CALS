@@ -1,0 +1,107 @@
+{
+  "all_logits_finite": true,
+  "argmax_tokens": [
+    11,
+    13,
+    9259,
+    7876
+  ],
+  "base_rank": 16,
+  "components": {
+    "attention_block_ms": {
+      "mean_ms": 69.59255154430866,
+      "median_ms": 8.359328046441078,
+      "samples_ms": [
+        253.30716609954834,
+        8.34438407421112,
+        8.344383984804153,
+        8.374272018671036
+      ]
+    },
+    "cache_append_ms": {
+      "mean_ms": 0.4563599997200072,
+      "median_ms": 0.3452959950082004,
+      "samples_ms": [
+        0.7900480087846518,
+        0.34495999570935965,
+        0.34563199430704117,
+        0.34480000007897615
+      ]
+    },
+    "page_selection_ms": {
+      "mean_ms": 2.3584159687161446,
+      "median_ms": 0.9061759989708662,
+      "samples_ms": [
+        6.723039880394936,
+        0.8982719965279102,
+        0.9011519998311996,
+        0.9111999981105328
+      ]
+    },
+    "router_scan_ms": {
+      "mean_ms": 1.3189360024407506,
+      "median_ms": 1.304288001731038,
+      "samples_ms": [
+        1.3690560087561607,
+        1.2998400032520294,
+        1.2981119975447655,
+        1.3087360002100468
+      ]
+    },
+    "sparse_attention_ms": {
+      "mean_ms": 5.504512000828981,
+      "median_ms": 5.462640017271042,
+      "samples_ms": [
+        5.6339519917964935,
+        5.460736006498337,
+        5.458815976977348,
+        5.464544028043747
+      ]
+    }
+  },
+  "context_tokens": 8192,
+  "decode_cuda_mean_ms": 108.12617588043213,
+  "decode_cuda_median_ms": 32.48115158081055,
+  "decode_cuda_ms": [
+    335.1653137207031,
+    32.576416015625,
+    32.385887145996094,
+    32.3770866394043
+  ],
+  "decode_cuda_p95_ms": 335.1653137207031,
+  "decode_wall_median_ms": 32.49944164417684,
+  "decode_wall_ms": [
+    335.1744501851499,
+    32.59351197630167,
+    32.40537131205201,
+    32.39374374970794
+  ],
+  "factor_root": "/workspace/runs/l31-router-source/v128-router/ours_b16r16",
+  "gpu": "NVIDIA L40S",
+  "measured_steps": 4,
+  "mode": "optimized",
+  "model_path": "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+  "page_size": 32,
+  "peak_allocated_gib": 16.095530033111572,
+  "physical_token_budget": 2048,
+  "prefill_backend": "torch-flash-sdpa",
+  "prefill_ms": 1370.306640625,
+  "profile_components": true,
+  "recent_tokens": 64,
+  "repeat": 0,
+  "residual_rank": 16,
+  "routed_pages": 62,
+  "schema": "tp1-sparse-full-v6",
+  "source_sha256": {
+    "basisserve/kernels/csrc/conditional_router_page32.cu": "1392e6f991ca1681798289db01f0f5b6c0dd33b491053af214129fe49598cf9e",
+    "basisserve/kernels/csrc/mapped_host_paged_attention.cu": "54d8865424e347704d9e4c198ef8d2dfaa5df93eea8eb4f4f233d0e8e2ad9b7a",
+    "benchmarks/system/bench_tp1_sparse_full_v6.py": "d1eabeaa3fc75db0a83395536bb47a6af61f5f0b26bcb1152041f1f28e6caa21"
+  },
+  "storage": "offload",
+  "throughput_tokens_per_second": 9.247120760269825,
+  "tokens_path": "/workspace/runs/l31-cal128/calibration/windows.safetensors",
+  "torch": "2.13.0+cu130",
+  "validated_layers": 32,
+  "value_dim": 128,
+  "warmup_steps": 0
+}

@@ -1,10 +1,4 @@
-"""End-to-end TP1 Llama-3.1-8B sparse-decode benchmark.
-
-The prefill is exact Flash SDPA. Decode uses the calibrated B16R16 Page32
-router, 1,984 routed tokens plus the exact most-recent 64 tokens, and the
-production C1 attention kernel.  Teacher-forced decode tokens make legacy and
-optimized runs consume identical model inputs.
-"""
+"""TP1 Llama-3.1-8B dense-local and naive dense-offload benchmark."""
 
 from __future__ import annotations
 
@@ -20,7 +14,6 @@ import time
 
 import torch
 import torch.nn.functional as F
-from safetensors.torch import load_file
 from torch.nn.attention import SDPBackend, sdpa_kernel
 from transformers import AutoModelForCausalLM
 from transformers.models.llama.modeling_llama import apply_rotary_pos_emb
@@ -31,7 +24,6 @@ if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from basisserve.kernels.mapped_host_paged_attention import _load_extension
-from benchmarks.system.bench_router_append_v6 import _build_shared_router_baseline
 from evaluation.chunked_prefill_mlp import ChunkedTokenwise
 
 
@@ -39,13 +31,10 @@ MODEL_PATH = Path(
     "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/"
     "snapshots/0e9e39f249a16976918f6564b8830bc894c89659"
 )
-FACTOR_ROOT = Path("/workspace/runs/l31-router-source/v128-router/ours_b16r16")
 TOKENS_PATH = Path("/workspace/runs/l31-cal128/calibration/windows.safetensors")
-PAGE_SIZE = 32
-ROUTED_PAGES = 62
-RECENT_TOKENS = 64
-SUPPORT_TOKENS = ROUTED_PAGES * PAGE_SIZE + RECENT_TOKENS
-SPLITS = 32
+LAYERS = 32
+KV_HEADS = 8
+HEAD_DIM = 128
 
 
 def _sha256(path: Path) -> str:
@@ -62,20 +51,17 @@ def _percentile(values: list[float], fraction: float) -> float:
     return ordered[index]
 
 
-class TP1SparseAttention(torch.nn.Module):
-    """Llama attention with exact prefill and native Page32 sparse decode."""
+class TP1DenseAttention(torch.nn.Module):
+    """Exact Llama attention with either GPU KV or full per-token KV transfer."""
 
     def __init__(
         self,
         original: torch.nn.Module,
-        factors: dict[str, torch.Tensor],
         *,
         capacity: int,
         storage: str,
-        mode: str,
-        router_extension: object,
-        attention_extension: object,
-        shared_rope: dict[str, torch.Tensor],
+        host_extension: object | None,
+        shared_staging: dict[str, torch.Tensor] | None,
         profile_components: bool,
         validate: bool,
     ) -> None:
@@ -89,77 +75,40 @@ class TP1SparseAttention(torch.nn.Module):
         self.head_dim = int(original.head_dim)
         self.scaling = float(original.scaling)
         self.attention_dropout = float(original.attention_dropout)
-        self.router_extension = router_extension
-        self.attention_extension = attention_extension
-        self.shared_rope = shared_rope
-        self.storage = storage
-        self.mode = mode
         self.capacity = int(capacity)
+        self.storage = storage
+        self.host_extension = host_extension
+        self.shared_staging = shared_staging
         self.profile_components = bool(profile_components)
         self.validate = bool(validate)
         self.validated = False
         self.length = 0
 
-        self.register_buffer(
-            "base_left", factors["base_left_b16"].to("cuda", torch.bfloat16).contiguous()
-        )
-        self.register_buffer(
-            "base_right", factors["base_right_b16"].to("cuda", torch.bfloat16).contiguous()
-        )
-        self.register_buffer(
-            "base_bias", factors["base_bias_b16"].to("cuda", torch.bfloat16).contiguous()
-        )
-        self.register_buffer(
-            "residual_encoder",
-            factors["residual_encoder_b16_r16"].to("cuda", torch.bfloat16).contiguous(),
-        )
-        self.register_buffer(
-            "residual_query",
-            factors["residual_query_b16_r16"].to("cuda", torch.bfloat16).contiguous(),
-        )
-
-        cache_shape = (1, 8, capacity)
-        self.value_cache = torch.empty(*cache_shape, 128, device="cuda", dtype=torch.bfloat16)
-        self.base_cache = torch.empty(*cache_shape, 16, device="cuda", dtype=torch.bfloat16)
-        self.residual_cache = torch.empty(*cache_shape, 16, device="cuda", dtype=torch.bfloat16)
+        cache_shape = (1, KV_HEADS, capacity, HEAD_DIM)
         if storage == "local":
             self.key_cache = torch.empty(
-                *cache_shape, 128, device="cuda", dtype=torch.bfloat16
+                cache_shape, device="cuda", dtype=torch.bfloat16
             )
+            self.value_cache = torch.empty_like(self.key_cache)
             self.host_key = None
-            self.key_pointer = int(self.key_cache.data_ptr())
+            self.host_value = None
         else:
+            assert host_extension is not None and shared_staging is not None
             self.key_cache = None
-            self.host_key = router_extension.mapped_host_bf16_empty(1, 8, capacity, 128)
-            self.key_pointer = int(router_extension.device_pointer(self.host_key))
+            self.value_cache = None
+            self.host_key = host_extension.mapped_host_bf16_empty(
+                1, KV_HEADS, capacity, HEAD_DIM
+            )
+            self.host_value = host_extension.mapped_host_bf16_empty(
+                1, KV_HEADS, capacity, HEAD_DIM
+            )
 
-        maximum_pages = math.ceil(capacity / PAGE_SIZE)
-        self.query_code = torch.empty(1, 8, 4, 16, device="cuda", dtype=torch.bfloat16)
-        self.router_output = torch.empty(1, 8, 4, maximum_pages, device="cuda")
-        self.selected_pages = torch.empty(
-            1, 8, ROUTED_PAGES, device="cuda", dtype=torch.long
-        )
-        self.support_ids = torch.empty(
-            1, 8, SUPPORT_TOKENS, device="cuda", dtype=torch.long
-        )
-        self.page_offsets = torch.arange(PAGE_SIZE, device="cuda", dtype=torch.long)
-        self.token_range = torch.arange(capacity, device="cuda", dtype=torch.long)
-        self.attention_workspace = torch.empty(
-            32, SPLITS, 130, device="cuda", dtype=torch.float32
-        )
-        self.attention_output = torch.empty(
-            1, 32, 1, 128, device="cuda", dtype=torch.bfloat16
-        )
-        self.single_rope = torch.empty(1, 64, device="cuda", dtype=torch.bfloat16)
         self.profile_events = {}
         if self.profile_components:
-            for name in (
-                "attention_block",
-                "cache_append",
-                "router_scan",
-                "page_selection",
-                "sparse_attention",
-            ):
+            names = ["attention_block", "cache_append", "dense_attention"]
+            if self.storage == "offload":
+                names.append("host_to_gpu")
+            for name in names:
                 self.profile_events[name] = (
                     torch.cuda.Event(enable_timing=True),
                     torch.cuda.Event(enable_timing=True),
@@ -181,164 +130,58 @@ class TP1SparseAttention(torch.nn.Module):
             for name, (begin, end) in self.profile_events.items()
         }
 
-    def _store_exact_key(self, key: torch.Tensor, start: int) -> None:
+    def _append(self, key: torch.Tensor, value: torch.Tensor, start: int) -> None:
         if self.storage == "local":
-            self.key_cache[:, :, start : start + key.shape[2]].copy_(key)
+            stop = start + int(key.shape[2])
+            self.key_cache[:, :, start:stop].copy_(key)
+            self.value_cache[:, :, start:stop].copy_(value)
         else:
-            self.router_extension.append(self.host_key, key, int(start))
+            self.host_extension.append(self.host_key, key, int(start))
+            self.host_extension.append(self.host_value, value, int(start))
 
-    def _write_codes(
+    def _decode_cache(self, end: int) -> tuple[torch.Tensor, torch.Tensor]:
+        if self.storage == "local":
+            return self.key_cache[:, :, :end], self.value_cache[:, :, :end]
+        self.shared_staging["key"].copy_(self.host_key, non_blocking=True)
+        self.shared_staging["value"].copy_(self.host_value, non_blocking=True)
+        return (
+            self.shared_staging["key"][:, :, :end],
+            self.shared_staging["value"][:, :, :end],
+        )
+
+    def _validate_prefill_cache(
+        self, key: torch.Tensor, value: torch.Tensor, end: int
+    ) -> None:
+        if self.storage == "local":
+            assert torch.equal(self.key_cache[:, :, :end], key)
+            assert torch.equal(self.value_cache[:, :, :end], value)
+        else:
+            torch.cuda.synchronize()
+            assert torch.equal(self.host_key[:, :, :end], key.cpu())
+            assert torch.equal(self.host_value[:, :, :end], value.cpu())
+
+    def _validate_staging(
+        self, key: torch.Tensor, value: torch.Tensor, end: int
+    ) -> None:
+        if self.storage == "offload":
+            assert torch.equal(key.cpu(), self.host_key[:, :, :end])
+            assert torch.equal(value.cpu(), self.host_value[:, :, :end])
+
+    def _validate_attention(
         self,
+        query: torch.Tensor,
         key: torch.Tensor,
         value: torch.Tensor,
-        cos_half: torch.Tensor,
-        sin_half: torch.Tensor,
-        start: int,
+        output: torch.Tensor,
     ) -> None:
-        stop = start + int(key.shape[2])
-        base = torch.einsum("bhtd,hdr->bhtr", value, self.base_left)
-        predicted = (
-            torch.einsum("bhtr,hrd->bhtd", base, self.base_right)
-            + self.base_bias[None, :, None, :]
-        ).to(torch.bfloat16)
-        cos = cos_half[None, None]
-        sin = sin_half[None, None]
-        first = (
-            (predicted[..., :64] * cos).to(torch.bfloat16)
-            - (predicted[..., 64:] * sin).to(torch.bfloat16)
-        ).to(torch.bfloat16)
-        second = (
-            (predicted[..., 64:] * cos).to(torch.bfloat16)
-            + (predicted[..., :64] * sin).to(torch.bfloat16)
-        ).to(torch.bfloat16)
-        predicted_rotary = torch.cat((first, second), dim=-1)
-        residual = torch.einsum(
-            "bhtd,hdr->bhtr", (key - predicted_rotary).to(torch.bfloat16), self.residual_encoder
+        repeated_key = key.repeat_interleave(4, dim=1)
+        repeated_value = value.repeat_interleave(4, dim=1)
+        score = torch.matmul(query.float(), repeated_key.transpose(-1, -2).float())
+        expected = torch.matmul(
+            torch.softmax(score * self.scaling, dim=-1), repeated_value.float()
         )
-        self.value_cache[:, :, start:stop].copy_(value)
-        self.base_cache[:, :, start:stop].copy_(base)
-        self.residual_cache[:, :, start:stop].copy_(residual)
-
-    def _append_decode(
-        self,
-        key: torch.Tensor,
-        value: torch.Tensor,
-        cos_half: torch.Tensor,
-        sin_half: torch.Tensor,
-        start: int,
-    ) -> None:
-        if self.mode == "legacy":
-            self._write_codes(key, value, cos_half, sin_half, start)
-            self._store_exact_key(key, start)
-            return
-        mapped_pointer = self.key_pointer if self.storage == "offload" else 0
-        mapped_capacity = self.capacity if self.storage == "offload" else 0
-        self.router_extension.conditional_router_append_decode(
-            key,
-            value,
-            self.base_left,
-            self.base_right,
-            self.base_bias,
-            self.residual_encoder,
-            cos_half,
-            sin_half,
-            self.value_cache,
-            self.base_cache,
-            self.residual_cache,
-            self.single_rope,
-            self.single_rope,
-            int(start),
-            False,
-            mapped_pointer,
-            mapped_capacity,
-        )
-        if self.storage == "local":
-            self.key_cache[:, :, start : start + 1].copy_(key)
-
-    def _validate_attention(self, query: torch.Tensor, end: int) -> None:
-        ids = self.support_ids
-        valid = ids >= 0
-        gather_ids = ids.clamp_min(0)[:, :, :, None].expand(-1, -1, -1, 128)
-        if self.storage == "local":
-            selected_key = torch.gather(self.key_cache, 2, gather_ids)
-        else:
-            cpu_ids = gather_ids.cpu()
-            selected_key = torch.gather(self.host_key, 2, cpu_ids).to("cuda")
-        selected_value = torch.gather(self.value_cache, 2, gather_ids)
-        selected_key = selected_key.repeat_interleave(4, dim=1)
-        selected_value = selected_value.repeat_interleave(4, dim=1)
-        scores = torch.matmul(
-            query.float(), selected_key.transpose(-1, -2).float()
-        ) * self.scaling
-        scores.masked_fill_(~valid.repeat_interleave(4, dim=1)[:, :, None, :], -torch.inf)
-        expected = torch.matmul(torch.softmax(scores, dim=-1), selected_value.float())
-        torch.testing.assert_close(
-            self.attention_output.float(), expected, rtol=0.025, atol=0.025
-        )
-        assert end <= self.capacity
+        torch.testing.assert_close(output.float(), expected, rtol=0.025, atol=0.025)
         self.validated = True
-
-    def _decode_attention(self, query: torch.Tensor, end: int) -> torch.Tensor:
-        historical = end - RECENT_TOKENS
-        pages = math.ceil(historical / PAGE_SIZE)
-        selected_count = min(ROUTED_PAGES, pages)
-        assert selected_count == ROUTED_PAGES
-        self._start("router_scan")
-        self.router_extension.conditional_router_page_lse(
-            query,
-            self.base_cache[:, :, :historical],
-            self.residual_cache[:, :, :historical],
-            self.base_right,
-            self.base_bias,
-            self.residual_query,
-            self.shared_rope["cos"][:historical],
-            self.shared_rope["sin"][:historical],
-            self.query_code,
-            self.router_output[:, :, :, :pages],
-            self.scaling,
-            False,
-        )
-        self._end("router_scan")
-        self._start("page_selection")
-        self.router_extension.select_fixed_group_max_pages(
-            self.router_output[:, :, :, :pages],
-            self.selected_pages,
-            ROUTED_PAGES,
-            1,
-            False,
-        )
-        routed = self.support_ids[:, :, : ROUTED_PAGES * PAGE_SIZE].view(
-            1, 8, ROUTED_PAGES, PAGE_SIZE
-        )
-        torch.add(
-            self.selected_pages[..., None] * PAGE_SIZE,
-            self.page_offsets,
-            out=routed,
-        )
-        routed.masked_fill_(routed >= historical, -1)
-        self.support_ids[:, :, ROUTED_PAGES * PAGE_SIZE :].copy_(
-            self.token_range[historical:end][None, None, :].expand(1, 8, -1)
-        )
-        self._end("page_selection")
-        self._start("sparse_attention")
-        self.attention_extension.attention(
-            self.key_pointer,
-            self.capacity,
-            query,
-            self.value_cache,
-            self.support_ids,
-            self.attention_workspace,
-            self.attention_output,
-            int(end),
-            self.scaling,
-            SPLITS,
-            self.value_cache,
-            0,
-        )
-        self._end("sparse_attention")
-        if self.validate and not self.validated:
-            self._validate_attention(query, end)
-        return self.attention_output
 
     def forward(
         self,
@@ -360,25 +203,11 @@ class TP1SparseAttention(torch.nn.Module):
         value = self.v_proj(hidden_states).view(hidden_shape).transpose(1, 2)
         cos, sin = position_embeddings
         query, key = apply_rotary_pos_emb(query, key, cos, sin)
-        cos_rows = cos[0] if cos.ndim == 3 else cos
-        sin_rows = sin[0] if sin.ndim == 3 else sin
-        cos_half = cos_rows[:, :64].contiguous()
-        sin_half = sin_rows[:, :64].contiguous()
-        if self.layer_idx == 0:
-            self.shared_rope["cos"][start:end].copy_(cos_half)
-            self.shared_rope["sin"][start:end].copy_(sin_half)
 
         if start == 0:
-            self._store_exact_key(key, 0)
-            for offset in range(0, tokens, 2048):
-                stop = min(tokens, offset + 2048)
-                self._write_codes(
-                    key[:, :, offset:stop],
-                    value[:, :, offset:stop],
-                    cos_half[offset:stop],
-                    sin_half[offset:stop],
-                    offset,
-                )
+            self._append(key, value, 0)
+            if self.validate:
+                self._validate_prefill_cache(key, value, end)
             with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
                 attention = F.scaled_dot_product_attention(
                     query,
@@ -389,13 +218,31 @@ class TP1SparseAttention(torch.nn.Module):
                     enable_gqa=True,
                 )
         else:
-            assert tokens == 1 and start >= RECENT_TOKENS
+            assert tokens == 1
             self._start("attention_block")
             self._start("cache_append")
-            self._append_decode(key, value, cos_half, sin_half, start)
+            self._append(key, value, start)
             self._end("cache_append")
-            attention = self._decode_attention(query, end)
+            if self.storage == "offload":
+                self._start("host_to_gpu")
+            full_key, full_value = self._decode_cache(end)
+            if self.storage == "offload":
+                self._end("host_to_gpu")
+            self._start("dense_attention")
+            with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
+                attention = F.scaled_dot_product_attention(
+                    query,
+                    full_key,
+                    full_value,
+                    is_causal=False,
+                    scale=self.scaling,
+                    enable_gqa=True,
+                )
+            self._end("dense_attention")
             self._end("attention_block")
+            if self.validate and not self.validated:
+                self._validate_staging(full_key, full_value, end)
+                self._validate_attention(query, full_key, full_value, attention)
 
         self.length = end
         output = attention.transpose(1, 2).reshape(batch, tokens, -1).contiguous()
@@ -403,39 +250,38 @@ class TP1SparseAttention(torch.nn.Module):
 
 
 def _load_tokens(context: int, decode_steps: int) -> tuple[torch.Tensor, torch.Tensor]:
+    from safetensors.torch import load_file
+
     windows = load_file(str(TOKENS_PATH))["input_ids"]
     assert windows.ndim == 2 and windows.shape[0] >= 2
     assert windows.shape[1] >= context and windows.shape[1] >= decode_steps
     return windows[0, :context].clone(), windows[1, :decode_steps].clone()
 
 
-def _install_sparse_attention(
+def _install_dense_attention(
     model: torch.nn.Module,
     *,
     capacity: int,
     storage: str,
-    mode: str,
-    router_extension: object,
-    attention_extension: object,
+    host_extension: object | None,
     profile_components: bool,
     validate: bool,
-) -> list[TP1SparseAttention]:
-    shared_rope = {
-        "cos": torch.empty(capacity, 64, device="cuda", dtype=torch.bfloat16),
-        "sin": torch.empty(capacity, 64, device="cuda", dtype=torch.bfloat16),
-    }
+) -> list[TP1DenseAttention]:
+    shared_staging = None
+    if storage == "offload":
+        cache_shape = (1, KV_HEADS, capacity, HEAD_DIM)
+        shared_staging = {
+            "key": torch.empty(cache_shape, device="cuda", dtype=torch.bfloat16),
+            "value": torch.empty(cache_shape, device="cuda", dtype=torch.bfloat16),
+        }
     installed = []
-    for layer_index, layer in enumerate(model.model.layers):
-        factors = load_file(str(FACTOR_ROOT / f"layer_{layer_index:03d}.safetensors"))
-        replacement = TP1SparseAttention(
+    for layer in model.model.layers:
+        replacement = TP1DenseAttention(
             layer.self_attn,
-            factors,
             capacity=capacity,
             storage=storage,
-            mode=mode,
-            router_extension=router_extension,
-            attention_extension=attention_extension,
-            shared_rope=shared_rope,
+            host_extension=host_extension,
+            shared_staging=shared_staging,
             profile_components=profile_components,
             validate=validate,
         )
@@ -453,7 +299,6 @@ def _install_sparse_attention(
 @torch.inference_mode()
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=("legacy", "optimized"), required=True)
     parser.add_argument("--storage", choices=("local", "offload"), required=True)
     parser.add_argument("--length", type=int, default=8192)
     parser.add_argument("--warmup-steps", type=int, default=0)
@@ -465,14 +310,14 @@ def main() -> None:
     parser.add_argument(
         "--output-root",
         type=Path,
-        default=Path("results/system_benchmarks/tp1_sparse_full_v6"),
+        default=Path("results/system_benchmarks/tp1_dense_full_v6"),
     )
     args = parser.parse_args()
     assert args.length >= 4096 and args.warmup_steps >= 0 and args.measure_steps > 0
     total_steps = args.warmup_steps + args.measure_steps
     capacity = args.length + total_steps
     output = args.output_root / (
-        f"{args.tag}_{args.mode}_{args.storage}_t{args.length}_r{args.repeat}"
+        f"{args.tag}_dense_{args.storage}_t{args.length}_r{args.repeat}"
     )
     output.mkdir(parents=True, exist_ok=True)
     log_path = output / "run.log"
@@ -486,7 +331,7 @@ def main() -> None:
 
     assert torch.cuda.is_available()
     assert torch.cuda.get_device_capability() == (8, 9)
-    assert MODEL_PATH.is_dir() and FACTOR_ROOT.is_dir() and TOKENS_PATH.is_file()
+    assert MODEL_PATH.is_dir() and TOKENS_PATH.is_file()
     torch.manual_seed(20260921)
     torch.set_num_threads(2)
     torch.backends.cuda.matmul.allow_tf32 = False
@@ -494,7 +339,6 @@ def main() -> None:
     emit(
         {
             "status": "starting",
-            "mode": args.mode,
             "storage": args.storage,
             "context": args.length,
             "warmup_steps": args.warmup_steps,
@@ -504,51 +348,42 @@ def main() -> None:
         }
     )
 
-    optimized_extension = _load_extension(
-        value_dim=128,
-        queries_per_kv=4,
-        page_size=32,
-        base_rank=16,
-        residual_rank=16,
-    )
-    router_extension = (
-        optimized_extension if args.mode == "optimized" else _build_shared_router_baseline()
-    )
-    attention_extension = _load_extension(
-        value_dim=128,
-        queries_per_kv=4,
-        page_size=1,
-        base_rank=16,
-        residual_rank=16,
-    )
-    emit({"status": "extensions_ready"})
-
+    host_extension = None
+    if args.storage == "offload":
+        host_extension = _load_extension(
+            value_dim=128,
+            queries_per_kv=4,
+            page_size=1,
+            base_rank=16,
+            residual_rank=16,
+        )
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_PATH,
         dtype=torch.bfloat16,
         local_files_only=True,
         attn_implementation="sdpa",
     ).to("cuda").eval()
-    layers = _install_sparse_attention(
+    layers = _install_dense_attention(
         model,
         capacity=capacity,
         storage=args.storage,
-        mode=args.mode,
-        router_extension=router_extension,
-        attention_extension=attention_extension,
+        host_extension=host_extension,
         profile_components=args.profile_components,
         validate=args.validate,
     )
     prefill_tokens, decode_tokens = _load_tokens(args.length, total_steps)
     prefill_tokens = prefill_tokens[None].to("cuda")
     decode_tokens = decode_tokens.to("cuda")
+    full_kv_bytes = LAYERS * 2 * KV_HEADS * capacity * HEAD_DIM * 2
+    context_kv_bytes = LAYERS * 2 * KV_HEADS * args.length * HEAD_DIM * 2
+    stage_bytes = 0 if args.storage == "local" else 2 * KV_HEADS * capacity * HEAD_DIM * 2
     emit(
         {
             "status": "model_ready",
             "allocated_gib": torch.cuda.memory_allocated() / 2**30,
-            "host_exact_key_gib": (
-                32 * capacity * 8 * 128 * 2 / 2**30 if args.storage == "offload" else 0.0
-            ),
+            "exact_kv_gib": full_kv_bytes / 2**30,
+            "host_exact_kv_gib": full_kv_bytes / 2**30 if args.storage == "offload" else 0.0,
+            "gpu_staging_gib": stage_bytes / 2**30,
         }
     )
 
@@ -575,9 +410,8 @@ def main() -> None:
     component_samples = {
         "attention_block_ms": [],
         "cache_append_ms": [],
-        "router_scan_ms": [],
-        "page_selection_ms": [],
-        "sparse_attention_ms": [],
+        "host_to_gpu_ms": [],
+        "dense_attention_ms": [],
     }
     argmax_tokens = []
     finite = []
@@ -635,27 +469,17 @@ def main() -> None:
         for name, values in component_samples.items()
         if values
     }
-    source_paths = [
-        REPOSITORY_ROOT / "basisserve/kernels/csrc/conditional_router_page32.cu",
-        REPOSITORY_ROOT / "basisserve/kernels/csrc/mapped_host_paged_attention.cu",
-        Path(__file__).resolve(),
-    ]
+    source_path = Path(__file__).resolve()
     result = {
-        "schema": "tp1-sparse-full-v6",
-        "mode": args.mode,
+        "schema": "tp1-dense-full-v6",
+        "method": f"dense-{args.storage}",
         "storage": args.storage,
         "context_tokens": args.length,
         "warmup_steps": args.warmup_steps,
         "measured_steps": args.measure_steps,
         "repeat": args.repeat,
-        "page_size": PAGE_SIZE,
-        "routed_pages": ROUTED_PAGES,
-        "recent_tokens": RECENT_TOKENS,
-        "physical_token_budget": SUPPORT_TOKENS,
-        "base_rank": 16,
-        "residual_rank": 16,
-        "value_dim": 128,
         "prefill_backend": "torch-flash-sdpa",
+        "decode_backend": "torch-flash-sdpa",
         "prefill_ms": prefill_ms,
         "decode_cuda_ms": cuda_ms,
         "decode_wall_ms": wall_ms,
@@ -666,6 +490,11 @@ def main() -> None:
         "throughput_tokens_per_second": 1000.0 / statistics.fmean(wall_ms),
         "profile_components": args.profile_components,
         "components": component_summary,
+        "exact_kv_bytes": full_kv_bytes,
+        "exact_kv_bytes_at_context": context_kv_bytes,
+        "gpu_resident_kv_bytes": full_kv_bytes if args.storage == "local" else stage_bytes,
+        "host_resident_kv_bytes": full_kv_bytes if args.storage == "offload" else 0,
+        "host_to_gpu_bytes_per_decode_token": full_kv_bytes if args.storage == "offload" else 0,
         "all_logits_finite": all(finite),
         "argmax_tokens": argmax_tokens,
         "validated_layers": sum(int(layer.validated) for layer in layers),
@@ -673,9 +502,8 @@ def main() -> None:
         "gpu": torch.cuda.get_device_name(),
         "torch": torch.__version__,
         "model_path": str(MODEL_PATH),
-        "factor_root": str(FACTOR_ROOT),
         "tokens_path": str(TOKENS_PATH),
-        "source_sha256": {str(path.relative_to(REPOSITORY_ROOT)): _sha256(path) for path in source_paths},
+        "source_sha256": {str(source_path.relative_to(REPOSITORY_ROOT)): _sha256(source_path)},
     }
     (output / "benchmark.json").write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"

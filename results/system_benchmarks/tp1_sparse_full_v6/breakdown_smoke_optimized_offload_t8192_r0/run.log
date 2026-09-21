@@ -1,0 +1,10 @@
+status=running
+{"context": 8192, "gpu": "NVIDIA L40S", "measure_steps": 4, "mode": "optimized", "profile_components": true, "status": "starting", "storage": "offload", "warmup_steps": 0}
+{"status": "extensions_ready"}
+{"allocated_gib": 15.614878177642822, "host_exact_key_gib": 0.500244140625, "status": "model_ready"}
+{"peak_allocated_gib": 16.095530033111572, "prefill_ms": 1370.306640625, "status": "prefill_complete"}
+{"argmax": 11, "components": {"attention_block_ms": 253.30716609954834, "cache_append_ms": 0.7900480087846518, "page_selection_ms": 6.723039880394936, "router_scan_ms": 1.3690560087561607, "sparse_attention_ms": 5.6339519917964935}, "cuda_ms": 335.1653137207031, "finite": true, "measured": true, "status": "decode_step", "step": 0, "wall_ms": 335.1744501851499}
+{"argmax": 13, "components": {"attention_block_ms": 8.34438407421112, "cache_append_ms": 0.34495999570935965, "page_selection_ms": 0.8982719965279102, "router_scan_ms": 1.2998400032520294, "sparse_attention_ms": 5.460736006498337}, "cuda_ms": 32.576416015625, "finite": true, "measured": true, "status": "decode_step", "step": 1, "wall_ms": 32.59351197630167}
+{"argmax": 9259, "components": {"attention_block_ms": 8.344383984804153, "cache_append_ms": 0.34563199430704117, "page_selection_ms": 0.9011519998311996, "router_scan_ms": 1.2981119975447655, "sparse_attention_ms": 5.458815976977348}, "cuda_ms": 32.385887145996094, "finite": true, "measured": true, "status": "decode_step", "step": 2, "wall_ms": 32.40537131205201}
+{"argmax": 7876, "components": {"attention_block_ms": 8.374272018671036, "cache_append_ms": 0.34480000007897615, "page_selection_ms": 0.9111999981105328, "router_scan_ms": 1.3087360002100468, "sparse_attention_ms": 5.464544028043747}, "cuda_ms": 32.3770866394043, "finite": true, "measured": true, "status": "decode_step", "step": 3, "wall_ms": 32.39374374970794}
+{"decode_cuda_median_ms": 32.48115158081055, "decode_wall_median_ms": 32.49944164417684, "result": "results/system_benchmarks/tp1_sparse_full_v6/breakdown_smoke_optimized_offload_t8192_r0/benchmark.json", "status": "complete", "validated_layers": 32}

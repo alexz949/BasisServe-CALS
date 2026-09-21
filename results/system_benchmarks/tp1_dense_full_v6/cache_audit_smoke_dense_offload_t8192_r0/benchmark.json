@@ -1,0 +1,79 @@
+{
+  "all_logits_finite": true,
+  "argmax_tokens": [
+    11,
+    13
+  ],
+  "components": {
+    "attention_block_ms": {
+      "mean_ms": 45.44817578792572,
+      "median_ms": 45.44817578792572,
+      "samples_ms": [
+        48.522143483161926,
+        42.374208092689514
+      ]
+    },
+    "cache_append_ms": {
+      "mean_ms": 0.9776320056989789,
+      "median_ms": 0.9776320056989789,
+      "samples_ms": [
+        1.002944003790617,
+        0.9523200076073408
+      ]
+    },
+    "dense_attention_ms": {
+      "mean_ms": 4.046496085822582,
+      "median_ms": 4.046496085822582,
+      "samples_ms": [
+        7.117056168615818,
+        0.9759360030293465
+      ]
+    },
+    "host_to_gpu_ms": {
+      "mean_ms": 40.145120203495026,
+      "median_ms": 40.145120203495026,
+      "samples_ms": [
+        40.115936160087585,
+        40.174304246902466
+      ]
+    }
+  },
+  "context_tokens": 8192,
+  "decode_backend": "torch-flash-sdpa",
+  "decode_cuda_mean_ms": 336.3857421875,
+  "decode_cuda_median_ms": 336.3857421875,
+  "decode_cuda_ms": [
+    606.221435546875,
+    66.550048828125
+  ],
+  "decode_cuda_p95_ms": 606.221435546875,
+  "decode_wall_median_ms": 336.40591567382216,
+  "decode_wall_ms": [
+    606.2364019453526,
+    66.57542940229177
+  ],
+  "exact_kv_bytes": 1074003968,
+  "exact_kv_bytes_at_context": 1073741824,
+  "gpu": "NVIDIA L40S",
+  "gpu_resident_kv_bytes": 33562624,
+  "host_resident_kv_bytes": 1074003968,
+  "host_to_gpu_bytes_per_decode_token": 1074003968,
+  "measured_steps": 2,
+  "method": "dense-offload",
+  "model_path": "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+  "peak_allocated_gib": 15.469468593597412,
+  "prefill_backend": "torch-flash-sdpa",
+  "prefill_ms": 1843.6700439453125,
+  "profile_components": true,
+  "repeat": 0,
+  "schema": "tp1-dense-full-v6",
+  "source_sha256": {
+    "benchmarks/system/bench_tp1_dense_full_v6.py": "4b3e3ebf6abe537ac1402f3724016e16b64eb81f605ce9be11c5c29ade20cb37"
+  },
+  "storage": "offload",
+  "throughput_tokens_per_second": 2.972599331367276,
+  "tokens_path": "/workspace/runs/l31-cal128/calibration/windows.safetensors",
+  "torch": "2.13.0+cu130",
+  "validated_layers": 32,
+  "warmup_steps": 0
+}
