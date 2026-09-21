@@ -1,0 +1,405 @@
+INFO 09-21 04:51:50 [api_utils.py:286] non-default args: {'dtype': 'bfloat16', 'max_model_len': 4224, 'tensor_parallel_size': 8, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.8, 'max_num_batched_tokens': 8192, 'max_num_seqs': 64, 'hf_overrides': {'architectures': ['BasisServeLlama31_70BC1ForCausalLM'], 'basisserve_c1_factor_dir': '/workspace/.cache/huggingface/models--alexz949--BasisServe-CALS/snapshots/68c16cfb9bfb14906b36fa2719073e99e26e10c8/ICLR-results/llama31-70b/checkpoints/L31-70B-C1U-R96', 'basisserve_c1_result_sha256': 'f44ee70c1f54fca4012d527a22ee5ba214f8dade20bbde93b2c3d271a34269ed', 'basisserve_model_config_sha256': '37653c55ea907be0dc75070afd416fc77e20981c60b7c7e9521ba343678c5349'}, 'enable_chunked_prefill': True, 'compilation_config': {'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': [], 'ir_enable_torch_wrap': None, 'splitting_ops': None, 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': None, 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_DECODE_ONLY: (2, 0)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 32, 64], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': None, 'pass_config': {}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': None, 'static_all_moe_layers': []}, 'worker_extension_cls': 'basisserve.vllm.worker_extension.BasisServeWorkerExtension', 'async_scheduling': False, 'model': '/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-70B/snapshots/349b2ddb53ce8f2849a6c168a81980ab25258dac'}
+INFO 09-21 04:51:50 [model.py:684] Resolved architecture: BasisServeLlama31_70BC1ForCausalLM
+INFO 09-21 04:51:50 [model.py:2021] Using max model len 4224
+INFO 09-21 04:51:50 [scheduler.py:277] Chunked prefill is enabled with max_num_batched_tokens=8192.
+WARNING 09-21 04:51:50 [vllm.py:1406] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 09-21 04:51:50 [kernel.py:369] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+INFO 09-21 04:51:51 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+(EngineCore pid=205553) INFO 09-21 04:51:59 [core.py:123] Initializing a V1 LLM engine (v0.29.0) with config: model='/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-70B/snapshots/349b2ddb53ce8f2849a6c168a81980ab25258dac', speculative_config=None, tokenizer='/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-70B/snapshots/349b2ddb53ce8f2849a6c168a81980ab25258dac', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4224, download_dir=None, load_format=auto, tensor_parallel_size=8, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-70B/snapshots/349b2ddb53ce8f2849a6c168a81980ab25258dac, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [8192], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_DECODE_ONLY: (2, 0)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 32, 64], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 64, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=205553) INFO 09-21 04:51:59 [multiproc_executor.py:153] DP group leader: node_rank=0, node_rank_within_dp=0, master_addr=127.0.0.1, mq_connect_ip=172.18.0.2 (local), world_size=8, local_world_size=8
+INFO 09-21 04:52:08 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-21 04:52:08 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-21 04:52:08 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-21 04:52:08 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-21 04:52:08 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-21 04:52:08 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-21 04:52:08 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+INFO 09-21 04:52:08 [worker_base.py:306] Injected <class 'basisserve.vllm.worker_extension.BasisServeWorkerExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['basisserve_c1_statistics', 'basisserve_cuda_statistics', 'basisserve_profile_start', 'basisserve_profile_stop', 'basisserve_runtime_statistics']
+(Worker pid=205564) INFO 09-21 04:52:10 [parallel_state.py:1775] world_size=8 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_6eb192ebf4a64505b15cb254d29b2718 backend=nccl
+(Worker pid=205565) INFO 09-21 04:52:10 [parallel_state.py:1775] world_size=8 rank=1 local_rank=1 distributed_init_method=file:///tmp/vllm_dist_6eb192ebf4a64505b15cb254d29b2718 backend=nccl
+(Worker pid=205568) INFO 09-21 04:52:10 [parallel_state.py:1775] world_size=8 rank=4 local_rank=4 distributed_init_method=file:///tmp/vllm_dist_6eb192ebf4a64505b15cb254d29b2718 backend=nccl
+(Worker pid=205571) INFO 09-21 04:52:10 [parallel_state.py:1775] world_size=8 rank=7 local_rank=7 distributed_init_method=file:///tmp/vllm_dist_6eb192ebf4a64505b15cb254d29b2718 backend=nccl
+(Worker pid=205567) INFO 09-21 04:52:10 [parallel_state.py:1775] world_size=8 rank=3 local_rank=3 distributed_init_method=file:///tmp/vllm_dist_6eb192ebf4a64505b15cb254d29b2718 backend=nccl
+(Worker pid=205566) INFO 09-21 04:52:10 [parallel_state.py:1775] world_size=8 rank=2 local_rank=2 distributed_init_method=file:///tmp/vllm_dist_6eb192ebf4a64505b15cb254d29b2718 backend=nccl
+(Worker pid=205570) INFO 09-21 04:52:10 [parallel_state.py:1775] world_size=8 rank=6 local_rank=6 distributed_init_method=file:///tmp/vllm_dist_6eb192ebf4a64505b15cb254d29b2718 backend=nccl
+(Worker pid=205569) INFO 09-21 04:52:10 [parallel_state.py:1775] world_size=8 rank=5 local_rank=5 distributed_init_method=file:///tmp/vllm_dist_6eb192ebf4a64505b15cb254d29b2718 backend=nccl
+(Worker pid=205564) INFO 09-21 04:52:11 [pynccl.py:113] vLLM is using nccl==2.29.7
+(Worker pid=205564) WARNING 09-21 04:52:12 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=205566) WARNING 09-21 04:52:12 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=205565) (Worker pid=205567) (Worker pid=205569) WARNING 09-21 04:52:12 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+WARNING 09-21 04:52:12 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+WARNING 09-21 04:52:12 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=205571) WARNING 09-21 04:52:12 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=205570) (Worker pid=205568) WARNING 09-21 04:52:12 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+WARNING 09-21 04:52:12 [symm_mem.py:67] SymmMemCommunicator: Device capability 8.9 not supported, communicator is not available.
+(Worker pid=205566) WARNING 09-21 04:52:12 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=205565) WARNING 09-21 04:52:12 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=205569) WARNING 09-21 04:52:12 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=205567) WARNING 09-21 04:52:12 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=205571) WARNING 09-21 04:52:12 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=205564) WARNING 09-21 04:52:12 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=205568) WARNING 09-21 04:52:12 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=205570) WARNING 09-21 04:52:12 [flashinfer_all_reduce.py:383] FlashInfer All Reduce is disabled because it is not supported for world_size=8.
+(Worker pid=205566) WARNING 09-21 04:52:12 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=205567) WARNING 09-21 04:52:12 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=205565) WARNING 09-21 04:52:12 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=205571) WARNING 09-21 04:52:12 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=205570) WARNING 09-21 04:52:12 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=205564) WARNING 09-21 04:52:12 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=205568) WARNING 09-21 04:52:12 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=205564) INFO 09-21 04:52:12 [cuda_communicator.py:269] Using ['PYNCCL'] all-reduce backends (in dispatch order) for group 'tp:0' out of potential backends: ['FLASHINFER', 'NCCL_SYMM_MEM', 'QUICK_REDUCE', 'AITER_CUSTOM', 'CUSTOM', 'SYMM_MEM', 'PYNCCL'].
+(Worker pid=205569) WARNING 09-21 04:52:12 [custom_all_reduce.py:237] Custom allreduce is disabled because it's not supported on more than two PCIe-only GPUs. To silence this warning, specify disable_custom_all_reduce=True explicitly.
+(Worker pid=205564) INFO 09-21 04:52:12 [parallel_state.py:2119] rank 0 in world size 8 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+(Worker pid=205564) INFO 09-21 04:52:12 [gpu_worker.py:429] Using V2 Model Runner
+(Worker_TP0 pid=205564) INFO 09-21 04:52:13 [model_runner.py:382] Loading model from scratch...
+(Worker_TP0 pid=205564) INFO 09-21 04:52:13 [cuda.py:492] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(Worker_TP0 pid=205564) INFO 09-21 04:52:13 [flash_attn.py:897] Using FlashAttention version 2
+(Worker_TP0 pid=205564) INFO 09-21 04:52:19 [weight_utils.py:863] Filesystem type for checkpoints: XFS. Checkpoint size: 131.42 GiB. Available RAM: 252.38 GiB.
+(Worker_TP0 pid=205564) INFO 09-21 04:52:19 [weight_utils.py:886] Auto-prefetch is disabled because the filesystem (XFS) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(Worker_TP0 pid=205564) INFO 09-21 04:52:23 [default_loader.py:430] Loading weights took 3.90 seconds
+(Worker_TP3 pid=205567) INFO 09-21 04:52:24 [model_runner.py:404] Model loading took 22.82 GiB memory and 11.675211 seconds
+(Worker_TP1 pid=205565) INFO 09-21 04:52:24 [model_runner.py:404] Model loading took 22.82 GiB memory and 11.700206 seconds
+(Worker_TP2 pid=205566) INFO 09-21 04:52:24 [model_runner.py:404] Model loading took 22.82 GiB memory and 11.645644 seconds
+(Worker_TP5 pid=205569) INFO 09-21 04:52:24 [model_runner.py:404] Model loading took 22.82 GiB memory and 11.833844 seconds
+(Worker_TP0 pid=205564) INFO 09-21 04:52:24 [model_runner.py:404] Model loading took 22.82 GiB memory and 11.764854 seconds
+(Worker_TP0 pid=205564) INFO 09-21 04:52:24 [topk_topp_sampler.py:62] Using FlashInfer for top-p & top-k sampling.
+(Worker_TP6 pid=205570) INFO 09-21 04:52:24 [model_runner.py:404] Model loading took 22.82 GiB memory and 11.818535 seconds
+(Worker_TP4 pid=205568) INFO 09-21 04:52:24 [model_runner.py:404] Model loading took 22.82 GiB memory and 11.841326 seconds
+(Worker_TP7 pid=205571) INFO 09-21 04:52:24 [model_runner.py:404] Model loading took 22.82 GiB memory and 11.847099 seconds
+(EngineCore pid=205553) INFO 09-21 04:52:24 [utils.py:306] Using LBNHC KV cache layout.
+(Worker_TP3 pid=205567) INFO 09-21 04:52:29 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.08 GiB
+(Worker_TP1 pid=205565) INFO 09-21 04:52:29 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.08 GiB
+(Worker_TP5 pid=205569) INFO 09-21 04:52:29 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.08 GiB
+(Worker_TP0 pid=205564) INFO 09-21 04:52:29 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.08 GiB
+(Worker_TP2 pid=205566) INFO 09-21 04:52:29 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.08 GiB
+(Worker_TP6 pid=205570) INFO 09-21 04:52:29 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.08 GiB
+(Worker_TP7 pid=205571) INFO 09-21 04:52:29 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.08 GiB
+(Worker_TP4 pid=205568) INFO 09-21 04:52:29 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.08 GiB
+(Worker_TP1 pid=205565) INFO 09-21 04:52:30 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.8000 is equivalent to --gpu-memory-utilization=0.7959 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.8041. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP3 pid=205567) INFO 09-21 04:52:30 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.8000 is equivalent to --gpu-memory-utilization=0.7959 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.8041. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP5 pid=205569) INFO 09-21 04:52:30 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.8000 is equivalent to --gpu-memory-utilization=0.7959 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.8041. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP4 pid=205568) INFO 09-21 04:52:30 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.8000 is equivalent to --gpu-memory-utilization=0.7959 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.8041. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP2 pid=205566) INFO 09-21 04:52:30 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.8000 is equivalent to --gpu-memory-utilization=0.7959 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.8041. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP7 pid=205571) INFO 09-21 04:52:30 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.8000 is equivalent to --gpu-memory-utilization=0.7959 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.8041. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP6 pid=205570) INFO 09-21 04:52:30 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.8000 is equivalent to --gpu-memory-utilization=0.7959 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.8041. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(Worker_TP0 pid=205564) INFO 09-21 04:52:30 [gpu_worker.py:625] Available KV cache memory: 11.73 GiB
+(Worker_TP0 pid=205564) INFO 09-21 04:52:30 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.8000 is equivalent to --gpu-memory-utilization=0.7959 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.8041. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=205553) INFO 09-21 04:52:30 [kv_cache_utils.py:2032] GPU KV cache size: 350,384 tokens, Maximum concurrency for 4,224 tokens per request: 82.95x
+(Worker_TP5 pid=205569) INFO 09-21 04:52:30 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP1 pid=205565) INFO 09-21 04:52:30 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP5 pid=205569) INFO 09-21 04:52:30 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP1 pid=205565) INFO 09-21 04:52:30 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP3 pid=205567) INFO 09-21 04:52:30 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP6 pid=205570) INFO 09-21 04:52:30 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP3 pid=205567) INFO 09-21 04:52:30 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP0 pid=205564) INFO 09-21 04:52:30 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP0 pid=205564) INFO 09-21 04:52:30 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP6 pid=205570) INFO 09-21 04:52:30 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP2 pid=205566) INFO 09-21 04:52:30 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP2 pid=205566) INFO 09-21 04:52:30 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP4 pid=205568) INFO 09-21 04:52:30 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP4 pid=205568) INFO 09-21 04:52:30 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP7 pid=205571) INFO 09-21 04:52:30 [kernel_warmup.py:124] JIT kernel warmup starting.
+(Worker_TP7 pid=205571) INFO 09-21 04:52:30 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(Worker_TP5 pid=205569) INFO 09-21 04:52:31 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.15 GiB
+(Worker_TP5 pid=205569) INFO 09-21 04:52:31 [gpu_worker.py:797] CUDA graph pool memory: 0.15 GiB (actual), 0.18 GiB (estimated), difference: 0.03 GiB (22.1%).
+(Worker_TP5 pid=205569) INFO 09-21 04:52:31 [gpu_worker.py:860] Free memory on device (43.74/44.39 GiB) on startup. Desired GPU memory utilization is (0.8, 35.51 GiB). Actual usage is 22.96 GiB for consumed memory (weights + non-torch), 0.86 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=12239029453` (11.4 GiB) to fit into requested memory, or `--kv-cache-memory=21067200512` (19.62 GiB) to fully utilize gpu memory. Current kv cache memory in use is 11.7 GiB.
+(Worker_TP7 pid=205571) INFO 09-21 04:52:31 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.15 GiB
+(Worker_TP7 pid=205571) INFO 09-21 04:52:31 [gpu_worker.py:797] CUDA graph pool memory: 0.15 GiB (actual), 0.18 GiB (estimated), difference: 0.03 GiB (22.1%).
+(Worker_TP7 pid=205571) INFO 09-21 04:52:31 [gpu_worker.py:860] Free memory on device (43.74/44.39 GiB) on startup. Desired GPU memory utilization is (0.8, 35.51 GiB). Actual usage is 22.96 GiB for consumed memory (weights + non-torch), 0.86 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=12239029453` (11.4 GiB) to fit into requested memory, or `--kv-cache-memory=21067200512` (19.62 GiB) to fully utilize gpu memory. Current kv cache memory in use is 11.7 GiB.
+(Worker_TP4 pid=205568) INFO 09-21 04:52:31 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.15 GiB
+(Worker_TP4 pid=205568) INFO 09-21 04:52:31 [gpu_worker.py:797] CUDA graph pool memory: 0.15 GiB (actual), 0.18 GiB (estimated), difference: 0.03 GiB (22.1%).
+(Worker_TP4 pid=205568) INFO 09-21 04:52:31 [gpu_worker.py:860] Free memory on device (43.75/44.39 GiB) on startup. Desired GPU memory utilization is (0.8, 35.51 GiB). Actual usage is 22.92 GiB for consumed memory (weights + non-torch), 0.86 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=12272583885` (11.43 GiB) to fit into requested memory, or `--kv-cache-memory=21117532160` (19.67 GiB) to fully utilize gpu memory. Current kv cache memory in use is 11.73 GiB.
+(Worker_TP6 pid=205570) INFO 09-21 04:52:31 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.15 GiB
+(Worker_TP6 pid=205570) INFO 09-21 04:52:31 [gpu_worker.py:797] CUDA graph pool memory: 0.15 GiB (actual), 0.18 GiB (estimated), difference: 0.03 GiB (22.1%).
+(Worker_TP6 pid=205570) INFO 09-21 04:52:31 [gpu_worker.py:860] Free memory on device (43.75/44.39 GiB) on startup. Desired GPU memory utilization is (0.8, 35.51 GiB). Actual usage is 22.92 GiB for consumed memory (weights + non-torch), 0.86 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=12272583885` (11.43 GiB) to fit into requested memory, or `--kv-cache-memory=21117532160` (19.67 GiB) to fully utilize gpu memory. Current kv cache memory in use is 11.73 GiB.
+(Worker_TP3 pid=205567) INFO 09-21 04:52:31 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.15 GiB
+(Worker_TP3 pid=205567) INFO 09-21 04:52:31 [gpu_worker.py:797] CUDA graph pool memory: 0.15 GiB (actual), 0.18 GiB (estimated), difference: 0.03 GiB (22.1%).
+(Worker_TP3 pid=205567) INFO 09-21 04:52:31 [gpu_worker.py:860] Free memory on device (43.74/44.39 GiB) on startup. Desired GPU memory utilization is (0.8, 35.51 GiB). Actual usage is 22.96 GiB for consumed memory (weights + non-torch), 0.86 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=12239029453` (11.4 GiB) to fit into requested memory, or `--kv-cache-memory=21067200512` (19.62 GiB) to fully utilize gpu memory. Current kv cache memory in use is 11.7 GiB.
+(Worker_TP2 pid=205566) INFO 09-21 04:52:31 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.15 GiB
+(Worker_TP2 pid=205566) INFO 09-21 04:52:31 [gpu_worker.py:797] CUDA graph pool memory: 0.15 GiB (actual), 0.18 GiB (estimated), difference: 0.03 GiB (22.1%).
+(Worker_TP1 pid=205565) INFO 09-21 04:52:31 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.15 GiB
+(Worker_TP2 pid=205566) INFO 09-21 04:52:31 [gpu_worker.py:860] Free memory on device (43.75/44.39 GiB) on startup. Desired GPU memory utilization is (0.8, 35.51 GiB). Actual usage is 22.92 GiB for consumed memory (weights + non-torch), 0.86 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=12272583885` (11.43 GiB) to fit into requested memory, or `--kv-cache-memory=21117532160` (19.67 GiB) to fully utilize gpu memory. Current kv cache memory in use is 11.73 GiB.
+(Worker_TP1 pid=205565) INFO 09-21 04:52:31 [gpu_worker.py:797] CUDA graph pool memory: 0.15 GiB (actual), 0.18 GiB (estimated), difference: 0.03 GiB (22.1%).
+(Worker_TP1 pid=205565) INFO 09-21 04:52:31 [gpu_worker.py:860] Free memory on device (43.74/44.39 GiB) on startup. Desired GPU memory utilization is (0.8, 35.51 GiB). Actual usage is 22.96 GiB for consumed memory (weights + non-torch), 0.86 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=12239029453` (11.4 GiB) to fit into requested memory, or `--kv-cache-memory=21067200512` (19.62 GiB) to fully utilize gpu memory. Current kv cache memory in use is 11.7 GiB.
+(Worker_TP0 pid=205564) INFO 09-21 04:52:31 [model_runner.py:960] Graph capturing finished in 1 secs, took 0.15 GiB
+(Worker_TP0 pid=205564) INFO 09-21 04:52:31 [gpu_worker.py:797] CUDA graph pool memory: 0.15 GiB (actual), 0.18 GiB (estimated), difference: 0.03 GiB (22.1%).
+(Worker_TP0 pid=205564) INFO 09-21 04:52:31 [gpu_worker.py:860] Free memory on device (43.75/44.39 GiB) on startup. Desired GPU memory utilization is (0.8, 35.51 GiB). Actual usage is 22.92 GiB for consumed memory (weights + non-torch), 0.86 GiB for peak activation, and 0.15 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=12272583885` (11.43 GiB) to fit into requested memory, or `--kv-cache-memory=21117532160` (19.67 GiB) to fully utilize gpu memory. Current kv cache memory in use is 11.73 GiB.
+(Worker_TP5 pid=205569) INFO 09-21 04:53:30 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP4 pid=205568) INFO 09-21 04:53:30 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP2 pid=205566) INFO 09-21 04:53:30 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP7 pid=205571) INFO 09-21 04:53:30 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP1 pid=205565) INFO 09-21 04:53:30 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP0 pid=205564) INFO 09-21 04:53:30 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP3 pid=205567) INFO 09-21 04:53:30 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP6 pid=205570) INFO 09-21 04:53:30 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(EngineCore pid=205553) INFO 09-21 04:53:30 [shm_broadcast.py:801] No available shared memory broadcast block found in 60 seconds. This typically happens when some processes are hanging or doing some time-consuming work (e.g. compilation, weight/kv cache quantization).
+(EngineCore pid=205553) INFO 09-21 04:53:30 [core.py:368] init engine (profile, create kv cache, warmup model) took 66.05 s
+(EngineCore pid=205553) WARNING 09-21 04:53:32 [vllm.py:1406] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore pid=205553) INFO 09-21 04:53:32 [kernel.py:369] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+(EngineCore pid=205553) INFO 09-21 04:53:32 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+INFO 09-21 04:53:32 [hf.py:547] Detected the chat template content format to be 'string'. You can set `--chat-template-content-format` to override this.
+BENCH arm=v96 batch=1 phase=warmup
+(EngineCore pid=205553) INFO 09-21 04:53:32 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:53:32 [scheduler.py:2519] setting pause state to UNPAUSED
+(Worker_TP0 pid=205564) WARNING 09-21 04:53:32 [jit_monitor.py:141] Triton kernel JIT compilation during inference: kernel_diffkv_prefill_sm89. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=205553) INFO 09-21 04:53:39 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:53:39 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:53:43 [loggers.py:310] Engine 000: Avg prompt throughput: 685.9 tokens/s, Avg generation throughput: 18.1 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.2%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 1, "repeat": 0, "wall_seconds": 6.426947094965726, "preemptions": 0, "output_tokens_per_second": 19.916143405048928, "ttft_ms": {"mean": 1212.776065338403, "median": 1212.776065338403, "p95": 1212.776065338403, "min": 1212.776065338403, "max": 1212.776065338403}, "tpot_ms": {"mean": 41.04711299791463, "median": 41.04711299791463, "p95": 41.04711299791463, "min": 41.04711299791463, "max": 41.04711299791463}}
+(EngineCore pid=205553) INFO 09-21 04:53:45 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:53:45 [scheduler.py:2519] setting pause state to UNPAUSED
+{"event": "BENCH", "arm": "v96", "batch": 1, "repeat": 1, "wall_seconds": 6.42641931399703, "preemptions": 0, "output_tokens_per_second": 19.917779053291813, "ttft_ms": {"mean": 1214.9679479189217, "median": 1214.9679479189217, "p95": 1214.9679479189217, "min": 1214.9679479189217, "max": 1214.9679479189217}, "tpot_ms": {"mean": 41.028048931144355, "median": 41.028048931144355, "p95": 41.028048931144355, "min": 41.028048931144355, "max": 41.028048931144355}}
+(EngineCore pid=205553) INFO 09-21 04:53:52 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:53:52 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:53:53 [loggers.py:310] Engine 000: Avg prompt throughput: 816.5 tokens/s, Avg generation throughput: 18.6 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.2%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 1, "repeat": 2, "wall_seconds": 6.429177735000849, "preemptions": 0, "output_tokens_per_second": 19.909233385034597, "ttft_ms": {"mean": 1215.9953461959958, "median": 1215.9953461959958, "p95": 1215.9953461959958, "min": 1215.9953461959958, "max": 1215.9953461959958}, "tpot_ms": {"mean": 41.0410855515442, "median": 41.0410855515442, "p95": 41.0410855515442, "min": 41.0410855515442, "max": 41.0410855515442}}
+BENCH arm=v96 batch=2 phase=warmup
+(EngineCore pid=205553) INFO 09-21 04:53:58 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:53:58 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:54:04 [loggers.py:310] Engine 000: Avg prompt throughput: 818.9 tokens/s, Avg generation throughput: 25.7 tokens/s, Running: 2 reqs, Waiting: 0 reqs, GPU KV cache usage: 2.4%, Prefix cache hit rate: 0.0%
+(EngineCore pid=205553) INFO 09-21 04:54:06 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:54:06 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:54:14 [loggers.py:310] Engine 000: Avg prompt throughput: 816.1 tokens/s, Avg generation throughput: 35.9 tokens/s, Running: 2 reqs, Waiting: 0 reqs, GPU KV cache usage: 2.4%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 2, "repeat": 0, "wall_seconds": 7.820212614256889, "preemptions": 0, "output_tokens_per_second": 32.73568285512992, "ttft_ms": {"mean": 2414.727851981297, "median": 2414.727851981297, "p95": 2414.800486061722, "min": 2414.6552179008722, "max": 2414.800486061722}, "tpot_ms": {"mean": 42.55556218384758, "median": 42.55556218384758, "p95": 42.55556218384758, "min": 42.55556218384758, "max": 42.55556218384758}}
+(EngineCore pid=205553) INFO 09-21 04:54:14 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:54:14 [scheduler.py:2519] setting pause state to UNPAUSED
+{"event": "BENCH", "arm": "v96", "batch": 2, "repeat": 1, "wall_seconds": 7.816829754970968, "preemptions": 0, "output_tokens_per_second": 32.74984975043131, "ttft_ms": {"mean": 2415.069095790386, "median": 2415.069095790386, "p95": 2415.1318497024477, "min": 2415.0063418783247, "max": 2415.1318497024477}, "tpot_ms": {"mean": 42.525697844176314, "median": 42.525697844176314, "p95": 42.525697844176314, "min": 42.525697844176314, "max": 42.525697844176314}}
+(EngineCore pid=205553) INFO 09-21 04:54:21 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:54:21 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:54:24 [loggers.py:310] Engine 000: Avg prompt throughput: 1585.6 tokens/s, Avg generation throughput: 25.4 tokens/s, Running: 2 reqs, Waiting: 0 reqs, GPU KV cache usage: 2.3%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 2, "repeat": 2, "wall_seconds": 7.818178826011717, "preemptions": 0, "output_tokens_per_second": 32.744198578352695, "ttft_ms": {"mean": 2417.5387606956065, "median": 2417.5387606956065, "p95": 2417.6008687354624, "min": 2417.4766526557505, "max": 2417.6008687354624}, "tpot_ms": {"mean": 42.5175336394899, "median": 42.5175336394899, "p95": 42.5175336394899, "min": 42.5175336394899, "max": 42.5175336394899}}
+BENCH arm=v96 batch=4 phase=warmup
+(EngineCore pid=205553) INFO 09-21 04:54:29 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:54:29 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:54:34 [loggers.py:310] Engine 000: Avg prompt throughput: 1198.4 tokens/s, Avg generation throughput: 25.3 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.7%, Prefix cache hit rate: 0.0%
+(EngineCore pid=205553) INFO 09-21 04:54:40 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:54:40 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:54:45 [loggers.py:310] Engine 000: Avg prompt throughput: 1570.3 tokens/s, Avg generation throughput: 49.1 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.7%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 4, "repeat": 0, "wall_seconds": 10.42829228611663, "preemptions": 0, "output_tokens_per_second": 49.0972045999933, "ttft_ms": {"mean": 3647.602837299928, "median": 3634.1749413404614, "p95": 4899.60602670908, "min": 2422.45543980971, "max": 4899.60602670908}, "tpot_ms": {"mean": 52.97426899847406, "median": 52.99956011072564, "p95": 62.37101069409547, "min": 43.52694507834949, "max": 62.37101069409547}}
+(EngineCore pid=205553) INFO 09-21 04:54:50 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:54:50 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:54:55 [loggers.py:310] Engine 000: Avg prompt throughput: 1568.9 tokens/s, Avg generation throughput: 49.0 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.7%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 4, "repeat": 1, "wall_seconds": 10.429619994014502, "preemptions": 0, "output_tokens_per_second": 49.090954444537175, "ttft_ms": {"mean": 3651.700777700171, "median": 3638.404947007075, "p95": 4904.750051908195, "min": 2425.2431648783386, "max": 4904.750051908195}, "tpot_ms": {"mean": 52.95487271537491, "median": 52.97925654160753, "p95": 62.36335488886932, "min": 43.497622889415254, "max": 62.36335488886932}}
+(EngineCore pid=205553) INFO 09-21 04:55:01 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:55:01 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:55:05 [loggers.py:310] Engine 000: Avg prompt throughput: 1570.8 tokens/s, Avg generation throughput: 49.1 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.7%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 4, "repeat": 2, "wall_seconds": 10.426803797017783, "preemptions": 0, "output_tokens_per_second": 49.10421352192696, "ttft_ms": {"mean": 3648.7473191227764, "median": 3635.2353147231042, "p95": 4899.578074924648, "min": 2424.9405721202493, "max": 4899.578074924648}, "tpot_ms": {"mean": 52.953252629340284, "median": 52.97830436510716, "p95": 62.340736125163204, "min": 43.515665661983604, "max": 62.340736125163204}}
+BENCH arm=v96 batch=8 phase=warmup
+(EngineCore pid=205553) INFO 09-21 04:55:11 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:55:11 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:55:16 [loggers.py:310] Engine 000: Avg prompt throughput: 1569.2 tokens/s, Avg generation throughput: 49.0 tokens/s, Running: 4 reqs, Waiting: 4 reqs, GPU KV cache usage: 4.7%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:55:26 [loggers.py:310] Engine 000: Avg prompt throughput: 2039.0 tokens/s, Avg generation throughput: 89.6 tokens/s, Running: 8 reqs, Waiting: 0 reqs, GPU KV cache usage: 9.6%, Prefix cache hit rate: 0.0%
+(EngineCore pid=205553) INFO 09-21 04:55:27 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:55:27 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:55:36 [loggers.py:310] Engine 000: Avg prompt throughput: 2731.0 tokens/s, Avg generation throughput: 13.0 tokens/s, Running: 8 reqs, Waiting: 0 reqs, GPU KV cache usage: 9.4%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 8, "repeat": 0, "wall_seconds": 15.686645456124097, "preemptions": 0, "output_tokens_per_second": 65.27845630629896, "ttft_ms": {"mean": 6681.2057759962045, "median": 7280.545345507562, "p95": 9767.760281916708, "min": 2426.09957838431, "max": 9767.760281916708}, "tpot_ms": {"mean": 70.18269524922388, "median": 65.52190541869074, "p95": 103.02104600008548, "min": 46.599769400154045, "max": 103.02104600008548}}
+(EngineCore pid=205553) INFO 09-21 04:55:42 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:55:42 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:55:47 [loggers.py:310] Engine 000: Avg prompt throughput: 1510.8 tokens/s, Avg generation throughput: 93.3 tokens/s, Running: 4 reqs, Waiting: 4 reqs, GPU KV cache usage: 4.7%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:55:57 [loggers.py:310] Engine 000: Avg prompt throughput: 2047.1 tokens/s, Avg generation throughput: 89.2 tokens/s, Running: 8 reqs, Waiting: 0 reqs, GPU KV cache usage: 9.6%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 8, "repeat": 1, "wall_seconds": 15.692820206750184, "preemptions": 0, "output_tokens_per_second": 65.25277079001592, "ttft_ms": {"mean": 6687.695636821445, "median": 7287.685175659135, "p95": 9777.245752047747, "min": 2428.4943360835314, "max": 9777.245752047747}, "tpot_ms": {"mean": 70.18041548751822, "median": 65.51502125455052, "p95": 103.05010803835833, "min": 46.573773052132736, "max": 103.05010803835833}}
+(EngineCore pid=205553) INFO 09-21 04:55:58 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:55:58 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:56:08 [loggers.py:310] Engine 000: Avg prompt throughput: 2714.3 tokens/s, Avg generation throughput: 13.6 tokens/s, Running: 8 reqs, Waiting: 0 reqs, GPU KV cache usage: 9.4%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 8, "repeat": 2, "wall_seconds": 15.705203241668642, "preemptions": 0, "output_tokens_per_second": 65.20132113178578, "ttft_ms": {"mean": 6692.45192798553, "median": 7292.165314778686, "p95": 9785.270539112389, "min": 2430.3299952298403, "max": 9785.270539112389}, "tpot_ms": {"mean": 70.24035979003652, "median": 65.57675079611225, "p95": 103.13314705441786, "min": 46.608067414628, "max": 103.13314705441786}}
+BENCH arm=v96 batch=16 phase=warmup
+(EngineCore pid=205553) INFO 09-21 04:56:14 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:56:14 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:56:19 [loggers.py:310] Engine 000: Avg prompt throughput: 1508.7 tokens/s, Avg generation throughput: 93.2 tokens/s, Running: 4 reqs, Waiting: 12 reqs, GPU KV cache usage: 4.7%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:56:31 [loggers.py:310] Engine 000: Avg prompt throughput: 3366.5 tokens/s, Avg generation throughput: 3.7 tokens/s, Running: 14 reqs, Waiting: 2 reqs, GPU KV cache usage: 16.4%, Prefix cache hit rate: 0.0%
+(EngineCore pid=205553) INFO 09-21 04:56:40 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:56:40 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:56:42 [loggers.py:310] Engine 000: Avg prompt throughput: 1769.1 tokens/s, Avg generation throughput: 172.8 tokens/s, Running: 2 reqs, Waiting: 14 reqs, GPU KV cache usage: 2.3%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:56:55 [loggers.py:310] Engine 000: Avg prompt throughput: 3027.3 tokens/s, Avg generation throughput: 2.9 tokens/s, Running: 12 reqs, Waiting: 4 reqs, GPU KV cache usage: 14.1%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:57:05 [loggers.py:310] Engine 000: Avg prompt throughput: 2041.6 tokens/s, Avg generation throughput: 159.1 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 19.2%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 16, "repeat": 0, "wall_seconds": 26.18380906712264, "preemptions": 0, "output_tokens_per_second": 78.21627459740168, "ttft_ms": {"mean": 11878.245152969612, "median": 12178.23566799052, "p95": 19556.56722281128, "min": 2437.434596940875, "max": 19556.56722281128}, "tpot_ms": {"mean": 111.17166313425248, "median": 108.87815869288652, "p95": 183.95903625151539, "min": 52.177049054610215, "max": 183.95903625151539}}
+(EngineCore pid=205553) INFO 09-21 04:57:06 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:57:06 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:57:16 [loggers.py:310] Engine 000: Avg prompt throughput: 2546.7 tokens/s, Avg generation throughput: 38.4 tokens/s, Running: 8 reqs, Waiting: 8 reqs, GPU KV cache usage: 9.4%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:57:26 [loggers.py:310] Engine 000: Avg prompt throughput: 3676.3 tokens/s, Avg generation throughput: 14.4 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 18.8%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 16, "repeat": 1, "wall_seconds": 26.10042155114934, "preemptions": 0, "output_tokens_per_second": 78.46616561293877, "ttft_ms": {"mean": 11830.770499742357, "median": 12130.499755963683, "p95": 19473.14782999456, "min": 2430.077577009797, "max": 19473.14782999456}, "tpot_ms": {"mean": 110.89326651156404, "median": 108.60437267701926, "p95": 183.3684860076022, "min": 52.17704708563296, "max": 183.3684860076022}}
+(EngineCore pid=205553) INFO 09-21 04:57:32 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:57:32 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:57:37 [loggers.py:310] Engine 000: Avg prompt throughput: 1094.5 tokens/s, Avg generation throughput: 168.5 tokens/s, Running: 4 reqs, Waiting: 12 reqs, GPU KV cache usage: 4.7%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:57:49 [loggers.py:310] Engine 000: Avg prompt throughput: 3387.2 tokens/s, Avg generation throughput: 3.7 tokens/s, Running: 14 reqs, Waiting: 2 reqs, GPU KV cache usage: 16.4%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 16, "repeat": 2, "wall_seconds": 26.06722269486636, "preemptions": 0, "output_tokens_per_second": 78.56609904220177, "ttft_ms": {"mean": 11804.816678282805, "median": 12102.991696447134, "p95": 19432.81961372122, "min": 2426.5044247731566, "max": 19432.81961372122}, "tpot_ms": {"mean": 110.83807644212442, "median": 108.56111584172591, "p95": 183.1386687791371, "min": 52.233418372760376, "max": 183.1386687791371}}
+BENCH arm=v96 batch=32 phase=warmup
+(EngineCore pid=205553) INFO 09-21 04:57:58 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:57:58 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:58:01 [loggers.py:310] Engine 000: Avg prompt throughput: 1769.3 tokens/s, Avg generation throughput: 172.8 tokens/s, Running: 2 reqs, Waiting: 30 reqs, GPU KV cache usage: 2.3%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:58:13 [loggers.py:310] Engine 000: Avg prompt throughput: 3054.5 tokens/s, Avg generation throughput: 2.9 tokens/s, Running: 12 reqs, Waiting: 20 reqs, GPU KV cache usage: 14.1%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:58:25 [loggers.py:310] Engine 000: Avg prompt throughput: 3394.0 tokens/s, Avg generation throughput: 7.0 tokens/s, Running: 22 reqs, Waiting: 10 reqs, GPU KV cache usage: 25.8%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:58:37 [loggers.py:310] Engine 000: Avg prompt throughput: 3393.1 tokens/s, Avg generation throughput: 11.2 tokens/s, Running: 32 reqs, Waiting: 0 reqs, GPU KV cache usage: 37.5%, Prefix cache hit rate: 0.0%
+(EngineCore pid=205553) INFO 09-21 04:58:45 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:58:45 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:58:48 [loggers.py:310] Engine 000: Avg prompt throughput: 1151.9 tokens/s, Avg generation throughput: 360.1 tokens/s, Running: 2 reqs, Waiting: 30 reqs, GPU KV cache usage: 2.3%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:59:00 [loggers.py:310] Engine 000: Avg prompt throughput: 3052.6 tokens/s, Avg generation throughput: 2.9 tokens/s, Running: 12 reqs, Waiting: 20 reqs, GPU KV cache usage: 14.1%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:59:12 [loggers.py:310] Engine 000: Avg prompt throughput: 3385.2 tokens/s, Avg generation throughput: 7.0 tokens/s, Running: 22 reqs, Waiting: 10 reqs, GPU KV cache usage: 25.8%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:59:24 [loggers.py:310] Engine 000: Avg prompt throughput: 3378.5 tokens/s, Avg generation throughput: 11.1 tokens/s, Running: 32 reqs, Waiting: 0 reqs, GPU KV cache usage: 37.5%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 32, "repeat": 0, "wall_seconds": 46.945757965091616, "preemptions": 0, "output_tokens_per_second": 87.24962973322837, "ttft_ms": {"mean": 21612.146979008685, "median": 21750.41054841131, "p95": 38711.86371007934, "min": 2418.1460016407073, "max": 38845.105974934995}, "tpot_ms": {"mean": 196.26126414649355, "median": 195.38190152026772, "p95": 343.6505002534296, "min": 63.77857464446327, "max": 343.6505002534296}}
+(EngineCore pid=205553) INFO 09-21 04:59:32 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 04:59:32 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 04:59:35 [loggers.py:310] Engine 000: Avg prompt throughput: 1150.8 tokens/s, Avg generation throughput: 359.7 tokens/s, Running: 2 reqs, Waiting: 30 reqs, GPU KV cache usage: 2.3%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:59:47 [loggers.py:310] Engine 000: Avg prompt throughput: 3043.9 tokens/s, Avg generation throughput: 2.9 tokens/s, Running: 12 reqs, Waiting: 20 reqs, GPU KV cache usage: 14.1%, Prefix cache hit rate: 0.0%
+INFO 09-21 04:59:59 [loggers.py:310] Engine 000: Avg prompt throughput: 3377.6 tokens/s, Avg generation throughput: 7.0 tokens/s, Running: 22 reqs, Waiting: 10 reqs, GPU KV cache usage: 25.8%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:00:11 [loggers.py:310] Engine 000: Avg prompt throughput: 3362.9 tokens/s, Avg generation throughput: 11.1 tokens/s, Running: 32 reqs, Waiting: 0 reqs, GPU KV cache usage: 37.5%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 32, "repeat": 1, "wall_seconds": 47.07685425085947, "preemptions": 0, "output_tokens_per_second": 87.0066631507185, "ttft_ms": {"mean": 21683.401330607012, "median": 21813.500312855467, "p95": 38844.587398227304, "min": 2431.3937509432435, "max": 38978.38433505967}, "tpot_ms": {"mean": 196.72517067586406, "median": 195.91212399509243, "p95": 344.560622937948, "min": 63.7608305441113, "max": 344.560622937948}}
+(EngineCore pid=205553) INFO 09-21 05:00:19 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 05:00:19 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 05:00:22 [loggers.py:310] Engine 000: Avg prompt throughput: 1149.9 tokens/s, Avg generation throughput: 359.5 tokens/s, Running: 2 reqs, Waiting: 30 reqs, GPU KV cache usage: 2.3%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:00:34 [loggers.py:310] Engine 000: Avg prompt throughput: 3034.0 tokens/s, Avg generation throughput: 2.9 tokens/s, Running: 12 reqs, Waiting: 20 reqs, GPU KV cache usage: 14.1%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:00:46 [loggers.py:310] Engine 000: Avg prompt throughput: 3366.9 tokens/s, Avg generation throughput: 7.0 tokens/s, Running: 22 reqs, Waiting: 10 reqs, GPU KV cache usage: 25.8%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:00:58 [loggers.py:310] Engine 000: Avg prompt throughput: 3362.4 tokens/s, Avg generation throughput: 11.1 tokens/s, Running: 32 reqs, Waiting: 0 reqs, GPU KV cache usage: 37.5%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 32, "repeat": 2, "wall_seconds": 47.17391674593091, "preemptions": 0, "output_tokens_per_second": 86.82764295490281, "ttft_ms": {"mean": 21738.58584096888, "median": 21879.856327548623, "p95": 38926.826760638505, "min": 2435.191840864718, "max": 39061.21760932729}, "tpot_ms": {"mean": 197.05577086983615, "median": 196.1561696361897, "p95": 345.2918674415491, "min": 63.87366694361558, "max": 345.2918674415491}}
+BENCH arm=v96 batch=64 phase=warmup
+(EngineCore pid=205553) INFO 09-21 05:01:07 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 05:01:07 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 05:01:09 [loggers.py:310] Engine 000: Avg prompt throughput: 1145.0 tokens/s, Avg generation throughput: 357.9 tokens/s, Running: 2 reqs, Waiting: 62 reqs, GPU KV cache usage: 2.3%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:01:21 [loggers.py:310] Engine 000: Avg prompt throughput: 3028.2 tokens/s, Avg generation throughput: 2.9 tokens/s, Running: 12 reqs, Waiting: 52 reqs, GPU KV cache usage: 14.1%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:01:33 [loggers.py:310] Engine 000: Avg prompt throughput: 3370.8 tokens/s, Avg generation throughput: 7.0 tokens/s, Running: 22 reqs, Waiting: 42 reqs, GPU KV cache usage: 25.8%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:01:45 [loggers.py:310] Engine 000: Avg prompt throughput: 3369.7 tokens/s, Avg generation throughput: 11.1 tokens/s, Running: 32 reqs, Waiting: 32 reqs, GPU KV cache usage: 37.5%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:01:58 [loggers.py:310] Engine 000: Avg prompt throughput: 3367.3 tokens/s, Avg generation throughput: 15.2 tokens/s, Running: 42 reqs, Waiting: 22 reqs, GPU KV cache usage: 49.2%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:02:10 [loggers.py:310] Engine 000: Avg prompt throughput: 3369.2 tokens/s, Avg generation throughput: 19.3 tokens/s, Running: 52 reqs, Waiting: 12 reqs, GPU KV cache usage: 60.9%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:02:22 [loggers.py:310] Engine 000: Avg prompt throughput: 3371.5 tokens/s, Avg generation throughput: 23.5 tokens/s, Running: 62 reqs, Waiting: 2 reqs, GPU KV cache usage: 72.6%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:02:32 [loggers.py:310] Engine 000: Avg prompt throughput: 1219.1 tokens/s, Avg generation throughput: 584.1 tokens/s, Running: 64 reqs, Waiting: 0 reqs, GPU KV cache usage: 76.9%, Prefix cache hit rate: 0.0%
+(EngineCore pid=205553) INFO 09-21 05:02:35 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 05:02:35 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 05:02:44 [loggers.py:310] Engine 000: Avg prompt throughput: 2345.6 tokens/s, Avg generation throughput: 111.3 tokens/s, Running: 8 reqs, Waiting: 56 reqs, GPU KV cache usage: 9.4%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:02:56 [loggers.py:310] Engine 000: Avg prompt throughput: 3391.2 tokens/s, Avg generation throughput: 5.4 tokens/s, Running: 18 reqs, Waiting: 46 reqs, GPU KV cache usage: 21.1%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:03:08 [loggers.py:310] Engine 000: Avg prompt throughput: 3391.7 tokens/s, Avg generation throughput: 9.5 tokens/s, Running: 28 reqs, Waiting: 36 reqs, GPU KV cache usage: 32.8%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:03:20 [loggers.py:310] Engine 000: Avg prompt throughput: 3391.9 tokens/s, Avg generation throughput: 13.7 tokens/s, Running: 38 reqs, Waiting: 26 reqs, GPU KV cache usage: 44.5%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:03:33 [loggers.py:310] Engine 000: Avg prompt throughput: 3388.7 tokens/s, Avg generation throughput: 17.8 tokens/s, Running: 48 reqs, Waiting: 16 reqs, GPU KV cache usage: 56.2%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:03:45 [loggers.py:310] Engine 000: Avg prompt throughput: 3385.5 tokens/s, Avg generation throughput: 21.9 tokens/s, Running: 58 reqs, Waiting: 6 reqs, GPU KV cache usage: 67.9%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:03:55 [loggers.py:310] Engine 000: Avg prompt throughput: 2849.0 tokens/s, Avg generation throughput: 215.3 tokens/s, Running: 64 reqs, Waiting: 0 reqs, GPU KV cache usage: 75.8%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 64, "repeat": 0, "wall_seconds": 87.52699061203748, "preemptions": 0, "output_tokens_per_second": 93.59398675445108, "ttft_ms": {"mean": 41013.93016052316, "median": 41075.32091601752, "p95": 74926.95356579497, "min": 2429.0638146921992, "max": 77729.6570208855}, "tpot_ms": {"mean": 358.75881550526276, "median": 358.7880004417357, "p95": 616.5892636938769, "min": 77.13867801674239, "max": 653.3973473967529}}
+(EngineCore pid=205553) INFO 09-21 05:04:02 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 05:04:02 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 05:04:07 [loggers.py:310] Engine 000: Avg prompt throughput: 1002.7 tokens/s, Avg generation throughput: 423.3 tokens/s, Running: 4 reqs, Waiting: 60 reqs, GPU KV cache usage: 4.7%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:04:19 [loggers.py:310] Engine 000: Avg prompt throughput: 3383.9 tokens/s, Avg generation throughput: 3.7 tokens/s, Running: 14 reqs, Waiting: 50 reqs, GPU KV cache usage: 16.4%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:04:31 [loggers.py:310] Engine 000: Avg prompt throughput: 3376.9 tokens/s, Avg generation throughput: 7.8 tokens/s, Running: 24 reqs, Waiting: 40 reqs, GPU KV cache usage: 28.1%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:04:43 [loggers.py:310] Engine 000: Avg prompt throughput: 3372.1 tokens/s, Avg generation throughput: 11.9 tokens/s, Running: 34 reqs, Waiting: 30 reqs, GPU KV cache usage: 39.8%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:04:56 [loggers.py:310] Engine 000: Avg prompt throughput: 3374.2 tokens/s, Avg generation throughput: 16.1 tokens/s, Running: 44 reqs, Waiting: 20 reqs, GPU KV cache usage: 51.5%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:05:08 [loggers.py:310] Engine 000: Avg prompt throughput: 3369.7 tokens/s, Avg generation throughput: 20.2 tokens/s, Running: 54 reqs, Waiting: 10 reqs, GPU KV cache usage: 63.3%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:05:20 [loggers.py:310] Engine 000: Avg prompt throughput: 3363.5 tokens/s, Avg generation throughput: 24.2 tokens/s, Running: 64 reqs, Waiting: 0 reqs, GPU KV cache usage: 75.0%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:05:30 [loggers.py:310] Engine 000: Avg prompt throughput: 408.3 tokens/s, Avg generation throughput: 713.5 tokens/s, Running: 5 reqs, Waiting: 0 reqs, GPU KV cache usage: 6.0%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 64, "repeat": 1, "wall_seconds": 87.85525001911446, "preemptions": 0, "output_tokens_per_second": 93.2442853240721, "ttft_ms": {"mean": 41165.12500236422, "median": 41223.90406229533, "p95": 75253.38852684945, "min": 2430.779980029911, "max": 78071.36270590127}, "tpot_ms": {"mean": 360.1617024539201, "median": 360.21195469776126, "p95": 619.1401398909373, "min": 77.03279723655285, "max": 655.9895176924472}}
+(EngineCore pid=205553) INFO 09-21 05:05:30 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 05:05:30 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 05:05:42 [loggers.py:310] Engine 000: Avg prompt throughput: 2994.4 tokens/s, Avg generation throughput: 2.8 tokens/s, Running: 10 reqs, Waiting: 54 reqs, GPU KV cache usage: 11.7%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:05:54 [loggers.py:310] Engine 000: Avg prompt throughput: 3367.6 tokens/s, Avg generation throughput: 6.2 tokens/s, Running: 20 reqs, Waiting: 44 reqs, GPU KV cache usage: 23.4%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:06:07 [loggers.py:310] Engine 000: Avg prompt throughput: 3364.9 tokens/s, Avg generation throughput: 10.3 tokens/s, Running: 30 reqs, Waiting: 34 reqs, GPU KV cache usage: 35.1%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:06:19 [loggers.py:310] Engine 000: Avg prompt throughput: 3360.7 tokens/s, Avg generation throughput: 14.4 tokens/s, Running: 40 reqs, Waiting: 24 reqs, GPU KV cache usage: 46.9%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:06:31 [loggers.py:310] Engine 000: Avg prompt throughput: 3359.6 tokens/s, Avg generation throughput: 18.5 tokens/s, Running: 50 reqs, Waiting: 14 reqs, GPU KV cache usage: 58.6%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:06:43 [loggers.py:310] Engine 000: Avg prompt throughput: 3363.3 tokens/s, Avg generation throughput: 22.6 tokens/s, Running: 60 reqs, Waiting: 4 reqs, GPU KV cache usage: 70.3%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:06:53 [loggers.py:310] Engine 000: Avg prompt throughput: 2031.8 tokens/s, Avg generation throughput: 399.6 tokens/s, Running: 64 reqs, Waiting: 0 reqs, GPU KV cache usage: 76.3%, Prefix cache hit rate: 0.0%
+{"event": "BENCH", "arm": "v96", "batch": 64, "repeat": 2, "wall_seconds": 88.07666910579428, "preemptions": 0, "output_tokens_per_second": 93.00987518226975, "ttft_ms": {"mean": 41305.03905474325, "median": 41361.50041176006, "p95": 75477.03918255866, "min": 2437.2203038074076, "max": 78292.34109120443}, "tpot_ms": {"mean": 360.7780266636579, "median": 360.84517667172696, "p95": 620.6371799536695, "min": 77.03624801402252, "max": 657.632425211106}}
+PROFILE arm=v96 batch=1 prefix=/workspace/BasisServe-CALS/results/vllm_llama31_70b_tp8_optimized/profiles/v96_b1
+(EngineCore pid=205553) INFO 09-21 05:06:58 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 05:06:58 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 05:07:03 [loggers.py:310] Engine 000: Avg prompt throughput: 409.6 tokens/s, Avg generation throughput: 335.4 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.2%, Prefix cache hit rate: 0.0%
+PROFILE arm=v96 batch=32 prefix=/workspace/BasisServe-CALS/results/vllm_llama31_70b_tp8_optimized/profiles/v96_b32
+(EngineCore pid=205553) INFO 09-21 05:07:15 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 05:07:15 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 05:07:17 [loggers.py:310] Engine 000: Avg prompt throughput: 584.0 tokens/s, Avg generation throughput: 2.8 tokens/s, Running: 2 reqs, Waiting: 30 reqs, GPU KV cache usage: 2.3%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:07:29 [loggers.py:310] Engine 000: Avg prompt throughput: 3049.2 tokens/s, Avg generation throughput: 2.9 tokens/s, Running: 12 reqs, Waiting: 20 reqs, GPU KV cache usage: 14.1%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:07:41 [loggers.py:310] Engine 000: Avg prompt throughput: 3389.8 tokens/s, Avg generation throughput: 7.0 tokens/s, Running: 22 reqs, Waiting: 10 reqs, GPU KV cache usage: 25.8%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:07:53 [loggers.py:310] Engine 000: Avg prompt throughput: 3390.8 tokens/s, Avg generation throughput: 11.2 tokens/s, Running: 32 reqs, Waiting: 0 reqs, GPU KV cache usage: 37.5%, Prefix cache hit rate: 0.0%
+PROFILE arm=v96 batch=64 prefix=/workspace/BasisServe-CALS/results/vllm_llama31_70b_tp8_optimized/profiles/v96_b64
+(EngineCore pid=205553) INFO 09-21 05:08:19 [scheduler.py:2519] setting pause state to PAUSED_ALL
+(EngineCore pid=205553) INFO 09-21 05:08:19 [scheduler.py:2519] setting pause state to UNPAUSED
+INFO 09-21 05:08:22 [loggers.py:310] Engine 000: Avg prompt throughput: 433.2 tokens/s, Avg generation throughput: 135.4 tokens/s, Running: 2 reqs, Waiting: 62 reqs, GPU KV cache usage: 2.3%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:08:34 [loggers.py:310] Engine 000: Avg prompt throughput: 3067.2 tokens/s, Avg generation throughput: 2.9 tokens/s, Running: 12 reqs, Waiting: 52 reqs, GPU KV cache usage: 14.1%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:08:46 [loggers.py:310] Engine 000: Avg prompt throughput: 3402.3 tokens/s, Avg generation throughput: 7.1 tokens/s, Running: 22 reqs, Waiting: 42 reqs, GPU KV cache usage: 25.8%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:08:58 [loggers.py:310] Engine 000: Avg prompt throughput: 3393.8 tokens/s, Avg generation throughput: 11.2 tokens/s, Running: 32 reqs, Waiting: 32 reqs, GPU KV cache usage: 37.5%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:09:10 [loggers.py:310] Engine 000: Avg prompt throughput: 3387.8 tokens/s, Avg generation throughput: 15.3 tokens/s, Running: 42 reqs, Waiting: 22 reqs, GPU KV cache usage: 49.2%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:09:22 [loggers.py:310] Engine 000: Avg prompt throughput: 3377.8 tokens/s, Avg generation throughput: 19.4 tokens/s, Running: 52 reqs, Waiting: 12 reqs, GPU KV cache usage: 60.9%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:09:34 [loggers.py:310] Engine 000: Avg prompt throughput: 3370.2 tokens/s, Avg generation throughput: 23.4 tokens/s, Running: 62 reqs, Waiting: 2 reqs, GPU KV cache usage: 72.6%, Prefix cache hit rate: 0.0%
+INFO 09-21 05:09:44 [loggers.py:310] Engine 000: Avg prompt throughput: 1226.7 tokens/s, Avg generation throughput: 581.3 tokens/s, Running: 64 reqs, Waiting: 0 reqs, GPU KV cache usage: 76.9%, Prefix cache hit rate: 0.0%
+COMPLETE /workspace/BasisServe-CALS/results/vllm_llama31_70b_tp8_optimized/v96.json
+INFO 09-21 05:10:13 [utils.py:620] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=205553) INFO 09-21 05:10:13 [core.py:1350] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=205553) INFO 09-21 05:10:13 [core.py:1501] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=205553) INFO 09-21 05:10:13 [core.py:1532] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=205553) INFO 09-21 05:10:13 [core.py:1363] [shutdown] EngineCore: exiting busy loop
+(EngineCore pid=205553) INFO 09-21 05:10:13 [multiproc_executor.py:472] [shutdown] Executor: waiting for worker exit count=8
+(Worker_TP0 pid=205564) INFO 09-21 05:10:13 [multiproc_executor.py:836] Parent process exited, terminating worker queues
+WARNING 09-21 05:10:18 [utils.py:640] [shutdown] Process manager: force killing remaining processes count=1
+WARNING 09-21 05:10:18 [utils.py:645] [shutdown] Process manager: force killing remaining process EngineCore pid 205553
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:   0% Completed | 0/30 [00:00<?, ?it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:   3% Completed | 1/30 [00:00<00:02,  9.67it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:   7% Completed | 2/30 [00:00<00:04,  6.19it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  10% Completed | 3/30 [00:00<00:05,  5.29it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  13% Completed | 4/30 [00:00<00:05,  5.15it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  17% Completed | 5/30 [00:00<00:04,  5.66it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  20% Completed | 6/30 [00:01<00:04,  5.29it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  23% Completed | 7/30 [00:01<00:04,  5.28it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  27% Completed | 8/30 [00:01<00:04,  5.27it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  30% Completed | 9/30 [00:01<00:03,  5.67it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  37% Completed | 11/30 [00:01<00:02,  7.03it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  40% Completed | 12/30 [00:01<00:02,  7.33it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  43% Completed | 13/30 [00:02<00:02,  7.54it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  47% Completed | 14/30 [00:02<00:02,  7.76it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  53% Completed | 16/30 [00:02<00:01,  8.51it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  57% Completed | 17/30 [00:02<00:01,  8.48it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  60% Completed | 18/30 [00:02<00:01,  8.42it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  63% Completed | 19/30 [00:02<00:01,  8.42it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  70% Completed | 21/30 [00:02<00:01,  8.90it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  73% Completed | 22/30 [00:03<00:00,  8.78it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  77% Completed | 23/30 [00:03<00:00,  8.65it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  80% Completed | 24/30 [00:03<00:00,  8.61it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  87% Completed | 26/30 [00:03<00:00,  9.04it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  90% Completed | 27/30 [00:03<00:00,  8.89it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  93% Completed | 28/30 [00:03<00:00,  8.71it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards:  97% Completed | 29/30 [00:03<00:00,  8.62it/s]
+(Worker_TP0 pid=205564) 
+Loading safetensors checkpoint shards: 100% Completed | 30/30 [00:03<00:00,  7.71it/s]
+(Worker_TP0 pid=205564) 
+(Worker_TP0 pid=205564) 
+Capturing CUDA graphs (FULL):   0%|          | 0/2 [00:00<?, ?it/s]
+Capturing CUDA graphs (FULL):  50%|█████     | 1/2 [00:00<00:00,  7.26it/s]
+Capturing CUDA graphs (FULL): 100%|██████████| 2/2 [00:00<00:00,  8.32it/s]
+Capturing CUDA graphs (FULL): 100%|██████████| 2/2 [00:00<00:00,  8.14it/s]
+(Worker_TP0 pid=205564) 
+Capturing CUDA graphs (FULL):   0%|          | 0/7 [00:00<?, ?it/s]
+Capturing CUDA graphs (FULL):  14%|█▍        | 1/7 [00:00<00:00,  9.32it/s]
+Capturing CUDA graphs (FULL):  43%|████▎     | 3/7 [00:00<00:00,  9.60it/s]
+Capturing CUDA graphs (FULL):  71%|███████▏  | 5/7 [00:00<00:00, 10.33it/s]
+Capturing CUDA graphs (FULL): 100%|██████████| 7/7 [00:00<00:00, 10.45it/s]
+Capturing CUDA graphs (FULL): 100%|██████████| 7/7 [00:00<00:00, 10.27it/s]
+USDT:2026-09-21 05:06:58 205564:205564 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-21 05:07:05 205564:205564 SyncActivityProfilerHandler.cpp:59] profiler_stop
+USDT:2026-09-21 05:07:15 205564:205564 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-21 05:08:02 205564:205564 SyncActivityProfilerHandler.cpp:59] profiler_stop
+USDT:2026-09-21 05:08:19 205564:205564 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-21 05:09:47 205564:205564 SyncActivityProfilerHandler.cpp:59] profiler_stop
+/workspace/miniforge3/envs/basis/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 3 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+/workspace/miniforge3/envs/basis/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 2 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

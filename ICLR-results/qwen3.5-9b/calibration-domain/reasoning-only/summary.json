@@ -1,0 +1,96 @@
+{
+  "format": "basisserve.qwen35_9b.reasoning_v128_wo768_512_summary.v1",
+  "status": "complete_and_audited",
+  "timestamp_utc": "2026-09-21T02:27:52.374333+00:00",
+  "method": "Two-Sided V128 frozen-C4 schedule; reasoning-calibrated V factors; reasoning-calibrated Wo768/512",
+  "schedule": {
+    "3": 80,
+    "7": 96,
+    "11": 96,
+    "15": 96,
+    "19": 192,
+    "23": 160,
+    "27": 192,
+    "31": 112
+  },
+  "average_v_rank": 128.0,
+  "calibration": {
+    "fit": {
+      "math": 128,
+      "code": 128
+    },
+    "heldout": {
+      "c4": 64
+    }
+  },
+  "artifacts": {
+    "data_manifest": {
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_reasoning_v128_wo/formal/data/manifest.json",
+      "sha256": "5266dcafbca87527a160beca0fdf2aa1cdc9ce26815fadff1a3a057f167fc5ea"
+    },
+    "v_bank": {
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_reasoning_v128_wo/formal/banks/c1_twosided_v128.pt",
+      "sha256": "ab1f42c063d701a0aa6efa98def183f680a7f4ccd019664cbec4772b6033ca50"
+    },
+    "wo_bank": {
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_reasoning_v128_wo/formal/wo/wo_bank.pt",
+      "sha256": "48abf72b94de2f0c5d075150201089aafdddf0362fd333c32270dd96016c6f1a"
+    }
+  },
+  "rows": [
+    {
+      "task": "gsm8k",
+      "questions": 1319,
+      "metrics": {
+        "exact_match,strict-match": 0.8893100833965125,
+        "exact_match,flexible-extract": 0.9037149355572404
+      },
+      "length_capped": 58,
+      "closing_think_responses": 0,
+      "elapsed_seconds": 780.4035090059042,
+      "source": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_reasoning_v128_wo/formal/eval/gsm8k.json",
+      "source_sha256": "aebbf28730bb43ece3e7ec319abe40b28298a9c9ede20794268cd39a3e9fac8b"
+    },
+    {
+      "task": "minerva_math500",
+      "questions": 500,
+      "metrics": {
+        "exact_match,none": 0.0,
+        "math_verify,none": 0.856
+      },
+      "length_capped": 92,
+      "closing_think_responses": 0,
+      "elapsed_seconds": 1063.0451486036181,
+      "source": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_reasoning_v128_wo/formal/eval/minerva_math500.json",
+      "source_sha256": "72630caadf52571eea2f7e249bfb4f755a5f13c3021ba14501599d5b32b1f45c"
+    },
+    {
+      "task": "ifeval",
+      "questions": 541,
+      "metrics": {
+        "prompt_level_strict_acc,none": 0.7264325323475046,
+        "inst_level_strict_acc,none": 0.8129496402877698,
+        "prompt_level_loose_acc,none": 0.7744916820702403,
+        "inst_level_loose_acc,none": 0.8465227817745803
+      },
+      "length_capped": 61,
+      "closing_think_responses": 0,
+      "elapsed_seconds": 525.0986067503691,
+      "source": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_reasoning_v128_wo/formal/eval/ifeval.json",
+      "source_sha256": "5336d3050e39701fbcf5fae52e1e753daaaa8d3b2c8377617978b7fb60877f90"
+    },
+    {
+      "task": "mbpp_plus_full",
+      "questions": 378,
+      "metrics": {
+        "base_pass_at_1,none": 0.8597883597883598,
+        "plus_pass_at_1,none": 0.7248677248677249
+      },
+      "length_capped": 75,
+      "closing_think_responses": 0,
+      "elapsed_seconds": 1198.838183619082,
+      "source": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/q35_reasoning_v128_wo/formal/eval/mbpp_plus_full.json",
+      "source_sha256": "a9d1d988de50fb3398a15734a10ce129cd7e2c2dfd703f5dfe4c44e368bb5599"
+    }
+  ]
+}
