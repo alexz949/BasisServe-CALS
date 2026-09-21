@@ -8,6 +8,11 @@ from transformers import AutoModelForCausalLM
 from basisserve.core.c1_v_conditional_k_router import AffineReducedRankMap
 from basisserve.core.query_position_sampling import candidate_positions, select_stratified_query_positions
 from evaluation.v96kl_common import configure, read_json, write_json, save_tensors, sha256
+from evaluation.k_routing_config import (
+    residual_fisher_support,
+    routing_config,
+    routing_position_embeddings,
+)
 from evaluation.streaming_k_statistics import RawBaseMoments, base_from_moments, base_mse, packed_fisher, load_fisher_windows
 from evaluation.fit_qwen3_8b_q8_fisher_residual import build_multi_query_statistics
 from evaluation.eval_qwen3_8b_v80_conditional_residual_router import _fit_residual_grid
@@ -28,7 +33,10 @@ def verified(path):
     return load_file(str(path)), meta
 
 
-def encoder_for(identity, layer):
+def encoder_for(identity, layer, *, dense_v=False):
+    if dense_v:
+        dim, groups = identity['head_dim'], identity['hkv']
+        return torch.eye(dim, dtype=torch.float32).expand(groups, -1, -1).clone()
     checkpoint = Path(identity['checkpoint'])
     assert sha256(checkpoint/'manifest.json')==identity['manifest_sha256']
     entry = read_json(checkpoint/'manifest.json')['layers'][layer]
@@ -44,17 +52,24 @@ def restore_base(payload):
 
 @torch.inference_mode()
 def replay(args, identity, windows, layers, protocol, *, fisher=False):
-    model = AutoModelForCausalLM.from_pretrained(identity['model'], dtype=torch.bfloat16,
-        attn_implementation='sdpa',local_files_only=True).eval().cuda()
-    assert model.config.model_type=='llama'
-    from transformers.models.llama.modeling_llama import apply_rotary_pos_emb
+    config = routing_config(identity, rope=args.rope, sequence_length=args.sequence_length)
+    model = AutoModelForCausalLM.from_pretrained(identity['model'], config=config, dtype=torch.bfloat16,
+        attn_implementation='sdpa', local_files_only=True, trust_remote_code=False).eval().cuda()
+    assert model.config.model_type in ('llama', 'qwen3')
+    raw_value_projections = {i: layer.self_attn.v_proj for i, layer in enumerate(model.model.layers)}
+    if args.trajectory == 'c1':
+        from evaluation.llama_c1_capture import install_capture_trajectory
+        install_capture_trajectory(model, identity)
+    if model.config.model_type == 'llama':
+        from transformers.models.llama.modeling_llama import apply_rotary_pos_emb
+    else:
+        from transformers.models.qwen3.modeling_qwen3 import apply_rotary_pos_emb
     config=model.config
     heads,groups=config.num_attention_heads,config.num_key_value_heads
     dim=config.hidden_size//heads
     grid=candidate_positions(args.sequence_length)
-    stats_cos,stats_sin=model.model.rotary_emb(torch.empty(1,device='cuda',dtype=torch.float32),
-        torch.arange(args.sequence_length,device='cuda')[None])
-    moments,covariances,candidates,base_payloads,selections = {},{},{},{},{}
+    stats_cos,stats_sin=routing_position_embeddings(config,args.sequence_length,torch.device('cuda'))
+    moments,post_moments,covariances,candidates,base_payloads,selections = {},{},{},{},{},{}
     active={}
     handles=[]
     for layer in layers:
@@ -66,35 +81,40 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
             selections[layer]=selection_meta['selections']
         else:
             moments[layer]={s:RawBaseMoments(groups,dim) for s in ('fit','heldout')}
-            covariances[layer]={s:torch.zeros(heads*dim,heads*dim,device='cuda',dtype=torch.float32)
-                for s in ('fit','heldout')}
+            post_moments[layer]={s:RawBaseMoments(groups,dim) for s in ('fit','heldout')}
+            if args.collect_covariance:
+                covariances[layer]={s:torch.zeros(heads*dim,heads*dim,device='cuda',dtype=torch.float32)
+                    for s in ('fit','heldout')}
             candidates[layer]=torch.empty(args.fit_count,len(grid),heads,dim,dtype=torch.bfloat16)
         def capture(attention,positional,kwargs,layer=layer):
             split,index=active['split'],active['index']
             x=kwargs['hidden_states']; n=x.shape[1]
             k=attention.k_proj(x).view(1,n,groups,dim)
-            v=attention.v_proj(x).view(1,n,groups,dim)
+            v=raw_value_projections[layer](x).view(1,n,groups,dim)
+            q=attention.q_proj(x).view(1,n,heads,dim)
+            if config.model_type == 'qwen3':
+                q, k = attention.q_norm(q), attention.k_norm(k)
             if not fisher:
                 moments[layer][split].update(v[0],k[0],args.chunk_rows)
+                q,k_post=apply_rotary_pos_emb(q.transpose(1,2),k.transpose(1,2),*kwargs['position_embeddings'])
+                post_moments[layer][split].update(v[0],k_post.transpose(1,2)[0],args.chunk_rows)
                 if split=='fit':
-                    q=attention.q_proj(x).view(1,n,heads,dim)
-                    q,_=apply_rotary_pos_emb(q.transpose(1,2),k.transpose(1,2),*kwargs['position_embeddings'])
                     candidates[layer][index].copy_(q[0,:,grid].transpose(0,1).cpu())
             else:
                 positions=selections[layer][split]['selected_positions']
-                q=attention.q_proj(x).view(1,n,heads,dim)
                 q,k=apply_rotary_pos_emb(q.transpose(1,2),k.transpose(1,2),*kwargs['position_embeddings'])
                 rows=torch.cat((v,k.transpose(1,2)),-1)
                 stats,diagnostics=build_multi_query_statistics(q[:,:,positions].transpose(1,2),rows,
                     query_positions=positions,cos=stats_cos,sin=stats_sin,
                     value_encoder=base_payloads[layer]['encoder'],base_maps=restore_base(base_payloads[layer]),
-                    page_size=32,excluded_prefix_pages=1,device=torch.device('cuda'))
+                    page_size=32,excluded_prefix_pages=protocol['excluded_prefix_pages'],
+                    excluded_recent_tokens=protocol['excluded_recent_tokens'],device=torch.device('cuda'))
                 path=args.output/'fisher'/f'l{layer:03d}'/f'w{index:03d}.safetensors'
                 save_record(path,packed_fisher(stats[args.base_rank]),dict(protocol=protocol,layer=layer,
                     window_id=index,split=split,base_sha256=sha256(layer_file(args.output,'base',layer)),
                     diagnostics=diagnostics,storage='symmetric upper triangle FP32'))
         handles.append(module.register_forward_pre_hook(capture,with_kwargs=True))
-        if not fisher:
+        if not fisher and args.collect_covariance:
             def covariance(module,positional,layer=layer):
                 rows=positional[0].reshape(-1,heads*dim)
                 result=covariances[layer][active['split']]
@@ -102,7 +122,8 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
                     z=rows[start:start+args.chunk_rows].float()
                     result.addmm_(z.mT,z)
             handles.append(module.o_proj.register_forward_pre_hook(covariance))
-    for split,indices in (('fit',range(args.fit_count)),('heldout',range(64,64+args.diagnostic_count))):
+    for split,indices in (('fit',protocol['fit_ids']),
+                          ('heldout',protocol['diagnostic_ids'])):
         for index in indices:
             active.update(split=split,index=index)
             # One window's hidden states exist at a time; never allocate [N,T,H].
@@ -119,13 +140,17 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
                     context_length=args.sequence_length,num_bins=4,queries_per_bin=qpb)
                 selections[split]=selected
             tensors={f'{split}_{name}':value for split,m in moments[layer].items() for name,value in m.tensors().items()}
+            tensors.update({f'{split}_post_{name}':value for split,m in post_moments[layer].items()
+                for name,value in m.tensors().items()})
             save_record(layer_file(args.moments_root or args.output,'moments',layer),tensors,
                 dict(protocol=protocol,layer=layer,selections=selections,selection_fit_only=True))
-            payload={f'{split}_covariance':covariances[layer][split].cpu()/moments[layer][split].count
-                for split in ('fit','heldout')}
-            payload['weight']=model.model.layers[layer].self_attn.o_proj.weight.detach().cpu()
-            save_record(layer_file(args.output,'covariance',layer),payload,dict(protocol=protocol,layer=layer))
-            del candidates[layer],covariances[layer],moments[layer]
+            if args.collect_covariance:
+                payload={f'{split}_covariance':covariances[layer][split].cpu()/moments[layer][split].count
+                    for split in ('fit','heldout')}
+                payload['weight']=model.model.layers[layer].self_attn.o_proj.weight.detach().cpu()
+                save_record(layer_file(args.output,'covariance',layer),payload,dict(protocol=protocol,layer=layer))
+            del candidates[layer],moments[layer],post_moments[layer]
+            covariances.pop(layer, None)
     del model
     gc.collect();torch.cuda.empty_cache()
 
@@ -136,6 +161,7 @@ def fit_bases(args,identity,layers,protocol):
         assert meta['protocol']['model_config_sha256']==protocol['model_config_sha256']
         assert meta['protocol']['windows_sha256']==protocol['windows_sha256']
         assert meta['protocol']['sequence_length']==protocol['sequence_length']
+        assert meta['protocol']['teacher']==protocol['teacher']
         assert not meta['protocol']['smoke'] or args.smoke
         for key in ('windows_manifest_sha256', 'fit_queries', 'diagnostic_queries'):
             assert meta['protocol'][key] == protocol[key]
@@ -144,7 +170,7 @@ def fit_bases(args,identity,layers,protocol):
                 assert meta['protocol'][key] == protocol[key]
         split_moments={s:{k.removeprefix(s+'_'):v for k,v in payload.items() if k.startswith(s+'_')}
             for s in ('fit','heldout')}
-        encoder=encoder_for(identity,layer)
+        encoder=encoder_for(identity,layer,dense_v=args.dense_v)
         bases=base_from_moments(split_moments['fit'],encoder,rank=args.base_rank)
         tensors={name:torch.stack([getattr(m,name) for m in bases[args.base_rank]]) for name in ('left','right','bias')}
         tensors['encoder']=encoder
@@ -159,7 +185,8 @@ def fit_residuals(args,identity,layers,protocol):
         assert meta['protocol']==protocol and meta['identity_sha256']==sha256(args.identity)
         groups,dim=base['encoder'].shape[:2]
         stats={}
-        for split,indices in (('fit',range(args.fit_count)),('heldout',range(64,64+args.diagnostic_count))):
+        for split,indices in (('fit',protocol['fit_ids']),
+                              ('heldout',protocol['diagnostic_ids'])):
             payloads=[]
             for index in indices:
                 path=args.output/'fisher'/f'l{layer:03d}'/f'w{index:03d}.safetensors'
@@ -223,7 +250,14 @@ def main():
     p.add_argument('--sweeps',type=int,default=40)
     p.add_argument('--pcg-iterations',type=int,default=100)
     p.add_argument('--smoke',action='store_true')
+    p.add_argument('--trajectory', choices=('dense','c1'), default='dense')
+    p.add_argument('--dense-v', action='store_true')
+    p.add_argument('--collect-covariance', action='store_true')
+    p.add_argument('--rope', choices=('native','yarn2','yarn4'), required=True)
     args=p.parse_args();configure()
+    assert args.trajectory == 'dense' or args.stage != 'assemble-covariance'
+    assert args.collect_covariance or args.stage != 'assemble-covariance'
+    assert not args.dense_v or args.trajectory == 'dense'
     assert 0<=args.base_rank<=128 and 0<args.residual_rank<=128
     assert args.moments_root is None or args.stage not in ('moments','all')
     identity=read_json(args.identity)
@@ -232,28 +266,50 @@ def main():
     windows=load_file(str(args.windows))['input_ids']
     wm=read_json(args.windows.with_name('manifest.json'))
     assert wm['sha256']==sha256(args.windows) and wm['model_config_sha256']==identity['model_config_sha256']
-    assert wm['fit_ids']==list(range(64)) and wm['validation_ids']==list(range(64,80))
-    assert windows.shape[0]==80 and 4096<=args.sequence_length<=windows.shape[1]
+    available_fit_ids=list(map(int,wm['fit_ids']))
+    available_diagnostic_ids=list(map(int,wm['validation_ids']))
+    assert available_fit_ids==list(range(len(available_fit_ids)))
+    heldout_start=len(available_fit_ids)
+    expected_windows=heldout_start+len(available_diagnostic_ids)
+    assert available_diagnostic_ids==list(range(heldout_start,expected_windows))
+    assert windows.shape[0]==expected_windows and 4096<=args.sequence_length<=windows.shape[1]
+    assert 0<args.fit_count<=len(available_fit_ids)
+    assert 0<args.diagnostic_count<=len(available_diagnostic_ids)
     if not args.smoke:
         assert not wm.get('test_only', False)
-        assert windows.shape[1]==args.sequence_length and args.fit_count==64 and args.diagnostic_count==16
+        assert windows.shape[1]==args.sequence_length
+        assert args.fit_count==len(available_fit_ids)
+        assert args.diagnostic_count==len(available_diagnostic_ids)
         assert args.sweeps==40 and args.pcg_iterations==100
-    assert 0<args.fit_count<=64 and 0<args.diagnostic_count<=16 and args.chunk_rows>0
+    assert args.fit_count>0 and args.diagnostic_count>0 and args.chunk_rows>0
     windows=windows[:,:args.sequence_length]
     layers=[int(x) for x in args.layers.split(',')]
     assert len(set(layers))==len(layers) and set(layers)<=set(identity['attention_layers'])
+    runtime = routing_config(identity, rope=args.rope, sequence_length=args.sequence_length)
+    runtime_config = runtime.to_dict()
+    fisher_support = residual_fisher_support(runtime.model_type)
     protocol=dict(format='basisserve.k_router.streaming.v1',model_config_sha256=identity['model_config_sha256'],
         windows_sha256=sha256(args.windows),windows_manifest_sha256=sha256(args.windows.with_name('manifest.json')),
-        sequence_length=args.sequence_length,fit_ids=list(range(args.fit_count)),
-        diagnostic_ids=list(range(64,64+args.diagnostic_count)),fit_queries=64,diagnostic_queries=32,
-        base_rank=args.base_rank,residual_rank=args.residual_rank,page_size=32,excluded_prefix_pages=1,chunk_rows=args.chunk_rows,
+        sequence_length=args.sequence_length,fit_ids=available_fit_ids[:args.fit_count],
+        diagnostic_ids=available_diagnostic_ids[:args.diagnostic_count],fit_queries=64,diagnostic_queries=32,
+        base_rank=args.base_rank,residual_rank=args.residual_rank,page_size=32,
+        **fisher_support,chunk_rows=args.chunk_rows,
         smoke=args.smoke,teacher='native dense BF16 SDPA, model.model, use_cache=False',
-        base_moments='FP64 raw moments and encoder transform; no bitwise claim versus projected FP32 accumulation',
-        covariance='FP32 chunked normalized o_proj input second moment',
+        rope=args.rope,runtime_config=runtime_config,dense_v=args.dense_v,
+        base_moments='FP64 raw pre-RoPE and post-RoPE moments with identical rows and encoder transform; no bitwise claim versus projected FP32 accumulation',
+        covariance=('FP32 chunked normalized o_proj input second moment' if args.collect_covariance else 'not collected'),
         source_sha256={name:sha256(Path(name)) for name in ('evaluation/fit_k_routing_streaming.py',
+            'evaluation/k_routing_config.py',
             'evaluation/streaming_k_statistics.py','evaluation/fit_qwen3_8b_q8_fisher_residual.py',
             'basisserve/core/query_position_sampling.py','basisserve/core/c1_v_conditional_k_router.py')})
     stages=('moments','base','fisher','fit') if args.stage=='all' else (args.stage,)
+    if args.trajectory == 'c1':
+        protocol.update(teacher='C1-V96 BF16 full causal attention, model.model, use_cache=False',
+            trajectory='c1', trajectory_identity_sha256=sha256(args.identity),
+            trajectory_checkpoint_sha256=identity['manifest_sha256'],
+            covariance='not collected; fixed existing V96 checkpoint')
+        protocol['source_sha256']['evaluation/llama_c1_capture.py']=sha256(Path('evaluation/llama_c1_capture.py'))
+        protocol['source_sha256']['evaluation/eval_k_routing_ruler.py']=sha256(Path('evaluation/eval_k_routing_ruler.py'))
     for stage in stages:
         if stage=='moments':replay(args,identity,windows,layers,protocol)
         elif stage=='base':fit_bases(args,identity,layers,protocol)

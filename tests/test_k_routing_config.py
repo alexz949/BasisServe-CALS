@@ -29,6 +29,24 @@ def test_static_yarn_matches_calibration_and_evaluation_positions(tmp_path):
         routing_config(identity, rope='native', sequence_length=65536)
 
 
+def test_yarn4_reaches_128k_without_mutating_source_config(tmp_path):
+    config = Qwen3Config(hidden_size=32, intermediate_size=64, num_hidden_layers=2,
+        num_attention_heads=4, num_key_value_heads=2, head_dim=8,
+        max_position_embeddings=40960, rope_theta=1000000.0)
+    config.save_pretrained(tmp_path)
+    original = (tmp_path / 'config.json').read_bytes()
+    identity = dict(model=str(tmp_path), model_config_sha256=sha256(tmp_path / 'config.json'),
+        hq=4, hkv=2, head_dim=8, hidden_size=32)
+    runtime = routing_config(identity, rope='yarn4', sequence_length=131072)
+    assert runtime.max_position_embeddings == 131072
+    assert runtime.rope_parameters == dict(rope_type='yarn', factor=4.0,
+        original_max_position_embeddings=32768, rope_theta=1000000.0)
+    cos, sin = routing_position_embeddings(runtime, 131072, 'cpu')
+    assert cos.shape == sin.shape == (1, 131072, 8)
+    assert torch.isfinite(cos).all() and torch.isfinite(sin).all()
+    assert (tmp_path / 'config.json').read_bytes() == original
+
+
 def test_nemotron_fitting_preserves_unrotated_keys():
     from transformers import NemotronHConfig
     from evaluation.eval_qwen3_8b_v80_conditional_residual_router import _post_rope_rows

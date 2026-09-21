@@ -28,7 +28,8 @@ from basisserve.core.c1_lrqk import LRQKState
 from basisserve.core.c1_v_conditional_k_router import build_conditional_routing_sidecar, conditional_routing_query_projector
 from basisserve.core.c1_conditional_page_attention import c1_conditional_page_topk_attention
 from basisserve.kernels.compressed_v_decode_attention import (
-    compressed_v_decode_attention_triton, compressed_v_prefill_attention,
+    compressed_v_decode_attention_triton,
+    compressed_v_prefill_attention,
 )
 
 ARMS = ('full','exact_sparse','lrqk','shadowkv','ours')
@@ -257,8 +258,13 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
     manifest=read_json(checkpoint/'manifest.json')
     assert sha256(checkpoint/'manifest.json')==identity['manifest_sha256']
     assert sha256(Path(identity['model'])/'config.json')==identity['model_config_sha256']
-    for record in manifest['layers']:
-        assert sha256(checkpoint/record['file'])==record['sha256']
+    if args.dense_v:
+        assert not manifest['layers']
+        manifest = dict(manifest, layers=[dict(layer=i, ranks=[identity['head_dim']] * identity['hkv'])
+            for i in identity['attention_layers']])
+    else:
+        for record in manifest['layers']:
+            assert sha256(checkpoint/record['file'])==record['sha256']
     data=read_json(args.data/'manifest.json')
     task_names = tuple(task_names)
     assert task_names and len(set(task_names)) == len(task_names)
@@ -299,12 +305,15 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
             )
             if protocol_format not in score_only_formats:
                 validate_residual_fisher_support(audit['protocol'], runtime_config.model_type)
-            if runtime_config.model_type == 'llama':
-                assert protocol_format in (
-                    'basisserve.k_router.streaming.v1',
-                    'basisserve.k_router.streaming.v2',
-                    *score_only_formats,
-                )
+            if protocol_format in ('basisserve.k_router.streaming.v1',
+                                   'basisserve.k_router.streaming.v2'):
+                assert audit['identity_sha256'] == sha256(args.identity)
+                assert audit['protocol']['sequence_length'] == args.sequence_length
+                assert not audit['protocol']['smoke']
+                assert audit['protocol'].get('dense_v', False) == args.dense_v
+                assert audit['sweeps'] == 40 and audit['pcg_iterations'] == 100
+            elif runtime_config.model_type == 'llama':
+                assert protocol_format in score_only_formats
                 assert audit['identity_sha256'] == sha256(args.identity)
                 assert audit['protocol']['sequence_length'] == 65536
                 assert not audit['protocol']['smoke']
@@ -323,7 +332,9 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
             heldout_queries = audit['protocol'].get('diagnostic_queries', audit['protocol'].get('heldout_queries'))
             heldout_ids = audit['protocol'].get('diagnostic_ids', audit['protocol'].get('heldout_ids'))
             assert audit['protocol']['fit_queries']==64 and heldout_queries==32
-            assert audit['protocol']['fit_ids']==list(range(64)) and heldout_ids==list(range(64,80))
+            assert audit['protocol']['fit_ids']==list(range(args.router_fit_count))
+            assert heldout_ids==list(range(args.router_fit_count,
+                args.router_fit_count + args.router_diagnostic_count))
             if runtime_config.model_type=='qwen3':
                 assert audit['protocol']['rope']==args.rope
                 assert audit['protocol']['runtime_config']['rope_parameters']==runtime_config.rope_parameters
@@ -431,14 +442,16 @@ def summarize(args,rows,spec,tokenizer,bank_hashes,identity):
             assert sample_score(r['prediction'],row['answers'],row['match_type'])==r['score']
             results[arm].append(r)
         assert all(a['ids'][0]==b['ids'][0] for a,b in zip(results['full'],results[arm],strict=True))
-    tasks={t:{a:100*sum(r['score'] for r,row in zip(rs,rows,strict=True) if row['task']==t)/8
-              for a,rs in results.items()} for t in dict.fromkeys(r['task'] for r in rows)}
-    means={a:100*sum(r['score'] for r in rs)/88 for a,rs in results.items()}
-    write_json(args.output/'summary.json',dict(status='complete',verified_predictions=len(ARMS)*88,
+    task_names = tuple(dict.fromkeys(r['task'] for r in rows))
+    tasks={t:{a:100*sum(r['score'] for r,row in zip(rs,rows,strict=True) if row['task']==t)
+                  / sum(row['task']==t for row in rows)
+              for a,rs in results.items()} for t in task_names}
+    means={a:100*sum(r['score'] for r in rs)/len(rows) for a,rs in results.items()}
+    write_json(args.output/'summary.json',dict(status='complete',verified_predictions=len(ARMS)*len(rows),
         protocol=spec,means=means,tasks=tasks,results=results,bank_sha256=bank_hashes,
         refit64k_required=None if args.dense_v else means['full']-means['ours']>4))
     lines=[f"# RULER {spec['sequence_length']//1024}K: "+spec['value_mode'],'',
-        '11 tasks × 8 prompts; all 88 included; shared V setting across arms.', '',
+        f"{len(task_names)} tasks × {spec['samples_per_task']} prompts; all {len(rows)} included; shared V setting across arms.", '',
         '| Task | '+' | '.join(ARMS)+' |','|---|'+'---:|'*len(ARMS)]
     for t,values in [*tasks.items(),('Mean',means)]:
         lines.append('| '+t+' | '+' | '.join(f'{values[a]:.4f}' for a in ARMS)+' |')
@@ -450,8 +463,9 @@ def summarize(args,rows,spec,tokenizer,bank_hashes,identity):
 
 def audit_smoke(args,rows,spec,bank_hashes):
     first={}
+    indices=(0,) if len(spec['task_names'])==1 else tuple(dict.fromkeys((0,len(rows)-1)))
     for arm in ARMS:
-        for index in (0,56):
+        for index in indices:
             smoke_dir='smoke_mlp1024_deviceguard' if 'prefill_mlp_chunk_tokens' in spec else 'smoke'
             saved=read_json(args.output/arm/smoke_dir/f'sample_{index:03d}.json')
             assert saved['status']=='complete' and saved['protocol']==spec
@@ -463,10 +477,11 @@ def audit_smoke(args,rows,spec,bank_hashes):
             assert first[index]==result['ids'][0]
             if arm!='full':
                 assert len(result['ids'])>1, 'Smoke must exercise sparse decode'
-    assert read_json(args.bank.parent/'manifests/fit_audit.json')['status']=='complete'
+    audit=read_json(args.bank.parent/'manifests/fit_audit.json')
+    assert audit['status']=='complete' and audit['layers']==len(spec['rank_schedule'])
     write_json(args.output/'smoke_audit.json',dict(status='complete',protocol=spec,
-        verified=2*len(ARMS),first_token_agreement=True,bank_sha256=bank_hashes))
-    print('ALL FIVE ARM SMOKES VERIFIED',flush=True)
+        verified=len(indices)*len(ARMS),first_token_agreement=True,bank_sha256=bank_hashes))
+    print('ALL ARM SMOKES VERIFIED',flush=True)
 
 
 def main():
@@ -474,13 +489,18 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('stage',choices=['smoke','audit-smoke','evaluate','summarize'])
     p.add_argument('--arm',choices=ARMS,default='full')
+    p.add_argument('--arms',default=','.join(ARMS))
+    p.add_argument('--tasks',default=','.join(DEFAULT_TASK_NAMES))
+    p.add_argument('--samples-per-task',type=int,default=8)
+    p.add_argument('--router-fit-count',type=int,default=64)
+    p.add_argument('--router-diagnostic-count',type=int,default=16)
     p.add_argument('--dense-v', action='store_true')
     p.add_argument('--identity',type=Path,required=True)
     p.add_argument('--data',type=Path,required=True)
     p.add_argument('--bank',type=Path,required=True)
     p.add_argument('--output',type=Path,required=True)
     p.add_argument('--sequence-length',type=int,default=65536)
-    p.add_argument('--rope',choices=('native','yarn2'),required=True)
+    p.add_argument('--rope',choices=('native','yarn2','yarn4'),required=True)
     p.add_argument('--native-audit',type=Path)
     p.add_argument('--full-smoke',type=Path)
     p.add_argument('--wo-bank',type=Path)
@@ -489,13 +509,16 @@ def main():
     p.add_argument('--official-lrqk',action='store_true')
     p.add_argument('--chat-template',action='store_true')
     args=p.parse_args();configure();torch.manual_seed(0)
-    if args.dense_v:
-        ARMS = ('full', 'lrqk', 'shadowkv', 'ours')
-        assert args.arm in ARMS
+    requested_arms=tuple(x.strip() for x in args.arms.split(',') if x.strip())
+    assert requested_arms and len(set(requested_arms))==len(requested_arms)
+    assert set(requested_arms)<=set(ARMS)
+    ARMS=requested_arms
+    assert args.arm in ARMS
+    task_names=tuple(task.name for task in parse_tasks(args.tasks))
     identity=read_json(args.identity)
     tokenizer=AutoTokenizer.from_pretrained(identity['model'],local_files_only=True)
     identity,manifest,rows,bank,bank_hashes,spec=inputs(
-        args, tokenizer, task_names=DEFAULT_TASK_NAMES, samples_per_task=8
+        args, tokenizer, task_names=task_names, samples_per_task=args.samples_per_task
     )
     if args.stage=='summarize':
         summarize(args,rows,spec,tokenizer,bank_hashes,identity)
@@ -519,7 +542,9 @@ def main():
         lrqk_adapter.LRQKState=OfficialLRQKState
         for _,module in c1_attention_layers(model):
             module._lrqk_official=True
-    selected=[rows[0],rows[56]] if args.stage=='smoke' else rows[args.shard_index::args.num_shards]
+    selected=([rows[0]['index']] if len(spec['task_names'])==1 else
+              list(dict.fromkeys((rows[0]['index'],rows[-1]['index'])))) if args.stage=='smoke' else None
+    selected=[rows[i] for i in selected] if selected is not None else rows[args.shard_index::args.num_shards]
     for row in selected:
         stage_dir='smoke_mlp1024_deviceguard' if args.stage=='smoke' and 'prefill_mlp_chunk_tokens' in spec else args.stage
         path=args.output/args.arm/stage_dir/f"sample_{row['index']:03d}.json"

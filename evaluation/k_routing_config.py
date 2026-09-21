@@ -24,13 +24,14 @@ def routing_config(identity, *, rope, sequence_length):
     assert sha256(path / 'config.json') == identity['model_config_sha256']
     config = AutoConfig.from_pretrained(path, trust_remote_code=False, local_files_only=True)
     assert config.model_type in ('llama', 'qwen3', 'nemotron_h')
-    assert rope in ('native', 'yarn2')
-    if rope == 'yarn2':
+    assert rope in ('native', 'yarn2', 'yarn4')
+    if rope in ('yarn2', 'yarn4'):
         assert config.model_type == 'qwen3'
         assert config.rope_parameters['rope_type'] == 'default'
-        config.rope_parameters = dict(rope_type='yarn', factor=2.0,
+        factor = float(rope.removeprefix('yarn'))
+        config.rope_parameters = dict(rope_type='yarn', factor=factor,
             original_max_position_embeddings=32768, rope_theta=config.rope_parameters['rope_theta'])
-        config.max_position_embeddings = 65536
+        config.max_position_embeddings = int(32768 * factor)
     assert 0 < sequence_length <= config.max_position_embeddings
     assert config.num_attention_heads == identity['hq']
     assert config.num_key_value_heads == identity['hkv']
