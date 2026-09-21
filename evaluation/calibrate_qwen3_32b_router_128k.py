@@ -58,7 +58,9 @@ def save_layer_statistics(root, layer, statistics, bases, encoder, selection, pr
     _fit_residual_grid straight off disk, the way fit_k_routing_streaming.py does.
     """
     root.mkdir(parents=True, exist_ok=True)
-    payload = packed_fisher(statistics)
+    # build_multi_query_statistics returns one routing object per base rank.
+    routing = statistics[16]
+    payload = packed_fisher(routing)
     payload.update(encoder=encoder.cpu())
     payload.update({f'base_{name}': torch.stack([getattr(m, name) for m in bases[16]]).cpu()
                     for name in ('left', 'right', 'bias')})
@@ -66,10 +68,10 @@ def save_layer_statistics(root, layer, statistics, bases, encoder, selection, pr
     save_tensors(path, payload)
     write_json(path.with_suffix('.json'), dict(status='complete', layer=layer, protocol=protocol,
         sha256=sha256(path), query_selection=selection, base_rank=16,
-        heads=int(statistics.queries_by_head.shape[0]),
-        examples=int(statistics.queries_by_head.shape[1]),
-        key_dim=int(statistics.key_dim), scaling=float(statistics.scaling),
-        teacher_fisher_energy=float(statistics.teacher_fisher_energy)))
+        heads=int(routing.queries_by_head.shape[0]),
+        examples=int(routing.queries_by_head.shape[1]),
+        key_dim=int(routing.key_dim), scaling=float(routing.scaling),
+        teacher_fisher_energy=float(routing.teacher_fisher_energy)))
     print('statistics saved layer', layer, 'packed', tuple(payload['packed'].shape), flush=True)
 
 
