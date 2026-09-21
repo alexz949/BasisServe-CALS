@@ -179,7 +179,16 @@ def main():
 
     diagnostics = read_json(args.section4 / "diagnostics/qgram_score_only/summary.json")
     assert diagnostics["status"] == "complete"
-    diagnostic_means = {method: diagnostics["means"][method] for method in DIAGNOSTIC_METHODS}
+    diagnostic_means = {}
+    for method in DIAGNOSTIC_METHODS:
+        values = dict(diagnostics["means"][method])
+        values["attention_rel_mse"] = values.get(
+            "pooled_attention_rel_mse", values["attention_rel_mse"]
+        )
+        values["post_wo_rel_mse"] = values.get(
+            "pooled_post_wo_rel_mse", values["post_wo_rel_mse"]
+        )
+        diagnostic_means[method] = values
 
     hard_folder = args.section4 / "ruler64k_hard_n50_seed43"
     hard_records = {method: load_results(hard_folder, method, 300) for method in HARD_METHODS}

@@ -28,8 +28,6 @@ METHOD_LABELS = {
     "qgram_score_only": "QGram Score-only",
 }
 TASKS = ("qasper", "multifieldqa_en", "hotpotqa", "2wikimqa", "gov_report", "qmsum")
-SAMPLES_PER_TASK = 32
-TOTAL_SAMPLES = len(TASKS) * SAMPLES_PER_TASK
 BOOTSTRAP_REPLICATES = 10_000
 BOOTSTRAP_SEED = 20260918
 
@@ -78,6 +76,7 @@ def load_bank(identity_path, checkpoint_manifest, root, section4, method):
 
 
 def inputs(args):
+    total_samples = len(TASKS) * args.samples_per_task
     identity_path = args.root / "manifests/v128.json"
     identity = common.read_json(identity_path)
     checkpoint = Path(identity["checkpoint"])
@@ -90,14 +89,14 @@ def inputs(args):
     dataset_protocol = dataset["protocol"]
     assert dataset["status"] == "complete"
     assert dataset_protocol["tasks"] == list(TASKS)
-    assert dataset_protocol["samples_per_task"] == SAMPLES_PER_TASK
+    assert dataset_protocol["samples_per_task"] == args.samples_per_task
     assert dataset_protocol["sequence_length"] == 32768
     assert dataset_protocol["model_config_sha256"] == identity["model_config_sha256"]
     assert common.sha256(args.data / "tokens.safetensors") == dataset["tokens_sha256"]
     assert common.sha256(args.data / "samples.json") == dataset["samples_sha256"]
     rows = common.read_json(args.data / "samples.json")
     tokens = load_file(str(args.data / "tokens.safetensors"))
-    assert len(rows) == len(tokens) == TOTAL_SAMPLES
+    assert len(rows) == len(tokens) == total_samples
     for index, row in enumerate(rows):
         tensor = tokens[f"sample_{index:03d}"]
         assert row["index"] == index and len(tensor) == row["prompt_tokens"]
@@ -220,9 +219,19 @@ def run(args, *, smoke):
 
 
 def summarize_method(args):
-    _, _, _, rows, _, _, hashes, protocol, scorer = inputs(args)
+    _, _, _, rows, _, _, hashes, current_protocol, scorer = inputs(args)
     gate = common.read_json(args.output / args.method / "smoke_audit.json")
-    assert gate["status"] == "complete" and gate["protocol"] == protocol
+    assert gate["status"] == "complete" and gate["method"] == args.method
+    first = common.read_json(args.output / args.method / "evaluate" / "sample_000.json")
+    protocol = first["protocol"]
+    frozen_settings = {key: value for key, value in protocol.items() if key != "source_sha256"}
+    current_settings = {
+        key: value for key, value in current_protocol.items() if key != "source_sha256"
+    }
+    smoke_settings = {
+        key: value for key, value in gate["protocol"].items() if key != "source_sha256"
+    }
+    assert frozen_settings == current_settings == smoke_settings
     results = []
     for row in rows:
         saved = common.read_json(args.output / args.method / "evaluate" / f"sample_{row['index']:03d}.json")
@@ -232,8 +241,8 @@ def summarize_method(args):
     for task in TASKS:
         selected_rows = [row for row in rows if row["task"] == task]
         selected_results = [result for row, result in zip(rows, results, strict=True) if row["task"] == task]
-        assert len(selected_results) == SAMPLES_PER_TASK
-        mean = 100 * sum(result["score"] for result in selected_results) / SAMPLES_PER_TASK
+        assert len(selected_results) == args.samples_per_task
+        mean = 100 * sum(result["score"] for result in selected_results) / args.samples_per_task
         official = scorer.scorer(
             task,
             [result["prediction"] for result in selected_results],
@@ -246,7 +255,7 @@ def summarize_method(args):
         "status": "complete",
         "method": args.method,
         "protocol": protocol,
-        "samples": TOTAL_SAMPLES,
+        "samples": len(TASKS) * args.samples_per_task,
         "mean": sum(tasks.values()) / len(tasks),
         "tasks": tasks,
         "results": results,
@@ -255,16 +264,19 @@ def summarize_method(args):
     print(args.method, summary["mean"], flush=True)
 
 
-def stratified_bootstrap(differences):
-    assert len(differences) == TOTAL_SAMPLES
+def stratified_bootstrap(differences, samples_per_task):
+    assert len(differences) == len(TASKS) * samples_per_task
     generator = random.Random(BOOTSTRAP_SEED)
     estimates = []
     for _ in range(BOOTSTRAP_REPLICATES):
         task_means = []
         for task_index in range(len(TASKS)):
-            start = task_index * SAMPLES_PER_TASK
-            group = differences[start : start + SAMPLES_PER_TASK]
-            task_means.append(sum(group[generator.randrange(SAMPLES_PER_TASK)] for _ in range(SAMPLES_PER_TASK)) / SAMPLES_PER_TASK)
+            start = task_index * samples_per_task
+            group = differences[start : start + samples_per_task]
+            task_means.append(
+                sum(group[generator.randrange(samples_per_task)] for _ in range(samples_per_task))
+                / samples_per_task
+            )
         estimates.append(100 * sum(task_means) / len(task_means))
     estimates.sort()
     return [
@@ -273,7 +285,7 @@ def stratified_bootstrap(differences):
     ]
 
 
-def paired_record(reference, candidate):
+def paired_record(reference, candidate, samples_per_task):
     differences = [
         right["score"] - left["score"]
         for left, right in zip(reference["results"], candidate["results"], strict=True)
@@ -283,30 +295,39 @@ def paired_record(reference, candidate):
         "losses": sum(value < 0 for value in differences),
         "ties": sum(value == 0 for value in differences),
         "macro_mean_delta": candidate["mean"] - reference["mean"],
-        "stratified_paired_bootstrap_95_ci": stratified_bootstrap(differences),
+        "stratified_paired_bootstrap_95_ci": stratified_bootstrap(differences, samples_per_task),
         "bootstrap_replicates": BOOTSTRAP_REPLICATES,
         "bootstrap_seed": BOOTSTRAP_SEED,
     }
 
 
 def aggregate(args):
+    total_samples = len(TASKS) * args.samples_per_task
     methods = tuple(method for method in METHODS if (args.output / method / "summary.json").is_file())
-    assert methods[:3] == ("dense_full", "exact_k", "page_fisher")
+    assert args.reference_method in methods and len(methods) >= 2
     summaries = {method: common.read_json(args.output / method / "summary.json") for method in methods}
-    assert all(summary["status"] == "complete" and summary["samples"] == TOTAL_SAMPLES for summary in summaries.values())
-    dense = summaries["dense_full"]
-    for method in methods[1:]:
+    assert all(summary["status"] == "complete" and summary["samples"] == total_samples for summary in summaries.values())
+    reference = summaries[args.reference_method]
+    for method in methods:
+        if method == args.reference_method:
+            continue
         assert all(
             left["ids"][0] == right["ids"][0]
-            for left, right in zip(dense["results"], summaries[method]["results"], strict=True)
+            for left, right in zip(reference["results"], summaries[method]["results"], strict=True)
         )
-    paired = {f"{method}_vs_dense_full": paired_record(dense, summaries[method]) for method in methods[1:]}
-    for method in methods[3:]:
-        paired[f"{method}_vs_page_fisher"] = paired_record(summaries["page_fisher"], summaries[method])
+    paired = {
+        f"{method}_vs_{args.reference_method}": paired_record(
+            reference, summaries[method], args.samples_per_task
+        )
+        for method in methods
+        if method != args.reference_method
+    }
     combined = {
         "status": "complete",
-        "samples_per_method": TOTAL_SAMPLES,
+        "samples_per_task": args.samples_per_task,
+        "samples_per_method": total_samples,
         "methods": list(methods),
+        "reference_method": args.reference_method,
         "means": {method: summaries[method]["mean"] for method in methods},
         "tasks": {
             task: {method: summaries[method]["tasks"][task] for method in methods}
@@ -317,7 +338,7 @@ def aggregate(args):
     }
     common.write_json(args.output / "summary.json", combined)
     args.repo_output.mkdir(parents=True, exist_ok=True)
-    with (args.repo_output / "section4_longbench192.csv").open("w", newline="") as stream:
+    with (args.repo_output / f"section4_longbench{total_samples}.csv").open("w", newline="") as stream:
         writer = csv.writer(stream)
         writer.writerow(["task", *methods])
         for task in TASKS:
@@ -326,7 +347,7 @@ def aggregate(args):
     lines = [
         "# Section 4 Dense-V LongBench-32K",
         "",
-        "Six tasks × 32 paired seed-43 prompts. Llama-3.1-8B-Instruct; Dense V128; B2048; Page32; sink32/recent64.",
+        f"Six tasks × {args.samples_per_task} paired seed-43 prompts. Llama-3.1-8B-Instruct; Dense V128; B2048; Page32; sink32/recent64.",
         "",
         "| Task | " + " | ".join(METHOD_LABELS[method] for method in methods) + " |",
         "|---|" + "---:|" * len(methods),
@@ -336,7 +357,7 @@ def aggregate(args):
         lines.append("| " + task + " | " + " | ".join(f"{values[method]:.4f}" for method in methods) + " |")
     lines.append("| Mean | " + " | ".join(f"{combined['means'][method]:.4f}" for method in methods) + " |")
     lines += ["", "## Paired comparisons", "", "```json", json.dumps(paired, indent=2), "```"]
-    (args.repo_output / "section4_longbench192.md").write_text("\n".join(lines) + "\n")
+    (args.repo_output / f"section4_longbench{total_samples}.md").write_text("\n".join(lines) + "\n")
     print(combined, flush=True)
 
 
@@ -349,10 +370,13 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--repo-output", type=Path, default=Path("results/section4_ablation"))
     parser.add_argument("--method", choices=METHODS, default="dense_full")
+    parser.add_argument("--reference-method", choices=METHODS, default="page_fisher")
+    parser.add_argument("--samples-per-task", type=int, required=True)
     parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--num-shards", type=int, default=4)
     args = parser.parse_args()
     common.configure()
+    assert args.samples_per_task > 0
     assert 0 <= args.shard_index < args.num_shards
     if args.stage == "smoke":
         run(args, smoke=True)

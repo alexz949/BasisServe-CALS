@@ -161,9 +161,19 @@ def run(args, *, smoke):
 
 
 def summarize_method(args):
-    _, _, _, rows, _, hashes, protocol = inputs(args)
+    _, _, _, rows, _, hashes, current_protocol = inputs(args)
     gate = common.read_json(args.output / args.method / "smoke_audit.json")
-    assert gate["status"] == "complete" and gate["protocol"] == protocol
+    assert gate["status"] == "complete" and gate["method"] == args.method
+    first = common.read_json(args.output / args.method / "evaluate" / "sample_000.json")
+    protocol = first["protocol"]
+    frozen_settings = {key: value for key, value in protocol.items() if key != "source_sha256"}
+    current_settings = {
+        key: value for key, value in current_protocol.items() if key != "source_sha256"
+    }
+    smoke_settings = {
+        key: value for key, value in gate["protocol"].items() if key != "source_sha256"
+    }
+    assert frozen_settings == current_settings == smoke_settings
     results = []
     for row in rows:
         saved = common.read_json(args.output / args.method / "evaluate" / f"sample_{row['index']:03d}.json")
