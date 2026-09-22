@@ -69,3 +69,28 @@ HF `alexz949/BasisServe-CALS`：
 - `evaluation/llama31-8b-instruct-ruler128k-1100-seed42/{prompts.json,prompts.safetensors}`
 
 本机：`/home/Ubuntu/l31_router_fit/{eval1100,eval1100_baselines,eval1100_loki_prerope}` 逐条记录（含协议、输入 sha256、路由统计、耗时、峰值显存），`eval1100_summary.txt` 为配对汇总输出。
+
+## 秩分配消融：B0R32（总秩 32，全部给残差）
+
+Nemotron 上把 Base 的 8 维挪给残差（B8R24）把 multikey_2 从 30 拉回 63，B0R32 更到 69；在 Llama 上用同样的办法做一次检验。B0R32 复用 B16R16 的 moments（`router_B/moments`），只重跑 base（rank 0）、Fisher 重放和 rank-32 的 ALS 40 / PCG 100（8 shard × 4 层，约 22 分钟）；评估器、V96、冻结 prompt、预算（sink 32 + recent 64 + 61 页 = 硬 2048）与 B16R16 完全相同，1100 题同题配对。
+
+| 任务 | B16R16 | B0R32 | Full-K | LRQK | B0R32 − B16R16 胜/负 |
+|---|---:|---:|---:|---:|---|
+| niah_single_1 / 2 / 3 | 100 / 100 / 97 | 100 / 100 / 97 | 100 / 100 / 100 | 100 / 100 / 100 | 0/0 |
+| niah_multikey_1 | 100.0 | 98.0 | 99.0 | 99.0 | 0/2 |
+| niah_multikey_2 | 66.0 | 69.0 | 83.0 | 76.0 | 9/6 |
+| niah_multiquery | 98.75 | 98.75 | 99.0 | 99.0 | 1/1 |
+| niah_multivalue | 93.25 | 92.25 | 95.0 | 93.25 | 4/8 |
+| vt | 66.8 | 63.2 | 76.8 | 53.6 | 10/23 |
+| fwe | 60.33 | 61.0 | 52.67 | 48.67 | 14/13 |
+| qa_1 / qa_2 | 74 / 46 | 74 / 47 | 74 / 48 | 75 / 47 | 1/1, 2/1 |
+| **RULER 均分** | **82.01** | 81.84 | 84.32 | 81.05 | |
+
+配对 bootstrap（10000 次）：B0R32 − B16R16 = **−0.18** [−1.15, +0.81]，胜/负 41/55；B0R32 − Full-K = −2.48 [−3.72, −1.28]。
+
+- **Llama 上去掉 Base 没有收益**：multikey_2 只多对 3 题（69 vs 66，Full-K 83），远不及 Nemotron 的 +33/+39；vt 退 3.6、multikey_1 退 2、multivalue 退 1，fwe/qa 在噪声内。均分持平略低。
+- 拟合侧同向：B0R32 的残差 in-sample NMSE 在 32 层中有 24 层高于 B16R16（中位 0.034 vs 0.023；只有 L2 0.197→0.075、L4 0.140→0.060 这几个差层改善），而 Nemotron 上 B0R32 四层全部下降。注意两者分母不同（B16R16 相对 Base 剩余能量，B0R32 相对全部 K 能量），只作方向参考。
+- 结论：**Llama 保持 B16R16**，B0R32 只作消融；秩在 Base 与残差之间的最优分配是模型相关的（Llama 的 V→K 仿射 Base 有用，Nemotron 的 4 个 attention 层没有）。
+- 运行时：B0R32 每题中位 33.1 s（B16R16 33.6 s），峰值显存 27.8 GiB（rank-0 路径不构造 Base 预测的中间量），平均选中 2042 token/KV group；sidecar 32 维/token（B16R16 16 维）。
+- 评估器为此泛化为任意 base/residual 秩（`eval_llama_cal128.py` 从 bank 记录读秩，`llama_b16r16_k_offload.py` 增加 rank-0 sidecar 分支）；改动后用 B16R16 bank 重跑 smoke，两条 128K 提示生成的 token 与正式 smoke 逐个相同。正式 B16R16 / Full-K 记录的协议哈希对应 f19bce4 版本的源码。
+- 产物：本机 `/home/Ubuntu/l31_router_fit/{router_B0R32, eval1100_b0r32, eval1100_b0r32_summary.txt}`；HF `…/llama31_8b_instruct_uniform_v96_128k_als6_retrievalmix/router_b0r32/`。

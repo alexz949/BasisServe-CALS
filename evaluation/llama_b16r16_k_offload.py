@@ -1,4 +1,4 @@
-"""Llama B16R16 with GPU routing/V96 and pinned-CPU exact K."""
+"""Llama page routing (Base+Residual or Residual-only sidecar) with GPU routing/V96 and pinned-CPU exact K."""
 from types import MethodType
 
 import torch
@@ -83,10 +83,13 @@ def forward(self, hidden_states, position_embeddings, attention_mask=None,
     previous = past_key_values.get_seq_length(self.layer_idx)
     assert previous == 0 or length == 1
     factors = self._routing_factors
-    current = runtime.build_conditional_routing_sidecar(
-        v, k, base_left=factors['base_left'], base_right=factors['base_right'],
-        base_bias=factors['base_bias'],
-        residual_encoder=factors['residual_encoder'], cos=cos, sin=sin)
+    if self._routing_base_rank == 0:
+        current = torch.einsum('bhtd,hdr->bhtr', k, factors['residual_encoder'].to(k.dtype))
+    else:
+        current = runtime.build_conditional_routing_sidecar(
+            v, k, base_left=factors['base_left'], base_right=factors['base_right'],
+            base_bias=factors['base_bias'],
+            residual_encoder=factors['residual_encoder'], cos=cos, sin=sin)
     if previous:
         past_key_values.sidecars[self.layer_idx] = torch.cat(
             (past_key_values.sidecars[self.layer_idx], current), 2)

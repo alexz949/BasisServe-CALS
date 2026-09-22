@@ -93,15 +93,16 @@ def inputs(args, identity):
     samples_per_task = read_json(args.data/'manifest.json')['protocol']['samples_per_task']
     assert len(prompts['rows']) == len(TASKS)*samples_per_task
     assert Counter(r['task'] for r in prompts['rows']) == dict.fromkeys(TASKS, samples_per_task)
+    base_rank, residual_rank = router_ranks(args)
     spec = dict(format='basisserve.llama_cal128_ruler.v1', numerical_policy=NUMERICAL_POLICY,
         identity_sha256=sha256(args.identity),
         prompts_sha256=sha256(args.output/'prompts.json'), dtype='bfloat16', sequence_length=131072,
         samples=len(prompts['rows']), samples_per_task=samples_per_task, arms=list(ARMS), rank_schedule=identity['layer_ranks'],
         generation='greedy; native EOS; official task caps; same compressed V in every arm',
         kernels='our Triton prefill and decode; actual dispatch counts checked per prompt',
-        memory_policy=('V96 and B16R16 routing sidecars remain on GPU; B16R16 exact K is held '
+        memory_policy=('V96 and routing sidecars remain on GPU; exact K of the routed arm is held '
                        'in pinned CPU memory and only selected K rows are fetched for decode'),
-        ours=dict(base=16, residual=16, page_size=32, physical_group_budget=2048, sink=32, recent=64),
+        ours=dict(base=base_rank, residual=residual_rank, page_size=32, physical_group_budget=2048, sink=32, recent=64),
         source_sha256={name:sha256(Path(name)) for name in SOURCES})
     native_eos = read_json(Path(identity['model'])/'config.json')['eos_token_id']
     spec['eos_ids'] = sorted(native_eos if isinstance(native_eos, list) else [native_eos])
@@ -109,9 +110,15 @@ def inputs(args, identity):
     return manifest, prompts['rows'], load_file(str(args.output/'prompts.safetensors')), spec
 
 
+def router_ranks(args):
+    p = read_json(args.bank/'layer_000.json')['protocol']
+    return int(p['base_rank']), int(p['residual_rank'])
+
+
 def bank_for(args, identity, manifest, arm):
     bank, hashes = {}, {}
     if arm == 'ours':
+        base_rank, residual_rank = router_ranks(args)
         for entry in manifest['layers']:
             i = entry['layer']
             path = args.bank/f'layer_{i:03d}.safetensors'
@@ -126,11 +133,14 @@ def bank_for(args, identity, manifest, arm):
             assert p['sequence_length'] == 131072 and p['fit_queries'] == 64 and p['diagnostic_queries'] == 0
             assert p['excluded_recent_tokens'] == 64 and p['teacher'].startswith('V96-deployed')
             assert record['sweeps'] == 40 and record['pcg_iterations'] == 100
-            loss = record['losses']['b16_r16']
+            assert (p['base_rank'], p['residual_rank']) == (base_rank, residual_rank)
+            loss = record['losses'][f'b{base_rank}_r{residual_rank}']
             assert len(loss['sweeps']) == 40
             g, h, d = identity['hkv'], identity['hq'], identity['head_dim']
-            shapes = dict(base_left_b16=(g, record['v_rank'], 16), base_right_b16=(g, 16, d),
-                base_bias_b16=(g, d), residual_encoder_b16_r16=(g, d, 16), residual_query_b16_r16=(h, d, 16))
+            b, r = f'b{base_rank}', f'b{base_rank}_r{residual_rank}'
+            shapes = {f'base_left_{b}': (g, record['v_rank'], base_rank), f'base_right_{b}': (g, base_rank, d),
+                f'base_bias_{b}': (g, d), f'residual_encoder_{r}': (g, d, residual_rank),
+                f'residual_query_{r}': (h, d, residual_rank)}
             assert set(tensors) == set(shapes)
             assert all(t.shape == shapes[n] and t.dtype == torch.float32 and torch.isfinite(t).all()
                        for n, t in tensors.items())
