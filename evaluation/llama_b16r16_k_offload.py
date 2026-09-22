@@ -84,9 +84,9 @@ def forward(self, hidden_states, position_embeddings, attention_mask=None,
     assert previous == 0 or length == 1
     factors = self._routing_factors
     current = runtime.build_conditional_routing_sidecar(
-        v, k, base_left=factors['base_left_b16'], base_right=factors['base_right_b16'],
-        base_bias=factors['base_bias_b16'],
-        residual_encoder=factors['residual_encoder_b16_r16'], cos=cos, sin=sin)
+        v, k, base_left=factors['base_left'], base_right=factors['base_right'],
+        base_bias=factors['base_bias'],
+        residual_encoder=factors['residual_encoder'], cos=cos, sin=sin)
     if previous:
         past_key_values.sidecars[self.layer_idx] = torch.cat(
             (past_key_values.sidecars[self.layer_idx], current), 2)
