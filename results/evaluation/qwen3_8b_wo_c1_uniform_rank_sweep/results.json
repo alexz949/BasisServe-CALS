@@ -1,0 +1,168 @@
+{
+  "audit": {
+    "dense_ppl_maximum": 7.002025537618722,
+    "dense_ppl_minimum": 7.002025537618722,
+    "dense_ppl_range": 0.0,
+    "expected_ranks": [
+      512,
+      640,
+      768,
+      896,
+      1024
+    ],
+    "wire_matching_passed_all_ranks": true
+  },
+  "command": "/home/zhangal/.conda/envs/basis/bin/python evaluation/summarize_qwen3_8b_wo_c1_uniform_rank_sweep.py --quality-results results/evaluation/qwen3_8b_wo_c1_uniform_r512_quality/results.json results/evaluation/qwen3_8b_wo_c1_uniform_r640_quality/results.json results/evaluation/qwen3_8b_wo_c1_uniform_r768_quality/results.json results/evaluation/qwen3_8b_wo_c1_uniform_r896_quality/results.json results/evaluation/qwen3_8b_wo_c1_uniform_r1024_quality/results.json --expected-ranks 512,640,768,896,1024 --output-dir results/evaluation/qwen3_8b_wo_c1_uniform_rank_sweep",
+  "format": "basisserve.qwen3_8b.wo_c1_uniform_rank_sweep.v1",
+  "inputs": [
+    {
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/qwen3_8b_wo_c1_uniform_r512_quality/results.json",
+      "sha256": "0218ff0b0d3f15db5e5342ec75c9568f9a4b59b9ef7aa1d6ce3d629a5ccc3ba9"
+    },
+    {
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/qwen3_8b_wo_c1_uniform_r640_quality/results.json",
+      "sha256": "aadd5e7366a94bd571f8654c26fc5ccb17e9069615609d6e29fb6a3dfd9ea778"
+    },
+    {
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/qwen3_8b_wo_c1_uniform_r768_quality/results.json",
+      "sha256": "7b3c90b87cf397f6c86e2ccf48a6caa2f628067aa56c58ef74ad25846b9a3ce4"
+    },
+    {
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/qwen3_8b_wo_c1_uniform_r896_quality/results.json",
+      "sha256": "3a77dafe55ddc25eaec08c8a225a011bbf5ac81abd77da1d453852fd6aaff06a"
+    },
+    {
+      "path": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/qwen3_8b_wo_c1_uniform_r1024_quality/results.json",
+      "sha256": "07e53c4c913dd4c32049f7638615fb86caa15617ead4b726d1a21f7dbfff0be2"
+    }
+  ],
+  "model_config_sha256": "3bd01d7ad7a2e203ecbbe84e24087a51c6d2a108ee4bcc42d0016bf49564983a",
+  "quality_protocol": {
+    "attn_implementation": "sdpa",
+    "batch_size": 1,
+    "dataset": "wikitext2",
+    "model_dtype": "bfloat16",
+    "sequence_length": 2048,
+    "split": "test"
+  },
+  "ranks": [
+    {
+      "capacity_lr_heldout_mse": 0.01664295567806944,
+      "capacity_lr_ppl": 7.039705355607559,
+      "capacity_matched_lr_rank": 2048,
+      "dense_ppl": 7.002025537618722,
+      "headline_ring_bytes_per_rank_per_row": 3072.0,
+      "independent_local_c1_heldout_mse": 0.048528799181778125,
+      "independent_local_c1_ppl": 7.251400435969429,
+      "joint_c1_heldout_mse": 0.04599002945456111,
+      "joint_c1_mse_reduction_vs_independent_local": 0.05231470322822829,
+      "joint_c1_mse_reduction_vs_wire_lr": 0.4684005368185211,
+      "joint_c1_ppl": 7.2819491932305676,
+      "joint_c1_ppl_advantage_vs_independent_local": -0.004195134633668829,
+      "joint_c1_ppl_advantage_vs_wire_lr": 0.0363421936888384,
+      "joint_c1_ppl_change_vs_dense": 0.0399775256613879,
+      "retained_ratio": 0.5,
+      "source_rank": 512,
+      "source_width": 1024,
+      "wire_lr_heldout_mse": 0.08651255811908318,
+      "wire_lr_ppl": 7.546591201243233,
+      "wire_lr_ppl_change_vs_dense": 0.07777259033101291,
+      "wire_matched_lr_rank": 1024
+    },
+    {
+      "capacity_lr_heldout_mse": 0.006004752548585568,
+      "capacity_lr_ppl": 7.013370582468395,
+      "capacity_matched_lr_rank": 2560,
+      "dense_ppl": 7.002025537618722,
+      "headline_ring_bytes_per_rank_per_row": 3840.0,
+      "independent_local_c1_heldout_mse": 0.026363482576583323,
+      "independent_local_c1_ppl": 7.11920025656573,
+      "joint_c1_heldout_mse": 0.025244214989882496,
+      "joint_c1_mse_reduction_vs_independent_local": 0.04245522508073296,
+      "joint_c1_mse_reduction_vs_wire_lr": 0.568503542214418,
+      "joint_c1_ppl": 7.120592463114178,
+      "joint_c1_ppl_advantage_vs_independent_local": -0.00019551835829112463,
+      "joint_c1_ppl_advantage_vs_wire_lr": 0.015056269204987816,
+      "joint_c1_ppl_change_vs_dense": 0.0169332323708975,
+      "retained_ratio": 0.625,
+      "source_rank": 640,
+      "source_width": 1024,
+      "wire_lr_heldout_mse": 0.05850387537231367,
+      "wire_lr_ppl": 7.227802020137833,
+      "wire_lr_ppl_change_vs_dense": 0.03224445288097222,
+      "wire_matched_lr_rank": 1280
+    },
+    {
+      "capacity_lr_heldout_mse": 0.001559510111248398,
+      "capacity_lr_ppl": 7.001655843439571,
+      "capacity_matched_lr_rank": 3072,
+      "dense_ppl": 7.002025537618722,
+      "headline_ring_bytes_per_rank_per_row": 4608.0,
+      "independent_local_c1_heldout_mse": 0.01254011347495931,
+      "independent_local_c1_ppl": 7.044130561182954,
+      "joint_c1_heldout_mse": 0.012129332886087491,
+      "joint_c1_mse_reduction_vs_independent_local": 0.03275732629470096,
+      "joint_c1_mse_reduction_vs_wire_lr": 0.6911865727966571,
+      "joint_c1_ppl": 7.048182631919855,
+      "joint_c1_ppl_advantage_vs_independent_local": -0.0005749100085105097,
+      "joint_c1_ppl_advantage_vs_wire_lr": 0.009526463519358597,
+      "joint_c1_ppl_change_vs_dense": 0.0065919631473996265,
+      "retained_ratio": 0.75,
+      "source_rank": 768,
+      "source_width": 1024,
+      "wire_lr_heldout_mse": 0.039277219892711296,
+      "wire_lr_ppl": 7.115326886640616,
+      "wire_lr_ppl_change_vs_dense": 0.016181224763202717,
+      "wire_matched_lr_rank": 1536
+    },
+    {
+      "capacity_lr_heldout_mse": 0.00017761793649086386,
+      "capacity_lr_ppl": 7.002844615252644,
+      "capacity_matched_lr_rank": 3584,
+      "dense_ppl": 7.002025537618722,
+      "headline_ring_bytes_per_rank_per_row": 5376.0,
+      "independent_local_c1_heldout_mse": 0.0042424393405747765,
+      "independent_local_c1_ppl": 7.010227659244282,
+      "joint_c1_heldout_mse": 0.004148707266075674,
+      "joint_c1_mse_reduction_vs_independent_local": 0.02209391036016628,
+      "joint_c1_mse_reduction_vs_wire_lr": 0.8399126752886603,
+      "joint_c1_ppl": 7.00946825922963,
+      "joint_c1_ppl_advantage_vs_independent_local": 0.00010833917589292419,
+      "joint_c1_ppl_advantage_vs_wire_lr": 0.009341863555843322,
+      "joint_c1_ppl_change_vs_dense": 0.0010629383698934625,
+      "retained_ratio": 0.875,
+      "source_rank": 896,
+      "source_width": 1024,
+      "wire_lr_heldout_mse": 0.025915276387786387,
+      "wire_lr_ppl": 7.074949755306368,
+      "wire_lr_ppl_change_vs_dense": 0.010414731750956419,
+      "wire_matched_lr_rank": 1792
+    },
+    {
+      "capacity_lr_heldout_mse": 5.204570381059566e-06,
+      "capacity_lr_ppl": 7.00235694282352,
+      "capacity_matched_lr_rank": 4096,
+      "dense_ppl": 7.002025537618722,
+      "headline_ring_bytes_per_rank_per_row": 6144.0,
+      "independent_local_c1_heldout_mse": 7.201236370620173e-06,
+      "independent_local_c1_ppl": 7.002613694397223,
+      "joint_c1_heldout_mse": 0.0,
+      "joint_c1_mse_reduction_vs_independent_local": 1.0,
+      "joint_c1_mse_reduction_vs_wire_lr": 1.0,
+      "joint_c1_ppl": 7.002025537618722,
+      "joint_c1_ppl_advantage_vs_independent_local": 8.399809102965783e-05,
+      "joint_c1_ppl_advantage_vs_wire_lr": 0.005381274002272729,
+      "joint_c1_ppl_change_vs_dense": 0.0,
+      "retained_ratio": 1.0,
+      "source_rank": 1024,
+      "source_width": 1024,
+      "wire_lr_heldout_mse": 0.01664295567806944,
+      "wire_lr_ppl": 7.039705355607559,
+      "wire_lr_ppl_change_vs_dense": 0.005381274002272729,
+      "wire_matched_lr_rank": 2048
+    }
+  ],
+  "schema_version": 1,
+  "status": "complete",
+  "timestamp_utc": "2026-08-29T04:35:55.269057+00:00"
+}

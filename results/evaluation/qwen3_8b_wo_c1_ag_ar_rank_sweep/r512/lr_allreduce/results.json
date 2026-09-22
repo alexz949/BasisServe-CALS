@@ -1,0 +1,1084 @@
+{
+  "arm": "lr_allreduce",
+  "command": "evaluation/eval_qwen3_8b_wo_c1_ag_ar_mcq.py --model /deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4 --factor-dir results/checkpoints/qwen3_8b_wo_c1_lr_ar_phase1_tp4_exact_fp64_s20 --arm lr_allreduce --output-dir results/evaluation/qwen3_8b_wo_c1_ag_ar_rank_sweep/r512/lr_allreduce --tasks arc_easy,arc_challenge,hellaswag,piqa,winogrande,boolq,openbookqa --lm-eval-batch-size 8 --ppl-batch-size 1 --device cuda:0 --torch-num-threads 4 --skip-ppl",
+  "elapsed_seconds": 553.5645304173231,
+  "environment": {
+    "conda_environment": "basis",
+    "datasets": "5.0.0",
+    "device": "NVIDIA L40S",
+    "lm_eval": "0.4.11",
+    "peak_cuda_allocated_bytes": 22564856832,
+    "python": "3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0]",
+    "slurm_job_id": "8338920",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.15.1"
+  },
+  "factor_bank": {
+    "directory": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/checkpoints/qwen3_8b_wo_c1_lr_ar_phase1_tp4_exact_fp64_s20",
+    "format": "basisserve.qwen3_8b.wo_c1_lr_ar_phase1.v2",
+    "results_sha256": "d932bb113ee5f586a67f585017558811f0c4a64054d2493c2d4cccfa22c9a7c0"
+  },
+  "format": "basisserve.qwen3_8b.wo_c1_ag_ar_mcq.v1",
+  "installation": [
+    {
+      "artifact": "layer_000.safetensors",
+      "artifact_sha256": "83cae79dce90a85fbd810ba6e10bfa716f0894b3766a5ad427acd143aef59096",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 0,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.07619734853506088,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_001.safetensors",
+      "artifact_sha256": "6958ff139e1e87db4cdecab27d6b4e113b9abec385869dbb7c5d5c5433f3b15a",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 1,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.009269915521144867,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_002.safetensors",
+      "artifact_sha256": "065c93309b55130104829d83500cc508cdb36fa72313457a37cddd63d3c373b6",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 2,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007756352424621582,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_003.safetensors",
+      "artifact_sha256": "58fc512a067dea6d7d864dc18f081e2325ca853437d88371b11f94c54d90ab47",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 3,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.008481822907924652,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_004.safetensors",
+      "artifact_sha256": "0fd77317a4338296871fb2b66d85b5e92bfa2202c0769bf4fcf7f7b6aca57d35",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 4,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.006699405610561371,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_005.safetensors",
+      "artifact_sha256": "1c9d8c89a8f770948869499c84aab02ed89b3ec5168a8c3b99ca0ed9b5575b49",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 5,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.00679507851600647,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_006.safetensors",
+      "artifact_sha256": "97a22d92c7949b110ca7cdbf61e4ee8e6ef0814cfe0b0f21ab19709be857fefe",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 6,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.008167579770088196,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_007.safetensors",
+      "artifact_sha256": "7e9cd0213f58dff5a4b209650295447d6845f7e08cb5cc28ef21bb2a42f1a801",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 7,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.0061258673667907715,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_008.safetensors",
+      "artifact_sha256": "1cccbcfaaa4c1d60ff61c9b6fc22f6902ceda9acc9363c42096c9bef4516eedb",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 8,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007565304636955261,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_009.safetensors",
+      "artifact_sha256": "b37b50a8f0a181f853c3b1bd679d66d58aa591c68ea6dac15dc0b89832cd6b4e",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 9,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007216602563858032,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_010.safetensors",
+      "artifact_sha256": "1b993a99021eb9e9e9a5f2be6adfd7ef850ea25fea939e12a4a62f5923f1bb64",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 10,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.008448861539363861,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_011.safetensors",
+      "artifact_sha256": "c47a73ca7bd37d60746b027c2aef23b16b75ca54f4113a156be8854d97966c97",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 11,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.008288301527500153,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_012.safetensors",
+      "artifact_sha256": "3322a834073e1e1f02472689c65bdbf1d993e7fea8596c340dc9ddec1a3fb756",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 12,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.006798446178436279,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_013.safetensors",
+      "artifact_sha256": "a3887a83d851071e2821b206c10c98c50dd14ac6fe72cd1658fde09ce06b64b4",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 13,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.009247906506061554,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_014.safetensors",
+      "artifact_sha256": "962cfb4a9c2c76dca81cd81cef97638bd0d91ea1202338fe2f8605b45b832017",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 14,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.00907975435256958,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_015.safetensors",
+      "artifact_sha256": "8c6659775c9a8042919e7ec5d124a613c24bd136da5be8a5b28ae1321e7bde9b",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 15,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.006729811429977417,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_016.safetensors",
+      "artifact_sha256": "2cdfd9ce40dc5742e700750359f0d95fa95f8a36988ac46492214cdefdccc70e",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 16,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.0087847039103508,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_017.safetensors",
+      "artifact_sha256": "f92b726da58f42e6167325b0b9bd77f20eeb60f4ee7cc739a05ae39f8227935a",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 17,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.008868075907230377,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_018.safetensors",
+      "artifact_sha256": "1f075391f3c87f124d34394eba209d5c1491d84e845f339ed961519e2891dd69",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 18,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007076948881149292,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_019.safetensors",
+      "artifact_sha256": "9b7ad16c4c6b33323bb45710195dd44a476bff435fd1bdc8587c33456b0f1d1c",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 19,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.008597366511821747,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_020.safetensors",
+      "artifact_sha256": "d470e9053f73fe6da85606ae498dd58318b34417fbab4c8800ec2f92c5a2b822",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 20,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.0072250887751579285,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_021.safetensors",
+      "artifact_sha256": "0d347b6705ac786e03a3fd62df033b60a6ba0c4bf104b484206682d0e523fb31",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 21,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.005675263702869415,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_022.safetensors",
+      "artifact_sha256": "ba828e558714bdb42bb9a75ed8ded10723b67a49f4bf86ed96f7f7b4a85a6813",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 22,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007760532200336456,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_023.safetensors",
+      "artifact_sha256": "08701ee47baace30c47ff43719a8f4f67c37a2695f471012e7bca77df19cfef0",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 23,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.008706532418727875,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_024.safetensors",
+      "artifact_sha256": "777432442800c10365bcc47cdd004f4c771d3518e408eb5edd82eb593899e648",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 24,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.006751544773578644,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_025.safetensors",
+      "artifact_sha256": "d51625a89236e7d4b71609554e4e418d85f9fd1ac21582dfbc71f3e51324af65",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 25,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007589668035507202,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_026.safetensors",
+      "artifact_sha256": "624f6766b87dc3c083c404a78d45b2f9dd6410ed11072a9a620a9d2b07960412",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 26,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007458619773387909,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_027.safetensors",
+      "artifact_sha256": "6bb1747e0221e0d0d533fcec6e781b226fd6277d4b8123c43abd8d540ce01a04",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 27,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007254272699356079,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_028.safetensors",
+      "artifact_sha256": "d6fefd5e253c06c4de544fd60c0b4f7d38215c148f8fac0b5a321ecb25343027",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 28,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007595032453536987,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_029.safetensors",
+      "artifact_sha256": "de13551098c87173179aeb03ad9db1acf1359122891617eef0d3672587e5c8cd",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 29,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.006709665060043335,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_030.safetensors",
+      "artifact_sha256": "047eba52dd7109df9a80c5845a5fd9816cfdb0e09c5817bd25229dd5cc05d9bc",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 30,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.008216410875320435,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_031.safetensors",
+      "artifact_sha256": "be17f013315bfef5be9c4b4a9ebd900f2fa0f038e80e5b46d4a5ad1663325d76",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 31,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.00679267942905426,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_032.safetensors",
+      "artifact_sha256": "b0eca8da7366669dc340539f745e671e98321b02fe05ff22d5ef6367185e5705",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 32,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007690712809562683,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_033.safetensors",
+      "artifact_sha256": "9c8d4f6941a71d967fc3dafde16c071b4f00f7d4cacd2a3d01a9f53ea81e7b57",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 33,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.00709708034992218,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_034.safetensors",
+      "artifact_sha256": "05a6164c96eade33605aa0f90b98996522887236fd1ca25cf090e64065712375",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 34,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007900156080722809,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "artifact": "layer_035.safetensors",
+      "artifact_sha256": "b9206870f446719a7897acde98ea6d7af5a22dee30a9d9d501c217a03ee6bad6",
+      "factor_dtype": "bfloat16",
+      "installed_dtype": "torch.bfloat16",
+      "layer": 35,
+      "reconstruction_dtype": "float32",
+      "seconds": 0.007021203637123108,
+      "weight_shape": [
+        4096,
+        4096
+      ]
+    }
+  ],
+  "mcq": {
+    "average_accuracy": 0.7079069513260465,
+    "elapsed_seconds": 549.6657152399421,
+    "evaluation": {
+      "config": {
+        "batch_size": null,
+        "batch_sizes": [],
+        "bootstrap_iters": 100000,
+        "device": null,
+        "fewshot_seed": 1234,
+        "gen_kwargs": null,
+        "limit": null,
+        "model": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+        "model_args": null,
+        "model_dtype": "torch.bfloat16",
+        "model_num_parameters": 8190735360,
+        "model_revision": "main",
+        "model_sha": "",
+        "numpy_seed": 1234,
+        "random_seed": 0,
+        "torch_seed": 1234,
+        "use_cache": null
+      },
+      "configs": {
+        "arc_challenge": {
+          "dataset_name": "ARC-Challenge",
+          "dataset_path": "allenai/ai2_arc",
+          "description": "",
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": "{{choices.text}}",
+            "doc_to_target": "{{choices.label.index(answerKey)}}",
+            "doc_to_text": "Question: {{question}}\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "tag": [
+            "ai2_arc"
+          ],
+          "target_delimiter": " ",
+          "task": "arc_challenge",
+          "test_split": "test",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "arc_easy": {
+          "dataset_name": "ARC-Easy",
+          "dataset_path": "allenai/ai2_arc",
+          "description": "",
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+          "doc_to_target": "{{choices.label.index(answerKey)}}",
+          "doc_to_text": "Question: {{question}}\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": "{{choices.text}}",
+            "doc_to_target": "{{choices.label.index(answerKey)}}",
+            "doc_to_text": "Question: {{question}}\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "tag": [
+            "ai2_arc"
+          ],
+          "target_delimiter": " ",
+          "task": "arc_easy",
+          "test_split": "test",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "boolq": {
+          "dataset_name": "boolq",
+          "dataset_path": "aps/super_glue",
+          "description": "",
+          "doc_to_choice": [
+            "no",
+            "yes"
+          ],
+          "doc_to_decontamination_query": "passage",
+          "doc_to_target": "label",
+          "doc_to_text": "{{passage}}\nQuestion: {{question}}?\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": [
+              "no",
+              "yes"
+            ],
+            "doc_to_target": "label",
+            "doc_to_text": "{{passage}}\nQuestion: {{question}}?\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 2.0
+          },
+          "metric_list": [
+            {
+              "metric": "acc"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "tag": [
+            "super-glue-lm-eval-v1"
+          ],
+          "target_delimiter": " ",
+          "task": "boolq",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "hellaswag": {
+          "dataset_path": "Rowan/hellaswag",
+          "description": "",
+          "doc_to_choice": "choices",
+          "doc_to_target": "{{label}}",
+          "doc_to_text": "{{query}}",
+          "fewshot_config": {
+            "doc_to_choice": "choices",
+            "doc_to_target": "{{label}}",
+            "doc_to_text": "{{query}}",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": "<function process_docs at 0x7fed8ca83ec0>",
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc):\n        ctx = doc[\"ctx_a\"] + \" \" + doc[\"ctx_b\"].capitalize()\n        out_doc = {\n            \"query\": preprocess(doc[\"activity_label\"] + \": \" + ctx),\n            \"choices\": [preprocess(ending) for ending in doc[\"endings\"]],\n            \"gold\": int(doc[\"label\"]),\n        }\n        return out_doc\n\n    return dataset.map(_process_doc)\n",
+          "repeats": 1,
+          "should_decontaminate": false,
+          "tag": [
+            "multiple_choice"
+          ],
+          "target_delimiter": " ",
+          "task": "hellaswag",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "openbookqa": {
+          "dataset_name": "main",
+          "dataset_path": "allenai/openbookqa",
+          "description": "",
+          "doc_to_choice": "{{choices.text}}",
+          "doc_to_decontamination_query": "question_stem",
+          "doc_to_target": "{{choices.label.index(answerKey.lstrip())}}",
+          "doc_to_text": "question_stem",
+          "fewshot_config": {
+            "doc_to_choice": "{{choices.text}}",
+            "doc_to_target": "{{choices.label.index(answerKey.lstrip())}}",
+            "doc_to_text": "question_stem",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "target_delimiter": " ",
+          "task": "openbookqa",
+          "test_split": "test",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "piqa": {
+          "dataset_path": "baber/piqa",
+          "description": "",
+          "doc_to_choice": "{{[sol1, sol2]}}",
+          "doc_to_decontamination_query": "goal",
+          "doc_to_target": "label",
+          "doc_to_text": "Question: {{goal}}\nAnswer:",
+          "fewshot_config": {
+            "doc_to_choice": "{{[sol1, sol2]}}",
+            "doc_to_target": "label",
+            "doc_to_text": "Question: {{goal}}\nAnswer:",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            },
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc_norm"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "target_delimiter": " ",
+          "task": "piqa",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        },
+        "winogrande": {
+          "dataset_name": "winogrande_xl",
+          "dataset_path": "allenai/winogrande",
+          "description": "",
+          "doc_to_choice": "def doc_to_choice(doc):\n    idx = doc[\"sentence\"].index(\"_\")\n    options = [doc[\"option1\"], doc[\"option2\"]]\n    return [doc[\"sentence\"][:idx] + opt for opt in options]\n",
+          "doc_to_decontamination_query": "sentence",
+          "doc_to_target": "def doc_to_target(doc):\n    idx = doc[\"sentence\"].index(\"_\") + 1\n    return doc[\"sentence\"][idx:].strip()\n",
+          "doc_to_text": "def doc_to_text(doc):\n    answer_to_num = {\"1\": 0, \"2\": 1}\n    return answer_to_num[doc[\"answer\"]]\n",
+          "fewshot_config": {
+            "doc_to_choice": "<function doc_to_choice at 0x7fed7d6cf1a0>",
+            "doc_to_target": "<function doc_to_target at 0x7fed7d6cede0>",
+            "doc_to_text": "<function doc_to_text at 0x7fed7d6cea20>",
+            "fewshot_delimiter": "\n\n",
+            "fewshot_indices": null,
+            "gen_prefix": null,
+            "process_docs": null,
+            "sampler": "default",
+            "samples": null,
+            "split": null,
+            "target_delimiter": " "
+          },
+          "fewshot_delimiter": "\n\n",
+          "metadata": {
+            "version": 1.0
+          },
+          "metric_list": [
+            {
+              "aggregation": "mean",
+              "higher_is_better": true,
+              "metric": "acc"
+            }
+          ],
+          "num_fewshot": 0,
+          "output_type": "multiple_choice",
+          "repeats": 1,
+          "should_decontaminate": true,
+          "target_delimiter": " ",
+          "task": "winogrande",
+          "training_split": "train",
+          "unsafe_code": false,
+          "validation_split": "validation"
+        }
+      },
+      "date": 1789708563.7154467,
+      "eot_token_id": 151643,
+      "git_hash": "7db091e",
+      "group_subtasks": {
+        "arc_challenge": [],
+        "arc_easy": [],
+        "boolq": [],
+        "hellaswag": [],
+        "openbookqa": [],
+        "piqa": [],
+        "winogrande": []
+      },
+      "higher_is_better": {
+        "arc_challenge": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "arc_easy": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "boolq": {
+          "acc": true
+        },
+        "hellaswag": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "openbookqa": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "piqa": {
+          "acc": true,
+          "acc_norm": true
+        },
+        "winogrande": {
+          "acc": true
+        }
+      },
+      "lm_eval_version": "0.4.11",
+      "max_length": 4096,
+      "n-samples": {
+        "arc_challenge": {
+          "effective": 1172,
+          "original": 1172
+        },
+        "arc_easy": {
+          "effective": 2376,
+          "original": 2376
+        },
+        "boolq": {
+          "effective": 3270,
+          "original": 3270
+        },
+        "hellaswag": {
+          "effective": 10042,
+          "original": 10042
+        },
+        "openbookqa": {
+          "effective": 500,
+          "original": 500
+        },
+        "piqa": {
+          "effective": 1838,
+          "original": 1838
+        },
+        "winogrande": {
+          "effective": 1267,
+          "original": 1267
+        }
+      },
+      "n-shot": {
+        "arc_challenge": 0,
+        "arc_easy": 0,
+        "boolq": 0,
+        "hellaswag": 0,
+        "openbookqa": 0,
+        "piqa": 0,
+        "winogrande": 0
+      },
+      "pretty_env_info": "PyTorch version: 2.6.0+cu124\nIs debug build: False\nCUDA used to build PyTorch: 12.4\nROCM used to build PyTorch: N/A\n\nOS: Rocky Linux 9.4 (Blue Onyx) (x86_64)\nGCC version: (GCC) 11.4.1 20231218 (Red Hat 11.4.1-3)\nClang version: Could not collect\nCMake version: version 3.26.5\nLibc version: glibc-2.34\n\nPython version: 3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:26:29) [GCC 14.4.0] (64-bit runtime)\nPython platform: Linux-5.14.0-427.33.1.el9_4.x86_64-x86_64-with-glibc2.34\nIs CUDA available: True\nCUDA runtime version: Could not collect\nCUDA_MODULE_LOADING set to: LAZY\nGPU models and configuration: \nGPU 0: NVIDIA L40S\nGPU 1: NVIDIA L40S\nGPU 2: NVIDIA L40S\nGPU 3: NVIDIA L40S\n\nNvidia driver version: 550.54.15\ncuDNN version: Could not collect\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: True\n\nCPU:\nArchitecture:                       x86_64\nCPU op-mode(s):                     32-bit, 64-bit\nAddress sizes:                      52 bits physical, 57 bits virtual\nByte Order:                         Little Endian\nCPU(s):                             64\nOn-line CPU(s) list:                0-63\nVendor ID:                          AuthenticAMD\nModel name:                         AMD EPYC 9334 32-Core Processor\nCPU family:                         25\nModel:                              17\nThread(s) per core:                 1\nCore(s) per socket:                 32\nSocket(s):                          2\nStepping:                           1\nFrequency boost:                    enabled\nCPU(s) scaling MHz:                 73%\nCPU max MHz:                        3910.2529\nCPU min MHz:                        1500.0000\nBogoMIPS:                           5400.61\nFlags:                              fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid overflow_recov succor smca fsrm flush_l1d debug_swap\nVirtualization:                     AMD-V\nL1d cache:                          2 MiB (64 instances)\nL1i cache:                          2 MiB (64 instances)\nL2 cache:                           64 MiB (64 instances)\nL3 cache:                           256 MiB (8 instances)\nNUMA node(s):                       2\nNUMA node0 CPU(s):                  0-31\nNUMA node1 CPU(s):                  32-63\nVulnerability Gather data sampling: Not affected\nVulnerability Itlb multihit:        Not affected\nVulnerability L1tf:                 Not affected\nVulnerability Mds:                  Not affected\nVulnerability Meltdown:             Not affected\nVulnerability Mmio stale data:      Not affected\nVulnerability Retbleed:             Not affected\nVulnerability Spec rstack overflow: Mitigation; Safe RET\nVulnerability Spec store bypass:    Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:           Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:           Mitigation; Enhanced / Automatic IBRS, IBPB conditional, STIBP disabled, RSB filling, PBRSB-eIBRS Not affected\nVulnerability Srbds:                Not affected\nVulnerability Tsx async abort:      Not affected\n\nVersions of relevant libraries:\n[pip3] numpy==2.2.6\n[pip3] nvidia-cublas-cu12==12.4.5.8\n[pip3] nvidia-cuda-cupti-cu12==12.4.127\n[pip3] nvidia-cuda-nvrtc-cu12==12.4.127\n[pip3] nvidia-cuda-runtime-cu12==12.4.127\n[pip3] nvidia-cudnn-cu12==9.1.0.70\n[pip3] nvidia-cufft-cu12==11.2.1.3\n[pip3] nvidia-curand-cu12==10.3.5.147\n[pip3] nvidia-cusolver-cu12==11.6.1.9\n[pip3] nvidia-cusparse-cu12==12.3.1.170\n[pip3] nvidia-cusparselt-cu12==0.6.2\n[pip3] nvidia-nccl-cu12==2.21.5\n[pip3] nvidia-nvjitlink-cu12==12.4.127\n[pip3] nvidia-nvtx-cu12==12.4.127\n[pip3] torch==2.6.0+cu124\n[pip3] torchaudio==2.6.0\n[pip3] torchvision==0.21.0\n[pip3] triton==3.2.0\n[conda] Could not collect",
+      "results": {
+        "arc_challenge": {
+          "acc,none": 0.5554607508532423,
+          "acc_norm,none": 0.5938566552901023,
+          "acc_norm_stderr,none": 0.014351656690097858,
+          "acc_stderr,none": 0.014521226405627079,
+          "alias": "arc_challenge"
+        },
+        "arc_easy": {
+          "acc,none": 0.8308080808080808,
+          "acc_norm,none": 0.8320707070707071,
+          "acc_norm_stderr,none": 0.007670285673828046,
+          "acc_stderr,none": 0.007693223639488826,
+          "alias": "arc_easy"
+        },
+        "boolq": {
+          "acc,none": 0.8201834862385321,
+          "acc_stderr,none": 0.0067168064948446,
+          "alias": "boolq"
+        },
+        "hellaswag": {
+          "acc,none": 0.5685122485560645,
+          "acc_norm,none": 0.7681736705835491,
+          "acc_norm_stderr,none": 0.004211362296663457,
+          "acc_stderr,none": 0.0049427160919960815,
+          "alias": "hellaswag"
+        },
+        "openbookqa": {
+          "acc,none": 0.318,
+          "acc_norm,none": 0.412,
+          "acc_norm_stderr,none": 0.02203367799374086,
+          "acc_stderr,none": 0.020847571620814014,
+          "alias": "openbookqa"
+        },
+        "piqa": {
+          "acc,none": 0.7916213275299239,
+          "acc_norm,none": 0.7997823721436343,
+          "acc_norm_stderr,none": 0.00933646538735082,
+          "acc_stderr,none": 0.00947612538304945,
+          "alias": "piqa"
+        },
+        "winogrande": {
+          "acc,none": 0.7292817679558011,
+          "acc_stderr,none": 0.012487904760626304,
+          "alias": "winogrande"
+        }
+      },
+      "tokenizer_bos_token": [
+        null,
+        "None"
+      ],
+      "tokenizer_eos_token": [
+        "<|endoftext|>",
+        "151643"
+      ],
+      "tokenizer_pad_token": [
+        "<|endoftext|>",
+        "151643"
+      ],
+      "transformers_version": "5.15.1",
+      "upper_git_hash": null,
+      "versions": {
+        "arc_challenge": 1.0,
+        "arc_easy": 1.0,
+        "boolq": 2.0,
+        "hellaswag": 1.0,
+        "openbookqa": 1.0,
+        "piqa": 1.0,
+        "winogrande": 1.0
+      }
+    },
+    "task_accuracy": [
+      {
+        "metric": "acc_norm",
+        "task": "arc_easy",
+        "value": 0.8320707070707071
+      },
+      {
+        "metric": "acc_norm",
+        "task": "arc_challenge",
+        "value": 0.5938566552901023
+      },
+      {
+        "metric": "acc_norm",
+        "task": "hellaswag",
+        "value": 0.7681736705835491
+      },
+      {
+        "metric": "acc_norm",
+        "task": "piqa",
+        "value": 0.7997823721436343
+      },
+      {
+        "metric": "acc",
+        "task": "winogrande",
+        "value": 0.7292817679558011
+      },
+      {
+        "metric": "acc",
+        "task": "boolq",
+        "value": 0.8201834862385321
+      },
+      {
+        "metric": "acc_norm",
+        "task": "openbookqa",
+        "value": 0.412
+      }
+    ]
+  },
+  "model": {
+    "attention_type": "gqa",
+    "config_sha256": "3bd01d7ad7a2e203ecbbe84e24087a51c6d2a108ee4bcc42d0016bf49564983a",
+    "head_dim": 128,
+    "hidden_size": 4096,
+    "model_type": "qwen3",
+    "num_attention_heads": 32,
+    "num_hidden_layers": 36,
+    "num_key_value_heads": 8,
+    "path": "/deac/csc/yangGrp/zhangal/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4"
+  },
+  "protocol": {
+    "limit": null,
+    "lm_eval_batch_size": 8,
+    "max_length": 4096,
+    "metric_selection": "acc_norm when present, otherwise acc",
+    "num_fewshot": 0,
+    "quality_runtime": "factorized maps folded into equivalent BF16 o_proj weights",
+    "retained_ratio": 0.5,
+    "ring_bytes_per_row_per_rank": 3072.0,
+    "scope": "post-attention W_o only; dense V and dense KV cache",
+    "source_rank": 512,
+    "source_width": 1024,
+    "tasks": [
+      "arc_easy",
+      "arc_challenge",
+      "hellaswag",
+      "piqa",
+      "winogrande",
+      "boolq",
+      "openbookqa"
+    ],
+    "tp_size": 4,
+    "wikitext2_batch_size": null,
+    "wikitext2_sequence_length": null,
+    "wire_allreduce_rank": 1024
+  },
+  "status": "complete",
+  "timestamp_utc": "2026-09-18T05:24:55.522854+00:00",
+  "wikitext2": null
+}
