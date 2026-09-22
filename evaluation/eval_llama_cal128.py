@@ -24,7 +24,7 @@ from evaluation.fit_k_routing_streaming import verified
 
 
 ARMS = ('full', 'ours')
-FORMAL_ARMS = ('full',)
+FORMAL_ARMS = ('full', 'ours')
 TASKS = ('niah_single_1', 'niah_single_2', 'niah_single_3', 'niah_multikey_1',
          'niah_multikey_2', 'niah_multiquery', 'niah_multivalue', 'vt', 'fwe', 'qa_1', 'qa_2')
 SMOKE_IDS = (0, 210)
@@ -121,8 +121,10 @@ def bank_for(args, identity, manifest, arm):
             assert record['identity_sha256'] == sha256(args.identity) and record['layer'] == i
             assert record['v_rank'] == entry['ranks'][0]
             assert p['format'] == 'basisserve.k_router.streaming.v2' and not p['smoke']
-            assert p['fit_ids'] == list(range(32)) and p['diagnostic_ids'] == list(range(32, 48))
-            assert p['sequence_length'] == 131072 and p['fit_queries'] == 64 and p['diagnostic_queries'] == 32
+            # This protocol fits on 32 windows with 64 queries and no diagnostic windows.
+            assert p['fit_ids'] == list(range(32)) and p['diagnostic_ids'] == []
+            assert p['sequence_length'] == 131072 and p['fit_queries'] == 64 and p['diagnostic_queries'] == 0
+            assert p['excluded_recent_tokens'] == 64 and p['teacher'].startswith('V96-deployed')
             assert record['sweeps'] == 40 and record['pcg_iterations'] == 100
             loss = record['losses']['b16_r16']
             assert len(loss['sweeps']) == 40
