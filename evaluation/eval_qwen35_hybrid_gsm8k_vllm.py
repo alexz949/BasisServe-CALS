@@ -67,7 +67,7 @@ def main():
     assert a.wo_bank or a.wo_scope == 'all'
     assert 0 < a.max_new_tokens < a.max_model_len
     assert a.limit is None or 0 < a.limit <= expected_samples
-    assert not a.doc_ids or (a.limit is None and not a.smoke and a.task != 'gsm8k')
+    assert not a.doc_ids or (a.limit is None and not a.smoke)
     if a.doc_ids:
         assert len(set(a.doc_ids)) == len(a.doc_ids)
         assert all(0 <= i < expected_samples for i in a.doc_ids)
@@ -151,7 +151,7 @@ def main():
         if a.doc_ids:
             assert {s['doc_id'] for s in samples} == set(a.doc_ids)
         if a.task == 'gsm8k':
-            validate_gsm8k_samples(samples, expected)
+            validate_gsm8k_samples(samples, a.doc_ids or range(expected))
         else:
             assert len(samples) == expected
         assert len(lm.generation_records) == expected

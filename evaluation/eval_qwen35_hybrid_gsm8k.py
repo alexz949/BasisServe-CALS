@@ -15,12 +15,13 @@ from basisserve.core.qwen35_hybrid_output_runtime import HybridOutputRuntime
 from evaluation.qwen35_hybrid_common import atomic_save, load_bank, load_model, sha256, verify_model_identity
 
 
-def validate_gsm8k_samples(samples, expected):
+def validate_gsm8k_samples(samples, expected_doc_ids):
     # lm-eval logs each question once per answer filter, not once overall.
     filters = {'strict-match', 'flexible-extract'}
-    assert len(samples) == 2 * expected
+    expected_doc_ids = set(expected_doc_ids)
+    assert len(samples) == len(filters) * len(expected_doc_ids)
     assert {(s['doc_id'], s['filter']) for s in samples} == {
-        (i, f) for i in range(expected) for f in filters}
+        (i, f) for i in expected_doc_ids for f in filters}
 
 
 @torch.inference_mode()
@@ -88,7 +89,7 @@ def main():
             bootstrap_iters=1000,
         )
     samples = evaluation['samples']['gsm8k']
-    validate_gsm8k_samples(samples, args.limit or 1319)
+    validate_gsm8k_samples(samples, range(args.limit or 1319))
     metrics = evaluation['results']['gsm8k']
     assert all(k in metrics for k in ('exact_match,strict-match', 'exact_match,flexible-extract'))
     if bank is not None:

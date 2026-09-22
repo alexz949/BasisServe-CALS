@@ -61,6 +61,7 @@ class BasisServeQwen35HybridForCausalLM(Qwen3_5ForCausalLM):
         if self.v_bank_path is None:
             assert self.wo_bank_path is None
             return loaded
+        native_parameters = {name for name, _ in self.named_parameters()}
         assert sha256(self.v_bank_path) == self.v_bank_sha
         bank = load_bank(self.v_bank_path)
         wo = None
@@ -68,4 +69,5 @@ class BasisServeQwen35HybridForCausalLM(Qwen3_5ForCausalLM):
             assert sha256(self.wo_bank_path) == self.wo_bank_sha
             wo = torch.load(self.wo_bank_path, map_location='cpu', weights_only=True)
         install_vllm_hybrid_layers(self.model.layers, bank, wo, self.wo_scope)
-        return loaded
+        bank_parameters = {name for name, _ in self.named_parameters()} - native_parameters
+        return loaded | bank_parameters
