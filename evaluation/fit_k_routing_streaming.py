@@ -1,10 +1,20 @@
-"""Two dense replays for C1/Base moments and packed Page-Fisher; no raw capture."""
+"""Two replays for C1/Base moments and packed Page-Fisher; no raw capture.
+
+The teacher is the deployed model by default: the compressed V and its decoder (and, for Nemotron-H,
+the folded Mamba Wo) are installed from the identity checkpoint before the replay, so the router sees
+the Q/K/V distribution it will be deployed in. Only the Base moments, which map V codes to K, keep the
+dense v_proj weights. Llama and Qwen3 attention rotate Q/K with their native RoPE; Nemotron-H attention
+has no rotation and is replayed with identity phases.
+"""
 import argparse
 import gc
+import json
+import math
 from pathlib import Path
 import torch
 from safetensors.torch import load_file
 from transformers import AutoModelForCausalLM
+from basisserve.checkpoint.c1_attention_layers import c1_attention_layers
 from basisserve.core.c1_v_conditional_k_router import AffineReducedRankMap
 from basisserve.core.query_position_sampling import candidate_positions, select_stratified_query_positions
 from evaluation.v96kl_common import configure, read_json, write_json, save_tensors, sha256
@@ -16,6 +26,8 @@ from evaluation.k_routing_config import (
 from evaluation.streaming_k_statistics import RawBaseMoments, base_from_moments, base_mse, packed_fisher, load_fisher_windows
 from evaluation.fit_qwen3_8b_q8_fisher_residual import build_multi_query_statistics
 from evaluation.eval_qwen3_8b_v80_conditional_residual_router import _fit_residual_grid
+
+SINK_TOKENS = 32
 
 
 def layer_file(root, stage, layer):
@@ -39,9 +51,9 @@ def encoder_for(identity, layer, *, dense_v=False):
         return torch.eye(dim, dtype=torch.float32).expand(groups, -1, -1).clone()
     checkpoint = Path(identity['checkpoint'])
     assert sha256(checkpoint/'manifest.json')==identity['manifest_sha256']
-    entry = read_json(checkpoint/'manifest.json')['layers'][layer]
-    path = checkpoint/entry['file']
-    assert sha256(path)==entry['sha256']
+    entries = {entry['layer']: entry for entry in read_json(checkpoint/'manifest.json')['layers']}
+    path = checkpoint/entries[layer]['file']
+    assert sha256(path)==entries[layer]['sha256']
     return load_file(str(path))['value_coordinate_encoders']
 
 
@@ -50,30 +62,55 @@ def restore_base(payload):
         for g in range(len(payload['left'])))}
 
 
+def install_deployed_teacher(model, args, identity):
+    """Install the identity checkpoint (compressed V + decoder, and Nemotron-H Wo) and drop the RULER decode
+    forward that install() binds so the cache-free class prefill runs during the replay."""
+    from evaluation.eval_k_routing_ruler import install as install_runtime
+    checkpoint = Path(identity['checkpoint'])
+    install_runtime(model, checkpoint, read_json(checkpoint/'manifest.json'), 'full', {}, dense_v=args.dense_v)
+    if model.config.model_type == 'nemotron_h':
+        from evaluation.install_nemotron_h_wo import install_nemotron_h_wo
+        assert args.native_audit is not None and args.wo_bank is not None
+        install_nemotron_h_wo(model, args.identity, args.native_audit, args.wo_bank)
+    for _, module in c1_attention_layers(model):
+        if 'forward' in module.__dict__:
+            del module.forward
+    model.eval()
+
+
 @torch.inference_mode()
 def replay(args, identity, windows, layers, protocol, *, fisher=False):
     config = routing_config(identity, rope=args.rope, sequence_length=args.sequence_length)
+    if config.model_type == 'nemotron_h':
+        from evaluation import nemotron_h_triton_mamba as triton_mamba
+        triton_mamba.install()
     model = AutoModelForCausalLM.from_pretrained(identity['model'], config=config, dtype=torch.bfloat16,
         attn_implementation='sdpa', local_files_only=True, trust_remote_code=False).eval().cuda()
-    assert model.config.model_type in ('llama', 'qwen3')
-    raw_value_projections = {i: layer.self_attn.v_proj for i, layer in enumerate(model.model.layers)}
-    if args.trajectory == 'c1':
-        from evaluation.llama_c1_capture import install_capture_trajectory
-        install_capture_trajectory(model, identity)
-    if model.config.model_type == 'llama':
+    assert model.config.model_type in ('llama', 'qwen3', 'nemotron_h')
+    if model.config.model_type == 'nemotron_h':
+        triton_mamba.restore_dt_limit(model)
+    dense_value_weights = {i: m.v_proj.weight.detach().clone() for i, m in c1_attention_layers(model)}
+    if args.teacher == 'deployed':
+        install_deployed_teacher(model, args, identity)
+    attention_modules = dict(c1_attention_layers(model))
+    probe = attention_modules[layers[0]]
+    print(dict(teacher=args.teacher, attention=type(probe).__name__, v_proj=tuple(probe.v_proj.weight.shape),
+               forward=probe.forward.__func__.__qualname__), flush=True)
+    rotary = config.model_type != 'nemotron_h'
+    if config.model_type == 'llama':
         from transformers.models.llama.modeling_llama import apply_rotary_pos_emb
-    else:
+    elif config.model_type == 'qwen3':
         from transformers.models.qwen3.modeling_qwen3 import apply_rotary_pos_emb
     config=model.config
     heads,groups=config.num_attention_heads,config.num_key_value_heads
-    dim=config.hidden_size//heads
-    grid=candidate_positions(args.sequence_length)
+    dim=identity['head_dim']
+    grid=candidate_positions(args.sequence_length, excluded_query_prefix=protocol['query_grid_prefix'])
     stats_cos,stats_sin=routing_position_embeddings(config,args.sequence_length,torch.device('cuda'))
     moments,post_moments,covariances,candidates,base_payloads,selections = {},{},{},{},{},{}
     active={}
     handles=[]
     for layer in layers:
-        module=model.model.layers[layer].self_attn
+        module=attention_modules[layer]
         if fisher:
             base_payloads[layer],meta=verified(layer_file(args.output,'base',layer))
             assert meta['protocol']==protocol and meta['identity_sha256']==sha256(args.identity)
@@ -88,22 +125,24 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
             candidates[layer]=torch.empty(args.fit_count,len(grid),heads,dim,dtype=torch.bfloat16)
         def capture(attention,positional,kwargs,layer=layer):
             split,index=active['split'],active['index']
-            x=kwargs['hidden_states']; n=x.shape[1]
+            x=kwargs['hidden_states'] if 'hidden_states' in kwargs else positional[0]; n=x.shape[1]
             k=attention.k_proj(x).view(1,n,groups,dim)
-            v=raw_value_projections[layer](x).view(1,n,groups,dim)
+            v=torch.nn.functional.linear(x,dense_value_weights[layer]).view(1,n,groups,dim)
             q=attention.q_proj(x).view(1,n,heads,dim)
             if config.model_type == 'qwen3':
                 q, k = attention.q_norm(q), attention.k_norm(k)
+            if rotary:
+                q,k_post=apply_rotary_pos_emb(q.transpose(1,2),k.transpose(1,2),*kwargs['position_embeddings'])
+            else:
+                q,k_post=q.transpose(1,2),k.transpose(1,2)
             if not fisher:
                 moments[layer][split].update(v[0],k[0],args.chunk_rows)
-                q,k_post=apply_rotary_pos_emb(q.transpose(1,2),k.transpose(1,2),*kwargs['position_embeddings'])
                 post_moments[layer][split].update(v[0],k_post.transpose(1,2)[0],args.chunk_rows)
                 if split=='fit':
                     candidates[layer][index].copy_(q[0,:,grid].transpose(0,1).cpu())
             else:
                 positions=selections[layer][split]['selected_positions']
-                q,k=apply_rotary_pos_emb(q.transpose(1,2),k.transpose(1,2),*kwargs['position_embeddings'])
-                rows=torch.cat((v,k.transpose(1,2)),-1)
+                rows=torch.cat((v,k_post.transpose(1,2)),-1)
                 stats,diagnostics=build_multi_query_statistics(q[:,:,positions].transpose(1,2),rows,
                     query_positions=positions,cos=stats_cos,sin=stats_sin,
                     value_encoder=base_payloads[layer]['encoder'],base_maps=restore_base(base_payloads[layer]),
@@ -135,7 +174,7 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
     if not fisher:
         for layer in layers:
             selections={}
-            for split,qpb in (('fit',16),('heldout',8)):
+            for split,qpb in [('fit',16)]+([('heldout',8)] if protocol['diagnostic_ids'] else []):
                 selected,_,_=select_stratified_query_positions(candidates[layer],grid,
                     context_length=args.sequence_length,num_bins=4,queries_per_bin=qpb)
                 selections[split]=selected
@@ -145,9 +184,9 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
             save_record(layer_file(args.moments_root or args.output,'moments',layer),tensors,
                 dict(protocol=protocol,layer=layer,selections=selections,selection_fit_only=True))
             if args.collect_covariance:
-                payload={f'{split}_covariance':covariances[layer][split].cpu()/moments[layer][split].count
+                payload={f'{split}_covariance':covariances[layer][split].cpu()/max(moments[layer][split].count,1)
                     for split in ('fit','heldout')}
-                payload['weight']=model.model.layers[layer].self_attn.o_proj.weight.detach().cpu()
+                payload['weight']=attention_modules[layer].o_proj.weight.detach().cpu()
                 save_record(layer_file(args.output,'covariance',layer),payload,dict(protocol=protocol,layer=layer))
             del candidates[layer],moments[layer],post_moments[layer]
             covariances.pop(layer, None)
@@ -176,7 +215,7 @@ def fit_bases(args,identity,layers,protocol):
         tensors['encoder']=encoder
         save_record(layer_file(args.output,'base',layer),tensors,dict(protocol=protocol,layer=layer,
             identity_sha256=sha256(args.identity),moments_sha256=sha256(layer_file(args.moments_root or args.output,'moments',layer)),
-            metrics={s:base_mse(m,encoder,bases[args.base_rank]) for s,m in split_moments.items()}))
+            metrics={s:base_mse(m,encoder,bases[args.base_rank]) for s,m in split_moments.items() if int(m['count'])>0}))
 
 
 def fit_residuals(args,identity,layers,protocol):
@@ -187,6 +226,7 @@ def fit_residuals(args,identity,layers,protocol):
         stats={}
         for split,indices in (('fit',protocol['fit_ids']),
                               ('heldout',protocol['diagnostic_ids'])):
+            if not indices: continue
             payloads=[]
             for index in indices:
                 path=args.output/'fisher'/f'l{layer:03d}'/f'w{index:03d}.safetensors'
@@ -197,7 +237,8 @@ def fit_residuals(args,identity,layers,protocol):
             heads=payloads[0]['queries'].shape[0]
             stats[split]={args.base_rank:load_fisher_windows(payloads,heads,groups,dim)}
             del payloads
-        factors,losses=_fit_residual_grid(stats['fit'],stats['heldout'],residual_ranks=(args.residual_rank,),
+        # With no diagnostic windows the reported validation NMSE is in-sample by construction.
+        factors,losses=_fit_residual_grid(stats['fit'],stats.get('heldout',stats['fit']),residual_ranks=(args.residual_rank,),
             sweeps=args.sweeps,relative_damping=1e-5,iterative_tolerance=1e-5,
             iterative_max_iterations=args.pcg_iterations,device=torch.device('cuda'))
         tensors={f'base_{name}_b{args.base_rank}':base[name].float() for name in ('left','right','bias')}
@@ -214,7 +255,7 @@ def fit_residuals(args,identity,layers,protocol):
 
 def assemble_covariance(args,identity,protocol):
     config=read_json(Path(identity['model'])/'config.json')
-    layers=list(range(config['num_hidden_layers']))
+    layers=list(identity['attention_layers'])
     artifacts={}
     for layer in layers:
         path=layer_file(args.output,'covariance',layer)
@@ -223,9 +264,9 @@ def assemble_covariance(args,identity,protocol):
         artifacts[str(layer)]=dict(file=path.name,sha256=sha256(path))
     write_json(args.output/'covariance'/'manifest.json',dict(format='basisserve.attention_o_proj_covariances.v1',
         schema_version=1,model=dict(path=identity['model'],config_sha256=identity['model_config_sha256'],
-            model_type='llama',attention_type='gqa',num_hidden_layers=len(layers),
+            model_type=config['model_type'],attention_type='gqa',num_hidden_layers=config['num_hidden_layers'],
             num_attention_heads=config['num_attention_heads'],num_key_value_heads=config['num_key_value_heads'],
-            head_dim=config['hidden_size']//config['num_attention_heads'],hidden_size=config['hidden_size']),
+            head_dim=identity['head_dim'],hidden_size=config['hidden_size']),
         layers=layers,artifacts=artifacts,calibration=dict(fit_windows=args.fit_count,heldout_windows=args.diagnostic_count,
             window_count=args.fit_count+args.diagnostic_count,sequence_length=args.sequence_length,
             positions_per_window=args.sequence_length,fit_rows=args.fit_count*args.sequence_length,
@@ -245,19 +286,21 @@ def main():
     p.add_argument('--moments-root',type=Path)
     p.add_argument('--sequence-length',type=int,default=65536)
     p.add_argument('--fit-count',type=int,default=64)
-    p.add_argument('--diagnostic-count',type=int,default=16)
+    p.add_argument('--diagnostic-count',type=int,default=0)
     p.add_argument('--chunk-rows',type=int,default=2048)
     p.add_argument('--sweeps',type=int,default=40)
     p.add_argument('--pcg-iterations',type=int,default=100)
     p.add_argument('--smoke',action='store_true')
-    p.add_argument('--trajectory', choices=('dense','c1'), default='dense')
+    p.add_argument('--teacher', choices=('dense','deployed'), default='deployed')
     p.add_argument('--dense-v', action='store_true')
     p.add_argument('--collect-covariance', action='store_true')
     p.add_argument('--rope', choices=('native','yarn2','yarn4'), required=True)
+    p.add_argument('--native-audit', type=Path, help='Nemotron-H native audit (deployed teacher installs Wo)')
+    p.add_argument('--wo-bank', type=Path, help='Nemotron-H Mamba Wo factor bank (deployed teacher)')
     args=p.parse_args();configure()
-    assert args.trajectory == 'dense' or args.stage != 'assemble-covariance'
+    assert args.teacher == 'dense' or not args.collect_covariance
     assert args.collect_covariance or args.stage != 'assemble-covariance'
-    assert not args.dense_v or args.trajectory == 'dense'
+    assert not args.dense_v or args.teacher == 'dense'
     assert 0<=args.base_rank<=128 and 0<args.residual_rank<=128
     assert args.moments_root is None or args.stage not in ('moments','all')
     identity=read_json(args.identity)
@@ -274,42 +317,55 @@ def main():
     assert available_diagnostic_ids==list(range(heldout_start,expected_windows))
     assert windows.shape[0]==expected_windows and 4096<=args.sequence_length<=windows.shape[1]
     assert 0<args.fit_count<=len(available_fit_ids)
-    assert 0<args.diagnostic_count<=len(available_diagnostic_ids)
+    assert 0<=args.diagnostic_count<=len(available_diagnostic_ids)
     if not args.smoke:
         assert not wm.get('test_only', False)
         assert windows.shape[1]==args.sequence_length
         assert args.fit_count==len(available_fit_ids)
-        assert args.diagnostic_count==len(available_diagnostic_ids)
+        assert args.diagnostic_count in (0, len(available_diagnostic_ids))
         assert args.sweeps==40 and args.pcg_iterations==100
-    assert args.fit_count>0 and args.diagnostic_count>0 and args.chunk_rows>0
+    assert args.chunk_rows>0
     windows=windows[:,:args.sequence_length]
     layers=[int(x) for x in args.layers.split(',')]
     assert len(set(layers))==len(layers) and set(layers)<=set(identity['attention_layers'])
     runtime = routing_config(identity, rope=args.rope, sequence_length=args.sequence_length)
     runtime_config = runtime.to_dict()
+    if runtime.model_type == 'nemotron_h':
+        runtime_config['time_step_limit'] = [str(x) if math.isinf(x) else x for x in runtime.time_step_limit]
     fisher_support = residual_fisher_support(runtime.model_type)
-    protocol=dict(format='basisserve.k_router.streaming.v1',model_config_sha256=identity['model_config_sha256'],
+    diagnostic_ids = available_diagnostic_ids[:args.diagnostic_count]
+    teacher = ('deployed model: identity checkpoint (compressed V and decoder' +
+               (', folded Mamba Wo' if runtime.model_type == 'nemotron_h' else '') +
+               ') installed before the replay; dense v_proj kept only for Base moments; BF16, use_cache=False'
+               if args.teacher == 'deployed' else 'native dense BF16 SDPA, model.model, use_cache=False')
+    protocol=dict(format='basisserve.k_router.streaming.v2',model_config_sha256=identity['model_config_sha256'],
         windows_sha256=sha256(args.windows),windows_manifest_sha256=sha256(args.windows.with_name('manifest.json')),
         sequence_length=args.sequence_length,fit_ids=available_fit_ids[:args.fit_count],
-        diagnostic_ids=available_diagnostic_ids[:args.diagnostic_count],fit_queries=64,diagnostic_queries=32,
+        diagnostic_ids=diagnostic_ids,fit_queries=64,diagnostic_queries=32 if diagnostic_ids else 0,
+        validation_scope='held-out diagnostic windows' if diagnostic_ids else 'in-sample: no diagnostic windows',
         base_rank=args.base_rank,residual_rank=args.residual_rank,page_size=32,
-        **fisher_support,chunk_rows=args.chunk_rows,
-        smoke=args.smoke,teacher='native dense BF16 SDPA, model.model, use_cache=False',
+        **fisher_support,query_grid_prefix=SINK_TOKENS+fisher_support['excluded_recent_tokens'],
+        deployment_page_budget_tokens=2048,maximum_deployment_support_tokens=2048,
+        sink_tokens_within_page_budget=SINK_TOKENS,recent_tokens_within_page_budget=fisher_support['excluded_recent_tokens'],
+        chunk_rows=args.chunk_rows,smoke=args.smoke,teacher=teacher,
+        deployed_checkpoint_manifest_sha256=identity['manifest_sha256'] if args.teacher == 'deployed' else None,
         rope=args.rope,runtime_config=runtime_config,dense_v=args.dense_v,
         base_moments='FP64 raw pre-RoPE and post-RoPE moments with identical rows and encoder transform; no bitwise claim versus projected FP32 accumulation',
         covariance=('FP32 chunked normalized o_proj input second moment' if args.collect_covariance else 'not collected'),
         source_sha256={name:sha256(Path(name)) for name in ('evaluation/fit_k_routing_streaming.py',
-            'evaluation/k_routing_config.py',
+            'evaluation/eval_k_routing_ruler.py','evaluation/k_routing_config.py',
             'evaluation/streaming_k_statistics.py','evaluation/fit_qwen3_8b_q8_fisher_residual.py',
             'basisserve/core/query_position_sampling.py','basisserve/core/c1_v_conditional_k_router.py')})
+    if runtime.model_type == 'nemotron_h':
+        protocol['mamba_scan']='vLLM Triton chunk scan via evaluation/nemotron_h_triton_mamba.py; dt clamp reset to (0, inf)'
+        protocol['source_sha256']['evaluation/nemotron_h_triton_mamba.py']=sha256(Path('evaluation/nemotron_h_triton_mamba.py'))
+        if args.teacher == 'deployed':
+            assert args.native_audit is not None and args.wo_bank is not None
+            protocol['native_audit_sha256']=sha256(args.native_audit)
+            protocol['wo_bank_layers']={p.stem:sha256(p) for p in sorted(args.wo_bank.glob('layer_*.safetensors'))}
+    # Records compare the protocol after a JSON round trip, so normalize tuples and floats once here.
+    protocol=json.loads(json.dumps(protocol,allow_nan=False))
     stages=('moments','base','fisher','fit') if args.stage=='all' else (args.stage,)
-    if args.trajectory == 'c1':
-        protocol.update(teacher='C1-V96 BF16 full causal attention, model.model, use_cache=False',
-            trajectory='c1', trajectory_identity_sha256=sha256(args.identity),
-            trajectory_checkpoint_sha256=identity['manifest_sha256'],
-            covariance='not collected; fixed existing V96 checkpoint')
-        protocol['source_sha256']['evaluation/llama_c1_capture.py']=sha256(Path('evaluation/llama_c1_capture.py'))
-        protocol['source_sha256']['evaluation/eval_k_routing_ruler.py']=sha256(Path('evaluation/eval_k_routing_ruler.py'))
     for stage in stages:
         if stage=='moments':replay(args,identity,windows,layers,protocol)
         elif stage=='base':fit_bases(args,identity,layers,protocol)

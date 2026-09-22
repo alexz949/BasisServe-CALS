@@ -32,7 +32,8 @@ from basisserve.kernels.compressed_v_decode_attention import (
     compressed_v_prefill_attention,
 )
 
-ARMS = ('full','exact_sparse','lrqk','shadowkv','ours')
+ARMS = ('full','exact_sparse','lrqk','shadowkv','loki','ours')
+LRQK_TOPK, LOKI_TOPK, LOKI_RECENT = 2048, 2048, 64
 DEFAULT_TASK_NAMES = (
     'niah_single_1','niah_single_2','niah_single_3','niah_multikey_1',
     'niah_multikey_2','niah_multiquery','niah_multivalue','vt','fwe','qa_1','qa_2',
@@ -43,42 +44,37 @@ def native_protocol(args, identity, config):
     from transformers.models.nemotron_h import modeling_nemotron_h as native
     from evaluation.install_nemotron_h_wo import audit_nemotron_h_wo
 
-    assert args.native_audit is not None and args.full_smoke is not None and args.wo_bank is not None
-    audit, smoke = read_json(args.native_audit), read_json(args.full_smoke)
-    assert audit['status'] == smoke['status'] == 'complete'
+    assert args.native_audit is not None and args.wo_bank is not None
+    audit = read_json(args.native_audit)
+    assert audit['status'] == 'complete'
     assert audit['config_sha256'] == identity['model_config_sha256']
     assert audit['index_sha256'] == sha256(Path(identity['model'])/'model.safetensors.index.json')
     assert audit['implementation_sha256'] == sha256(inspect.getfile(native.NemotronHForCausalLM))
-    assert smoke['audit_sha256'] == sha256(args.native_audit)
-    assert smoke['full_model_tested'] and smoke['verified_tensor_count'] == audit['tensor_count'] == 577
-    assert smoke['device_guard_sha256'] == sha256(ROOT/'evaluation/nemotron_h_runtime.py')
-    assert smoke['guarded_mamba_layers'] == [i for i,k in enumerate(config.layers_block_type) if k=='linear_attention']
+    mamba_layers = [i for i,k in enumerate(config.layers_block_type) if k=='linear_attention']
+    assert audit['layer_counts']['linear_attention'] == len(mamba_layers)
     assert identity['attention_layers'] == [i for i,k in enumerate(config.layers_block_type) if k=='full_attention']
     wo=audit_nemotron_h_wo(config,args.identity,args.native_audit,args.wo_bank)
     wo_audit_path=args.wo_bank.parent/'manifests/wo_audit.json'
     wo_audit=read_json(wo_audit_path)
-    assert wo_audit['status']=='complete' and wo_audit['verified_layers']==45 and wo_audit['wo']==wo
-    return dict(audit_sha256=sha256(args.native_audit), full_smoke_sha256=sha256(args.full_smoke),
-        device_guard_sha256=smoke['device_guard_sha256'], guarded_mamba_layers=smoke['guarded_mamba_layers'],
+    assert wo_audit['status']=='complete' and wo_audit['verified_layers']==len(mamba_layers) and wo_audit['wo']==wo
+    return dict(audit_sha256=sha256(args.native_audit), tensor_count=audit['tensor_count'],
+        device_guard_sha256=sha256(ROOT/'evaluation/nemotron_h_runtime.py'), guarded_mamba_layers=mamba_layers,
+        mamba_scan='vLLM Triton chunk scan via evaluation/nemotron_h_triton_mamba.py; torch conv1d and single-token update',
+        dt_limit='(0, inf) restored on every Mamba mixer (transformers 5.17 clamps dt >= time_step_min=1e-3, which erases long-range state)',
+        triton_dropin_sha256=sha256(ROOT/'evaluation/nemotron_h_triton_mamba.py'),
         wo=wo,wo_audit_sha256=sha256(wo_audit_path))
 
 
 def install_native_runtime(model, args, protocol):
-    import causal_conv1d
-    import mamba_ssm
-    from transformers.models.nemotron_h import modeling_nemotron_h as native
     from evaluation.install_nemotron_h_wo import install_nemotron_h_wo
     from evaluation.nemotron_h_runtime import install_mamba_device_guards
-    from evaluation.nemotron_h_scan_layout import install_contiguous_dt_scan, install_chunked_mamba_norms
+    from evaluation.nemotron_h_scan_layout import install_chunked_mamba_norms
+    from evaluation import nemotron_h_triton_mamba as triton_mamba
 
-    for name, package in (('mamba2_chunk_scan','mamba_ssm'),
-            ('mamba2_selective_state_update','mamba_ssm'),
-            ('causal_conv1d_fn','causal_conv1d'),('causal_conv1d_update','causal_conv1d')):
-        implementation=inspect.getclosurevars(getattr(native,name)).nonlocals['implementation']
-        assert implementation.__module__.startswith(package)
+    triton_mamba.install()
+    assert triton_mamba.restore_dt_limit(model)==len(protocol['guarded_mamba_layers'])
     assert install_mamba_device_guards(model)==protocol['guarded_mamba_layers']
     assert install_nemotron_h_wo(model,args.identity,args.native_audit,args.wo_bank)==protocol['wo']
-    install_contiguous_dt_scan(native)
     install_chunked_mamba_norms(model)
 
 
@@ -146,7 +142,7 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
     elif self._routing_arm == 'loki':
         from basisserve.core.c1_loki_attention import c1_loki_recent_decode
         result = c1_loki_recent_decode(q, k, v, self._loki_projector,
-            past_key_values.sidecars[self.layer_idx], scale=self.scaling)
+            past_key_values.sidecars[self.layer_idx], top_k=LOKI_TOPK, recent_tokens=LOKI_RECENT, scale=self.scaling)
         output = result.output
         past_key_values.statistics[self.layer_idx] = result.statistics
     else:
@@ -159,7 +155,7 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
             sidecar = past_key_values.sidecars[self.layer_idx]
             projector = self._routing_projector
             route_q,route_k,route_v = q,k,v
-        if self.config.model_type == 'llama':
+        if self.config.model_type in ('llama', 'nemotron_h'):
             from evaluation.llama_sink_recent_routing import page_support
             from basisserve.kernels.split_indexed_attention import split_indexed_attention
             if attention_mask is not None:
@@ -245,7 +241,7 @@ def install(model, checkpoint, manifest, arm, bank, *, dense_v=False):
             replacement.forward=MethodType(routing_forward,replacement)
     if arm=='lrqk':
         lrqk_adapter.LRQKState=LRQKState
-        lrqk_adapter.install_c1_lrqk(model,LRQKConfig())
+        lrqk_adapter.install_c1_lrqk(model,LRQKConfig(topk=LRQK_TOPK))
     elif arm=='shadowkv':
         install_c1_shadowkv(model)
     model.eval()
@@ -283,8 +279,17 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
         assert len(sources)==samples_per_task
         for ordinal,source in enumerate(sources):
             if args.chat_template:
-                ids=tokenizer.apply_chat_template([{'role':'user','content':ruler_prompt(source)}],
-                    tokenize=True,add_generation_prompt=True,return_dict=True)['input_ids']
+                messages=([{'role':'system','content':args.system_prompt}] if args.system_prompt else [])
+                if args.prompt_layout=='chat_nn_no_prefix':
+                    # Chat models answer directly after the assistant header; the completion-style answer prefix
+                    # is dropped and a blank line follows the header (and any empty think block).
+                    messages.append({'role':'user','content':str(source['input'])})
+                    text=tokenizer.apply_chat_template(messages,tokenize=False,add_generation_prompt=True)+'\n\n'
+                    ids=tokenizer(text,add_special_tokens=False)['input_ids']
+                else:
+                    messages.append({'role':'user','content':ruler_prompt(source)})
+                    ids=tokenizer.apply_chat_template(messages,
+                        tokenize=True,add_generation_prompt=True,return_dict=True)['input_ids']
             else:
                 ids=tokenizer(ruler_prompt(source),add_special_tokens=True)['input_ids']
             assert len(ids)+task.tokens_to_generate<=args.sequence_length
@@ -331,7 +336,7 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
                 assert audit['protocol']['v96_manifest_sha256']==identity['manifest_sha256']
             heldout_queries = audit['protocol'].get('diagnostic_queries', audit['protocol'].get('heldout_queries'))
             heldout_ids = audit['protocol'].get('diagnostic_ids', audit['protocol'].get('heldout_ids'))
-            assert audit['protocol']['fit_queries']==64 and heldout_queries==32
+            assert audit['protocol']['fit_queries']==64 and heldout_queries==(32 if args.router_diagnostic_count else 0)
             assert audit['protocol']['fit_ids']==list(range(args.router_fit_count))
             assert heldout_ids==list(range(args.router_fit_count,
                 args.router_fit_count + args.router_diagnostic_count))
@@ -341,6 +346,19 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
             assert audit['sha256']==sha256(path)
             bank[i]=load_file(str(path));bank_hashes[str(i)]=audit['sha256']
             assert all(v.dtype==torch.float32 and torch.isfinite(v).all() for v in bank[i].values())
+    if args.arm=='loki' or (args.stage in ('summarize','audit-smoke') and 'loki' in ARMS):
+        assert args.loki_bank is not None
+        loki_manifest=read_json(args.loki_bank/'manifest.json')
+        assert loki_manifest['status']=='complete' and loki_manifest['rank']==32 and not loki_manifest['smoke']
+        assert loki_manifest['model_config_sha256']==identity['model_config_sha256']
+        assert loki_manifest['sequence_length']==args.sequence_length
+        assert [entry['layer'] for entry in loki_manifest['layers']]==identity['attention_layers']
+        for entry in loki_manifest['layers']:
+            path=args.loki_bank/entry['file']
+            assert sha256(path)==entry['sha256']
+            projector=load_file(str(path))['projector']
+            assert projector.shape==(identity['hkv'],identity['head_dim'],32) and torch.isfinite(projector.float()).all()
+            bank.setdefault(entry['layer'],{})['projector']=projector
     config_record=runtime_config.to_dict()
     if runtime_config.model_type=='nemotron_h':
         config_record['time_step_limit']=[str(x) if math.isinf(x) else x for x in runtime_config.time_step_limit]
@@ -352,8 +370,11 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
                  'full causal FlashAttention-2 for equal QKV widths, C1 Triton for compact V'),rank_schedule=identity['layer_ranks'],
         exact_sparse='FP32 exact-QK normalized Page32 mass, GQA max, pinned page0 within B2048',
         ours='native Base16/Residual16 Page32 GQA max, pinned page0 within B2048',
-        lrqk=dict(rank=32,topk_per_query_head=2048,recent=64,prefill_iterations=2,decode_iterations=2,tolerance=0.01,seed=0,state_dtype='bfloat16',solve_dtype='float32'),
+        lrqk=dict(rank=32,topk_per_query_head=LRQK_TOPK,recent=64,prefill_iterations=2,decode_iterations=2,tolerance=0.01,seed=0,state_dtype='bfloat16',solve_dtype='float32'),
         shadowkv=dict(rank=160,chunk=8,routed=2048,outlier_chunks=48,extra_support='native local and generated tokens'),
+        loki=(dict(rank=32,topk_per_query_head=LOKI_TOPK,recent=LOKI_RECENT,bank_manifest_sha256=sha256(args.loki_bank/'manifest.json'),
+                   coordinate=read_json(args.loki_bank/'manifest.json')['runtime'],calibration='dense model')
+              if args.loki_bank is not None else 'not evaluated'),
         source_sha256={n:sha256(ROOT/n) for n in ('evaluation/eval_k_routing_ruler.py',
             'evaluation/k_routing_config.py',
             'basisserve/core/c1_conditional_page_attention.py','basisserve/core/c1_v_conditional_k_router.py',
@@ -369,17 +390,22 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
                 'basisserve/checkpoint/c1_attention_layers.py','basisserve/core/tp_source_wo_c1.py'):
             spec['source_sha256'][name]=sha256(ROOT/name)
     else:
-        assert args.native_audit is None and args.full_smoke is None and args.wo_bank is None
-    if runtime_config.model_type == 'llama':
-        spec['prefill_mlp_chunk_tokens'] = 1024
+        assert args.native_audit is None and args.wo_bank is None
+    if runtime_config.model_type in ('llama', 'nemotron_h'):
         spec['exact_sparse'] = 'FP32 exact-QK Page32 mass, GQA max; sink32 + recent64 inside hard B2048'
         spec['ours'] = 'Base16/Residual16 Page32 mass, GQA max; sink32 + recent64 inside hard B2048'
-        for name in ('evaluation/llama_sink_recent_routing.py', 'basisserve/kernels/split_indexed_attention.py',
-                     'evaluation/chunked_prefill_mlp.py'):
+        for name in ('evaluation/llama_sink_recent_routing.py', 'basisserve/kernels/split_indexed_attention.py'):
             spec['source_sha256'][name] = sha256(ROOT/name)
+    if runtime_config.model_type == 'llama':
+        spec['prefill_mlp_chunk_tokens'] = 1024
+        spec['source_sha256']['evaluation/chunked_prefill_mlp.py'] = sha256(ROOT/'evaluation/chunked_prefill_mlp.py')
     spec['value_mode'] = 'dense original V and Wo' if args.dense_v else 'allocated C1 V'
     if args.chat_template:
-        spec['input_template'] = 'tokenizer.apply_chat_template user message, add_generation_prompt=True'
+        spec['input_template'] = ('chat template, user turn = RULER input without answer prefix, generation prompt + blank line'
+                                  if args.prompt_layout=='chat_nn_no_prefix' else
+                                  'tokenizer.apply_chat_template user message (input + answer prefix), add_generation_prompt=True')
+        if args.system_prompt:
+            spec['system_prompt'] = args.system_prompt
     if args.official_lrqk:
         assert args.dense_v
         spec['lrqk'].update(tolerance=0.01, implementation='upstream unchanged cache', cpu_offload=True,
@@ -477,15 +503,13 @@ def audit_smoke(args,rows,spec,bank_hashes):
             assert first[index]==result['ids'][0]
             if arm!='full':
                 assert len(result['ids'])>1, 'Smoke must exercise sparse decode'
-    audit=read_json(args.bank.parent/'manifests/fit_audit.json')
-    assert audit['status']=='complete' and audit['layers']==len(spec['rank_schedule'])
     write_json(args.output/'smoke_audit.json',dict(status='complete',protocol=spec,
         verified=len(indices)*len(ARMS),first_token_agreement=True,bank_sha256=bank_hashes))
     print('ALL ARM SMOKES VERIFIED',flush=True)
 
 
 def main():
-    global ARMS
+    global ARMS, LRQK_TOPK, LOKI_TOPK, LOKI_RECENT
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('stage',choices=['smoke','audit-smoke','evaluate','summarize'])
     p.add_argument('--arm',choices=ARMS,default='full')
@@ -502,13 +526,20 @@ def main():
     p.add_argument('--sequence-length',type=int,default=65536)
     p.add_argument('--rope',choices=('native','yarn2','yarn4'),required=True)
     p.add_argument('--native-audit',type=Path)
-    p.add_argument('--full-smoke',type=Path)
     p.add_argument('--wo-bank',type=Path)
+    p.add_argument('--loki-bank',type=Path,help='Loki PCA bank directory (pca/manifest.json + layer files)')
+    p.add_argument('--lrqk-topk',type=int,default=LRQK_TOPK)
+    p.add_argument('--loki-topk',type=int,default=LOKI_TOPK)
+    p.add_argument('--loki-recent',type=int,default=LOKI_RECENT)
     p.add_argument('--shard-index',type=int,default=0)
     p.add_argument('--num-shards',type=int,default=4)
     p.add_argument('--official-lrqk',action='store_true')
     p.add_argument('--chat-template',action='store_true')
+    p.add_argument('--system-prompt',help='system message placed before the user turn when --chat-template is set')
+    p.add_argument('--prompt-layout',choices=('completion','chat_nn_no_prefix'),default='completion')
     args=p.parse_args();configure();torch.manual_seed(0)
+    LRQK_TOPK, LOKI_TOPK, LOKI_RECENT = args.lrqk_topk, args.loki_topk, args.loki_recent
+    assert LRQK_TOPK > 0 and LOKI_TOPK > 0 and LOKI_RECENT >= 0
     requested_arms=tuple(x.strip() for x in args.arms.split(',') if x.strip())
     assert requested_arms and len(set(requested_arms))==len(requested_arms)
     assert set(requested_arms)<=set(ARMS)
@@ -530,9 +561,6 @@ def main():
         gate=read_json(args.output/'smoke_audit.json')
         assert gate['status']=='complete' and gate['protocol']==spec
     config=routing_config(identity,rope=args.rope,sequence_length=args.sequence_length)
-    if config.model_type=='nemotron_h':
-        import causal_conv1d
-        import mamba_ssm
     model=load_evaluation_model(identity,config)
     if config.model_type=='nemotron_h':
         install_native_runtime(model,args,spec['native'])

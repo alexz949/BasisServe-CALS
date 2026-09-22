@@ -88,7 +88,8 @@ def expanded_queries(root, split, layer, positions=Q16_POSITIONS):
 @torch.inference_mode()
 def build_multi_query_statistics(queries, rows, *, query_positions, cos, sin,
                                  value_encoder, base_maps, page_size,
-                                 excluded_prefix_pages, device):
+                                 excluded_prefix_pages, device,
+                                 excluded_recent_tokens=0):
     """Compute token features once/window; retain exact per-Q causal Grams.
 
     Output order stays query-position-major, document-minor. The teacher
@@ -99,6 +100,10 @@ def build_multi_query_statistics(queries, rows, *, query_positions, cos, sin,
     positions = torch.as_tensor(query_positions, dtype=torch.long).tolist()
     assert positions and len(positions) == queries.shape[1] and len(set(positions)) == len(positions)
     assert all(page_size * excluded_prefix_pages <= p < rows.shape[1] for p in positions)
+    # Tokens the deployed selector always retains never compete for a routed page,
+    # so they are dropped from the causal prefix the Fisher statistics are built on.
+    assert excluded_recent_tokens >= 0
+    assert all(p + 1 - excluded_recent_tokens > page_size * excluded_prefix_pages for p in positions)
     documents, query_count, heads, dim = map(int, queries.shape)
     groups = int(rows.shape[2])
     assert rows.ndim == 4 and rows.shape[-1] == 2 * dim and heads % groups == 0
@@ -126,7 +131,7 @@ def build_multi_query_statistics(queries, rows, *, query_positions, cos, sin,
             base_post = _post_rope_rows(base_pre, cos[:, :stop], sin[:, :stop])
             residual = exact_key - base_post
             for index, position in enumerate(positions):
-                prefix = position + 1
+                prefix = position + 1 - excluded_recent_tokens
                 errors[rank][index] += float(residual[:prefix].square().sum())
                 slot = index * documents + document
                 for group in range(groups):
