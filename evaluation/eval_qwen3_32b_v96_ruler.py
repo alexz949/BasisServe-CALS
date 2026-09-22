@@ -63,6 +63,10 @@ RULER_SEED = 42
 PROMPT_MARGIN = 128
 YARN_FACTOR = 4.0
 SMOKE_IDS = (0, 7 * SAMPLES_PER_TASK)
+LOKI_FORMAT = "basisserve.qwen3_32b.loki_key_pca_r32_128k.v1"
+LOKI_FIT_COORDINATE = "centered post-RoPE K PCA after Qwen3 k_norm and YaRN RoPE"
+LOKI_RUNTIME_COORDINATE = "post-RoPE Q/K projection without mean subtraction"
+LOKI_TOPK = 856
 LRQK = LRQKConfig(
     rank=32,
     topk=832,
@@ -150,8 +154,10 @@ def factor_identity(model_path, factors):
 def loki_identity(model_path, loki, expected_fit_windows=32):
     path = loki / "manifest.json"
     manifest = read_json(path)
-    assert manifest["format"] == "basisserve.qwen3_32b.loki_key_pca_r32_128k.v1"
+    assert manifest["format"] == LOKI_FORMAT
     assert manifest["status"] == "complete"
+    assert manifest["coordinate"] == LOKI_FIT_COORDINATE
+    assert manifest["runtime"] == LOKI_RUNTIME_COORDINATE
     assert manifest["rank"] == 32
     assert manifest["fit_windows"] == expected_fit_windows
     assert manifest["fit_ids"] == list(range(expected_fit_windows))
@@ -294,10 +300,10 @@ def inputs(args):
         "lrqk": {**asdict(LRQK), "implementation": "repository equation adapter"},
         "loki_config": {
             "pca_rank": 32,
-            "historical_topk_per_query_head": 856,
+            "historical_topk_per_query_head": LOKI_TOPK,
             "recent_tokens": 0,
-            "fit_coordinate": "centered pre-RoPE K after Qwen3 k_norm",
-            "runtime_coordinate": "post-RoPE Q/K without mean subtraction",
+            "fit_coordinate": LOKI_FIT_COORDINATE,
+            "runtime_coordinate": LOKI_RUNTIME_COORDINATE,
         },
         "numerical_policy": NUMERICAL_POLICY,
         "source_sha256": {name: sha256(Path(name)) for name in SOURCES},
@@ -364,7 +370,7 @@ def install_arm(model, arm, loki_root, model_path, loki_fit_windows=32):
 
         c1_loki_attention.c1_loki_recent_decode = functools.partial(
             c1_loki_attention.c1_loki_recent_decode,
-            top_k=856,
+            top_k=LOKI_TOPK,
             recent_tokens=0,
         )
     install_offload(model, arm)
@@ -501,7 +507,7 @@ def audit(saved, row, spec, arm, tokenizer, smoke=False):
         assert all(stat["svd_rank"] == 160 for stat in result["routing"])
         assert all(stat["routed_tokens"] == 2048 for stat in result["routing"])
     if len(ids) > 1 and arm == "loki":
-        assert all(stat["selected_per_query_head"] <= 856 for stat in result["routing"])
+        assert all(stat["selected_per_query_head"] <= LOKI_TOPK for stat in result["routing"])
         assert all(stat["recent_tokens"] == 0 for stat in result["routing"])
     return result
 
@@ -559,6 +565,9 @@ def main():
     parser.add_argument("--arm", choices=ARMS, default="shadowkv")
     parser.add_argument("--shard", type=int, default=0)
     parser.add_argument("--shards", type=int, default=4)
+    parser.add_argument(
+        "--indices", type=int, nargs="+", help="evaluate only these prompt indices"
+    )
     args = parser.parse_args()
     configure_deterministic_evaluation()
     assert 0 <= args.shard < args.shards
@@ -586,11 +595,12 @@ def main():
     config = effective_config(args.model)
     model = load_model(args, config)
     install_arm(model, args.arm, args.loki, args.model)
-    selected = (
-        [rows[index] for index in SMOKE_IDS]
-        if args.stage == "smoke"
-        else rows[args.shard :: args.shards]
-    )
+    if args.stage == "smoke":
+        selected = [rows[index] for index in SMOKE_IDS]
+    elif args.indices:
+        selected = [rows[index] for index in args.indices]
+    else:
+        selected = rows[args.shard :: args.shards]
     directory = "smoke" if args.stage == "smoke" else "evaluate"
     for row in selected:
         path = args.output / args.arm / directory / f"sample_{row['index']:04d}.json"
