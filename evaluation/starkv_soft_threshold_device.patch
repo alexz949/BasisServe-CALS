@@ -1,0 +1,12 @@
+diff --git a/soft_thres_layer.py b/soft_thres_layer.py
+index 7d98385..1c362e5 100644
+--- a/soft_thres_layer.py
++++ b/soft_thres_layer.py
+@@ -39,6 +39,6 @@ class soft_thres_func(torch.autograd.Function):
+ 
+         grad_x_out = grad_x * grad_output
+         grad_alpha_out = grad_alpha * grad_output
+-        grad_alpha_sum = torch.tensor([torch.sum(grad_alpha_out)]).to('cuda')
++        grad_alpha_sum = grad_alpha_out.sum().reshape_as(alpha).to(alpha)
+ 
+         return grad_x_out, grad_alpha_sum, None, None
