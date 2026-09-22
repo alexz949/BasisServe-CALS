@@ -10,7 +10,7 @@ def residual_fisher_support(model_type):
     """Candidate exclusions used by the current model's page selector."""
     assert model_type in ('llama', 'qwen3', 'qwen3_5', 'nemotron_h')
     return dict(excluded_prefix_pages=0 if model_type == 'qwen3_5' else 1,
-                excluded_recent_tokens=64 if model_type in ('llama', 'qwen3_5') else 0)
+                excluded_recent_tokens=64 if model_type in ('llama', 'qwen3_5', 'nemotron_h') else 0)
 
 
 def validate_residual_fisher_support(protocol, model_type):
