@@ -1,0 +1,670 @@
+You are working on the BasisKV repository. Implement and run TWO new formal TP8 baseline experiments for the ICLR 2027 paper.
+
+Do NOT redesign either baseline.
+Do NOT tune on the final benchmark results.
+Do NOT silently fall back to a different algorithm.
+Preserve every OOM/failure in the output.
+Use the existing Llama-3.1-8B-Instruct TP8 benchmark infrastructure and the same 8x NVIDIA L40S node used by the existing BasisKV TP8 grid.
+
+The two experiments are independent:
+
+===============================================================================
+EXPERIMENT 1: TP8 ShadowKV request-time overhead
+===============================================================================
+
+GOAL
+----
+Measure the cost of ShadowKV's prompt-dependent representation construction
+under TP8, and compare request-level latency against BasisKV.
+
+This experiment is about:
+    online K gather
+    + global prompt-specific SVD
+    + redistribution of SVD factors
+    + decode
+
+The main result should support a request-latency breakdown figure.
+
+METHODS
+-------
+Run:
+
+1. Dense
+2. BasisKV joint:
+      Joint-ALS V96
+      B16R16 routing
+      Page32
+      hard support 2048
+      same frozen factors/router as the existing TP8 joint benchmark
+3. ShadowKV TP8
+
+ALS-full may also be collected if it is essentially free, but it is not
+required for the main ShadowKV comparison.
+
+SHADOWKV SEMANTICS
+------------------
+Preserve the original ShadowKV global-K SVD semantics.
+
+For Llama-3.1-8B-Instruct:
+    H_kv = 8
+    head_dim = 128
+    TP = 8
+
+Each TP rank owns one local KV head after prefill:
+
+    K_p: [B, T, 128]
+
+ShadowKV's original decomposition acts on the concatenated K:
+
+    K_global = concat(K_0, ..., K_7)
+             = [B, T, 1024]
+
+and computes a rank-160 decomposition.
+
+DO NOT replace this with 8 independent per-rank SVDs.
+That is a different algorithm.
+
+Implement the TP8 construction as:
+
+For transformer layer l:
+
+    owner = l % 8
+
+    1. Each rank produces its local pre-RoPE K_p normally.
+    2. Gather the 8 local K shards to `owner`.
+       Prefer gather-to-owner / explicit send-recv over all-gather-to-all.
+    3. Owner concatenates them to [B, T, 1024].
+    4. Owner computes ONE rank-160 ShadowKV SVD per request.
+    5. Redistribute factors:
+           shared U [B, T, 160] -> broadcast to all ranks
+           local SV_p [B, 160, 128] -> each rank receives only its own shard
+    6. Free the temporary full [B, T, 1024] K buffer immediately.
+    7. Each rank subsequently runs ShadowKV decode locally:
+           local Q
+           local landmarks / retrieval
+           selected U rows
+           local SV_p
+           reconstruct local selected K
+           local selected V / CPU-offload path
+           normal TP output collective
+
+Do NOT perform an additional cross-rank K gather during decode.
+
+Rotate the owner by layer (l % 8) so the global SVD work and temporary memory
+are not always assigned to rank 0.
+
+For large B, it is acceptable and preferred to process the SVD per request
+rather than forming one enormous [B,T,1024] temporary tensor, as long as this
+is mathematically equivalent to independent per-request ShadowKV SVDs.
+
+Use ShadowKV's paper-faithful:
+    rank = 160
+    chunk_size = 8
+    sparse budget = the configuration already used in our ShadowKV quality
+                    protocol / official CPU-offload implementation
+
+Do not modify the retrieval algorithm to match BasisKV's exact support.
+
+CORRECTNESS CHECK BEFORE FORMAL RUN
+-----------------------------------
+Before benchmarking:
+
+1. TP8 global-SVD factors must reconstruct the same global low-rank K as a
+   single-device reference within BF16/FP32 numerical tolerance.
+2. Verify every rank receives identical U.
+3. Verify rank p receives the correct 128-column SV shard.
+4. For a short prompt, compare selected chunks / generated tokens against the
+   existing ShadowKV implementation as closely as numerically possible.
+5. Confirm no SVD/gather occurs inside the measured steady-state decode loop.
+
+If any of these fail, stop and fix correctness before running the grid.
+
+WORKLOAD
+--------
+Use the SAME frozen real-text cohorts already used by the formal BasisKV TP8
+decode benchmark.
+
+Run:
+
+    context:
+        65536
+        130048   # approx 128K while leaving generation room
+
+    batch:
+        1
+        4
+        8
+
+Three preselected cohorts per workload.
+
+Generation:
+    greedy
+    fixed 128 output tokens
+    do not stop early at EOS for performance measurement
+
+Same:
+    BF16
+    TF32 disabled
+    eager/graph mode as existing formal TP8 runner
+    TP8 / DP1 / PP1
+    hardware
+    CPU affinity policy
+    tokenizer/model revision
+    benchmark synchronization policy
+
+TIMING BOUNDARIES
+-----------------
+Measure a true request timeline.
+
+For each request cohort record:
+
+    t0 = request/prefill start
+
+    prefill_start
+    prefill_end
+
+    shadow_build_start
+    shadow_build_end
+
+    first_output_token
+
+    final_output_token
+
+For ShadowKV, break shadow_build into:
+
+    K_gather_ms
+    SVD_ms
+    factor_redistribution_ms
+    other_shadow_prepare_ms
+
+Use CUDA events for GPU work when appropriate and synchronized wall-clock
+timing for the complete distributed phase.
+
+All ranks must participate in timing.
+The reported replica latency is the critical-path / synchronized TP8 latency,
+not rank-0 launch time.
+
+IMPORTANT:
+The request-level ShadowKV result MUST include:
+
+    global K gather
+    SVD
+    factor redistribution
+
+because these are prompt-specific online operations.
+
+Offline compilation/model loading does not count.
+
+Also separately measure steady-state decode:
+
+    finish all preparation
+    16 conditioning decode steps
+    128 measured decode steps
+
+This gives two distinct metrics:
+
+    decode-only latency
+    request-level latency
+
+Do not mix them.
+
+METRICS
+-------
+For each successful trial save:
+
+Request metrics:
+    prefill_ms
+    representation_build_ms
+    k_gather_ms
+    svd_ms
+    factor_redistribution_ms
+    other_prepare_ms
+    first_token_ms from t0
+    decode_after_first_token_ms
+    total_request_ms
+    output_tokens_per_second
+
+Steady-state decode:
+    mean_ms_per_step
+    p50_ms
+    p95_ms
+    aggregate_tokens_per_second
+
+Memory:
+    max-rank GPU allocated at:
+        end of prefill
+        representation-ready
+        peak request
+        peak decode
+    NVML process GPU memory if available
+    CPU/pinned-memory capacity
+    temporary owner-rank peak during global gather/SVD
+
+ShadowKV state:
+    U bytes
+    SV bytes
+    landmark bytes
+    CPU V bytes
+    selected-buffer bytes
+
+Also record:
+    owner rank per layer
+    number of successful ranks
+    OOM/failure stage
+    source git commit/hash
+    baseline commit/hash
+    full command
+    environment versions
+
+PAPER FIGURE OUTPUT
+-------------------
+Produce a CSV suitable for a stacked-bar request-latency figure.
+
+Primary plot:
+
+    ShadowKV vs BasisKV
+    at:
+        64K B1
+        64K B8
+        ~128K B1
+        ~128K B8
+
+Stack components:
+
+    Prefill
+    Online representation construction
+    128-token decode
+
+Within the ShadowKV construction component retain the detailed:
+    gather / SVD / redistribution
+breakdown for an appendix table or inset.
+
+Also output a small steady-state decode table for:
+    Dense
+    ShadowKV
+    BasisKV
+
+Do NOT claim that an E2E difference is a decode-kernel difference if the
+difference comes from representation construction.
+
+
+===============================================================================
+EXPERIMENT 2: STAR-KV V-only TP8 GPU-memory / OOM behavior
+===============================================================================
+
+GOAL
+----
+Measure how a STAR-KV-style shared low-rank VALUE representation behaves
+under TP8 compared with source-local BasisKV Value compression.
+
+THIS IS A V-COMPRESSION-ONLY EXPERIMENT.
+
+Do NOT enable:
+    BasisKV Key routing
+    ShadowKV routing
+    STAR-KV K compression
+
+All methods use:
+    dense exact K
+    full attention
+
+We only change the Value representation.
+
+LABEL THE BASELINE CLEARLY
+--------------------------
+Use the label:
+
+    "STAR-KV V-only"
+
+or
+
+    "STAR-KV Value compression"
+
+Do not present it as the complete STAR-KV method if K compression is disabled.
+
+METHODS
+-------
+Run these Value configurations:
+
+1. Dense
+       local V width / TP rank = 128
+
+2. BasisKV V96 / ALS-full
+       source-local width / TP rank = 96
+
+3. BasisKV V64 / ALS-full
+       source-local width / TP rank = 64
+
+4. STAR-KV V-only, 75% retained
+       original global V width = 1024
+       shared latent rank rV = 768
+       replicated on every TP rank
+
+5. STAR-KV V-only, 50% retained
+       original global V width = 1024
+       shared latent rank rV = 512
+       replicated on every TP rank
+
+If actual STAR-KV exported ranks differ from these nominal targets, use the
+actual ranks and record them. Never report nominal compression when the
+real exported rank differs.
+
+STAR-KV TP8 SEMANTICS
+---------------------
+Preserve STAR-KV's layer-wise shared Value latent.
+
+For each layer:
+
+    V_c = X W_V_low
+        shape [B, T, rV]
+
+The latent is shared across all KV heads.
+
+Under TP8, to preserve this factorization while allowing each rank to compute
+its local attention output without per-token cross-rank communication:
+
+    replicate the complete V_c on every TP rank
+
+Each rank stores only the decoder/up-projection slice required to recover its
+local Value/output contribution.
+
+DO NOT silently replace this with 8 independent local low-rank decompositions.
+That would be a different algorithm.
+
+The intended per-token V-state widths per GPU are therefore approximately:
+
+    Dense TP8:
+        128
+
+    Basis V96:
+        96
+
+    Basis V64:
+        64
+
+    STAR-KV 75%:
+        768
+
+    STAR-KV 50%:
+        512
+
+The purpose of the experiment is precisely to measure the resulting TP8
+placement behavior.
+
+FAIRNESS
+--------
+Dense K is identical in all arms.
+
+Do not count model weights differently between methods.
+
+Do not introduce CPU V offload for one method unless all compared methods use
+the same policy.
+
+Use BF16 Value-cache state for all methods.
+
+Use the same attention/backend wherever compatible.
+
+This is NOT a speed benchmark for STAR-KV.
+Do not optimize the figure around latency.
+The primary endpoint is GPU-resident memory / capacity.
+
+PREFILL DESIGN
+--------------
+IMPORTANT: Do not let a giant one-shot prefill temporary tensor dominate the
+result.
+
+The existing fixed runner can fail at ~128K/B16 because of a large temporary
+prompt/hidden-state allocation. That is not the effect we want to measure.
+
+For this experiment implement/use a bounded-memory chunked prefill path for
+ALL arms, with the same chunk size, e.g.:
+
+    prefill chunk = 4096 or 8192 tokens
+
+Choose one value after a smoke test and freeze it for all formal runs.
+
+The benchmark must distinguish:
+
+    cache/state OOM
+
+from
+
+    unrelated transient prefill workspace OOM
+
+If a failure is caused by transient prefill workspace, record it separately
+and do not describe it as a KV-cache capacity limit.
+
+GRID
+----
+Use:
+
+    sequence lengths:
+        4096
+        16384
+        32768
+        65536
+        98304
+        130048
+
+    batch sizes:
+        1
+        4
+        8
+
+Use the same real-text cohorts as the existing TP8 benchmark where possible.
+
+For capacity/OOM behavior, one successful prefill + one decode step is
+sufficient after the cache has been fully populated, but use three cohorts
+where practical so failures are reproducible.
+
+Do not skip failed configurations.
+Record them explicitly.
+
+MEMORY METRICS
+--------------
+For every run collect:
+
+1. max-rank PyTorch allocated bytes:
+       end of cache construction
+       decode-ready resident
+       peak prefill
+       peak decode
+
+2. PyTorch reserved bytes
+
+3. NVML process memory per rank if available
+
+4. explicit active state bytes:
+       dense K cache
+       V cache / V latent
+       decoder/factor state
+       attention workspace
+       other persistent cache metadata
+
+5. max across the 8 TP ranks
+
+6. OOM:
+       yes/no
+       exact phase
+       allocation size requested
+       rank that failed
+
+The main quantity for the paper should be:
+
+    decode-ready GPU-resident memory per GPU
+
+Peak prefill is secondary and must be shown separately.
+
+THEORETICAL SANITY CHECK
+------------------------
+For BF16 and L layers, verify the measured Value-cache trend against:
+
+Dense:
+    M_V / rank =
+        B * T * L * 128 * 2 bytes
+
+Basis V96:
+    B * T * L * 96 * 2
+
+Basis V64:
+    B * T * L * 64 * 2
+
+STAR-KV V-only 75%:
+    B * T * L * 768 * 2
+
+STAR-KV V-only 50%:
+    B * T * L * 512 * 2
+
+The total measured process memory will also include dense K, weights,
+workspace, etc., so do not expect total process memory to equal these formulas.
+
+Output both:
+    theoretical active V bytes
+    measured total/resident GPU memory
+
+FIGURE OUTPUT
+-------------
+Produce a CSV and plotting script for:
+
+MAIN/APPENDIX FIGURE:
+    "TP8 GPU-resident memory vs context length"
+
+Two panels:
+
+    panel A: B=1
+    panel B: B=8
+
+x-axis:
+    context length
+
+y-axis:
+    decode-ready GPU-resident GiB / GPU
+
+curves:
+    Dense
+    Basis V96
+    Basis V64
+    STAR-KV V-only 75%
+    STAR-KV V-only 50%
+
+Mark OOM configurations explicitly at the top boundary instead of dropping
+them from the plot.
+
+Also produce a small table containing:
+
+    first OOM context for each method/batch
+    largest successful context
+    measured resident GiB
+    theoretical active V GiB
+
+OPTIONAL:
+If the data are especially clear, also produce a B_max-vs-context table.
+Do NOT spend significant time on an exhaustive integer B_max search unless
+the basic grid is complete first.
+
+
+===============================================================================
+OUTPUT DIRECTORY AND ARTIFACTS
+===============================================================================
+
+Create:
+
+results/system_benchmarks/tp8_external_baselines/
+
+with:
+
+shadowkv/
+    raw/
+    summary.csv
+    request_breakdown.csv
+    decode_summary.csv
+    memory_summary.csv
+    failures.csv
+    README.md
+
+starkv_v_only/
+    raw/
+    summary.csv
+    memory_summary.csv
+    oom_frontier.csv
+    failures.csv
+    README.md
+
+plots/
+    shadowkv_request_breakdown.pdf
+    shadowkv_request_breakdown.png
+    starkv_tp8_memory.pdf
+    starkv_tp8_memory.png
+
+Also create a top-level:
+
+results/system_benchmarks/tp8_external_baselines/SUMMARY.md
+
+The summary must state:
+
+- exact code commit
+- whether the worktree was dirty
+- exact model revision
+- hardware/topology
+- TP/DP/PP
+- software/CUDA/NCCL versions
+- exact baseline source/commit
+- all parameter choices
+- exact timing boundary
+- exact memory definition
+- all failures
+- which numbers are measured vs theoretical
+
+Do not hide failed trials.
+Do not average an OOM away.
+Do not substitute a smaller batch after failure without recording the original
+failure.
+
+===============================================================================
+EXECUTION ORDER
+===============================================================================
+
+Do the work in this order:
+
+1. Inspect the existing formal TP8 BasisKV benchmark and reuse its:
+       model loading
+       TP partitioning
+       cohort generation
+       timing helpers
+       JSON schema
+       memory helpers
+
+2. Implement unit/smoke tests for TP8 ShadowKV factor construction.
+
+3. Run ShadowKV:
+       64K/B1
+       128K/B1
+   first.
+   Validate correctness and timing breakdown.
+
+4. Then complete ShadowKV B1/B4/B8 grid.
+
+5. Implement STAR-KV V-only TP8 placement.
+
+6. Verify state-shape / byte-count formulas at 4K/B1.
+
+7. Verify chunked prefill gives consistent model state while bounding transient
+   memory.
+
+8. Run STAR-KV memory grid from shortest/smallest to longest/largest.
+
+9. Generate summaries and plots only from raw recorded results.
+
+Do not change algorithm parameters after seeing formal results.
+
+If an external baseline cannot be reproduced faithfully because a required
+checkpoint/factor file is unavailable, STOP that baseline and document the
+missing artifact. Do not silently replace it with random factors, plain SVD,
+or a locally invented approximation.
+
+At completion, print:
+    - paths to all result summaries
+    - successful/failed trial counts
+    - headline measured numbers
+    - any protocol deviations
+    - any result that should NOT be used in the paper
