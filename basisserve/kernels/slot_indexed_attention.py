@@ -140,7 +140,8 @@ def _split_slot_kernel(
 
 
 @triton.jit
-def _merge_kernel(partial, lse, output, R:tl.constexpr, BR:tl.constexpr, SPLITS:tl.constexpr):
+def _merge_kernel(partial, lse, output, R:tl.constexpr, BR:tl.constexpr, SPLITS:tl.constexpr,
+                  HEADS:tl.constexpr, O0:tl.constexpr, O1:tl.constexpr, O3:tl.constexpr):
     row=tl.program_id(0)
     splits=tl.arange(0,SPLITS)
     dims=tl.arange(0,BR)
@@ -149,7 +150,7 @@ def _merge_kernel(partial, lse, output, R:tl.constexpr, BR:tl.constexpr, SPLITS:
     weights=weights/tl.sum(weights,0)
     values=tl.load(partial+(row*SPLITS+splits[:,None])*R+dims[None,:],dims[None,:]<R,0)
     out=tl.sum(values*weights[:,None],0)
-    tl.store(output+row*R+dims,out,dims<R)
+    tl.store(output+(row//HEADS)*O0+(row%HEADS)*O1+dims*O3,out,dims<R)
 
 
 
@@ -165,5 +166,6 @@ def slot_indexed_attention(q,k,v,ids,slots,workspace,*,scale):
         SCALE=scale,QUERY_HEADS=heads,HEADS_PER_KV=heads//k.shape[1],QK_DIM=d,VALUE_DIM=rank,
         selected_count=ids.shape[-1],BLOCK_QK=triton.next_power_of_2(d),BLOCK_VALUE=triton.next_power_of_2(rank),
         BLOCK_SELECTED=32,SPLITS=splits,PER_SPLIT=per_split,num_warps=4)
-    _merge_kernel[(batch*heads,)](partial,lse,out,R=rank,BR=triton.next_power_of_2(rank),SPLITS=splits,num_warps=4)
+    _merge_kernel[(batch*heads,)](partial,lse,out,R=rank,BR=triton.next_power_of_2(rank),SPLITS=splits,
+        HEADS=heads,O0=out.stride(0),O1=out.stride(1),O3=out.stride(3),num_warps=4)
     return out

@@ -1,5 +1,4 @@
 """Exact-K Page32 metadata and candidate-only register MMA routing."""
-import hashlib
 from pathlib import Path
 import torch
 import triton as tr
@@ -65,6 +64,9 @@ class Metadata:
         b,h,n,_=k.shape;self.h=h;self.n=n-64;self.cap=tr.cdiv(capacity,32)
         self.minimum=torch.empty(b,h,self.cap,128,device=k.device,dtype=k.dtype)
         self.maximum=torch.empty_like(self.minimum)
+        self.score_storage=torch.empty(b*h*4*self.cap,device=k.device,dtype=torch.float32)
+        pages=tr.cdiv(n,32)
+        self.score_output=self.score_storage[:b*h*4*pages].view(b,h,4,pages)
         self.ring=k[:,:,-64:].contiguous().clone();self.slot=0
         _summary[(b*h,tr.cdiv(self.n,32))](k,self.minimum,self.maximum,self.n,h,self.cap,*k.stride()[:3])
     def advance(self,k):
@@ -73,8 +75,11 @@ class Metadata:
     def commit_advance(self):
         self.n+=1;self.slot=(self.slot+1)%64
     def scores(self,q):
+        """Return transient scores backed by the reusable decode workspace."""
         p=tr.cdiv(self.n+64,32)
-        out=torch.empty(q.shape[0],self.h,4,p,device=q.device)
+        if self.score_output.shape[-1]!=p:
+            self.score_output=self.score_storage[:q.shape[0]*self.h*4*p].view(q.shape[0],self.h,4,p)
+        out=self.score_output
         _coarse[(q.shape[0]*self.h*4,tr.cdiv(p,16))](q,self.minimum,self.maximum,out,self.h,self.cap,p,self.n,*q.stride()[:2])
         return out
 
@@ -112,6 +117,5 @@ def compile_fine(root):
     cpp=cpp.replace('pybind11::arg("query_code_prepared"));','pybind11::arg("query_code_prepared"), pybind11::arg("ids"));')
     write_source(folder/'mapped_host_paged_attention.cpp',cpp)
     write_source(folder/'mapped_host_paged_attention.cu',(src/'mapped_host_paged_attention.cu').read_text())
-    digest=hashlib.sha256((text+cpp).encode()).hexdigest()[:10]
-    fine=load(name=f'two_stage_{digest}',sources=[str(folder/n) for n in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','-DBASIS_VALUE_DIM=128','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32','-DBASIS_BASE_RANK=16','-DBASIS_RESIDUAL_RANK=16','-DREGISTER_WARPS=8','-DBASIS_DISABLE_REGISTER_ROUTER'])
+    fine=load(name='two_stage_b16_w8',sources=[str(folder/n) for n in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','-DBASIS_VALUE_DIM=128','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32','-DBASIS_BASE_RANK=16','-DBASIS_RESIDUAL_RANK=16','-DREGISTER_WARPS=8','-DBASIS_DISABLE_REGISTER_ROUTER'])
     return full,fine

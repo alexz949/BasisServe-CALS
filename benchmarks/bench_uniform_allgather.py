@@ -162,17 +162,20 @@ def measure(
     timing_stream: torch.cuda.Stream | None = None,
 ) -> tuple[torch.Tensor, list[float]]:
     output: torch.Tensor | None = None
-    for _ in range(warmup):
-        output = run_once()
+    with torch.cuda.stream(timing_stream):
+        for _ in range(warmup):
+            output = run_once()
     torch.cuda.synchronize(device)
     dist.barrier()
 
     starts = [torch.cuda.Event(enable_timing=True) for _ in range(iters)]
     ends = [torch.cuda.Event(enable_timing=True) for _ in range(iters)]
-    for start, end in zip(starts, ends, strict=True):
-        start.record(timing_stream)
-        output = run_once()
-        end.record(timing_stream)
+    # Graph replay launches on the current stream, not its capture stream.
+    with torch.cuda.stream(timing_stream):
+        for start, end in zip(starts, ends, strict=True):
+            start.record()
+            output = run_once()
+            end.record()
     assert output is not None
     ends[-1].synchronize()
     local = torch.tensor(

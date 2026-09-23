@@ -1,0 +1,903 @@
+diff --git a/basisserve/core/llama31_8b_tp8_combined.py b/basisserve/core/llama31_8b_tp8_combined.py
+index 2d5e652..7bef01b 100644
+--- a/basisserve/core/llama31_8b_tp8_combined.py
++++ b/basisserve/core/llama31_8b_tp8_combined.py
+@@ -3,7 +3,6 @@
+ from __future__ import annotations
+ 
+ from functools import lru_cache
+-import hashlib
+ import math
+ from pathlib import Path
+ from types import MethodType
+@@ -80,20 +79,11 @@ class DecodeBreakdownRecorder:
+         }
+ 
+ 
+-def _sha256(path: Path) -> str:
+-    digest = hashlib.sha256()
+-    with path.open("rb") as source:
+-        while block := source.read(1 << 20):
+-            digest.update(block)
+-    return digest.hexdigest()
+-
+-
+ @lru_cache(maxsize=1)
+ def load_decode_postprocess_extension() -> object:
+     source = Path(__file__).resolve().parents[1] / "kernels/csrc/fused_decode_postprocess.cu"
+-    digest = _sha256(source)[:10]
+     return load(
+-        name=f"basisserve_fused_decode_postprocess_{digest}",
++        name="basisserve_fused_decode_postprocess",
+         sources=[str(source)],
+         extra_cflags=["-O3", "-std=c++17"],
+         extra_cuda_cflags=["-O3", "-std=c++17", "--use_fast_math"],
+@@ -348,6 +338,7 @@ class JointALSTP8Attention(nn.Module):
+                 device=device, dtype=torch.bfloat16,
+             )
+             self.candidate_ids = torch.empty(batch, 1, 512, device=device, dtype=torch.long)
++            self.all_candidate_ids: torch.Tensor | None = None
+             self.fine_router_output = torch.empty(
+                 batch, 1, QUERY_HEADS_PER_RANK, min(512, maximum_pages),
+                 device=device, dtype=torch.float32,
+@@ -508,18 +499,33 @@ class JointALSTP8Attention(nn.Module):
+         )
+         self.metadata.commit_advance()
+ 
++    def _candidate_pages(self, query: torch.Tensor) -> torch.Tensor:
++        assert self.metadata is not None
++        pages = math.ceil((self.metadata.n + RECENT_TOKENS) / PAGE_SIZE)
++        if pages > 512:
++            coarse = self.breakdown.begin("router_coarse") if self.breakdown else None
++            coarse_scores = self.metadata.scores(query)
++            DecodeBreakdownRecorder.end(coarse)
++        selection = self.breakdown.begin("router_candidates") if self.breakdown else None
++        if pages <= 512:
++            # Every page survives; reuse the IDs until a page boundary is crossed.
++            if self.all_candidate_ids is None or self.all_candidate_ids.shape[-1] != pages:
++                self.all_candidate_ids = torch.arange(
++                    pages, device=query.device, dtype=torch.long
++                )[None, None].expand(query.shape[0], KV_HEADS_PER_RANK, -1).contiguous()
++            candidate_ids = self.all_candidate_ids
++        else:
++            candidate_ids = fused_candidates(
++                coarse_scores, self.metadata.n, output=self.candidate_ids
++            )
++        DecodeBreakdownRecorder.end(selection)
++        return candidate_ids
++
+     def _basis_decode_attention(self, query: torch.Tensor, end: int) -> torch.Tensor:
+         assert end > SUPPORT_TOKENS and self.metadata is not None
+         historical = end - RECENT_TOKENS
+         factors = self.router_factors
+-        coarse = self.breakdown.begin("router_coarse") if self.breakdown else None
+-        coarse_scores = self.metadata.scores(query)
+-        DecodeBreakdownRecorder.end(coarse)
+-        selection = self.breakdown.begin("router_candidates") if self.breakdown else None
+-        candidate_ids = fused_candidates(
+-            coarse_scores, historical, output=self.candidate_ids
+-        )
+-        DecodeBreakdownRecorder.end(selection)
++        candidate_ids = self._candidate_pages(query)
+         candidate_count = candidate_ids.shape[-1]
+         route_args = (
+             query,
+diff --git a/basisserve/kernels/slot_indexed_attention.py b/basisserve/kernels/slot_indexed_attention.py
+index 2908994..fee9f2d 100644
+--- a/basisserve/kernels/slot_indexed_attention.py
++++ b/basisserve/kernels/slot_indexed_attention.py
+@@ -140,7 +140,8 @@ def _split_slot_kernel(
+ 
+ 
+ @triton.jit
+-def _merge_kernel(partial, lse, output, R:tl.constexpr, BR:tl.constexpr, SPLITS:tl.constexpr):
++def _merge_kernel(partial, lse, output, R:tl.constexpr, BR:tl.constexpr, SPLITS:tl.constexpr,
++                  HEADS:tl.constexpr, O0:tl.constexpr, O1:tl.constexpr, O3:tl.constexpr):
+     row=tl.program_id(0)
+     splits=tl.arange(0,SPLITS)
+     dims=tl.arange(0,BR)
+@@ -149,7 +150,7 @@ def _merge_kernel(partial, lse, output, R:tl.constexpr, BR:tl.constexpr, SPLITS:
+     weights=weights/tl.sum(weights,0)
+     values=tl.load(partial+(row*SPLITS+splits[:,None])*R+dims[None,:],dims[None,:]<R,0)
+     out=tl.sum(values*weights[:,None],0)
+-    tl.store(output+row*R+dims,out,dims<R)
++    tl.store(output+(row//HEADS)*O0+(row%HEADS)*O1+dims*O3,out,dims<R)
+ 
+ 
+ 
+@@ -165,5 +166,6 @@ def slot_indexed_attention(q,k,v,ids,slots,workspace,*,scale):
+         SCALE=scale,QUERY_HEADS=heads,HEADS_PER_KV=heads//k.shape[1],QK_DIM=d,VALUE_DIM=rank,
+         selected_count=ids.shape[-1],BLOCK_QK=triton.next_power_of_2(d),BLOCK_VALUE=triton.next_power_of_2(rank),
+         BLOCK_SELECTED=32,SPLITS=splits,PER_SPLIT=per_split,num_warps=4)
+-    _merge_kernel[(batch*heads,)](partial,lse,out,R=rank,BR=triton.next_power_of_2(rank),SPLITS=splits,num_warps=4)
++    _merge_kernel[(batch*heads,)](partial,lse,out,R=rank,BR=triton.next_power_of_2(rank),SPLITS=splits,
++        HEADS=heads,O0=out.stride(0),O1=out.stride(1),O3=out.stride(3),num_warps=4)
+     return out
+diff --git a/benchmarks/bench_uniform_allgather.py b/benchmarks/bench_uniform_allgather.py
+index 312c76c..f2d56de 100755
+--- a/benchmarks/bench_uniform_allgather.py
++++ b/benchmarks/bench_uniform_allgather.py
+@@ -162,17 +162,20 @@ def measure(
+     timing_stream: torch.cuda.Stream | None = None,
+ ) -> tuple[torch.Tensor, list[float]]:
+     output: torch.Tensor | None = None
+-    for _ in range(warmup):
+-        output = run_once()
++    with torch.cuda.stream(timing_stream):
++        for _ in range(warmup):
++            output = run_once()
+     torch.cuda.synchronize(device)
+     dist.barrier()
+ 
+     starts = [torch.cuda.Event(enable_timing=True) for _ in range(iters)]
+     ends = [torch.cuda.Event(enable_timing=True) for _ in range(iters)]
+-    for start, end in zip(starts, ends, strict=True):
+-        start.record(timing_stream)
+-        output = run_once()
+-        end.record(timing_stream)
++    # Graph replay launches on the current stream, not its capture stream.
++    with torch.cuda.stream(timing_stream):
++        for start, end in zip(starts, ends, strict=True):
++            start.record()
++            output = run_once()
++            end.record()
+     assert output is not None
+     ends[-1].synchronize()
+     local = torch.tensor(
+diff --git a/benchmarks/system/bench_llama31_8b_tp8_combined.py b/benchmarks/system/bench_llama31_8b_tp8_combined.py
+index db4dd18..6adbab4 100644
+--- a/benchmarks/system/bench_llama31_8b_tp8_combined.py
++++ b/benchmarks/system/bench_llama31_8b_tp8_combined.py
+@@ -3,8 +3,7 @@
+ from __future__ import annotations
+ 
+ import argparse
+-from datetime import timedelta
+-import hashlib
++from datetime import datetime, timedelta, timezone
+ import json
+ import math
+ import os
+@@ -41,7 +40,7 @@ from basisserve.core.llama31_8b_tp8_combined import (
+ )
+ from basisserve.kernels.feature_ragged_allgather import FeatureRaggedCommunicator
+ from basisserve.kernels.mapped_host_paged_attention import _load_extension
+-from benchmarks.system.common import metadata
++from benchmarks.system.common import command
+ from benchmarks.system.numa_memory import bind_host_allocations
+ from benchmarks.system.two_stage_router import compile_fine
+ 
+@@ -109,14 +108,6 @@ def _choose(logits: torch.Tensor, vocab_size: int) -> torch.Tensor:
+     return ids
+ 
+ 
+-def _sha256(path: Path) -> str:
+-    digest = hashlib.sha256()
+-    with path.open("rb") as source:
+-        while block := source.read(8 << 20):
+-            digest.update(block)
+-    return digest.hexdigest()
+-
+-
+ def _load_prompts(
+     path: Path, manifest_path: Path | None, *, batch: int, length: int
+ ) -> tuple[torch.Tensor, dict]:
+@@ -126,7 +117,8 @@ def _load_prompts(
+     assert all(torch.unique(prompts[index]).numel() > 1 for index in range(batch))
+     if manifest_path is None:
+         prompt_metadata = {
+-            "tokens_file_sha256": _sha256(path),
++            "tokens_file": str(path),
++            "tokens_file_bytes": path.stat().st_size,
+             "sample_ids": [f"row_{index}" for index in range(batch)],
+             "cohort_hash": None,
+         }
+@@ -135,11 +127,11 @@ def _load_prompts(
+         assert prompt_metadata["status"] == "complete"
+         assert prompt_metadata["prompt_tokens"] == length
+         assert prompt_metadata["maximum_batch"] >= batch
+-        assert prompt_metadata["tokens_file_sha256"] == _sha256(path)
+         prompt_metadata = {
+             **prompt_metadata,
+             "sample_ids": prompt_metadata["sample_ids"][:batch],
+-            "token_sha256": prompt_metadata["token_sha256"][:batch],
++            "tokens_file_bytes": path.stat().st_size,
++            "integrity_validation": "shape_and_manifest_fields_only",
+         }
+     return prompts, prompt_metadata
+ 
+@@ -221,9 +213,12 @@ def main() -> None:
+             base_rank=BASE_RANK,
+             residual_rank=RESIDUAL_RANK,
+         )
+-        _, fine_router_extension = compile_fine(
+-            Path(f"/tmp/basisserve_tp8_two_stage/rank{rank}")
+-        )
++        fine_build_root = Path("/tmp/basisserve_tp8_two_stage/shared")
++        if rank == 0:
++            _, fine_router_extension = compile_fine(fine_build_root)
++        dist.barrier()
++        if rank != 0:
++            _, fine_router_extension = compile_fine(fine_build_root)
+         postprocess_extension = load_decode_postprocess_extension()
+     else:
+         _load_extension(
+@@ -436,7 +431,18 @@ def main() -> None:
+             str(args.prompt_manifest.resolve()) if args.prompt_manifest is not None else None
+         ),
+         "prompt_cohort": prompt_metadata,
+-        "metadata": metadata(),
++        "metadata": {
++            "git_commit": command(["git", "rev-parse", "HEAD"])["stdout"].strip(),
++            "git_status": command(["git", "status", "--porcelain"])["stdout"],
++            "command_line": sys.argv,
++            "pytorch": torch.__version__,
++            "cuda": torch.version.cuda,
++            "nccl": torch.cuda.nccl.version(),
++            "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
++            "torch_matmul_tf32": torch.backends.cuda.matmul.allow_tf32,
++            "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
++            "source_hash_validation": "not_performed",
++        },
+     }
+     result_path = folder / f"rank{rank}.json"
+     result_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+diff --git a/benchmarks/system/register_router.py b/benchmarks/system/register_router.py
+index 7839926..89d3d60 100644
+--- a/benchmarks/system/register_router.py
++++ b/benchmarks/system/register_router.py
+@@ -1,5 +1,4 @@
+ """Build the register-consumed MMA router against the current serving baseline."""
+-import hashlib
+ from pathlib import Path
+ from torch.utils.cpp_extension import load
+ from benchmarks.system.local_kernel_candidates import write_source
+@@ -21,8 +20,7 @@ def compile_register(root, rank, warps):
+     write_source(folder/'conditional_router_page32.cu',text)
+     for name in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu']:
+         write_source(folder/name,(src/name).read_text())
+-    digest=hashlib.sha256(text.encode()).hexdigest()[:10]
+-    return load(name=f'register_router_{digest}_b{rank}_w{warps}',
++    return load(name=f'register_router_b{rank}_w{warps}',
+         sources=[str(folder/name) for name in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],
+         extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','--ptxas-options=-v',
+             '-DBASIS_VALUE_DIM=80','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32',
+diff --git a/benchmarks/system/run_llama31_8b_tp8_decode_grid.py b/benchmarks/system/run_llama31_8b_tp8_decode_grid.py
+index 62417ac..b7e4d9a 100644
+--- a/benchmarks/system/run_llama31_8b_tp8_decode_grid.py
++++ b/benchmarks/system/run_llama31_8b_tp8_decode_grid.py
+@@ -33,23 +33,39 @@ def main() -> None:
+         "--contexts", nargs="+", type=int, choices=tuple(MATRIX), default=tuple(MATRIX)
+     )
+     parser.add_argument("--cohorts", nargs="+", type=int, choices=(0, 1, 2), default=(0, 1, 2))
++    parser.add_argument("--batches", nargs="+", type=int)
++    parser.add_argument("--tag", default="formal_decode")
++    parser.add_argument("--profile-components", action="store_true")
+     parser.add_argument("--conditioning-steps", type=int, default=16)
+     parser.add_argument("--measure-steps", type=int, default=128)
+     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT)
+     args = parser.parse_args()
+     assert args.conditioning_steps >= 0 and args.measure_steps > 0
+     assert PROMPT_ROOT.is_dir() and BENCHMARK.is_file()
++    matrix = {
++        length: [batch for batch in MATRIX[length] if args.batches is None or batch in args.batches]
++        for length in args.contexts
++    }
++    assert all(matrix.values())
+     args.output_root.mkdir(parents=True, exist_ok=True)
+     manifest_path = args.output_root / "decode_grid_trials.json"
+     if manifest_path.exists():
+         manifest = json.loads(manifest_path.read_text())
+         assert manifest["status"] in ("running", "complete_with_failures", "complete")
++        assert manifest["conditioning_steps"] == args.conditioning_steps
++        assert manifest["measure_steps"] == args.measure_steps
++        assert manifest["matrix"] == {str(key): value for key, value in matrix.items()}
++        assert manifest["arms"] == list(args.arms) and manifest["cohorts"] == list(args.cohorts)
++        assert manifest["tag"] == args.tag
++        assert manifest["profile_components"] == args.profile_components
+     else:
+         manifest = {
+             "status": "running",
+             "format": "basisserve.llama31_8b.tp8_combined_decode_grid.v1",
+             "created_at": datetime.now(timezone.utc).isoformat(),
+-            "matrix": {str(key): list(value) for key, value in MATRIX.items()},
++            "matrix": {str(key): value for key, value in matrix.items()},
++            "tag": args.tag,
++            "profile_components": args.profile_components,
+             "arms": list(args.arms),
+             "contexts": list(args.contexts),
+             "cohorts": list(args.cohorts),
+@@ -65,7 +81,7 @@ def main() -> None:
+     for prompt_tokens in args.contexts:
+         tokens = PROMPT_ROOT / f"p{prompt_tokens}_c0.safetensors"
+         assert tokens.is_file()
+-        for batch in MATRIX[prompt_tokens]:
++        for batch in matrix[prompt_tokens]:
+             for cohort in args.cohorts:
+                 tokens = PROMPT_ROOT / f"p{prompt_tokens}_c{cohort}.safetensors"
+                 prompt_manifest = PROMPT_ROOT / f"p{prompt_tokens}_c{cohort}.json"
+@@ -86,11 +102,13 @@ def main() -> None:
+                         "--conditioning-steps", str(args.conditioning_steps),
+                         "--measure-steps", str(args.measure_steps),
+                         "--repeat", str(cohort),
+-                        "--tag", f"formal_decode_c{cohort}",
++                        "--tag", f"{args.tag}_c{cohort}",
+                         "--tokens", str(tokens),
+                         "--prompt-manifest", str(prompt_manifest),
+                         "--output-root", str(args.output_root),
+                     ]
++                    if args.profile_components:
++                        command.append("--profile-components")
+                     trial_log = args.output_root / (
+                         f"launcher_{arm}_p{prompt_tokens}_b{batch}_c{cohort}.log"
+                     )
+diff --git a/benchmarks/system/two_stage_router.py b/benchmarks/system/two_stage_router.py
+index c15a16a..47502da 100644
+--- a/benchmarks/system/two_stage_router.py
++++ b/benchmarks/system/two_stage_router.py
+@@ -1,5 +1,4 @@
+ """Exact-K Page32 metadata and candidate-only register MMA routing."""
+-import hashlib
+ from pathlib import Path
+ import torch
+ import triton as tr
+@@ -65,6 +64,9 @@ class Metadata:
+         b,h,n,_=k.shape;self.h=h;self.n=n-64;self.cap=tr.cdiv(capacity,32)
+         self.minimum=torch.empty(b,h,self.cap,128,device=k.device,dtype=k.dtype)
+         self.maximum=torch.empty_like(self.minimum)
++        self.score_storage=torch.empty(b*h*4*self.cap,device=k.device,dtype=torch.float32)
++        pages=tr.cdiv(n,32)
++        self.score_output=self.score_storage[:b*h*4*pages].view(b,h,4,pages)
+         self.ring=k[:,:,-64:].contiguous().clone();self.slot=0
+         _summary[(b*h,tr.cdiv(self.n,32))](k,self.minimum,self.maximum,self.n,h,self.cap,*k.stride()[:3])
+     def advance(self,k):
+@@ -73,8 +75,11 @@ class Metadata:
+     def commit_advance(self):
+         self.n+=1;self.slot=(self.slot+1)%64
+     def scores(self,q):
++        """Return transient scores backed by the reusable decode workspace."""
+         p=tr.cdiv(self.n+64,32)
+-        out=torch.empty(q.shape[0],self.h,4,p,device=q.device)
++        if self.score_output.shape[-1]!=p:
++            self.score_output=self.score_storage[:q.shape[0]*self.h*4*p].view(q.shape[0],self.h,4,p)
++        out=self.score_output
+         _coarse[(q.shape[0]*self.h*4,tr.cdiv(p,16))](q,self.minimum,self.maximum,out,self.h,self.cap,p,self.n,*q.stride()[:2])
+         return out
+ 
+@@ -112,6 +117,5 @@ def compile_fine(root):
+     cpp=cpp.replace('pybind11::arg("query_code_prepared"));','pybind11::arg("query_code_prepared"), pybind11::arg("ids"));')
+     write_source(folder/'mapped_host_paged_attention.cpp',cpp)
+     write_source(folder/'mapped_host_paged_attention.cu',(src/'mapped_host_paged_attention.cu').read_text())
+-    digest=hashlib.sha256((text+cpp).encode()).hexdigest()[:10]
+-    fine=load(name=f'two_stage_{digest}',sources=[str(folder/n) for n in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','-DBASIS_VALUE_DIM=128','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32','-DBASIS_BASE_RANK=16','-DBASIS_RESIDUAL_RANK=16','-DREGISTER_WARPS=8','-DBASIS_DISABLE_REGISTER_ROUTER'])
++    fine=load(name='two_stage_b16_w8',sources=[str(folder/n) for n in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','-DBASIS_VALUE_DIM=128','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32','-DBASIS_BASE_RANK=16','-DBASIS_RESIDUAL_RANK=16','-DREGISTER_WARPS=8','-DBASIS_DISABLE_REGISTER_ROUTER'])
+     return full,fine
+diff --git a/benchmarks/system/bench_tp8_candidate_path.py b/benchmarks/system/bench_tp8_candidate_path.py
+new file mode 100644
+index 0000000..fe1aa43
+--- /dev/null
++++ b/benchmarks/system/bench_tp8_candidate_path.py
+@@ -0,0 +1,125 @@
++"""Compare TP8 candidate selection before and after workspace reuse."""
++
++import argparse
++from datetime import datetime, timezone
++import json
++from pathlib import Path
++import statistics
++import sys
++import time
++from types import SimpleNamespace
++
++import torch
++
++ROOT = Path(__file__).resolve().parents[2]
++sys.path.insert(0, str(ROOT))
++
++from basisserve.core.llama31_8b_tp8_combined import JointALSTP8Attention
++from benchmarks.system.fused_candidates import candidates
++from benchmarks.system.two_stage_router import Metadata, _coarse
++
++
++def measure(call, iterations):
++    begin, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
++    torch.cuda.synchronize()
++    start = time.perf_counter()
++    begin.record()
++    for _ in range(iterations):
++        call()
++    end.record()
++    end.synchronize()
++    return {
++        "stream_us": begin.elapsed_time(end) * 1000 / iterations,
++        "wall_us": (time.perf_counter() - start) * 1e6 / iterations,
++    }
++
++
++@torch.inference_mode()
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--lengths", nargs="+", type=int, default=[4096, 16384, 65536, 130048])
++    parser.add_argument("--batches", nargs="+", type=int, default=[1, 8])
++    parser.add_argument("--iterations", type=int, default=32)
++    parser.add_argument("--trials", type=int, default=5)
++    parser.add_argument("--decode-offset", type=int, default=17)
++    parser.add_argument("--output", type=Path, default=ROOT / "results/system_benchmarks/tp8_path_opt/candidates.json")
++    args = parser.parse_args()
++    assert args.iterations > 0 and args.trials > 0
++    assert args.decode_offset >= 0
++    assert all(length >= 4096 for length in args.lengths)
++    assert all(batch > 0 for batch in args.batches)
++    torch.set_num_threads(2)
++    torch.manual_seed(42)
++    results = []
++    for length in args.lengths:
++        for batch in args.batches:
++            cache_length = length + args.decode_offset
++            keys = torch.randn(batch, 1, cache_length, 128, device="cuda", dtype=torch.bfloat16)
++            query = torch.randn(batch, 4, 1, 128, device="cuda", dtype=keys.dtype)
++            metadata = Metadata(keys, cache_length + 144)
++            pages = (cache_length + 31) // 32
++            old_ids = torch.empty(batch, 1, 512, device="cuda", dtype=torch.long)
++            attention = SimpleNamespace(
++                metadata=metadata, breakdown=None, all_candidate_ids=None,
++                candidate_ids=torch.empty_like(old_ids),
++            )
++
++            def original_scores():
++                count = (metadata.n + 64 + 31) // 32
++                scores = torch.empty(query.shape[0], metadata.h, 4, count, device=query.device)
++                _coarse[(query.shape[0] * metadata.h * 4, (count + 15) // 16)](
++                    query, metadata.minimum, metadata.maximum, scores,
++                    metadata.h, metadata.cap, count, metadata.n, *query.stride()[:2],
++                )
++                return scores
++
++            def before():
++                # The archived path allocates and scores even when all pages survive.
++                return candidates(original_scores(), metadata.n, output=old_ids)
++
++            def after():
++                return JointALSTP8Attention._candidate_pages(attention, query)
++
++            expected = before().clone()
++            torch.testing.assert_close(after(), expected, atol=0, rtol=0)
++            for _ in range(10):
++                before()
++                after()
++            samples = {"before": [], "after": []}
++            for trial in range(args.trials):
++                order = [("before", before), ("after", after)]
++                if trial % 2:
++                    order.reverse()
++                for name, call in order:
++                    samples[name].append(measure(call, args.iterations))
++            row = {"length": length, "cache_length": cache_length, "batch": batch, "pages": pages, "candidate_ids_equal": True}
++            for name, values in samples.items():
++                row[name] = {
++                    metric: statistics.median(value[metric] for value in values)
++                    for metric in ("stream_us", "wall_us")
++                }
++            row["samples"] = samples
++            results.append(row)
++            print(json.dumps({key: value for key, value in row.items() if key != "samples"}), flush=True)
++            del attention, metadata, keys, query, old_ids, expected
++
++    payload = {
++        "scope": "Single-rank candidate selection only; synthetic BF16 inputs; steady-state fixed length",
++        "timing": "CUDA event intervals include stream idle time between eager launches; wall intervals include synchronization",
++        "limitations": "Excludes page-boundary updates, fine routing, K fetch, attention, decoder, and TP communication",
++        "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
++        "command": sys.argv,
++        "conda_environment": "basis",
++        "gpu": torch.cuda.get_device_name(),
++        "pytorch": torch.__version__,
++        "iterations": args.iterations,
++        "trials": args.trials,
++        "decode_offset": args.decode_offset,
++        "results": results,
++    }
++    args.output.parent.mkdir(parents=True, exist_ok=True)
++    args.output.write_text(json.dumps(payload, indent=2) + "\n")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/benchmarks/system/summarize_tp8_path_run.py b/benchmarks/system/summarize_tp8_path_run.py
+new file mode 100644
+index 0000000..fac8084
+--- /dev/null
++++ b/benchmarks/system/summarize_tp8_path_run.py
+@@ -0,0 +1,157 @@
++"""Validate and summarize the corrected TP8 decode pilot without file hashing."""
++
++import argparse
++import csv
++import json
++from pathlib import Path
++import statistics
++
++
++def write_csv(path, rows):
++    if not rows:
++        return
++    with path.open("w", newline="") as handle:
++        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
++        writer.writeheader()
++        writer.writerows(rows)
++
++
++def read_trials(root):
++    rows, profiles, generations = [], [], []
++    for phase in ("smoke", "timing", "profile"):
++        manifest_path = root / phase / "decode_grid_trials.json"
++        if not manifest_path.exists():
++            continue
++        manifest = json.loads(manifest_path.read_text())
++        for trial in manifest["trials"]:
++            command = trial["command"]
++            tag = command[command.index("--tag") + 1]
++            arm, length, batch, cohort = (trial[key] for key in ("arm", "prompt_tokens", "batch", "cohort"))
++            folder = root / phase / f"{tag}_{arm}_p{length}_b{batch}_r{cohort}"
++            row = dict(phase=phase, arm=arm, prompt_tokens=length, batch=batch, cohort=cohort,
++                       status="failed", rank_files=0, mean_ms=None, p50_ms=None, p95_ms=None,
++                       tokens_s=None, decode_gpu_maxrank_gib=None, host_exact_key_total_gib=None, ranks_identical=False,
++                       launcher_log=trial["log"])
++            if trial["returncode"] == 0:
++                paths = [folder / f"rank{rank}.json" for rank in range(8)]
++                assert all(path.is_file() for path in paths), str(folder)
++                ranks = [json.loads(path.read_text()) for path in paths]
++                first = ranks[0]
++                measured = manifest["measure_steps"]
++                generated = measured + manifest["conditioning_steps"] + 1
++                assert all(value["status"] == "complete" for value in ranks)
++                assert all(len(value["decode_step_ms"]) == measured for value in ranks)
++                assert all(value["generated_token_ids"] == first["generated_token_ids"] for value in ranks)
++                assert all(value["decode_step_ms"] == first["decode_step_ms"] for value in ranks)
++                assert len(first["generated_token_ids"]) == batch
++                assert all(len(tokens) == generated for tokens in first["generated_token_ids"])
++                row.update(status="complete", rank_files=8, mean_ms=first["decode_step_mean_ms"],
++                           p50_ms=first["decode_step_p50_ms"], p95_ms=first["decode_step_p95_ms"],
++                           tokens_s=first["decode_tokens_per_second"], ranks_identical=True,
++                           decode_gpu_maxrank_gib=max(value["decode_resident_allocated_bytes"] for value in ranks) / 2**30,
++                           host_exact_key_total_gib=sum(value["host_persistent_exact_key_bytes"] for value in ranks) / 2**30)
++                if phase == "timing":
++                    generations.append(dict(arm=arm, prompt_tokens=length, batch=batch, cohort=cohort,
++                                            token_ids=first["generated_token_ids"][0], model=first["model"]))
++                if phase == "profile":
++                    for component in sorted(first["component_profile"]):
++                        values = [value["component_profile"][component]["mean_ms_per_step"] for value in ranks]
++                        profiles.append(dict(arm=arm, prompt_tokens=length, batch=batch, cohort=cohort,
++                                             component=component, rank0_ms=values[0],
++                                             median_rank_ms=statistics.median(values), min_rank_ms=min(values),
++                                             max_rank_ms=max(values)))
++            rows.append(row)
++    return rows, profiles, generations
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--root", type=Path, default=Path("results/system_benchmarks/tp8_path_opt"))
++    args = parser.parse_args()
++    rows, profiles, generations = read_trials(args.root)
++    write_csv(args.root / "decode_summary.csv", rows)
++    write_csv(args.root / "component_profile.csv", profiles)
++    comparisons = []
++    for small in generations:
++        if small["batch"] != 1:
++            continue
++        large = next((value for value in generations if value["batch"] == 8 and all(
++            value[key] == small[key] for key in ("arm", "prompt_tokens", "cohort"))), None)
++        if large is None:
++            continue
++        pairs = list(zip(small["token_ids"], large["token_ids"], strict=True))
++        prefix = next((index for index, (a, b) in enumerate(pairs) if a != b), len(pairs))
++        comparisons.append(dict(arm=small["arm"], prompt_tokens=small["prompt_tokens"],
++                                token_agreement=sum(a == b for a, b in pairs) / len(pairs),
++                                exact_prefix_tokens=prefix, compared_tokens=len(pairs)))
++    write_csv(args.root / "batch_consistency.csv", comparisons)
++    if generations:
++        from transformers import AutoTokenizer
++        tokenizer = AutoTokenizer.from_pretrained(generations[0]["model"], local_files_only=True)
++        for sample in generations:
++            sample["text"] = tokenizer.decode(sample["token_ids"], skip_special_tokens=True)
++        (args.root / "generated_samples.json").write_text(json.dumps(generations, indent=2) + "\n")
++    counts = {phase: {status: sum(row["phase"] == phase and row["status"] == status for row in rows)
++                      for status in ("complete", "failed")} for phase in ("smoke", "timing", "profile")}
++    lines = ["# Corrected TP8 Decode Pilot", "", "Conda environment: `basis`. Jobs ran directly on 8 x L40S.", "",
++             "This is a single-cohort pilot, not the full three-cohort grid or a task-quality evaluation.", "",
++             "## Completion", "", "```json", json.dumps(counts, indent=2), "```", "",
++             "Every successful trial has eight rank JSON files, complete step arrays, and identical tokens/timings across ranks.", "",
++             "## Uninstrumented Timing", "", "| Prompt | B | Arm | Mean ms | P50 ms | P95 ms | tokens/s | vs Dense | vs ALS-full | GPU GiB/rank | Host K GiB total |",
++             "|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
++    timing = [row for row in rows if row["phase"] == "timing" and row["status"] == "complete"]
++    for row in timing:
++        dense = next((value for value in timing if value["arm"] == "dense" and all(
++            value[key] == row[key] for key in ("prompt_tokens", "batch", "cohort"))), None)
++        als = next((value for value in timing if value["arm"] == "als_full" and all(
++            value[key] == row[key] for key in ("prompt_tokens", "batch", "cohort"))), None)
++        speedup = f"{dense['mean_ms'] / row['mean_ms']:.3f}x" if dense else "-"
++        als_speedup = f"{als['mean_ms'] / row['mean_ms']:.3f}x" if als else "-"
++        lines.append(f"| {row['prompt_tokens']} | {row['batch']} | {row['arm']} | {row['mean_ms']:.2f} | "
++                     f"{row['p50_ms']:.2f} | {row['p95_ms']:.2f} | {row['tokens_s']:.2f} | {speedup} | "
++                     f"{als_speedup} | {row['decode_gpu_maxrank_gib']:.2f} | {row['host_exact_key_total_gib']:.2f} |")
++    lines += ["", "GPU GiB is the maximum per-rank allocated decode-resident memory, not prefill peak or total host memory.",
++              "Latency is the mean of per-step rank maxima; tokens/s uses maximum-rank wall time. These are not exact reciprocals.",
++              "The timed loop includes greedy token selection, finite-logit checks, and generated-token copies for all arms.",
++              "", "## Component Profiles", "",
++              "Profiles contain CUDA-event instrumentation. They are not comparable to uninstrumented latency.",
++              "`attention_total` contains attention subcomponents. Do not add it to those components; do not sum per-component rank maxima.",
++              "Collective intervals can include rank arrival skew and CPU launch gaps, not only transfer time.", "",
++              "| Prompt | B | Component | Rank 0 ms/step | Median rank ms/step | Max rank ms/step |",
++              "|---:|---:|---|---:|---:|---:|"]
++    for row in profiles:
++        lines.append(f"| {row['prompt_tokens']} | {row['batch']} | {row['component']} | {row['rank0_ms']:.3f} | "
++                     f"{row['median_rank_ms']:.3f} | {row['max_rank_ms']:.3f} |")
++    collective_paths = sorted(args.root.glob("collective_b*.json"))
++    if collective_paths:
++        lines += ["", "## Collective Smoke Measurements", "",
++                  "TP8 BF16, local width 384, 20 warmup calls and 100 measured calls per backend. Each completed backend passes exact output comparison.",
++                  "The timing helper now executes graph replay and timing events on the same CUDA stream; the old side-stream measurement was not reliable.",
++                  "These short standalone measurements do not reproduce model rank-arrival skew or its CPU affinity; they do not establish end-to-end backend speedups.",
++                  "", "| B | Backend | Median us | Mean us | Status |", "|---:|---|---:|---:|---|"]
++        for path in collective_paths:
++            payload = json.loads(path.read_text())
++            for record in payload["records"]:
++                if record["status"] == "complete":
++                    lines.append(f"| {payload['tokens']} | {record['backend']} | {record['p50_us']:.2f} | "
++                                 f"{record['mean_us']:.2f} | complete |")
++                else:
++                    lines.append(f"| {payload['tokens']} | {record['backend']} | - | - | {record['status']} |")
++    lines += ["", "## Validation Limits", "",
++              "- Finite logits are checked by the runner. Generated first-sequence samples are in `generated_samples.json`.",
++              "- `batch_consistency.csv` compares the same first prompt at B=1 and B=8; floating-point changes can alter greedy trajectories.",
++              f"- Observed B=1/B=8 trajectory divergence in {sum(row['exact_prefix_tokens'] < row['compared_tokens'] for row in comparisons)}/{len(comparisons)} arm/context pairs. Dense also diverges; teacher-forced comparisons are needed to diagnose this, not free-generation token agreement alone.",
++              "- Cross-rank agreement and finite logits do not establish task accuracy or numerical equivalence to Dense.",
++              "- Historical B>1 Basis-joint runs had an output-stride error and are not a correctness baseline.",
++              "- CPU affinity is set, but strict pinned-host NUMA placement is unavailable (`set_mempolicy: Operation not permitted`).",
++              "- No SHA256 validation was performed.", "", "## Commands and Logs", "",
++              "Exact per-trial torchrun commands and return codes are in each phase's `decode_grid_trials.json`.",
++              "Top-level launcher logs are `smoke.log`, `timing.log`, and `profile.log`; each trial also has launcher and rank logs.",
++              "Timing uses 16 conditioning + 128 measured steps; profile uses 16 conditioning + 16 measured steps.",
++              "Source changes relative to the archived baseline are recorded in `source.patch`.", ""]
++    (args.root / "SUMMARY.md").write_text("\n".join(lines))
++    print(json.dumps({"counts": counts, "summary": str(args.root / "SUMMARY.md")}), flush=True)
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/tests/distributed_tp8_slot_output_smoke.py b/tests/distributed_tp8_slot_output_smoke.py
+new file mode 100644
+index 0000000..2d3088f
+--- /dev/null
++++ b/tests/distributed_tp8_slot_output_smoke.py
+@@ -0,0 +1,73 @@
++"""Check slot attention -> prepared TP8 AllGather -> output decoder."""
++
++from datetime import timedelta
++import json
++import os
++from pathlib import Path
++import sys
++
++import torch
++import torch.distributed as dist
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++
++from basisserve.kernels.feature_ragged_allgather import FeatureRaggedCommunicator
++from basisserve.kernels.ragged_allgather import StaticRaggedPlan
++from basisserve.kernels.slot_indexed_attention import slot_indexed_attention
++
++
++@torch.inference_mode()
++def main():
++    local_rank = int(os.environ["LOCAL_RANK"])
++    torch.cuda.set_device(local_rank)
++    torch.set_num_threads(2)
++    device = torch.device("cuda", local_rank)
++    dist.init_process_group("nccl", timeout=timedelta(minutes=5))
++    rank, world = dist.get_rank(), dist.get_world_size()
++    assert world == 8
++    communicator = FeatureRaggedCommunicator.from_distributed(device=device)
++    plan = StaticRaggedPlan.from_source_widths((384,) * world)
++    generator = torch.Generator(device=device).manual_seed(91)
++    decoder = torch.randn(3072, 4096, device=device, dtype=torch.bfloat16, generator=generator) / 3072**0.5
++
++    for batch in (1, 2, 8):
++        torch.manual_seed(42 + rank)
++        q = torch.randn(batch, 4, 1, 128, device=device, dtype=torch.bfloat16)
++        k = torch.randn(batch, 1, 2048, 128, device=device, dtype=q.dtype)
++        v = torch.randn(batch, 1, 4096, 96, device=device, dtype=q.dtype)
++        ids = torch.stack([torch.randperm(4096, device=device)[:2048] for _ in range(batch)])[:, None]
++        slots = torch.stack([torch.randperm(2048, device=device) for _ in range(batch)])[:, None]
++        ids[:, :, :128] = -1
++        rows = torch.arange(batch, device=device)[:, None]
++        selected_k = k[:, 0][rows, slots[:, 0]].float()
++        selected_v = v[:, 0][rows, ids[:, 0].clamp_min(0)].float()
++        scores = q[:, :, 0].float() @ selected_k.transpose(1, 2) * 128**-0.5
++        reference = (scores.masked_fill(ids[:, 0, None] < 0, -torch.inf).softmax(-1) @ selected_v)
++        reference = reference.reshape(batch, 384).to(q.dtype).contiguous()
++        peers = [torch.empty_like(reference) for _ in range(world)]
++        dist.all_gather(peers, reference)
++        expected_features = torch.cat(peers, dim=1)
++
++        prepared = communicator.prepare_uniform(plan, tokens=batch, dtype=q.dtype, backend="uniform_nccl")
++        out = prepared.local_feature_major_view_fast().T.view(batch, 4, 1, 96)
++        workspace = (
++            torch.empty(batch, 4, 16, 96, device=device),
++            torch.empty(batch, 4, 16, device=device),
++            out,
++        )
++        slot_indexed_attention(q, k, v, ids, slots, workspace, scale=128**-0.5)
++        actual_features = prepared.gather_inplace_fast().T
++        torch.testing.assert_close(actual_features, expected_features, atol=0.002, rtol=0.02)
++        actual = actual_features @ decoder
++        expected = expected_features @ decoder
++        torch.testing.assert_close(actual, expected, atol=0.002, rtol=0.02)
++        error = (actual - expected).abs().max().float()
++        dist.all_reduce(error, op=dist.ReduceOp.MAX)
++        if rank == 0:
++            print(json.dumps({"status": "passed", "tp": world, "batch": batch, "decoder_max_abs_error": error.item()}), flush=True)
++    communicator.close()
++    dist.destroy_process_group()
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/tests/test_slot_indexed_attention.py b/tests/test_slot_indexed_attention.py
+new file mode 100644
+index 0000000..c6a6256
+--- /dev/null
++++ b/tests/test_slot_indexed_attention.py
+@@ -0,0 +1,43 @@
++import pytest
++import torch
++
++from basisserve.kernels.slot_indexed_attention import slot_indexed_attention
++
++
++@pytest.mark.skipif(not torch.cuda.is_available(), reason="Requires CUDA")
++@pytest.mark.parametrize("batch", [1, 2, 8])
++@pytest.mark.parametrize("layout", ["contiguous", "feature_major"])
++def test_slot_attention_matches_reference(batch, layout):
++    torch.manual_seed(42)
++    device = "cuda"
++    heads, rank, support, length, splits = 4, 96, 2048, 4096, 16
++    q = torch.randn(batch, heads, 1, 128, device=device, dtype=torch.bfloat16)
++    k = torch.randn(batch, 1, support, 128, device=device, dtype=torch.bfloat16)
++    v = torch.randn(batch, 1, length, rank, device=device, dtype=torch.bfloat16)
++    ids = torch.stack([torch.randperm(length, device=device)[:support] for _ in range(batch)])[:, None]
++    slots = torch.stack([torch.randperm(support, device=device) for _ in range(batch)])[:, None]
++    # Empty splits and a partial page must not contaminate the softmax merge.
++    ids[:, :, :128] = -1
++    ids[:, :, 500:509] = -1
++    slots[:, :, 900:905] = -1
++    partial = torch.empty(batch, heads, splits, rank, device=device)
++    lse = torch.empty(batch, heads, splits, device=device)
++    if layout == "feature_major":
++        arena = torch.full((heads * rank + 2, batch), 123, device=device, dtype=q.dtype)
++        out = arena[1:-1].T.view(batch, heads, 1, rank)
++    else:
++        out = torch.empty(batch, heads, 1, rank, device=device, dtype=q.dtype)
++
++    rows = torch.arange(batch, device=device)[:, None]
++    selected_k = k[:, 0][rows, slots[:, 0].clamp_min(0)].float()
++    selected_v = v[:, 0][rows, ids[:, 0].clamp_min(0)].float()
++    scores = q[:, :, 0].float() @ selected_k.transpose(1, 2) * 128**-0.5
++    valid = (ids[:, 0] >= 0) & (slots[:, 0] >= 0)
++    expected = (scores.masked_fill(~valid[:, None], -torch.inf).softmax(-1) @ selected_v)[:, :, None]
++
++    actual = slot_indexed_attention(q, k, v, ids, slots, (partial, lse, out), scale=128**-0.5)
++    assert actual.data_ptr() == out.data_ptr()
++    torch.testing.assert_close(actual.float(), expected, atol=0.002, rtol=0.02)
++    if layout == "feature_major":
++        assert torch.all(arena[[0, -1]] == 123)
++        torch.testing.assert_close(arena[1:-1].T.float(), expected.reshape(batch, -1), atol=0.002, rtol=0.02)
+diff --git a/tests/test_tp8_candidate_path.py b/tests/test_tp8_candidate_path.py
+new file mode 100644
+index 0000000..7457ca2
+--- /dev/null
++++ b/tests/test_tp8_candidate_path.py
+@@ -0,0 +1,63 @@
++from types import SimpleNamespace
++from unittest.mock import patch
++
++import pytest
++import torch
++
++from basisserve.core.llama31_8b_tp8_combined import JointALSTP8Attention
++from benchmarks.system.fused_candidates import candidates
++from benchmarks.system.two_stage_router import Metadata
++
++
++pytestmark = pytest.mark.skipif(not torch.cuda.is_available(), reason="Requires CUDA")
++
++
++@pytest.mark.parametrize("batch", [1, 2])
++@pytest.mark.parametrize("length", [4096, 16384, 16416])
++def test_candidate_path_preserves_pages_across_boundary(batch, length):
++    torch.manual_seed(7)
++    keys = torch.randn(batch, 1, length, 128, device="cuda", dtype=torch.bfloat16)
++    query = torch.randn(batch, 4, 1, 128, device="cuda", dtype=torch.bfloat16)
++    metadata = Metadata(keys, length + 64)
++    attention = SimpleNamespace(
++        metadata=metadata,
++        breakdown=None,
++        all_candidate_ids=None,
++        candidate_ids=torch.empty(batch, 1, 512, device="cuda", dtype=torch.long),
++    )
++    storage_pointer = metadata.score_storage.data_ptr()
++    for advance in (False, True):
++        if advance:
++            metadata.advance(torch.randn(batch, 1, 1, 128, device="cuda", dtype=keys.dtype))
++        scores = metadata.scores(query)
++        assert scores.is_contiguous() and scores.data_ptr() == storage_pointer
++        expected = candidates(scores, metadata.n).clone()
++        with patch.object(metadata, "scores", wraps=metadata.scores) as score_call:
++            actual = JointALSTP8Attention._candidate_pages(attention, query)
++            assert score_call.call_count == int(scores.shape[-1] > 512)
++        assert actual.is_contiguous()
++        torch.testing.assert_close(actual, expected, atol=0, rtol=0)
++        again = JointALSTP8Attention._candidate_pages(attention, query)
++        assert again.data_ptr() == actual.data_ptr()
++
++
++@pytest.mark.parametrize("batch", [1, 2])
++@pytest.mark.parametrize("kv_heads", [1, 2])
++def test_reused_coarse_scores_match_reference_after_page_growth(batch, kv_heads):
++    torch.manual_seed(11)
++    keys = torch.randn(batch, kv_heads, 4096, 128, device="cuda", dtype=torch.bfloat16)
++    query = torch.randn(batch, kv_heads * 4, 1, 128, device="cuda", dtype=torch.bfloat16)
++    metadata = Metadata(keys, 4160)
++    pointer = metadata.scores(query).data_ptr()
++    metadata.advance(torch.randn(batch, kv_heads, 1, 128, device="cuda", dtype=keys.dtype))
++    actual = metadata.scores(query)
++    pages = actual.shape[-1]
++    lo = metadata.minimum[:, :, :pages].float()
++    hi = metadata.maximum[:, :, :pages].float()
++    q = query.reshape(batch, kv_heads, 4, 1, 128).float()
++    expected = torch.maximum(q * lo[:, :, None], q * hi[:, :, None]).sum(-1) * 128**-0.5
++    counts = (metadata.n - torch.arange(pages, device="cuda") * 32).clamp(1, 32)
++    expected += counts.float().log()
++    expected.masked_fill_(torch.arange(pages, device="cuda") * 32 >= metadata.n, -torch.inf)
++    assert actual.data_ptr() == pointer and actual.is_contiguous()
++    torch.testing.assert_close(actual, expected, atol=2e-5, rtol=2e-6)
+diff --git a/tests/test_uniform_allgather_timing.py b/tests/test_uniform_allgather_timing.py
+new file mode 100644
+index 0000000..d2301a4
+--- /dev/null
++++ b/tests/test_uniform_allgather_timing.py
+@@ -0,0 +1,32 @@
++import pytest
++import torch
++
++from benchmarks import bench_uniform_allgather as benchmark
++
++
++@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
++@pytest.mark.parametrize("explicit_stream", [False, True])
++def test_measure_uses_timing_stream_and_restores_caller(monkeypatch, explicit_stream):
++    monkeypatch.setattr(benchmark.dist, "barrier", lambda: None)
++    monkeypatch.setattr(benchmark.dist, "all_reduce", lambda tensor, op: None)
++    device = torch.device("cuda", torch.cuda.current_device())
++    caller = torch.cuda.Stream(device=device)
++    timing = torch.cuda.Stream(device=device) if explicit_stream else None
++    expected = timing if explicit_stream else caller
++    output = torch.empty(16, device=device)
++    observed = []
++
++    def run_once():
++        observed.append(torch.cuda.current_stream(device).cuda_stream)
++        output.fill_(len(observed))
++        return output
++
++    with torch.cuda.stream(caller):
++        result, samples = benchmark.measure(
++            run_once, warmup=2, iters=3, device=device, timing_stream=timing
++        )
++        assert torch.cuda.current_stream(device) == caller
++    assert observed == [expected.cuda_stream] * 5
++    assert result is output and len(samples) == 3
++    assert all(sample >= 0 for sample in samples)
++    torch.testing.assert_close(output, torch.full_like(output, 5))

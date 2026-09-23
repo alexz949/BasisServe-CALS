@@ -1,0 +1,19 @@
+ M basisserve/core/llama31_8b_tp8_combined.py
+ M basisserve/kernels/csrc/fused_decode_postprocess.cu
+ M basisserve/kernels/slot_indexed_attention.py
+ M benchmarks/bench_uniform_allgather.py
+ M benchmarks/system/bench_llama31_8b_tp8_combined.py
+ M benchmarks/system/register_router.py
+ M benchmarks/system/run_llama31_8b_tp8_decode_grid.py
+ M benchmarks/system/two_stage_router.py
+?? benchmarks/system/summarize_tp8_path_run.py
+?? docs/hardware/
+?? docs/tp8_decode_path_optimization.md
+?? docs/tp8_full_scan_routing.md
+?? results/system_benchmarks/llama31_8b_tp8_full_scan/
+?? results/system_benchmarks/tp8_full_scan/
+?? results/system_benchmarks/tp8_path_opt/
+?? tests/distributed_tp8_slot_output_smoke.py
+?? tests/test_slot_indexed_attention.py
+?? tests/test_tp8_full_scan_routing.py
+?? tests/test_uniform_allgather_timing.py

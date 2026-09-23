@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from functools import lru_cache
-import hashlib
 import math
 from pathlib import Path
 from types import MethodType
@@ -27,8 +26,6 @@ from basisserve.kernels.mapped_host_paged_attention import (
 )
 from basisserve.kernels.ragged_allgather import StaticRaggedPlan
 from basisserve.kernels.slot_indexed_attention import slot_indexed_attention
-from benchmarks.system.fused_candidates import candidates as fused_candidates
-from benchmarks.system.two_stage_router import Metadata
 from evaluation.chunked_prefill_mlp import ChunkedTokenwise
 
 
@@ -80,20 +77,11 @@ class DecodeBreakdownRecorder:
         }
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        while block := source.read(1 << 20):
-            digest.update(block)
-    return digest.hexdigest()
-
-
 @lru_cache(maxsize=1)
 def load_decode_postprocess_extension() -> object:
     source = Path(__file__).resolve().parents[1] / "kernels/csrc/fused_decode_postprocess.cu"
-    digest = _sha256(source)[:10]
     return load(
-        name=f"basisserve_fused_decode_postprocess_{digest}",
+        name="basisserve_fused_decode_postprocess",
         sources=[str(source)],
         extra_cflags=["-O3", "-std=c++17"],
         extra_cuda_cflags=["-O3", "-std=c++17", "--use_fast_math"],
@@ -261,7 +249,7 @@ class JointALSTP8Attention(nn.Module):
         rank: int,
         communicator: FeatureRaggedCommunicator,
         router_extension: object | None,
-        fine_router_extension: object | None,
+        full_router_extension: object | None,
         postprocess_extension: object | None,
         shared_rope: dict[str, torch.Tensor],
         breakdown: DecodeBreakdownRecorder | None,
@@ -275,7 +263,7 @@ class JointALSTP8Attention(nn.Module):
         self.length = 0
         self.shared_rope = shared_rope
         self.router_extension = router_extension
-        self.fine_router_extension = fine_router_extension
+        self.full_router_extension = full_router_extension
         self.postprocess_extension = postprocess_extension
         self.breakdown = breakdown
         device = original.q_proj.weight.device
@@ -347,9 +335,8 @@ class JointALSTP8Attention(nn.Module):
                 batch, 1, QUERY_HEADS_PER_RANK, RESIDUAL_RANK,
                 device=device, dtype=torch.bfloat16,
             )
-            self.candidate_ids = torch.empty(batch, 1, 512, device=device, dtype=torch.long)
-            self.fine_router_output = torch.empty(
-                batch, 1, QUERY_HEADS_PER_RANK, min(512, maximum_pages),
+            self.router_output = torch.empty(
+                batch, 1, QUERY_HEADS_PER_RANK, maximum_pages,
                 device=device, dtype=torch.float32,
             )
             self.selected_pages = torch.empty(
@@ -370,7 +357,6 @@ class JointALSTP8Attention(nn.Module):
             self.selected_slots = torch.empty_like(self.support_ids)
             self.slot_missing = torch.empty_like(self.support_ids, dtype=torch.int32)
             self.slot_counts = torch.empty(batch, 1, 2, device=device, dtype=torch.int32)
-            self.metadata: Metadata | None = None
 
         self.plan = StaticRaggedPlan.from_source_widths(
             (QUERY_HEADS_PER_RANK * VALUE_RANK,) * TP_SIZE
@@ -480,7 +466,6 @@ class JointALSTP8Attention(nn.Module):
         sin_half: torch.Tensor,
         start: int,
     ) -> None:
-        assert self.metadata is not None
         factors = self.router_factors
         conditional_router_append_decode(
             key,
@@ -500,27 +485,14 @@ class JointALSTP8Attention(nn.Module):
             write_rope=False,
             mapped_host_key=self.host_key,
             mapped_host_key_device_pointer=self.key_pointer,
-            metadata_minimum=self.metadata.minimum,
-            metadata_maximum=self.metadata.maximum,
-            metadata_ring=self.metadata.ring,
-            metadata_position=self.metadata.n,
-            metadata_slot=self.metadata.slot,
         )
-        self.metadata.commit_advance()
 
     def _basis_decode_attention(self, query: torch.Tensor, end: int) -> torch.Tensor:
-        assert end > SUPPORT_TOKENS and self.metadata is not None
+        assert end > SUPPORT_TOKENS
         historical = end - RECENT_TOKENS
         factors = self.router_factors
-        coarse = self.breakdown.begin("router_coarse") if self.breakdown else None
-        coarse_scores = self.metadata.scores(query)
-        DecodeBreakdownRecorder.end(coarse)
-        selection = self.breakdown.begin("router_candidates") if self.breakdown else None
-        candidate_ids = fused_candidates(
-            coarse_scores, historical, output=self.candidate_ids
-        )
-        DecodeBreakdownRecorder.end(selection)
-        candidate_count = candidate_ids.shape[-1]
+        pages = math.ceil(historical / PAGE_SIZE)
+        page_scores = self.router_output[:, :, :, :pages]
         route_args = (
             query,
             self.base_cache[:, :, :historical],
@@ -532,19 +504,17 @@ class JointALSTP8Attention(nn.Module):
             self.shared_rope["sin"][:historical],
             self.query_code,
         )
-        fine = self.breakdown.begin("router_fine") if self.breakdown else None
-        self.fine_router_extension.conditional_router_page_lse(
+        routing = self.breakdown.begin("router_full") if self.breakdown else None
+        self.full_router_extension.conditional_router_page_lse(
             *route_args,
-            self.fine_router_output[:, :, :, :candidate_count],
+            page_scores,
             self.scaling,
             False,
-            candidate_ids,
         )
-        DecodeBreakdownRecorder.end(fine)
+        DecodeBreakdownRecorder.end(routing)
         postprocess = self.breakdown.begin("router_postprocess") if self.breakdown else None
         self.postprocess_extension.select_pack_refresh(
-            self.fine_router_output[:, :, :, :candidate_count],
-            candidate_ids,
+            page_scores,
             self.selected_pages,
             self.support_ids,
             self.key_pointer,
@@ -674,7 +644,6 @@ class JointALSTP8Attention(nn.Module):
         if self.arm == "basis_joint":
             if start == 0:
                 append_mapped_host_key(self.host_key, key, start=0)
-                self.metadata = Metadata(key, self.capacity)
             else:
                 self._append_basis_decode(
                     key,
@@ -780,7 +749,7 @@ def install_tp8_combined(
     rank: int,
     communicator: FeatureRaggedCommunicator | None,
     router_extension: object | None = None,
-    fine_router_extension: object | None = None,
+    full_router_extension: object | None = None,
     postprocess_extension: object | None = None,
     breakdown: DecodeBreakdownRecorder | None = None,
 ) -> list[nn.Module]:
@@ -793,7 +762,7 @@ def install_tp8_combined(
             item is not None
             for item in (
                 router_extension,
-                fine_router_extension,
+                full_router_extension,
                 postprocess_extension,
             )
         )
@@ -816,7 +785,7 @@ def install_tp8_combined(
                 rank=rank,
                 communicator=communicator,
                 router_extension=router_extension,
-                fine_router_extension=fine_router_extension,
+                full_router_extension=full_router_extension,
                 postprocess_extension=postprocess_extension,
                 shared_rope=shared_rope,
                 breakdown=breakdown,

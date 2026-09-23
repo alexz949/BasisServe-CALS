@@ -9,12 +9,14 @@
 #include <cfloat>
 #include <climits>
 #include <cmath>
+#include <type_traits>
 
 namespace {
 
 constexpr int kThreads = 256;
 constexpr int kQueriesPerKv = 4;
 constexpr int kMaximumCandidates = 512;
+constexpr int kMaximumFullPages = 4096;
 constexpr int kItemsPerThread = 2;
 constexpr int kSelectedPages = 62;
 constexpr int kPageSize = 32;
@@ -171,9 +173,9 @@ __global__ void select_and_pack_kernel(
   }
 }
 
+template <int ItemsPerThread>
 __global__ void select_pack_plan_kernel(
     const float* __restrict__ page_log_mass,
-    const int64_t* __restrict__ candidate_ids,
     int64_t* __restrict__ selected_pages_output,
     int64_t* __restrict__ support_ids,
     int64_t* __restrict__ resident,
@@ -191,7 +193,7 @@ __global__ void select_pack_plan_kernel(
     int64_t input_stride_query) {
   using BlockReduce = cub::BlockReduce<float, kThreads>;
   using BlockSort =
-      cub::BlockRadixSort<float, kThreads, kItemsPerThread, int>;
+      cub::BlockRadixSort<float, kThreads, ItemsPerThread, int>;
   union TemporaryStorage {
     typename BlockReduce::TempStorage reduce;
     typename BlockSort::TempStorage sort;
@@ -255,11 +257,11 @@ __global__ void select_pack_plan_kernel(
     __syncthreads();
   }
 
-  float scores[kItemsPerThread];
-  int page_positions[kItemsPerThread];
+  float scores[ItemsPerThread];
+  int page_positions[ItemsPerThread];
 #pragma unroll
-  for (int item = 0; item < kItemsPerThread; ++item) {
-    const int page = thread * kItemsPerThread + item;
+  for (int item = 0; item < ItemsPerThread; ++item) {
+    const int page = thread * ItemsPerThread + item;
     page_positions[item] = page;
     float group_score = -FLT_MAX;
     if (page > 0 && page < pages) {
@@ -279,8 +281,8 @@ __global__ void select_pack_plan_kernel(
 
   BlockSort(temporary.sort).SortDescending(scores, page_positions);
 #pragma unroll
-  for (int item = 0; item < kItemsPerThread; ++item) {
-    const int rank = thread * kItemsPerThread + item;
+  for (int item = 0; item < ItemsPerThread; ++item) {
+    const int rank = thread * ItemsPerThread + item;
     if (rank < kSelectedPages - 1) {
       selected_positions[rank + 1] = page_positions[item];
     }
@@ -311,7 +313,7 @@ __global__ void select_pack_plan_kernel(
   }
 
   if (thread < kSelectedPages) {
-    const int64_t page = candidate_ids[row * pages + selected_positions[thread]];
+    const int64_t page = selected_positions[thread];
     selected_pages[thread] = page;
     selected_pages_output[row * kSelectedPages + thread] = page;
   }
@@ -467,7 +469,6 @@ void select_and_pack(
 
 void select_pack_refresh(
     const at::Tensor& page_log_mass,
-    const at::Tensor& candidate_ids,
     const at::Tensor& selected_pages,
     const at::Tensor& support_ids,
     int64_t pointer,
@@ -479,12 +480,11 @@ void select_pack_refresh(
     const at::Tensor& counts,
     int64_t historical,
     int64_t end) {
-  assert(page_log_mass.is_cuda() && candidate_ids.is_cuda());
+  assert(page_log_mass.is_cuda());
   assert(selected_pages.is_cuda() && support_ids.is_cuda());
   assert(cache.is_cuda() && resident.is_cuda() && lookup.is_cuda());
   assert(slots.is_cuda() && missing.is_cuda() && counts.is_cuda());
   assert(page_log_mass.scalar_type() == at::kFloat);
-  assert(candidate_ids.scalar_type() == at::kLong);
   assert(selected_pages.scalar_type() == at::kLong);
   assert(support_ids.scalar_type() == at::kLong);
   assert(cache.scalar_type() == at::kBFloat16);
@@ -499,8 +499,9 @@ void select_pack_refresh(
   const int64_t rows = batch * kv_heads;
   const int64_t pages = page_log_mass.size(3);
   const int64_t capacity = lookup.size(2);
-  assert(pages >= kSelectedPages && pages <= kMaximumCandidates);
-  assert(candidate_ids.sizes() == at::IntArrayRef({batch, kv_heads, pages}));
+  assert(pages >= kSelectedPages && pages <= kMaximumFullPages);
+  assert(pages == (historical + kPageSize - 1) / kPageSize);
+  assert(capacity >= end);
   assert(selected_pages.sizes() ==
          at::IntArrayRef({batch, kv_heads, kSelectedPages}));
   assert(support_ids.sizes() ==
@@ -510,7 +511,7 @@ void select_pack_refresh(
   assert(slots.numel() == rows * kSupportTokens);
   assert(missing.numel() == rows * kSupportTokens);
   assert(counts.numel() == rows * 2);
-  assert(candidate_ids.is_contiguous() && selected_pages.is_contiguous());
+  assert(selected_pages.is_contiguous());
   assert(support_ids.is_contiguous() && page_log_mass.stride(3) == 1);
   assert(cache.is_contiguous() && resident.is_contiguous());
   assert(lookup.is_contiguous() && slots.is_contiguous());
@@ -520,10 +521,10 @@ void select_pack_refresh(
   c10::cuda::CUDAGuard guard(page_log_mass.device());
   auto stream =
       c10::cuda::getCurrentCUDAStream(page_log_mass.get_device()).stream();
-  select_pack_plan_kernel<<<
-      static_cast<unsigned int>(rows), kThreads, 0, stream>>>(
+  const auto launch = [&](auto items) {
+    select_pack_plan_kernel<decltype(items)::value><<<
+        static_cast<unsigned int>(rows), kThreads, 0, stream>>>(
       page_log_mass.const_data_ptr<float>(),
-      candidate_ids.const_data_ptr<int64_t>(),
       selected_pages.mutable_data_ptr<int64_t>(),
       support_ids.mutable_data_ptr<int64_t>(),
       resident.mutable_data_ptr<int64_t>(),
@@ -539,6 +540,18 @@ void select_pack_refresh(
       page_log_mass.stride(0),
       page_log_mass.stride(1),
       page_log_mass.stride(2));
+  };
+  if (pages <= 256) {
+    launch(std::integral_constant<int, 1>{});
+  } else if (pages <= 512) {
+    launch(std::integral_constant<int, 2>{});
+  } else if (pages <= 1024) {
+    launch(std::integral_constant<int, 4>{});
+  } else if (pages <= 2048) {
+    launch(std::integral_constant<int, 8>{});
+  } else {
+    launch(std::integral_constant<int, 16>{});
+  }
   constexpr int kVectorsPerKey = 16;
   const int vectors =
       static_cast<int>(rows) * kSupportTokens * kVectorsPerKey;

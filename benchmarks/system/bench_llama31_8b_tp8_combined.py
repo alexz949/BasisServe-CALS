@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import argparse
-from datetime import timedelta
-import hashlib
+from contextlib import nullcontext
+from datetime import datetime, timedelta, timezone
 import json
 import math
 import os
@@ -41,9 +41,9 @@ from basisserve.core.llama31_8b_tp8_combined import (
 )
 from basisserve.kernels.feature_ragged_allgather import FeatureRaggedCommunicator
 from basisserve.kernels.mapped_host_paged_attention import _load_extension
-from benchmarks.system.common import metadata
+from benchmarks.system.common import command
 from benchmarks.system.numa_memory import bind_host_allocations
-from benchmarks.system.two_stage_router import compile_fine
+from benchmarks.system.register_router import compile_register
 
 
 DEFAULT_MODEL = Path(
@@ -53,6 +53,31 @@ DEFAULT_MODEL = Path(
 DEFAULT_FACTORS = Path("/workspace/runs/l31-cal128/tp8-combined-v96")
 DEFAULT_ROUTER = Path("/workspace/runs/l31-cal128/router/ours_b16r16")
 DEFAULT_TOKENS = Path("/workspace/runs/l31-cal128/calibration/windows.safetensors")
+
+
+def _trace_hooks(model):
+    handles = []
+
+    def attach(module, name):
+        scopes = []
+
+        def before(module, inputs):
+            scope = torch.profiler.record_function(name)
+            scope.__enter__()
+            scopes.append(scope)
+
+        def after(module, inputs, output):
+            scopes.pop().__exit__(None, None, None)
+
+        handles.extend((module.register_forward_pre_hook(before), module.register_forward_hook(after)))
+
+    for index, layer in enumerate(model.model.layers):
+        attach(layer.self_attn, f"layer_{index}.attention")
+        attach(layer.mlp, f"layer_{index}.mlp")
+        attach(layer.mlp.gate_proj, f"layer_{index}.mlp.gate")
+        attach(layer.mlp.up_proj, f"layer_{index}.mlp.up")
+        attach(layer.mlp.down_proj, f"layer_{index}.mlp.down_reduce")
+    return handles
 
 
 def _percentile(values: list[float], fraction: float) -> float:
@@ -109,14 +134,6 @@ def _choose(logits: torch.Tensor, vocab_size: int) -> torch.Tensor:
     return ids
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        while block := source.read(8 << 20):
-            digest.update(block)
-    return digest.hexdigest()
-
-
 def _load_prompts(
     path: Path, manifest_path: Path | None, *, batch: int, length: int
 ) -> tuple[torch.Tensor, dict]:
@@ -126,7 +143,8 @@ def _load_prompts(
     assert all(torch.unique(prompts[index]).numel() > 1 for index in range(batch))
     if manifest_path is None:
         prompt_metadata = {
-            "tokens_file_sha256": _sha256(path),
+            "tokens_file": str(path),
+            "tokens_file_bytes": path.stat().st_size,
             "sample_ids": [f"row_{index}" for index in range(batch)],
             "cohort_hash": None,
         }
@@ -135,11 +153,11 @@ def _load_prompts(
         assert prompt_metadata["status"] == "complete"
         assert prompt_metadata["prompt_tokens"] == length
         assert prompt_metadata["maximum_batch"] >= batch
-        assert prompt_metadata["tokens_file_sha256"] == _sha256(path)
         prompt_metadata = {
             **prompt_metadata,
             "sample_ids": prompt_metadata["sample_ids"][:batch],
-            "token_sha256": prompt_metadata["token_sha256"][:batch],
+            "tokens_file_bytes": path.stat().st_size,
+            "integrity_validation": "shape_and_manifest_fields_only",
         }
     return prompts, prompt_metadata
 
@@ -158,15 +176,17 @@ def main() -> None:
     parser.add_argument("--conditioning-steps", type=int, default=16)
     parser.add_argument("--measure-steps", type=int, default=128)
     parser.add_argument("--repeat", type=int, default=0)
-    parser.add_argument("--tag", default="formal")
+    parser.add_argument("--tag", default="full_scan")
     parser.add_argument("--profile-components", action="store_true")
+    parser.add_argument("--trace", action="store_true")
     parser.add_argument(
         "--output-root", type=Path,
-        default=Path("results/system_benchmarks/llama31_8b_tp8_combined"),
+        default=Path("results/system_benchmarks/llama31_8b_tp8_full_scan"),
     )
     args = parser.parse_args()
     assert args.length >= 4096 and args.length <= 130048
     assert args.batch > 0 and args.conditioning_steps >= 0 and args.measure_steps > 0
+    assert not (args.trace and args.profile_components)
     assert args.length + args.conditioning_steps + args.measure_steps <= 131072
     assert args.model.is_dir() and args.tokens.is_file()
     if args.arm != "dense":
@@ -211,7 +231,7 @@ def main() -> None:
     )
 
     router_extension = None
-    fine_router_extension = None
+    full_router_extension = None
     postprocess_extension = None
     if args.arm == "basis_joint":
         router_extension = _load_extension(
@@ -221,9 +241,12 @@ def main() -> None:
             base_rank=BASE_RANK,
             residual_rank=RESIDUAL_RANK,
         )
-        _, fine_router_extension = compile_fine(
-            Path(f"/tmp/basisserve_tp8_two_stage/rank{rank}")
-        )
+        router_build_root = Path("/tmp/basisserve_tp8_full_router")
+        if rank == 0:
+            full_router_extension = compile_register(router_build_root, BASE_RANK, 8)
+        dist.barrier()
+        if rank != 0:
+            full_router_extension = compile_register(router_build_root, BASE_RANK, 8)
         postprocess_extension = load_decode_postprocess_extension()
     else:
         _load_extension(
@@ -257,7 +280,7 @@ def main() -> None:
         rank=rank,
         communicator=communicator,
         router_extension=router_extension,
-        fine_router_extension=fine_router_extension,
+        full_router_extension=full_router_extension,
         postprocess_extension=postprocess_extension,
         breakdown=breakdown,
     )
@@ -333,25 +356,38 @@ def main() -> None:
     torch.cuda.reset_peak_memory_stats()
     if breakdown is not None:
         breakdown.enabled = True
+    trace = torch.profiler.profile(
+        activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
+    ) if args.trace else None
+    trace_handles = _trace_hooks(model) if args.trace else []
+    if trace is not None:
+        trace.start()
+        dist.barrier()
     wall_start = time.perf_counter()
     for measured_step, (begin, end) in enumerate(events):
         step = args.conditioning_steps + measured_step
         begin.record()
-        output = model(
-            input_ids=token,
-            position_ids=positions[step],
-            use_cache=False,
-            logits_to_keep=1,
-        )
-        token = _choose(output.logits, model.config.vocab_size)
-        finite.append(torch.isfinite(output.logits).all())
-        generated.append(token.clone())
+        with torch.profiler.record_function(f"decode_step_{measured_step}") if args.trace else nullcontext():
+            output = model(
+                input_ids=token,
+                position_ids=positions[step],
+                use_cache=False,
+                logits_to_keep=1,
+            )
+            token = _choose(output.logits, model.config.vocab_size)
+            finite.append(torch.isfinite(output.logits).all())
+            generated.append(token.clone())
         end.record()
         del output
     torch.cuda.synchronize()
     if breakdown is not None:
         breakdown.enabled = False
     wall_seconds = time.perf_counter() - wall_start
+    if trace is not None:
+        trace.stop()
+        trace.export_chrome_trace(str(folder / f"rank{rank}.trace.json"))
+    for handle in trace_handles:
+        handle.remove()
     decode_peak_allocated = torch.cuda.max_memory_allocated()
     decode_peak_reserved = torch.cuda.max_memory_reserved()
     assert bool(torch.stack(finite).all())
@@ -390,6 +426,7 @@ def main() -> None:
         "batch": args.batch,
         "conditioning_steps": args.conditioning_steps,
         "measured_steps": args.measure_steps,
+        "trace_enabled": args.trace,
         "repeat": args.repeat,
         "dtype": "bfloat16",
         "value_rank": None if args.arm == "dense" else VALUE_RANK,
@@ -400,7 +437,7 @@ def main() -> None:
         "recent_tokens": RECENT_TOKENS if args.arm == "basis_joint" else None,
         "physical_support": SUPPORT_TOKENS if args.arm == "basis_joint" else None,
         "key_placement": "pinned_host_with_gpu_slots" if args.arm == "basis_joint" else "gpu",
-        "routing_mode": "two_stage_512_persistent_slots" if args.arm == "basis_joint" else "full",
+        "routing_mode": "full_scan_b16r16_persistent_slots" if args.arm == "basis_joint" else "full",
         "prefill": "full_context_flash_attention_with_arm_value_representation",
         "prefill_cuda_ms": prefill_cuda_ms,
         "prefill_wall_seconds": prefill_wall_seconds,
@@ -436,7 +473,18 @@ def main() -> None:
             str(args.prompt_manifest.resolve()) if args.prompt_manifest is not None else None
         ),
         "prompt_cohort": prompt_metadata,
-        "metadata": metadata(),
+        "metadata": {
+            "git_commit": command(["git", "rev-parse", "HEAD"])["stdout"].strip(),
+            "git_status": command(["git", "status", "--porcelain"])["stdout"],
+            "command_line": sys.argv,
+            "pytorch": torch.__version__,
+            "cuda": torch.version.cuda,
+            "nccl": torch.cuda.nccl.version(),
+            "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
+            "torch_matmul_tf32": torch.backends.cuda.matmul.allow_tf32,
+            "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
+            "source_hash_validation": "not_performed",
+        },
     }
     result_path = folder / f"rank{rank}.json"
     result_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")

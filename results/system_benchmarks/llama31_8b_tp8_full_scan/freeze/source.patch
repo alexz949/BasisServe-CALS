@@ -1,0 +1,772 @@
+diff --git a/basisserve/core/llama31_8b_tp8_combined.py b/basisserve/core/llama31_8b_tp8_combined.py
+index 2d5e652..d7e444b 100644
+--- a/basisserve/core/llama31_8b_tp8_combined.py
++++ b/basisserve/core/llama31_8b_tp8_combined.py
+@@ -3,7 +3,6 @@
+ from __future__ import annotations
+ 
+ from functools import lru_cache
+-import hashlib
+ import math
+ from pathlib import Path
+ from types import MethodType
+@@ -27,8 +26,6 @@ from basisserve.kernels.mapped_host_paged_attention import (
+ )
+ from basisserve.kernels.ragged_allgather import StaticRaggedPlan
+ from basisserve.kernels.slot_indexed_attention import slot_indexed_attention
+-from benchmarks.system.fused_candidates import candidates as fused_candidates
+-from benchmarks.system.two_stage_router import Metadata
+ from evaluation.chunked_prefill_mlp import ChunkedTokenwise
+ 
+ 
+@@ -80,20 +77,11 @@ class DecodeBreakdownRecorder:
+         }
+ 
+ 
+-def _sha256(path: Path) -> str:
+-    digest = hashlib.sha256()
+-    with path.open("rb") as source:
+-        while block := source.read(1 << 20):
+-            digest.update(block)
+-    return digest.hexdigest()
+-
+-
+ @lru_cache(maxsize=1)
+ def load_decode_postprocess_extension() -> object:
+     source = Path(__file__).resolve().parents[1] / "kernels/csrc/fused_decode_postprocess.cu"
+-    digest = _sha256(source)[:10]
+     return load(
+-        name=f"basisserve_fused_decode_postprocess_{digest}",
++        name="basisserve_fused_decode_postprocess",
+         sources=[str(source)],
+         extra_cflags=["-O3", "-std=c++17"],
+         extra_cuda_cflags=["-O3", "-std=c++17", "--use_fast_math"],
+@@ -261,7 +249,7 @@ class JointALSTP8Attention(nn.Module):
+         rank: int,
+         communicator: FeatureRaggedCommunicator,
+         router_extension: object | None,
+-        fine_router_extension: object | None,
++        full_router_extension: object | None,
+         postprocess_extension: object | None,
+         shared_rope: dict[str, torch.Tensor],
+         breakdown: DecodeBreakdownRecorder | None,
+@@ -275,7 +263,7 @@ class JointALSTP8Attention(nn.Module):
+         self.length = 0
+         self.shared_rope = shared_rope
+         self.router_extension = router_extension
+-        self.fine_router_extension = fine_router_extension
++        self.full_router_extension = full_router_extension
+         self.postprocess_extension = postprocess_extension
+         self.breakdown = breakdown
+         device = original.q_proj.weight.device
+@@ -347,9 +335,8 @@ class JointALSTP8Attention(nn.Module):
+                 batch, 1, QUERY_HEADS_PER_RANK, RESIDUAL_RANK,
+                 device=device, dtype=torch.bfloat16,
+             )
+-            self.candidate_ids = torch.empty(batch, 1, 512, device=device, dtype=torch.long)
+-            self.fine_router_output = torch.empty(
+-                batch, 1, QUERY_HEADS_PER_RANK, min(512, maximum_pages),
++            self.router_output = torch.empty(
++                batch, 1, QUERY_HEADS_PER_RANK, maximum_pages,
+                 device=device, dtype=torch.float32,
+             )
+             self.selected_pages = torch.empty(
+@@ -370,7 +357,6 @@ class JointALSTP8Attention(nn.Module):
+             self.selected_slots = torch.empty_like(self.support_ids)
+             self.slot_missing = torch.empty_like(self.support_ids, dtype=torch.int32)
+             self.slot_counts = torch.empty(batch, 1, 2, device=device, dtype=torch.int32)
+-            self.metadata: Metadata | None = None
+ 
+         self.plan = StaticRaggedPlan.from_source_widths(
+             (QUERY_HEADS_PER_RANK * VALUE_RANK,) * TP_SIZE
+@@ -480,7 +466,6 @@ class JointALSTP8Attention(nn.Module):
+         sin_half: torch.Tensor,
+         start: int,
+     ) -> None:
+-        assert self.metadata is not None
+         factors = self.router_factors
+         conditional_router_append_decode(
+             key,
+@@ -500,27 +485,14 @@ class JointALSTP8Attention(nn.Module):
+             write_rope=False,
+             mapped_host_key=self.host_key,
+             mapped_host_key_device_pointer=self.key_pointer,
+-            metadata_minimum=self.metadata.minimum,
+-            metadata_maximum=self.metadata.maximum,
+-            metadata_ring=self.metadata.ring,
+-            metadata_position=self.metadata.n,
+-            metadata_slot=self.metadata.slot,
+         )
+-        self.metadata.commit_advance()
+ 
+     def _basis_decode_attention(self, query: torch.Tensor, end: int) -> torch.Tensor:
+-        assert end > SUPPORT_TOKENS and self.metadata is not None
++        assert end > SUPPORT_TOKENS
+         historical = end - RECENT_TOKENS
+         factors = self.router_factors
+-        coarse = self.breakdown.begin("router_coarse") if self.breakdown else None
+-        coarse_scores = self.metadata.scores(query)
+-        DecodeBreakdownRecorder.end(coarse)
+-        selection = self.breakdown.begin("router_candidates") if self.breakdown else None
+-        candidate_ids = fused_candidates(
+-            coarse_scores, historical, output=self.candidate_ids
+-        )
+-        DecodeBreakdownRecorder.end(selection)
+-        candidate_count = candidate_ids.shape[-1]
++        pages = math.ceil(historical / PAGE_SIZE)
++        page_scores = self.router_output[:, :, :, :pages]
+         route_args = (
+             query,
+             self.base_cache[:, :, :historical],
+@@ -532,19 +504,17 @@ class JointALSTP8Attention(nn.Module):
+             self.shared_rope["sin"][:historical],
+             self.query_code,
+         )
+-        fine = self.breakdown.begin("router_fine") if self.breakdown else None
+-        self.fine_router_extension.conditional_router_page_lse(
++        routing = self.breakdown.begin("router_full") if self.breakdown else None
++        self.full_router_extension.conditional_router_page_lse(
+             *route_args,
+-            self.fine_router_output[:, :, :, :candidate_count],
++            page_scores,
+             self.scaling,
+             False,
+-            candidate_ids,
+         )
+-        DecodeBreakdownRecorder.end(fine)
++        DecodeBreakdownRecorder.end(routing)
+         postprocess = self.breakdown.begin("router_postprocess") if self.breakdown else None
+         self.postprocess_extension.select_pack_refresh(
+-            self.fine_router_output[:, :, :, :candidate_count],
+-            candidate_ids,
++            page_scores,
+             self.selected_pages,
+             self.support_ids,
+             self.key_pointer,
+@@ -674,7 +644,6 @@ class JointALSTP8Attention(nn.Module):
+         if self.arm == "basis_joint":
+             if start == 0:
+                 append_mapped_host_key(self.host_key, key, start=0)
+-                self.metadata = Metadata(key, self.capacity)
+             else:
+                 self._append_basis_decode(
+                     key,
+@@ -780,7 +749,7 @@ def install_tp8_combined(
+     rank: int,
+     communicator: FeatureRaggedCommunicator | None,
+     router_extension: object | None = None,
+-    fine_router_extension: object | None = None,
++    full_router_extension: object | None = None,
+     postprocess_extension: object | None = None,
+     breakdown: DecodeBreakdownRecorder | None = None,
+ ) -> list[nn.Module]:
+@@ -793,7 +762,7 @@ def install_tp8_combined(
+             item is not None
+             for item in (
+                 router_extension,
+-                fine_router_extension,
++                full_router_extension,
+                 postprocess_extension,
+             )
+         )
+@@ -816,7 +785,7 @@ def install_tp8_combined(
+                 rank=rank,
+                 communicator=communicator,
+                 router_extension=router_extension,
+-                fine_router_extension=fine_router_extension,
++                full_router_extension=full_router_extension,
+                 postprocess_extension=postprocess_extension,
+                 shared_rope=shared_rope,
+                 breakdown=breakdown,
+diff --git a/basisserve/kernels/csrc/fused_decode_postprocess.cu b/basisserve/kernels/csrc/fused_decode_postprocess.cu
+index 6bb8df1..fbc0ff5 100644
+--- a/basisserve/kernels/csrc/fused_decode_postprocess.cu
++++ b/basisserve/kernels/csrc/fused_decode_postprocess.cu
+@@ -9,12 +9,14 @@
+ #include <cfloat>
+ #include <climits>
+ #include <cmath>
++#include <type_traits>
+ 
+ namespace {
+ 
+ constexpr int kThreads = 256;
+ constexpr int kQueriesPerKv = 4;
+ constexpr int kMaximumCandidates = 512;
++constexpr int kMaximumFullPages = 4096;
+ constexpr int kItemsPerThread = 2;
+ constexpr int kSelectedPages = 62;
+ constexpr int kPageSize = 32;
+@@ -171,9 +173,9 @@ __global__ void select_and_pack_kernel(
+   }
+ }
+ 
++template <int ItemsPerThread>
+ __global__ void select_pack_plan_kernel(
+     const float* __restrict__ page_log_mass,
+-    const int64_t* __restrict__ candidate_ids,
+     int64_t* __restrict__ selected_pages_output,
+     int64_t* __restrict__ support_ids,
+     int64_t* __restrict__ resident,
+@@ -191,7 +193,7 @@ __global__ void select_pack_plan_kernel(
+     int64_t input_stride_query) {
+   using BlockReduce = cub::BlockReduce<float, kThreads>;
+   using BlockSort =
+-      cub::BlockRadixSort<float, kThreads, kItemsPerThread, int>;
++      cub::BlockRadixSort<float, kThreads, ItemsPerThread, int>;
+   union TemporaryStorage {
+     typename BlockReduce::TempStorage reduce;
+     typename BlockSort::TempStorage sort;
+@@ -255,11 +257,11 @@ __global__ void select_pack_plan_kernel(
+     __syncthreads();
+   }
+ 
+-  float scores[kItemsPerThread];
+-  int page_positions[kItemsPerThread];
++  float scores[ItemsPerThread];
++  int page_positions[ItemsPerThread];
+ #pragma unroll
+-  for (int item = 0; item < kItemsPerThread; ++item) {
+-    const int page = thread * kItemsPerThread + item;
++  for (int item = 0; item < ItemsPerThread; ++item) {
++    const int page = thread * ItemsPerThread + item;
+     page_positions[item] = page;
+     float group_score = -FLT_MAX;
+     if (page > 0 && page < pages) {
+@@ -279,8 +281,8 @@ __global__ void select_pack_plan_kernel(
+ 
+   BlockSort(temporary.sort).SortDescending(scores, page_positions);
+ #pragma unroll
+-  for (int item = 0; item < kItemsPerThread; ++item) {
+-    const int rank = thread * kItemsPerThread + item;
++  for (int item = 0; item < ItemsPerThread; ++item) {
++    const int rank = thread * ItemsPerThread + item;
+     if (rank < kSelectedPages - 1) {
+       selected_positions[rank + 1] = page_positions[item];
+     }
+@@ -311,7 +313,7 @@ __global__ void select_pack_plan_kernel(
+   }
+ 
+   if (thread < kSelectedPages) {
+-    const int64_t page = candidate_ids[row * pages + selected_positions[thread]];
++    const int64_t page = selected_positions[thread];
+     selected_pages[thread] = page;
+     selected_pages_output[row * kSelectedPages + thread] = page;
+   }
+@@ -467,7 +469,6 @@ void select_and_pack(
+ 
+ void select_pack_refresh(
+     const at::Tensor& page_log_mass,
+-    const at::Tensor& candidate_ids,
+     const at::Tensor& selected_pages,
+     const at::Tensor& support_ids,
+     int64_t pointer,
+@@ -479,12 +480,11 @@ void select_pack_refresh(
+     const at::Tensor& counts,
+     int64_t historical,
+     int64_t end) {
+-  assert(page_log_mass.is_cuda() && candidate_ids.is_cuda());
++  assert(page_log_mass.is_cuda());
+   assert(selected_pages.is_cuda() && support_ids.is_cuda());
+   assert(cache.is_cuda() && resident.is_cuda() && lookup.is_cuda());
+   assert(slots.is_cuda() && missing.is_cuda() && counts.is_cuda());
+   assert(page_log_mass.scalar_type() == at::kFloat);
+-  assert(candidate_ids.scalar_type() == at::kLong);
+   assert(selected_pages.scalar_type() == at::kLong);
+   assert(support_ids.scalar_type() == at::kLong);
+   assert(cache.scalar_type() == at::kBFloat16);
+@@ -499,8 +499,9 @@ void select_pack_refresh(
+   const int64_t rows = batch * kv_heads;
+   const int64_t pages = page_log_mass.size(3);
+   const int64_t capacity = lookup.size(2);
+-  assert(pages >= kSelectedPages && pages <= kMaximumCandidates);
+-  assert(candidate_ids.sizes() == at::IntArrayRef({batch, kv_heads, pages}));
++  assert(pages >= kSelectedPages && pages <= kMaximumFullPages);
++  assert(pages == (historical + kPageSize - 1) / kPageSize);
++  assert(capacity >= end);
+   assert(selected_pages.sizes() ==
+          at::IntArrayRef({batch, kv_heads, kSelectedPages}));
+   assert(support_ids.sizes() ==
+@@ -510,7 +511,7 @@ void select_pack_refresh(
+   assert(slots.numel() == rows * kSupportTokens);
+   assert(missing.numel() == rows * kSupportTokens);
+   assert(counts.numel() == rows * 2);
+-  assert(candidate_ids.is_contiguous() && selected_pages.is_contiguous());
++  assert(selected_pages.is_contiguous());
+   assert(support_ids.is_contiguous() && page_log_mass.stride(3) == 1);
+   assert(cache.is_contiguous() && resident.is_contiguous());
+   assert(lookup.is_contiguous() && slots.is_contiguous());
+@@ -520,10 +521,10 @@ void select_pack_refresh(
+   c10::cuda::CUDAGuard guard(page_log_mass.device());
+   auto stream =
+       c10::cuda::getCurrentCUDAStream(page_log_mass.get_device()).stream();
+-  select_pack_plan_kernel<<<
+-      static_cast<unsigned int>(rows), kThreads, 0, stream>>>(
++  const auto launch = [&](auto items) {
++    select_pack_plan_kernel<decltype(items)::value><<<
++        static_cast<unsigned int>(rows), kThreads, 0, stream>>>(
+       page_log_mass.const_data_ptr<float>(),
+-      candidate_ids.const_data_ptr<int64_t>(),
+       selected_pages.mutable_data_ptr<int64_t>(),
+       support_ids.mutable_data_ptr<int64_t>(),
+       resident.mutable_data_ptr<int64_t>(),
+@@ -539,6 +540,18 @@ void select_pack_refresh(
+       page_log_mass.stride(0),
+       page_log_mass.stride(1),
+       page_log_mass.stride(2));
++  };
++  if (pages <= 256) {
++    launch(std::integral_constant<int, 1>{});
++  } else if (pages <= 512) {
++    launch(std::integral_constant<int, 2>{});
++  } else if (pages <= 1024) {
++    launch(std::integral_constant<int, 4>{});
++  } else if (pages <= 2048) {
++    launch(std::integral_constant<int, 8>{});
++  } else {
++    launch(std::integral_constant<int, 16>{});
++  }
+   constexpr int kVectorsPerKey = 16;
+   const int vectors =
+       static_cast<int>(rows) * kSupportTokens * kVectorsPerKey;
+diff --git a/basisserve/kernels/slot_indexed_attention.py b/basisserve/kernels/slot_indexed_attention.py
+index 2908994..fee9f2d 100644
+--- a/basisserve/kernels/slot_indexed_attention.py
++++ b/basisserve/kernels/slot_indexed_attention.py
+@@ -140,7 +140,8 @@ def _split_slot_kernel(
+ 
+ 
+ @triton.jit
+-def _merge_kernel(partial, lse, output, R:tl.constexpr, BR:tl.constexpr, SPLITS:tl.constexpr):
++def _merge_kernel(partial, lse, output, R:tl.constexpr, BR:tl.constexpr, SPLITS:tl.constexpr,
++                  HEADS:tl.constexpr, O0:tl.constexpr, O1:tl.constexpr, O3:tl.constexpr):
+     row=tl.program_id(0)
+     splits=tl.arange(0,SPLITS)
+     dims=tl.arange(0,BR)
+@@ -149,7 +150,7 @@ def _merge_kernel(partial, lse, output, R:tl.constexpr, BR:tl.constexpr, SPLITS:
+     weights=weights/tl.sum(weights,0)
+     values=tl.load(partial+(row*SPLITS+splits[:,None])*R+dims[None,:],dims[None,:]<R,0)
+     out=tl.sum(values*weights[:,None],0)
+-    tl.store(output+row*R+dims,out,dims<R)
++    tl.store(output+(row//HEADS)*O0+(row%HEADS)*O1+dims*O3,out,dims<R)
+ 
+ 
+ 
+@@ -165,5 +166,6 @@ def slot_indexed_attention(q,k,v,ids,slots,workspace,*,scale):
+         SCALE=scale,QUERY_HEADS=heads,HEADS_PER_KV=heads//k.shape[1],QK_DIM=d,VALUE_DIM=rank,
+         selected_count=ids.shape[-1],BLOCK_QK=triton.next_power_of_2(d),BLOCK_VALUE=triton.next_power_of_2(rank),
+         BLOCK_SELECTED=32,SPLITS=splits,PER_SPLIT=per_split,num_warps=4)
+-    _merge_kernel[(batch*heads,)](partial,lse,out,R=rank,BR=triton.next_power_of_2(rank),SPLITS=splits,num_warps=4)
++    _merge_kernel[(batch*heads,)](partial,lse,out,R=rank,BR=triton.next_power_of_2(rank),SPLITS=splits,
++        HEADS=heads,O0=out.stride(0),O1=out.stride(1),O3=out.stride(3),num_warps=4)
+     return out
+diff --git a/benchmarks/bench_uniform_allgather.py b/benchmarks/bench_uniform_allgather.py
+index 312c76c..f2d56de 100755
+--- a/benchmarks/bench_uniform_allgather.py
++++ b/benchmarks/bench_uniform_allgather.py
+@@ -162,17 +162,20 @@ def measure(
+     timing_stream: torch.cuda.Stream | None = None,
+ ) -> tuple[torch.Tensor, list[float]]:
+     output: torch.Tensor | None = None
+-    for _ in range(warmup):
+-        output = run_once()
++    with torch.cuda.stream(timing_stream):
++        for _ in range(warmup):
++            output = run_once()
+     torch.cuda.synchronize(device)
+     dist.barrier()
+ 
+     starts = [torch.cuda.Event(enable_timing=True) for _ in range(iters)]
+     ends = [torch.cuda.Event(enable_timing=True) for _ in range(iters)]
+-    for start, end in zip(starts, ends, strict=True):
+-        start.record(timing_stream)
+-        output = run_once()
+-        end.record(timing_stream)
++    # Graph replay launches on the current stream, not its capture stream.
++    with torch.cuda.stream(timing_stream):
++        for start, end in zip(starts, ends, strict=True):
++            start.record()
++            output = run_once()
++            end.record()
+     assert output is not None
+     ends[-1].synchronize()
+     local = torch.tensor(
+diff --git a/benchmarks/system/bench_llama31_8b_tp8_combined.py b/benchmarks/system/bench_llama31_8b_tp8_combined.py
+index db4dd18..96aa04c 100644
+--- a/benchmarks/system/bench_llama31_8b_tp8_combined.py
++++ b/benchmarks/system/bench_llama31_8b_tp8_combined.py
+@@ -3,8 +3,8 @@
+ from __future__ import annotations
+ 
+ import argparse
+-from datetime import timedelta
+-import hashlib
++from contextlib import nullcontext
++from datetime import datetime, timedelta, timezone
+ import json
+ import math
+ import os
+@@ -41,9 +41,9 @@ from basisserve.core.llama31_8b_tp8_combined import (
+ )
+ from basisserve.kernels.feature_ragged_allgather import FeatureRaggedCommunicator
+ from basisserve.kernels.mapped_host_paged_attention import _load_extension
+-from benchmarks.system.common import metadata
++from benchmarks.system.common import command
+ from benchmarks.system.numa_memory import bind_host_allocations
+-from benchmarks.system.two_stage_router import compile_fine
++from benchmarks.system.register_router import compile_register
+ 
+ 
+ DEFAULT_MODEL = Path(
+@@ -55,6 +55,31 @@ DEFAULT_ROUTER = Path("/workspace/runs/l31-cal128/router/ours_b16r16")
+ DEFAULT_TOKENS = Path("/workspace/runs/l31-cal128/calibration/windows.safetensors")
+ 
+ 
++def _trace_hooks(model):
++    handles = []
++
++    def attach(module, name):
++        scopes = []
++
++        def before(module, inputs):
++            scope = torch.profiler.record_function(name)
++            scope.__enter__()
++            scopes.append(scope)
++
++        def after(module, inputs, output):
++            scopes.pop().__exit__(None, None, None)
++
++        handles.extend((module.register_forward_pre_hook(before), module.register_forward_hook(after)))
++
++    for index, layer in enumerate(model.model.layers):
++        attach(layer.self_attn, f"layer_{index}.attention")
++        attach(layer.mlp, f"layer_{index}.mlp")
++        attach(layer.mlp.gate_proj, f"layer_{index}.mlp.gate")
++        attach(layer.mlp.up_proj, f"layer_{index}.mlp.up")
++        attach(layer.mlp.down_proj, f"layer_{index}.mlp.down_reduce")
++    return handles
++
++
+ def _percentile(values: list[float], fraction: float) -> float:
+     ordered = sorted(values)
+     return ordered[min(len(ordered) - 1, math.ceil(fraction * len(ordered)) - 1)]
+@@ -109,14 +134,6 @@ def _choose(logits: torch.Tensor, vocab_size: int) -> torch.Tensor:
+     return ids
+ 
+ 
+-def _sha256(path: Path) -> str:
+-    digest = hashlib.sha256()
+-    with path.open("rb") as source:
+-        while block := source.read(8 << 20):
+-            digest.update(block)
+-    return digest.hexdigest()
+-
+-
+ def _load_prompts(
+     path: Path, manifest_path: Path | None, *, batch: int, length: int
+ ) -> tuple[torch.Tensor, dict]:
+@@ -126,7 +143,8 @@ def _load_prompts(
+     assert all(torch.unique(prompts[index]).numel() > 1 for index in range(batch))
+     if manifest_path is None:
+         prompt_metadata = {
+-            "tokens_file_sha256": _sha256(path),
++            "tokens_file": str(path),
++            "tokens_file_bytes": path.stat().st_size,
+             "sample_ids": [f"row_{index}" for index in range(batch)],
+             "cohort_hash": None,
+         }
+@@ -135,11 +153,11 @@ def _load_prompts(
+         assert prompt_metadata["status"] == "complete"
+         assert prompt_metadata["prompt_tokens"] == length
+         assert prompt_metadata["maximum_batch"] >= batch
+-        assert prompt_metadata["tokens_file_sha256"] == _sha256(path)
+         prompt_metadata = {
+             **prompt_metadata,
+             "sample_ids": prompt_metadata["sample_ids"][:batch],
+-            "token_sha256": prompt_metadata["token_sha256"][:batch],
++            "tokens_file_bytes": path.stat().st_size,
++            "integrity_validation": "shape_and_manifest_fields_only",
+         }
+     return prompts, prompt_metadata
+ 
+@@ -158,15 +176,17 @@ def main() -> None:
+     parser.add_argument("--conditioning-steps", type=int, default=16)
+     parser.add_argument("--measure-steps", type=int, default=128)
+     parser.add_argument("--repeat", type=int, default=0)
+-    parser.add_argument("--tag", default="formal")
++    parser.add_argument("--tag", default="full_scan")
+     parser.add_argument("--profile-components", action="store_true")
++    parser.add_argument("--trace", action="store_true")
+     parser.add_argument(
+         "--output-root", type=Path,
+-        default=Path("results/system_benchmarks/llama31_8b_tp8_combined"),
++        default=Path("results/system_benchmarks/llama31_8b_tp8_full_scan"),
+     )
+     args = parser.parse_args()
+     assert args.length >= 4096 and args.length <= 130048
+     assert args.batch > 0 and args.conditioning_steps >= 0 and args.measure_steps > 0
++    assert not (args.trace and args.profile_components)
+     assert args.length + args.conditioning_steps + args.measure_steps <= 131072
+     assert args.model.is_dir() and args.tokens.is_file()
+     if args.arm != "dense":
+@@ -211,7 +231,7 @@ def main() -> None:
+     )
+ 
+     router_extension = None
+-    fine_router_extension = None
++    full_router_extension = None
+     postprocess_extension = None
+     if args.arm == "basis_joint":
+         router_extension = _load_extension(
+@@ -221,9 +241,12 @@ def main() -> None:
+             base_rank=BASE_RANK,
+             residual_rank=RESIDUAL_RANK,
+         )
+-        _, fine_router_extension = compile_fine(
+-            Path(f"/tmp/basisserve_tp8_two_stage/rank{rank}")
+-        )
++        router_build_root = Path("/tmp/basisserve_tp8_full_router")
++        if rank == 0:
++            full_router_extension = compile_register(router_build_root, BASE_RANK, 8)
++        dist.barrier()
++        if rank != 0:
++            full_router_extension = compile_register(router_build_root, BASE_RANK, 8)
+         postprocess_extension = load_decode_postprocess_extension()
+     else:
+         _load_extension(
+@@ -257,7 +280,7 @@ def main() -> None:
+         rank=rank,
+         communicator=communicator,
+         router_extension=router_extension,
+-        fine_router_extension=fine_router_extension,
++        full_router_extension=full_router_extension,
+         postprocess_extension=postprocess_extension,
+         breakdown=breakdown,
+     )
+@@ -333,25 +356,38 @@ def main() -> None:
+     torch.cuda.reset_peak_memory_stats()
+     if breakdown is not None:
+         breakdown.enabled = True
++    trace = torch.profiler.profile(
++        activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
++    ) if args.trace else None
++    trace_handles = _trace_hooks(model) if args.trace else []
++    if trace is not None:
++        trace.start()
++        dist.barrier()
+     wall_start = time.perf_counter()
+     for measured_step, (begin, end) in enumerate(events):
+         step = args.conditioning_steps + measured_step
+         begin.record()
+-        output = model(
+-            input_ids=token,
+-            position_ids=positions[step],
+-            use_cache=False,
+-            logits_to_keep=1,
+-        )
+-        token = _choose(output.logits, model.config.vocab_size)
+-        finite.append(torch.isfinite(output.logits).all())
+-        generated.append(token.clone())
++        with torch.profiler.record_function(f"decode_step_{measured_step}") if args.trace else nullcontext():
++            output = model(
++                input_ids=token,
++                position_ids=positions[step],
++                use_cache=False,
++                logits_to_keep=1,
++            )
++            token = _choose(output.logits, model.config.vocab_size)
++            finite.append(torch.isfinite(output.logits).all())
++            generated.append(token.clone())
+         end.record()
+         del output
+     torch.cuda.synchronize()
+     if breakdown is not None:
+         breakdown.enabled = False
+     wall_seconds = time.perf_counter() - wall_start
++    if trace is not None:
++        trace.stop()
++        trace.export_chrome_trace(str(folder / f"rank{rank}.trace.json"))
++    for handle in trace_handles:
++        handle.remove()
+     decode_peak_allocated = torch.cuda.max_memory_allocated()
+     decode_peak_reserved = torch.cuda.max_memory_reserved()
+     assert bool(torch.stack(finite).all())
+@@ -390,6 +426,7 @@ def main() -> None:
+         "batch": args.batch,
+         "conditioning_steps": args.conditioning_steps,
+         "measured_steps": args.measure_steps,
++        "trace_enabled": args.trace,
+         "repeat": args.repeat,
+         "dtype": "bfloat16",
+         "value_rank": None if args.arm == "dense" else VALUE_RANK,
+@@ -400,7 +437,7 @@ def main() -> None:
+         "recent_tokens": RECENT_TOKENS if args.arm == "basis_joint" else None,
+         "physical_support": SUPPORT_TOKENS if args.arm == "basis_joint" else None,
+         "key_placement": "pinned_host_with_gpu_slots" if args.arm == "basis_joint" else "gpu",
+-        "routing_mode": "two_stage_512_persistent_slots" if args.arm == "basis_joint" else "full",
++        "routing_mode": "full_scan_b16r16_persistent_slots" if args.arm == "basis_joint" else "full",
+         "prefill": "full_context_flash_attention_with_arm_value_representation",
+         "prefill_cuda_ms": prefill_cuda_ms,
+         "prefill_wall_seconds": prefill_wall_seconds,
+@@ -436,7 +473,18 @@ def main() -> None:
+             str(args.prompt_manifest.resolve()) if args.prompt_manifest is not None else None
+         ),
+         "prompt_cohort": prompt_metadata,
+-        "metadata": metadata(),
++        "metadata": {
++            "git_commit": command(["git", "rev-parse", "HEAD"])["stdout"].strip(),
++            "git_status": command(["git", "status", "--porcelain"])["stdout"],
++            "command_line": sys.argv,
++            "pytorch": torch.__version__,
++            "cuda": torch.version.cuda,
++            "nccl": torch.cuda.nccl.version(),
++            "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
++            "torch_matmul_tf32": torch.backends.cuda.matmul.allow_tf32,
++            "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
++            "source_hash_validation": "not_performed",
++        },
+     }
+     result_path = folder / f"rank{rank}.json"
+     result_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+diff --git a/benchmarks/system/register_router.py b/benchmarks/system/register_router.py
+index 7839926..89d3d60 100644
+--- a/benchmarks/system/register_router.py
++++ b/benchmarks/system/register_router.py
+@@ -1,5 +1,4 @@
+ """Build the register-consumed MMA router against the current serving baseline."""
+-import hashlib
+ from pathlib import Path
+ from torch.utils.cpp_extension import load
+ from benchmarks.system.local_kernel_candidates import write_source
+@@ -21,8 +20,7 @@ def compile_register(root, rank, warps):
+     write_source(folder/'conditional_router_page32.cu',text)
+     for name in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu']:
+         write_source(folder/name,(src/name).read_text())
+-    digest=hashlib.sha256(text.encode()).hexdigest()[:10]
+-    return load(name=f'register_router_{digest}_b{rank}_w{warps}',
++    return load(name=f'register_router_b{rank}_w{warps}',
+         sources=[str(folder/name) for name in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],
+         extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','--ptxas-options=-v',
+             '-DBASIS_VALUE_DIM=80','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32',
+diff --git a/benchmarks/system/run_llama31_8b_tp8_decode_grid.py b/benchmarks/system/run_llama31_8b_tp8_decode_grid.py
+index 62417ac..c23cda3 100644
+--- a/benchmarks/system/run_llama31_8b_tp8_decode_grid.py
++++ b/benchmarks/system/run_llama31_8b_tp8_decode_grid.py
+@@ -14,7 +14,8 @@ import sys
+ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+ BENCHMARK = REPOSITORY_ROOT / "benchmarks/system/bench_llama31_8b_tp8_combined.py"
+ PROMPT_ROOT = Path("/workspace/runs/l31-cal128/tp8-benchmark-prompts")
+-DEFAULT_OUTPUT = REPOSITORY_ROOT / "results/system_benchmarks/llama31_8b_tp8_combined"
++DEFAULT_OUTPUT = REPOSITORY_ROOT / "results/system_benchmarks/llama31_8b_tp8_full_scan"
++ROUTING_MODE = "full_scan_b16r16_persistent_slots"
+ MATRIX = {
+     4096: (1, 8, 32, 128),
+     16384: (1, 4, 8, 16),
+@@ -33,23 +34,41 @@ def main() -> None:
+         "--contexts", nargs="+", type=int, choices=tuple(MATRIX), default=tuple(MATRIX)
+     )
+     parser.add_argument("--cohorts", nargs="+", type=int, choices=(0, 1, 2), default=(0, 1, 2))
++    parser.add_argument("--batches", nargs="+", type=int)
++    parser.add_argument("--tag", default="full_scan_decode")
++    parser.add_argument("--profile-components", action="store_true")
+     parser.add_argument("--conditioning-steps", type=int, default=16)
+     parser.add_argument("--measure-steps", type=int, default=128)
+     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT)
+     args = parser.parse_args()
+     assert args.conditioning_steps >= 0 and args.measure_steps > 0
+     assert PROMPT_ROOT.is_dir() and BENCHMARK.is_file()
++    matrix = {
++        length: [batch for batch in MATRIX[length] if args.batches is None or batch in args.batches]
++        for length in args.contexts
++    }
++    assert all(matrix.values())
+     args.output_root.mkdir(parents=True, exist_ok=True)
+     manifest_path = args.output_root / "decode_grid_trials.json"
+     if manifest_path.exists():
+         manifest = json.loads(manifest_path.read_text())
+         assert manifest["status"] in ("running", "complete_with_failures", "complete")
++        assert manifest["conditioning_steps"] == args.conditioning_steps
++        assert manifest["measure_steps"] == args.measure_steps
++        assert manifest["matrix"] == {str(key): value for key, value in matrix.items()}
++        assert manifest["arms"] == list(args.arms) and manifest["cohorts"] == list(args.cohorts)
++        assert manifest["tag"] == args.tag
++        assert manifest["profile_components"] == args.profile_components
++        assert manifest["routing_mode"] == ROUTING_MODE
+     else:
+         manifest = {
+             "status": "running",
+             "format": "basisserve.llama31_8b.tp8_combined_decode_grid.v1",
+             "created_at": datetime.now(timezone.utc).isoformat(),
+-            "matrix": {str(key): list(value) for key, value in MATRIX.items()},
++            "matrix": {str(key): value for key, value in matrix.items()},
++            "tag": args.tag,
++            "profile_components": args.profile_components,
++            "routing_mode": ROUTING_MODE,
+             "arms": list(args.arms),
+             "contexts": list(args.contexts),
+             "cohorts": list(args.cohorts),
+@@ -65,7 +84,7 @@ def main() -> None:
+     for prompt_tokens in args.contexts:
+         tokens = PROMPT_ROOT / f"p{prompt_tokens}_c0.safetensors"
+         assert tokens.is_file()
+-        for batch in MATRIX[prompt_tokens]:
++        for batch in matrix[prompt_tokens]:
+             for cohort in args.cohorts:
+                 tokens = PROMPT_ROOT / f"p{prompt_tokens}_c{cohort}.safetensors"
+                 prompt_manifest = PROMPT_ROOT / f"p{prompt_tokens}_c{cohort}.json"
+@@ -86,11 +105,13 @@ def main() -> None:
+                         "--conditioning-steps", str(args.conditioning_steps),
+                         "--measure-steps", str(args.measure_steps),
+                         "--repeat", str(cohort),
+-                        "--tag", f"formal_decode_c{cohort}",
++                        "--tag", f"{args.tag}_c{cohort}",
+                         "--tokens", str(tokens),
+                         "--prompt-manifest", str(prompt_manifest),
+                         "--output-root", str(args.output_root),
+                     ]
++                    if args.profile_components:
++                        command.append("--profile-components")
+                     trial_log = args.output_root / (
+                         f"launcher_{arm}_p{prompt_tokens}_b{batch}_c{cohort}.log"
+                     )
+diff --git a/benchmarks/system/two_stage_router.py b/benchmarks/system/two_stage_router.py
+index c15a16a..47502da 100644
+--- a/benchmarks/system/two_stage_router.py
++++ b/benchmarks/system/two_stage_router.py
+@@ -1,5 +1,4 @@
+ """Exact-K Page32 metadata and candidate-only register MMA routing."""
+-import hashlib
+ from pathlib import Path
+ import torch
+ import triton as tr
+@@ -65,6 +64,9 @@ class Metadata:
+         b,h,n,_=k.shape;self.h=h;self.n=n-64;self.cap=tr.cdiv(capacity,32)
+         self.minimum=torch.empty(b,h,self.cap,128,device=k.device,dtype=k.dtype)
+         self.maximum=torch.empty_like(self.minimum)
++        self.score_storage=torch.empty(b*h*4*self.cap,device=k.device,dtype=torch.float32)
++        pages=tr.cdiv(n,32)
++        self.score_output=self.score_storage[:b*h*4*pages].view(b,h,4,pages)
+         self.ring=k[:,:,-64:].contiguous().clone();self.slot=0
+         _summary[(b*h,tr.cdiv(self.n,32))](k,self.minimum,self.maximum,self.n,h,self.cap,*k.stride()[:3])
+     def advance(self,k):
+@@ -73,8 +75,11 @@ class Metadata:
+     def commit_advance(self):
+         self.n+=1;self.slot=(self.slot+1)%64
+     def scores(self,q):
++        """Return transient scores backed by the reusable decode workspace."""
+         p=tr.cdiv(self.n+64,32)
+-        out=torch.empty(q.shape[0],self.h,4,p,device=q.device)
++        if self.score_output.shape[-1]!=p:
++            self.score_output=self.score_storage[:q.shape[0]*self.h*4*p].view(q.shape[0],self.h,4,p)
++        out=self.score_output
+         _coarse[(q.shape[0]*self.h*4,tr.cdiv(p,16))](q,self.minimum,self.maximum,out,self.h,self.cap,p,self.n,*q.stride()[:2])
+         return out
+ 
+@@ -112,6 +117,5 @@ def compile_fine(root):
+     cpp=cpp.replace('pybind11::arg("query_code_prepared"));','pybind11::arg("query_code_prepared"), pybind11::arg("ids"));')
+     write_source(folder/'mapped_host_paged_attention.cpp',cpp)
+     write_source(folder/'mapped_host_paged_attention.cu',(src/'mapped_host_paged_attention.cu').read_text())
+-    digest=hashlib.sha256((text+cpp).encode()).hexdigest()[:10]
+-    fine=load(name=f'two_stage_{digest}',sources=[str(folder/n) for n in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','-DBASIS_VALUE_DIM=128','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32','-DBASIS_BASE_RANK=16','-DBASIS_RESIDUAL_RANK=16','-DREGISTER_WARPS=8','-DBASIS_DISABLE_REGISTER_ROUTER'])
++    fine=load(name='two_stage_b16_w8',sources=[str(folder/n) for n in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','-DBASIS_VALUE_DIM=128','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32','-DBASIS_BASE_RANK=16','-DBASIS_RESIDUAL_RANK=16','-DREGISTER_WARPS=8','-DBASIS_DISABLE_REGISTER_ROUTER'])
+     return full,fine

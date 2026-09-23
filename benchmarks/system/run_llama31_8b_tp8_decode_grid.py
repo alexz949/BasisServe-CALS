@@ -14,7 +14,8 @@ import sys
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 BENCHMARK = REPOSITORY_ROOT / "benchmarks/system/bench_llama31_8b_tp8_combined.py"
 PROMPT_ROOT = Path("/workspace/runs/l31-cal128/tp8-benchmark-prompts")
-DEFAULT_OUTPUT = REPOSITORY_ROOT / "results/system_benchmarks/llama31_8b_tp8_combined"
+DEFAULT_OUTPUT = REPOSITORY_ROOT / "results/system_benchmarks/llama31_8b_tp8_full_scan"
+ROUTING_MODE = "full_scan_b16r16_persistent_slots"
 MATRIX = {
     4096: (1, 8, 32, 128),
     16384: (1, 4, 8, 16),
@@ -33,23 +34,41 @@ def main() -> None:
         "--contexts", nargs="+", type=int, choices=tuple(MATRIX), default=tuple(MATRIX)
     )
     parser.add_argument("--cohorts", nargs="+", type=int, choices=(0, 1, 2), default=(0, 1, 2))
+    parser.add_argument("--batches", nargs="+", type=int)
+    parser.add_argument("--tag", default="full_scan_decode")
+    parser.add_argument("--profile-components", action="store_true")
     parser.add_argument("--conditioning-steps", type=int, default=16)
     parser.add_argument("--measure-steps", type=int, default=128)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
     assert args.conditioning_steps >= 0 and args.measure_steps > 0
     assert PROMPT_ROOT.is_dir() and BENCHMARK.is_file()
+    matrix = {
+        length: [batch for batch in MATRIX[length] if args.batches is None or batch in args.batches]
+        for length in args.contexts
+    }
+    assert all(matrix.values())
     args.output_root.mkdir(parents=True, exist_ok=True)
     manifest_path = args.output_root / "decode_grid_trials.json"
     if manifest_path.exists():
         manifest = json.loads(manifest_path.read_text())
         assert manifest["status"] in ("running", "complete_with_failures", "complete")
+        assert manifest["conditioning_steps"] == args.conditioning_steps
+        assert manifest["measure_steps"] == args.measure_steps
+        assert manifest["matrix"] == {str(key): value for key, value in matrix.items()}
+        assert manifest["arms"] == list(args.arms) and manifest["cohorts"] == list(args.cohorts)
+        assert manifest["tag"] == args.tag
+        assert manifest["profile_components"] == args.profile_components
+        assert manifest["routing_mode"] == ROUTING_MODE
     else:
         manifest = {
             "status": "running",
             "format": "basisserve.llama31_8b.tp8_combined_decode_grid.v1",
             "created_at": datetime.now(timezone.utc).isoformat(),
-            "matrix": {str(key): list(value) for key, value in MATRIX.items()},
+            "matrix": {str(key): value for key, value in matrix.items()},
+            "tag": args.tag,
+            "profile_components": args.profile_components,
+            "routing_mode": ROUTING_MODE,
             "arms": list(args.arms),
             "contexts": list(args.contexts),
             "cohorts": list(args.cohorts),
@@ -65,7 +84,7 @@ def main() -> None:
     for prompt_tokens in args.contexts:
         tokens = PROMPT_ROOT / f"p{prompt_tokens}_c0.safetensors"
         assert tokens.is_file()
-        for batch in MATRIX[prompt_tokens]:
+        for batch in matrix[prompt_tokens]:
             for cohort in args.cohorts:
                 tokens = PROMPT_ROOT / f"p{prompt_tokens}_c{cohort}.safetensors"
                 prompt_manifest = PROMPT_ROOT / f"p{prompt_tokens}_c{cohort}.json"
@@ -86,11 +105,13 @@ def main() -> None:
                         "--conditioning-steps", str(args.conditioning_steps),
                         "--measure-steps", str(args.measure_steps),
                         "--repeat", str(cohort),
-                        "--tag", f"formal_decode_c{cohort}",
+                        "--tag", f"{args.tag}_c{cohort}",
                         "--tokens", str(tokens),
                         "--prompt-manifest", str(prompt_manifest),
                         "--output-root", str(args.output_root),
                     ]
+                    if args.profile_components:
+                        command.append("--profile-components")
                     trial_log = args.output_root / (
                         f"launcher_{arm}_p{prompt_tokens}_b{batch}_c{cohort}.log"
                     )
