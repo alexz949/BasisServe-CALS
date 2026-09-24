@@ -7,7 +7,7 @@ from pathlib import Path
 import shlex
 import sys
 import time
-from types import MethodType
+from types import MethodType, SimpleNamespace
 
 import torch
 from safetensors.torch import load_file
@@ -22,6 +22,7 @@ from basisserve.checkpoint.gqa_vo_qwen3 import GQATiedVOQwen3Attention
 from basisserve.checkpoint.gqa_vo_nemotron_h import nemotron_h_c1_attention
 from basisserve.checkpoint.c1_attention_layers import c1_attention_layers
 from basisserve.checkpoint import c1_lrqk_qwen3 as lrqk_adapter
+from basisserve.checkpoint import c1_shadowkv_qwen3 as shadowkv_adapter
 from basisserve.checkpoint.c1_shadowkv_qwen3 import C1ShadowKVCache, install_c1_shadowkv
 from basisserve.core.c1_lrqk import LRQKConfig
 from basisserve.core.c1_lrqk import LRQKState
@@ -34,6 +35,19 @@ from basisserve.kernels.compressed_v_decode_attention import (
 
 ARMS = ('full','exact_sparse','lrqk','shadowkv','loki','ours')
 LRQK_TOPK, LOKI_TOPK, LOKI_RECENT = 2048, 2048, 64
+# Physical KV budgets: 'ours'/'exact_sparse' page routing (sink page + recent 64 inside) and ShadowKV routed tokens.
+OURS_BUDGET, SHADOWKV_BUDGET = 2048, 2048
+# 'ruler' (frozen RULER prompts, substring metrics) or 'longbench' (ShadowKV 9-task LongBench-v1 subset, official metrics).
+BENCHMARK = 'ruler'
+# Official LongBench pred.py: chat models are better off without the chat wrapper on these datasets.
+LONGBENCH_NO_CHAT_TASKS = ('trec', 'triviaqa', 'samsum', 'lsht', 'lcc', 'repobench-p')
+
+
+def score_prediction(prediction, row):
+    if BENCHMARK == 'longbench':
+        from evaluation.longbench_metrics import longbench_score
+        return longbench_score(row['task'], prediction, row['answers'], row.get('all_classes'))
+    return sample_score(prediction, row['answers'], row['match_type'])
 DEFAULT_TASK_NAMES = (
     'niah_single_1','niah_single_2','niah_single_3','niah_multikey_1',
     'niah_multikey_2','niah_multiquery','niah_multivalue','vt','fwe','qa_1','qa_2',
@@ -92,7 +106,7 @@ def load_evaluation_model(identity, config):
         model=AutoModelForCausalLM.from_pretrained(identity['model'],device_map='balanced',
             max_memory=memory,**options).eval()
         assert all(str(device) not in ('cpu','disk') for device in model.hf_device_map.values())
-    if config.model_type=='llama':
+    if config.model_type in ('llama', 'qwen3'):
         from evaluation.chunked_prefill_mlp import install_chunked_prefill_mlps
         install_chunked_prefill_mlps(model)
     return model
@@ -103,6 +117,18 @@ class RoutingCache(DynamicCache):
         super().__init__(config=config)
         self.sidecars = {}
         self.statistics = {}
+
+
+def flash_prefill_attention(query, key, value, *, scale):
+    """Causal GQA prefill with compact Values through FlashAttention: on sm_120 the repository's Triton compressed-V
+    kernel runs at under half the FlashAttention throughput. V is zero-padded to the key width; attention is linear
+    in V, so the leading value features are exact and the padding contributes zeros."""
+    from torch.nn.attention import sdpa_kernel, SDPBackend
+    width = value.shape[-1]
+    padded = torch.nn.functional.pad(value, (0, key.shape[-1] - width))
+    with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
+        output = torch.nn.functional.scaled_dot_product_attention(query, key, padded, is_causal=True, enable_gqa=True, scale=scale)
+    return output[..., :width]
 
 
 @torch.inference_mode()
@@ -136,7 +162,8 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
             if previous else current)
     k,v = past_key_values.update(k,v,self.layer_idx)
     if previous == 0:
-        output = compressed_v_prefill_attention(q,k,v,scale=self.scaling)
+        output = (flash_prefill_attention(q,k,v,scale=self.scaling) if self.config.model_type == 'qwen3'
+                  else compressed_v_prefill_attention(q,k,v,scale=self.scaling))
     elif self._routing_arm == 'full':
         output = compressed_v_decode_attention_triton(q,k,v,scale=self.scaling)
     elif self._routing_arm == 'loki':
@@ -155,7 +182,7 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
             sidecar = past_key_values.sidecars[self.layer_idx]
             projector = self._routing_projector
             route_q,route_k,route_v = q,k,v
-        if self.config.model_type in ('llama', 'nemotron_h'):
+        if self.config.model_type in ('llama', 'qwen3', 'nemotron_h'):
             from evaluation.llama_sink_recent_routing import page_support
             from basisserve.kernels.split_indexed_attention import split_indexed_attention
             if attention_mask is not None:
@@ -165,15 +192,15 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
             codes = torch.einsum('bhqd,hdr->bhqr', q.float(), projector.float())
             codes = codes[:, :, 0].reshape(batch, self.num_key_value_heads, group_heads, -1)
             scores = (codes @ sidecar.float().transpose(-1, -2)) * self.scaling
-            ids, valid = page_support(scores)
+            ids, valid = page_support(scores, budget=OURS_BUDGET)
             selected = ids.masked_fill(~valid, -1).repeat_interleave(group_heads, dim=1)
             output = split_indexed_attention(q, k, v, selected, scale=self.scaling)
             past_key_values.statistics[self.layer_idx] = dict(
                 selected_tokens_mean=float(valid.sum(-1).float().mean()), sink_tokens=32,
-                recent_tokens=64, token_budget=2048)
+                recent_tokens=64, token_budget=OURS_BUDGET)
         else:
             result = c1_conditional_page_topk_attention(route_q,route_k,route_v,sidecar,projector,
-                page_size=32,exact_token_budget=2048,pinned_prefix_pages=1,scale=self.scaling,
+                page_size=32,exact_token_budget=OURS_BUDGET,pinned_prefix_pages=1,scale=self.scaling,
                 query_block_size=1,attention_mask=attention_mask,collect_statistics=True)
             output = result.output.to(v.dtype)
             past_key_values.statistics[self.layer_idx] = result.statistics
@@ -264,37 +291,56 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
     data=read_json(args.data/'manifest.json')
     task_names = tuple(task_names)
     assert task_names and len(set(task_names)) == len(task_names)
-    assert samples_per_task > 0
-    assert data['status']=='complete' and data['protocol']['samples_per_task']==samples_per_task
+    assert data['status']=='complete'
     assert data['protocol']['sequence_length']==args.sequence_length
     assert data['tokenizer_config_sha256']==sha256(Path(identity['model'])/'tokenizer_config.json')
     assert set(task_names).issubset(data['protocol']['tasks'])
-    tasks=parse_tasks(','.join(task_names))
-    assert len(tasks)==len(task_names)
+    if BENCHMARK=='longbench':
+        # Official prompts, caps and metrics travel with the frozen rows; the kept count varies per task.
+        assert data['format']=='basisserve.longbench_v1.shadowkv9.v1' and data['benchmark']=='longbench_v1'
+        samples_per_task={name:int(data['protocol']['samples_per_task'][name]) for name in task_names}
+        tasks=[SimpleNamespace(name=name,tokens_to_generate=None,match_type=None) for name in task_names]
+    else:
+        assert samples_per_task > 0 and data['protocol']['samples_per_task']==samples_per_task
+        tasks=parse_tasks(','.join(task_names))
+        assert len(tasks)==len(task_names)
+        samples_per_task={task.name:samples_per_task for task in tasks}
     rows=[]
     for task in tasks:
         path=args.data/task.name/'validation.jsonl'
         assert sha256(path)==data['artifacts'][task.name]['sha256']
         sources=[json.loads(line) for line in path.read_text().splitlines()]
-        assert len(sources)==samples_per_task
+        assert len(sources)==samples_per_task[task.name]
         for ordinal,source in enumerate(sources):
-            if args.chat_template:
+            if args.chat_template and not (BENCHMARK=='longbench' and task.name in LONGBENCH_NO_CHAT_TASKS):
                 messages=([{'role':'system','content':args.system_prompt}] if args.system_prompt else [])
+                template_kwargs=json.loads(args.chat_template_kwargs) if args.chat_template_kwargs else {}
                 if args.prompt_layout=='chat_nn_no_prefix':
                     # Chat models answer directly after the assistant header; the completion-style answer prefix
                     # is dropped and a blank line follows the header (and any empty think block).
                     messages.append({'role':'user','content':str(source['input'])})
-                    text=tokenizer.apply_chat_template(messages,tokenize=False,add_generation_prompt=True)+'\n\n'
+                    text=tokenizer.apply_chat_template(messages,tokenize=False,add_generation_prompt=True,**template_kwargs)+'\n\n'
+                    ids=tokenizer(text,add_special_tokens=False)['input_ids']
+                elif args.prompt_layout=='chat_answer_prefix':
+                    # Llama-3.1-Instruct protocol: user turn holds the RULER input, the official completion-style
+                    # answer prefix is appended as assistant text after the generation header (and any empty think block).
+                    messages.append({'role':'user','content':str(source['input'])})
+                    text=tokenizer.apply_chat_template(messages,tokenize=False,add_generation_prompt=True,**template_kwargs)+str(source.get('answer_prefix',''))
                     ids=tokenizer(text,add_special_tokens=False)['input_ids']
                 else:
                     messages.append({'role':'user','content':ruler_prompt(source)})
                     ids=tokenizer.apply_chat_template(messages,
-                        tokenize=True,add_generation_prompt=True,return_dict=True)['input_ids']
+                        tokenize=True,add_generation_prompt=True,return_dict=True,**template_kwargs)['input_ids']
             else:
                 ids=tokenizer(ruler_prompt(source),add_special_tokens=True)['input_ids']
-            assert len(ids)+task.tokens_to_generate<=args.sequence_length
-            rows.append(dict(index=len(rows),task=task.name,ordinal=ordinal,input_ids=ids,
-                answers=source['outputs'],match_type=task.match_type,maximum_tokens=task.tokens_to_generate))
+            maximum=int(source['max_gen']) if BENCHMARK=='longbench' else task.tokens_to_generate
+            match=str(source['metric']) if BENCHMARK=='longbench' else task.match_type
+            assert len(ids)+maximum<=args.sequence_length
+            row=dict(index=len(rows),task=task.name,ordinal=ordinal,input_ids=ids,
+                answers=source['outputs'],match_type=match,maximum_tokens=maximum)
+            if BENCHMARK=='longbench':
+                row.update(all_classes=source.get('all_classes'),source_index=int(source['source_index']),_id=str(source['_id']))
+            rows.append(row)
     bank,bank_hashes={},{}
     if args.dense_v:
         assert identity['layer_ranks'] == [identity['head_dim']] * len(identity['attention_layers'])
@@ -364,14 +410,16 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
         config_record['time_step_limit']=[str(x) if math.isinf(x) else x for x in runtime_config.time_step_limit]
     spec=dict(identity_sha256=sha256(args.identity),data_sha256=sha256(args.data/'manifest.json'),
         runtime_config=config_record,rope=args.rope,
-        sequence_length=args.sequence_length,samples=len(rows),samples_per_task=samples_per_task,
+        sequence_length=args.sequence_length,samples=len(rows),samples_per_task=samples_per_task,benchmark=BENCHMARK,
+        ours_budget=OURS_BUDGET,shadowkv_budget=SHADOWKV_BUDGET,
         task_names=list(task_names),dtype='bfloat16',generation='greedy, native EOS, official caps',
         prefill=('full causal FlashAttention-2 on all arms' if args.dense_v else
+                 'full causal FlashAttention with zero-padded compact V (sm_120)' if runtime_config.model_type == 'qwen3' else
                  'full causal FlashAttention-2 for equal QKV widths, C1 Triton for compact V'),rank_schedule=identity['layer_ranks'],
-        exact_sparse='FP32 exact-QK normalized Page32 mass, GQA max, pinned page0 within B2048',
-        ours='native Base16/Residual16 Page32 GQA max, pinned page0 within B2048',
+        exact_sparse=f'FP32 exact-QK normalized Page32 mass, GQA max, pinned page0 within B{OURS_BUDGET}',
+        ours=f'native Base16/Residual16 Page32 GQA max, pinned page0 within B{OURS_BUDGET}',
         lrqk=dict(rank=32,topk_per_query_head=LRQK_TOPK,recent=64,prefill_iterations=2,decode_iterations=2,tolerance=0.01,seed=0,state_dtype='bfloat16',solve_dtype='float32'),
-        shadowkv=dict(rank=160,chunk=8,routed=2048,outlier_chunks=48,extra_support='native local and generated tokens'),
+        shadowkv=dict(rank=160,chunk=8,routed=SHADOWKV_BUDGET,outlier_chunks=48,extra_support='native local and generated tokens'),
         loki=(dict(rank=32,topk_per_query_head=LOKI_TOPK,recent=LOKI_RECENT,bank_manifest_sha256=sha256(args.loki_bank/'manifest.json'),
                    coordinate=read_json(args.loki_bank/'manifest.json')['runtime'],calibration='dense model')
               if args.loki_bank is not None else 'not evaluated'),
@@ -391,21 +439,34 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
             spec['source_sha256'][name]=sha256(ROOT/name)
     else:
         assert args.native_audit is None and args.wo_bank is None
-    if runtime_config.model_type in ('llama', 'nemotron_h'):
-        spec['exact_sparse'] = 'FP32 exact-QK Page32 mass, GQA max; sink32 + recent64 inside hard B2048'
-        spec['ours'] = 'Base16/Residual16 Page32 mass, GQA max; sink32 + recent64 inside hard B2048'
+    if runtime_config.model_type in ('llama', 'qwen3', 'nemotron_h'):
+        spec['exact_sparse'] = f'FP32 exact-QK Page32 mass, GQA max; sink32 + recent64 inside hard B{OURS_BUDGET}'
+        spec['ours'] = f'Base16/Residual16 Page32 mass, GQA max; sink32 + recent64 inside hard B{OURS_BUDGET}'
         for name in ('evaluation/llama_sink_recent_routing.py', 'basisserve/kernels/split_indexed_attention.py'):
             spec['source_sha256'][name] = sha256(ROOT/name)
-    if runtime_config.model_type == 'llama':
+    if runtime_config.model_type in ('llama', 'qwen3'):
         spec['prefill_mlp_chunk_tokens'] = 1024
         spec['source_sha256']['evaluation/chunked_prefill_mlp.py'] = sha256(ROOT/'evaluation/chunked_prefill_mlp.py')
     spec['value_mode'] = 'dense original V and Wo' if args.dense_v else 'allocated C1 V'
+    if BENCHMARK=='longbench':
+        spec['longbench']=dict(data_protocol=data['protocol'],model_tag=data['model_tag'],
+            scoring='official LongBench eval.py per-sample scorer: max over references; first non-empty line for samsum/trec/triviaqa/lsht',
+            generation='greedy, native EOS, official dataset2maxlen caps',
+            chat_wrapping=('official pred.py rule: chat template for every task except ' + ', '.join(LONGBENCH_NO_CHAT_TASKS)
+                           + ' (raw completion prompt)') if args.chat_template else 'raw completion prompt for every task')
+        for name in ('evaluation/longbench_metrics.py','evaluation/longbench_official/metrics.py',
+                     'evaluation/longbench_official/dataset2prompt.json','evaluation/longbench_official/dataset2maxlen.json'):
+            spec['source_sha256'][name]=sha256(ROOT/name)
     if args.chat_template:
         spec['input_template'] = ('chat template, user turn = RULER input without answer prefix, generation prompt + blank line'
                                   if args.prompt_layout=='chat_nn_no_prefix' else
+                                  'tokenizer.apply_chat_template user message (input), add_generation_prompt=True, then the official answer prefix as assistant text'
+                                  if args.prompt_layout=='chat_answer_prefix' else
                                   'tokenizer.apply_chat_template user message (input + answer prefix), add_generation_prompt=True')
         if args.system_prompt:
             spec['system_prompt'] = args.system_prompt
+        if args.chat_template_kwargs:
+            spec['chat_template_kwargs'] = json.loads(args.chat_template_kwargs)
     if args.official_lrqk:
         assert args.dense_v
         spec['lrqk'].update(tolerance=0.01, implementation='upstream unchanged cache', cpu_offload=True,
@@ -453,6 +514,7 @@ def generate(model,tokenizer,row,arm,cap):
 
 def summarize(args,rows,spec,tokenizer,bank_hashes,identity):
     results={}
+    first_token_agreement={}
     config=read_json(Path(identity['model'])/'config.json')
     eos=config['eos_token_id'];eos=set(eos if isinstance(eos,list) else [eos])|{tokenizer.eos_token_id}
     for arm in ARMS:
@@ -465,22 +527,37 @@ def summarize(args,rows,spec,tokenizer,bank_hashes,identity):
             assert 0<len(ids)<=row['maximum_tokens'] and not any(t in eos for t in ids[:-1])
             assert r['stopped']==(ids[-1] in eos) and (r['stopped'] or len(ids)==row['maximum_tokens'])
             assert tokenizer.decode(ids,skip_special_tokens=True,clean_up_tokenization_spaces=False)==r['prediction']
-            assert sample_score(r['prediction'],row['answers'],row['match_type'])==r['score']
+            assert score_prediction(r['prediction'],row)==r['score']
             results[arm].append(r)
-        assert all(a['ids'][0]==b['ids'][0] for a,b in zip(results['full'],results[arm],strict=True))
+        agreement=sum(a['ids'][0]==b['ids'][0] for a,b in zip(results['full'],results[arm],strict=True))/len(rows)
+        first_token_agreement[arm]=agreement
+        if BENCHMARK!='longbench':
+            assert agreement==1.0
     task_names = tuple(dict.fromkeys(r['task'] for r in rows))
     tasks={t:{a:100*sum(r['score'] for r,row in zip(rs,rows,strict=True) if row['task']==t)
                   / sum(row['task']==t for row in rows)
               for a,rs in results.items()} for t in task_names}
     means={a:100*sum(r['score'] for r in rs)/len(rows) for a,rs in results.items()}
+    task_means={a:sum(tasks[t][a] for t in task_names)/len(task_names) for a in results}
+    aggregates={'task_mean':task_means}
+    if BENCHMARK=='longbench':
+        lrqk6=[t for t in ('narrativeqa','multifieldqa_en','gov_report','samsum','passage_retrieval_en','lcc') if t in task_names]
+        aggregates['lrqk6_task_mean']={a:sum(tasks[t][a] for t in lrqk6)/len(lrqk6) for a in results} if lrqk6 else None
+        aggregates['lrqk6_tasks']=lrqk6
     write_json(args.output/'summary.json',dict(status='complete',verified_predictions=len(ARMS)*len(rows),
-        protocol=spec,means=means,tasks=tasks,results=results,bank_sha256=bank_hashes,
+        protocol=spec,means=means,tasks=tasks,aggregates=aggregates,first_token_agreement=first_token_agreement,
+        results=results,bank_sha256=bank_hashes,
         refit64k_required=None if args.dense_v else means['full']-means['ours']>4))
-    lines=[f"# RULER {spec['sequence_length']//1024}K: "+spec['value_mode'],'',
-        f"{len(task_names)} tasks × {spec['samples_per_task']} prompts; all {len(rows)} included; shared V setting across arms.", '',
+    title=(f"# LongBench-v1 ShadowKV 9-task (>4K): "+spec['value_mode'] if BENCHMARK=='longbench'
+           else f"# RULER {spec['sequence_length']//1024}K: "+spec['value_mode'])
+    counts=(', '.join(f'{t} {n}' for t,n in spec['samples_per_task'].items()) if isinstance(spec['samples_per_task'],dict)
+            else f"{spec['samples_per_task']} per task")
+    lines=[title,'',f"{len(task_names)} tasks ({counts}); all {len(rows)} included; shared V setting across arms.", '',
         '| Task | '+' | '.join(ARMS)+' |','|---|'+'---:|'*len(ARMS)]
-    for t,values in [*tasks.items(),('Mean',means)]:
+    for t,values in [*tasks.items(),('Mean (samples)',means),('Mean (tasks)',task_means)]:
         lines.append('| '+t+' | '+' | '.join(f'{values[a]:.4f}' for a in ARMS)+' |')
+    if BENCHMARK=='longbench' and aggregates['lrqk6_task_mean']:
+        lines.append('| LRQK 6-task mean | '+' | '.join(f"{aggregates['lrqk6_task_mean'][a]:.4f}" for a in ARMS)+' |')
     path=args.output/'summary.md';text='\n'.join(lines)+'\n'
     if path.exists():assert path.read_text()==text
     else:path.write_text(text)
@@ -509,12 +586,12 @@ def audit_smoke(args,rows,spec,bank_hashes):
 
 
 def main():
-    global ARMS, LRQK_TOPK, LOKI_TOPK, LOKI_RECENT
+    global ARMS, LRQK_TOPK, LOKI_TOPK, LOKI_RECENT, OURS_BUDGET, SHADOWKV_BUDGET, BENCHMARK
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('stage',choices=['smoke','audit-smoke','evaluate','summarize'])
     p.add_argument('--arm',choices=ARMS,default='full')
     p.add_argument('--arms',default=','.join(ARMS))
-    p.add_argument('--tasks',default=','.join(DEFAULT_TASK_NAMES))
+    p.add_argument('--tasks',help='comma list; default: RULER task list, or every task in the LongBench manifest')
     p.add_argument('--samples-per-task',type=int,default=8)
     p.add_argument('--router-fit-count',type=int,default=64)
     p.add_argument('--router-diagnostic-count',type=int,default=16)
@@ -536,16 +613,27 @@ def main():
     p.add_argument('--official-lrqk',action='store_true')
     p.add_argument('--chat-template',action='store_true')
     p.add_argument('--system-prompt',help='system message placed before the user turn when --chat-template is set')
-    p.add_argument('--prompt-layout',choices=('completion','chat_nn_no_prefix'),default='completion')
+    p.add_argument('--prompt-layout',choices=('completion','chat_nn_no_prefix','chat_answer_prefix'),default='completion')
+    p.add_argument('--chat-template-kwargs',help='JSON kwargs for apply_chat_template, e.g. {"enable_thinking": false} for Qwen3')
+    p.add_argument('--benchmark',choices=('ruler','longbench'),default='ruler')
+    p.add_argument('--ours-budget',type=int,default=OURS_BUDGET,help='physical tokens for ours/exact_sparse incl. sink page and recent 64')
+    p.add_argument('--shadowkv-budget',type=int,default=SHADOWKV_BUDGET,help='ShadowKV routed tokens (outliers and local tail are extra)')
     args=p.parse_args();configure();torch.manual_seed(0)
     LRQK_TOPK, LOKI_TOPK, LOKI_RECENT = args.lrqk_topk, args.loki_topk, args.loki_recent
+    OURS_BUDGET, SHADOWKV_BUDGET, BENCHMARK = args.ours_budget, args.shadowkv_budget, args.benchmark
+    assert OURS_BUDGET>=96 and OURS_BUDGET%32==0 and SHADOWKV_BUDGET>0 and SHADOWKV_BUDGET%8==0
+    shadowkv_adapter.SHADOWKV_BUDGET=SHADOWKV_BUDGET
     assert LRQK_TOPK > 0 and LOKI_TOPK > 0 and LOKI_RECENT >= 0
     requested_arms=tuple(x.strip() for x in args.arms.split(',') if x.strip())
     assert requested_arms and len(set(requested_arms))==len(requested_arms)
     assert set(requested_arms)<=set(ARMS)
     ARMS=requested_arms
     assert args.arm in ARMS
-    task_names=tuple(task.name for task in parse_tasks(args.tasks))
+    if BENCHMARK=='longbench':
+        raw=args.tasks or ','.join(read_json(args.data/'manifest.json')['protocol']['tasks'])
+        task_names=tuple(x.strip() for x in raw.split(',') if x.strip())
+    else:
+        task_names=tuple(task.name for task in parse_tasks(args.tasks or ','.join(DEFAULT_TASK_NAMES)))
     identity=read_json(args.identity)
     tokenizer=AutoTokenizer.from_pretrained(identity['model'],local_files_only=True)
     identity,manifest,rows,bank,bank_hashes,spec=inputs(
@@ -592,7 +680,7 @@ def main():
                 assert ids==again
                 torch.testing.assert_close(first,other,atol=0,rtol=0)
         prediction=tokenizer.decode(ids,skip_special_tokens=True,clean_up_tokenization_spaces=False)
-        result=dict(ids=ids,prediction=prediction,score=sample_score(prediction,row['answers'],row['match_type']),
+        result=dict(ids=ids,prediction=prediction,score=score_prediction(prediction,row),
             stopped=stopped,routing=stats,seconds=time.monotonic()-started,
             peak_gib_by_device={str(i):torch.cuda.max_memory_allocated(i)/2**30
                                 for i in range(torch.cuda.device_count())})

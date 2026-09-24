@@ -20,7 +20,7 @@ from typing import Any, Mapping, Sequence
 from safetensors.torch import load_file, save_file
 import torch
 from torch import Tensor, nn
-from transformers import AutoModel
+from transformers import AutoConfig, AutoModel
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -104,6 +104,8 @@ def parse_args() -> argparse.Namespace:
         help="Allow checkpoints such as DeepSeek-V2-Lite to load custom model code",
     )
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--rope", choices=("native", "yarn2", "yarn4"), default="native",
+                        help="Qwen3 YaRN extension (original 32768 x factor), same convention as k_routing_config")
     parser.add_argument(
         "--device-map",
         choices=("none", "balanced", "balanced_low_0"),
@@ -268,6 +270,17 @@ def main() -> None:
         "local_files_only": True,
         "trust_remote_code": args.trust_remote_code,
     }
+    config = AutoConfig.from_pretrained(str(model_path), local_files_only=True, trust_remote_code=args.trust_remote_code)
+    rope_record: dict[str, Any] = {"rope": args.rope}
+    if args.rope != "native":
+        assert config.model_type == "qwen3" and config.rope_parameters["rope_type"] == "default"
+        factor = float(args.rope.removeprefix("yarn"))
+        config.rope_parameters = dict(rope_type="yarn", factor=factor, original_max_position_embeddings=32768,
+                                      rope_theta=config.rope_parameters["rope_theta"])
+        config.max_position_embeddings = int(32768 * factor)
+        rope_record.update(rope_parameters=dict(config.rope_parameters), max_position_embeddings=config.max_position_embeddings)
+    assert sequence_length <= config.max_position_embeddings
+    model_kwargs["config"] = config
     if args.device_map == "none":
         model_kwargs["device_map"] = {"": str(device)}
     else:
@@ -392,6 +405,7 @@ def main() -> None:
         "elapsed_seconds": elapsed,
         "model": {
             "path": str(model_path),
+            "rope": rope_record,
             "config_sha256": _sha256(model_path / "config.json"),
             **geometry,
         },

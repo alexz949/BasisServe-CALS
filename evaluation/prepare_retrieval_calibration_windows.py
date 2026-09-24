@@ -1,4 +1,4 @@
-"""Generic synthetic long-range retrieval calibration windows (128K, Llama tokenizer).
+"""Generic synthetic long-range retrieval calibration windows (default 128K; --sequence-length overrides).
 
 Each window is a natural-text C4 haystack with synthetic records inserted at
 controlled token positions across eight positional strata, followed by a tail of
@@ -6,7 +6,7 @@ retrieval questions with deterministic answers. Records, questions and answers
 use independently written templates and fresh random identifiers; nothing here
 imports or copies an evaluation generator. Segments are tokenized separately and
 joined at the token level, matching the project's separator-free packing, so
-every window is exactly 131072 tokens with only C4 filler ever trimmed.
+every window is exactly the requested sequence length with only C4 filler ever trimmed.
 
 Task families over 16 windows: 8 multi-key retrieval, 4 multi-value retrieval,
 2 variable tracking, 2 aggregation.
@@ -424,6 +424,7 @@ def validate(windows, rows, tokenizer):
 
 
 def main():
+    global SEQUENCE_LENGTH, TAIL_MINIMUM, TAIL_MAXIMUM
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--model', type=Path, required=True)
     p.add_argument('--output', type=Path, required=True)
@@ -433,7 +434,12 @@ def main():
     p.add_argument('--haystack-seed', type=int, default=20260923)
     p.add_argument('--limit', type=int, help='Smoke test: build only the first N windows')
     p.add_argument('--families', help='Smoke test: comma-separated family list overriding the 16-window mix')
+    p.add_argument('--sequence-length', type=int, default=SEQUENCE_LENGTH,
+                   help='window length in tokens; the tail range scales with it (9216-13312 at 131072)')
     args = p.parse_args()
+    scale = args.sequence_length / SEQUENCE_LENGTH
+    TAIL_MINIMUM, TAIL_MAXIMUM = int(TAIL_MINIMUM * scale), int(TAIL_MAXIMUM * scale)
+    SEQUENCE_LENGTH = args.sequence_length
     families = args.families.split(',') if args.families else FAMILIES
     tokenizer = AutoTokenizer.from_pretrained(args.model, local_files_only=True)
     excluded = set()
@@ -463,7 +469,7 @@ def main():
                'level with a two-newline separator; synthetic records inserted at seeded positions across '
                'eight equal strata of the body; a tail of question/answer lines; identifiers drawn from a '
                'seeded RNG and rejected if present in the haystack; only C4 filler is trimmed to reach '
-               'exactly 131072 tokens',
+               f'exactly {SEQUENCE_LENGTH} tokens', sequence_length=SEQUENCE_LENGTH,
         families=families[:args.limit], seed=args.seed, haystack_seed=args.haystack_seed,
         window_seed_rule='seed * 1000 + sequence_id',
         model=str(args.model.resolve()), model_config_sha256=sha256(args.model / 'config.json'),

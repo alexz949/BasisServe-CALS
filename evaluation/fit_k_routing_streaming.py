@@ -15,7 +15,8 @@ import torch
 from safetensors.torch import load_file
 from transformers import AutoModelForCausalLM
 from basisserve.checkpoint.c1_attention_layers import c1_attention_layers
-from basisserve.core.c1_v_conditional_k_router import AffineReducedRankMap
+from basisserve.core.c1_v_conditional_k_router import AffineReducedRankMap, build_conditional_routing_sidecar
+from basisserve.core.gqa_joint_routing_payload_s80_fisher import pack_symmetric_fisher_grams
 from basisserve.core.query_position_sampling import candidate_positions, select_stratified_query_positions
 from evaluation.v96kl_common import configure, read_json, write_json, save_tensors, sha256
 from evaluation.k_routing_config import (
@@ -55,6 +56,31 @@ def encoder_for(identity, layer, *, dense_v=False):
     path = checkpoint/entries[layer]['file']
     assert sha256(path)==entries[layer]['sha256']
     return load_file(str(path))['value_coordinate_encoders']
+
+
+def score_mse_statistics(q, v, k_post, positions, encoder, base_payload, cos, sin, *, excluded_prefix_tokens,
+                         excluded_recent_tokens, heads, groups, dim):
+    """Section 4 'Score-MSE' statistics: for each selected query, the UNWEIGHTED Gram of the Base residual
+    K - Base(V) over the routable prefix (after the pinned sink page, before the recent window), packed in the
+    same payload layout as the page-Fisher statistics so the same ALS solver fits the residual factors."""
+    codes = torch.einsum('bngd,gdr->bgnr', v, encoder.to(v))   # encoder is loaded on CPU; .to(tensor) moves device and dtype
+    base = restore_base(base_payload)[base_payload['left'].shape[-1]]
+    left = torch.stack([m.left for m in base]).to(k_post); right = torch.stack([m.right for m in base]).to(k_post)
+    bias = torch.stack([m.bias for m in base]).to(k_post)
+    predicted = build_conditional_routing_sidecar(codes, k_post, base_left=left, base_right=right, base_bias=bias,
+        residual_encoder=torch.empty(groups, dim, 0, device=k_post.device, dtype=k_post.dtype), cos=cos, sin=sin)[..., :dim]
+    residual = (k_post - predicted)[0]
+    running = torch.zeros(groups, dim, dim, device=residual.device, dtype=torch.float32); cursor = excluded_prefix_tokens; by = {}
+    for position in sorted(int(x) for x in positions):
+        stop = max(position + 1 - excluded_recent_tokens, cursor)
+        if stop > cursor:
+            rows = residual[:, cursor:stop].float(); running.add_(torch.einsum('gtd,gte->gde', rows, rows)); cursor = stop
+        by[position] = running.clone()
+    grams = torch.stack([by[int(x)] for x in positions], 1).index_select(0, torch.arange(heads, device=residual.device) // (heads // groups))
+    queries = q[0, :, positions].float()
+    energy = 0.5 * dim ** -1 * float(torch.einsum('hqd,hqde,hqe->', queries, grams, queries))
+    payload = dict(queries=queries.cpu(), packed=pack_symmetric_fisher_grams(grams).cpu(), teacher_energy=torch.tensor(energy, dtype=torch.float64))
+    return payload, dict(objective='score_mse', score_energy=energy, queries=len(positions))
 
 
 def restore_base(payload):
@@ -143,6 +169,13 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
             else:
                 positions=selections[layer][split]['selected_positions']
                 rows=torch.cat((v,k_post.transpose(1,2)),-1)
+                if args.objective=='score_mse':
+                    payload,diagnostics=score_mse_statistics(q,v,k_post,positions,base_payloads[layer]['encoder'],base_payloads[layer],stats_cos,stats_sin,
+                        excluded_prefix_tokens=SINK_TOKENS*protocol['excluded_prefix_pages'],excluded_recent_tokens=protocol['excluded_recent_tokens'],heads=heads,groups=groups,dim=dim)
+                    path=args.output/'fisher'/f'l{layer:03d}'/f'w{index:03d}.safetensors'
+                    save_record(path,payload,dict(protocol=protocol,layer=layer,window_id=index,split=split,base_sha256=sha256(layer_file(args.output,'base',layer)),
+                        diagnostics=diagnostics,storage='symmetric upper triangle FP32'))
+                    return
                 stats,diagnostics=build_multi_query_statistics(q[:,:,positions].transpose(1,2),rows,
                     query_positions=positions,cos=stats_cos,sin=stats_sin,
                     value_encoder=base_payloads[layer]['encoder'],base_maps=restore_base(base_payloads[layer]),
@@ -282,6 +315,8 @@ def main():
     for name in ('identity','windows','output'):p.add_argument('--'+name,type=Path,required=True)
     p.add_argument('--layers',required=True)
     p.add_argument('--base-rank',type=int,default=16)
+    p.add_argument('--objective',choices=('page_fisher','score_mse'),default='page_fisher',
+                   help='residual statistics: softmax page-Fisher weighted (default) or unweighted causal QK-score MSE (Section 4)')
     p.add_argument('--residual-rank',type=int,default=16)
     p.add_argument('--moments-root',type=Path)
     p.add_argument('--sequence-length',type=int,default=65536)
@@ -343,7 +378,9 @@ def main():
         sequence_length=args.sequence_length,fit_ids=available_fit_ids[:args.fit_count],
         diagnostic_ids=diagnostic_ids,fit_queries=64,diagnostic_queries=32 if diagnostic_ids else 0,
         validation_scope='held-out diagnostic windows' if diagnostic_ids else 'in-sample: no diagnostic windows',
-        base_rank=args.base_rank,residual_rank=args.residual_rank,page_size=32,
+        base_rank=args.base_rank,residual_rank=args.residual_rank,page_size=32,objective=args.objective,
+        objective_definition=('softmax page-Fisher weighted residual objective' if args.objective=='page_fisher' else
+                              'unweighted causal residual QK score squared error over the routable prefix (sink page and recent window excluded)'),
         **fisher_support,query_grid_prefix=SINK_TOKENS+fisher_support['excluded_recent_tokens'],
         deployment_page_budget_tokens=2048,maximum_deployment_support_tokens=2048,
         sink_tokens_within_page_budget=SINK_TOKENS,recent_tokens_within_page_budget=fisher_support['excluded_recent_tokens'],

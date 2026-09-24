@@ -8,6 +8,9 @@ from basisserve.checkpoint.c1_attention_layers import c1_attention_layers
 from basisserve.kernels.compressed_v_decode_attention import compressed_v_prefill_attention
 from basisserve.core.c1_shadowkv import C1ShadowKVState
 
+# Routed-token budget for every layer's ShadowKV state; the evaluator sets it per benchmark (2048 RULER, 256 LongBench).
+SHADOWKV_BUDGET=2048
+
 
 class C1ShadowKVCache(DynamicCache):
     def __init__(self,config):
@@ -36,7 +39,7 @@ def forward(self,hidden_states,position_embeddings,attention_mask,past_key_value
     k,v=past_key_values.update(k,v,self.layer_idx,{'cos':cos,'sin':sin,'cache_position':cache_position})
     if previous==0:
         assert self.layer_idx not in past_key_values.shadow_states
-        past_key_values.shadow_states[self.layer_idx]=C1ShadowKVState(pre,k,cos,sin)
+        past_key_values.shadow_states[self.layer_idx]=C1ShadowKVState(pre,k,cos,sin,budget=SHADOWKV_BUDGET)
         output=compressed_v_prefill_attention(q,k,v,scale=self.scaling)
     else:
         state=past_key_values.shadow_states[self.layer_idx]

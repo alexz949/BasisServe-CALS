@@ -28,30 +28,38 @@ def page_support(scores, budget=2048, page_size=32):
     return torch.cat((ids, recent), -1), valid
 
 
-def build_qwen35_routing_sidecar(value, key, cos, sin, *, rank, factors):
-    left, right, bias = [factors[f'base_{name}_b{rank}'].to(device=value.device, dtype=torch.float32)
+def build_qwen35_routing_sidecar(value, key, cos, sin, *, base_rank, residual_rank, factors):
+    left, right, bias = [factors[f'base_{name}_b{base_rank}'].to(device=value.device, dtype=torch.float32)
         for name in ('left', 'right', 'bias')]
     base = torch.einsum('bhtv,hvr,hrd->bhtd', value.float(), left, right)+bias[None, :, None]
     base = apply_rotary(base, cos, sin)
-    residual_encoder = factors[f'residual_encoder_b{rank}_r{rank}'].to(device=value.device, dtype=torch.float32)
+    residual_encoder = factors[f'residual_encoder_b{base_rank}_r{residual_rank}'].to(device=value.device, dtype=torch.float32)
     code = torch.einsum('bhtd,hdr->bhtr', key.float()-base, residual_encoder)
     return torch.cat((base, code), -1)
 
 
 class Qwen35RoutingAttention(GatedVAttention):
-    def __init__(self, native, encoder, decoder, *, arm, factors=None, loki_basis=None):
+    def __init__(self, native, encoder, decoder, *, arm, factors=None, loki_basis=None, base_rank=None, residual_rank=None,
+                 budget=2048, lrqk_topk=2048, loki_topk=2048, shadowkv_budget=2048):
         super().__init__(native, encoder, decoder)
-        assert self.kv_per_group == 1 and arm in ('full', 'exact_sparse', 'b16r16', 'b32r32', 'loki', 'lrqk', 'shadowkv')
+        # Physical budgets: page routing (recent 64 inside), LRQK/Loki per-query-head top-k, ShadowKV routed tokens.
+        assert budget >= 64 and budget % 32 == 0 and lrqk_topk > 0 and loki_topk > 0 and shadowkv_budget % 8 == 0
+        self.budget, self.lrqk_topk, self.loki_topk, self.shadowkv_budget = int(budget), int(lrqk_topk), int(loki_topk), int(shadowkv_budget)
+        assert self.kv_per_group == 1 and arm in ('full', 'exact_sparse', 'b16r16', 'b32r32', 'ours', 'loki', 'lrqk', 'shadowkv')
         self.arm, self.routing_factors, self.loki_basis = arm, factors, loki_basis
         if arm in ('b16r16', 'b32r32'):
-            assert factors is not None
-            self.routing_rank = 16 if arm == 'b16r16' else 32
+            base_rank = residual_rank = 16 if arm == 'b16r16' else 32
+        if arm in ('b16r16', 'b32r32', 'ours'):
+            # 'ours' is any Base/residual split; the factor names carry both ranks.
+            assert factors is not None and base_rank and residual_rank
+            self.base_rank, self.residual_rank = int(base_rank), int(residual_rank)
+            assert f'residual_query_b{self.base_rank}_r{self.residual_rank}' in factors
         if arm == 'loki':
             assert loki_basis is not None and loki_basis.shape == (self.kv_heads, self.head_dim, 32)
 
     def sidecar(self, value, key, cos, sin):
         return build_qwen35_routing_sidecar(value, key, cos, sin,
-            rank=self.routing_rank, factors=self.routing_factors)
+            base_rank=self.base_rank, residual_rank=self.residual_rank, factors=self.routing_factors)
 
     def attention(self, q, k, v, *, pre_key, position_embeddings, attention_mask, cache_position, cache):
         assert cache is not None and q.shape[0] == 1 and attention_mask is None
@@ -66,16 +74,17 @@ class Qwen35RoutingAttention(GatedVAttention):
         if prefill:
             output = super().attention(q, k, v, pre_key=pre_key, position_embeddings=position_embeddings,
                 attention_mask=attention_mask, cache_position=cache_position, cache=cache)
-            if self.arm in ('b16r16', 'b32r32'):
+            if self.arm in ('b16r16', 'b32r32', 'ours'):
                 state = self.sidecar(v, k, cos, sin)
             elif self.arm == 'loki':
                 state = torch.einsum('bhtd,hdr->bhtr', k, self.loki_basis.to(k))
             elif self.arm == 'lrqk':
-                state = LRQKState(q, k, LRQKConfig(), layer=self.layer_idx)
+                state = LRQKState(q, k, LRQKConfig(topk=self.lrqk_topk), layer=self.layer_idx)
             elif self.arm == 'shadowkv':
                 # A short prompt fits entirely in the native routed/outlier/local
                 # capacity. Keep all prompt tokens and the growing generated tail.
-                state = C1ShadowKVState(pre_key, k, cos, sin) if k.shape[2]//8-4 > 48+2048//8 else None
+                state = (C1ShadowKVState(pre_key, k, cos, sin, budget=self.shadowkv_budget)
+                         if k.shape[2]//8-4 > 48+self.shadowkv_budget//8 else None)
             else:
                 state = None
             cache._q35_routing[self.layer_idx] = state
@@ -95,7 +104,7 @@ class Qwen35RoutingAttention(GatedVAttention):
             codes = torch.einsum('bhgd,hdr->bhgr', q[:, :, 0].reshape(1, self.kv_heads, heads_per_group, self.head_dim), basis)
             scores = (codes@state.transpose(-1, -2)).reshape(1, q.shape[1], k.shape[2])
             # Per-query-head support; its physical GQA union is not capped.
-            ids = scores.topk(min(2048, k.shape[2]), dim=-1).indices.sort(-1).values
+            ids = scores.topk(min(self.loki_topk, k.shape[2]), dim=-1).indices.sort(-1).values
             output = compact_v_flash_attention(q, gather_heads(k, ids), gather_heads(v, ids), scale=self.native.scaling)
         else:
             if self.arm == 'exact_sparse':
@@ -103,12 +112,11 @@ class Qwen35RoutingAttention(GatedVAttention):
                 scores = (query@k.float().transpose(-1, -2))*self.native.scaling
             else:
                 state = torch.cat((state, self.sidecar(v[:, :, -1:], k[:, :, -1:], cos, sin)), 2)
-                rank = self.routing_rank
-                projector = self.routing_factors[f'residual_query_b{rank}_r{rank}'].to(device=q.device, dtype=torch.float32)
+                projector = self.routing_factors[f'residual_query_b{self.base_rank}_r{self.residual_rank}'].to(device=q.device, dtype=torch.float32)
                 residual_query = torch.einsum('bhd,hdr->bhr', q[:, :, 0].float(), projector)
                 query = torch.cat((q[:, :, 0].float(), residual_query), -1).reshape(1, self.kv_heads, heads_per_group, -1)
                 scores = (query@state.transpose(-1, -2))*self.native.scaling
-            ids, valid = page_support(scores)
+            ids, valid = page_support(scores, budget=self.budget)
             # At most one partial page exists; remove its invalid token slots.
             safe_ids = ids.clamp_max(k.shape[2]-1)
             selected_k, selected_v = gather_group(k, safe_ids), gather_group(v, safe_ids)

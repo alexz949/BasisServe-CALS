@@ -1,10 +1,10 @@
-"""Paired 11-task comparison on the Nemotron frozen prompts: main five arms plus the B8R24 rerun, matched by (task, ordinal)."""
+"""Paired 11-task comparison on the Qwen3-8B 128K frozen prompts: main five arms plus the B8R24 rerun, matched by (task, ordinal)."""
 import json
 from pathlib import Path
 
 import numpy as np
 
-W = Path('/home/Ubuntu/nh8b_128k')
+W = Path('/home/Ubuntu/q3_8b_128k')
 ORDER = ['niah_single_1', 'niah_single_2', 'niah_single_3', 'niah_multikey_1', 'niah_multikey_2', 'niah_multiquery',
          'niah_multivalue', 'vt', 'fwe', 'qa_1', 'qa_2']
 
@@ -17,7 +17,7 @@ def load(root):
 
 
 arms = {'Full-K': load(W / 'eval1100/full/evaluate'), 'B16R16': load(W / 'eval1100/ours/evaluate'),
-        'B8R24': load(W / 'eval1100_b8r24/ours/evaluate'), 'B16R16-score': load(W / 'eval1100_score_b16r16/ours/evaluate'), 'B8R24-score': load(W / 'eval1100_score_b8r24/ours/evaluate'), 'LRQK': load(W / 'eval1100/lrqk/evaluate'),
+        'B8R24': load(W / 'eval1100_b8r24/ours/evaluate'), 'LRQK': load(W / 'eval1100/lrqk/evaluate'),
         'ShadowKV': load(W / 'eval1100/shadowkv/evaluate'), 'Loki': load(W / 'eval1100/loki/evaluate')}
 arms = {k: v for k, v in arms.items() if v}
 common = sorted(set.intersection(*(set(v) for v in arms.values())))
@@ -35,5 +35,5 @@ rng = np.random.default_rng(0)
 def ci(a, b):
     d = np.array([arms[a][k] - arms[b][k] for k in common]); bs = [rng.choice(d, len(d), replace=True).mean() for _ in range(10000)]
     return f'{100*d.mean():+.2f}  95% CI [{100*np.percentile(bs,2.5):+.2f}, {100*np.percentile(bs,97.5):+.2f}]  胜/负 {(d>0).sum()}/{(d<0).sum()}'
-for a, b in (('B8R24-score', 'B8R24'), ('B8R24-score', 'B16R16-score'), ('B8R24-score', 'Full-K'), ('B16R16-score', 'B16R16'), ('B8R24', 'B16R16'), ('B8R24', 'Full-K'), ('B8R24', 'LRQK'), ('B8R24', 'Loki'), ('B8R24', 'ShadowKV'), ('B16R16', 'Full-K'), ('LRQK', 'Full-K'), ('Loki', 'Full-K'), ('ShadowKV', 'Full-K')):
+for a, b in (('B8R24', 'B16R16'), ('B8R24', 'Full-K'), ('B8R24', 'LRQK'), ('B8R24', 'Loki'), ('B8R24', 'ShadowKV'), ('B16R16', 'Full-K'), ('LRQK', 'Full-K'), ('Loki', 'Full-K'), ('ShadowKV', 'Full-K')):
     if a in arms and b in arms: print(f'{a:8s} − {b:8s}: {ci(a, b)}')
