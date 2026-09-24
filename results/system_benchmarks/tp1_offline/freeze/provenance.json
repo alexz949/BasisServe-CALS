@@ -1,0 +1,15 @@
+{
+  "created_utc": "2026-09-24 09:44:04 UTC",
+  "repository_head": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+  "shadowkv_head": "e51904cdeab7d4d34013370f09f2cf5fcd655e15",
+  "lrqk_head": "caf16293db2e4423a84ab2e895bacf64479f1eb7",
+  "note": "Dirty source trees: actual imported source is preserved in dependencies.tar.gz; commit IDs alone do not specify the runtime.",
+  "conda_environment": "basis",
+  "gpu": "CUDA_VISIBLE_DEVICES=0, NVIDIA L40S",
+  "launch": "direct execution authorized by user; serial TP1 trials",
+  "formal_trials": 78,
+  "basis": "GPU-local K/V, Dense V128, B16R16/Page32 full scan, 16-warp router; no page-cache candidate",
+  "prompt_source": "../inputs/manifest.json",
+  "model_loading_and_upfront_cache_allocation": "excluded from timed request; runtime is warmed with same-shaped request and request-specific state is reset",
+  "sha256_calculated": false
+}

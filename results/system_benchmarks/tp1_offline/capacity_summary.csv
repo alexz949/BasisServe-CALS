@@ -1,0 +1,6 @@
+mode,method,context,cohort,output_tokens,status,phase,peak_allocated_gib,request_seconds,prefill_inclusive_seconds,post_prefill_phase_seconds,decode_phase_seconds,post_prefill_ready_seconds,ready_overlaps_first_decode,steady_tail_wall_mean_ms,cuda_median_ms,cuda_mean_ms,wall_median_ms,profile_construction_seconds,profile_attention_block_mean_ms
+request,shadowkv,8192,0,512,complete,complete,16.33727741241455,24.428905707783997,9.490735262166709,0.4658029805868864,14.472367465030402,0.4658029805868864,False,28.33207030451358,,,,,
+request,dense,130048,0,4,complete,complete,38.346795082092285,36.783243192825466,36.63920758571476,0.000166378915309906,0.14386922819539905,0.0,False,,,,,0.0,
+request,basis,130048,0,4,complete,complete,40.46248722076416,37.77666542259976,37.659815073013306,0.00018358463421463966,0.11666676495224237,0.0,False,,,,,0.0,
+request,shadowkv,130048,0,4,complete,complete,20.607624053955078,54.92364809894934,53.81896565388888,1.008877757936716,0.09580468712374568,1.008877757936716,False,,,,,,
+request,lrqk,130048,0,4,complete,complete,29.481566429138184,53.36625524889678,51.19896395690739,0.000760877039283514,2.1665304149501026,1.3764207498170435,True,,,,,,
