@@ -1,4 +1,4 @@
-"""Authenticated uniform R64 factors for Qwen3-8B and Qwen3-32B TP8 serving."""
+"""Validated uniform R64 factors for Qwen3-8B and Qwen3-32B TP8 serving."""
 
 from __future__ import annotations
 
@@ -30,9 +30,11 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def load_manifest(root: Path, expected_sha256: str) -> dict:
+def load_manifest(root: Path, expected_sha256: str | None, *, validation="sha256") -> dict:
     path = root / "results.json"
-    assert file_sha256(path) == expected_sha256
+    assert validation in ("sha256", "structure")
+    if validation == "sha256":
+        assert file_sha256(path) == expected_sha256
     manifest = json.loads(path.read_text())
     fit = manifest["fit_config"]
     geometry = (fit["hidden_size"], fit["num_query_heads"], fit["num_hidden_layers"])
@@ -45,11 +47,14 @@ def load_manifest(root: Path, expected_sha256: str) -> dict:
     return manifest
 
 
-def load_layer(root: Path, manifest: dict, layer: int, rank: int, *, device, dtype):
+def load_layer(root: Path, manifest: dict, layer: int, rank: int, *, device, dtype,
+               validation="sha256"):
     assert 0 <= rank < TP_SIZE
     record = manifest["artifacts"][str(layer)]
     path = root / record["file"]
-    assert file_sha256(path) == record["sha256"]
+    assert validation in ("sha256", "structure")
+    if validation == "sha256":
+        assert file_sha256(path) == record["sha256"]
     tensors = load_file(str(path), device="cpu")
     assert set(tensors) == {"value_coordinate_encoders", "head_output_decoders"}
     encoders = tensors["value_coordinate_encoders"]

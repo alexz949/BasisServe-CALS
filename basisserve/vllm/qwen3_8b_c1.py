@@ -81,9 +81,8 @@ class C1Attention(nn.Module):
         q = self.q_norm(q.reshape(-1, self.num_heads, HEAD_DIM)).reshape(-1, self.num_heads * HEAD_DIM)
         k = self.k_norm(k.reshape(-1, 1, HEAD_DIM)).reshape(-1, HEAD_DIM)
         q, k = self.rotary_emb(positions, q, k)
-        coordinates = self.attn(q, k, v)
-        return torch.ops.vllm.basisserve_prepared_c1_output(
-            coordinates, self.decoder, self.attn.layer_name,
+        return torch.ops.vllm.basisserve_c1_attention_output(
+            q, k, v, self.decoder, self.attn.layer_name,
         )
 
 
@@ -104,7 +103,9 @@ class BasisServeQwen3_8BC1ForCausalLM(Qwen3ForCausalLM):
         assert vllm_config.cache_config.cache_dtype in ("auto", "bfloat16")
         assert vllm_config.speculative_config is None
         root = Path(cfg.basisserve_c1_factor_dir).expanduser().resolve()
-        manifest = load_manifest(root, cfg.basisserve_c1_result_sha256)
+        validation = getattr(cfg, "basisserve_c1_validation", "sha256")
+        manifest = load_manifest(root, getattr(cfg, "basisserve_c1_result_sha256", None),
+                                 validation=validation)
         fit = manifest["fit_config"]
         assert (fit["hidden_size"], fit["num_query_heads"], fit["num_hidden_layers"]) == (
             cfg.hidden_size, cfg.num_attention_heads, cfg.num_hidden_layers)
@@ -116,7 +117,8 @@ class BasisServeQwen3_8BC1ForCausalLM(Qwen3ForCausalLM):
         )
         for index, layer in enumerate(self.model.layers):
             encoder, decoder = load_layer(root, manifest, index, group.rank_in_group,
-                                           device=device, dtype=torch.bfloat16)
+                                           device=device, dtype=torch.bfloat16,
+                                           validation=validation)
             layer.self_attn = C1Attention(layer.self_attn, encoder, decoder,
                                           self.c1_boundary, vllm_config)
 
@@ -128,11 +130,14 @@ class BasisServeQwen3_8BC1ForCausalLM(Qwen3ForCausalLM):
         return AutoWeightsLoader(self).load_weights(filtered)
 
     def c1_statistics(self):
+        local_heads = self.model.layers[0].self_attn.num_heads
         return self.c1_boundary.statistics() | {
             "loaded_value_layers": sum(layer.self_attn.qkv_proj.value_loaded for layer in self.model.layers),
             "attention_backend": self.model.layers[0].self_attn.attn.attn_backend.get_name(),
             "attention_impl": type(self.model.layers[0].self_attn.attn.impl).__name__,
             "prefill_specialization": "sm89_qk128_v64",
+            "decode_specialization": f"sm89_qk128_v64_h{local_heads}",
+            "decode_output_layout": "feature_major_allgather_slot",
             "key_head_size": HEAD_DIM,
             "value_head_size": VALUE_RANK,
         }

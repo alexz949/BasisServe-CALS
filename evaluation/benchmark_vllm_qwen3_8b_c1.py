@@ -65,6 +65,7 @@ def main():
     parser.add_argument("--arm", choices=("dense", "c1"), required=True)
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--factor-dir", type=Path, required=True)
+    parser.add_argument("--factor-validation", choices=("sha256", "structure"), default="sha256")
     parser.add_argument("--output-dir", type=Path, default=Path("results/vllm_tp8"))
     parser.add_argument("--batch-sizes", type=int, nargs="+", default=[1,2,4,8,16,32,64,128,256])
     parser.add_argument("--prefill-tokens", type=int, default=4096)
@@ -87,14 +88,24 @@ def main():
 
     register()
     root = args.factor_dir.resolve()
-    sha = file_sha256(root / "results.json")
-    manifest = load_manifest(root, sha)
+    sha = file_sha256(root / "results.json") if args.factor_validation == "sha256" else None
+    manifest = load_manifest(root, sha, validation=args.factor_validation)
     layers = manifest["fit_config"]["num_hidden_layers"]
     architecture = QWEN3_8B_C1_MODEL_ARCHITECTURE if layers == 36 else QWEN3_32B_TP8_C1_MODEL_ARCHITECTURE
-    assert file_sha256(args.model / "config.json") == manifest["fit_config"]["model_config_sha256"]
+    if args.factor_validation == "sha256":
+        assert file_sha256(args.model / "config.json") == manifest["fit_config"]["model_config_sha256"]
+    model_config = json.loads((args.model / "config.json").read_text())
+    fit = manifest["fit_config"]
+    for model_key, fit_key in (("hidden_size", "hidden_size"),
+                               ("num_attention_heads", "num_query_heads"),
+                               ("num_key_value_heads", "num_physical_kv_heads"),
+                               ("num_hidden_layers", "num_hidden_layers"),
+                               ("head_dim", "head_dim")):
+        assert model_config[model_key] == fit[fit_key]
     overrides = {} if args.arm == "dense" else {
         "architectures": [architecture],
         "basisserve_c1_factor_dir": str(root), "basisserve_c1_result_sha256": sha,
+        "basisserve_c1_validation": args.factor_validation,
     }
     configuration = dict(
         model=str(args.model.resolve()), tensor_parallel_size=8, dtype="bfloat16",
@@ -115,7 +126,7 @@ def main():
         torch=torch.__version__, torch_cuda=torch.version.cuda, vllm=vllm.__version__,
         git_head=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         git_status=subprocess.check_output(["git", "status", "--short"], text=True),
-        factor_sha256=sha, configuration=configuration,
+        factor_sha256=sha, factor_validation=args.factor_validation, configuration=configuration,
         arguments={key: str(value) if isinstance(value, Path) else value for key, value in vars(args).items()},
         metric_notes={"throughput": "All output tokens divided by cohort wall time, includes prefill.",
                       "ttft": "Per request: first_token_ts minus queued_ts; includes paused admission time.",

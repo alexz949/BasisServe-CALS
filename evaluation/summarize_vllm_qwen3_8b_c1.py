@@ -21,7 +21,10 @@ def kernel_category(name):
         return "allgather" if "allgather" in lowered else "allreduce" if "allreduce" in lowered else "other_collective"
     if "gemm" in lowered or "gemv" in lowered:
         return "gemm_gemv"
-    if any(part in lowered for part in ("flash_fwd", "attn", "attention", "reduce_segments", "diffkv_prefill")):
+    if any(part in lowered for part in (
+        "flash_fwd", "attn", "attention", "reduce_segments",
+        "diffkv_prefill", "diffkv_decode",
+    )):
         return "attention"
     return "other"
 
@@ -70,6 +73,15 @@ def main():
     model_config = json.loads((Path(dense["configuration"]["model"]) / "config.json").read_text())
     layers = model_config["num_hidden_layers"]
     model_label = "Qwen3-8B-Base" if layers == 36 else "Qwen3-32B"
+    decode_paths = sorted({worker["decode_specialization"]
+                           for batch in compact["batches"] for worker in batch["workers"]})
+    decode_label = "the recorded decode path(s): " + ", ".join(f"`{path}`" for path in decode_paths)
+    validation_label = (
+        "Factor validation: configuration, manifest structure and tensor shapes only; "
+        "no SHA256 checks were performed. Factor contents were not authenticated."
+        if compact["factor_validation"] == "structure"
+        else f"C1 manifest SHA256: `{compact['factor_sha256']}`."
+    )
     arguments = dense["arguments"]
     assert dense["status"] == compact["status"] == "complete"
     for key in ("batch_sizes", "prefill_tokens", "decode_tokens", "max_num_batched_tokens", "repeats", "warmups", "gpu_memory_utilization"):
@@ -139,8 +151,9 @@ def main():
              f"{arguments['warmups']} full warmup(s) and {arguments['repeats']} measured runs per batch; table entries are medians over runs. "
              f"Both arms use chunked prefill ({arguments['max_num_batched_tokens']}-token budget), no prefix caching, "
              "synchronous scheduling, FULL_DECODE_ONLY CUDA Graphs, and compilation mode NONE. "
-             "This is the matched first-version serving configuration, not a claim of optimal "
-             "production vLLM tuning. Dense uses FlashAttention 2; C1 uses native Triton DiffKV.", "",
+             "This is a matched serving configuration, not a claim of globally optimal "
+             "production vLLM tuning. Dense uses FlashAttention 2; C1 uses the SM89-specialized "
+             f"QK128/V64 Triton DiffKV prefill kernel and {decode_label}.", "",
              "| Batch | Dense E2E s | C1 E2E s | E2E speedup | Dense output tok/s | C1 output tok/s | Dense TPOT ms | C1 TPOT ms |",
              "| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
     for row in rows:
@@ -183,7 +196,9 @@ def main():
               f"for C1, before the attention-output AllReduce for dense. All {layers} layer "
               "boundaries are checked per replay. Values are mean GPU kernel microseconds "
               "per layer, not isolated operator benchmarks or unprofiled wall latency.", "",
-              "| Arm | Principal O/decoder kernel us | Output collective us | Attention kernels us | Pre-AllGather copy us |",
+              "The last kernel before AllGather can be a segment reduction rather than a layout copy; consult trace names. "
+              "A reduction classified as attention is already included in attention time and must not be added again.", "",
+              "| Arm | Principal O/decoder kernel us | Output collective us | Attention kernels us | Pre-AllGather kernel us |",
               "| --- | ---: | ---: | ---: | ---: |"]
     for profile in profile_rows:
         if profile["profile"] not in ("dense_b1.kernels", "c1_b1.kernels"):
@@ -193,18 +208,19 @@ def main():
         lines.append(f"| {profile['profile'].split('_')[0]} | {boundary['principal_decoder_gemm_us_mean']:.2f} | "
                      f"{boundary['boundary_collective_us_mean']:.2f} | {attention:.2f} | "
                      f"{boundary.get('pre_allgather_kernel_us_mean', 0):.2f} |")
-    lines += ["", "The first-version path is functional but is not established as optimal. "
-              "Retain one decoder GEMM. Prioritize realistic full-model/cold-cache small-batch "
-              "decoder layout and GEMM/GEMV selection, then paged compact-attention tuning. "
+    lines += ["", "The path is functional and offline-tuned for the measured SM89 prefill "
+              "shapes, but is not established as globally optimal. Retain one decoder GEMM. "
+              "The remaining priorities are realistic full-model/cold-cache small-batch "
+              "decoder layout and GEMM/GEMV selection, followed by broader-shape prefill tuning. "
               f"The C1 replicated decoder is [{model_config['num_attention_heads']*64},{model_config['hidden_size']}] per rank versus a dense local "
               f"O projection of [{model_config['num_attention_heads']//8*128},{model_config['hidden_size']}]: four times the BF16 weight bytes and matrix-product "
               "work per rank. Repeated resident-weight microbenchmarks do not reproduce the "
               "full model's cache working set. Cold-weight traffic is a hypothesis to test, "
-              "not a measured DRAM-bandwidth diagnosis. Compare the measured source-local "
-              "copy cost with decoder and attention costs before prioritizing copy fusion.", "",
+              "not a measured DRAM-bandwidth diagnosis. Compare the measured output "
+              "preparation cost with decoder and attention costs before prioritizing fusion.", "",
               "Warnings: native custom AllReduce variants are unsupported for eight PCIe-only "
-              "GPUs, so vLLM uses PyNccl. C1's first long-prefill DiffKV JIT compilation occurred "
-              "during warmup. vLLM process teardown can emit forced EngineCore cleanup and "
+              "GPUs, so vLLM uses PyNccl. Consult each arm's log for startup and JIT messages. "
+              "vLLM process teardown can emit forced EngineCore cleanup and "
               "Python shared-memory/semaphore resource-tracker warnings; retain logs. "
               "Completed runs validate exact output lengths, non-corrupted request status, "
               f"and all {layers} C1 V layers plus graph-capture counters on every rank."]
@@ -215,7 +231,7 @@ def main():
               dense["command"], compact["command"],
               "/workspace/miniforge3/envs/basis/bin/python evaluation/summarize_vllm_qwen3_8b_c1.py "
               f"--input-dir {shlex.quote(str(root))}", "```", "",
-              "C1 manifest SHA256: `"+compact["factor_sha256"]+"`.", "",
+              validation_label, "",
               "Model startup, JIT compilation, profiling, and trace export are excluded from "
               "timed measurements. This is a synthetic fixed-length throughput test, not a "
               "quality evaluation or an online arrival-rate benchmark.", ""]
