@@ -1,0 +1,418 @@
+{
+ "identity_sha256": "0b0d01dd403b37f5fc4f0b0a54230d7c94c87af02c9e164b8b59e2558889501b",
+ "data_sha256": "f756e957c432df92eb397baf86384f74dbe313efac23c986d23be5b2b4d9fb24",
+ "runtime_config": {
+  "transformers_version": "5.17.0",
+  "architectures": [
+   "NemotronHForCausalLM"
+  ],
+  "output_hidden_states": false,
+  "return_dict": true,
+  "dtype": "bfloat16",
+  "chunk_size_feed_forward": 0,
+  "is_encoder_decoder": false,
+  "id2label": {
+   "0": "LABEL_0",
+   "1": "LABEL_1"
+  },
+  "label2id": {
+   "LABEL_0": 0,
+   "LABEL_1": 1
+  },
+  "problem_type": null,
+  "vocab_size": 131072,
+  "hidden_size": 4096,
+  "layers_block_type": [
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "full_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "full_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "full_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "full_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp",
+   "linear_attention",
+   "mlp"
+  ],
+  "tie_word_embeddings": false,
+  "use_cache": true,
+  "num_logits_to_keep": 1,
+  "pad_token_id": 0,
+  "bos_token_id": 1,
+  "eos_token_id": 2,
+  "num_attention_heads": 32,
+  "num_key_value_heads": 8,
+  "head_dim": 128,
+  "max_position_embeddings": 131072,
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "sliding_window": null,
+  "intermediate_size": 21504,
+  "mlp_hidden_act": "relu2",
+  "mlp_bias": false,
+  "use_mamba_kernels": true,
+  "ssm_state_size": 128,
+  "mamba_num_heads": 128,
+  "mamba_head_dim": 64,
+  "mamba_hidden_act": "silu",
+  "n_groups": 8,
+  "conv_kernel": 4,
+  "expand": 2,
+  "time_step_min": 0.001,
+  "time_step_max": 0.1,
+  "time_step_limit": [
+   0.0,
+   "inf"
+  ],
+  "time_step_floor": 0.0001,
+  "use_conv_bias": true,
+  "chunk_size": 128,
+  "mamba_proj_bias": false,
+  "mamba_ssm_cache_dtype": "float32",
+  "n_routed_experts": 8,
+  "n_shared_experts": 1,
+  "moe_intermediate_size": 7688,
+  "moe_shared_expert_intermediate_size": 7688,
+  "moe_latent_size": null,
+  "moe_shared_expert_overlap": true,
+  "num_experts_per_tok": 2,
+  "routed_scaling_factor": 1.0,
+  "n_group": 1,
+  "topk_group": 1,
+  "norm_topk_prob": true,
+  "num_nextn_predict_layers": 0,
+  "mtp_layers_block_type": [
+   "full_attention",
+   "moe"
+  ],
+  "use_bias": false,
+  "initializer_range": 0.02,
+  "layer_norm_epsilon": 1e-05,
+  "residual_in_fp32": false,
+  "hidden_dropout": 0.0,
+  "rescale_prenorm_residual": true,
+  "_name_or_path": "/home/Ubuntu/.cache/huggingface/hub/models--nvidia--Nemotron-H-8B-Reasoning-128K/snapshots/2dcbcfd95b103843b6ad8e79690f34480ce5a5ae",
+  "attention_head_dim": 128,
+  "auto_map": {
+   "AutoConfig": "configuration_nemotron_h.NemotronHConfig",
+   "AutoModelForCausalLM": "modeling_nemotron_h.NemotronHForCausalLM"
+  },
+  "model_type": "nemotron_h",
+  "rms_norm_eps": 1e-05,
+  "time_step_rank": 256,
+  "output_attentions": false
+ },
+ "rope": "native",
+ "sequence_length": 131072,
+ "samples": 400,
+ "samples_per_task": 100,
+ "task_names": [
+  "niah_multikey_2",
+  "niah_multivalue",
+  "fwe",
+  "niah_multiquery"
+ ],
+ "dtype": "bfloat16",
+ "generation": "greedy, native EOS, official caps",
+ "prefill": "full causal FlashAttention-2 for equal QKV widths, C1 Triton for compact V",
+ "rank_schedule": [
+  96,
+  96,
+  96,
+  96
+ ],
+ "exact_sparse": "FP32 exact-QK Page32 mass, GQA max; sink32 + recent64 inside hard B2048",
+ "ours": "Base16/Residual16 Page32 mass, GQA max; sink32 + recent64 inside hard B2048",
+ "lrqk": {
+  "rank": 32,
+  "topk_per_query_head": 832,
+  "recent": 64,
+  "prefill_iterations": 2,
+  "decode_iterations": 2,
+  "tolerance": 0.01,
+  "seed": 0,
+  "state_dtype": "bfloat16",
+  "solve_dtype": "float32"
+ },
+ "shadowkv": {
+  "rank": 160,
+  "chunk": 8,
+  "routed": 2048,
+  "outlier_chunks": 48,
+  "extra_support": "native local and generated tokens"
+ },
+ "loki": {
+  "rank": 32,
+  "topk_per_query_head": 856,
+  "recent": 0,
+  "bank_manifest_sha256": "c073ed0dc7b9ffdcd8a8cc627a6b50a479ad2a698042bced2deb37344aeea426",
+  "coordinate": "raw Q/K projection without mean subtraction",
+  "calibration": "dense model"
+ },
+ "source_sha256": {
+  "evaluation/eval_k_routing_ruler.py": "07deb1707f1f79668d96788c192f81f13cb107f95bcc7ecd5c589b0b19e8364d",
+  "evaluation/k_routing_config.py": "76fdb5136f5cb0e77c6249eebb37426d125c1b359d15f214641cf3f4903d9905",
+  "basisserve/core/c1_conditional_page_attention.py": "d271f38ded18579752f55747b9226125fb9f67b1cceb7cac7ba32167ed987b00",
+  "basisserve/core/c1_v_conditional_k_router.py": "be45755d03e75d4572b7711cfcf80e12bd17087cdc98f848e0fc238a160b581c",
+  "basisserve/core/c1_lrqk.py": "fdd6d795d1968346af3b02d7aa803e445f72913e965cec49b92d62e3c9955c67",
+  "basisserve/core/c1_shadowkv.py": "73ca81c914a0a145b8c604b1e9d8aff82013a32a4820f4819afcf1c3458642d4",
+  "basisserve/checkpoint/c1_lrqk_qwen3.py": "5354256aae2c9c96da3d4f8385a587d8fb8b13f8afef73161540b9da6403812d",
+  "basisserve/checkpoint/c1_shadowkv_qwen3.py": "49d7ba0e7b1837fa108743181c36b2f339b4c5b72c6a7592f2d85bd64b4da586",
+  "basisserve/kernels/compressed_v_decode_attention.py": "9e13f8581f5af28e173063cacc0d996caeb722a7dc4d0678d1d3cbde70392418",
+  "evaluation/eval_longbench_lrqk_fp32route.py": "a372daf1c323ce11ab0d56217c4b478a5eeed1376355878fcf6e39845bacfd29",
+  "evaluation/install_nemotron_h_wo.py": "6ec41ec6ba6aa5ada3374a939fd81c8ea17bae3af0e2489285db261a12a42bd2",
+  "evaluation/nemotron_h_runtime.py": "c5016fa06fc38084ae146dd6b9c491195b37a47c2497b577f2604956a59c1a56",
+  "evaluation/nemotron_h_scan_layout.py": "9f1f7690d48806d3ddb215ad323d1de59516cf46fbf577331d037204b367d06b",
+  "evaluation/chunked_prefill_mlp.py": "54877ee2e0a6d94904e33716a84f324617e867668521b2dcb8bb0eb0ce44deac",
+  "basisserve/checkpoint/gqa_vo_nemotron_h.py": "025b1564dd57a551e9db2c17f83897a47e12bd1e02c20eed490005abaa1fe0e8",
+  "basisserve/checkpoint/gqa_vo_qwen3.py": "866518b80c0d5253819ee7c9172495e92cfa0abe062f2ff4d3006cc59d755b4d",
+  "basisserve/checkpoint/c1_attention_layers.py": "79d8469e2c8eefd521f02dfa5fbaa6865b45c6682158dec13e818407b7223ed5",
+  "basisserve/core/tp_source_wo_c1.py": "0849e7c049568e2dbe709e1af75e9fd8ba49bd2599fdfce68da49af3b504bd2f",
+  "evaluation/llama_sink_recent_routing.py": "cdfb9921b35444ead1848f774d12227dfb64d1bb482aa57709b86c94bb8b9bf3",
+  "basisserve/kernels/split_indexed_attention.py": "3362f9eecbd0daf14847587e936118516dea8ccc16a0174bd6273eec1344ded6"
+ },
+ "native": {
+  "audit_sha256": "d626b8a6603ef728f7ac7294afaa1af0ef6db61993c9c2232235faad042174e3",
+  "tensor_count": 311,
+  "device_guard_sha256": "c5016fa06fc38084ae146dd6b9c491195b37a47c2497b577f2604956a59c1a56",
+  "guarded_mamba_layers": [
+   0,
+   2,
+   4,
+   6,
+   9,
+   11,
+   13,
+   15,
+   17,
+   20,
+   22,
+   24,
+   26,
+   28,
+   31,
+   33,
+   35,
+   37,
+   39,
+   42,
+   44,
+   46,
+   48,
+   50
+  ],
+  "mamba_scan": "vLLM Triton chunk scan via evaluation/nemotron_h_triton_mamba.py; torch conv1d and single-token update",
+  "dt_limit": "(0, inf) restored on every Mamba mixer (transformers 5.17 clamps dt >= time_step_min=1e-3, which erases long-range state)",
+  "triton_dropin_sha256": "f8b79dd2900ede57abd2b237fd69d780e41811eef45b5d72ca5759f05245cad2",
+  "wo": {
+   "mode": "BF16 dense Wo folded from FP32 products of BF16 source factors",
+   "communication_benchmarked": false,
+   "layers": {
+    "0": {
+     "manifest_sha256": "47b9e65011c67d8d8101ae733c2e8cb39debe0f04ea29ff086a5f65eb993ca85",
+     "factors_sha256": "eba44800ad7715ff995b19d1d99baed1d7461ceaf010475351e00d2fecf64a4a"
+    },
+    "2": {
+     "manifest_sha256": "9fdb16fa76030d16b5ffc830547890b6bc22d023e4e556ee196dba732fcb941a",
+     "factors_sha256": "10e2222aadf95c2ae675014e237f37174b3f0681c4f791383039b5184ce12e40"
+    },
+    "4": {
+     "manifest_sha256": "8225a5561fb7232eacf570cf8dc00484819ec94d3bb0893a1ec7d6d9bd2cb089",
+     "factors_sha256": "e0707392183bf15099d0b65402c6a3ba1209d9bb02ffeebdae5b1f008993563e"
+    },
+    "6": {
+     "manifest_sha256": "601b42ccadd7739ae71bc057b5b738268671b196c1bb7ca88b71d7486f35eda8",
+     "factors_sha256": "61512b569a2c4c16e7e3934962531f3413d72b64b00dc59a8cbd39110cf87fa7"
+    },
+    "9": {
+     "manifest_sha256": "c0b6a28800df814b77eedcb9dad687619e633331654d4c0c260b279de3b3af63",
+     "factors_sha256": "da1c2b5e85f5c33d23e8a114cb1f99dda587da0414231f0e7cdb5bc5f1996ee9"
+    },
+    "11": {
+     "manifest_sha256": "7ce33d3c612bc59f7a8f8bfff94b3ec19781ea680696c65a06409d7af0cdfeb0",
+     "factors_sha256": "68e469f8384d8569e00ba0547d77ea68f8d6b497ef9e23dc84630a237f1d9e4f"
+    },
+    "13": {
+     "manifest_sha256": "a492149350976f3a6d47b496d6e4ec7b28a4d5af32791152ce32dc6fdb5920c0",
+     "factors_sha256": "e5d6bdfc085afc37d358f75a456eca82ff4a0dbf07c28fcc185abfc866de831c"
+    },
+    "15": {
+     "manifest_sha256": "7a3dbf0ac2a385a45ef34559a175032f78d2f5ea97cf36f5a9db04758a6c6fc9",
+     "factors_sha256": "e42a560795ddb7271f3fcc53ba538580c542614cc1970e97fbdc14d204b9dada"
+    },
+    "17": {
+     "manifest_sha256": "df97c6a1730663a6c4a176628f08ff320c481c383b5e743e413e3cecde9ba11d",
+     "factors_sha256": "310a393bf8829de9b56ed50b096aab2eaa92a7bde01144d38354ad83e66dae46"
+    },
+    "20": {
+     "manifest_sha256": "bd465bdfc28a53d1c4d2a15940c99161846dcf553f2b9f1084f2fd43f2f6720a",
+     "factors_sha256": "bf7cf4de3429244cbb79e14cd468c692784e954e6db11879f00419e1cf107726"
+    },
+    "22": {
+     "manifest_sha256": "55e1cd8e2502e1ac80a75366cb9d571e0032683a542c4213fb6d041a84a1247e",
+     "factors_sha256": "b4023d4c17e7e179188fd612cde8b1d5621f78aa6d8b4275588d905171cb3e03"
+    },
+    "24": {
+     "manifest_sha256": "75008124aa4f0b591fd268b912163ff5a0a7f684d5a10b81d7b0bac722374437",
+     "factors_sha256": "7b951bf26e7242d7ef992e3093b3dbcaacd15d24e7bc4a5dcbdeb5d70beddab4"
+    },
+    "26": {
+     "manifest_sha256": "1171b758e4fff79c598e11aa2408ae1a8f8a2e698c67b9211ccfc293df251a2d",
+     "factors_sha256": "026510035f031baf3c12ec277f57d4c49c6501a5c6bcfb454809d0e878552c66"
+    },
+    "28": {
+     "manifest_sha256": "f47f76025bb38eb9f7e6417f9d0bb7c233d7821b534d02263166e6968dbb1f92",
+     "factors_sha256": "ad8bc30ff80dedfbe07be5ab6ec651077fb00d4bdf144de2c5cad0580ad2f3b4"
+    },
+    "31": {
+     "manifest_sha256": "bcc4357ca2f5321ff8964ebcfdb20a2cf76803272669f360f78db12bfb9e6f11",
+     "factors_sha256": "549bbe40087545b130e8e3b1f8f7dc701a979acff68a6f0f0fa4ba4490212200"
+    },
+    "33": {
+     "manifest_sha256": "1b997fdf17f0e08ad692345100feb0ff0484c68356c76dd0bbadbf7e79e9c85a",
+     "factors_sha256": "5595354761cbcb405840fda77fb4ea37346b8997fb88a7a2325fad65fcc5e49c"
+    },
+    "35": {
+     "manifest_sha256": "cd5d1d98dad0b43468c3cf9609cb1324889ffb6e7774a758c725006193d44fcc",
+     "factors_sha256": "ed58eb284b7450e5d9ac560013463505e49a3b36042d40dd5035fc6e2e87241b"
+    },
+    "37": {
+     "manifest_sha256": "5475c8defdf72a48ed7e467d62725dbb25a63e73d1f8565f5432214f3605d38b",
+     "factors_sha256": "f78b301025a11bb178d7af156b9780ff1a20ec76737d4189e69802bcb71f63ea"
+    },
+    "39": {
+     "manifest_sha256": "f7b8bfbb2d0f725e0f783131f8c49548472207f54611b7cfb935bc6b8649b869",
+     "factors_sha256": "19239549af06e87e0b268808fc941d8fdb013c9fa2e3834c50b8b1b4759c259f"
+    },
+    "42": {
+     "manifest_sha256": "d294b54a1f145c182d4d6764013bae6d2844bb75e5556341c37f2d5f1fa03e14",
+     "factors_sha256": "9c4dabb984e8057506dd7ae7076e017a9f8c678b98d42b557d577228f620d791"
+    },
+    "44": {
+     "manifest_sha256": "bda028a9e7941fc3d611a0e84ada9b8d772ee2e34bd27c61d19cd7e0c3829cb3",
+     "factors_sha256": "81dac78038280738715b009f29ea4adb698e22fd48b7dae4745c6d9d41f0ae1d"
+    },
+    "46": {
+     "manifest_sha256": "78f5a914c6a4bd66542109b3d0fb4a4c1500e27c35b5928fa362de2d5ca1d380",
+     "factors_sha256": "c1c2d53d04e5de54d3ad57971165846a8e9f25b6bf155fe132f421383be4eceb"
+    },
+    "48": {
+     "manifest_sha256": "3dae1f18ad4c0a77cfa186fb7411be982aac0575650ddabc5d84fe4821d49488",
+     "factors_sha256": "33fb5a2e27b9d69de0c4a18382dd79bb5031d474d3d4cb0c48bb6d280a635ddf"
+    },
+    "50": {
+     "manifest_sha256": "19dd96448feeaee28283891c812538d7cefdcf3abe6e988e708a6a6da967f3f0",
+     "factors_sha256": "e4b5a43a8b969f62c81cc76b8ff63b41e71148f40a681bd4d8ac0445bc417eae"
+    }
+   },
+   "protocol": {
+    "identity_sha256": "0b0d01dd403b37f5fc4f0b0a54230d7c94c87af02c9e164b8b59e2558889501b",
+    "audit_sha256": "d626b8a6603ef728f7ac7294afaa1af0ef6db61993c9c2232235faad042174e3",
+    "covariance_manifest_sha256": "31126db2c382b44d9cacbdf6687b0db96f205678f23ec8913c4621df9b3ff6c8",
+    "tp": 4,
+    "total_rank": 3072,
+    "source_rank": 1536,
+    "attention_source_rank": 768,
+    "retained_ratio": 0.75,
+    "attention_reference": {
+     "collective": "private_allgather",
+     "input_width": 4096,
+     "output_width": 4096,
+     "tp_size": 4,
+     "source_width": 1024,
+     "source_rank": 768,
+     "gathered_width": 3072,
+     "dtype_bytes": 2,
+     "dense_allgather_ring_bytes_per_rank": 6144,
+     "compressed_allgather_ring_bytes_per_rank": 4608,
+     "dense_allreduce_ring_bytes_per_rank": 12288,
+     "reduction_vs_dense_allgather": 0.25,
+     "reduction_vs_dense_allreduce": 0.625,
+     "kv_cache_compression": "none"
+    },
+    "mamba_reference": {
+     "collective": "private_allgather",
+     "input_width": 8192,
+     "output_width": 4096,
+     "tp_size": 4,
+     "source_width": 2048,
+     "source_rank": 1536,
+     "gathered_width": 6144,
+     "dtype_bytes": 2,
+     "dense_allgather_ring_bytes_per_rank": 12288,
+     "compressed_allgather_ring_bytes_per_rank": 9216,
+     "dense_allreduce_ring_bytes_per_rank": 12288,
+     "reduction_vs_dense_allgather": 0.25,
+     "reduction_vs_dense_allreduce": 0.25,
+     "kv_cache_compression": "none"
+    },
+    "fit": {
+     "encoder_sweeps": 6,
+     "minimum_encoder_sweeps": 6,
+     "covariance_damping": 1e-05,
+     "encoder_relative_tolerance": 1e-05,
+     "encoder_patience": 1,
+     "maximum_backtracks": 8,
+     "encoder_cg_iterations": 16
+    },
+    "selection": "existing TP-source solver held-out MSE selector over decoder-closed checkpoints",
+    "encoder_solver": "fixed 16-iteration conjugate gradient",
+    "work_dtype": "float32",
+    "factor_dtype": "bfloat16",
+    "source_sha256": {
+     "evaluation/fit_nemotron_h_wo.py": "0eb71ab41eedbc6289cd64b1f0aef3e3ed5b4976acfee9e118ba533a86bd7a7c",
+     "basisserve/core/tp_source_wo_fit.py": "c4507ecf47883bd6a0552e271fa3c698a3fda8b3287ea1dae018e2fce33c6677",
+     "basisserve/core/tp_source_wo_c1.py": "0849e7c049568e2dbe709e1af75e9fd8ba49bd2599fdfce68da49af3b504bd2f",
+     "basisserve/core/gqa_routed_ov_joint.py": "d419baaf7c0c68c5762fd824fbd15bfdc0db05b2e81d8630d18408358376e386"
+    }
+   },
+   "source_sha256": "6ec41ec6ba6aa5ada3374a939fd81c8ea17bae3af0e2489285db261a12a42bd2"
+  },
+  "wo_audit_sha256": "dba6895f092f13d8ec7d6d04846bd7d19150fac8947fef03e82fc105ce2f8741"
+ },
+ "value_mode": "allocated C1 V",
+ "input_template": "chat template, user turn = RULER input without answer prefix, generation prompt + blank line",
+ "system_prompt": "{'reasoning': False}"
+}
