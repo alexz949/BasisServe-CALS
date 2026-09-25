@@ -1,0 +1,77 @@
+{
+ "format": "basisserve.qwen35.routing_ruler.128k.v2",
+ "benchmark": "ruler",
+ "v_bank_sha256": "1bc27d5cecb26951206b260e60d3a297872e7aa682cbc0b383735c50312dc165",
+ "gdn_bank_sha256": "989c44b8e987bc56db35aabe669f2bd1bd3442ab05e525322f7fa2f0b5d47c07",
+ "data_sha256": "9e489ddcacbc0cc5ae569d654be8a0288786323593847c51ba264bbacb9b2a1d",
+ "model_identity": {
+  "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+  "config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+  "model_files_sha256": {
+   "model.safetensors-00001-of-00004.safetensors": "db6f444b43d318c92f360a13a25561a6a65b10c0631b8ed305a426dbaa6c380e",
+   "model.safetensors-00002-of-00004.safetensors": "31c7d7e2dd5d207840b31cc59083c8f4c4718959149e0358c0364052bb9a0330",
+   "model.safetensors-00003-of-00004.safetensors": "7ec36ba3a4176a44c3c0876ad80c56a2f70c84bf008d82e9501df642f17dadec",
+   "model.safetensors-00004-of-00004.safetensors": "b62b0c4cd7e44edee103ee8f4fe225f246d5e768e07bfd5f25b63a8aa1fdd0c6"
+  }
+ },
+ "thinking": false,
+ "value_mode": "uniform V192 + GDN Wo75",
+ "prompt_format": "official RULER base completion",
+ "sequence_length": 131072,
+ "samples": 1100,
+ "arm": "lrqk",
+ "samples_per_task": {
+  "niah_single_1": 100,
+  "niah_single_2": 100,
+  "niah_single_3": 100,
+  "niah_multikey_1": 100,
+  "niah_multikey_2": 100,
+  "niah_multiquery": 100,
+  "niah_multivalue": 100,
+  "vt": 100,
+  "fwe": 100,
+  "qa_1": 100,
+  "qa_2": 100
+ },
+ "router_sources": {},
+ "code_sha256": {
+  "evaluation/eval_qwen35_128k_ruler.py": "137e7958e5b3ae0cda3d16b4ddb837022c448e5e47ab4a418a258b8fdeafe6e1",
+  "basisserve/core/qwen35_k_routing_runtime.py": "7ca1f388399b6b3ba574ccf9291fc40de3e39a07900435424674bad7afe3df69",
+  "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+  "basisserve/core/qwen35_gdn_private_ag_runtime.py": "bdfd810d8e9a5dee2b8a5072fef103239acbf5be4401c5c200e05542efb96e37",
+  "basisserve/core/c1_conditional_page_attention.py": "d271f38ded18579752f55747b9226125fb9f67b1cceb7cac7ba32167ed987b00",
+  "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+  "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756"
+ },
+ "numerical_policy": {
+  "model_dtype": "bfloat16",
+  "cuda_matmul_allow_tf32": false,
+  "cudnn_allow_tf32": false
+ },
+ "checkpoint": {
+  "full_attention_v": "uniform V192 ALS12 encoder-CG16 decoder-CG50",
+  "gdn_wo": "24 layers; TP4-private 1024->768 per source; ALS6"
+ },
+ "ours": null,
+ "lrqk": {
+  "rank": 32,
+  "topk_per_query_head": 832,
+  "recent": 64,
+  "prefill_iterations": 2,
+  "decode_iterations": 2,
+  "state_dtype": "bfloat16",
+  "solve_dtype": "float32",
+  "physical_gqa_union": "uncapped"
+ },
+ "shadowkv": {
+  "rank": 160,
+  "chunk": 8,
+  "routed": 2048,
+  "outlier_chunks": 48,
+  "extra_support": "official local tail and generated tokens"
+ },
+ "loki_topk": 2048,
+ "gdn_kernel": "flash-linear-attention chunk_gated_delta_rule (Triton) via transformers fallback resolution",
+ "prefill": "exact full causal FlashAttention with the V192 cache and GDN-Wo75 installed on every arm",
+ "selection": "greedy; native EOS; official per-task generation caps"
+}

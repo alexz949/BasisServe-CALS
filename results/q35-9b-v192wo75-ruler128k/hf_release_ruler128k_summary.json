@@ -1,0 +1,786 @@
+{
+  "status": "complete",
+  "format": "basisserve.qwen35.routing_ruler.128k.summary.v1",
+  "input": "/deac/csc/yangGrp/zhangal/BasisServe-CALS/results/evaluation/qwen35_9b_128k_v192_gdn_ruler1100",
+  "arms": {
+    "full": {
+      "samples": 1100,
+      "task_balanced_accuracy": 0.9445454545454546,
+      "sample_accuracy": 0.9445454545454546,
+      "mean_prefill_seconds": 34.94245868629014,
+      "median_prefill_seconds": 31.352728352881968,
+      "mean_total_seconds": 39.35720093564723,
+      "peak_allocated_gib": 77.80559539794922,
+      "execution": {
+        "records_by_batch_size": {
+          "1": 768,
+          "2": 332
+        },
+        "batches_by_size": {
+          "1": 768,
+          "2": 166
+        },
+        "mean_amortized_prefill_seconds": 28.28462817449123,
+        "mean_amortized_total_seconds": 31.862036390236835
+      },
+      "routing_audit": {
+        "observations": 0
+      },
+      "tasks": {
+        "niah_single_1": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_single_2": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_single_3": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multikey_1": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multikey_2": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multiquery": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multivalue": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "vt": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "fwe": {
+          "samples": 100,
+          "accuracy": 0.98
+        },
+        "qa_1": {
+          "samples": 100,
+          "accuracy": 0.83
+        },
+        "qa_2": {
+          "samples": 100,
+          "accuracy": 0.58
+        }
+      }
+    },
+    "b16r16": {
+      "samples": 1100,
+      "task_balanced_accuracy": 0.9309090909090909,
+      "sample_accuracy": 0.9309090909090909,
+      "mean_prefill_seconds": 39.01069915307855,
+      "median_prefill_seconds": 43.90961420163512,
+      "mean_total_seconds": 46.453400288041344,
+      "peak_allocated_gib": 85.23633670806885,
+      "execution": {
+        "records_by_batch_size": {
+          "1": 432,
+          "2": 668
+        },
+        "batches_by_size": {
+          "1": 432,
+          "2": 334
+        },
+        "mean_amortized_prefill_seconds": 25.55379178918898,
+        "mean_amortized_total_seconds": 30.18051026511768
+      },
+      "routing_audit": {
+        "observations": 8800,
+        "maximum_physical_tokens": 2048
+      },
+      "tasks": {
+        "niah_single_1": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_single_2": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_single_3": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multikey_1": {
+          "samples": 100,
+          "accuracy": 0.99
+        },
+        "niah_multikey_2": {
+          "samples": 100,
+          "accuracy": 0.91
+        },
+        "niah_multiquery": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multivalue": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "vt": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "fwe": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "qa_1": {
+          "samples": 100,
+          "accuracy": 0.78
+        },
+        "qa_2": {
+          "samples": 100,
+          "accuracy": 0.56
+        }
+      }
+    },
+    "lrqk": {
+      "samples": 1100,
+      "task_balanced_accuracy": 0.9336212121212122,
+      "sample_accuracy": 0.933621212121212,
+      "mean_prefill_seconds": 35.573334787826646,
+      "median_prefill_seconds": 31.81392278894782,
+      "mean_total_seconds": 43.78540928765454,
+      "peak_allocated_gib": 79.56181001663208,
+      "execution": {
+        "records_by_batch_size": {
+          "1": 768,
+          "2": 332
+        },
+        "batches_by_size": {
+          "1": 768,
+          "2": 166
+        },
+        "mean_amortized_prefill_seconds": 28.790790967296132,
+        "mean_amortized_total_seconds": 35.404167857143015
+      },
+      "routing_audit": {
+        "observations": 8800,
+        "selected_per_query_head": 896,
+        "maximum_physical_union": 3379
+      },
+      "tasks": {
+        "niah_single_1": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_single_2": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_single_3": {
+          "samples": 100,
+          "accuracy": 0.98
+        },
+        "niah_multikey_1": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multikey_2": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multiquery": {
+          "samples": 100,
+          "accuracy": 0.9975
+        },
+        "niah_multivalue": {
+          "samples": 100,
+          "accuracy": 0.985
+        },
+        "vt": {
+          "samples": 100,
+          "accuracy": 0.9940000000000001
+        },
+        "fwe": {
+          "samples": 100,
+          "accuracy": 0.9133333333333333
+        },
+        "qa_1": {
+          "samples": 100,
+          "accuracy": 0.84
+        },
+        "qa_2": {
+          "samples": 100,
+          "accuracy": 0.56
+        }
+      }
+    },
+    "shadowkv": {
+      "samples": 1100,
+      "task_balanced_accuracy": 0.9225757575757576,
+      "sample_accuracy": 0.9225757575757574,
+      "mean_prefill_seconds": 40.75140298009765,
+      "median_prefill_seconds": 46.29598227702081,
+      "mean_total_seconds": 46.864453135430814,
+      "peak_allocated_gib": 79.25043392181396,
+      "execution": {
+        "records_by_batch_size": {
+          "1": 432,
+          "2": 668
+        },
+        "batches_by_size": {
+          "1": 432,
+          "2": 334
+        },
+        "mean_amortized_prefill_seconds": 26.627351309567352,
+        "mean_amortized_total_seconds": 30.399561767241156
+      },
+      "routing_audit": {
+        "observations": 8800,
+        "routed_tokens": 2048,
+        "outlier_tokens": 384,
+        "maximum_physical_tokens": 2598
+      },
+      "tasks": {
+        "niah_single_1": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_single_2": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_single_3": {
+          "samples": 100,
+          "accuracy": 0.95
+        },
+        "niah_multikey_1": {
+          "samples": 100,
+          "accuracy": 0.98
+        },
+        "niah_multikey_2": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multiquery": {
+          "samples": 100,
+          "accuracy": 0.99
+        },
+        "niah_multivalue": {
+          "samples": 100,
+          "accuracy": 0.935
+        },
+        "vt": {
+          "samples": 100,
+          "accuracy": 0.9899999999999999
+        },
+        "fwe": {
+          "samples": 100,
+          "accuracy": 0.9933333333333333
+        },
+        "qa_1": {
+          "samples": 100,
+          "accuracy": 0.78
+        },
+        "qa_2": {
+          "samples": 100,
+          "accuracy": 0.53
+        }
+      }
+    },
+    "loki": {
+      "samples": 1100,
+      "task_balanced_accuracy": 0.9375757575757576,
+      "sample_accuracy": 0.9375757575757577,
+      "mean_prefill_seconds": 38.81880424562164,
+      "median_prefill_seconds": 43.78112320229411,
+      "mean_total_seconds": 44.793291587120095,
+      "peak_allocated_gib": 78.24272203445435,
+      "execution": {
+        "records_by_batch_size": {
+          "1": 432,
+          "2": 668
+        },
+        "batches_by_size": {
+          "1": 432,
+          "2": 334
+        },
+        "mean_amortized_prefill_seconds": 25.428902392211285,
+        "mean_amortized_total_seconds": 29.184750739657744
+      },
+      "routing_audit": {
+        "observations": 8800,
+        "selected_per_query_head": 856,
+        "maximum_physical_union": 3374
+      },
+      "tasks": {
+        "niah_single_1": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_single_2": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_single_3": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multikey_1": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multikey_2": {
+          "samples": 100,
+          "accuracy": 0.99
+        },
+        "niah_multiquery": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "niah_multivalue": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "vt": {
+          "samples": 100,
+          "accuracy": 1.0
+        },
+        "fwe": {
+          "samples": 100,
+          "accuracy": 0.9333333333333332
+        },
+        "qa_1": {
+          "samples": 100,
+          "accuracy": 0.81
+        },
+        "qa_2": {
+          "samples": 100,
+          "accuracy": 0.58
+        }
+      }
+    }
+  },
+  "shard_manifests": {
+    "full": {
+      "shard_00.json": "e1e7cc02949cbdb18b7cb2c1aab71a8eb5e077b64851690ea93d9aa86eb6b7b9",
+      "shard_01.json": "2a0445e5d27c84536f56e4a5762fa33173d844bf04c37fa5ec816aab70c515a4"
+    },
+    "b16r16": {
+      "shard_00.json": "dfb4411c290823902b5669f78837a2a5a941bc8cc4d856c434a52f14c19cabe2",
+      "shard_01.json": "aca34657a08e2b46f3a2f88c2008ca77705d4f3b3e2225f92758f8f7799218ca"
+    },
+    "lrqk": {
+      "shard_00.json": "e87f2df5f0b162d9c6dd3a610275c8f3b093711d3fa29f5224c1e8719ffe83f7",
+      "shard_01.json": "df1bb7e1ab8c3406f5f2e7ee51ab65ce4693d6ee78815eeb4a400e4b817f4623"
+    },
+    "shadowkv": {
+      "shard_00.json": "af20c253b652a6c88ab6f627e2ac3c52abcc78da54787c58bdf927cb0dc1f718",
+      "shard_01.json": "41fb87447512c165a68a32f584322ab243a57b9616c8f20fd8cb729ae3b639f9"
+    },
+    "loki": {
+      "shard_00.json": "5c83f33dedba63c9ed8b3bad3c959c50afbe0de6dae7346898903c0fe623a9e7",
+      "shard_01.json": "9c97122c730492325aa88c8c1a011960a0aba05aaca30377b22d1cbb960c365b"
+    }
+  },
+  "protocol_variants": {
+    "full": [
+      {
+        "samples": 550,
+        "code_sha256": {
+          "basisserve/core/c1_conditional_page_attention.py": "d271f38ded18579752f55747b9226125fb9f67b1cceb7cac7ba32167ed987b00",
+          "basisserve/core/c1_lrqk.py": "0b443357d622b4a37416eb9bb32161949a26282c0497b0832e651667a5335398",
+          "basisserve/core/c1_shadowkv.py": "cc66f36099b871c6926de6dd404e29fc3c2f2c3e31a583a7a5d283c72b6c8f98",
+          "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756",
+          "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+          "basisserve/core/qwen35_chunked_prefill_runtime.py": "7fefe71485e7177253a1f0eda060df256562311b689a8bc4c0ba838af2d021a9",
+          "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+          "basisserve/core/qwen35_gdn_private_ag_runtime.py": "bdfd810d8e9a5dee2b8a5072fef103239acbf5be4401c5c200e05542efb96e37",
+          "basisserve/core/qwen35_k_routing_runtime.py": "ee20067de214b08a973f9b6e5f337fd51126ec55e428e45a0de5dc3e85766245",
+          "evaluation/eval_qwen35_k_routing_ruler.py": "44cdf81437ff6afc84622992e2c0163c62675b0e33057ddce5e7b39994d0a28f"
+        }
+      },
+      {
+        "samples": 550,
+        "code_sha256": {
+          "basisserve/core/c1_conditional_page_attention.py": "d271f38ded18579752f55747b9226125fb9f67b1cceb7cac7ba32167ed987b00",
+          "basisserve/core/c1_lrqk.py": "1373a5122cb6d4af76cd1ce01b11a5862d9625139e2f49d8f2c4b5b0a449ba1f",
+          "basisserve/core/c1_shadowkv.py": "cc66f36099b871c6926de6dd404e29fc3c2f2c3e31a583a7a5d283c72b6c8f98",
+          "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756",
+          "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+          "basisserve/core/qwen35_chunked_prefill_runtime.py": "7fefe71485e7177253a1f0eda060df256562311b689a8bc4c0ba838af2d021a9",
+          "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+          "basisserve/core/qwen35_gdn_private_ag_runtime.py": "bdfd810d8e9a5dee2b8a5072fef103239acbf5be4401c5c200e05542efb96e37",
+          "basisserve/core/qwen35_k_routing_runtime.py": "69fb5b0bcc1d0a30b0d61c9ebfa281439a407a4d2edee9f36b602b54845ca8fe",
+          "evaluation/eval_qwen35_k_routing_ruler.py": "eb0481007aa86ca8274152dcedb1dd93f6340ae3c5464a39ad72862d14e027a4"
+        }
+      }
+    ],
+    "b16r16": [
+      {
+        "samples": 1100,
+        "code_sha256": {
+          "basisserve/core/c1_conditional_page_attention.py": "d271f38ded18579752f55747b9226125fb9f67b1cceb7cac7ba32167ed987b00",
+          "basisserve/core/c1_lrqk.py": "0b443357d622b4a37416eb9bb32161949a26282c0497b0832e651667a5335398",
+          "basisserve/core/c1_shadowkv.py": "cc66f36099b871c6926de6dd404e29fc3c2f2c3e31a583a7a5d283c72b6c8f98",
+          "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756",
+          "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+          "basisserve/core/qwen35_chunked_prefill_runtime.py": "7fefe71485e7177253a1f0eda060df256562311b689a8bc4c0ba838af2d021a9",
+          "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+          "basisserve/core/qwen35_gdn_private_ag_runtime.py": "bdfd810d8e9a5dee2b8a5072fef103239acbf5be4401c5c200e05542efb96e37",
+          "basisserve/core/qwen35_k_routing_runtime.py": "ee20067de214b08a973f9b6e5f337fd51126ec55e428e45a0de5dc3e85766245",
+          "evaluation/eval_qwen35_k_routing_ruler.py": "44cdf81437ff6afc84622992e2c0163c62675b0e33057ddce5e7b39994d0a28f"
+        }
+      }
+    ],
+    "lrqk": [
+      {
+        "samples": 550,
+        "code_sha256": {
+          "basisserve/core/c1_conditional_page_attention.py": "d271f38ded18579752f55747b9226125fb9f67b1cceb7cac7ba32167ed987b00",
+          "basisserve/core/c1_lrqk.py": "0b443357d622b4a37416eb9bb32161949a26282c0497b0832e651667a5335398",
+          "basisserve/core/c1_shadowkv.py": "cc66f36099b871c6926de6dd404e29fc3c2f2c3e31a583a7a5d283c72b6c8f98",
+          "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756",
+          "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+          "basisserve/core/qwen35_chunked_prefill_runtime.py": "7fefe71485e7177253a1f0eda060df256562311b689a8bc4c0ba838af2d021a9",
+          "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+          "basisserve/core/qwen35_gdn_private_ag_runtime.py": "bdfd810d8e9a5dee2b8a5072fef103239acbf5be4401c5c200e05542efb96e37",
+          "basisserve/core/qwen35_k_routing_runtime.py": "ee20067de214b08a973f9b6e5f337fd51126ec55e428e45a0de5dc3e85766245",
+          "evaluation/eval_qwen35_k_routing_ruler.py": "44cdf81437ff6afc84622992e2c0163c62675b0e33057ddce5e7b39994d0a28f"
+        }
+      },
+      {
+        "samples": 550,
+        "code_sha256": {
+          "basisserve/core/c1_conditional_page_attention.py": "d271f38ded18579752f55747b9226125fb9f67b1cceb7cac7ba32167ed987b00",
+          "basisserve/core/c1_lrqk.py": "1373a5122cb6d4af76cd1ce01b11a5862d9625139e2f49d8f2c4b5b0a449ba1f",
+          "basisserve/core/c1_shadowkv.py": "cc66f36099b871c6926de6dd404e29fc3c2f2c3e31a583a7a5d283c72b6c8f98",
+          "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756",
+          "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+          "basisserve/core/qwen35_chunked_prefill_runtime.py": "7fefe71485e7177253a1f0eda060df256562311b689a8bc4c0ba838af2d021a9",
+          "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+          "basisserve/core/qwen35_gdn_private_ag_runtime.py": "bdfd810d8e9a5dee2b8a5072fef103239acbf5be4401c5c200e05542efb96e37",
+          "basisserve/core/qwen35_k_routing_runtime.py": "69fb5b0bcc1d0a30b0d61c9ebfa281439a407a4d2edee9f36b602b54845ca8fe",
+          "evaluation/eval_qwen35_k_routing_ruler.py": "eb0481007aa86ca8274152dcedb1dd93f6340ae3c5464a39ad72862d14e027a4"
+        }
+      }
+    ],
+    "shadowkv": [
+      {
+        "samples": 1100,
+        "code_sha256": {
+          "basisserve/core/c1_conditional_page_attention.py": "d271f38ded18579752f55747b9226125fb9f67b1cceb7cac7ba32167ed987b00",
+          "basisserve/core/c1_lrqk.py": "0b443357d622b4a37416eb9bb32161949a26282c0497b0832e651667a5335398",
+          "basisserve/core/c1_shadowkv.py": "cc66f36099b871c6926de6dd404e29fc3c2f2c3e31a583a7a5d283c72b6c8f98",
+          "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756",
+          "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+          "basisserve/core/qwen35_chunked_prefill_runtime.py": "7fefe71485e7177253a1f0eda060df256562311b689a8bc4c0ba838af2d021a9",
+          "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+          "basisserve/core/qwen35_gdn_private_ag_runtime.py": "bdfd810d8e9a5dee2b8a5072fef103239acbf5be4401c5c200e05542efb96e37",
+          "basisserve/core/qwen35_k_routing_runtime.py": "ee20067de214b08a973f9b6e5f337fd51126ec55e428e45a0de5dc3e85766245",
+          "evaluation/eval_qwen35_k_routing_ruler.py": "44cdf81437ff6afc84622992e2c0163c62675b0e33057ddce5e7b39994d0a28f"
+        }
+      }
+    ],
+    "loki": [
+      {
+        "samples": 1100,
+        "code_sha256": {
+          "basisserve/core/c1_conditional_page_attention.py": "d271f38ded18579752f55747b9226125fb9f67b1cceb7cac7ba32167ed987b00",
+          "basisserve/core/c1_lrqk.py": "0b443357d622b4a37416eb9bb32161949a26282c0497b0832e651667a5335398",
+          "basisserve/core/c1_shadowkv.py": "cc66f36099b871c6926de6dd404e29fc3c2f2c3e31a583a7a5d283c72b6c8f98",
+          "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756",
+          "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+          "basisserve/core/qwen35_chunked_prefill_runtime.py": "7fefe71485e7177253a1f0eda060df256562311b689a8bc4c0ba838af2d021a9",
+          "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+          "basisserve/core/qwen35_gdn_private_ag_runtime.py": "bdfd810d8e9a5dee2b8a5072fef103239acbf5be4401c5c200e05542efb96e37",
+          "basisserve/core/qwen35_k_routing_runtime.py": "ee20067de214b08a973f9b6e5f337fd51126ec55e428e45a0de5dc3e85766245",
+          "evaluation/eval_qwen35_k_routing_ruler.py": "44cdf81437ff6afc84622992e2c0163c62675b0e33057ddce5e7b39994d0a28f"
+        }
+      }
+    ]
+  },
+  "paired_against_full": {
+    "b16r16": {
+      "improvements": 12,
+      "regressions": 27,
+      "ties": 1061
+    },
+    "lrqk": {
+      "improvements": 7,
+      "regressions": 27,
+      "ties": 1066
+    },
+    "shadowkv": {
+      "improvements": 14,
+      "regressions": 61,
+      "ties": 1025
+    },
+    "loki": {
+      "improvements": 10,
+      "regressions": 21,
+      "ties": 1069
+    }
+  },
+  "protocol": {
+    "format": "basisserve.qwen35.routing_ruler.128k.v1",
+    "checkpoint_manifest_sha256": "67bd8af1ec16b04114a10e01f7471bc97a74e7f393793e4e209a83bbfc096453",
+    "checkpoint_revision": "43b70b2dcc2f0edd5cda3a180d21d2cf747d4f3c",
+    "v_bank_sha256": "cca8c04469a5a50f97a720a148fcdafc1b5a822cf9d7118d1ed4388bc8a930b6",
+    "gdn_wo_bank_sha256": "e461a633cdde9ecde4c9502671d1e71803769b1d2bde1bdc0dcddf75adb1d325",
+    "model_identity": {
+      "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+      "config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+      "model_files_sha256": {
+        "model.safetensors-00001-of-00004.safetensors": "db6f444b43d318c92f360a13a25561a6a65b10c0631b8ed305a426dbaa6c380e",
+        "model.safetensors-00002-of-00004.safetensors": "31c7d7e2dd5d207840b31cc59083c8f4c4718959149e0358c0364052bb9a0330",
+        "model.safetensors-00003-of-00004.safetensors": "7ec36ba3a4176a44c3c0876ad80c56a2f70c84bf008d82e9501df642f17dadec",
+        "model.safetensors-00004-of-00004.safetensors": "b62b0c4cd7e44edee103ee8f4fe225f246d5e768e07bfd5f25b63a8aa1fdd0c6"
+      }
+    },
+    "data_sha256": "60fee095b91fda19b9209eb9922cd6dcbc434d0f4cee9ffeef86dc1dcefd03dd",
+    "tokenizer_config_sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+    "prompt_format": "official RULER base completion",
+    "thinking": false,
+    "sequence_length": 131072,
+    "samples": 1100,
+    "samples_per_task": 100,
+    "dataset_seed": 42,
+    "prompt_margin": 128,
+    "code_sha256": {
+      "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+      "basisserve/core/qwen35_chunked_prefill_runtime.py": "7fefe71485e7177253a1f0eda060df256562311b689a8bc4c0ba838af2d021a9",
+      "basisserve/core/qwen35_gdn_private_ag_runtime.py": "bdfd810d8e9a5dee2b8a5072fef103239acbf5be4401c5c200e05542efb96e37",
+      "basisserve/core/c1_shadowkv.py": "cc66f36099b871c6926de6dd404e29fc3c2f2c3e31a583a7a5d283c72b6c8f98",
+      "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+      "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756",
+      "basisserve/core/c1_conditional_page_attention.py": "d271f38ded18579752f55747b9226125fb9f67b1cceb7cac7ba32167ed987b00"
+    },
+    "numerical_policy": {
+      "model_dtype": "bfloat16",
+      "float32_matmul_precision": "highest",
+      "cuda_matmul_allow_tf32": false,
+      "cudnn_allow_tf32": false,
+      "deterministic_algorithms": true,
+      "cublas_workspace_config": ":4096:8"
+    },
+    "checkpoint": {
+      "full_attention_v": "uniform V192 ALS12 encoder-CG16 decoder-CG50",
+      "gdn_wo": "24 layers; TP4-private 1024->768 per source; ALS6",
+      "gdn_records": [
+        {
+          "layer_index": 0,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 1,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 2,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 4,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 5,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 6,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 8,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 9,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 10,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 12,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 13,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 14,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 16,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 17,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 18,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 20,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 21,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 22,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 24,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 25,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 26,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 28,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 29,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        },
+        {
+          "layer_index": 30,
+          "tp_size": 4,
+          "local_width": 1024,
+          "local_rank": 768,
+          "total_private_rank": 3072
+        }
+      ]
+    },
+    "execution": {
+      "prefill_chunk_size": 0,
+      "semantics": "0 is native full prefill; positive values only block native GDN/MLP/norm intermediates and retain the full causal sequence"
+    },
+    "ours": {
+      "base": 16,
+      "residual": 16,
+      "page_size": 32,
+      "physical_group_budget": 2048,
+      "sink": 0,
+      "recent": 64,
+      "recent_inside_budget": true,
+      "maximum_support": 2048
+    },
+    "loki": {
+      "pca_rank": 32,
+      "topk_per_query_head": 856,
+      "recent": 0,
+      "forced_sink": 0,
+      "physical_gqa_union": "uncapped"
+    },
+    "lrqk": {
+      "rank": 32,
+      "topk_per_query_head": 832,
+      "recent": 64,
+      "prefill_iterations": 2,
+      "decode_iterations": 2,
+      "tolerance": 0.01,
+      "seed": 0,
+      "state_dtype": "bfloat16",
+      "solve_dtype": "float32",
+      "physical_gqa_union": "uncapped"
+    },
+    "shadowkv": {
+      "rank": 160,
+      "chunk": 8,
+      "routed": 2048,
+      "outlier_chunks": 48,
+      "extra_support": "official local tail and generated tokens"
+    },
+    "prefill": "exact full causal attention with V192 cache and GDN-Wo75 installed on every arm",
+    "selection": "greedy; native EOS; official per-task generation caps"
+  },
+  "source_sha256": "f09df4516c353cc505b84438eca4a310dbef3e1971e7a5c1e5d618646c59dd77"
+}

@@ -1,8 +1,8 @@
 # longbench-shadowkv9 / Llama-3.1-8B-Instruct (V96 identity B, C4/retrieval 50-50 calibration)
 
-Compact per-sample predictions (prompt token ids stripped; the prompt hash, prediction, score, routing statistics and timing are kept). Full protocol per arm is in `protocols/`; paired comparison tables in `summaries/`. The per-sample prediction files (`predictions/<arm>.jsonl`, 9–15 MB each) are on the Hugging Face repo `alexz949/BasisServe-CALS` under `results/longbench-shadowkv9/llama31_8b_instruct/predictions/`.
+Compact per-sample predictions (prompt token ids stripped; the prompt hash, prediction, score, routing statistics and timing are kept). Full protocol per arm is in `protocols/`; paired comparison tables in `summaries/`.
 
-ShadowKV-aligned LongBench-v1 protocol: 9 tasks, samples > 4096 tokens under the model tokenizer (1543), sparse budget 256; page-32 arm = released Page-Fisher bank with sink 32 + recent 64 (352 physical); page-8/4/1 arms = Page-Fisher refits at that page size, no sink, 256 + recent 64 (320); dense_full = uncompressed model on the same prompts.
+ShadowKV-aligned LongBench-v1 protocol: 9 tasks, samples > 4096 tokens under the model tokenizer (1543), sparse budget 256; page-32 arm = released Page-Fisher bank with sink 32 + recent 64 (352 physical); page-8/4/1 arms = Page-Fisher refits at that page size, no sink, 256 + recent 64 (320); dense_full = uncompressed model on the same prompts; lrqk = rank 32, top-k 256 + recent 64; shadowkv = rank 160, routed 256 + 48 outlier chunks; loki_prerope_pca32 = centered pre-RoPE K PCA r32 of the dense model (HF loki_pca32_dense_prerope), top-k 256 + recent 64 per query head, evaluated in its own audited run (eval_llama31_8b_instruct_loki) and paired with the other arms in summaries/eval_llama31_8b_instruct_loki_summary.txt.
 
 | arm | samples | tasks | task-balanced mean |
 |---|---:|---:|---:|
@@ -13,6 +13,7 @@ ShadowKV-aligned LongBench-v1 protocol: 9 tasks, samples > 4096 tokens under the
 | b16r16_page8_fisher | 1543 | 9 | 46.61 |
 | dense_full | 1543 | 9 | 50.21 |
 | full | 1543 | 9 | 47.02 |
+| loki_prerope_pca32 | 1543 | 9 | 46.54 |
 | lrqk | 1543 | 9 | 46.62 |
 | shadowkv | 1543 | 9 | 46.72 |
 

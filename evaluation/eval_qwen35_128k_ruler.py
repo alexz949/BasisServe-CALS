@@ -24,7 +24,8 @@ from evaluation.qwen35_hybrid_common import atomic_save, load_bank, load_model, 
 from evaluation.ruler_v1 import parse_tasks, ruler_prompt, sample_score
 from evaluation.v96kl_common import read_json
 
-ARM_PATTERN = re.compile(r'^(full|dense|v_only|wo_only|lrqk|shadowkv|b(\d+)r(\d+))$')
+ARM_PATTERN = re.compile(r'^(full|dense|v_only|wo_only|lrqk|shadowkv|loki|b(\d+)r(\d+))$')
+LOKI_FORMAT = 'basisserve.qwen35.loki_key_pca.v1'
 TASKS = ('niah_single_1', 'niah_single_2', 'niah_single_3', 'niah_multikey_1',
          'niah_multikey_2', 'niah_multiquery', 'niah_multivalue', 'vt', 'fwe', 'qa_1', 'qa_2')
 LAYERS = (3, 7, 11, 15, 19, 23, 27, 31)
@@ -131,8 +132,22 @@ def install(model, args, bank, gdn):
             routing = {key: value.to(native.v_proj.weight.device) for key, value in tensors.items()}
             sources[path.name] = dict(sha256=sha256(path), objective=protocol['objective'],
                 fit_windows=len(protocol['fit_ids']), sweeps=protocol['sweeps'], pcg_iterations=protocol['pcg_iterations'])
+        loki_basis = None
+        if args.arm == 'loki':
+            # Loki: rank-32 centered pre-RoPE Key PCA of the dense model (evaluation/fit_qwen35_128k_loki.py); the runtime
+            # projects post-RoPE Q/K without mean subtraction and keeps top-k per query head, no recent window.
+            path = args.loki_bank / f'l{layer:02d}.pt'
+            record = torch.load(path, map_location='cpu', weights_only=True)
+            assert record['status'] == 'complete' and record['format'] == LOKI_FORMAT and record['layer'] == layer
+            assert record['rank'] == 32 and record['wo_compression'] is False and record['sequence_length'] == SEQUENCE_LENGTH
+            assert tuple(record['projector'].shape) == (native.k_proj.out_features // native.head_dim, native.head_dim, 32)
+            loki_basis = record['projector'].to(native.v_proj.weight.device)
+            sources[path.name] = dict(sha256=sha256(path), fit_windows=record['fit_windows'], windows_sha256=record['windows_sha256'],
+                retained_variance=[round(float(x), 4) for x in record['retained']], pca_coordinate=record['pca_coordinate'],
+                runtime_coordinate=record['runtime_coordinate'], topk_per_query_head=args.loki_topk, recent=0,
+                physical_gqa_union='uncapped')
         model.model.layers[layer].self_attn = Qwen35RoutingAttention(native, factors['E_V'], factors['R_V'],
-            arm='ours' if args.ranks is not None else ('full' if args.arm == 'v_only' else args.arm), factors=routing,
+            arm='ours' if args.ranks is not None else ('full' if args.arm == 'v_only' else args.arm), factors=routing, loki_basis=loki_basis,
             base_rank=None if args.ranks is None else args.ranks[0], residual_rank=None if args.ranks is None else args.ranks[1],
             budget=args.ours_budget, lrqk_topk=args.lrqk_topk, loki_topk=args.loki_topk, shadowkv_budget=args.shadowkv_budget, page_size=args.page_size)
     if args.arm != 'v_only':
@@ -157,11 +172,13 @@ def main():
     p.add_argument('--page-size', type=int, default=32, choices=(1, 2, 4, 8, 16, 32), help='routing page size; must match the router protocol')
     p.add_argument('--lrqk-topk', type=int, default=2048)
     p.add_argument('--loki-topk', type=int, default=2048)
+    p.add_argument('--loki-bank', type=Path, help='Loki Key-PCA bank directory (l{layer:02d}.pt); required for --arm loki')
     p.add_argument('--shadowkv-budget', type=int, default=2048, help='ShadowKV routed tokens; 48 outlier chunks x 8 and the local tail are extra')
     args = p.parse_args()
     match = ARM_PATTERN.match(args.arm)
     assert match, args.arm
     args.ranks = (int(match.group(2)), int(match.group(3))) if match.group(2) else None
+    assert (args.loki_bank is not None) == (args.arm == 'loki'), '--loki-bank goes with --arm loki'
     torch.set_num_threads(2)
     torch.manual_seed(0)
     torch.backends.cuda.matmul.allow_tf32 = False

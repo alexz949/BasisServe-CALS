@@ -1,8 +1,8 @@
 # longbench-shadowkv9 / Qwen3-8B post-trained (V96, retrieval-mix calibration, yarn4)
 
-Compact per-sample predictions (prompt token ids stripped; the prompt hash, prediction, score, routing statistics and timing are kept). Full protocol per arm is in `protocols/`; paired comparison tables in `summaries/`. The per-sample prediction files (`predictions/<arm>.jsonl`, 9–15 MB each) are on the Hugging Face repo `alexz949/BasisServe-CALS` under `results/longbench-shadowkv9/qwen3_8b/predictions/`.
+Compact per-sample predictions (prompt token ids stripped; the prompt hash, prediction, score, routing statistics and timing are kept). Full protocol per arm is in `protocols/`; paired comparison tables in `summaries/`.
 
-Same protocol (1549 samples). LRQK covers 1546 samples: three gov_report samples (982, 995, 1018) diverge in the LRQK decode solve (BF16 factor storage in our port), excluded; paired comparisons use the 1546 common samples. page-16/8 decode arms reuse the page-32 bank with one sink page (336/328 physical).
+Same protocol (1549 samples). LRQK covers 1546 samples: three gov_report samples (982, 995, 1018) diverge in the LRQK decode solve (BF16 factor storage in our port), excluded; paired comparisons use the 1546 common samples. page-16/8 decode arms reuse the page-32 bank with one sink page (336/328 physical); page-8/4/1 fisher arms = Page-Fisher refits at that page size, no sink, 256 + recent 64 (320); loki_postrope_pca32 = post-RoPE K PCA r32 (HF loki_pca32_post_rope), top-k 256 + recent 64 per query head, evaluated in its own audited run (eval_qwen3_8b_loki) and paired with the other arms in summaries/eval_qwen3_8b_loki_summary.txt.
 
 | arm | samples | tasks | task-balanced mean |
 |---|---:|---:|---:|
@@ -13,6 +13,7 @@ Same protocol (1549 samples). LRQK covers 1546 samples: three gov_report samples
 | b16r16_page8_decode_page32bank | 1549 | 9 | 45.08 |
 | b16r16_page8_fisher | 1549 | 9 | 44.91 |
 | full | 1549 | 9 | 46.20 |
+| loki_postrope_pca32 | 1549 | 9 | 45.61 |
 | lrqk_1546 | 1546 | 9 | 45.79 |
 | shadowkv | 1549 | 9 | 44.49 |
 

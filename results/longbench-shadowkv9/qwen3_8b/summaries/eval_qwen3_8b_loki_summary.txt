@@ -1,0 +1,22 @@
+# Qwen3-8B post LongBench-9 with the Loki arm (post-RoPE K PCA r32, top-k 256 + recent 64; own audited dir eval_qwen3_8b_loki); 2026-09-25 08:40 EDT
+n per arm: {'full': 1549, 'p32': 1549, 'p8fit': 1549, 'p4fit': 1549, 'p1fit': 1549, 'lrqk': 1546, 'shadowkv': 1549, 'loki': 1549}  common: 1546
+task                            full       p32     p8fit     p4fit     p1fit      lrqk  shadowkv      loki   (each arm over its own samples)
+dureader                       17.89     15.03     16.03     16.68     16.72     16.36     19.93     22.58
+gov_report                     33.53     31.19     32.88     32.86     32.74     33.22     33.82     32.94
+hotpotqa                       51.61     50.80     51.28     51.47     51.73     52.93     51.94     51.11
+lcc                            62.06     59.80     59.64     58.80     59.44     59.84     55.10     55.09
+multifieldqa_en                51.47     48.22     50.47     50.94     50.78     49.50     50.47     51.69
+musique                        27.34     25.14     25.82     26.63     26.56     26.86     27.32     27.69
+narrativeqa                    25.35     25.51     25.47     26.97     25.40     26.76     26.12     26.47
+passage_retrieval_en          100.00     88.50     98.00     98.50    100.00    100.00     91.00     98.00
+samsum                         46.52     44.16     44.63     44.60     45.44     46.64     44.67     44.94
+9-task mean                    46.20     43.15     44.91     45.27     45.42     45.79     44.49     45.61
+6-task mean                    53.16     49.56     51.85     52.11     52.30     52.66     50.20     51.52
+paired on 1546 common samples (task-balanced 9-task mean):
+  p32 - full: -3.05  95% CI [-4.05, -2.09]  win/loss 282/469
+  p8fit - full: -1.29  95% CI [-1.93, -0.69]  win/loss 277/379
+  p4fit - full: -0.93  95% CI [-1.53, -0.32]  win/loss 283/359
+  p1fit - full: -0.78  95% CI [-1.30, -0.28]  win/loss 274/325
+  lrqk - full: -0.41  95% CI [-0.94, +0.09]  win/loss 270/289
+  shadowkv - full: -1.71  95% CI [-2.58, -0.83]  win/loss 379/385
+  loki - full: -0.59  95% CI [-1.40, +0.17]  win/loss 374/340
