@@ -1,0 +1,811 @@
+Task: finalize the three TP1 efficiency figures for the BasisKV paper.
+
+The three figures answer three DIFFERENT questions:
+
+Fig. 1: Does sparse routing reduce computation as context grows?
+Fig. 2: Does sparse exact-K retrieval preserve serving throughput when K must be offloaded?
+Fig. 3: Does offline/pre-learned routing reduce complete request latency relative to prompt-dependent sparse baselines?
+
+Do not mix these metrics or claims.
+
+Use the current full-scan BasisKV implementation only.
+Do NOT use old two-stage routing results.
+
+============================================================
+0. General rules
+============================================================
+
+Model:
+- Llama-3.1-8B-Instruct
+- BF16
+- TP1
+- single NVIDIA L40S
+
+Basis configuration:
+- full-scan routing
+- B16R16 / Page32 where applicable
+- no two-stage routing
+- full V128 for these TP1 systems experiments unless the existing
+  formal experiment explicitly says otherwise
+
+Publication style:
+- compact conference-paper figures
+- no large plot titles
+- no dashboard/presentation styling
+- no giant speedup annotations
+- vector PDF output
+- typography readable at one-column paper width
+- about 3.35 inches wide and 2.2--2.4 inches high per figure
+- axis labels ~8 pt
+- tick/legend ~7--7.5 pt
+- annotations ~7 pt
+- remove top/right spines
+- very light or no grid
+- do not use color as the only distinction
+- use markers / line styles / hatches as well
+
+Output all raw plotting tables and provenance.
+
+============================================================
+1. FIGURE 1: Sparse decode scaling
+============================================================
+
+Goal:
+Show how sparse-attention computation and full-model decode speedup
+change with sequence length.
+
+This should be ONE SINGLE PANEL, not two panels.
+
+Title should NOT be printed inside the plot.
+Suggested paper caption title:
+"Sparse decode scaling with context length."
+
+------------------------------------------------------------
+1.1 Experiment
+------------------------------------------------------------
+
+TP1 / B1 / GPU-local.
+
+All exact K/V state is resident on GPU for BOTH Dense and BasisKV.
+
+No CPU offload.
+
+Compare:
+- Dense GPU-local
+- BasisKV GPU-local, full-scan B16R16
+
+Sequence lengths:
+
+16K
+24K
+32K
+48K
+64K
+96K
+~128K
+
+Use exact token counts consistent with the existing formal TP1 benchmark.
+
+IMPORTANT:
+Do not silently change the existing ~128K endpoint.
+
+If the existing formal GPU-local benchmark uses 130,048 rather than
+131,072, preserve 130,048 and label it "128K" or "~128K" consistently
+in the figure/caption.
+
+Use the same context-definition convention for the new 24K/48K/96K
+points.
+
+------------------------------------------------------------
+1.2 Existing formal values
+------------------------------------------------------------
+
+Existing GPU-local values to verify against archived results:
+
+Attention-block latency, ms/token:
+
+context     Dense      BasisKV
+16K         3.814      4.401
+32K         6.705      5.840
+64K        12.583      8.694
+~128K      23.857     14.649
+
+Full-model decode latency, ms/token:
+
+context     Dense      BasisKV
+16K        27.124     27.597
+32K        30.050     28.988
+64K        35.994     31.853
+~128K      47.370     37.817
+
+Expected speedups from these values:
+
+Attention:
+16K   0.87x
+32K   1.15x
+64K   1.45x
+128K  1.63x
+
+Full model:
+16K   0.98x
+32K   1.04x
+64K   1.13x
+128K  1.25x
+
+Before doing anything, verify these against the archived formal results.
+
+------------------------------------------------------------
+1.3 Missing points
+------------------------------------------------------------
+
+We need:
+
+24K
+48K
+96K
+
+If no formal values exist for these sequence lengths, run ONLY the
+needed TP1 GPU-local Dense/Basis benchmarks.
+
+Preferably, if a clean seven-point same-version sweep is cheap enough,
+rerun all seven sequence lengths using the exact same current benchmark
+revision and protocol. This is preferable for a final paper figure.
+
+Do NOT rerun expensive quality benchmarks.
+
+Use the same steady-decode measurement protocol for all points.
+
+Keep:
+- batch = 1
+- fixed active request
+- same prompt/cohort construction
+- same cache allocation policy
+- same compile/CUDA-graph policy for Dense and Basis
+- same warmup/measurement count
+- same synchronization policy
+
+If the existing formal protocol has a specific number of warmup and
+measured steps, preserve it rather than inventing a new protocol.
+
+Use 3 independent process runs per configuration if that is the
+existing formal protocol.
+
+Do not insert additional synchronization or Python work for one method
+only.
+
+If attention-block instrumentation changes whole-step timing, run the
+attention timing and full-model timing in separate but otherwise
+identical passes rather than perturbing the main latency measurement.
+
+------------------------------------------------------------
+1.4 Plot
+------------------------------------------------------------
+
+X axis:
+"Context length"
+
+Ticks:
+16K, 24K, 32K, 48K, 64K, 96K, 128K
+
+Y axis:
+"Speedup over dense (×)"
+
+Plot TWO curves:
+
+1. Attention
+   speedup = Dense attention latency / Basis attention latency
+
+2. Full model
+   speedup = Dense full-model latency / Basis full-model latency
+
+Use:
+- one solid line + markers
+- one dashed line + different markers
+- horizontal 1.0× reference line
+
+Do NOT plot four raw latency curves.
+
+The purpose of this figure is to show:
+
+routing overhead at short context
+        ->
+crossover
+        ->
+increasing sparse-attention benefit with context
+        ->
+smaller but increasing full-model benefit.
+
+At ~128K annotate only:
+
+Attention: "1.63×"
+Full model: "1.25×"
+
+Keep annotations small.
+
+Do not write explanatory sentences inside the plot.
+
+Save raw latency values and calculated speedups to CSV.
+
+Suggested caption:
+
+"Sparse decode scaling on one L40S with all K/V state resident on GPU.
+Full-scan routing has a small fixed overhead at short context, but its
+benefit grows with sequence length. At approximately 128K, BasisKV
+reduces attention-block latency by 1.63× and full-model steady-decode
+latency by 1.25×. Full-model timing includes the unchanged MLP and other
+model components."
+
+Do NOT call the full-model curve "end-to-end request latency".
+Use "full-model steady decode".
+
+============================================================
+2. FIGURE 2: Throughput under K offload
+============================================================
+
+Goal:
+Show the deployment consequence of sparse K access when historical K
+is placed in host memory.
+
+This is NOT the pure sparse-compute benchmark.
+This is a serving / data-movement benchmark.
+
+Use 64K as the main context because it provides a clean batch sweep.
+
+Suggested caption title:
+"Long-context decode throughput under K offload."
+
+------------------------------------------------------------
+2.1 Methods
+------------------------------------------------------------
+
+Compare three methods:
+
+A. Dense-local
+- full exact K/V GPU-resident
+- dense full-context attention
+
+B. Dense-K-offload
+- historical exact K in pinned/mapped CPU memory
+- full V remains GPU-resident
+- each layer/step retrieves the full historical K needed for dense attention
+- use preallocated staging
+- no per-step malloc/free
+- reasonable async-copy implementation
+
+C. BasisKV-K-offload
+- historical exact K in pinned/mapped CPU memory
+- full V128 and routing state GPU-resident
+- full-scan B16R16 / Page32
+- 1,984 routed tokens + 64 recent tokens
+- persistent GPU K slots
+- fetch only selected/missing exact-K pages
+
+This is a deployment comparison.
+Do NOT describe it as a quality-equivalence experiment.
+
+------------------------------------------------------------
+2.2 Workload
+------------------------------------------------------------
+
+Context:
+65,536 tokens
+
+Active batch sweep:
+
+B = 1, 2, 4, 8, ...
+
+Continue each method until its first OOM or clear inability to execute.
+
+At minimum obtain clean same-version values for:
+
+B=1
+B=2
+B=4
+
+If B=8 is feasible for any method, record it.
+
+Do not infer Bmax.
+Report:
+"largest successful tested batch"
+
+Measurement:
+- steady decode only
+- prefill excluded from throughput metric
+- all B requests remain active
+- no batch shrinking
+- aggregate output throughput
+
+Throughput:
+
+    tokens/s = active_batch / mean_decode_step_seconds
+
+Use the same existing formal protocol if available:
+- current benchmark used 8 warmup steps
+- 128 measured decode forwards
+- 3 independent processes
+- median across successful repeats
+
+Preserve this unless the archived benchmark says otherwise.
+
+Record OOM phase:
+- cache allocation
+- prefill
+- decode
+etc.
+
+Do NOT call a prefill/allocation OOM a decode-kernel OOM.
+
+------------------------------------------------------------
+2.3 Existing values to verify
+------------------------------------------------------------
+
+Current formal 64K values:
+
+                B1       B2       B4
+Dense-local     27.66    41.12    OOM
+Dense-K-offload  5.08     5.42     5.62
+Basis-K-offload 29.36    46.10    68.18
+
+At B4:
+
+68.18 / 5.62 ~= 12.13x
+
+These are sanity targets.
+
+For a final paper figure, prefer a clean same-version 64K rerun of all
+three methods if the archived values came from different revisions.
+
+Do NOT force the new results to equal these values.
+
+If the new clean rerun differs, use the new formal numbers and record
+the discrepancy.
+
+------------------------------------------------------------
+2.4 Plot
+------------------------------------------------------------
+
+Use ONE panel.
+
+X axis:
+"Active batch size"
+
+Y axis:
+"Decode throughput (tok/s)"
+
+Prefer a compact line plot with markers rather than large presentation
+bars.
+
+Three series:
+- Dense-local
+- Dense K-offload
+- BasisKV K-offload
+
+If Dense-local OOMs at B4:
+- terminate its line after B2
+- place a small "×" at B4
+- put small "OOM" text nearby
+
+Do not fake a zero throughput point.
+
+If offload methods OOM at larger B, use the same convention.
+
+At B4, if the ratio remains similar, annotate:
+
+"12.1×"
+
+or the newly measured ratio.
+
+Caption/text must define this as:
+
+BasisKV-K-offload / Dense-K-offload
+
+Never call it:
+"12.1× over Dense"
+
+Never imply this is the general full-model sparse-attention speedup.
+
+The plot should visually communicate:
+
+Dense-local:
+high performance but eventually capacity limited
+
+Dense-K-offload:
+capacity relief but severe full-history transfer cost
+
+Basis-K-offload:
+capacity relief with selective exact-K retrieval and much higher
+decode throughput
+
+Suggested caption:
+
+"Decode throughput at 64K on one L40S. GPU-resident dense execution
+reaches the tested memory limit as batch grows. Offloading historical
+Keys allows dense execution to continue but requires full-history K
+movement each step. BasisKV instead retrieves only selected exact-Key
+pages, sustaining substantially higher throughput under the same
+K-offload regime."
+
+If B4 reproduces 68.18 vs 5.62, add:
+
+"At B=4, BasisKV reaches 68.2 tok/s versus 5.6 tok/s for dense K
+offload (12.1×)."
+
+============================================================
+3. FIGURE 3: Complete request latency vs prompt-dependent methods
+============================================================
+
+Goal:
+Show the request-level consequence of using offline/pre-learned routing
+rather than constructing a prompt-specific representation.
+
+This is NOT a steady-decode figure.
+
+Suggested caption title:
+"Complete request latency with offline routing."
+
+------------------------------------------------------------
+3.1 Main comparison
+------------------------------------------------------------
+
+Main figure should include:
+
+- Dense GPU-local
+- BasisKV GPU-local
+- ShadowKV
+
+Do NOT make LRQK a headline series unless we have a stable, complete,
+same-protocol runtime at all contexts.
+
+Current LRQK runtime has:
+- compiler graph-break / recompilation warnings
+- incomplete longer-context results
+- GPU-local OOMs in different prefill/fitting stages
+
+Therefore:
+keep LRQK as an appendix/supplementary result unless a new stable
+implementation is available.
+
+Optionally create:
+fig_request_lrqk_appendix.pdf
+
+but do not put unstable LRQK numbers in the main headline figure.
+
+------------------------------------------------------------
+3.2 Request protocol
+------------------------------------------------------------
+
+TP1 / B1.
+
+Prompt lengths:
+
+32,768
+65,536
+130,048
+
+Plot labels:
+32K
+64K
+128K
+
+Caption must say the longest exact prompt is 130,048 tokens.
+
+Output:
+128 output tokens
+
+Timing includes:
+- prefill
+- request-specific preparation/construction
+- generation
+
+Timing excludes:
+- model loading
+- factor loading
+- cache preallocation
+- tokenization
+- network transfer
+
+This is warmed device-side request latency.
+
+Do NOT call it network-service latency or TTFT.
+
+Use the existing three fixed prompt cohorts.
+
+Require all three cohorts to complete for a reported main value.
+
+Use the existing aggregation rule:
+median across the three successful cohorts.
+
+------------------------------------------------------------
+3.3 Existing values
+------------------------------------------------------------
+
+Verify against archived formal results:
+
+Prompt       Dense       BasisKV      ShadowKV
+32K          8.433       8.306        19.131
+64K         16.709      16.399        29.508
+130,048     43.418      42.898        58.805
+
+Shadow / Basis:
+
+32K     2.30x
+64K     1.80x
+128K    1.37x
+
+Also verify request-tail steady-decode values at ~128K:
+
+ShadowKV:
+32.594 ms/token
+
+BasisKV:
+37.522 ms/token
+
+This detail is important because ShadowKV's steady decode is actually
+slightly faster at the longest context, while its complete request is
+slower.
+
+Existing separately profiled ShadowKV prompt-specific
+construction/preparation:
+
+32K      11.671 s
+64K      14.699 s
+128K     20.345 s
+
+BUT:
+
+These build-profile times come from separate instrumentation and may
+overlap prefill work.
+
+Therefore:
+
+DO NOT stack:
+prefill + build + decode
+
+DO NOT subtract build from E2E and call the remainder "prefill".
+
+Do NOT draw a stacked decomposition from these values.
+
+------------------------------------------------------------
+3.4 Plot
+------------------------------------------------------------
+
+Use ONE compact grouped-bar plot.
+
+X axis:
+"Prompt length"
+
+Y axis:
+"128-token request latency (s)"
+
+Three bars per context:
+- Dense
+- BasisKV
+- ShadowKV
+
+Annotate ShadowKV/Basis ratio above each group:
+
+2.30×
+1.80×
+1.37×
+
+Keep annotations small.
+
+Do not put the profiled construction times inside stacked bars.
+
+Instead:
+- mention the prompt-specific construction profile in the caption/text
+- optionally place a tiny non-additive note next to ShadowKV bars,
+  but omit it entirely if it hurts readability
+
+At the 128K group, optionally add a very small callout:
+
+"steady decode:
+Shadow 32.6,
+Basis 37.5 ms/tok"
+
+This is useful because it demonstrates:
+
+lower complete request latency != faster steady decode kernel.
+
+The correct interpretation is:
+
+- BasisKV uses offline learned routing factors and requires no
+  prompt-specific fitting
+- the evaluated ShadowKV path performs prompt-specific representation
+  construction
+- BasisKV has lower complete request latency in these workloads
+
+BUT:
+cache placement and attention execution also differ.
+
+Do NOT claim that the entire latency gap is caused by online
+construction.
+
+Suggested caption:
+
+"Complete 128-token request latency on one L40S. BasisKV uses
+offline-learned routing factors and does not perform prompt-specific
+representation fitting, while the evaluated ShadowKV path constructs a
+prompt-specific representation. BasisKV reduces complete request
+latency by 2.30×, 1.80×, and 1.37× at 32K, 64K, and approximately 128K,
+respectively. At the longest context, ShadowKV has slightly lower
+request-tail steady-decode latency (32.6 vs. 37.5 ms/token), so the
+request-level difference should not be interpreted as a pure
+steady-state kernel speedup. Cache placement and runtime implementation
+also differ."
+
+============================================================
+4. LRQK appendix
+============================================================
+
+Do not headline LRQK in Fig. 3 with the current runtime.
+
+Create an appendix-only table/figure if useful.
+
+Known GPU-local supplement:
+
+32K:
+request latency:
+55.603 s CPU-offload -> 28.659 s GPU-local
+
+request-tail decode:
+379.791 -> 187.501 ms/token
+
+GPU-local prompt-specific build profile:
+0.910 s
+
+64K:
+0/3 complete due warmup prefill MLP allocation OOM
+
+130,048:
+GPU-local runs OOM during online fitting
+
+The appendix MUST state:
+these failures are properties of the evaluated implementation/runtime,
+not proven algorithmic capacity limits of LRQK.
+
+Do not use these OOMs as a headline superiority claim.
+
+============================================================
+5. Figure organization
+============================================================
+
+The final paper structure should be:
+
+FIGURE 1
+Sparse decode scaling
+- one panel
+- Attention speedup + Full-model speedup vs context
+
+FIGURE 2
+Long-context throughput under K offload
+- one panel
+- throughput vs batch @64K
+- Dense-local / Dense-K-offload / Basis-K-offload
+
+FIGURE 3
+Complete request latency
+- one panel
+- Dense / BasisKV / ShadowKV
+- 32K / 64K / ~128K
+- fixed 128 output tokens
+
+These correspond to:
+
+Fig. 1:
+sparse computation
+
+Fig. 2:
+sparse data movement under memory pressure
+
+Fig. 3:
+offline representation / request-level overhead
+
+Do not merge the three claims.
+
+============================================================
+6. Files and provenance
+============================================================
+
+Create:
+
+paper_figures/tp1/
+    fig1_sparse_scaling.py
+    fig1_sparse_scaling.pdf
+    fig1_sparse_scaling.png
+    fig1_sparse_scaling_data.csv
+
+    fig2_offload_throughput.py
+    fig2_offload_throughput.pdf
+    fig2_offload_throughput.png
+    fig2_offload_throughput_data.csv
+
+    fig3_request_latency.py
+    fig3_request_latency.pdf
+    fig3_request_latency.png
+    fig3_request_latency_data.csv
+
+    fig3_lrqk_appendix.pdf            # optional
+    captions.md
+    provenance.json
+
+provenance.json should record for every plotted point:
+
+- exact source file
+- exact metric field
+- model
+- hardware
+- TP degree
+- batch
+- exact context length
+- method
+- K/V placement
+- routing configuration
+- warmup count
+- measured steps
+- repeat count
+- aggregation rule
+- whether prefill is included
+- whether this point was newly rerun or reused from archive
+- git commit/hash if available
+- benchmark date if available
+
+============================================================
+7. Source verification
+============================================================
+
+Before plotting, inspect the archived formal outputs, including as
+applicable:
+
+- tp1_capacity/README.md
+- tp1_capacity/formal/SUMMARY.md
+- tp1_capacity/rope_chunked/formal/SUMMARY.md
+- tp1_offline/SUMMARY.md
+- tp1_lrqk_local/COMPARISON.md
+- tp1_lrqk_local/SUMMARY.md
+- raw CSV / JSON / run.log files referenced by those summaries
+
+Search the repository if paths differ.
+
+Do not use a dirty current worktree as evidence for historical numbers.
+
+For Fig. 1 missing 24K/48K/96K points:
+run the current formal benchmark as described above.
+
+For Fig. 2:
+prefer a clean same-version 64K sweep if necessary.
+
+For Fig. 3:
+reuse the archived formal complete-request results unless a rerun is
+explicitly required.
+
+============================================================
+8. Final numerical checks
+============================================================
+
+Verify:
+
+23.857 / 14.649 ~= 1.63
+47.370 / 37.817 ~= 1.25
+68.18 / 5.62 ~= 12.1
+19.131 / 8.306 ~= 2.30
+29.508 / 16.399 ~= 1.80
+58.805 / 42.898 ~= 1.37
+
+Do not hard-code these ratios if a clean rerun changes the underlying
+values.
+
+============================================================
+9. Final report
+============================================================
+
+At completion, print a concise summary:
+
+1. Which old results were verified.
+2. Which new Fig. 1 sequence lengths were run.
+3. Whether Fig. 2 was rerun cleanly or reused.
+4. Exact final plotted values.
+5. Any OOM and the phase where it occurred.
+6. Any discrepancy with the supplied historical values.
+7. Exact output paths.
+8. Git commit / archived source provenance.

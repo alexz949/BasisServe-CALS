@@ -1,0 +1,26 @@
+{
+  "settings": {
+    "phase": "smoke",
+    "contexts": [
+      24576
+    ],
+    "cohorts": [
+      0
+    ],
+    "methods": [
+      "dense",
+      "basis"
+    ],
+    "warmup": 2,
+    "measured_steps": 4,
+    "separate_attention_steps": 4
+  },
+  "created_utc": "2026-09-25T09:52:17.266834+00:00",
+  "command": "/workspace/miniforge3/envs/basis/bin/python benchmarks/system/run_tp1_paper_scaling.py --phase smoke --output-root results/system_benchmarks/tp1_paper_scaling",
+  "environment": "basis",
+  "launch_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+  "runtime_manifest": "../runtime_manifest.json",
+  "cuda_graph": false,
+  "input_source": "/workspace/BasisServe-CALS/results/system_benchmarks/tp1_offline/inputs/prompts.safetensors",
+  "hardware": "index, name, uuid, driver_version\n0, NVIDIA L40S, GPU-3ba5c931-a9e7-77c9-f087-d4e521b8ada3, 580.178.04\n1, NVIDIA L40S, GPU-7ebed10d-c5a9-8b19-69f9-ffc8e20eb0da, 580.178.04\n2, NVIDIA L40S, GPU-9bfcb4fd-e39f-0241-ab82-30ce50b20e23, 580.178.04\n3, NVIDIA L40S, GPU-06459fab-03af-1b75-dba8-5b6658ba8ef3, 580.178.04\n4, NVIDIA L40S, GPU-f025bf5b-904f-6d73-e1cb-581de3702506, 580.178.04\n5, NVIDIA L40S, GPU-558700b7-5f6d-02ae-5eb3-086a947d6097, 580.178.04\n6, NVIDIA L40S, GPU-48152f29-8f9c-31ce-a594-b65bc258fc9e, 580.178.04\n7, NVIDIA L40S, GPU-1e6feefa-0370-a224-5404-1a5a44183742, 580.178.04\n"
+}

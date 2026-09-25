@@ -1,0 +1,3531 @@
+{
+  "created_utc": "2026-09-25T10:38:40.542199+00:00",
+  "input_task": "paper_figures/tp1/inputs/Pasted text.txt",
+  "command": "python paper_figures/tp1/prepare_data.py",
+  "conda_environment": "basis",
+  "offline_archive": {
+    "created_utc": "2026-09-24 09:44:04 UTC",
+    "repository_head": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+    "shadowkv_head": "e51904cdeab7d4d34013370f09f2cf5fcd655e15",
+    "lrqk_head": "caf16293db2e4423a84ab2e895bacf64479f1eb7",
+    "note": "Dirty source trees: actual imported source is preserved in dependencies.tar.gz; commit IDs alone do not specify the runtime.",
+    "conda_environment": "basis",
+    "gpu": "CUDA_VISIBLE_DEVICES=0, NVIDIA L40S",
+    "launch": "direct execution authorized by user; serial TP1 trials",
+    "formal_trials": 78,
+    "basis": "GPU-local K/V, Dense V128, B16R16/Page32 full scan, 16-warp router; no page-cache candidate",
+    "prompt_source": "../inputs/manifest.json",
+    "model_loading_and_upfront_cache_allocation": "excluded from timed request; runtime is warmed with same-shaped request and request-specific state is reset",
+    "sha256_calculated": false
+  },
+  "historical_verification": [
+    {
+      "figure": 1,
+      "values": {
+        "context_tokens": 16384,
+        "context_label": "16K",
+        "dense_attention_ms": 3.8140599944163114,
+        "basis_attention_ms": 4.40136800147593,
+        "attention_speedup": 0.8665623944958308,
+        "dense_full_model_ms": 27.123615264892578,
+        "basis_full_model_ms": 27.597439765930176,
+        "full_model_speedup": 0.9828308529683776,
+        "repeats": 3,
+        "origin": "archive"
+      },
+      "sources": {
+        "dense": {
+          "full": 27.123615264892578,
+          "attention": 3.8140599944163114,
+          "full_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c0_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 27.099552154541016,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c1_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 27.147135734558105,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c2_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 27.123615264892578,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c2_n128/run.log"
+            }
+          ],
+          "attention_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c0_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 3.8106010009068996,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c1_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 3.815125994151458,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c2_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 3.8140599944163114,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t16384_c2_n128/run.log"
+            }
+          ]
+        },
+        "basis": {
+          "full": 27.597439765930176,
+          "attention": 4.40136800147593,
+          "full_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c0_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 27.597439765930176,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c1_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 27.59425640106201,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c2_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 27.6003999710083,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c2_n128/run.log"
+            }
+          ],
+          "attention_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c0_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 4.409204002004117,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c1_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 4.40136800147593,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c2_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 4.399154004175216,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t16384_c2_n128/run.log"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "figure": 1,
+      "values": {
+        "context_tokens": 32768,
+        "context_label": "32K",
+        "dense_attention_ms": 6.705228005535901,
+        "basis_attention_ms": 5.839659000746906,
+        "attention_speedup": 1.1482225254382639,
+        "dense_full_model_ms": 30.05019187927246,
+        "basis_full_model_ms": 28.988064765930176,
+        "full_model_speedup": 1.0366401524875373,
+        "repeats": 3,
+        "origin": "archive"
+      },
+      "sources": {
+        "dense": {
+          "full": 30.05019187927246,
+          "attention": 6.705228005535901,
+          "full_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c0_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 30.135168075561523,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c1_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 30.05019187927246,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c2_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 30.04468822479248,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c2_n128/run.log"
+            }
+          ],
+          "attention_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c0_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 6.710847000591457,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c1_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 6.705228005535901,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c2_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 6.702382993884385,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t32768_c2_n128/run.log"
+            }
+          ]
+        },
+        "basis": {
+          "full": 28.988064765930176,
+          "attention": 5.839659000746906,
+          "full_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c0_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 28.987775802612305,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c1_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 28.988064765930176,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c2_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 29.004751205444336,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c2_n128/run.log"
+            }
+          ],
+          "attention_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c0_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 5.830691986251622,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c1_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 5.839659000746906,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c2_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 5.849705991335213,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t32768_c2_n128/run.log"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "figure": 1,
+      "values": {
+        "context_tokens": 65536,
+        "context_label": "64K",
+        "dense_attention_ms": 12.582821004092693,
+        "basis_attention_ms": 8.693937001749873,
+        "attention_speedup": 1.447309889818627,
+        "dense_full_model_ms": 35.99380874633789,
+        "basis_full_model_ms": 31.853456497192383,
+        "full_model_speedup": 1.129981254923165,
+        "repeats": 3,
+        "origin": "archive"
+      },
+      "sources": {
+        "dense": {
+          "full": 35.99380874633789,
+          "attention": 12.582821004092693,
+          "full_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c0_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 35.942975997924805,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c1_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 35.99380874633789,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c2_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 36.05796813964844,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c2_n128/run.log"
+            }
+          ],
+          "attention_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c0_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 12.579669004306197,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c1_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 12.582821004092693,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c2_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 12.599039006978273,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t65536_c2_n128/run.log"
+            }
+          ]
+        },
+        "basis": {
+          "full": 31.853456497192383,
+          "attention": 8.693937001749873,
+          "full_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c0_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 31.850128173828125,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c1_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 31.853456497192383,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c2_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 31.958335876464844,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c2_n128/run.log"
+            }
+          ],
+          "attention_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c0_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 8.635950013063848,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c1_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 8.693937001749873,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c2_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 8.725399018265307,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t65536_c2_n128/run.log"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "figure": 1,
+      "values": {
+        "context_tokens": 130048,
+        "context_label": "128K",
+        "dense_attention_ms": 23.857334028929472,
+        "basis_attention_ms": 14.649469008669257,
+        "attention_speedup": 1.6285459913128038,
+        "dense_full_model_ms": 47.37028884887695,
+        "basis_full_model_ms": 37.817359924316406,
+        "full_model_speedup": 1.2526069758354035,
+        "repeats": 3,
+        "origin": "archive"
+      },
+      "sources": {
+        "dense": {
+          "full": 47.37028884887695,
+          "attention": 23.857334028929472,
+          "full_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c0_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 47.37028884887695,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c1_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 47.32587242126465,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c2_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 47.39931297302246,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c2_n128/run.log"
+            }
+          ],
+          "attention_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c0_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 23.86809499748051,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c1_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 23.849767999723554,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c2_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 23.857334028929472,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_dense_t130048_c2_n128/run.log"
+            }
+          ]
+        },
+        "basis": {
+          "full": 37.817359924316406,
+          "attention": 14.649469008669257,
+          "full_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c0_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 37.817359924316406,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c1_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 37.83705711364746,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c2_n128/result.json",
+              "metric_field": "measurement.cuda_median_ms",
+              "value": 37.71001434326172,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c2_n128/run.log"
+            }
+          ],
+          "attention_sources": [
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c0_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 14.649469008669257,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c0_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c0_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c1_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 14.656078996136785,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c1_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c1_n128/run.log"
+            },
+            {
+              "file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c2_n128/result.json",
+              "metric_field": "mean(attention_profile.components[*].attention_block)",
+              "value": 14.51696099434048,
+              "command_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c2_n128/command.json",
+              "log_file": "results/system_benchmarks/tp1_offline/formal/steady_basis_t130048_c2_n128/run.log"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "points": [
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 16384,
+      "method": "attention_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 32,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort mean attention-block profile",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 3.8070810071658343,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 3.8086180044338107,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 3.808659995207563,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 4.434418000746518,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 4.394830995704979,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 4.390291006769985,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T09:55:10.432148+00:00",
+        "2026-09-25T09:55:33.455817+00:00",
+        "2026-09-25T10:09:02.069656+00:00",
+        "2026-09-25T10:09:25.705604+00:00",
+        "2026-09-25T10:22:55.812252+00:00",
+        "2026-09-25T10:23:19.583137+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": true,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 16529,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 16384,
+      "method": "full_model_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort CUDA-event step median",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 27.084735870361328,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 27.08220863342285,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 27.12830352783203,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t16384_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 27.662992477416992,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 27.61888027191162,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 27.6124324798584,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t16384_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T09:55:10.432148+00:00",
+        "2026-09-25T09:55:33.455817+00:00",
+        "2026-09-25T10:09:02.069656+00:00",
+        "2026-09-25T10:09:25.705604+00:00",
+        "2026-09-25T10:22:55.812252+00:00",
+        "2026-09-25T10:23:19.583137+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": false,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 16529,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 24576,
+      "method": "attention_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 32,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort mean attention-block profile",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 5.266510005109012,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 5.2732889908365905,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 5.266927003394812,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 5.3297499949112535,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 5.1615879982709885,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 5.167076013050973,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T09:55:57.074679+00:00",
+        "2026-09-25T09:56:24.620432+00:00",
+        "2026-09-25T10:09:50.055452+00:00",
+        "2026-09-25T10:10:18.061667+00:00",
+        "2026-09-25T10:23:43.576779+00:00",
+        "2026-09-25T10:24:11.587988+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": true,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 24721,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 24576,
+      "method": "full_model_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort CUDA-event step median",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 28.597647666931152,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 28.669471740722656,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 28.632831573486328,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t24576_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 28.360400199890137,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 28.33123207092285,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 28.331151962280273,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t24576_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T09:55:57.074679+00:00",
+        "2026-09-25T09:56:24.620432+00:00",
+        "2026-09-25T10:09:50.055452+00:00",
+        "2026-09-25T10:10:18.061667+00:00",
+        "2026-09-25T10:23:43.576779+00:00",
+        "2026-09-25T10:24:11.587988+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": false,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 24721,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 32768,
+      "method": "attention_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 32,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort mean attention-block profile",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 6.7027039914391935,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 6.7036259872838855,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 6.70659598801285,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 5.845434997230768,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 5.8481559958308935,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 5.8340050098486245,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T09:56:52.584774+00:00",
+        "2026-09-25T09:57:24.995646+00:00",
+        "2026-09-25T10:10:45.907054+00:00",
+        "2026-09-25T10:11:18.699221+00:00",
+        "2026-09-25T10:24:39.431101+00:00",
+        "2026-09-25T10:25:12.381470+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": true,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 32913,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 32768,
+      "method": "full_model_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort CUDA-event step median",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 30.06783962249756,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 30.105520248413086,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 30.117887496948242,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t32768_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 29.0032320022583,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 29.000096321105957,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 28.94534397125244,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t32768_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T09:56:52.584774+00:00",
+        "2026-09-25T09:57:24.995646+00:00",
+        "2026-09-25T10:10:45.907054+00:00",
+        "2026-09-25T10:11:18.699221+00:00",
+        "2026-09-25T10:24:39.431101+00:00",
+        "2026-09-25T10:25:12.381470+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": false,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 32913,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 49152,
+      "method": "attention_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 32,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort mean attention-block profile",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 9.610527009703219,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 9.610909007489681,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 9.610934003256261,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 7.314844994340092,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 7.3036279999651015,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 7.314571002032608,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T09:57:57.328038+00:00",
+        "2026-09-25T09:58:41.408145+00:00",
+        "2026-09-25T10:11:51.286595+00:00",
+        "2026-09-25T10:12:35.641408+00:00",
+        "2026-09-25T10:25:45.057026+00:00",
+        "2026-09-25T10:26:29.332119+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": true,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 49297,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 49152,
+      "method": "full_model_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort CUDA-event step median",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 33.02110481262207,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 33.03873634338379,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 33.00276756286621,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t49152_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 30.431504249572754,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 30.373680114746094,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 30.44870376586914,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t49152_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T09:57:57.328038+00:00",
+        "2026-09-25T09:58:41.408145+00:00",
+        "2026-09-25T10:11:51.286595+00:00",
+        "2026-09-25T10:12:35.641408+00:00",
+        "2026-09-25T10:25:45.057026+00:00",
+        "2026-09-25T10:26:29.332119+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": false,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 49297,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 65536,
+      "method": "attention_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 32,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort mean attention-block profile",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 12.582172995433211,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 12.583613007329404,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 12.583655992522836,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 8.70026001892984,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 8.69974298402667,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 8.691882003098726,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T09:59:25.068147+00:00",
+        "2026-09-25T10:00:23.377832+00:00",
+        "2026-09-25T10:13:19.489703+00:00",
+        "2026-09-25T10:14:17.959894+00:00",
+        "2026-09-25T10:27:12.995209+00:00",
+        "2026-09-25T10:28:11.333356+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": true,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 65681,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 65536,
+      "method": "full_model_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort CUDA-event step median",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 36.00846481323242,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 36.01176071166992,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 35.988481521606445,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t65536_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 31.928512573242188,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 31.88864040374756,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 31.948416709899902,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t65536_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T09:59:25.068147+00:00",
+        "2026-09-25T10:00:23.377832+00:00",
+        "2026-09-25T10:13:19.489703+00:00",
+        "2026-09-25T10:14:17.959894+00:00",
+        "2026-09-25T10:27:12.995209+00:00",
+        "2026-09-25T10:28:11.333356+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": false,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 65681,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 98304,
+      "method": "attention_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 32,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort mean attention-block profile",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 18.3338690251112,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 18.3322459962219,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 18.334877017885447,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 11.793618995696306,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 11.762372003868222,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 11.768535991199315,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T10:01:20.767892+00:00",
+        "2026-09-25T10:02:55.076373+00:00",
+        "2026-09-25T10:15:15.474778+00:00",
+        "2026-09-25T10:16:49.277410+00:00",
+        "2026-09-25T10:29:08.826811+00:00",
+        "2026-09-25T10:30:43.073851+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": true,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 98449,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 98304,
+      "method": "full_model_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort CUDA-event step median",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 41.765968322753906,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 41.776737213134766,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 41.78579330444336,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t98304_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 34.9748477935791,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 34.99403190612793,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 34.97920036315918,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t98304_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T10:01:20.767892+00:00",
+        "2026-09-25T10:02:55.076373+00:00",
+        "2026-09-25T10:15:15.474778+00:00",
+        "2026-09-25T10:16:49.277410+00:00",
+        "2026-09-25T10:29:08.826811+00:00",
+        "2026-09-25T10:30:43.073851+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": false,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 98449,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 130048,
+      "method": "attention_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 32,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort mean attention-block profile",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 23.851289996877313,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 23.846821021288633,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 23.849198013544083,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c0_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 14.688149005174637,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c1_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 14.501413997262716,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c2_n128/result.json",
+            "metric_field": "mean(attention_profile.components[*].attention_block)",
+            "value": 14.67408100143075,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T10:04:27.285508+00:00",
+        "2026-09-25T10:06:46.018033+00:00",
+        "2026-09-25T10:18:21.601499+00:00",
+        "2026-09-25T10:20:39.867140+00:00",
+        "2026-09-25T10:32:15.384695+00:00",
+        "2026-09-25T10:34:33.798487+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": true,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 130193,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 1,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 130048,
+      "method": "full_model_speedup",
+      "kv_placement": "Both methods: exact K128 and full V128 GPU-local",
+      "routing": "Basis: full-scan B16R16/Page32, 16 warps, 1984 routed + 64 recent; Dense: full attention",
+      "warmup_count": 16,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "ratio of three-cohort medians; per-cohort CUDA-event step median",
+      "prefill_included": false,
+      "newly_rerun": true,
+      "sources": {
+        "dense": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 47.313472747802734,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 47.30188751220703,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 47.35183906555176,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_dense_t130048_c2_n128/run.log"
+          }
+        ],
+        "basis": [
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c0_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 37.86956787109375,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c1_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 37.671905517578125,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c2_n128/result.json",
+            "metric_field": "measurement.cuda_median_ms",
+            "value": 37.86568069458008,
+            "command_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_paper_scaling/formal/steady_basis_t130048_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "runtime_source": "results/system_benchmarks/tp1_paper_scaling/runtime_manifest.json",
+      "run_manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json",
+      "benchmark_dates": [
+        "2026-09-25T10:04:27.285508+00:00",
+        "2026-09-25T10:06:46.018033+00:00",
+        "2026-09-25T10:18:21.601499+00:00",
+        "2026-09-25T10:20:39.867140+00:00",
+        "2026-09-25T10:32:15.384695+00:00",
+        "2026-09-25T10:34:33.798487+00:00"
+      ],
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "same_shape_warmup_requests": 1,
+      "measured_in_separate_pass": false,
+      "context_definition": "Initial prompt prefix; cache grows during conditioning and measured decode",
+      "cache_capacity_tokens": 130193,
+      "key_reuse": false,
+      "compilation_policy": "Extension/JIT setup and same-shape runtime warmup precede primary measurement"
+    },
+    {
+      "figure": 2,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 65536,
+      "method": "dense_local",
+      "kv_placement": "exact K128 and full V128 GPU",
+      "routing": "dense full-context attention",
+      "warmup_count": 8,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three process throughputs",
+      "prefill_included": false,
+      "newly_rerun": false,
+      "sources": [
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b1_r0/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 27.64477008379277,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b1_r0/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b1_r0/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b1_r1/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 27.722040906023775,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b1_r1/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b1_r1/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b1_r2/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 27.656505411188412,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b1_r2/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b1_r2/run.log"
+        }
+      ],
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "status": "complete",
+      "oom_phase": "",
+      "attempted_repeats": 3,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_dates": [
+        "2026-09-24T23:36:15.694214+00:00",
+        "2026-09-24T23:36:40.734643+00:00",
+        "2026-09-24T23:37:06.222159+00:00"
+      ],
+      "date_note": "Last recorded phase timestamp in progress.json, not inferred from file mtime",
+      "source_archive": "results/system_benchmarks/tp1_capacity/formal/source.tar.gz",
+      "source_check": "results/system_benchmarks/tp1_capacity/formal/source_check.json",
+      "hf_revision": "0d0b7a569eb3adcfbf5d63d78a8beb767980fcad"
+    },
+    {
+      "figure": 2,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 2,
+      "context_tokens": 65536,
+      "method": "dense_local",
+      "kv_placement": "exact K128 and full V128 GPU",
+      "routing": "dense full-context attention",
+      "warmup_count": 8,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three process throughputs",
+      "prefill_included": false,
+      "newly_rerun": false,
+      "sources": [
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b2_r0/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 41.24757804355444,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b2_r0/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b2_r0/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b2_r1/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 41.115377986649584,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b2_r1/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b2_r1/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b2_r2/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 41.09259731910142,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b2_r2/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b2_r2/run.log"
+        }
+      ],
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "status": "complete",
+      "oom_phase": "",
+      "attempted_repeats": 3,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_dates": [
+        "2026-09-24T23:37:45.623065+00:00",
+        "2026-09-24T23:38:25.374379+00:00",
+        "2026-09-24T23:39:05.450466+00:00"
+      ],
+      "date_note": "Last recorded phase timestamp in progress.json, not inferred from file mtime",
+      "source_archive": "results/system_benchmarks/tp1_capacity/formal/source.tar.gz",
+      "source_check": "results/system_benchmarks/tp1_capacity/formal/source_check.json",
+      "hf_revision": "0d0b7a569eb3adcfbf5d63d78a8beb767980fcad"
+    },
+    {
+      "figure": 2,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 4,
+      "context_tokens": 65536,
+      "method": "dense_local",
+      "kv_placement": "exact K128 and full V128 GPU",
+      "routing": "dense full-context attention",
+      "warmup_count": 8,
+      "measured_steps": 128,
+      "repeat_count": 0,
+      "requested_repeats": 3,
+      "aggregation": "median of three process throughputs",
+      "prefill_included": false,
+      "newly_rerun": false,
+      "sources": [
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/outcomes.json",
+          "metric_field": "status, phase",
+          "selector": {
+            "method": "dense_local",
+            "batch": 4,
+            "context": 65536
+          },
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_local_t65536_b4_r0/run.log",
+          "value": "gpu_oom"
+        }
+      ],
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "status": "gpu_oom",
+      "oom_phase": "cache_allocation",
+      "attempted_repeats": 1,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_dates": [
+        "2026-09-24T23:39:13.227041+00:00"
+      ],
+      "date_note": "Last recorded phase timestamp in progress.json, not inferred from file mtime",
+      "source_archive": "results/system_benchmarks/tp1_capacity/formal/source.tar.gz",
+      "source_check": "results/system_benchmarks/tp1_capacity/formal/source_check.json",
+      "hf_revision": "0d0b7a569eb3adcfbf5d63d78a8beb767980fcad"
+    },
+    {
+      "figure": 2,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 65536,
+      "method": "dense_k_offload",
+      "kv_placement": "historical exact K128 pinned/mapped CPU; full V128 GPU",
+      "routing": "dense full-context attention",
+      "warmup_count": 8,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three process throughputs",
+      "prefill_included": false,
+      "newly_rerun": false,
+      "sources": [
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b1_r0/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 5.074823365815701,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b1_r0/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b1_r0/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b1_r1/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 5.082651214036204,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b1_r1/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b1_r1/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b1_r2/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 5.078778384783307,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b1_r2/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b1_r2/run.log"
+        }
+      ],
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "status": "complete",
+      "oom_phase": "",
+      "attempted_repeats": 3,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_dates": [
+        "2026-09-24T23:40:03.103866+00:00",
+        "2026-09-24T23:40:53.456993+00:00",
+        "2026-09-24T23:41:43.717267+00:00"
+      ],
+      "date_note": "Last recorded phase timestamp in progress.json, not inferred from file mtime",
+      "source_archive": "results/system_benchmarks/tp1_capacity/formal/source.tar.gz",
+      "source_check": "results/system_benchmarks/tp1_capacity/formal/source_check.json",
+      "hf_revision": "0d0b7a569eb3adcfbf5d63d78a8beb767980fcad"
+    },
+    {
+      "figure": 2,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 2,
+      "context_tokens": 65536,
+      "method": "dense_k_offload",
+      "kv_placement": "historical exact K128 pinned/mapped CPU; full V128 GPU",
+      "routing": "dense full-context attention",
+      "warmup_count": 8,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three process throughputs",
+      "prefill_included": false,
+      "newly_rerun": false,
+      "sources": [
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b2_r0/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 5.416553882416243,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b2_r0/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b2_r0/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b2_r1/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 5.41823993368589,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b2_r1/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b2_r1/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b2_r2/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 5.418160165272926,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b2_r2/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b2_r2/run.log"
+        }
+      ],
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "status": "complete",
+      "oom_phase": "",
+      "attempted_repeats": 3,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_dates": [
+        "2026-09-24T23:43:11.758035+00:00",
+        "2026-09-24T23:44:40.389239+00:00",
+        "2026-09-24T23:46:08.865522+00:00"
+      ],
+      "date_note": "Last recorded phase timestamp in progress.json, not inferred from file mtime",
+      "source_archive": "results/system_benchmarks/tp1_capacity/formal/source.tar.gz",
+      "source_check": "results/system_benchmarks/tp1_capacity/formal/source_check.json",
+      "hf_revision": "0d0b7a569eb3adcfbf5d63d78a8beb767980fcad"
+    },
+    {
+      "figure": 2,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 4,
+      "context_tokens": 65536,
+      "method": "dense_k_offload",
+      "kv_placement": "historical exact K128 pinned/mapped CPU; full V128 GPU",
+      "routing": "dense full-context attention",
+      "warmup_count": 8,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three process throughputs",
+      "prefill_included": false,
+      "newly_rerun": false,
+      "sources": [
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b4_r0/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 5.613778509430784,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b4_r0/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b4_r0/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b4_r1/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 5.619329274147153,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b4_r1/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b4_r1/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b4_r2/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 5.617598328989352,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b4_r2/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b4_r2/run.log"
+        }
+      ],
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "status": "complete",
+      "oom_phase": "",
+      "attempted_repeats": 3,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_dates": [
+        "2026-09-24T23:48:54.934601+00:00",
+        "2026-09-24T23:51:42.266114+00:00",
+        "2026-09-24T23:54:32.271350+00:00"
+      ],
+      "date_note": "Last recorded phase timestamp in progress.json, not inferred from file mtime",
+      "source_archive": "results/system_benchmarks/tp1_capacity/formal/source.tar.gz",
+      "source_check": "results/system_benchmarks/tp1_capacity/formal/source_check.json",
+      "hf_revision": "0d0b7a569eb3adcfbf5d63d78a8beb767980fcad"
+    },
+    {
+      "figure": 2,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 8,
+      "context_tokens": 65536,
+      "method": "dense_k_offload",
+      "kv_placement": "historical exact K128 pinned/mapped CPU; full V128 GPU",
+      "routing": "dense full-context attention",
+      "warmup_count": 8,
+      "measured_steps": 128,
+      "repeat_count": 0,
+      "requested_repeats": 3,
+      "aggregation": "median of three process throughputs",
+      "prefill_included": false,
+      "newly_rerun": false,
+      "sources": [
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/outcomes.json",
+          "metric_field": "status, phase",
+          "selector": {
+            "method": "dense_k_offload",
+            "batch": 8,
+            "context": 65536
+          },
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/dense_k_offload_t65536_b8_r0/run.log",
+          "value": "gpu_oom"
+        }
+      ],
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "status": "gpu_oom",
+      "oom_phase": "cache_allocation",
+      "attempted_repeats": 1,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_dates": [
+        "2026-09-24T23:54:43.553132+00:00"
+      ],
+      "date_note": "Last recorded phase timestamp in progress.json, not inferred from file mtime",
+      "source_archive": "results/system_benchmarks/tp1_capacity/formal/source.tar.gz",
+      "source_check": "results/system_benchmarks/tp1_capacity/formal/source_check.json",
+      "hf_revision": "0d0b7a569eb3adcfbf5d63d78a8beb767980fcad"
+    },
+    {
+      "figure": 2,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 65536,
+      "method": "basis_k_offload",
+      "kv_placement": "historical exact K128 pinned/mapped CPU; full V128 GPU",
+      "routing": "full-scan B16R16/Page32, 1984 routed + 64 recent, persistent GPU K slots",
+      "warmup_count": 8,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three process throughputs",
+      "prefill_included": false,
+      "newly_rerun": false,
+      "sources": [
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b1_r0/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 29.326037885597167,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b1_r0/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b1_r0/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b1_r1/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 29.361772818413154,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b1_r1/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b1_r1/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b1_r2/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 29.39551205282085,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b1_r2/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b1_r2/run.log"
+        }
+      ],
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "status": "complete",
+      "oom_phase": "",
+      "attempted_repeats": 3,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_dates": [
+        "2026-09-24T23:55:34.689339+00:00",
+        "2026-09-24T23:56:03.480577+00:00",
+        "2026-09-24T23:56:32.148157+00:00"
+      ],
+      "date_note": "Last recorded phase timestamp in progress.json, not inferred from file mtime",
+      "source_archive": "results/system_benchmarks/tp1_capacity/formal/source.tar.gz",
+      "source_check": "results/system_benchmarks/tp1_capacity/formal/source_check.json",
+      "hf_revision": "0d0b7a569eb3adcfbf5d63d78a8beb767980fcad"
+    },
+    {
+      "figure": 2,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 2,
+      "context_tokens": 65536,
+      "method": "basis_k_offload",
+      "kv_placement": "historical exact K128 pinned/mapped CPU; full V128 GPU",
+      "routing": "full-scan B16R16/Page32, 1984 routed + 64 recent, persistent GPU K slots",
+      "warmup_count": 8,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three process throughputs",
+      "prefill_included": false,
+      "newly_rerun": false,
+      "sources": [
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b2_r0/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 46.0987413300075,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b2_r0/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b2_r0/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b2_r1/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 45.983766124953284,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b2_r1/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b2_r1/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b2_r2/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 46.25062109125554,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b2_r2/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b2_r2/run.log"
+        }
+      ],
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "status": "complete",
+      "oom_phase": "",
+      "attempted_repeats": 3,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_dates": [
+        "2026-09-24T23:57:16.685808+00:00",
+        "2026-09-24T23:58:01.639450+00:00",
+        "2026-09-24T23:58:46.810599+00:00"
+      ],
+      "date_note": "Last recorded phase timestamp in progress.json, not inferred from file mtime",
+      "source_archive": "results/system_benchmarks/tp1_capacity/formal/source.tar.gz",
+      "source_check": "results/system_benchmarks/tp1_capacity/formal/source_check.json",
+      "hf_revision": "0d0b7a569eb3adcfbf5d63d78a8beb767980fcad"
+    },
+    {
+      "figure": 2,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 4,
+      "context_tokens": 65536,
+      "method": "basis_k_offload",
+      "kv_placement": "historical exact K128 pinned/mapped CPU; full V128 GPU",
+      "routing": "full-scan B16R16/Page32, 1984 routed + 64 recent, persistent GPU K slots",
+      "warmup_count": 8,
+      "measured_steps": 128,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three process throughputs",
+      "prefill_included": false,
+      "newly_rerun": false,
+      "sources": [
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b4_r0/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 68.21545200640904,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b4_r0/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b4_r0/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b4_r1/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 68.18249168171484,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b4_r1/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b4_r1/run.log"
+        },
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b4_r2/result.json",
+          "metric_field": "aggregate_tokens_per_second",
+          "value": 68.08589572684156,
+          "command_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b4_r2/command.json",
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b4_r2/run.log"
+        }
+      ],
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "status": "complete",
+      "oom_phase": "",
+      "attempted_repeats": 3,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_dates": [
+        "2026-09-25T00:00:03.977679+00:00",
+        "2026-09-25T00:01:23.915795+00:00",
+        "2026-09-25T00:02:43.181701+00:00"
+      ],
+      "date_note": "Last recorded phase timestamp in progress.json, not inferred from file mtime",
+      "source_archive": "results/system_benchmarks/tp1_capacity/formal/source.tar.gz",
+      "source_check": "results/system_benchmarks/tp1_capacity/formal/source_check.json",
+      "hf_revision": "0d0b7a569eb3adcfbf5d63d78a8beb767980fcad"
+    },
+    {
+      "figure": 2,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 8,
+      "context_tokens": 65536,
+      "method": "basis_k_offload",
+      "kv_placement": "historical exact K128 pinned/mapped CPU; full V128 GPU",
+      "routing": "full-scan B16R16/Page32, 1984 routed + 64 recent, persistent GPU K slots",
+      "warmup_count": 8,
+      "measured_steps": 128,
+      "repeat_count": 0,
+      "requested_repeats": 3,
+      "aggregation": "median of three process throughputs",
+      "prefill_included": false,
+      "newly_rerun": false,
+      "sources": [
+        {
+          "file": "results/system_benchmarks/tp1_capacity/formal/outcomes.json",
+          "metric_field": "status, phase",
+          "selector": {
+            "method": "basis_k_offload",
+            "batch": 8,
+            "context": 65536
+          },
+          "log_file": "results/system_benchmarks/tp1_capacity/formal/basis_k_offload_t65536_b8_r0/run.log",
+          "value": "gpu_oom"
+        }
+      ],
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "status": "gpu_oom",
+      "oom_phase": "cache_allocation",
+      "attempted_repeats": 1,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_dates": [
+        "2026-09-25T00:02:54.589859+00:00"
+      ],
+      "date_note": "Last recorded phase timestamp in progress.json, not inferred from file mtime",
+      "source_archive": "results/system_benchmarks/tp1_capacity/formal/source.tar.gz",
+      "source_check": "results/system_benchmarks/tp1_capacity/formal/source_check.json",
+      "hf_revision": "0d0b7a569eb3adcfbf5d63d78a8beb767980fcad"
+    },
+    {
+      "figure": 3,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 32768,
+      "method": "dense",
+      "kv_placement": "GPU-local exact K128/full V128",
+      "routing": "dense full context",
+      "warmup_count": "one complete same-shape request, then reset",
+      "measured_steps": 127,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three fixed prompt cohorts",
+      "prefill_included": true,
+      "newly_rerun": false,
+      "sources": {
+        "request": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c0_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 8.432535252068192,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c1_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 8.444956390187144,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c2_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 8.430578648578376,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c2_n128/run.log"
+          }
+        ],
+        "tail": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c0_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 29.924356152076978,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c1_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 29.920833315364682,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c2_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 29.92711777102437,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c2_n128/run.log"
+          }
+        ],
+        "build": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c0_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c1_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c2_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t32768_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "output_tokens": 128,
+      "request_tail_conditioning_calls": 16,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_date": null,
+      "archive_created_utc": "2026-09-24 09:44:04 UTC",
+      "source_archive": "results/system_benchmarks/tp1_offline/freeze/dependencies.tar.gz",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "excluded": [
+        "model/factor loading",
+        "cache preallocation",
+        "tokenization",
+        "input/network transfer"
+      ],
+      "build_profile_is_nonadditive": true
+    },
+    {
+      "figure": 3,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 32768,
+      "method": "basis",
+      "kv_placement": "GPU-local exact K128/full V128",
+      "routing": "full-scan B16R16/Page32,16 warps,1984 routed+64 recent",
+      "warmup_count": "one complete same-shape request, then reset",
+      "measured_steps": 127,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three fixed prompt cohorts",
+      "prefill_included": true,
+      "newly_rerun": false,
+      "sources": {
+        "request": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c0_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 8.308955010958016,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c1_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 8.306144719012082,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c2_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 8.302002581767738,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c2_n128/run.log"
+          }
+        ],
+        "tail": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c0_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 28.821501272587895,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c1_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 28.810643855280972,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c2_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 28.83638305220384,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c2_n128/run.log"
+          }
+        ],
+        "build": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c0_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c1_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c2_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t32768_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "output_tokens": 128,
+      "request_tail_conditioning_calls": 16,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_date": null,
+      "archive_created_utc": "2026-09-24 09:44:04 UTC",
+      "source_archive": "results/system_benchmarks/tp1_offline/freeze/dependencies.tar.gz",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "excluded": [
+        "model/factor loading",
+        "cache preallocation",
+        "tokenization",
+        "input/network transfer"
+      ],
+      "build_profile_is_nonadditive": true
+    },
+    {
+      "figure": 3,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 32768,
+      "method": "shadowkv",
+      "kv_placement": "CPU V / low-rank reconstructed K",
+      "routing": "ShadowKV rank160/chunk8/support2048",
+      "warmup_count": "one complete same-shape request, then reset",
+      "measured_steps": 127,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three fixed prompt cohorts",
+      "prefill_included": true,
+      "newly_rerun": false,
+      "sources": {
+        "request": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c0_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 19.131371296942234,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c1_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 19.16072210902348,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c2_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 19.04387258272618,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c2_n128/run.log"
+          }
+        ],
+        "tail": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c0_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 28.820270433317166,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c1_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 29.774293353831446,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c2_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 29.252214323695714,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c2_n128/run.log"
+          }
+        ],
+        "build": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c0_n128/result.json",
+            "metric_field": "build_profile.construction_including_preparation_seconds",
+            "value": 11.794674215372652,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c1_n128/result.json",
+            "metric_field": "build_profile.construction_including_preparation_seconds",
+            "value": 11.670887409243733,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c2_n128/result.json",
+            "metric_field": "build_profile.construction_including_preparation_seconds",
+            "value": 11.54006833024323,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t32768_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "output_tokens": 128,
+      "request_tail_conditioning_calls": 16,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_date": null,
+      "archive_created_utc": "2026-09-24 09:44:04 UTC",
+      "source_archive": "results/system_benchmarks/tp1_offline/freeze/dependencies.tar.gz",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "excluded": [
+        "model/factor loading",
+        "cache preallocation",
+        "tokenization",
+        "input/network transfer"
+      ],
+      "build_profile_is_nonadditive": true
+    },
+    {
+      "figure": 3,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 65536,
+      "method": "dense",
+      "kv_placement": "GPU-local exact K128/full V128",
+      "routing": "dense full context",
+      "warmup_count": "one complete same-shape request, then reset",
+      "measured_steps": 127,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three fixed prompt cohorts",
+      "prefill_included": true,
+      "newly_rerun": false,
+      "sources": {
+        "request": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c0_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 16.70936464285478,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c1_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 16.707499667070806,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c2_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 16.72291982267052,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c2_n128/run.log"
+          }
+        ],
+        "tail": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c0_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 35.88041976547322,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c1_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 35.86873713343799,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c2_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 35.85956048488885,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c2_n128/run.log"
+          }
+        ],
+        "build": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c0_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c1_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c2_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t65536_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "output_tokens": 128,
+      "request_tail_conditioning_calls": 16,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_date": null,
+      "archive_created_utc": "2026-09-24 09:44:04 UTC",
+      "source_archive": "results/system_benchmarks/tp1_offline/freeze/dependencies.tar.gz",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "excluded": [
+        "model/factor loading",
+        "cache preallocation",
+        "tokenization",
+        "input/network transfer"
+      ],
+      "build_profile_is_nonadditive": true
+    },
+    {
+      "figure": 3,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 65536,
+      "method": "basis",
+      "kv_placement": "GPU-local exact K128/full V128",
+      "routing": "full-scan B16R16/Page32,16 warps,1984 routed+64 recent",
+      "warmup_count": "one complete same-shape request, then reset",
+      "measured_steps": 127,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three fixed prompt cohorts",
+      "prefill_included": true,
+      "newly_rerun": false,
+      "sources": {
+        "request": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c0_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 16.38641557423398,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c1_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 16.399364752694964,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c2_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 16.40196104720235,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c2_n128/run.log"
+          }
+        ],
+        "tail": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c0_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 31.58341309995399,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c1_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 31.607416907308608,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c2_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 31.65373219982595,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c2_n128/run.log"
+          }
+        ],
+        "build": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c0_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c1_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c2_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t65536_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "output_tokens": 128,
+      "request_tail_conditioning_calls": 16,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_date": null,
+      "archive_created_utc": "2026-09-24 09:44:04 UTC",
+      "source_archive": "results/system_benchmarks/tp1_offline/freeze/dependencies.tar.gz",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "excluded": [
+        "model/factor loading",
+        "cache preallocation",
+        "tokenization",
+        "input/network transfer"
+      ],
+      "build_profile_is_nonadditive": true
+    },
+    {
+      "figure": 3,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 65536,
+      "method": "shadowkv",
+      "kv_placement": "CPU V / low-rank reconstructed K",
+      "routing": "ShadowKV rank160/chunk8/support2048",
+      "warmup_count": "one complete same-shape request, then reset",
+      "measured_steps": 127,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three fixed prompt cohorts",
+      "prefill_included": true,
+      "newly_rerun": false,
+      "sources": {
+        "request": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c0_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 29.411805399227887,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c1_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 29.511251303367317,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c2_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 29.508449826855212,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c2_n128/run.log"
+          }
+        ],
+        "tail": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c0_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 30.813975062489778,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c1_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 30.8050205259844,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c2_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 31.604357458114087,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c2_n128/run.log"
+          }
+        ],
+        "build": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c0_n128/result.json",
+            "metric_field": "build_profile.construction_including_preparation_seconds",
+            "value": 14.643233073409647,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c1_n128/result.json",
+            "metric_field": "build_profile.construction_including_preparation_seconds",
+            "value": 14.698843052610755,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c2_n128/result.json",
+            "metric_field": "build_profile.construction_including_preparation_seconds",
+            "value": 14.736115803476423,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t65536_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "output_tokens": 128,
+      "request_tail_conditioning_calls": 16,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_date": null,
+      "archive_created_utc": "2026-09-24 09:44:04 UTC",
+      "source_archive": "results/system_benchmarks/tp1_offline/freeze/dependencies.tar.gz",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "excluded": [
+        "model/factor loading",
+        "cache preallocation",
+        "tokenization",
+        "input/network transfer"
+      ],
+      "build_profile_is_nonadditive": true
+    },
+    {
+      "figure": 3,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 130048,
+      "method": "dense",
+      "kv_placement": "GPU-local exact K128/full V128",
+      "routing": "dense full context",
+      "warmup_count": "one complete same-shape request, then reset",
+      "measured_steps": 127,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three fixed prompt cohorts",
+      "prefill_included": true,
+      "newly_rerun": false,
+      "sources": {
+        "request": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c0_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 43.41812606807798,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c1_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 43.43230511294678,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c2_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 43.392340091988444,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c2_n128/run.log"
+          }
+        ],
+        "tail": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c0_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 47.17232006274768,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c1_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 47.17920572908075,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c2_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 47.1926515854828,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c2_n128/run.log"
+          }
+        ],
+        "build": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c0_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c1_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c2_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_dense_t130048_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "output_tokens": 128,
+      "request_tail_conditioning_calls": 16,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_date": null,
+      "archive_created_utc": "2026-09-24 09:44:04 UTC",
+      "source_archive": "results/system_benchmarks/tp1_offline/freeze/dependencies.tar.gz",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "excluded": [
+        "model/factor loading",
+        "cache preallocation",
+        "tokenization",
+        "input/network transfer"
+      ],
+      "build_profile_is_nonadditive": true
+    },
+    {
+      "figure": 3,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 130048,
+      "method": "basis",
+      "kv_placement": "GPU-local exact K128/full V128",
+      "routing": "full-scan B16R16/Page32,16 warps,1984 routed+64 recent",
+      "warmup_count": "one complete same-shape request, then reset",
+      "measured_steps": 127,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three fixed prompt cohorts",
+      "prefill_included": true,
+      "newly_rerun": false,
+      "sources": {
+        "request": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c0_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 42.92235627118498,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c1_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 42.8976560048759,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c2_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 42.84726604539901,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c2_n128/run.log"
+          }
+        ],
+        "tail": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c0_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 37.52226667763951,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c1_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 37.503883934806325,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c2_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 37.575810715589704,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c2_n128/run.log"
+          }
+        ],
+        "build": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c0_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c1_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c2_n128/result.json",
+            "metric_field": "build_profile.prompt_specific_fit_seconds",
+            "value": 0.0,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_basis_t130048_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "output_tokens": 128,
+      "request_tail_conditioning_calls": 16,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_date": null,
+      "archive_created_utc": "2026-09-24 09:44:04 UTC",
+      "source_archive": "results/system_benchmarks/tp1_offline/freeze/dependencies.tar.gz",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "excluded": [
+        "model/factor loading",
+        "cache preallocation",
+        "tokenization",
+        "input/network transfer"
+      ],
+      "build_profile_is_nonadditive": true
+    },
+    {
+      "figure": 3,
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "dtype": "bfloat16",
+      "hardware": "NVIDIA L40S",
+      "tp_degree": 1,
+      "batch": 1,
+      "context_tokens": 130048,
+      "method": "shadowkv",
+      "kv_placement": "CPU V / low-rank reconstructed K",
+      "routing": "ShadowKV rank160/chunk8/support2048",
+      "warmup_count": "one complete same-shape request, then reset",
+      "measured_steps": 127,
+      "repeat_count": 3,
+      "requested_repeats": 3,
+      "aggregation": "median of three fixed prompt cohorts",
+      "prefill_included": true,
+      "newly_rerun": false,
+      "sources": {
+        "request": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c0_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 58.6414474141784,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c1_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 58.80481089837849,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c2_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 59.00791193591431,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c2_n128/run.log"
+          }
+        ],
+        "tail": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c0_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 32.58135472214571,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c1_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 32.593705200565026,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c2_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 32.99509789291266,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c2_n128/run.log"
+          }
+        ],
+        "build": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c0_n128/result.json",
+            "metric_field": "build_profile.construction_including_preparation_seconds",
+            "value": 20.1917838123627,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c1_n128/result.json",
+            "metric_field": "build_profile.construction_including_preparation_seconds",
+            "value": 20.34509773598984,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c2_n128/result.json",
+            "metric_field": "build_profile.construction_including_preparation_seconds",
+            "value": 20.69609201233834,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_shadowkv_t130048_c2_n128/run.log"
+          }
+        ]
+      },
+      "conda_environment": "basis",
+      "cuda_graph": false,
+      "output_tokens": 128,
+      "request_tail_conditioning_calls": 16,
+      "source_git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+      "benchmark_date": null,
+      "archive_created_utc": "2026-09-24 09:44:04 UTC",
+      "source_archive": "results/system_benchmarks/tp1_offline/freeze/dependencies.tar.gz",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "excluded": [
+        "model/factor loading",
+        "cache preallocation",
+        "tokenization",
+        "input/network transfer"
+      ],
+      "build_profile_is_nonadditive": true
+    }
+  ],
+  "lrqk_appendix": [
+    {
+      "values": {
+        "context_tokens": 32768,
+        "completed": 3,
+        "requested_cohorts": 3,
+        "request_seconds": 28.658504265360534,
+        "request_tail_ms": 187.5007277866406,
+        "nonadditive_build_s": 0.9104111730121076,
+        "failure_phase": "",
+        "cpu_request_seconds": 55.60319960489869,
+        "cpu_request_tail_ms": 379.7907380991288
+      },
+      "source_results": [
+        "results/system_benchmarks/tp1_lrqk_local/t32768_n128_c0/result.json",
+        "results/system_benchmarks/tp1_lrqk_local/t32768_n128_c1/result.json",
+        "results/system_benchmarks/tp1_lrqk_local/t32768_n128_c2/result.json"
+      ],
+      "source_outcomes": "results/system_benchmarks/tp1_lrqk_local/outcomes.json",
+      "source_logs": [
+        "results/system_benchmarks/tp1_lrqk_local/t32768_n128_c0/run.log",
+        "results/system_benchmarks/tp1_lrqk_local/t32768_n128_c1/run.log",
+        "results/system_benchmarks/tp1_lrqk_local/t32768_n128_c2/run.log"
+      ],
+      "source_interpretation": "results/system_benchmarks/tp1_lrqk_local/COMPARISON.md",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "cpu_sources": {
+        "request": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c0_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 55.60319960489869,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c1_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 56.24353001685813,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c2_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 55.29720321111381,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c2_n128/run.log"
+          }
+        ],
+        "tail": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c0_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 379.7907380991288,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c1_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 384.21403932561344,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c2_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 377.2834221001815,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t32768_c2_n128/run.log"
+          }
+        ]
+      }
+    },
+    {
+      "values": {
+        "context_tokens": 65536,
+        "completed": 0,
+        "requested_cohorts": 3,
+        "request_seconds": "",
+        "request_tail_ms": "",
+        "nonadditive_build_s": "",
+        "failure_phase": "warmup prefill MLP allocation",
+        "cpu_request_seconds": 70.9960754760541,
+        "cpu_request_tail_ms": 401.39890983197336
+      },
+      "source_results": [],
+      "source_outcomes": "results/system_benchmarks/tp1_lrqk_local/outcomes.json",
+      "source_logs": [
+        "results/system_benchmarks/tp1_lrqk_local/t65536_n128_c0/run.log",
+        "results/system_benchmarks/tp1_lrqk_local/t65536_n128_c1/run.log",
+        "results/system_benchmarks/tp1_lrqk_local/t65536_n128_c2/run.log"
+      ],
+      "source_interpretation": "results/system_benchmarks/tp1_lrqk_local/COMPARISON.md",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "cpu_sources": {
+        "request": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c0_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 70.9960754760541,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c1_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 70.89503420796245,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c2_n128/result.json",
+            "metric_field": "measurement.request_seconds",
+            "value": 72.05287282494828,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c2_n128/run.log"
+          }
+        ],
+        "tail": [
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c0_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 400.86362304518354,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c0_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c0_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c1_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 401.39890983197336,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c1_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c1_n128/run.log"
+          },
+          {
+            "file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c2_n128/result.json",
+            "metric_field": "measurement.steady_tail_wall_mean_ms",
+            "value": 414.8341893419825,
+            "command_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c2_n128/command.json",
+            "log_file": "results/system_benchmarks/tp1_offline/formal/request_lrqk_t65536_c2_n128/run.log"
+          }
+        ]
+      }
+    },
+    {
+      "values": {
+        "context_tokens": 130048,
+        "completed": 0,
+        "requested_cohorts": 3,
+        "request_seconds": "",
+        "request_tail_ms": "",
+        "nonadditive_build_s": "",
+        "failure_phase": "warmup online fitting",
+        "cpu_request_seconds": "",
+        "cpu_request_tail_ms": ""
+      },
+      "source_results": [],
+      "source_outcomes": "results/system_benchmarks/tp1_lrqk_local/outcomes.json",
+      "source_logs": [
+        "results/system_benchmarks/tp1_lrqk_local/t130048_n128_c0/run.log",
+        "results/system_benchmarks/tp1_lrqk_local/t130048_n128_c1/run.log",
+        "results/system_benchmarks/tp1_lrqk_local/t130048_n128_c2/run.log"
+      ],
+      "source_interpretation": "results/system_benchmarks/tp1_lrqk_local/COMPARISON.md",
+      "hf_revision": "86c03092c663dc6654584143130b5e5abf2fedaa",
+      "cpu_sources": {
+        "status": "Only 2/3 original CPU-offload cohorts completed; no median reported"
+      }
+    }
+  ],
+  "validation": "Raw JSON arithmetic and archived source metadata; no SHA256",
+  "factor_verification": {
+    "status": "passed",
+    "archive": "results/system_benchmarks/tp1_offline/freeze/factors.tar.gz",
+    "file_count": 64,
+    "files": [
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_018.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_012.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_012.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_018.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_024.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_024.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_015.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_000.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_000.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_015.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_008.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_008.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_003.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_020.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_020.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_027.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_028.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_028.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_019.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_016.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_016.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_027.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_013.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_013.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_031.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_025.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_025.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_005.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_001.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_001.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_019.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_009.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_009.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_006.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_021.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_021.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_005.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_029.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_029.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_007.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_017.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_017.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_006.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_014.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_014.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_004.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_004.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_007.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_026.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_026.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_002.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_002.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_010.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_010.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_022.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_022.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_030.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_030.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_003.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_011.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_011.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_023.safetensors",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_023.json",
+      "/workspace/runs/l31-router-source/v128-router/ours_b16r16/layer_031.safetensors"
+    ],
+    "comparison": "direct bytes; no SHA256"
+  },
+  "new_environment_packages": "results/system_benchmarks/tp1_paper_scaling/environment.json",
+  "plot_settings": {
+    "width_inches": 3.35,
+    "height_inches": 2.3,
+    "axis_label_pt": 8,
+    "tick_legend_annotation_pt": 7,
+    "pdf_fonttype": 42,
+    "png_dpi": 300,
+    "x_scale": {
+      "figure1": "log2",
+      "figure2": "log2",
+      "figure3": "categorical"
+    },
+    "oom_markers": "No measured y value; vertical placement is typographic only"
+  },
+  "archived_verification": {
+    "status": "passed",
+    "trials": 78,
+    "completed": 71,
+    "gpu_oom": 7,
+    "source_files_unchanged": 920,
+    "factor_files_unchanged": 64,
+    "primary_timing_compile_warning_logs": [],
+    "comparison": "direct bytes, no SHA256 calculation",
+    "warning": "Absence of compile warnings is not a profiler proof that every primary call was compilation-free."
+  },
+  "fig1_status": {
+    "complete_contexts": [
+      16384,
+      24576,
+      32768,
+      49152,
+      65536,
+      98304,
+      130048
+    ],
+    "pending_contexts": []
+  },
+  "new_formal_verification": {
+    "status": "passed",
+    "trials": 42,
+    "source_check": "results/system_benchmarks/tp1_paper_scaling/formal/source_check.json",
+    "manifest": "results/system_benchmarks/tp1_paper_scaling/formal/manifest.json"
+  },
+  "fig2_reuse_reason": "All 64K points share one source archive and passed end-of-run byte comparison; no chunked-RoPE supplement mixed in."
+}

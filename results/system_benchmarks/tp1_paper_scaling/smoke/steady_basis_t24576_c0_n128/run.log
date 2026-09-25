@@ -1,0 +1,78 @@
+{"method": "basis", "phase": "model_load", "context": 24576, "cohort": 0}
+[1/4] c++ -MMD -MF mapped_host_paged_attention.o.d -DTORCH_EXTENSION_NAME=tp1_router_config_w16u1 -DTORCH_API_INCLUDE_EXTENSION_H -isystem /workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/include -isystem /workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -isystem /usr/local/cuda/include -isystem /workspace/miniforge3/envs/basis/include/python3.12 -fPIC -std=c++20 -O3 -std=c++17 -c /workspace/BasisServe-CALS/results/system_benchmarks/tp1_paper_scaling/runtime/results/system_benchmarks/tp1_router_config/source/w16u1/mapped_host_paged_attention.cpp -o mapped_host_paged_attention.o 
+[2/4] /usr/local/cuda/bin/nvcc -MD -MF mapped_host_paged_attention.cuda.o.d -DTORCH_EXTENSION_NAME=tp1_router_config_w16u1 -DTORCH_API_INCLUDE_EXTENSION_H -isystem /workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/include -isystem /workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -isystem /usr/local/cuda/include -isystem /workspace/miniforge3/envs/basis/include/python3.12 -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr -gencode=arch=compute_89,code=sm_89 --compiler-options '-fPIC' -O3 -std=c++17 --use_fast_math --ptxas-options=-v -DBASIS_VALUE_DIM=128 -DBASIS_GQA=4 -DBASIS_PAGE_SIZE=32 -DBASIS_BASE_RANK=16 -DBASIS_RESIDUAL_RANK=16 -c /workspace/BasisServe-CALS/results/system_benchmarks/tp1_paper_scaling/runtime/results/system_benchmarks/tp1_router_config/source/w16u1/mapped_host_paged_attention.cu -o mapped_host_paged_attention.cuda.o 
+ptxas info    : 11 bytes gmem, 88 bytes cmem[4]
+ptxas info    : Compiling entry function '_ZN63_GLOBAL__N__8458f345_30_mapped_host_paged_attention_cu_598c1cf524mapped_host_paged_kernelILb0EEEvPKN3c108BFloat16ES4_S4_S4_llllPKlPfPS2_llllllllllllllllllf' for 'sm_89'
+ptxas info    : Function properties for _ZN63_GLOBAL__N__8458f345_30_mapped_host_paged_attention_cu_598c1cf524mapped_host_paged_kernelILb0EEEvPKN3c108BFloat16ES4_S4_S4_llllPKlPfPS2_llllllllllllllllllf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 1 barriers, 3072 bytes smem, 588 bytes cmem[0]
+ptxas info    : Compile time = 24.585 ms
+ptxas info    : Compiling entry function '_ZN63_GLOBAL__N__8458f345_30_mapped_host_paged_attention_cu_598c1cf524mapped_host_paged_kernelILb1EEEvPKN3c108BFloat16ES4_S4_S4_llllPKlPfPS2_llllllllllllllllllf' for 'sm_89'
+ptxas info    : Function properties for _ZN63_GLOBAL__N__8458f345_30_mapped_host_paged_attention_cu_598c1cf524mapped_host_paged_kernelILb1EEEvPKN3c108BFloat16ES4_S4_S4_llllPKlPfPS2_llllllllllllllllllf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 32 registers, used 1 barriers, 3072 bytes smem, 588 bytes cmem[0]
+ptxas info    : Compile time = 23.378 ms
+ptxas info    : Compiling entry function '_ZN63_GLOBAL__N__8458f345_30_mapped_host_paged_attention_cu_598c1cf519reduce_paged_kernelEPKfPN3c108BFloat16Elllllll' for 'sm_89'
+ptxas info    : Function properties for _ZN63_GLOBAL__N__8458f345_30_mapped_host_paged_attention_cu_598c1cf519reduce_paged_kernelEPKfPN3c108BFloat16Elllllll
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 0 barriers, 424 bytes cmem[0]
+ptxas info    : Compile time = 15.744 ms
+[3/4] /usr/local/cuda/bin/nvcc -MD -MF conditional_router_page32.cuda.o.d -DTORCH_EXTENSION_NAME=tp1_router_config_w16u1 -DTORCH_API_INCLUDE_EXTENSION_H -isystem /workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/include -isystem /workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -isystem /usr/local/cuda/include -isystem /workspace/miniforge3/envs/basis/include/python3.12 -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr -gencode=arch=compute_89,code=sm_89 --compiler-options '-fPIC' -O3 -std=c++17 --use_fast_math --ptxas-options=-v -DBASIS_VALUE_DIM=128 -DBASIS_GQA=4 -DBASIS_PAGE_SIZE=32 -DBASIS_BASE_RANK=16 -DBASIS_RESIDUAL_RANK=16 -c /workspace/BasisServe-CALS/results/system_benchmarks/tp1_paper_scaling/runtime/results/system_benchmarks/tp1_router_config/source/w16u1/conditional_router_page32.cu -o conditional_router_page32.cuda.o 
+/workspace/BasisServe-CALS/results/system_benchmarks/tp1_paper_scaling/runtime/results/system_benchmarks/tp1_router_config/source/w16u1/conditional_router_page32.cu(31): warning #177-D: variable "<unnamed>::kSharedQueryElements" was declared but never referenced
+  constexpr int kSharedQueryElements = 16 * kQueryKeyDim;
+                ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/workspace/BasisServe-CALS/results/system_benchmarks/tp1_paper_scaling/runtime/results/system_benchmarks/tp1_router_config/source/w16u1/conditional_router_page32.cu(340): warning #177-D: function "<unnamed>::conditional_router_page_lse_kernel" was declared but never referenced
+            void conditional_router_page_lse_kernel(
+                 ^
+
+ptxas info    : 11 bytes gmem, 88 bytes cmem[4]
+ptxas info    : Compiling entry function '_ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe635select_fixed_group_max_pages_kernelILi32EEEvPKfPlS3_llliiiiblll' for 'sm_89'
+ptxas info    : Function properties for _ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe635select_fixed_group_max_pages_kernelILi32EEEvPKfPlS3_llliiiiblll
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 170 registers, used 1 barriers, 34336 bytes smem, 448 bytes cmem[0]
+ptxas info    : Compile time = 170.425 ms
+ptxas info    : Compiling entry function '_ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe635select_fixed_group_max_pages_kernelILi16EEEvPKfPlS3_llliiiiblll' for 'sm_89'
+ptxas info    : Function properties for _ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe635select_fixed_group_max_pages_kernelILi16EEEvPKfPlS3_llliiiiblll
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 96 registers, used 1 barriers, 17440 bytes smem, 448 bytes cmem[0]
+ptxas info    : Compile time = 112.007 ms
+ptxas info    : Compiling entry function '_ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe635select_fixed_group_max_pages_kernelILi8EEEvPKfPlS3_llliiiiblll' for 'sm_89'
+ptxas info    : Function properties for _ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe635select_fixed_group_max_pages_kernelILi8EEEvPKfPlS3_llliiiiblll
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 64 registers, used 1 barriers, 9824 bytes smem, 448 bytes cmem[0]
+ptxas info    : Compile time = 91.533 ms
+ptxas info    : Compiling entry function '_ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe624fill_all_page_ids_kernelEPlli' for 'sm_89'
+ptxas info    : Function properties for _ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe624fill_all_page_ids_kernelEPlli
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 20 registers, used 0 barriers, 372 bytes cmem[0]
+ptxas info    : Compile time = 2.558 ms
+ptxas info    : Compiling entry function '_ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe639conditional_router_append_decode_kernelEPKN3c108BFloat16ES3_S3_S3_S3_S3_S3_S3_PS1_S4_S4_S4_S4_S4_S4_S4_S4_llllllllllllllllllllbb' for 'sm_89'
+ptxas info    : Function properties for _ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe639conditional_router_append_decode_kernelEPKN3c108BFloat16ES3_S3_S3_S3_S3_S3_S3_PS1_S4_S4_S4_S4_S4_S4_S4_S4_llllllllllllllllllllbb
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 44 registers, used 1 barriers, 544 bytes smem, 650 bytes cmem[0]
+ptxas info    : Compile time = 42.305 ms
+ptxas info    : Compiling entry function '_ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe634conditional_router_page_lse_kernelEPKN3c108BFloat16ES3_S3_S3_S3_S3_S3_S3_Pflllllllllllllllf' for 'sm_89'
+ptxas info    : Function properties for _ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe634conditional_router_page_lse_kernelEPKN3c108BFloat16ES3_S3_S3_S3_S3_S3_S3_Pflllllllllllllllf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 1 barriers, 548 bytes cmem[0]
+ptxas info    : Compile time = 40.378 ms
+ptxas info    : Compiling entry function '_ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe643conditional_router_page_lse_register_kernelEPKN3c108BFloat16ES3_S3_S3_S3_S3_S3_S3_Pflllllllllllllllf' for 'sm_89'
+ptxas info    : Function properties for _ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe643conditional_router_page_lse_register_kernelEPKN3c108BFloat16ES3_S3_S3_S3_S3_S3_S3_Pflllllllllllllllf
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 1 barriers, 17792 bytes smem, 548 bytes cmem[0]
+ptxas info    : Compile time = 41.489 ms
+ptxas info    : Compiling entry function '_ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe626residual_query_code_kernelEPKN3c108BFloat16ES3_PS1_lll' for 'sm_89'
+ptxas info    : Function properties for _ZN61_GLOBAL__N__64f16e3f_28_conditional_router_page32_cu_90091fe626residual_query_code_kernelEPKN3c108BFloat16ES3_PS1_lll
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 0 barriers, 400 bytes cmem[0]
+ptxas info    : Compile time = 43.662 ms
+[4/4] c++ mapped_host_paged_attention.o mapped_host_paged_attention.cuda.o conditional_router_page32.cuda.o -shared -L/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/lib -lc10 -lc10_cuda -ltorch_cpu -ltorch_cuda -ltorch -ltorch_python -L/usr/local/cuda/lib64 -lcudart -o tp1_router_config_w16u1.so
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 8785.94it/s]
+{"method": "basis", "phase": "same_shape_runtime_warmup", "context": 24576, "cohort": 0}
+{"method": "basis", "phase": "fresh_request_state", "context": 24576, "cohort": 0}
+{"method": "basis", "phase": "measured_steady", "context": 24576, "cohort": 0}
+{"method": "basis", "phase": "separate_attention_profile", "context": 24576, "cohort": 0}
+{"method": "basis", "phase": "complete", "context": 24576, "cohort": 0}

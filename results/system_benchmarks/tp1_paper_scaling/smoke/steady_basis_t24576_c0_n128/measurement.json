@@ -1,0 +1,48 @@
+{
+  "status": "measured",
+  "method": "basis",
+  "mode": "steady",
+  "context_tokens": 24576,
+  "cohort": 0,
+  "output_tokens": 128,
+  "configuration": {
+    "storage": "GPU-local K/V",
+    "prompt_specific_fit": false,
+    "routing": "full_scan",
+    "validation_enabled": false
+  },
+  "environment": "basis",
+  "gpu": "NVIDIA L40S",
+  "torch": "2.13.0+cu130",
+  "peak_allocated_gib": 19.814309120178223,
+  "measurement": {
+    "cuda_ms": [
+      29.11302375793457,
+      28.91971206665039,
+      28.475200653076172,
+      28.458240509033203
+    ],
+    "wall_ms": [
+      29.144363943487406,
+      28.94574636593461,
+      28.505817987024784,
+      28.486750088632107
+    ],
+    "cuda_median_ms": 28.69745635986328,
+    "cuda_mean_ms": 28.741544246673584,
+    "wall_median_ms": 28.725782176479697,
+    "all_logits_finite": true,
+    "generated_tokens": [
+      [
+        8747,
+        50915,
+        2085,
+        15419,
+        1210,
+        578
+      ]
+    ],
+    "components": []
+  },
+  "scope": "Same-shape runtime warmup; fresh request state and representation. Model loading, upfront cache allocation and input transfer excluded. Greedy fixed-length output ignores EOS. No build profiling in primary timing. Request steady tail is wall mean after 16 decode calls, not CUDA median."
+}

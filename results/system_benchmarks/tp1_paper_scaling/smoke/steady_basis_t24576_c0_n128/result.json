@@ -1,0 +1,107 @@
+{
+  "status": "complete",
+  "method": "basis",
+  "mode": "steady",
+  "context_tokens": 24576,
+  "cohort": 0,
+  "output_tokens": 128,
+  "configuration": {
+    "storage": "GPU-local K/V",
+    "prompt_specific_fit": false,
+    "routing": "full_scan",
+    "validation_enabled": false
+  },
+  "environment": "basis",
+  "gpu": "NVIDIA L40S",
+  "torch": "2.13.0+cu130",
+  "peak_allocated_gib": 19.814309120178223,
+  "measurement": {
+    "cuda_ms": [
+      29.11302375793457,
+      28.91971206665039,
+      28.475200653076172,
+      28.458240509033203
+    ],
+    "wall_ms": [
+      29.144363943487406,
+      28.94574636593461,
+      28.505817987024784,
+      28.486750088632107
+    ],
+    "cuda_median_ms": 28.69745635986328,
+    "cuda_mean_ms": 28.741544246673584,
+    "wall_median_ms": 28.725782176479697,
+    "all_logits_finite": true,
+    "generated_tokens": [
+      [
+        8747,
+        50915,
+        2085,
+        15419,
+        1210,
+        578
+      ]
+    ],
+    "components": []
+  },
+  "scope": "Same-shape runtime warmup; fresh request state and representation. Model loading, upfront cache allocation and input transfer excluded. Greedy fixed-length output ignores EOS. No build profiling in primary timing. Request steady tail is wall mean after 16 decode calls, not CUDA median.",
+  "attention_profile": {
+    "cuda_ms": [
+      29.940000534057617,
+      29.289920806884766,
+      29.18182373046875,
+      29.23801612854004
+    ],
+    "wall_ms": [
+      29.96736392378807,
+      29.31698178872466,
+      29.2111630551517,
+      29.264071956276894
+    ],
+    "cuda_median_ms": 29.263968467712402,
+    "cuda_mean_ms": 29.412440299987793,
+    "wall_median_ms": 29.290526872500777,
+    "all_logits_finite": true,
+    "generated_tokens": [
+      [
+        8747,
+        50915,
+        2085,
+        15419,
+        1210,
+        578
+      ]
+    ],
+    "components": [
+      {
+        "attention_block": 5.63017600774765,
+        "cache_append": 0.413119999691844,
+        "router_scan": 3.30860798060894,
+        "page_selection": 0.6553279999643564,
+        "sparse_attention": 0.9079999998211861
+      },
+      {
+        "attention_block": 5.282591953873634,
+        "cache_append": 0.3876799996942282,
+        "router_scan": 3.1467839926481247,
+        "page_selection": 0.5908480007201433,
+        "sparse_attention": 0.8204479962587357
+      },
+      {
+        "attention_block": 5.236639976501465,
+        "cache_append": 0.38575999811291695,
+        "router_scan": 3.1026239842176437,
+        "page_selection": 0.5809280034154654,
+        "sparse_attention": 0.8107200022786856
+      },
+      {
+        "attention_block": 5.2380479872226715,
+        "cache_append": 0.3865919979289174,
+        "router_scan": 3.1089599952101707,
+        "page_selection": 0.580095998942852,
+        "sparse_attention": 0.8234880026429892
+      }
+    ],
+    "prefix_tokens_match": true
+  }
+}
