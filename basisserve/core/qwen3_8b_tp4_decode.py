@@ -40,6 +40,7 @@ from basisserve.kernels.fp8_wire import (
     quantize_e4m3_static,
 )
 from basisserve.kernels.ragged_allgather import StaticRaggedPlan
+from basisserve.kernels.int4_wire import all_gather_int4
 
 TP_SIZE = 4
 NUM_QUERY_HEADS = 32
@@ -510,7 +511,7 @@ class Qwen3TP4C1DecodeAttention(_Qwen3TP4StaticDecodeAttention):
         self._observe_wire_amax = False
         self.register_buffer("compact_v_weight", compact_weight)
         self.register_buffer("compact_v_bias", compact_bias)
-        if wire_dtype == "bfloat16":
+        if wire_dtype in ("bfloat16", "int4"):
             if fp8_wire_source_scales is not None:
                 raise ValueError("BF16 C1 wire must not receive FP8 scales")
             selected_decoder = global_decoder
@@ -761,6 +762,15 @@ class Qwen3TP4C1DecodeAttention(_Qwen3TP4StaticDecodeAttention):
 
     def _project_output(self, local_output: Tensor) -> Tensor:
         self._update_wire_amax(local_output)
+        if self.wire_dtype == "int4":
+            if local_output.ndim == 2:
+                batch, tokens = int(local_output.shape[1]), 1
+                local = local_output.T.contiguous()
+            else:
+                batch, tokens = int(local_output.shape[0]), int(local_output.shape[2])
+                local = local_output.transpose(1, 2).reshape(-1, self.local_wire_width).contiguous()
+            gathered = all_gather_int4(local)
+            return (gathered @ self.global_decoder).reshape(batch, tokens, HIDDEN_SIZE)
         if local_output.ndim == 2:
             batch = int(local_output.shape[1])
             if self.wire_dtype == "float8_e4m3fn":
@@ -857,6 +867,11 @@ def configure_qwen3_tp4_caches(
             raise RuntimeError("Qwen3 TP4 C1 layers must share one packed communicator")
         communicator = next(iter(communicators.values()))
         wire_dtypes = {module.wire_dtype for module in c1_modules}
+        if wire_dtypes == {"int4"}:
+            # Packed NCCL path owns its packets; no BF16/FP8 collective arenas.
+            return sum(module.cache_bytes for module in modules) + (
+                0 if decode_workspace is None else decode_workspace.nbytes
+            )
         if len(wire_dtypes) != 1:
             raise RuntimeError("Qwen3 TP4 C1 layers must share one wire dtype")
         wire_dtype = (
@@ -921,7 +936,12 @@ def install_qwen3_tp4_decode_attention(
     c1_ipc_algorithm: str = "auto",
     c1_ipc_channels: int = 0,
 ) -> tuple[_Qwen3TP4StaticDecodeAttention, ...]:
-    """Replace every Qwen3 layer with the dense or C1 static decode path."""
+    """Replace every Qwen3 layer with the dense or C1 static decode path.
+
+    ``c1_wire_dtype='int4'`` selects the reference packed NCCL path,
+    independently of the BF16/FP8 arena backend. Use default IPC settings;
+    this path has no IPC or CUDA-graph optimization and needs no FP8 scales.
+    """
 
     if factor_dir is None:
         if c1_decode_attention_backend is not None:
@@ -938,11 +958,11 @@ def install_qwen3_tp4_decode_attention(
             raise ValueError("dense attention must not select C1 IPC channels")
     elif c1_decode_attention_backend not in ("cuda", "triton"):
         raise ValueError("C1 attention requires an explicit 'cuda' or 'triton' backend")
-    elif c1_wire_dtype not in ("bfloat16", "float8_e4m3fn"):
+    elif c1_wire_dtype not in ("bfloat16", "float8_e4m3fn", "int4"):
         raise ValueError("unsupported C1 wire dtype")
     elif c1_wire_dtype == "float8_e4m3fn" and c1_fp8_wire_scales is None:
         raise ValueError("FP8 C1 requires calibrated --c1-fp8-wire-scales")
-    elif c1_wire_dtype == "bfloat16" and c1_fp8_wire_scales is not None:
+    elif c1_wire_dtype in ("bfloat16", "int4") and c1_fp8_wire_scales is not None:
         raise ValueError("BF16 C1 wire must not receive FP8 scales")
     elif c1_allgather_backend not in (
         "feature_direct",

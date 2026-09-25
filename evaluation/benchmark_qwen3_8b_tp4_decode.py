@@ -351,6 +351,17 @@ def _communication_metadata(
         }
     c1_modules = tuple(module for module in modules if isinstance(module, Qwen3TP4C1DecodeAttention))
     widths = tuple(module.local_wire_width for module in c1_modules)
+    if c1_modules[0].wire_dtype == "int4":
+        from basisserve.kernels.int4_wire import communication_bytes
+        budgets = [communication_bytes(1, width, TP_SIZE) for width in widths]
+        return {
+            "collective": "packed uint8 NCCL AllGather (INT4 plus FP32 row scales)",
+            "wire_dtype": "int4",
+            "local_wire_widths_by_layer": list(widths),
+            "local_packet_bytes_per_token_all_layers": sum(b["local_packet_bytes"] for b in budgets),
+            "theoretical_ring_bytes_per_sequence_step_per_rank_all_layers": sum(b["int4_ring_sent_bytes"] for b in budgets),
+            "quantizer": "symmetric dynamic row-wise; not KVQuant NUQ",
+        }
     sent_elements = (TP_SIZE - 1) * sum(widths)
     wire_element_bytes = (
         1 if c1_modules[0].wire_dtype == "float8_e4m3fn" else dense_element_bytes
@@ -420,7 +431,7 @@ def main() -> None:
     parser.add_argument("--c1-decode-attention", choices=("cuda", "triton"))
     parser.add_argument(
         "--c1-wire-dtype",
-        choices=("bfloat16", "float8_e4m3fn"),
+        choices=("bfloat16", "float8_e4m3fn", "int4"),
         default="bfloat16",
     )
     parser.add_argument("--c1-fp8-wire-scales")
