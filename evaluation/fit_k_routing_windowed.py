@@ -162,6 +162,20 @@ def fit_residuals(args, identity, layers, protocol):
         base, meta = S.verified(S.layer_file(args.output, 'base', layer))
         assert protocol_matches(meta['protocol'], protocol, args.adopt_streaming_records) and meta['identity_sha256'] == sha256(args.identity)
         groups, dim = base['encoder'].shape[:2]
+        if args.residual_rank == 0:
+            # Base-only routing (Section 4 ablation): the sidecar is the predicted post-RoPE K alone, so there is no residual
+            # code to fit and no Fisher statistics are read; zero-width residual tensors keep the bank layout of the runtime.
+            heads = identity['hq']
+            tensors = {f'base_{name}_b{args.base_rank}': base[name].float() for name in ('left', 'right', 'bias')}
+            tensors.update({f'residual_encoder_b{args.base_rank}_r0': torch.zeros(groups, dim, 0), f'residual_query_b{args.base_rank}_r0': torch.zeros(heads, dim, 0)})
+            losses = {f'b{args.base_rank}_r0': dict(base_rank=args.base_rank, residual_rank=0, sweeps=[], fisher_artifacts_read=[],
+                      note='base-only routing: no residual fit; base metrics in the base record')}
+            S.save_record(S.layer_file(args.output, f'ours_b{args.base_rank}r0', layer), tensors,
+                dict(protocol=protocol, layer=layer, v_rank=base['encoder'].shape[-1], identity_sha256=sha256(args.identity), losses=losses,
+                     base_sha256=sha256(S.layer_file(args.output, 'base', layer)), sweeps=0, pcg_iterations=0,
+                     base_record_adopted_from_streaming_fitter=bool(args.adopt_streaming_records and meta['protocol'] != protocol)))
+            print(dict(stage='fit complete', layer=layer, losses=losses), flush=True)
+            continue
         stats = {}
         for split, indices in (('fit', protocol['fit_ids']), ('heldout', protocol['diagnostic_ids'])):
             if not indices:
@@ -251,7 +265,7 @@ def main():
     args.moments_root = None          # fit_bases / fit_residuals read the moments and fisher records under --output
     args.collect_covariance = False
     assert not args.dense_v or args.teacher == 'dense'
-    assert 0 <= args.base_rank <= 128 and 0 < args.residual_rank <= 128
+    assert 0 <= args.base_rank <= 128 and 0 <= args.residual_rank <= 128
     assert 0 <= args.window_shard < args.window_shards
     identity = read_json(args.identity)
     assert identity['status'] == 'complete'

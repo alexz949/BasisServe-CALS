@@ -135,10 +135,14 @@ def bank_for(args, identity, manifest, arm):
             assert p['fit_ids'] == list(range(32)) and p['diagnostic_ids'] == []
             assert p['sequence_length'] == 131072 and p['fit_queries'] == 64 and p['diagnostic_queries'] == 0
             assert p['excluded_recent_tokens'] == 64 and (p['teacher'].startswith('V96-deployed') or p['teacher'].startswith('deployed model'))
-            assert record['sweeps'] == 40 and record['pcg_iterations'] == 100
             assert (p['base_rank'], p['residual_rank']) == (base_rank, residual_rank)
             loss = record['losses'][f'b{base_rank}_r{residual_rank}']
-            assert len(loss['sweeps']) == 40
+            if residual_rank == 0:
+                # Base-only routing (Section 4 ablation): no residual fit, zero-width residual tensors.
+                assert record['sweeps'] == 0 and record['pcg_iterations'] == 0 and loss['sweeps'] == []
+            else:
+                assert record['sweeps'] == 40 and record['pcg_iterations'] == 100
+                assert len(loss['sweeps']) == 40
             g, h, d = identity['hkv'], identity['hq'], identity['head_dim']
             b, r = f'b{base_rank}', f'b{base_rank}_r{residual_rank}'
             shapes = {f'base_left_{b}': (g, record['v_rank'], base_rank), f'base_right_{b}': (g, base_rank, d),
@@ -222,6 +226,7 @@ def main():
     parser.add_argument('--allow-bank-sink-mismatch', action='store_true', help='diagnostic: run a bank fitted with a different pinned-sink exclusion')
     parser.add_argument('--ours-budget', type=int, default=2048, help='physical tokens incl. pinned sink and recent 64')
     parser.add_argument('--tasks', help='comma list of RULER tasks to evaluate (evaluate stage only; default all)')
+    parser.add_argument('--max-ordinal', type=int, help='evaluate stage only: keep the first N prompts of every task (same frozen prompts)')
     args = parser.parse_args()
     global PAGE_SIZE, PINNED_PAGES, OURS_BUDGET
     PAGE_SIZE, PINNED_PAGES, OURS_BUDGET = args.page_size, args.pinned_pages, args.ours_budget
@@ -286,6 +291,8 @@ def main():
     selected = [rows[i] for i in (0, 7*spec['samples_per_task'])] if args.stage == 'smoke' else rows[args.shard::args.shards]
     if args.stage == 'evaluate' and args.tasks:
         selected = [r for r in selected if r['task'] in set(args.tasks.split(','))]
+    if args.stage == 'evaluate' and args.max_ordinal is not None:
+        selected = [r for r in selected if r['ordinal'] < args.max_ordinal]
     for row in selected:
         path = args.output/args.arm/args.stage/f"sample_{row['index']:03d}.json"
         if path.exists():

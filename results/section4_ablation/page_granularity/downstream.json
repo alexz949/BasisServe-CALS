@@ -1,0 +1,453 @@
+{
+  "status": "complete",
+  "format": "basisserve.section4.page_granularity_downstream.v1",
+  "identity_sha256": "f6fbef8b66094083ca54bbff465decd080ce57457d515b798b7b146de1da7f0d",
+  "prompts": "/home/Ubuntu/l31_router_fit/eval1100_p4/prompts.json",
+  "prompts_sha256": "1f6389ddbb2a3ea46dc3933f6fba5414f186c1b925d099471b03947a30c0238b",
+  "data_sha256": "58710830bdb8eadd63df43014de6d2813d22ea25b30d9d960debcac5918925cc",
+  "tasks": [
+    "niah_multikey_2",
+    "fwe"
+  ],
+  "samples": 200,
+  "indices": [
+    400,
+    401,
+    402,
+    403,
+    404,
+    405,
+    406,
+    407,
+    408,
+    409,
+    410,
+    411,
+    412,
+    413,
+    414,
+    415,
+    416,
+    417,
+    418,
+    419,
+    420,
+    421,
+    422,
+    423,
+    424,
+    425,
+    426,
+    427,
+    428,
+    429,
+    430,
+    431,
+    432,
+    433,
+    434,
+    435,
+    436,
+    437,
+    438,
+    439,
+    440,
+    441,
+    442,
+    443,
+    444,
+    445,
+    446,
+    447,
+    448,
+    449,
+    450,
+    451,
+    452,
+    453,
+    454,
+    455,
+    456,
+    457,
+    458,
+    459,
+    460,
+    461,
+    462,
+    463,
+    464,
+    465,
+    466,
+    467,
+    468,
+    469,
+    470,
+    471,
+    472,
+    473,
+    474,
+    475,
+    476,
+    477,
+    478,
+    479,
+    480,
+    481,
+    482,
+    483,
+    484,
+    485,
+    486,
+    487,
+    488,
+    489,
+    490,
+    491,
+    492,
+    493,
+    494,
+    495,
+    496,
+    497,
+    498,
+    499,
+    800,
+    801,
+    802,
+    803,
+    804,
+    805,
+    806,
+    807,
+    808,
+    809,
+    810,
+    811,
+    812,
+    813,
+    814,
+    815,
+    816,
+    817,
+    818,
+    819,
+    820,
+    821,
+    822,
+    823,
+    824,
+    825,
+    826,
+    827,
+    828,
+    829,
+    830,
+    831,
+    832,
+    833,
+    834,
+    835,
+    836,
+    837,
+    838,
+    839,
+    840,
+    841,
+    842,
+    843,
+    844,
+    845,
+    846,
+    847,
+    848,
+    849,
+    850,
+    851,
+    852,
+    853,
+    854,
+    855,
+    856,
+    857,
+    858,
+    859,
+    860,
+    861,
+    862,
+    863,
+    864,
+    865,
+    866,
+    867,
+    868,
+    869,
+    870,
+    871,
+    872,
+    873,
+    874,
+    875,
+    876,
+    877,
+    878,
+    879,
+    880,
+    881,
+    882,
+    883,
+    884,
+    885,
+    886,
+    887,
+    888,
+    889,
+    890,
+    891,
+    892,
+    893,
+    894,
+    895,
+    896,
+    897,
+    898,
+    899
+  ],
+  "arms": {
+    "p1": {
+      "source": "/home/Ubuntu/l31_router_fit/eval1100_p1/ours/evaluate",
+      "per_task": {
+        "niah_multikey_2": 80.0,
+        "fwe": 46.33333333333333
+      },
+      "mean": 63.166666666666664,
+      "note": "Page-Fisher refit, no sink, 2048 + recent 64",
+      "protocols": [
+        {
+          "identity_sha256": "f6fbef8b66094083ca54bbff465decd080ce57457d515b798b7b146de1da7f0d",
+          "format": "basisserve.llama_cal128_ruler.v1",
+          "ours": {
+            "base": 16,
+            "page_size": 1,
+            "physical_group_budget": 2112,
+            "pinned_pages": 0,
+            "recent": 64,
+            "residual": 16,
+            "sink": 0
+          }
+        }
+      ]
+    },
+    "p4": {
+      "source": "/home/Ubuntu/l31_router_fit/eval1100_p4/ours/evaluate",
+      "per_task": {
+        "niah_multikey_2": 78.0,
+        "fwe": 46.66666666666666
+      },
+      "mean": 62.33333333333333,
+      "note": "Page-Fisher refit, no sink, 2048 + recent 64",
+      "protocols": [
+        {
+          "identity_sha256": "f6fbef8b66094083ca54bbff465decd080ce57457d515b798b7b146de1da7f0d",
+          "format": "basisserve.llama_cal128_ruler.v1",
+          "ours": {
+            "allow_bank_sink_mismatch": false,
+            "bank_page_size": 4,
+            "base": 16,
+            "page_size": 4,
+            "physical_group_budget": 2112,
+            "pinned_pages": 0,
+            "recent": 64,
+            "residual": 16,
+            "sink": 0
+          }
+        }
+      ]
+    },
+    "p8": {
+      "source": "/home/Ubuntu/l31_router_fit/eval1100_p8fit_2task/ours/evaluate",
+      "per_task": {
+        "niah_multikey_2": 75.0,
+        "fwe": 50.66666666666666
+      },
+      "mean": 62.83333333333333,
+      "note": "Page-Fisher refit, no sink, 2048 + recent 64",
+      "protocols": [
+        {
+          "identity_sha256": "f6fbef8b66094083ca54bbff465decd080ce57457d515b798b7b146de1da7f0d",
+          "format": "basisserve.llama_cal128_ruler.v1",
+          "ours": {
+            "allow_bank_sink_mismatch": false,
+            "bank_page_size": 8,
+            "base": 16,
+            "page_size": 8,
+            "physical_group_budget": 2112,
+            "pinned_pages": 0,
+            "recent": 64,
+            "residual": 16,
+            "sink": 0
+          }
+        }
+      ]
+    },
+    "p32": {
+      "source": "/home/Ubuntu/l31_router_fit/eval1100/ours/evaluate",
+      "per_task": {
+        "niah_multikey_2": 66.0,
+        "fwe": 60.33333333333333
+      },
+      "mean": 63.166666666666664,
+      "note": "released bank: pinned sink page (32) + 1952 routed + recent 64 = 2048 total",
+      "protocols": [
+        {
+          "identity_sha256": "f6fbef8b66094083ca54bbff465decd080ce57457d515b798b7b146de1da7f0d",
+          "format": "basisserve.llama_cal128_ruler.v1",
+          "ours": {
+            "base": 16,
+            "page_size": 32,
+            "physical_group_budget": 2048,
+            "recent": 64,
+            "residual": 16,
+            "sink": 32
+          }
+        }
+      ]
+    },
+    "full": {
+      "source": "/home/Ubuntu/l31_router_fit/eval1100/full/evaluate",
+      "per_task": {
+        "niah_multikey_2": 83.0,
+        "fwe": 52.66666666666666
+      },
+      "mean": 67.83333333333333,
+      "note": "exact attention",
+      "protocols": [
+        {
+          "identity_sha256": "f6fbef8b66094083ca54bbff465decd080ce57457d515b798b7b146de1da7f0d",
+          "format": "basisserve.llama_cal128_ruler.v1",
+          "ours": {
+            "base": 16,
+            "page_size": 32,
+            "physical_group_budget": 2048,
+            "recent": 64,
+            "residual": 16,
+            "sink": 32
+          }
+        }
+      ]
+    }
+  },
+  "paired": {
+    "p1 - p4 | niah_multikey_2": {
+      "delta": 2.0,
+      "ci95": [
+        0.0,
+        5.0
+      ],
+      "wins": 2,
+      "losses": 0
+    },
+    "p1 - p4 | fwe": {
+      "delta": -0.3333333333333334,
+      "ci95": [
+        -3.666666666666667,
+        3.0
+      ],
+      "wins": 9,
+      "losses": 10
+    },
+    "p1 - p8 | niah_multikey_2": {
+      "delta": 5.0,
+      "ci95": [
+        1.0,
+        9.0
+      ],
+      "wins": 5,
+      "losses": 0
+    },
+    "p1 - p8 | fwe": {
+      "delta": -4.333333333333333,
+      "ci95": [
+        -7.333333333333332,
+        -1.3333333333333335
+      ],
+      "wins": 4,
+      "losses": 16
+    },
+    "p1 - p32 | niah_multikey_2": {
+      "delta": 14.0,
+      "ci95": [
+        7.0,
+        21.0
+      ],
+      "wins": 15,
+      "losses": 1
+    },
+    "p1 - p32 | fwe": {
+      "delta": -14.0,
+      "ci95": [
+        -18.0,
+        -10.0
+      ],
+      "wins": 2,
+      "losses": 42
+    },
+    "p4 - p8 | niah_multikey_2": {
+      "delta": 3.0,
+      "ci95": [
+        -1.0,
+        8.0
+      ],
+      "wins": 4,
+      "losses": 1
+    },
+    "p4 - p8 | fwe": {
+      "delta": -4.0,
+      "ci95": [
+        -7.333333333333332,
+        -0.9999999999999999
+      ],
+      "wins": 5,
+      "losses": 16
+    },
+    "p32 - p4 | niah_multikey_2": {
+      "delta": -12.0,
+      "ci95": [
+        -20.0,
+        -5.0
+      ],
+      "wins": 2,
+      "losses": 14
+    },
+    "p32 - p4 | fwe": {
+      "delta": 13.666666666666664,
+      "ci95": [
+        9.0,
+        18.0
+      ],
+      "wins": 47,
+      "losses": 8
+    },
+    "p32 - p8 | niah_multikey_2": {
+      "delta": -9.0,
+      "ci95": [
+        -16.0,
+        -2.0
+      ],
+      "wins": 2,
+      "losses": 11
+    },
+    "p32 - p8 | fwe": {
+      "delta": 9.666666666666666,
+      "ci95": [
+        5.666666666666668,
+        13.666666666666664
+      ],
+      "wins": 34,
+      "losses": 5
+    }
+  },
+  "bootstrap": 4000,
+  "seed": 0,
+  "git_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a",
+  "command": "evaluation/section4_page_granularity_summary.py --diag /home/Ubuntu/l31_router_fit/section4/sweep_exp3a_nosink.json --fixed p4 --arms p1=/home/Ubuntu/l31_router_fit/eval1100_p1/ours/evaluate p4=/home/Ubuntu/l31_router_fit/eval1100_p4/ours/evaluate p8=/home/Ubuntu/l31_router_fit/eval1100_p8fit_2task/ours/evaluate p32=/home/Ubuntu/l31_router_fit/eval1100/ours/evaluate full=/home/Ubuntu/l31_router_fit/eval1100/full/evaluate --prompts /home/Ubuntu/l31_router_fit/eval1100_p4/prompts.json --tasks niah_multikey_2,fwe --notes 'p1=Page-Fisher refit, no sink, 2048 + recent 64' 'p4=Page-Fisher refit, no sink, 2048 + recent 64' 'p8=Page-Fisher refit, no sink, 2048 + recent 64' 'p32=released bank: pinned sink page (32) + 1952 routed + recent 64 = 2048 total' 'full=exact attention' --output /home/Ubuntu/l31_router_fit/section4/results/section4_ablation/page_granularity"
+}
