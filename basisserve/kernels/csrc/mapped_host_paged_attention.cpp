@@ -74,6 +74,13 @@ at::Tensor select_fixed_group_max_pages_cuda(
     int64_t pinned_prefix_pages,
     bool force_current_page);
 
+void select_full_group_max_pages_and_pack_cuda(
+    const at::Tensor& page_log_mass,
+    const at::Tensor& selected_pages,
+    const at::Tensor& support_ids,
+    int64_t historical,
+    int64_t end);
+
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, module) {
   module.doc() = "Mapped-host Page32 exact-K and GPU C1-V80 decode attention";
   module.def(
@@ -158,4 +165,12 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, module) {
       pybind11::arg("pages_per_kv_head"),
       pybind11::arg("pinned_prefix_pages"),
       pybind11::arg("force_current_page"));
+  module.def(
+      "select_full_group_max_pages_and_pack",
+      &select_full_group_max_pages_and_pack_cuda,
+      pybind11::arg("page_log_mass"),
+      pybind11::arg("selected_pages"),
+      pybind11::arg("support_ids"),
+      pybind11::arg("historical"),
+      pybind11::arg("end"));
 }

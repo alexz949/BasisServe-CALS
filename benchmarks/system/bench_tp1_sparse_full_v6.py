@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import argparse
 from functools import lru_cache
-import hashlib
 import json
 import math
 import os
@@ -38,6 +37,7 @@ from benchmarks.system.bench_router_append_v6 import _build_shared_router_baseli
 from benchmarks.system.fused_candidates import candidates as fused_candidates
 from benchmarks.system.two_stage_router import Metadata, compile_fine
 from evaluation.chunked_prefill_mlp import ChunkedTokenwise
+from benchmarks.system.chunked_prefill_rope import apply_prefill_rope_
 
 
 MODEL_PATH = Path(
@@ -54,14 +54,6 @@ SPLITS = 32
 SLOT_SPLITS = 16
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for block in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
 def _percentile(values: list[float], fraction: float) -> float:
     ordered = sorted(values)
     index = min(len(ordered) - 1, math.ceil(fraction * len(ordered)) - 1)
@@ -71,9 +63,8 @@ def _percentile(values: list[float], fraction: float) -> float:
 @lru_cache(maxsize=1)
 def _load_slot_extension() -> object:
     source = REPOSITORY_ROOT / "basisserve/kernels/csrc/persistent_key_slots.cu"
-    digest = _sha256(source)[:10]
     return load(
-        name=f"basisserve_persistent_key_slots_{digest}",
+        name="basisserve_persistent_key_slots_tp1",
         sources=[str(source)],
         extra_cflags=["-O3", "-std=c++17"],
         extra_cuda_cflags=["-O3", "-std=c++17"],
@@ -83,9 +74,8 @@ def _load_slot_extension() -> object:
 @lru_cache(maxsize=1)
 def _load_postprocess_extension() -> object:
     source = REPOSITORY_ROOT / "basisserve/kernels/csrc/fused_decode_postprocess.cu"
-    digest = _sha256(source)[:10]
     return load(
-        name=f"basisserve_fused_decode_postprocess_{digest}",
+        name="basisserve_fused_decode_postprocess_tp1",
         sources=[str(source)],
         extra_cflags=["-O3", "-std=c++17"],
         extra_cuda_cflags=["-O3", "-std=c++17", "--use_fast_math"],
@@ -113,6 +103,7 @@ class TP1SparseAttention(torch.nn.Module):
         shared_rope: dict[str, torch.Tensor],
         profile_components: bool,
         validate: bool,
+        batch_size: int = 1,
     ) -> None:
         super().__init__()
         self.q_proj = original.q_proj
@@ -132,6 +123,7 @@ class TP1SparseAttention(torch.nn.Module):
         self.mode = mode
         self.routing = routing
         self.key_reuse = bool(key_reuse)
+        self.indexed_attention = self.key_reuse or (storage == "local" and mode == "optimized")
         self.slot_extension = slot_extension
         self.postprocess_extension = postprocess_extension
         self.capacity = int(capacity)
@@ -162,7 +154,7 @@ class TP1SparseAttention(torch.nn.Module):
             factors["residual_query_b16_r16"].to("cuda", torch.bfloat16).contiguous(),
         )
 
-        cache_shape = (1, 8, capacity)
+        cache_shape = (batch_size, 8, capacity)
         self.value_cache = torch.empty(*cache_shape, 128, device="cuda", dtype=torch.bfloat16)
         self.base_cache = torch.empty(*cache_shape, 16, device="cuda", dtype=torch.bfloat16)
         self.residual_cache = torch.empty(*cache_shape, 16, device="cuda", dtype=torch.bfloat16)
@@ -174,47 +166,42 @@ class TP1SparseAttention(torch.nn.Module):
             self.key_pointer = int(self.key_cache.data_ptr())
         else:
             self.key_cache = None
-            self.host_key = router_extension.mapped_host_bf16_empty(1, 8, capacity, 128)
+            self.host_key = router_extension.mapped_host_bf16_empty(batch_size, 8, capacity, 128)
             self.key_pointer = int(router_extension.device_pointer(self.host_key))
 
         maximum_pages = math.ceil(capacity / PAGE_SIZE)
-        self.query_code = torch.empty(1, 8, 4, 16, device="cuda", dtype=torch.bfloat16)
-        self.router_output = torch.empty(1, 8, 4, maximum_pages, device="cuda")
-        self.candidate_ids = torch.empty(1, 8, 512, device="cuda", dtype=torch.long)
-        self.fine_router_output = torch.empty(1, 8, 4, 512, device="cuda")
+        self.query_code = torch.empty(batch_size, 8, 4, 16, device="cuda", dtype=torch.bfloat16)
+        self.router_output = torch.empty(batch_size, 8, 4, maximum_pages, device="cuda")
+        self.candidate_ids = torch.empty(batch_size, 8, 512, device="cuda", dtype=torch.long)
+        self.fine_router_output = torch.empty(batch_size, 8, 4, 512, device="cuda")
         self.selected_pages = torch.empty(
-            1, 8, ROUTED_PAGES, device="cuda", dtype=torch.long
+            batch_size, 8, ROUTED_PAGES, device="cuda", dtype=torch.long
         )
         self.reference_pages = torch.empty_like(self.selected_pages) if self.validate else None
         self.support_ids = torch.empty(
-            1, 8, SUPPORT_TOKENS, device="cuda", dtype=torch.long
+            batch_size, 8, SUPPORT_TOKENS, device="cuda", dtype=torch.long
         )
         self.page_offsets = torch.arange(PAGE_SIZE, device="cuda", dtype=torch.long)
         self.token_range = torch.arange(capacity, device="cuda", dtype=torch.long)
         self.attention_workspace = torch.empty(
-            32, SPLITS, 130, device="cuda", dtype=torch.float32
+            batch_size * 32, SPLITS, 130, device="cuda", dtype=torch.float32
         )
         self.attention_output = torch.empty(
-            1, 32, 1, 128, device="cuda", dtype=torch.bfloat16
+            batch_size, 32, 1, 128, device="cuda", dtype=torch.bfloat16
         )
         if self.key_reuse:
             self.slot_key_cache = torch.empty(
-                1, 8, SUPPORT_TOKENS, 128, device="cuda", dtype=torch.bfloat16
+                batch_size, 8, SUPPORT_TOKENS, 128, device="cuda", dtype=torch.bfloat16
             )
             self.slot_resident = torch.full(
-                (1, 8, SUPPORT_TOKENS), -1, device="cuda", dtype=torch.long
+                (batch_size, 8, SUPPORT_TOKENS), -1, device="cuda", dtype=torch.long
             )
             self.slot_lookup = torch.full(
-                (1, 8, capacity), -1, device="cuda", dtype=torch.int32
+                (batch_size, 8, capacity), -1, device="cuda", dtype=torch.int32
             )
             self.selected_slots = torch.empty_like(self.support_ids)
             self.slot_missing = torch.empty_like(self.support_ids, dtype=torch.int32)
-            self.slot_counts = torch.empty(1, 8, 2, device="cuda", dtype=torch.int32)
-            self.slot_workspace = (
-                torch.empty(1, 32, SLOT_SPLITS, 128, device="cuda", dtype=torch.float32),
-                torch.empty(1, 32, SLOT_SPLITS, device="cuda", dtype=torch.float32),
-                self.attention_output,
-            )
+            self.slot_counts = torch.empty(batch_size, 8, 2, device="cuda", dtype=torch.int32)
         else:
             self.slot_key_cache = None
             self.slot_resident = None
@@ -222,7 +209,14 @@ class TP1SparseAttention(torch.nn.Module):
             self.selected_slots = None
             self.slot_missing = None
             self.slot_counts = None
-            self.slot_workspace = None
+        self.slot_workspace = (
+            (
+                torch.empty(batch_size, 32, SLOT_SPLITS, 128, device="cuda", dtype=torch.float32),
+                torch.empty(batch_size, 32, SLOT_SPLITS, device="cuda", dtype=torch.float32),
+                self.attention_output,
+            )
+            if self.indexed_attention else None
+        )
         self.single_rope = torch.empty(1, 64, device="cuda", dtype=torch.bfloat16)
         self.profile_events = {}
         if self.profile_components:
@@ -405,13 +399,48 @@ class TP1SparseAttention(torch.nn.Module):
         self._end("router_scan")
         self._start("page_selection")
         if self.routing == "full":
-            self.router_extension.select_fixed_group_max_pages(
-                self.router_output[:, :, :, :pages],
-                self.selected_pages,
-                ROUTED_PAGES,
-                1,
-                False,
-            )
+            if self.indexed_attention:
+                self.router_extension.select_full_group_max_pages_and_pack(
+                    self.router_output[:, :, :, :pages],
+                    self.selected_pages,
+                    self.support_ids,
+                    int(historical),
+                    int(end),
+                )
+            else:
+                self.router_extension.select_fixed_group_max_pages(
+                    self.router_output[:, :, :, :pages],
+                    self.selected_pages,
+                    ROUTED_PAGES,
+                    1,
+                    False,
+                )
+            if self.indexed_attention and self.validate and not self.router_validated:
+                self.router_extension.select_fixed_group_max_pages(
+                    self.router_output[:, :, :, :pages],
+                    self.reference_pages,
+                    ROUTED_PAGES,
+                    1,
+                    False,
+                )
+                torch.testing.assert_close(
+                    self.selected_pages, self.reference_pages, rtol=0, atol=0
+                )
+                expected_routed = (
+                    self.reference_pages[..., None] * PAGE_SIZE + self.page_offsets
+                ).flatten(-2)
+                expected_routed.masked_fill_(expected_routed >= historical, -1)
+                expected_support = torch.cat(
+                    (
+                        expected_routed,
+                        self.token_range[historical:end][None, None, :].expand(query.shape[0], 8, -1),
+                    ),
+                    dim=-1,
+                )
+                torch.testing.assert_close(
+                    self.support_ids, expected_support, rtol=0, atol=0
+                )
+                self.router_validated = True
         else:
             self.postprocess_extension.select_and_pack(
                 self.fine_router_output[:, :, :, :candidate_count],
@@ -479,7 +508,7 @@ class TP1SparseAttention(torch.nn.Module):
                 expected_support = torch.cat(
                     (
                         expected_routed,
-                        self.token_range[historical:end][None, None, :].expand(1, 8, -1),
+                        self.token_range[historical:end][None, None, :].expand(query.shape[0], 8, -1),
                     ),
                     dim=-1,
                 )
@@ -487,9 +516,9 @@ class TP1SparseAttention(torch.nn.Module):
                     self.support_ids, expected_support, rtol=0, atol=0
                 )
                 self.router_validated = True
-        if self.routing == "full":
+        if self.routing == "full" and not self.indexed_attention:
             routed = self.support_ids[:, :, : ROUTED_PAGES * PAGE_SIZE].view(
-                1, 8, ROUTED_PAGES, PAGE_SIZE
+                query.shape[0], 8, ROUTED_PAGES, PAGE_SIZE
             )
             torch.add(
                 self.selected_pages[..., None] * PAGE_SIZE,
@@ -498,7 +527,7 @@ class TP1SparseAttention(torch.nn.Module):
             )
             routed.masked_fill_(routed >= historical, -1)
             self.support_ids[:, :, ROUTED_PAGES * PAGE_SIZE :].copy_(
-                self.token_range[historical:end][None, None, :].expand(1, 8, -1)
+                self.token_range[historical:end][None, None, :].expand(query.shape[0], 8, -1)
             )
         self._end("page_selection")
         if self.key_reuse:
@@ -516,13 +545,13 @@ class TP1SparseAttention(torch.nn.Module):
             )
             self._end("key_refresh")
         self._start("sparse_attention")
-        if self.key_reuse:
+        if self.indexed_attention:
             slot_indexed_attention(
                 query,
-                self.slot_key_cache,
+                self.slot_key_cache if self.key_reuse else self.key_cache,
                 self.value_cache,
                 self.support_ids,
-                self.selected_slots,
+                self.selected_slots if self.key_reuse else self.support_ids,
                 self.slot_workspace,
                 scale=self.scaling,
             )
@@ -556,7 +585,7 @@ class TP1SparseAttention(torch.nn.Module):
     ) -> tuple[torch.Tensor, None]:
         del attention_mask, past_key_values, kwargs
         batch, tokens, _ = hidden_states.shape
-        assert batch == 1 and position_embeddings is not None
+        assert position_embeddings is not None
         start = self.length
         end = start + tokens
         assert end <= self.capacity
@@ -565,7 +594,10 @@ class TP1SparseAttention(torch.nn.Module):
         key = self.k_proj(hidden_states).view(hidden_shape).transpose(1, 2)
         value = self.v_proj(hidden_states).view(hidden_shape).transpose(1, 2)
         cos, sin = position_embeddings
-        query, key = apply_rotary_pos_emb(query, key, cos, sin)
+        if start == 0:
+            query, key = apply_prefill_rope_(query, key, cos, sin)
+        else:
+            query, key = apply_rotary_pos_emb(query, key, cos, sin)
         cos_rows = cos[0] if cos.ndim == 3 else cos
         sin_rows = sin[0] if sin.ndim == 3 else sin
         cos_half = cos_rows[:, :64].contiguous()
@@ -634,6 +666,7 @@ def _install_sparse_attention(
     postprocess_extension: object | None,
     profile_components: bool,
     validate: bool,
+    batch_size: int = 1,
 ) -> list[TP1SparseAttention]:
     shared_rope = {
         "cos": torch.empty(capacity, 64, device="cuda", dtype=torch.bfloat16),
@@ -658,6 +691,7 @@ def _install_sparse_attention(
             shared_rope=shared_rope,
             profile_components=profile_components,
             validate=validate,
+            batch_size=batch_size,
         )
         layer.self_attn = replacement
         layer.mlp = ChunkedTokenwise(layer.mlp, chunk_size=1024)
@@ -880,27 +914,8 @@ def main() -> None:
         for name, values in component_samples.items()
         if values
     }
-    source_paths = [
-        REPOSITORY_ROOT / "basisserve/kernels/csrc/conditional_router_page32.cu",
-        REPOSITORY_ROOT / "basisserve/kernels/csrc/mapped_host_paged_attention.cu",
-        Path(__file__).resolve(),
-    ]
-    if args.routing == "two-stage":
-        source_paths.extend(
-            [
-                REPOSITORY_ROOT / "benchmarks/system/two_stage_router.py",
-                REPOSITORY_ROOT / "benchmarks/system/fused_candidates.py",
-                REPOSITORY_ROOT / "basisserve/kernels/csrc/fused_decode_postprocess.cu",
-            ]
-        )
     slot_hit_fraction = None
     if args.key_reuse:
-        source_paths.extend(
-            [
-                REPOSITORY_ROOT / "basisserve/kernels/csrc/persistent_key_slots.cu",
-                REPOSITORY_ROOT / "basisserve/kernels/slot_indexed_attention.py",
-            ]
-        )
         slot_counts = torch.stack([layer.slot_counts for layer in layers]).sum(dim=(0, 1, 2))
         slot_hit_fraction = float(slot_counts[0].float() / slot_counts[1].clamp_min(1))
     result = {
@@ -909,6 +924,11 @@ def main() -> None:
         "storage": args.storage,
         "routing": args.routing,
         "key_reuse": args.key_reuse,
+        "postprocess": (
+            "full_scan_fused" if args.routing == "full" and layers[0].indexed_attention else
+            "full_scan_reference" if args.routing == "full" else "two_stage_fused"
+        ),
+        "decode_backend": "indexed_attention" if layers[0].indexed_attention else "paged_attention",
         "last_step_key_hit_fraction": slot_hit_fraction,
         "context_tokens": args.length,
         "warmup_steps": args.warmup_steps,
@@ -963,7 +983,6 @@ def main() -> None:
         "model_path": str(MODEL_PATH),
         "factor_root": str(FACTOR_ROOT),
         "tokens_path": str(TOKENS_PATH),
-        "source_sha256": {str(path.relative_to(REPOSITORY_ROOT)): _sha256(path) for path in source_paths},
     }
     (output / "benchmark.json").write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"

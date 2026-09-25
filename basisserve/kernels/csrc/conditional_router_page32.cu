@@ -713,6 +713,9 @@ template <int ItemsPerThread>
 __global__ void select_fixed_group_max_pages_kernel(
     const float* __restrict__ page_log_mass,
     int64_t* __restrict__ output,
+    int64_t* __restrict__ support_ids,
+    int64_t historical,
+    int64_t end,
     int64_t kv_heads,
     int pages,
     int selected_count,
@@ -848,6 +851,21 @@ __global__ void select_fixed_group_max_pages_kernel(
 
   if (thread < selected_count) {
     output[row * selected_count + thread] = selected_pages[thread];
+  }
+  if (support_ids != nullptr) {
+    const int support_count = selected_count * kPageSize + 64;
+    for (int index = thread; index < selected_count * kPageSize;
+         index += kThreads) {
+      const int token = selected_pages[index / kPageSize] * kPageSize +
+          index % kPageSize;
+      support_ids[row * support_count + index] =
+          token < historical ? token : -1;
+    }
+    for (int index = thread; index < 64; index += kThreads) {
+      const int64_t token = historical + index;
+      support_ids[row * support_count + selected_count * kPageSize + index] =
+          token < end ? token : -1;
+    }
   }
 }
 
@@ -1176,9 +1194,12 @@ void conditional_router_append_decode_cuda(
   assert(cudaGetLastError() == cudaSuccess);
 }
 
-at::Tensor select_fixed_group_max_pages_cuda(
+static at::Tensor select_fixed_group_max_pages_impl(
     const at::Tensor& page_log_mass,
     const at::Tensor& output,
+    int64_t* support_ids,
+    int64_t historical,
+    int64_t end,
     int64_t pages_per_kv_head,
     int64_t pinned_prefix_pages,
     bool force_current_page) {
@@ -1204,6 +1225,7 @@ at::Tensor select_fixed_group_max_pages_cuda(
               page_log_mass.size(1),
               selected_count}));
   assert(page_log_mass.stride(3) == 1 && output.is_contiguous());
+  assert(support_ids == nullptr || selected_count < pages);
 
   c10::cuda::CUDAGuard guard(page_log_mass.device());
   const cudaStream_t stream = c10::cuda::getCurrentCUDAStream(
@@ -1219,6 +1241,9 @@ at::Tensor select_fixed_group_max_pages_cuda(
         <<<static_cast<unsigned int>(rows), kThreads, 0, stream>>>(
             page_log_mass.const_data_ptr<float>(),
             output.mutable_data_ptr<int64_t>(),
+            support_ids,
+            historical,
+            end,
             page_log_mass.size(1),
             pages,
             selected_count,
@@ -1233,6 +1258,9 @@ at::Tensor select_fixed_group_max_pages_cuda(
         <<<static_cast<unsigned int>(rows), kThreads, 0, stream>>>(
             page_log_mass.const_data_ptr<float>(),
             output.mutable_data_ptr<int64_t>(),
+            support_ids,
+            historical,
+            end,
             page_log_mass.size(1),
             pages,
             selected_count,
@@ -1247,6 +1275,9 @@ at::Tensor select_fixed_group_max_pages_cuda(
         <<<static_cast<unsigned int>(rows), kThreads, 0, stream>>>(
             page_log_mass.const_data_ptr<float>(),
             output.mutable_data_ptr<int64_t>(),
+            support_ids,
+            historical,
+            end,
             page_log_mass.size(1),
             pages,
             selected_count,
@@ -1259,4 +1290,40 @@ at::Tensor select_fixed_group_max_pages_cuda(
   }
   assert(cudaGetLastError() == cudaSuccess);
   return output;
+}
+
+at::Tensor select_fixed_group_max_pages_cuda(
+    const at::Tensor& page_log_mass,
+    const at::Tensor& output,
+    int64_t pages_per_kv_head,
+    int64_t pinned_prefix_pages,
+    bool force_current_page) {
+  return select_fixed_group_max_pages_impl(
+      page_log_mass, output, nullptr, 0, 0, pages_per_kv_head,
+      pinned_prefix_pages, force_current_page);
+}
+
+void select_full_group_max_pages_and_pack_cuda(
+    const at::Tensor& page_log_mass,
+    const at::Tensor& selected_pages,
+    const at::Tensor& support_ids,
+    int64_t historical,
+    int64_t end) {
+  constexpr int kRoutedPages = 62;
+  constexpr int kRecentTokens = 64;
+  assert(kPageSize == 32);
+  assert(page_log_mass.is_cuda() && selected_pages.is_cuda() && support_ids.is_cuda());
+  assert(page_log_mass.device() == selected_pages.device());
+  assert(page_log_mass.device() == support_ids.device());
+  assert(page_log_mass.size(3) > kRoutedPages);
+  assert(selected_pages.sizes() == at::IntArrayRef(
+      {page_log_mass.size(0), page_log_mass.size(1), kRoutedPages}));
+  assert(support_ids.sizes() == at::IntArrayRef(
+      {page_log_mass.size(0), page_log_mass.size(1),
+       kRoutedPages * kPageSize + kRecentTokens}));
+  assert(support_ids.scalar_type() == at::kLong && support_ids.is_contiguous());
+  assert(historical >= 0 && end - historical == kRecentTokens);
+  select_fixed_group_max_pages_impl(
+      page_log_mass, selected_pages, support_ids.mutable_data_ptr<int64_t>(),
+      historical, end, kRoutedPages, 1, false);
 }

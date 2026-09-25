@@ -7,6 +7,7 @@ import pytest
 import torch
 
 from basisserve.kernels.mapped_host_paged_attention import (
+    _load_extension,
     append_mapped_host_key,
     conditional_router_append_decode,
     conditional_router_page_lse,
@@ -186,6 +187,46 @@ def test_fused_group_max_page_selection_matches_pytorch_reference(
     torch.cuda.synchronize()
 
     torch.testing.assert_close(observed, expected, rtol=0, atol=0)
+
+
+@pytest.mark.parametrize("pages", (128, 512, 2048, 4096))
+@pytest.mark.skipif(
+    not _CUDA_BUILD_AVAILABLE
+    or (torch.cuda.is_available() and torch.cuda.get_device_capability()[0] < 8),
+    reason="the fused full-scan selector requires a CUDA build node",
+)
+def test_full_scan_selection_packs_exact_support(pages: int) -> None:
+    torch.manual_seed(2718 + pages)
+    scores = torch.randn(1, 8, 4, pages, dtype=torch.float32, device="cuda")
+    scores[..., -1] = 10.0
+    selected = torch.empty(1, 8, 62, dtype=torch.long, device="cuda")
+    support = torch.empty(1, 8, 2048, dtype=torch.long, device="cuda")
+    historical = pages * 32 - 7
+    extension = _load_extension(
+        value_dim=128, queries_per_kv=4, page_size=32,
+        base_rank=16, residual_rank=16,
+    )
+    extension.select_full_group_max_pages_and_pack(
+        scores, selected, support, historical, historical + 64
+    )
+    expected_pages = select_fixed_group_max_pages(
+        scores, pages_per_kv_head=62, pinned_prefix_pages=1,
+        force_current_page=False,
+    )
+    expected_routed = (
+        expected_pages[..., None] * 32 + torch.arange(32, device="cuda")
+    ).flatten(-2)
+    expected_routed.masked_fill_(expected_routed >= historical, -1)
+    expected_support = torch.cat(
+        (
+            expected_routed,
+            torch.arange(historical, historical + 64, device="cuda")
+            .view(1, 1, -1).expand(1, 8, -1),
+        ),
+        dim=-1,
+    )
+    torch.testing.assert_close(selected, expected_pages, rtol=0, atol=0)
+    torch.testing.assert_close(support, expected_support, rtol=0, atol=0)
 
 
 @pytest.mark.skipif(
