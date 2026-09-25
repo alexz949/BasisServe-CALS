@@ -1,0 +1,27 @@
+# Llama-3.1-8B-Instruct V96 LongBench ShadowKV-9: page-size curve (refit banks p8/p4/p1 sink 0 budget 320; p32 = PF bank sink 32 budget 352) + baselines; 2026-09-24 20:34 EDT
+# command: python compare_arms.py full=... p32=... p8fit=... p4fit=... p1fit=... lrqk=... shadowkv=... (paired on 1543 common samples)
+n per arm: {'full': 1543, 'p32': 1543, 'p8fit': 1543, 'p4fit': 1543, 'p1fit': 1543, 'lrqk': 1543, 'shadowkv': 1543}  common: 1543
+task                            full       p32     p8fit     p4fit     p1fit      lrqk  shadowkv   (each arm over its own samples)
+dureader                       32.34     29.58     30.00     28.95     30.77     30.63     31.12
+gov_report                     32.76     29.10     31.29     31.47     32.18     31.00     30.99
+hotpotqa                       52.23     51.66     51.45     52.51     52.18     52.13     52.64
+lcc                            52.22     48.95     53.46     54.05     51.24     51.61     51.18
+multifieldqa_en                50.25     51.62     50.24     51.02     50.15     50.00     51.06
+musique                        31.32     31.15     31.15     30.70     29.93     31.46     31.49
+narrativeqa                    28.06     29.16     27.96     29.05     28.79     27.90     29.22
+passage_retrieval_en           99.50     99.50     99.50     99.50     99.50     99.50     99.00
+samsum                         44.50     43.34     44.43     44.90     45.23     45.37     43.74
+9-task mean                    47.02     46.01     46.61     46.91     46.66     46.62     46.72
+6-task mean                    51.21     50.28     51.15     51.66     51.18     50.90     50.87
+paired on 1543 common samples (task-balanced 9-task mean):
+  p32 - full: -1.01  95% CI [-1.78, -0.23]  win/loss 264/391
+  p8fit - full: -0.41  95% CI [-1.00, +0.16]  win/loss 267/348
+  p4fit - full: -0.11  95% CI [-0.65, +0.44]  win/loss 266/332
+  p1fit - full: -0.35  95% CI [-0.80, +0.14]  win/loss 262/298
+  lrqk - full: -0.39  95% CI [-0.89, +0.09]  win/loss 248/325
+  shadowkv - full: -0.30  95% CI [-0.99, +0.35]  win/loss 281/339
+
+# pairwise with p4fit as baseline
+  p8fit - p4fit: -0.30  95% CI [-0.81, +0.21]  win/loss 252/264
+  p1fit - p4fit: -0.24  95% CI [-0.75, +0.30]  win/loss 274/241
+  p32 - p4fit: -0.90  95% CI [-1.62, -0.16]  win/loss 274/368

@@ -1,10 +1,18 @@
 # l31-v96-retrievalmix-ruler1100
 
-Compact per-sample predictions (prompt token ids stripped; the prompt hash, prediction, score, routing statistics and timing are kept). Full protocol per arm is in `protocols/`; summaries copied from the run directory.
+Compact per-sample predictions (prompt token ids stripped; the prompt hash, prediction, score, routing statistics and timing are kept). Full protocol per arm is in `protocols/`; paired comparison tables in `summaries/`.
+
+2026-09-24/25 additions: page-1 and page-4 Page-Fisher refits (no sink, 2048 + recent 64 = 2112) on all 1100 prompts; page-8 diagnostics (page-32 bank decoded at page 8 with one 8-token sink page on niah_multikey_2 + fwe; page-8 Page-Fisher refit, no sink, on niah_multikey_2 + fwe and on vt + qa_1 + qa_2); page-1 refit decoded with a 32-token pinned sink on fwe. Original arms: page 32, sink 32, recent 64 inside 2048.
 
 | arm | samples | tasks | task-balanced mean |
 |---|---:|---:|---:|
 | b0r32_page_fisher | 1100 | 11 | 81.84 |
+| b16r16_page1_fisher | 1100 | 11 | 82.33 |
+| b16r16_page1_fisher_sink32_diag_fwe | 100 | 1 | 46.67 |
+| b16r16_page4_fisher | 1100 | 11 | 82.02 |
+| b16r16_page8_decode_page32bank_diag_mk2_fwe | 200 | 2 | 62.00 |
+| b16r16_page8_fisher_diag_mk2_fwe | 200 | 2 | 62.83 |
+| b16r16_page8_fisher_diag_vt_qa | 300 | 3 | 61.80 |
 | b16r16_page_fisher | 1100 | 11 | 82.01 |
 | b16r16_score_mse_partial634 | 634 | 7 | 92.84 |
 | full | 1100 | 11 | 84.32 |

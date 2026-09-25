@@ -1,0 +1,581 @@
+{
+  "status": "complete",
+  "sha256": "cffb41d71029525d1229831de2c0020c2b95c639cfa8ab6f1076b42df64c49a1",
+  "protocol": {
+    "format": "basisserve.k_router.fisher_base.v1",
+    "model_config_sha256": "f7c4eadfbbf522470667b797a3c89be2524832d2d599797248dc304fff447c30",
+    "windows_sha256": "b3e7142cbd60c58d140b7015b540fec6dcecde3cf91e6588e66ffaa8583d4396",
+    "windows_manifest_sha256": "031447cdffb715fbcba0d3ade35caf6231092de7be2acc497ac51c04d26d788d",
+    "sequence_length": 131072,
+    "fit_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "diagnostic_ids": [
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47
+    ],
+    "fit_queries": 64,
+    "diagnostic_queries": 32,
+    "validation_scope": "held-out diagnostic windows",
+    "base_rank": 0,
+    "residual_rank": 32,
+    "page_size": 8,
+    "objective": "page_fisher",
+    "objective_definition": "softmax page-Fisher weighted residual objective",
+    "excluded_prefix_pages": 0,
+    "excluded_recent_tokens": 64,
+    "query_grid_prefix": 64,
+    "deployment_page_budget_tokens": 2048,
+    "maximum_deployment_support_tokens": 2048,
+    "sink_tokens_within_page_budget": 0,
+    "recent_tokens_within_page_budget": 64,
+    "chunk_rows": 2048,
+    "smoke": false,
+    "teacher": "deployed model: identity checkpoint (compressed V and decoder) installed before the replay; dense v_proj kept only for Base moments; BF16, use_cache=False",
+    "deployed_checkpoint_manifest_sha256": "ee184aa35a06fa59361c6fe7f9add43544343ece5718af7dc3b041f630aaa23f",
+    "rope": "yarn4",
+    "runtime_config": {
+      "transformers_version": "5.17.0",
+      "architectures": [
+        "Qwen3ForCausalLM"
+      ],
+      "output_hidden_states": false,
+      "return_dict": true,
+      "dtype": "bfloat16",
+      "chunk_size_feed_forward": 0,
+      "is_encoder_decoder": false,
+      "id2label": {
+        "0": "LABEL_0",
+        "1": "LABEL_1"
+      },
+      "label2id": {
+        "LABEL_0": 0,
+        "LABEL_1": 1
+      },
+      "problem_type": null,
+      "vocab_size": 151936,
+      "hidden_size": 4096,
+      "intermediate_size": 12288,
+      "num_hidden_layers": 36,
+      "num_attention_heads": 32,
+      "num_key_value_heads": 8,
+      "head_dim": 128,
+      "hidden_act": "silu",
+      "max_position_embeddings": 131072,
+      "initializer_range": 0.02,
+      "rms_norm_eps": 1e-06,
+      "use_cache": true,
+      "tie_word_embeddings": false,
+      "rope_parameters": {
+        "rope_type": "yarn",
+        "factor": 4.0,
+        "original_max_position_embeddings": 32768,
+        "rope_theta": 1000000
+      },
+      "attention_bias": false,
+      "use_sliding_window": false,
+      "sliding_window": null,
+      "max_window_layers": 36,
+      "layer_types": [
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention"
+      ],
+      "attention_dropout": 0.0,
+      "pad_token_id": null,
+      "bos_token_id": 151643,
+      "eos_token_id": 151645,
+      "_name_or_path": "/home/Ubuntu/.cache/huggingface/hub/models--Qwen--Qwen3-8B/snapshots/b968826d9c46dd6066d109eabc6255188de91218",
+      "model_type": "qwen3",
+      "output_attentions": false
+    },
+    "dense_v": false,
+    "base_moments": "FP64 raw pre-RoPE and post-RoPE moments with identical rows and encoder transform; no bitwise claim versus projected FP32 accumulation",
+    "covariance": "not collected",
+    "sharding": {
+      "kind": "window",
+      "window_shards": 8,
+      "replay": "every attention layer per window; partial moments merged in FP64"
+    },
+    "source_sha256": {
+      "evaluation/fit_k_routing_fisher_base.py": "5a88ebc2f77ef7dffb65577de258a9729a013b818ba6259b94af5730472b264e",
+      "evaluation/fit_k_routing_windowed.py": "3e772e0f1e978ac4c5a2b3b46ab58e5a14981c6477889f24e218e1ac81ea9441",
+      "evaluation/fit_k_routing_streaming.py": "1f7fa40fc5e0b2b09ef21a10eff09dcdcc2faebf48aa60fb461dc5adfe25713a",
+      "evaluation/fit_qwen3_8b_q8_fisher_residual.py": "5c83de39c3783c1d97c4851d88fa62ab96dc7b5180c74aaa2536b9f85e0263c1",
+      "evaluation/eval_qwen3_8b_v80_conditional_residual_router.py": "b0a0ffed781f27ebba82aa0b9c0f63cd7f7edea5216e7ffc03a5ae27cfda8e30",
+      "basisserve/core/c1_v_conditional_k_router.py": "2d05009e4a7e3a30d5cea6bcdb3e19256bc749ca76b88fd9c4ab383a85ee9cea",
+      "basisserve/core/gqa_joint_routing_payload_s80_fisher.py": "f68e2e656dd2496cb1ae85b17fc163d4903c3a47552ad11dcec55bb55b0a4684",
+      "basisserve/core/gqa_joint_routing_payload_s80_ablation.py": "43dc1891bbf775d11cb85bffdfe02cf91f468403452212c076789353e412ea80",
+      "evaluation/llama_sink_recent_routing_p16.py": "f247e7427954f6a9fc3b8bf1328ea70b84143bbcfe3ede8f0f662790e0a31e7e"
+    },
+    "source_protocol_format": "basisserve.k_router.streaming.v2",
+    "base_objective": "none (pure residual routing on the post-RoPE key)",
+    "fisher_page_size": 8,
+    "base_relative_damping": 1e-06,
+    "residual_objective": "page_fisher_sequential"
+  },
+  "layer": 33,
+  "v_rank": 96,
+  "identity_sha256": "0bc127d0f574f12a68a4df5304a52ee2061a5e596782e26a8e1f030dd6e6e491",
+  "losses": {
+    "b0_r0": {
+      "base_rank": 0,
+      "residual_rank": 0,
+      "fit_page_fisher_nmse": 1.0,
+      "validation_page_fisher_nmse": 1.0
+    },
+    "b0_r32": {
+      "base_rank": 0,
+      "residual_rank": 32,
+      "fit_page_fisher_nmse": 0.01745165723552782,
+      "validation_page_fisher_nmse": 0.023784817395840412,
+      "sweeps": [
+        {
+          "sweep": 1,
+          "loss_before": 11407.6669921875,
+          "loss_after_queries": 5293.76904296875,
+          "loss_after_encoder": 4200.1875
+        },
+        {
+          "sweep": 2,
+          "loss_before": 4200.1875,
+          "loss_after_queries": 3948.494384765625,
+          "loss_after_encoder": 3867.607666015625
+        },
+        {
+          "sweep": 3,
+          "loss_before": 3867.607666015625,
+          "loss_after_queries": 3816.249755859375,
+          "loss_after_encoder": 3789.7998046875
+        },
+        {
+          "sweep": 4,
+          "loss_before": 3789.7998046875,
+          "loss_after_queries": 3764.3046875,
+          "loss_after_encoder": 3750.039306640625
+        },
+        {
+          "sweep": 5,
+          "loss_before": 3750.039306640625,
+          "loss_after_queries": 3733.240478515625,
+          "loss_after_encoder": 3724.2197265625
+        },
+        {
+          "sweep": 6,
+          "loss_before": 3724.2197265625,
+          "loss_after_queries": 3713.04296875,
+          "loss_after_encoder": 3706.92822265625
+        },
+        {
+          "sweep": 7,
+          "loss_before": 3706.92822265625,
+          "loss_after_queries": 3699.15625,
+          "loss_after_encoder": 3694.5126953125
+        },
+        {
+          "sweep": 8,
+          "loss_before": 3694.5126953125,
+          "loss_after_queries": 3688.930419921875,
+          "loss_after_encoder": 3684.953125
+        },
+        {
+          "sweep": 9,
+          "loss_before": 3684.953125,
+          "loss_after_queries": 3680.49267578125,
+          "loss_after_encoder": 3676.88720703125
+        },
+        {
+          "sweep": 10,
+          "loss_before": 3676.88720703125,
+          "loss_after_queries": 3672.86572265625,
+          "loss_after_encoder": 3669.828369140625
+        },
+        {
+          "sweep": 11,
+          "loss_before": 3669.828369140625,
+          "loss_after_queries": 3665.66943359375,
+          "loss_after_encoder": 3663.49072265625
+        },
+        {
+          "sweep": 12,
+          "loss_before": 3663.49072265625,
+          "loss_after_queries": 3659.79931640625,
+          "loss_after_encoder": 3657.8564453125
+        },
+        {
+          "sweep": 13,
+          "loss_before": 3657.8564453125,
+          "loss_after_queries": 3654.91162109375,
+          "loss_after_encoder": 3653.97607421875
+        },
+        {
+          "sweep": 14,
+          "loss_before": 3653.97607421875,
+          "loss_after_queries": 3651.42578125,
+          "loss_after_encoder": 3650.69287109375
+        },
+        {
+          "sweep": 15,
+          "loss_before": 3650.69287109375,
+          "loss_after_queries": 3648.582763671875,
+          "loss_after_encoder": 3648.498291015625
+        },
+        {
+          "sweep": 16,
+          "loss_before": 3648.498291015625,
+          "loss_after_queries": 3647.23046875,
+          "loss_after_encoder": 3647.29541015625
+        },
+        {
+          "sweep": 17,
+          "loss_before": 3647.29541015625,
+          "loss_after_queries": 3646.14013671875,
+          "loss_after_encoder": 3646.56103515625
+        },
+        {
+          "sweep": 18,
+          "loss_before": 3646.56103515625,
+          "loss_after_queries": 3644.957275390625,
+          "loss_after_encoder": 3645.8525390625
+        },
+        {
+          "sweep": 19,
+          "loss_before": 3645.8525390625,
+          "loss_after_queries": 3644.46923828125,
+          "loss_after_encoder": 3645.27294921875
+        },
+        {
+          "sweep": 20,
+          "loss_before": 3645.27294921875,
+          "loss_after_queries": 3644.0146484375,
+          "loss_after_encoder": 3644.09716796875
+        },
+        {
+          "sweep": 21,
+          "loss_before": 3644.09716796875,
+          "loss_after_queries": 3643.61669921875,
+          "loss_after_encoder": 3642.96728515625
+        },
+        {
+          "sweep": 22,
+          "loss_before": 3642.96728515625,
+          "loss_after_queries": 3643.02197265625,
+          "loss_after_encoder": 3642.201171875
+        },
+        {
+          "sweep": 23,
+          "loss_before": 3642.201171875,
+          "loss_after_queries": 3643.158203125,
+          "loss_after_encoder": 3642.02880859375
+        },
+        {
+          "sweep": 24,
+          "loss_before": 3642.02880859375,
+          "loss_after_queries": 3642.39208984375,
+          "loss_after_encoder": 3641.37158203125
+        },
+        {
+          "sweep": 25,
+          "loss_before": 3641.37158203125,
+          "loss_after_queries": 3642.458740234375,
+          "loss_after_encoder": 3641.391845703125
+        },
+        {
+          "sweep": 26,
+          "loss_before": 3641.391845703125,
+          "loss_after_queries": 3642.0078125,
+          "loss_after_encoder": 3640.912841796875
+        },
+        {
+          "sweep": 27,
+          "loss_before": 3640.912841796875,
+          "loss_after_queries": 3642.02734375,
+          "loss_after_encoder": 3640.87060546875
+        },
+        {
+          "sweep": 28,
+          "loss_before": 3640.87060546875,
+          "loss_after_queries": 3641.361083984375,
+          "loss_after_encoder": 3640.18701171875
+        },
+        {
+          "sweep": 29,
+          "loss_before": 3640.18701171875,
+          "loss_after_queries": 3640.98486328125,
+          "loss_after_encoder": 3639.86669921875
+        },
+        {
+          "sweep": 30,
+          "loss_before": 3639.86669921875,
+          "loss_after_queries": 3640.9140625,
+          "loss_after_encoder": 3639.76953125
+        },
+        {
+          "sweep": 31,
+          "loss_before": 3639.76953125,
+          "loss_after_queries": 3640.79296875,
+          "loss_after_encoder": 3639.67431640625
+        },
+        {
+          "sweep": 32,
+          "loss_before": 3639.67431640625,
+          "loss_after_queries": 3640.157470703125,
+          "loss_after_encoder": 3639.0859375
+        },
+        {
+          "sweep": 33,
+          "loss_before": 3639.0859375,
+          "loss_after_queries": 3640.00341796875,
+          "loss_after_encoder": 3639.0146484375
+        },
+        {
+          "sweep": 34,
+          "loss_before": 3639.0146484375,
+          "loss_after_queries": 3639.49658203125,
+          "loss_after_encoder": 3638.67431640625
+        },
+        {
+          "sweep": 35,
+          "loss_before": 3638.67431640625,
+          "loss_after_queries": 3639.591796875,
+          "loss_after_encoder": 3638.6826171875
+        },
+        {
+          "sweep": 36,
+          "loss_before": 3638.6826171875,
+          "loss_after_queries": 3639.317138671875,
+          "loss_after_encoder": 3638.489501953125
+        },
+        {
+          "sweep": 37,
+          "loss_before": 3638.489501953125,
+          "loss_after_queries": 3639.09130859375,
+          "loss_after_encoder": 3638.26611328125
+        },
+        {
+          "sweep": 38,
+          "loss_before": 3638.26611328125,
+          "loss_after_queries": 3639.03515625,
+          "loss_after_encoder": 3638.15087890625
+        },
+        {
+          "sweep": 39,
+          "loss_before": 3638.15087890625,
+          "loss_after_queries": 3638.8583984375,
+          "loss_after_encoder": 3637.9990234375
+        },
+        {
+          "sweep": 40,
+          "loss_before": 3637.9990234375,
+          "loss_after_queries": 3638.826171875,
+          "loss_after_encoder": 3638.0634765625
+        }
+      ],
+      "final_query_maximum_iterations": 100,
+      "final_query_maximum_relative_residual": 0.0013905782252550125
+    },
+    "total": {
+      "fit": {
+        "loss": 3638.44921875,
+        "exact_energy": 208487.31840451807,
+        "nmse": 0.01745165723552782
+      },
+      "heldout": {
+        "loss": 1266.979248046875,
+        "exact_energy": 53268.4034088254,
+        "nmse": 0.023784817395840412
+      },
+      "base_only": {
+        "fit": 0.999995025335229,
+        "heldout": 0.9999966800896201
+      }
+    }
+  },
+  "base_sha256": null,
+  "base_stage": "zero",
+  "query_positions": {
+    "fit": [
+      383,
+      831,
+      1279,
+      1983,
+      3007,
+      3583,
+      4159,
+      7551,
+      8511,
+      8895,
+      9791,
+      11839,
+      13823,
+      14911,
+      20415,
+      22975,
+      37119,
+      40703,
+      42495,
+      44287,
+      45055,
+      45183,
+      48511,
+      52351,
+      52991,
+      54847,
+      55039,
+      55999,
+      57471,
+      60095,
+      61439,
+      63295,
+      65919,
+      68479,
+      70591,
+      70783,
+      73407,
+      80575,
+      83583,
+      84927,
+      85631,
+      87423,
+      90367,
+      92351,
+      93183,
+      93631,
+      94527,
+      96191,
+      99263,
+      101823,
+      102463,
+      110655,
+      119231,
+      122239,
+      122431,
+      122623,
+      123519,
+      125311,
+      126079,
+      127039,
+      127679,
+      130239,
+      130303,
+      130879
+    ],
+    "heldout": [
+      831,
+      1279,
+      3007,
+      3583,
+      7551,
+      8511,
+      20415,
+      22975,
+      37119,
+      40703,
+      42495,
+      45183,
+      52991,
+      55039,
+      55999,
+      63295,
+      70591,
+      80575,
+      83583,
+      84927,
+      85631,
+      90367,
+      92351,
+      96191,
+      101823,
+      110655,
+      122239,
+      122623,
+      125311,
+      127039,
+      130303,
+      130879
+    ]
+  },
+  "residual_statistics": "rebuilt from the cache for this Base (never reused across Base records)",
+  "sweeps": 40,
+  "pcg_iterations": 100,
+  "wall_time_seconds": 88.2,
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition"
+}

@@ -1,0 +1,29 @@
+# Llama-3.1-8B-Instruct V96 (identity B) LongBench ShadowKV-9, page-8 REFIT bank (router_B_p8, page_fisher page 8, pinned 0, 256 routed + recent 64 = 320) vs all arms; 2026-09-24 19:22 EDT
+# command: python compare_arms.py full=... p32=... p1old=... p1fit=... p8fit=... lrqk=... shadowkv=... dense=... (paired on common samples)
+n per arm: {'full': 1543, 'p32': 1543, 'p1old': 1543, 'p1fit': 1543, 'p8fit': 1543, 'lrqk': 1543, 'shadowkv': 1543, 'dense': 1543}  common: 1543
+task                            full       p32     p1old     p1fit     p8fit      lrqk  shadowkv     dense   (each arm over its own samples)
+dureader                       32.34     29.58     29.60     30.77     30.00     30.63     31.12     34.03
+gov_report                     32.76     29.10     32.12     32.18     31.29     31.00     30.99     34.52
+hotpotqa                       52.23     51.66     53.10     52.18     51.45     52.13     52.64     56.87
+lcc                            52.22     48.95     51.57     51.24     53.46     51.61     51.18     64.58
+multifieldqa_en                50.25     51.62     49.94     50.15     50.24     50.00     51.06     54.14
+musique                        31.32     31.15     31.24     29.93     31.15     31.46     31.49     33.31
+narrativeqa                    28.06     29.16     29.49     28.79     27.96     27.90     29.22     29.39
+passage_retrieval_en           99.50     99.50     99.50     99.50     99.50     99.50     99.00    100.00
+samsum                         44.50     43.34     45.41     45.23     44.43     45.37     43.74     45.02
+9-task mean                    47.02     46.01     46.89     46.66     46.61     46.62     46.72     50.21
+6-task mean                    51.21     50.28     51.34     51.18     51.15     50.90     50.87     54.61
+paired on 1543 common samples (task-balanced 9-task mean):
+  p32 - full: -1.01  95% CI [-1.78, -0.23]  win/loss 264/391
+  p1old - full: -0.13  95% CI [-0.63, +0.34]  win/loss 269/311
+  p1fit - full: -0.35  95% CI [-0.86, +0.14]  win/loss 262/298
+  p8fit - full: -0.41  95% CI [-0.96, +0.16]  win/loss 267/348
+  lrqk - full: -0.39  95% CI [-0.89, +0.09]  win/loss 248/325
+  shadowkv - full: -0.30  95% CI [-0.99, +0.35]  win/loss 281/339
+  dense - full: +3.19  95% CI [+2.09, +4.28]  win/loss 469/344
+
+# pairwise with p8fit as baseline
+  p1fit - p8fit: +0.05  95% CI [-0.49, +0.62]  win/loss 316/260
+  p32 - p8fit: -0.60  95% CI [-1.36, +0.11]  win/loss 267/356
+  lrqk - p8fit: +0.01  95% CI [-0.53, +0.57]  win/loss 315/301
+  shadowkv - p8fit: +0.11  95% CI [-0.54, +0.77]  win/loss 315/313

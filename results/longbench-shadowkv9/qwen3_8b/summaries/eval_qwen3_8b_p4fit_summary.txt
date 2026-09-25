@@ -1,0 +1,30 @@
+# Qwen3-8B (post) V96 LongBench ShadowKV-9: page-size curve (refit banks p8/p4/p1 sink 0 budget 320; p32 PF bank sink 32 budget 352; p16/p8dec = old bank decode-only with one sink page) + baselines; 2026-09-24 20:38 EDT
+# command: python compare_arms.py full=... p32=... p16=... p8dec=... p8fit=... p4fit=... p1fit=... lrqk=... shadowkv=... (paired on 1546 common samples)
+n per arm: {'full': 1549, 'p32': 1549, 'p16': 1549, 'p8dec': 1549, 'p8fit': 1549, 'p4fit': 1549, 'p1fit': 1549, 'lrqk': 1546, 'shadowkv': 1549}  common: 1546
+task                            full       p32       p16     p8dec     p8fit     p4fit     p1fit      lrqk  shadowkv   (each arm over its own samples)
+dureader                       17.89     15.03     15.94     16.48     16.03     16.68     16.72     16.36     19.93
+gov_report                     33.53     31.19     31.51     32.40     32.88     32.86     32.74     33.22     33.82
+hotpotqa                       51.61     50.80     50.85     51.98     51.28     51.47     51.73     52.93     51.94
+lcc                            62.06     59.80     60.11     59.35     59.64     58.80     59.44     59.84     55.10
+multifieldqa_en                51.47     48.22     50.03     49.94     50.47     50.94     50.78     49.50     50.47
+musique                        27.34     25.14     25.86     26.98     25.82     26.63     26.56     26.86     27.32
+narrativeqa                    25.35     25.51     24.86     25.47     25.47     26.97     25.40     26.76     26.12
+passage_retrieval_en          100.00     88.50     94.50     98.50     98.00     98.50    100.00    100.00     91.00
+samsum                         46.52     44.16     43.70     44.61     44.63     44.60     45.44     46.64     44.67
+9-task mean                    46.20     43.15     44.15     45.08     44.91     45.27     45.42     45.79     44.49
+6-task mean                    53.16     49.56     50.79     51.71     51.85     52.11     52.30     52.66     50.20
+paired on 1546 common samples (task-balanced 9-task mean):
+  p32 - full: -3.05  95% CI [-4.05, -2.09]  win/loss 282/469
+  p16 - full: -2.05  95% CI [-2.90, -1.28]  win/loss 264/439
+  p8dec - full: -1.12  95% CI [-1.78, -0.46]  win/loss 282/389
+  p8fit - full: -1.29  95% CI [-1.95, -0.70]  win/loss 277/379
+  p4fit - full: -0.93  95% CI [-1.54, -0.26]  win/loss 283/359
+  p1fit - full: -0.78  95% CI [-1.31, -0.30]  win/loss 274/325
+  lrqk - full: -0.41  95% CI [-0.90, +0.08]  win/loss 270/289
+  shadowkv - full: -1.71  95% CI [-2.64, -0.86]  win/loss 379/385
+
+# pairwise with p4fit as baseline
+  p8fit - p4fit: -0.36  95% CI [-0.84, +0.13]  win/loss 273/309
+  p1fit - p4fit: +0.15  95% CI [-0.39, +0.70]  win/loss 296/279
+  p32 - p4fit: -2.12  95% CI [-2.96, -1.30]  win/loss 293/421
+  lrqk - p4fit: +0.52  95% CI [-0.14, +1.23]  win/loss 352/296

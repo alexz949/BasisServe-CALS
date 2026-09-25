@@ -1,0 +1,29 @@
+# Qwen3-8B (post) RULER-128K 1100, PAGE-4 Page-Fisher refit (router_p4, sink 0, 2112) vs all arms; 2026-09-25 02:16 EDT; command: python compare_ruler.py full=... p32=... p32score=... b8r24=... p1=... p4=... lrqk=... shadowkv=...
+n per arm: {'full': 1100, 'p32': 1100, 'p32score': 1100, 'b8r24': 1100, 'p1': 1100, 'p4': 1100, 'lrqk': 1100, 'shadowkv': 1100}  common: 1100
+task                        full         p32    p32score       b8r24          p1          p4        lrqk    shadowkv
+fwe                        88.00       88.67       92.00       89.33       79.00       80.33       81.33       88.67
+niah_multikey_1            85.00       84.00       87.00       86.00       88.00       86.00       86.00       84.00
+niah_multikey_2            61.00       44.00       54.00       56.00       57.00       53.00       57.00       44.00
+niah_multiquery            93.50       94.75       95.00       93.75       94.50       94.00       93.75       83.75
+niah_multivalue            96.50       92.50       94.00       95.75       96.00       94.00       96.50       86.75
+niah_single_1             100.00      100.00      100.00      100.00      100.00      100.00      100.00      100.00
+niah_single_2             100.00       98.00       99.00       98.00       99.00       99.00       98.00       95.00
+niah_single_3             100.00       98.00      100.00      100.00      100.00      100.00      100.00       98.00
+qa_1                       55.00       49.00       51.00       52.00       55.00       54.00       51.00       53.00
+qa_2                       36.00       31.00       32.00       32.00       34.00       33.00       36.00       28.00
+vt                         93.40       92.00       92.40       92.40       93.20       93.00       91.20       82.00
+mean                       82.58       79.27       81.49       81.38       81.43       80.58       80.98       76.65
+  p32 - full: -3.32  95% CI [-4.70, -1.95]  win/loss 48/93
+  p32score - full: -1.09  95% CI [-2.35, +0.14]  win/loss 59/62
+  b8r24 - full: -1.20  95% CI [-2.46, +0.06]  win/loss 57/65
+  p1 - full: -1.15  95% CI [-2.13, -0.24]  win/loss 31/59
+  p4 - full: -2.01  95% CI [-3.06, -1.02]  win/loss 35/74
+  lrqk - full: -1.60  95% CI [-2.62, -0.57]  win/loss 28/67
+  shadowkv - full: -5.93  95% CI [-7.54, -4.42]  win/loss 54/170
+
+# pairwise with p4 as baseline
+  p1 - p4: +0.85  95% CI [+0.09, +1.67]  win/loss 36/24
+  p32 - p4: -1.31  95% CI [-2.47, -0.14]  win/loss 51/55
+  p32score - p4: +0.92  95% CI [-0.17, +1.97]  win/loss 71/32
+  b8r24 - p4: +0.81  95% CI [-0.21, +1.86]  win/loss 63/32
+  lrqk - p4: +0.40  95% CI [-0.62, +1.35]  win/loss 46/46

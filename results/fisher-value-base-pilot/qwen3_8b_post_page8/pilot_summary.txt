@@ -1,0 +1,44 @@
+
+== layer 0
+arm                           fit Fisher  val Fisher  page recall   page KL    mass
+MSE-B16                           0.4543      0.4265            -         -       -
+Fisher-B16                        0.2795      0.2988            -         -       -
+R16-Fisher                        0.3492      0.4079       0.6416    0.7332  0.7834
+MSE-B16 + R16-Fisher              0.2103      0.2745       0.8072    0.3958  0.8101
+Fisher-B16 + R16-Fisher           0.1769      0.2443       0.7723    0.4301  0.8080
+Joint-Fisher B16R16               0.1626      0.2333       0.7853    0.4089  0.8098
+R32-Fisher                        0.1791      0.2507       0.7581    0.4264  0.8060
+Exact-K                                -           -       1.0000    0.0000  0.8239
+
+== layer 13
+arm                           fit Fisher  val Fisher  page recall   page KL    mass
+MSE-B16                           3.0524      3.0361            -         -       -
+Fisher-B16                        0.1733      0.1974            -         -       -
+R16-Fisher                        0.1396      0.1864       0.4459    1.0917  0.8482
+MSE-B16 + R16-Fisher              0.0777      0.1053       0.6453    0.4947  0.8956
+Fisher-B16 + R16-Fisher           0.0756      0.1073       0.6182    0.5490  0.8914
+Joint-Fisher B16R16               0.0606      0.0894       0.6585    0.4372  0.8995
+R32-Fisher                        0.0700      0.1038       0.6067    0.4866  0.8964
+Exact-K                                -           -       1.0000    0.0000  0.9240
+
+== layer 33
+arm                           fit Fisher  val Fisher  page recall   page KL    mass
+MSE-B16                           2.3834      2.4823            -         -       -
+Fisher-B16                        0.3288      0.3629            -         -       -
+R16-Fisher                        0.0573      0.0770       0.6348    0.3405  0.8960
+MSE-B16 + R16-Fisher              0.0690      0.0875       0.6792    0.3224  0.9019
+Fisher-B16 + R16-Fisher           0.0563      0.0737       0.6241    0.4503  0.8939
+Joint-Fisher B16R16               0.0332      0.0467       0.7148    0.2123  0.9054
+R32-Fisher                        0.0175      0.0238       0.7881    0.0975  0.9136
+Exact-K                                -           -       1.0000    0.0000  0.9194
+
+== mean over layers [0, 13, 33]
+arm                           fit Fisher  val Fisher  page recall   page KL    mass
+MSE-B16                           1.9634      1.9816            -         -       -
+Fisher-B16                        0.2605      0.2864            -         -       -
+R16-Fisher                        0.1820      0.2238       0.5741    0.7218  0.8425
+MSE-B16 + R16-Fisher              0.1190      0.1558       0.7106    0.4043  0.8692
+Fisher-B16 + R16-Fisher           0.1029      0.1418       0.6715    0.4765  0.8644
+Joint-Fisher B16R16               0.0855      0.1231       0.7196    0.3528  0.8716
+R32-Fisher                        0.0888      0.1261       0.7176    0.3368  0.8720
+Exact-K                                -           -       1.0000    0.0000  0.8891

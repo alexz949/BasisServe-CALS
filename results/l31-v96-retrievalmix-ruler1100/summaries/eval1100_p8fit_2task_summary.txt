@@ -1,0 +1,23 @@
+# Llama-3.1-8B-Instruct RULER-128K two-task diagnostic (niah_multikey_2 + fwe, 100 each), page-8 REFIT bank router_B_p8 (page_fisher, page 8, pinned 0, budget 2048+64), 2026-09-24 18:32 EDT
+# command: python compare_arms_p8fit.py (paired on index + input_sha256)
+配对样本 200 条；arm: ['Full-K', 'B16R16-p32', 'B16R16-p1', 'B16R16-p8dec', 'B16R16-p8fit', 'B0R32', 'LRQK', 'ShadowKV']
+
+任务                    Full-KB16R16-p32 B16R16-p1B16R16-p8decB16R16-p8fit     B0R32      LRQK  ShadowKV
+niah_multikey_2        83.00     66.00     80.00     73.00     75.00     69.00     76.00     61.00   n=100
+fwe                    52.67     60.33     46.33     51.00     50.67     61.00     48.67     58.00   n=100
+RULER 均分             67.83     63.17     63.17     62.00     62.83     65.00     62.33     59.50
+B16R16-p32  vs Full-K: 差 -4.67  95% CI [-10.00, +0.33]  胜/负/平 32/31/137
+B16R16-p1   vs Full-K: 差 -4.67  95% CI [-8.33, -1.00]  胜/负/平 19/39/142
+B16R16-p8dec vs Full-K: 差 -5.83  95% CI [-10.33, -1.67]  胜/负/平 25/40/135
+B16R16-p8fit vs Full-K: 差 -5.00  95% CI [-9.33, -1.00]  胜/负/平 25/39/136
+B0R32       vs Full-K: 差 -2.83  95% CI [-7.67, +2.00]  胜/负/平 35/30/135
+LRQK        vs Full-K: 差 -5.50  95% CI [-9.50, -1.67]  胜/负/平 21/38/141
+ShadowKV    vs Full-K: 差 -8.33  95% CI [-13.83, -3.17]  胜/负/平 27/38/135
+B16R16-p1 vs B16R16-p32: 差 +0.00  95% CI [-4.50, +4.67]  胜/负/平 17/43/140
+B16R16-p1 vs B16R16-p8dec: 差 +1.17  95% CI [-1.67, +4.50]  胜/负/平 12/18/170
+B16R16-p1 vs B16R16-p8fit: 差 +0.33  95% CI [-2.33, +3.17]  胜/负/平 9/16/175
+B16R16-p1 vs LRQK      : 差 +0.83  95% CI [-1.67, +3.67]  胜/负/平 13/17/170
+B16R16-p1 vs ShadowKV  : 差 +3.67  95% CI [-1.17, +8.67]  胜/负/平 24/35/141
+B16R16-p8fit vs B16R16-p8dec: 差 +0.83  95% CI [-0.83, +2.67]  胜/负/平 7/6/187
+B16R16-p8fit vs B16R16-p1   : 差 -0.33  95% CI [-3.17, +2.17]  胜/负/平 16/9/175
+B16R16-p8fit vs B16R16-p32  : 差 -0.33  95% CI [-4.50, +3.83]  胜/负/平 16/36/148

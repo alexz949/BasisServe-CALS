@@ -1,0 +1,22 @@
+task                            b16r16 (local)                full (local)                lrqk (local)            shadowkv (local)
+narrativeqa                       32.4 (n=200)                32.8 (n=200)                32.2 (n=200)                32.0 (n=200)
+multifieldqa_en                   52.3 (n=110)                52.0 (n=110)                51.6 (n=110)                52.9 (n=110)
+hotpotqa                          59.2 (n=195)                59.4 (n=195)                58.9 (n=195)                58.5 (n=195)
+musique                           38.1 (n=200)                39.5 (n=200)                39.6 (n=200)                39.6 (n=200)
+dureader                          24.2 (n=200)                23.4 (n=200)                23.0 (n=200)                23.0 (n=200)
+gov_report                        30.7 (n=182)                31.4 (n=182)                31.3 (n=182)                31.7 (n=182)
+samsum                            31.4 (n=167)                31.6 (n=167)                31.9 (n=167)                31.3 (n=167)
+passage_retrieval_en                23.7 (n=200)                19.2 (n=200)                23.0 (n=200)                27.0 (n=200)
+lcc                               60.9 (n=110)                65.7 (n=110)                66.1 (n=110)                61.3 (n=110)
+task-balanced mean        39.20 (1564 prompts)        39.45 (1564 prompts)        39.73 (1564 prompts)        39.70 (1564 prompts)
+LRQK 6-task mean               38.56 (6 tasks)             38.78 (6 tasks)             39.34 (6 tasks)             39.36 (6 tasks)
+b16r16: mean prefill 1.6 s, mean total 9.1 s, peak 29.4 GiB
+full: mean prefill 2.0 s, mean total 6.7 s, peak 27.4 GiB
+lrqk: mean prefill 1.2 s, mean total 7.1 s, peak 27.9 GiB
+shadowkv: mean prefill 1.6 s, mean total 4.2 s, peak 27.8 GiB
+b16r16 - full: -0.25 95% CI [-1.05, +0.55] win/loss 320/355 on 1564 paired prompts
+b16r16 - lrqk: -0.52 95% CI [-1.35, +0.29] win/loss 333/346 on 1564 paired prompts
+b16r16 - shadowkv: -0.49 95% CI [-1.39, +0.42] win/loss 348/371 on 1564 paired prompts
+full - lrqk: -0.28 95% CI [-0.72, +0.16] win/loss 244/248 on 1564 paired prompts
+full - shadowkv: -0.25 95% CI [-1.06, +0.53] win/loss 326/327 on 1564 paired prompts
+lrqk - shadowkv: +0.03 95% CI [-0.78, +0.87] win/loss 326/343 on 1564 paired prompts

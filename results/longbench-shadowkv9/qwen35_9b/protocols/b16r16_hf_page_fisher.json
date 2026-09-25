@@ -1,0 +1,181 @@
+{
+ "format": "basisserve.qwen35.routing_ruler.128k.v2",
+ "benchmark": "longbench",
+ "v_bank_sha256": "cca8c04469a5a50f97a720a148fcdafc1b5a822cf9d7118d1ed4388bc8a930b6",
+ "gdn_bank_sha256": "e461a633cdde9ecde4c9502671d1e71803769b1d2bde1bdc0dcddf75adb1d325",
+ "data_sha256": "0460175185e80955e3455242a3ce3b7a60247f349f5dc9df2640ff735a8e5f27",
+ "model_identity": {
+  "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+  "config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+  "model_files_sha256": {
+   "model.safetensors-00001-of-00004.safetensors": "db6f444b43d318c92f360a13a25561a6a65b10c0631b8ed305a426dbaa6c380e",
+   "model.safetensors-00002-of-00004.safetensors": "31c7d7e2dd5d207840b31cc59083c8f4c4718959149e0358c0364052bb9a0330",
+   "model.safetensors-00003-of-00004.safetensors": "7ec36ba3a4176a44c3c0876ad80c56a2f70c84bf008d82e9501df642f17dadec",
+   "model.safetensors-00004-of-00004.safetensors": "b62b0c4cd7e44edee103ee8f4fe225f246d5e768e07bfd5f25b63a8aa1fdd0c6"
+  }
+ },
+ "thinking": false,
+ "prompt_format": "chat template (user = official LongBench prompt), add_generation_prompt, enable_thinking=False; raw completion prompt for trec, triviaqa, samsum, lsht, lcc, repobench-p",
+ "sequence_length": 131072,
+ "samples": 1564,
+ "arm": "b16r16",
+ "samples_per_task": {
+  "narrativeqa": 200,
+  "multifieldqa_en": 110,
+  "hotpotqa": 195,
+  "musique": 200,
+  "dureader": 200,
+  "gov_report": 182,
+  "samsum": 167,
+  "passage_retrieval_en": 200,
+  "lcc": 110
+ },
+ "router_sources": {
+  "layer_003.safetensors": {
+   "sha256": "dd9c1c7b1d03d4da642a9cfa82269369aba0b2771e1ce83bab51757859391ad0",
+   "objective": "page_fisher",
+   "fit_windows": 32,
+   "sweeps": 60,
+   "pcg_iterations": 50
+  },
+  "layer_007.safetensors": {
+   "sha256": "d289929e645c327afe84b420dac6a0eacd29e989a98fba9087e207d3125d80b7",
+   "objective": "page_fisher",
+   "fit_windows": 32,
+   "sweeps": 60,
+   "pcg_iterations": 50
+  },
+  "layer_011.safetensors": {
+   "sha256": "99e9bab47c1a3dba996060d5815d0bf9a0d07d84635f01b5c6b6f7932141fff2",
+   "objective": "page_fisher",
+   "fit_windows": 32,
+   "sweeps": 60,
+   "pcg_iterations": 50
+  },
+  "layer_015.safetensors": {
+   "sha256": "b2cc37ec39ee470fbeb30d17e7b7148ce7a829fae1013faf5d7bc09049865691",
+   "objective": "page_fisher",
+   "fit_windows": 32,
+   "sweeps": 60,
+   "pcg_iterations": 50
+  },
+  "layer_019.safetensors": {
+   "sha256": "140503652c734bf028cf0587e2a72407570ce3c729d81799359fe31f155ae656",
+   "objective": "page_fisher",
+   "fit_windows": 32,
+   "sweeps": 60,
+   "pcg_iterations": 50
+  },
+  "layer_023.safetensors": {
+   "sha256": "4d4c18779fb19e1192e53839cc7e32c1e161c86bcc8a4c74cb56f572f24b1765",
+   "objective": "page_fisher",
+   "fit_windows": 32,
+   "sweeps": 60,
+   "pcg_iterations": 50
+  },
+  "layer_027.safetensors": {
+   "sha256": "2e24aa2fc26d7e4b9ea264da6d141b2cdf99fcb14ab4192ddcc754b944180b32",
+   "objective": "page_fisher",
+   "fit_windows": 32,
+   "sweeps": 60,
+   "pcg_iterations": 50
+  },
+  "layer_031.safetensors": {
+   "sha256": "bd138bf90dfced4cb0fe91e60de2822ee6640f3cc4a79fee25d7338d4759ce1c",
+   "objective": "page_fisher",
+   "fit_windows": 32,
+   "sweeps": 60,
+   "pcg_iterations": 50
+  }
+ },
+ "code_sha256": {
+  "evaluation/eval_qwen35_128k_ruler.py": "c441c1d9151f7568f00174c1c97e419023f48f51770564f3c0a4b8ea25d5b983",
+  "basisserve/core/qwen35_k_routing_runtime.py": "9930496171f5b0b49cd0ec2e0d03d0fee599db9cfe95eff1de80ae874856f7d8",
+  "basisserve/core/qwen35_gated_v_runtime.py": "c2a9f33acfb286c2a0177bfa9c70f3d4ba2888b547fbc7da47aff8bea83ab6a2",
+  "basisserve/core/qwen35_gdn_private_ag_runtime.py": "bdfd810d8e9a5dee2b8a5072fef103239acbf5be4401c5c200e05542efb96e37",
+  "basisserve/core/c1_conditional_page_attention.py": "d271f38ded18579752f55747b9226125fb9f67b1cceb7cac7ba32167ed987b00",
+  "basisserve/core/compact_v_flash.py": "c29c74f08713e00687fc63aba0eee6b73e7be9254fc9c23ff74ddab67d5bda70",
+  "basisserve/core/c1_v_k_index.py": "17ddc7b469912ac15f0050185ba3d493e9dbdffecd59f9b57004730ef6c94756",
+  "evaluation/longbench_metrics.py": "20844f1b8629afd9251ac490c97d7bf4ed9331558bf3cf31a58ef7c8a45a5837",
+  "evaluation/longbench_official/metrics.py": "e22e2a2662e0f7e683137fa3541f64edb6a801e9138d16d2f3459a6ab9941323",
+  "evaluation/longbench_official/dataset2prompt.json": "56d22ad4f382169c2b8a11ff4c982a4a1bea096c8152b0f0b85b64686b157c30",
+  "evaluation/longbench_official/dataset2maxlen.json": "72966b3c0933e214591637fb085798c5e687ebff4ddaab5d99bbc31120532022"
+ },
+ "numerical_policy": {
+  "model_dtype": "bfloat16",
+  "cuda_matmul_allow_tf32": false,
+  "cudnn_allow_tf32": false
+ },
+ "checkpoint": {
+  "full_attention_v": "uniform V192 ALS12 encoder-CG16 decoder-CG50",
+  "gdn_wo": "24 layers; TP4-private 1024->768 per source; ALS6"
+ },
+ "ours": {
+  "base": 16,
+  "residual": 16,
+  "page_size": 32,
+  "physical_group_budget": 320,
+  "sink": 0,
+  "recent": 64,
+  "recent_inside_budget": true,
+  "maximum_support": 320
+ },
+ "lrqk": {
+  "rank": 32,
+  "topk_per_query_head": 256,
+  "recent": 64,
+  "prefill_iterations": 2,
+  "decode_iterations": 2,
+  "state_dtype": "bfloat16",
+  "solve_dtype": "float32",
+  "physical_gqa_union": "uncapped"
+ },
+ "shadowkv": {
+  "rank": 160,
+  "chunk": 8,
+  "routed": 256,
+  "outlier_chunks": 48,
+  "extra_support": "official local tail and generated tokens"
+ },
+ "loki_topk": 2048,
+ "gdn_kernel": "flash-linear-attention chunk_gated_delta_rule (Triton) via transformers fallback resolution",
+ "prefill": "exact full causal FlashAttention with the V192 cache and GDN-Wo75 installed on every arm",
+ "selection": "greedy; native EOS; official per-task generation caps",
+ "longbench": {
+  "data_protocol": {
+   "tasks": [
+    "narrativeqa",
+    "multifieldqa_en",
+    "hotpotqa",
+    "musique",
+    "dureader",
+    "gov_report",
+    "samsum",
+    "passage_retrieval_en",
+    "lcc"
+   ],
+   "samples_per_task": {
+    "narrativeqa": 200,
+    "multifieldqa_en": 110,
+    "hotpotqa": 195,
+    "musique": 200,
+    "dureader": 200,
+    "gov_report": 182,
+    "samsum": 167,
+    "passage_retrieval_en": 200,
+    "lcc": 110
+   },
+   "filter": "official prompt tokens > 4096 under the model tokenizer (add_special_tokens=False); no truncation",
+   "min_input_tokens": 4096,
+   "sequence_length": 131072,
+   "prompt_source": "evaluation/longbench_official/dataset2prompt.json",
+   "maxlen_source": "evaluation/longbench_official/dataset2maxlen.json",
+   "longbench_repo_revision": "2e00731f8d0bff23dc4325161044d0ed8af94c1e",
+   "data_zip_sha256": "cb45b11a4133c6bc1d6a44b0f8e701335ff1e543195db1103472e575857f7f64",
+   "chat_wrapping": "applied by the evaluator (official build_chat equivalent: chat template + generation prompt)"
+  },
+  "model_tag": "qwen35_9b",
+  "scoring": "official LongBench eval.py per-sample scorer: max over references; first non-empty line for samsum/trec/triviaqa/lsht",
+  "generation": "greedy, native EOS, official dataset2maxlen caps"
+ }
+}

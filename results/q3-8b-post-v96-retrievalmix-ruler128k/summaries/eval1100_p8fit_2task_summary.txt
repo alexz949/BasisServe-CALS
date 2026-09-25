@@ -1,0 +1,15 @@
+# Qwen3-8B (post) RULER-128K two-task diagnostic (niah_multikey_2 + fwe, 100 each), page-8 REFIT bank router_p8 (page_fisher, page 8, pinned 0, budget 2048+64), 2026-09-24 18:32 EDT
+# command: python compare_ruler.py full=... p32=... p32score=... b8r24=... lrqk=... shadowkv=... p1fit=... p8decode=... p8fit=... (paired on (task, ordinal); first arm = baseline)
+n per arm: {'full': 1100, 'p32': 1100, 'p32score': 1100, 'b8r24': 1100, 'lrqk': 1100, 'shadowkv': 1100, 'p1fit': 1100, 'p8decode': 200, 'p8fit': 200}  common: 200
+task                        full         p32    p32score       b8r24        lrqk    shadowkv       p1fit    p8decode       p8fit
+fwe                        88.00       88.67       92.00       89.33       81.33       88.67       79.00       82.33       82.67
+niah_multikey_2            61.00       44.00       54.00       56.00       57.00       44.00       57.00       48.00       53.00
+mean                       74.50       66.33       73.00       72.67       69.17       66.33       68.00       65.17       67.83
+  p32 - full: -8.17  95% CI [-12.44, -3.77]  win/loss 18/33
+  p32score - full: -1.50  95% CI [-5.65, +2.81]  win/loss 28/23
+  b8r24 - full: -1.83  95% CI [-6.33, +2.38]  win/loss 24/24
+  lrqk - full: -5.33  95% CI [-8.68, -2.30]  win/loss 7/31
+  shadowkv - full: -8.17  95% CI [-13.05, -3.27]  win/loss 23/37
+  p1fit - full: -6.50  95% CI [-10.07, -2.76]  win/loss 9/39
+  p8decode - full: -9.33  95% CI [-13.50, -5.28]  win/loss 14/43
+  p8fit - full: -6.67  95% CI [-10.88, -2.80]  win/loss 16/40

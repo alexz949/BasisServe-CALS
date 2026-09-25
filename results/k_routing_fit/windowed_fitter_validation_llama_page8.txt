@@ -1,0 +1,39 @@
+# Windowed-fitter validation, Llama-3.1-8B-Instruct page-8 Page-Fisher B16R16 (2026-09-24): bank A = router_B_p8 (layer-sharded streaming moments/base adopted, window-sharded fisher/fit), bank B = router_B_p8w (window-sharded end to end). Same 32 windows, ALS 40 / PCG 100.
+# command: python compare_banks.py router_B_p8/ours_b16r16 router_B_p8w/ours_b16r16
+layer    nmse_a    nmse_b  max rel diff of factors
+    0    0.0598    0.0598                   0.0000
+    1    0.0010    0.0010                   0.0000
+    2    0.0036    0.0036                   0.0000
+    3    0.0008    0.0008                   0.0000
+    4    0.0015    0.0015                   0.0000
+    5    0.0032    0.0032                   0.0000
+    6    0.0028    0.0028                   0.0000
+    7    0.0042    0.0042                   0.0000
+    8    0.0053    0.0053                   0.0000
+    9    0.0057    0.0057                   0.0000
+   10    0.0066    0.0066                   0.0000
+   11    0.0053    0.0053                   0.0000
+   12    0.0036    0.0036                   0.0000
+   13    0.0094    0.0094                   0.0000
+   14    0.0061    0.0061                   0.0000
+   15    0.0067    0.0067                   0.0000
+   16    0.0062    0.0062                   0.0000
+   17    0.0081    0.0081                   0.0000
+   18    0.0051    0.0051                   0.0000
+   19    0.0047    0.0047                   0.0000
+   20    0.0061    0.0061                   0.0000
+   21    0.0069    0.0069                   0.0000
+   22    0.0061    0.0061                   0.2126
+   23    0.0069    0.0069                   0.0000
+   24    0.0074    0.0074                   0.0000
+   25    0.0088    0.0088                   0.0000
+   26    0.0085    0.0085                   0.0000
+   27    0.0081    0.0081                   0.0000
+   28    0.0075    0.0075                   0.0000
+   29    0.0076    0.0076                   0.0000
+   30    0.0138    0.0138                   0.0000
+   31    0.0047    0.0047                   0.0000
+mean nmse a/b: 0.0076 0.0076  layers: 32
+protocol sharding a/b: {'kind': 'window', 'window_shards': 8, 'replay': 'every attention layer per window; partial moments merged in FP64'} | {'kind': 'window', 'window_shards': 8, 'replay': 'every attention layer per window; partial moments merged in FP64'}
+
+# layer 22: identical loss trajectory (7 digits) and NMSE 0.006067 in both banks; the residual factors of KV group 5 (heads 20-23) differ (composed Q-K map rel diff 9%) = non-unique ALS optimum (query PCG at the 100-iteration cap, rel residual 1.2e-3), not a merge difference.

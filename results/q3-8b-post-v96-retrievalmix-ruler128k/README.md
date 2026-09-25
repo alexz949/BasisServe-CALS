@@ -1,9 +1,17 @@
 # q3-8b-post-v96-retrievalmix-ruler128k
 
-Compact per-sample predictions (prompt token ids stripped; the prompt hash, prediction, score, routing statistics and timing are kept). Full protocol per arm is in `protocols/`; summaries copied from the run directory.
+Compact per-sample predictions (prompt token ids stripped; the prompt hash, prediction, score, routing statistics and timing are kept). Full protocol per arm is in `protocols/`; paired comparison tables in `summaries/`.
+
+2026-09-24/25 additions: page-1 and page-4 Page-Fisher refits (no sink, 2048 + recent 64 = 2112) on all 1100 prompts; page-8 diagnostics (page-32 bank decoded at page 8 with one 8-token sink page on niah_multikey_2 + fwe; page-8 Page-Fisher refit, no sink, on niah_multikey_2 + fwe and on vt + qa_1 + qa_2); page-1 refit decoded with a 32-token pinned sink on fwe. Original arms: page 32, sink 32, recent 64 inside 2048.
 
 | arm | samples | tasks | task-balanced mean |
 |---|---:|---:|---:|
+| b16r16_page1_fisher | 1100 | 11 | 81.43 |
+| b16r16_page1_fisher_sink32_diag_fwe | 100 | 1 | 80.00 |
+| b16r16_page4_fisher | 1100 | 11 | 80.58 |
+| b16r16_page8_decode_page32bank_diag_mk2_fwe | 200 | 2 | 65.17 |
+| b16r16_page8_fisher_diag_mk2_fwe | 200 | 2 | 67.83 |
+| b16r16_page8_fisher_diag_vt_qa | 300 | 3 | 58.47 |
 | b16r16_page_fisher | 1100 | 11 | 79.27 |
 | b16r16_score_mse | 1100 | 11 | 81.49 |
 | b8r24_page_fisher | 1100 | 11 | 81.38 |
@@ -20,37 +28,22 @@ Protocol excerpt (first arm):
 ```json
 {
  "sequence_length": 131072,
- "rope": "yarn4",
- "value_mode": "allocated C1 V",
- "ours": "Base16/Residual16 Page32 mass, GQA max; sink32 + recent64 inside hard B2048",
- "lrqk": {
-  "rank": 32,
-  "topk_per_query_head": 704,
-  "recent": 64,
-  "prefill_iterations": 2,
-  "decode_iterations": 2,
-  "tolerance": 0.01,
-  "seed": 0,
-  "state_dtype": "bfloat16",
-  "solve_dtype": "float32"
+ "ours": "Base16/Residual16 Page1 mass, GQA max; sink0 (0 pinned page) + recent64 inside hard B2112",
+ "samples_per_task": {
+  "niah_single_1": 100,
+  "niah_single_2": 100,
+  "niah_single_3": 100,
+  "niah_multikey_1": 100,
+  "niah_multikey_2": 100,
+  "niah_multiquery": 100,
+  "niah_multivalue": 100,
+  "vt": 100,
+  "fwe": 100,
+  "qa_1": 100,
+  "qa_2": 100
  },
- "shadowkv": {
-  "rank": 160,
-  "chunk": 8,
-  "routed": 2048,
-  "outlier_chunks": 48,
-  "extra_support": "native local and generated tokens"
- },
- "loki": {
-  "rank": 32,
-  "topk_per_query_head": 856,
-  "recent": 0,
-  "bank_manifest_sha256": "a03a5f325e0bc6cb416ba0329b66e605f844bda6c9a02cc53e8b264c65f0e31c",
-  "coordinate": "post-RoPE Q/K projection without mean subtraction",
-  "calibration": "dense model"
- },
- "input_template": "tokenizer.apply_chat_template user message (input), add_generation_prompt=True, then the official answer prefix as assistant text",
- "samples_per_task": 100,
- "generation": "greedy, native EOS, official caps"
+ "generation": "greedy, native EOS, official caps",
+ "benchmark": "ruler",
+ "ours_budget": 2112
 }
 ```

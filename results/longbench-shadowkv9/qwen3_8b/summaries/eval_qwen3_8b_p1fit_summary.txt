@@ -1,0 +1,20 @@
+n per arm: {'full': 1549, 'p32': 1549, 'p16': 1549, 'p8': 1549, 'p1_refit': 1549, 'lrqk': 1546, 'shadowkv': 1549}  common: 1546
+task                            full       p32       p16        p8  p1_refit      lrqk  shadowkv   (each arm over its own samples)
+dureader                       17.89     15.03     15.94     16.48     16.72     16.36     19.93
+gov_report                     33.53     31.19     31.51     32.40     32.74     33.22     33.82
+hotpotqa                       51.61     50.80     50.85     51.98     51.73     52.93     51.94
+lcc                            62.06     59.80     60.11     59.35     59.44     59.84     55.10
+multifieldqa_en                51.47     48.22     50.03     49.94     50.78     49.50     50.47
+musique                        27.34     25.14     25.86     26.98     26.56     26.86     27.32
+narrativeqa                    25.35     25.51     24.86     25.47     25.40     26.76     26.12
+passage_retrieval_en          100.00     88.50     94.50     98.50    100.00    100.00     91.00
+samsum                         46.52     44.16     43.70     44.61     45.44     46.64     44.67
+9-task mean                    46.20     43.15     44.15     45.08     45.42     45.79     44.49
+6-task mean                    53.16     49.56     50.79     51.71     52.30     52.66     50.20
+paired on 1546 common samples (task-balanced 9-task mean):
+  p32 - full: -3.05  95% CI [-4.05, -2.09]  win/loss 282/469
+  p16 - full: -2.05  95% CI [-2.90, -1.28]  win/loss 264/439
+  p8 - full: -1.12  95% CI [-1.78, -0.46]  win/loss 282/389
+  p1_refit - full: -0.78  95% CI [-1.30, -0.28]  win/loss 274/325
+  lrqk - full: -0.41  95% CI [-0.94, +0.09]  win/loss 270/289
+  shadowkv - full: -1.71  95% CI [-2.58, -0.83]  win/loss 379/385
