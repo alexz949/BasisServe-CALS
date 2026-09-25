@@ -143,13 +143,13 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
                 rows = torch.cat((v, k_post.transpose(1, 2)), -1)
                 stats, diagnostics = build_multi_query_statistics(q[:, :, positions].transpose(1, 2), rows,
                     query_positions=positions, cos=cos, sin=sin, value_encoder=base_payloads[layer]['encoder'],
-                    base_maps=restore_base(base_payloads[layer]), page_size=PAGE_SIZE,
+                    base_maps=restore_base(base_payloads[layer]), page_size=args.page_size,
                     excluded_prefix_pages=protocol['excluded_prefix_pages'],
                     excluded_recent_tokens=protocol['excluded_recent_tokens'], device=torch.device('cuda'))
                 payload = packed_fisher(stats[args.base_rank])
             else:
                 payload, diagnostics = score_mse_statistics(q, v, k_post, positions, base_payloads[layer]['encoder'],
-                    base_payloads[layer], cos, sin, excluded_prefix_tokens=PAGE_SIZE * protocol['excluded_prefix_pages'],
+                    base_payloads[layer], cos, sin, excluded_prefix_tokens=args.page_size * protocol['excluded_prefix_pages'],
                     excluded_recent_tokens=protocol['excluded_recent_tokens'], heads=heads, groups=groups, dim=dim)
             if args.smoke:
                 # The prefix rotation of the Base prediction must match the model's own partial RoPE rule.
@@ -228,6 +228,7 @@ def main():
     p.add_argument('--window-shard', type=int, default=0)
     p.add_argument('--window-shards', type=int, default=1)
     p.add_argument('--objective', choices=('score_mse', 'page_fisher'), default='score_mse')
+    p.add_argument('--page-size', type=int, default=PAGE_SIZE, choices=(1, 2, 4, 8, 16, 32))
     p.add_argument('--smoke', action='store_true')
     args = p.parse_args()
     configure()
@@ -244,8 +245,8 @@ def main():
     assert manifest['status'] == 'complete' and manifest['sha256'] == sha256(args.windows)
     assert manifest['model_config_sha256'] == identity['model_config_sha256']
     fit_ids = [int(x) for x in manifest['fit_ids']]
-    assert fit_ids == list(range(len(fit_ids))) and not manifest['validation_ids']
-    assert windows.shape[0] == len(fit_ids) and 4096 <= args.sequence_length <= windows.shape[1]
+    assert fit_ids == list(range(len(fit_ids)))   # validation windows (if any) are never read by this fitter
+    assert windows.shape[0] >= len(fit_ids) and 4096 <= args.sequence_length <= windows.shape[1]   # extra validation windows are ignored
     assert 0 < args.fit_count <= len(fit_ids)
     if not args.smoke:
         assert windows.shape[1] == args.sequence_length and args.fit_count == len(fit_ids)
@@ -263,7 +264,7 @@ def main():
         windows_sha256=sha256(args.windows), windows_manifest_sha256=sha256(args.windows.with_name('manifest.json')),
         sequence_length=args.sequence_length, fit_ids=fit_ids[:args.fit_count], diagnostic_ids=[],
         fit_queries=64, diagnostic_queries=0, validation_scope='in-sample: no diagnostic windows',
-        base_rank=args.base_rank, residual_rank=args.residual_rank, page_size=PAGE_SIZE, objective=args.objective,
+        base_rank=args.base_rank, residual_rank=args.residual_rank, page_size=args.page_size, objective=args.objective,
         objective_definition=definition,
         excluded_prefix_pages=0, excluded_recent_tokens=RECENT_TOKENS, query_grid_prefix=RECENT_TOKENS,
         deployment_page_budget_tokens=2048, maximum_deployment_support_tokens=2048,

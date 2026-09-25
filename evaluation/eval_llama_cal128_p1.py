@@ -1,4 +1,5 @@
-"""Llama V96 at 128k: Full-K reference evaluation."""
+"""Llama V96 at 128k: Full-K reference and page routing with configurable page size / pinned sink pages / token budget
+(copy of eval_llama_cal128 for the page-1 no-sink refit; --page-size, --pinned-pages, --ours-budget)."""
 import argparse
 from collections import Counter
 import functools
@@ -28,12 +29,13 @@ FORMAL_ARMS = ('full', 'ours')
 TASKS = ('niah_single_1', 'niah_single_2', 'niah_single_3', 'niah_multikey_1',
          'niah_multikey_2', 'niah_multiquery', 'niah_multivalue', 'vt', 'fwe', 'qa_1', 'qa_2')
 SMOKE_IDS = (0, 210)
+PAGE_SIZE, PINNED_PAGES, OURS_BUDGET = 32, 1, 2048
 SOURCES = (
     'evaluation/deterministic_evaluation.py',
-    'evaluation/eval_llama_cal128.py', 'evaluation/eval_k_routing_ruler.py',
+    'evaluation/eval_llama_cal128_p1.py', 'evaluation/eval_k_routing_ruler.py',
     'evaluation/k_routing_config.py', 'evaluation/ruler_v1.py', 'evaluation/v96kl_common.py',
-    'evaluation/chunked_prefill_mlp.py', 'evaluation/llama_sink_recent_routing.py',
-    'evaluation/llama_b16r16_k_offload.py', 'evaluation/llama_resident_prefill.py',
+    'evaluation/chunked_prefill_mlp.py', 'evaluation/llama_sink_recent_routing_p16.py',
+    'evaluation/llama_b16r16_k_offload_p1.py', 'evaluation/llama_resident_prefill.py',
     'basisserve/core/c1_lrqk.py', 'basisserve/core/c1_shadowkv.py',
     'basisserve/core/c1_loki_attention.py', 'basisserve/core/c1_k_routing_sidecar.py',
     'basisserve/core/c1_v_conditional_k_router.py',
@@ -102,7 +104,8 @@ def inputs(args, identity):
         kernels='our Triton prefill and decode; actual dispatch counts checked per prompt',
         memory_policy=('V96 and routing sidecars remain on GPU; exact K of the routed arm is held '
                        'in pinned CPU memory and only selected K rows are fetched for decode'),
-        ours=dict(base=base_rank, residual=residual_rank, page_size=32, physical_group_budget=2048, sink=32, recent=64),
+        ours=dict(base=base_rank, residual=residual_rank, page_size=PAGE_SIZE, physical_group_budget=OURS_BUDGET, sink=PAGE_SIZE*PINNED_PAGES, pinned_pages=PINNED_PAGES, recent=64, allow_bank_sink_mismatch=args.allow_bank_sink_mismatch,
+                  bank_page_size=read_json(args.bank/'layer_000.json')['protocol'].get('page_size')),
         source_sha256={name:sha256(Path(name)) for name in SOURCES})
     native_eos = read_json(Path(identity['model'])/'config.json')['eos_token_id']
     spec['eos_ids'] = sorted(native_eos if isinstance(native_eos, list) else [native_eos])
@@ -124,14 +127,14 @@ def bank_for(args, identity, manifest, arm):
             path = args.bank/f'layer_{i:03d}.safetensors'
             tensors, record = verified(path)
             p = record['protocol']
-            validate_residual_fisher_support(p, 'llama')
+            assert (p['excluded_prefix_pages'] == PINNED_PAGES or args.allow_bank_sink_mismatch) and p['excluded_recent_tokens'] == 64, 'bank sink/recent exclusions differ from the requested runtime'
             assert record['identity_sha256'] == sha256(args.identity) and record['layer'] == i
             assert record['v_rank'] == entry['ranks'][0]
             assert p['format'] in ('basisserve.k_router.streaming.v2', 'basisserve.k_router.fisher_base.v1') and not p['smoke']
             # This protocol fits on 32 windows with 64 queries and no diagnostic windows.
             assert p['fit_ids'] == list(range(32)) and p['diagnostic_ids'] == []
             assert p['sequence_length'] == 131072 and p['fit_queries'] == 64 and p['diagnostic_queries'] == 0
-            assert p['excluded_recent_tokens'] == 64 and p['teacher'].startswith('V96-deployed')
+            assert p['excluded_recent_tokens'] == 64 and (p['teacher'].startswith('V96-deployed') or p['teacher'].startswith('deployed model'))
             assert record['sweeps'] == 40 and record['pcg_iterations'] == 100
             assert (p['base_rank'], p['residual_rank']) == (base_rank, residual_rank)
             loss = record['losses'][f'b{base_rank}_r{residual_rank}']
@@ -201,7 +204,7 @@ def audit_saved(saved, row, spec, hashes, arm, tokenizer, smoke=False):
         assert all(s['exact_key_storage'] == 'pinned_cpu' and
                    s['routing_sidecar_storage'] == 'cuda' and
                    s['value_storage'] == 'cuda' and
-                   s['selected_tokens_mean'] <= s['token_budget'] == 2048
+                   s['selected_tokens_mean'] <= s['token_budget'] == OURS_BUDGET
                    for s in r['routing'])
     return r
 
@@ -214,7 +217,17 @@ def main():
     parser.add_argument('--arm', choices=ARMS, default='full')
     parser.add_argument('--shard', type=int, default=0)
     parser.add_argument('--shards', type=int, default=4)
+    parser.add_argument('--page-size', type=int, default=32, choices=(1, 2, 4, 8, 16, 32))
+    parser.add_argument('--pinned-pages', type=int, default=1, help='sink pages pinned inside the budget (e.g. 32 at page size 1 = a 32-token sink)')
+    parser.add_argument('--allow-bank-sink-mismatch', action='store_true', help='diagnostic: run a bank fitted with a different pinned-sink exclusion')
+    parser.add_argument('--ours-budget', type=int, default=2048, help='physical tokens incl. pinned sink and recent 64')
+    parser.add_argument('--tasks', help='comma list of RULER tasks to evaluate (evaluate stage only; default all)')
     args = parser.parse_args()
+    global PAGE_SIZE, PINNED_PAGES, OURS_BUDGET
+    PAGE_SIZE, PINNED_PAGES, OURS_BUDGET = args.page_size, args.pinned_pages, args.ours_budget
+    assert OURS_BUDGET >= 64 + (PINNED_PAGES + 1) * PAGE_SIZE and OURS_BUDGET % PAGE_SIZE == 0
+    from evaluation import llama_b16r16_k_offload_p1 as offload
+    offload.PAGE_SIZE, offload.PINNED_PAGES, offload.BUDGET = PAGE_SIZE, PINNED_PAGES, OURS_BUDGET
     if args.stage == 'evaluate' and args.arm not in FORMAL_ARMS:
         print('SKIP FORMAL ARM', args.arm, flush=True)
         return
@@ -262,7 +275,7 @@ def main():
     model = runtime.load_evaluation_model(identity, config)
     runtime.install(model, Path(identity['checkpoint']), manifest, args.arm, bank)
     if args.arm == 'ours':
-        from evaluation.llama_b16r16_k_offload import install as install_prefill
+        from evaluation.llama_b16r16_k_offload_p1 import install as install_prefill
         install_prefill(model)
     else:
         from evaluation.llama_resident_prefill import install_full_or_ours
@@ -271,6 +284,8 @@ def main():
     eos = model.config.eos_token_id
     eos = sorted(set(eos if isinstance(eos, list) else [eos]) | {tokenizer.eos_token_id})
     selected = [rows[i] for i in (0, 7*spec['samples_per_task'])] if args.stage == 'smoke' else rows[args.shard::args.shards]
+    if args.stage == 'evaluate' and args.tasks:
+        selected = [r for r in selected if r['task'] in set(args.tasks.split(','))]
     for row in selected:
         path = args.output/args.arm/args.stage/f"sample_{row['index']:03d}.json"
         if path.exists():

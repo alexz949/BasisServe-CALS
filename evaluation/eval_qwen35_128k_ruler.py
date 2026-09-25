@@ -124,7 +124,7 @@ def install(model, args, bank, gdn):
             protocol = meta['protocol']
             assert meta['layer'] == layer and int(meta['v_rank']) == 192
             assert protocol['v_bank_sha256'] == sha256(args.v_bank) and protocol['gdn_bank_sha256'] == sha256(args.gdn_bank)
-            assert protocol['base_rank'] == base_rank and protocol['residual_rank'] == residual_rank and protocol['page_size'] == 32
+            assert protocol['base_rank'] == base_rank and protocol['residual_rank'] == residual_rank and protocol['page_size'] == args.page_size
             assert protocol['excluded_prefix_pages'] == 0 and protocol['excluded_recent_tokens'] == 64
             assert protocol['deployment_page_budget_tokens'] == 2048 and protocol['sequence_length'] == SEQUENCE_LENGTH
             assert not protocol['smoke']
@@ -134,7 +134,7 @@ def install(model, args, bank, gdn):
         model.model.layers[layer].self_attn = Qwen35RoutingAttention(native, factors['E_V'], factors['R_V'],
             arm='ours' if args.ranks is not None else ('full' if args.arm == 'v_only' else args.arm), factors=routing,
             base_rank=None if args.ranks is None else args.ranks[0], residual_rank=None if args.ranks is None else args.ranks[1],
-            budget=args.ours_budget, lrqk_topk=args.lrqk_topk, loki_topk=args.loki_topk, shadowkv_budget=args.shadowkv_budget)
+            budget=args.ours_budget, lrqk_topk=args.lrqk_topk, loki_topk=args.loki_topk, shadowkv_budget=args.shadowkv_budget, page_size=args.page_size)
     if args.arm != 'v_only':
         # Attribution arm 'v_only': V192 installed, GDN Wo left original.
         Qwen35PrivateAGRuntime(model, gdn).install()
@@ -154,6 +154,7 @@ def main():
     p.add_argument('--indices', help='comma-separated row indices for smoke runs (overrides sharding)')
     p.add_argument('--benchmark', choices=('ruler', 'longbench'), default='ruler')
     p.add_argument('--ours-budget', type=int, default=2048, help='page-routing physical tokens incl. recent 64 (no sink on Qwen3.5)')
+    p.add_argument('--page-size', type=int, default=32, choices=(1, 2, 4, 8, 16, 32), help='routing page size; must match the router protocol')
     p.add_argument('--lrqk-topk', type=int, default=2048)
     p.add_argument('--loki-topk', type=int, default=2048)
     p.add_argument('--shadowkv-budget', type=int, default=2048, help='ShadowKV routed tokens; 48 outlier chunks x 8 and the local tail are extra')
@@ -193,7 +194,7 @@ def main():
         numerical_policy=dict(model_dtype='bfloat16', cuda_matmul_allow_tf32=False, cudnn_allow_tf32=False),
         checkpoint=dict(full_attention_v='uniform V192 ALS12 encoder-CG16 decoder-CG50',
                         gdn_wo='24 layers; TP4-private 1024->768 per source; ALS6'),
-        ours=None if args.ranks is None else dict(base=args.ranks[0], residual=args.ranks[1], page_size=32,
+        ours=None if args.ranks is None else dict(base=args.ranks[0], residual=args.ranks[1], page_size=args.page_size,
             physical_group_budget=args.ours_budget, sink=0, recent=64, recent_inside_budget=True, maximum_support=args.ours_budget),
         lrqk=dict(rank=32, topk_per_query_head=args.lrqk_topk, recent=64, prefill_iterations=2, decode_iterations=2,
                   state_dtype='bfloat16', solve_dtype='float32', physical_gqa_union='uncapped'),

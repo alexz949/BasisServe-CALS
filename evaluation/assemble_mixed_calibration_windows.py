@@ -38,12 +38,12 @@ def main():
         status='complete', sha256=sha256(args.output / 'windows.safetensors'), shape=list(packed.shape),
         condition='c4_retrieval_50_50', fit_ids=fit_ids, validation_ids=validation_ids,
         composition=f'fit windows 0-{half - 1}: C4 bank windows 0-{half - 1}; fit windows {half}-{len(fit_ids) - 1}: '
-                    f'synthetic retrieval windows 0-{half - 1}; validation windows {validation_ids[0]}-{validation_ids[-1]}: '
-                    f'C4 bank windows {validation_ids[0]}-{validation_ids[-1]} (identical to the pure-C4 condition)',
+                    f'synthetic retrieval windows 0-{half - 1}; ' + (f'validation windows {validation_ids[0]}-{validation_ids[-1]}: '
+                    f'C4 bank windows {validation_ids[0]}-{validation_ids[-1]} (identical to the pure-C4 condition)' if validation_ids else 'no validation windows (the C4 bank has none)'),
         c4_manifest_sha256=sha256(args.c4 / 'manifest.json'), c4_windows_sha256=c4m['sha256'], c4_seed=c4m['seed'],
         synthetic_manifest_sha256=sha256(args.synthetic / 'manifest.json'), synthetic_windows_sha256=sm['sha256'],
         synthetic_seed=sm['seed'], synthetic_haystack_seed=sm['haystack_seed'], synthetic_method=sm['method'],
-        model=c4m['model'], model_config_sha256=c4m['model_config_sha256'], tokenizer_sha256=c4m['tokenizer_sha256'],
+        model=c4m.get('model', sm['model']), model_config_sha256=c4m['model_config_sha256'], tokenizer_sha256=c4m['tokenizer_sha256'],
         source_sha256=sha256(Path(__file__))))
     print('mixed calibration windows complete', tuple(packed.shape), args.output, flush=True)
 

@@ -40,10 +40,12 @@ def build_qwen35_routing_sidecar(value, key, cos, sin, *, base_rank, residual_ra
 
 class Qwen35RoutingAttention(GatedVAttention):
     def __init__(self, native, encoder, decoder, *, arm, factors=None, loki_basis=None, base_rank=None, residual_rank=None,
-                 budget=2048, lrqk_topk=2048, loki_topk=2048, shadowkv_budget=2048):
+                 budget=2048, lrqk_topk=2048, loki_topk=2048, shadowkv_budget=2048, page_size=32):
         super().__init__(native, encoder, decoder)
+        assert page_size in (1, 2, 4, 8, 16, 32) and budget % page_size == 0
+        self.page_size = int(page_size)
         # Physical budgets: page routing (recent 64 inside), LRQK/Loki per-query-head top-k, ShadowKV routed tokens.
-        assert budget >= 64 and budget % 32 == 0 and lrqk_topk > 0 and loki_topk > 0 and shadowkv_budget % 8 == 0
+        assert budget >= 64 and lrqk_topk > 0 and loki_topk > 0 and shadowkv_budget % 8 == 0
         self.budget, self.lrqk_topk, self.loki_topk, self.shadowkv_budget = int(budget), int(lrqk_topk), int(loki_topk), int(shadowkv_budget)
         assert self.kv_per_group == 1 and arm in ('full', 'exact_sparse', 'b16r16', 'b32r32', 'ours', 'loki', 'lrqk', 'shadowkv')
         self.arm, self.routing_factors, self.loki_basis = arm, factors, loki_basis
@@ -116,7 +118,7 @@ class Qwen35RoutingAttention(GatedVAttention):
                 residual_query = torch.einsum('bhd,hdr->bhr', q[:, :, 0].float(), projector)
                 query = torch.cat((q[:, :, 0].float(), residual_query), -1).reshape(1, self.kv_heads, heads_per_group, -1)
                 scores = (query@state.transpose(-1, -2))*self.native.scaling
-            ids, valid = page_support(scores, budget=self.budget)
+            ids, valid = page_support(scores, budget=self.budget, page_size=self.page_size)
             # At most one partial page exists; remove its invalid token slots.
             safe_ids = ids.clamp_max(k.shape[2]-1)
             selected_k, selected_v = gather_group(k, safe_ids), gather_group(v, safe_ids)

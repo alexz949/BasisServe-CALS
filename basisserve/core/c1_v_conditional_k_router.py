@@ -286,6 +286,48 @@ def affine_predictive_spectrum(
     )
 
 
+def page_fisher_teacher(
+    queries: torch.Tensor,
+    exact_key_rows: torch.Tensor,
+    *,
+    scaling: float,
+    page_size: int,
+    excluded_prefix_pages: int,
+) -> tuple[torch.Tensor, torch.Tensor, int]:
+    """Exact-teacher page distribution over the routable prefix.
+
+    Returns the token probabilities grouped by page ``[heads, pages, page_size]``
+    (zero padded to whole pages), the page masses ``[heads, pages]`` and the
+    first routable token (the pinned prefix pages are removed before the
+    candidate distribution is normalized). Only the exact Key enters here.
+    """
+
+    first_token = int(excluded_prefix_pages) * int(page_size)
+    exact_key_rows = exact_key_rows[first_token:]
+    tokens = int(exact_key_rows.shape[0])
+    pages = (tokens + int(page_size) - 1) // int(page_size)
+    padding = pages * int(page_size) - tokens
+    scores = float(scaling) * queries @ exact_key_rows.mT
+    probabilities = torch.softmax(scores, dim=-1)
+    if padding:
+        probabilities = torch.nn.functional.pad(probabilities, (0, padding))
+    probabilities_by_page = probabilities.reshape(queries.shape[0], pages, int(page_size))
+    return probabilities_by_page, probabilities_by_page.sum(dim=-1), first_token
+
+
+def page_fisher_gram_from_page_rows(
+    page_mass: torch.Tensor,
+    page_rows: torch.Tensor,
+) -> torch.Tensor:
+    """Page-Fisher Gram ``sum_p m_p (rho_p - mu)(rho_p - mu)^T`` of page representatives ``[heads, pages, features]``."""
+
+    page_mean = torch.einsum("hp,hpd->hd", page_mass, page_rows)
+    centered = page_rows - page_mean.unsqueeze(1)
+    weighted = centered * torch.sqrt(page_mass).unsqueeze(-1)
+    grams = torch.bmm(weighted.mT, weighted)
+    return 0.5 * (grams + grams.mT)
+
+
 def residual_page_fisher_gram(
     queries: torch.Tensor,
     exact_key_rows: torch.Tensor,
@@ -304,60 +346,55 @@ def residual_page_fisher_gram(
     representative uses the residual feature. The returned energy is the Page-Fisher energy
     of the exact residual score, so a zero-dimensional residual router has
     normalized loss one.
+
+    ``residual_rows`` is ``[tokens, features]`` (one feature row per token, shared
+    by every query head) or ``[heads, tokens, features]`` (head-specific feature
+    rows, e.g. the RoPE-lifted Base features of a Fisher-trained Value Base whose
+    rows depend on each head's query). The teacher distribution and the page
+    grouping are identical in both cases (``page_fisher_teacher`` /
+    ``page_fisher_gram_from_page_rows``).
     """
 
-    first_token = int(excluded_prefix_pages) * int(page_size)
-    exact_key_rows = exact_key_rows[first_token:]
-    residual_rows = residual_rows[first_token:]
-    tokens = int(exact_key_rows.shape[0])
-    if tokens == 0:
-        return queries.new_zeros((queries.shape[0], queries.shape[1], queries.shape[1])), 0.0
-    pages = (tokens + int(page_size) - 1) // int(page_size)
-    padded_tokens = pages * int(page_size)
-    padding = padded_tokens - tokens
-    scores = float(scaling) * queries @ exact_key_rows.mT
-    probabilities = torch.softmax(scores, dim=-1)
-    if padding:
-        probabilities = torch.nn.functional.pad(probabilities, (0, padding))
-        residual_rows = torch.nn.functional.pad(
-            residual_rows,
-            (0, 0, 0, padding),
-        )
-    probabilities_by_page = probabilities.reshape(
-        queries.shape[0],
-        pages,
-        int(page_size),
-    )
-    residual_by_page = residual_rows.reshape(
-        pages,
-        int(page_size),
-        residual_rows.shape[-1],
-    )
-    page_mass = probabilities_by_page.sum(dim=-1)
-    page_numerator = torch.einsum(
-        "hps,psd->hpd",
-        probabilities_by_page,
-        residual_by_page,
-    )
-    page_rows = page_numerator / page_mass.clamp_min(
-        torch.finfo(page_mass.dtype).tiny
-    ).unsqueeze(-1)
-    page_mean = torch.einsum("hp,hpd->hd", page_mass, page_rows)
-    centered = page_rows - page_mean.unsqueeze(1)
-    weighted = centered * torch.sqrt(page_mass).unsqueeze(-1)
-    grams = torch.bmm(weighted.mT, weighted)
-    grams = 0.5 * (grams + grams.mT)
-    page_scores = float(scaling) * torch.einsum(
-        "hd,hpd->hp",
+    assert residual_rows.ndim in (2, 3)
+    per_head_rows = residual_rows.ndim == 3
+    probabilities_by_page, page_mass, first_token = page_fisher_teacher(
         queries,
-        page_rows,
+        exact_key_rows,
+        scaling=scaling,
+        page_size=page_size,
+        excluded_prefix_pages=excluded_prefix_pages,
     )
+    residual_rows = residual_rows[:, first_token:] if per_head_rows else residual_rows[first_token:]
+    tokens = int(residual_rows.shape[-2])
+    if tokens == 0:
+        width = int(residual_rows.shape[-1])
+        return queries.new_zeros((queries.shape[0], width, width)), 0.0
+    pages = int(page_mass.shape[-1])
+    padding = pages * int(page_size) - tokens
+    if padding:
+        residual_rows = torch.nn.functional.pad(residual_rows, (0, 0, 0, padding))
+    if per_head_rows:
+        assert residual_rows.shape[0] == queries.shape[0]
+        residual_by_page = residual_rows.reshape(queries.shape[0], pages, int(page_size), residual_rows.shape[-1])
+        page_numerator = torch.einsum("hps,hpsd->hpd", probabilities_by_page, residual_by_page)
+    else:
+        residual_by_page = residual_rows.reshape(pages, int(page_size), residual_rows.shape[-1])
+        page_numerator = torch.einsum("hps,psd->hpd", probabilities_by_page, residual_by_page)
+    page_rows = page_numerator / page_mass.clamp_min(torch.finfo(page_mass.dtype).tiny).unsqueeze(-1)
+    grams = page_fisher_gram_from_page_rows(page_mass, page_rows)
+    if int(page_rows.shape[-1]) != int(queries.shape[-1]):
+        # Head-specific feature rows of another width carry no exact residual score; the caller
+        # normalizes with the teacher energy of the exact score instead.
+        return grams, 0.0
+    page_scores = float(scaling) * torch.einsum("hd,hpd->hp", queries, page_rows)
     score_mean = torch.sum(page_mass * page_scores, dim=-1, keepdim=True)
     energy = float(0.5 * torch.sum(page_mass * (page_scores - score_mean).square()))
     return grams, energy
 
 
 __all__ = [
+    "page_fisher_teacher",
+    "page_fisher_gram_from_page_rows",
     "AffinePredictiveSpectrum",
     "AffineReducedRankMap",
     "affine_predictive_spectrum",

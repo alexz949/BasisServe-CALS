@@ -171,7 +171,7 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
                 rows=torch.cat((v,k_post.transpose(1,2)),-1)
                 if args.objective=='score_mse':
                     payload,diagnostics=score_mse_statistics(q,v,k_post,positions,base_payloads[layer]['encoder'],base_payloads[layer],stats_cos,stats_sin,
-                        excluded_prefix_tokens=SINK_TOKENS*protocol['excluded_prefix_pages'],excluded_recent_tokens=protocol['excluded_recent_tokens'],heads=heads,groups=groups,dim=dim)
+                        excluded_prefix_tokens=args.page_size*protocol['excluded_prefix_pages'],excluded_recent_tokens=protocol['excluded_recent_tokens'],heads=heads,groups=groups,dim=dim)
                     path=args.output/'fisher'/f'l{layer:03d}'/f'w{index:03d}.safetensors'
                     save_record(path,payload,dict(protocol=protocol,layer=layer,window_id=index,split=split,base_sha256=sha256(layer_file(args.output,'base',layer)),
                         diagnostics=diagnostics,storage='symmetric upper triangle FP32'))
@@ -179,7 +179,7 @@ def replay(args, identity, windows, layers, protocol, *, fisher=False):
                 stats,diagnostics=build_multi_query_statistics(q[:,:,positions].transpose(1,2),rows,
                     query_positions=positions,cos=stats_cos,sin=stats_sin,
                     value_encoder=base_payloads[layer]['encoder'],base_maps=restore_base(base_payloads[layer]),
-                    page_size=32,excluded_prefix_pages=protocol['excluded_prefix_pages'],
+                    page_size=args.page_size,excluded_prefix_pages=protocol['excluded_prefix_pages'],
                     excluded_recent_tokens=protocol['excluded_recent_tokens'],device=torch.device('cuda'))
                 path=args.output/'fisher'/f'l{layer:03d}'/f'w{index:03d}.safetensors'
                 save_record(path,packed_fisher(stats[args.base_rank]),dict(protocol=protocol,layer=layer,
@@ -315,6 +315,8 @@ def main():
     for name in ('identity','windows','output'):p.add_argument('--'+name,type=Path,required=True)
     p.add_argument('--layers',required=True)
     p.add_argument('--base-rank',type=int,default=16)
+    p.add_argument('--page-size',type=int,default=32,choices=(1,2,4,8,16,32),help='routing page size of the Fisher statistics and the deployed selector')
+    p.add_argument('--pinned-pages',type=int,default=1,choices=(0,1),help='sink pages pinned by the deployed selector (excluded from the routable prefix); 0 = no sink')
     p.add_argument('--objective',choices=('page_fisher','score_mse'),default='page_fisher',
                    help='residual statistics: softmax page-Fisher weighted (default) or unweighted causal QK-score MSE (Section 4)')
     p.add_argument('--residual-rank',type=int,default=16)
@@ -368,6 +370,8 @@ def main():
     if runtime.model_type == 'nemotron_h':
         runtime_config['time_step_limit'] = [str(x) if math.isinf(x) else x for x in runtime.time_step_limit]
     fisher_support = residual_fisher_support(runtime.model_type)
+    fisher_support['excluded_prefix_pages'] = args.pinned_pages
+    sink_tokens = args.page_size * args.pinned_pages
     diagnostic_ids = available_diagnostic_ids[:args.diagnostic_count]
     teacher = ('deployed model: identity checkpoint (compressed V and decoder' +
                (', folded Mamba Wo' if runtime.model_type == 'nemotron_h' else '') +
@@ -378,12 +382,12 @@ def main():
         sequence_length=args.sequence_length,fit_ids=available_fit_ids[:args.fit_count],
         diagnostic_ids=diagnostic_ids,fit_queries=64,diagnostic_queries=32 if diagnostic_ids else 0,
         validation_scope='held-out diagnostic windows' if diagnostic_ids else 'in-sample: no diagnostic windows',
-        base_rank=args.base_rank,residual_rank=args.residual_rank,page_size=32,objective=args.objective,
+        base_rank=args.base_rank,residual_rank=args.residual_rank,page_size=args.page_size,objective=args.objective,
         objective_definition=('softmax page-Fisher weighted residual objective' if args.objective=='page_fisher' else
                               'unweighted causal residual QK score squared error over the routable prefix (sink page and recent window excluded)'),
-        **fisher_support,query_grid_prefix=SINK_TOKENS+fisher_support['excluded_recent_tokens'],
+        **fisher_support,query_grid_prefix=sink_tokens+fisher_support['excluded_recent_tokens'],
         deployment_page_budget_tokens=2048,maximum_deployment_support_tokens=2048,
-        sink_tokens_within_page_budget=SINK_TOKENS,recent_tokens_within_page_budget=fisher_support['excluded_recent_tokens'],
+        sink_tokens_within_page_budget=sink_tokens,recent_tokens_within_page_budget=fisher_support['excluded_recent_tokens'],
         chunk_rows=args.chunk_rows,smoke=args.smoke,teacher=teacher,
         deployed_checkpoint_manifest_sha256=identity['manifest_sha256'] if args.teacher == 'deployed' else None,
         rope=args.rope,runtime_config=runtime_config,dense_v=args.dense_v,

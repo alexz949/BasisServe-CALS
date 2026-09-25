@@ -344,7 +344,8 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
     bank,bank_hashes={},{}
     if args.dense_v:
         assert identity['layer_ranks'] == [identity['head_dim']] * len(identity['attention_layers'])
-    if args.arm=='ours' or args.stage in ('summarize','audit-smoke'):
+    if args.arm=='ours' or (args.stage in ('summarize','audit-smoke') and 'ours' in ARMS):
+        # A dense-V reference run (arms without 'ours') has no router bank to audit.
         for record in manifest['layers']:
             i=record['layer'];path=args.bank/f'layer_{i:03d}.safetensors'
             audit=read_json(path.with_suffix('.json'))
@@ -357,8 +358,7 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
             if protocol_format not in score_only_formats:
                 validate_residual_fisher_support(audit['protocol'], runtime_config.model_type)
             if protocol_format in ('basisserve.k_router.streaming.v1',
-                                   'basisserve.k_router.streaming.v2',
-                                   'basisserve.k_router.fisher_base.v1'):
+                                   'basisserve.k_router.streaming.v2'):
                 assert audit['identity_sha256'] == sha256(args.identity)
                 assert audit['protocol']['sequence_length'] == args.sequence_length
                 assert not audit['protocol']['smoke']
@@ -424,7 +424,7 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
         loki=(dict(rank=32,topk_per_query_head=LOKI_TOPK,recent=LOKI_RECENT,bank_manifest_sha256=sha256(args.loki_bank/'manifest.json'),
                    coordinate=read_json(args.loki_bank/'manifest.json')['runtime'],calibration='dense model')
               if args.loki_bank is not None else 'not evaluated'),
-        source_sha256={n:sha256(ROOT/n) for n in ('evaluation/eval_k_routing_ruler.py',
+        source_sha256={n:sha256(ROOT/n) for n in ('evaluation/eval_k_routing_ruler.py','evaluation/eval_k_routing_ruler_dense.py',
             'evaluation/k_routing_config.py',
             'basisserve/core/c1_conditional_page_attention.py','basisserve/core/c1_v_conditional_k_router.py',
             'basisserve/core/c1_lrqk.py','basisserve/core/c1_shadowkv.py',

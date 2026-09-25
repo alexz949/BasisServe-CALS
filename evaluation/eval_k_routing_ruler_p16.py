@@ -37,6 +37,9 @@ ARMS = ('full','exact_sparse','lrqk','shadowkv','loki','ours')
 LRQK_TOPK, LOKI_TOPK, LOKI_RECENT = 2048, 2048, 64
 # Physical KV budgets: 'ours'/'exact_sparse' page routing (sink page + recent 64 inside) and ShadowKV routed tokens.
 OURS_BUDGET, SHADOWKV_BUDGET = 2048, 2048
+# Decode-time page size for ours/exact_sparse (the router factors are per-token; the bank was fitted with page-32 statistics).
+PAGE_SIZE = 32
+PINNED_PAGES = 1
 # 'ruler' (frozen RULER prompts, substring metrics) or 'longbench' (ShadowKV 9-task LongBench-v1 subset, official metrics).
 BENCHMARK = 'ruler'
 # Official LongBench pred.py: chat models are better off without the chat wrapper on these datasets.
@@ -183,7 +186,7 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
             projector = self._routing_projector
             route_q,route_k,route_v = q,k,v
         if self.config.model_type in ('llama', 'qwen3', 'nemotron_h'):
-            from evaluation.llama_sink_recent_routing import page_support
+            from evaluation.llama_sink_recent_routing_p16 import page_support
             from basisserve.kernels.split_indexed_attention import split_indexed_attention
             if attention_mask is not None:
                 assert attention_mask.shape[-2] == 1
@@ -192,15 +195,15 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
             codes = torch.einsum('bhqd,hdr->bhqr', q.float(), projector.float())
             codes = codes[:, :, 0].reshape(batch, self.num_key_value_heads, group_heads, -1)
             scores = (codes @ sidecar.float().transpose(-1, -2)) * self.scaling
-            ids, valid = page_support(scores, budget=OURS_BUDGET)
+            ids, valid = page_support(scores, budget=OURS_BUDGET, page_size=PAGE_SIZE, pinned=PINNED_PAGES)
             selected = ids.masked_fill(~valid, -1).repeat_interleave(group_heads, dim=1)
             output = split_indexed_attention(q, k, v, selected, scale=self.scaling)
             past_key_values.statistics[self.layer_idx] = dict(
-                selected_tokens_mean=float(valid.sum(-1).float().mean()), sink_tokens=32,
-                recent_tokens=64, token_budget=OURS_BUDGET)
+                selected_tokens_mean=float(valid.sum(-1).float().mean()), sink_tokens=PAGE_SIZE*PINNED_PAGES,
+                recent_tokens=64, token_budget=OURS_BUDGET, page_size=PAGE_SIZE)
         else:
             result = c1_conditional_page_topk_attention(route_q,route_k,route_v,sidecar,projector,
-                page_size=32,exact_token_budget=OURS_BUDGET,pinned_prefix_pages=1,scale=self.scaling,
+                page_size=PAGE_SIZE,exact_token_budget=OURS_BUDGET,pinned_prefix_pages=PINNED_PAGES,scale=self.scaling,
                 query_block_size=1,attention_mask=attention_mask,collect_statistics=True)
             output = result.output.to(v.dtype)
             past_key_values.statistics[self.layer_idx] = result.statistics
@@ -342,6 +345,8 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
                 row.update(all_classes=source.get('all_classes'),source_index=int(source['source_index']),_id=str(source['_id']))
             rows.append(row)
     bank,bank_hashes={},{}
+    # Arm-independent so every arm's spec agrees: the bank's Fisher page size (None when no bank is present).
+    bank_page_size=read_json(args.bank/'layer_000.json')['protocol'].get('page_size') if (args.bank/'layer_000.json').exists() else None
     if args.dense_v:
         assert identity['layer_ranks'] == [identity['head_dim']] * len(identity['attention_layers'])
     if args.arm=='ours' or args.stage in ('summarize','audit-smoke'):
@@ -355,7 +360,11 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
                 'basisserve.section4.qgram_score_only_b16r16.v1',
             )
             if protocol_format not in score_only_formats:
-                validate_residual_fisher_support(audit['protocol'], runtime_config.model_type)
+                # The bank must have been fitted with the same pinned-sink and recent exclusions as the requested runtime;
+                # its Fisher page size is recorded in the spec (decode page size may differ for the no-refit page sweeps).
+                assert (audit['protocol'].get('excluded_prefix_pages') == PINNED_PAGES or args.allow_bank_sink_mismatch) and audit['protocol'].get('excluded_recent_tokens') == 64, \
+                    'bank sink/recent exclusions differ from the requested runtime; refit or change --pinned-pages'
+                assert bank_page_size == audit['protocol'].get('page_size')
             if protocol_format in ('basisserve.k_router.streaming.v1',
                                    'basisserve.k_router.streaming.v2',
                                    'basisserve.k_router.fisher_base.v1'):
@@ -412,7 +421,7 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
     spec=dict(identity_sha256=sha256(args.identity),data_sha256=sha256(args.data/'manifest.json'),
         runtime_config=config_record,rope=args.rope,
         sequence_length=args.sequence_length,samples=len(rows),samples_per_task=samples_per_task,benchmark=BENCHMARK,
-        ours_budget=OURS_BUDGET,shadowkv_budget=SHADOWKV_BUDGET,
+        ours_budget=OURS_BUDGET,shadowkv_budget=SHADOWKV_BUDGET,runtime_page_size=PAGE_SIZE,runtime_pinned_pages=PINNED_PAGES,bank_page_size=bank_page_size,allow_bank_sink_mismatch=args.allow_bank_sink_mismatch,
         task_names=list(task_names),dtype='bfloat16',generation='greedy, native EOS, official caps',
         prefill=('full causal FlashAttention-2 on all arms' if args.dense_v else
                  'full causal FlashAttention with zero-padded compact V (sm_120)' if runtime_config.model_type == 'qwen3' else
@@ -424,7 +433,7 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
         loki=(dict(rank=32,topk_per_query_head=LOKI_TOPK,recent=LOKI_RECENT,bank_manifest_sha256=sha256(args.loki_bank/'manifest.json'),
                    coordinate=read_json(args.loki_bank/'manifest.json')['runtime'],calibration='dense model')
               if args.loki_bank is not None else 'not evaluated'),
-        source_sha256={n:sha256(ROOT/n) for n in ('evaluation/eval_k_routing_ruler.py',
+        source_sha256={n:sha256(ROOT/n) for n in ('evaluation/eval_k_routing_ruler.py','evaluation/eval_k_routing_ruler_p16.py','evaluation/llama_sink_recent_routing_p16.py',
             'evaluation/k_routing_config.py',
             'basisserve/core/c1_conditional_page_attention.py','basisserve/core/c1_v_conditional_k_router.py',
             'basisserve/core/c1_lrqk.py','basisserve/core/c1_shadowkv.py',
@@ -441,8 +450,8 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
     else:
         assert args.native_audit is None and args.wo_bank is None
     if runtime_config.model_type in ('llama', 'qwen3', 'nemotron_h'):
-        spec['exact_sparse'] = f'FP32 exact-QK Page32 mass, GQA max; sink32 + recent64 inside hard B{OURS_BUDGET}'
-        spec['ours'] = f'Base16/Residual16 Page32 mass, GQA max; sink32 + recent64 inside hard B{OURS_BUDGET}'
+        spec['exact_sparse'] = f'FP32 exact-QK Page{PAGE_SIZE} mass, GQA max; sink{PAGE_SIZE*PINNED_PAGES} ({PINNED_PAGES} pinned page) + recent64 inside hard B{OURS_BUDGET}'
+        spec['ours'] = f'Base16/Residual16 Page{PAGE_SIZE} mass, GQA max; sink{PAGE_SIZE*PINNED_PAGES} ({PINNED_PAGES} pinned page) + recent64 inside hard B{OURS_BUDGET}'
         for name in ('evaluation/llama_sink_recent_routing.py', 'basisserve/kernels/split_indexed_attention.py'):
             spec['source_sha256'][name] = sha256(ROOT/name)
     if runtime_config.model_type in ('llama', 'qwen3'):
@@ -587,7 +596,7 @@ def audit_smoke(args,rows,spec,bank_hashes):
 
 
 def main():
-    global ARMS, LRQK_TOPK, LOKI_TOPK, LOKI_RECENT, OURS_BUDGET, SHADOWKV_BUDGET, BENCHMARK
+    global ARMS, LRQK_TOPK, LOKI_TOPK, LOKI_RECENT, OURS_BUDGET, SHADOWKV_BUDGET, BENCHMARK, PAGE_SIZE, PINNED_PAGES
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('stage',choices=['smoke','audit-smoke','evaluate','summarize'])
     p.add_argument('--arm',choices=ARMS,default='full')
@@ -619,10 +628,13 @@ def main():
     p.add_argument('--benchmark',choices=('ruler','longbench'),default='ruler')
     p.add_argument('--ours-budget',type=int,default=OURS_BUDGET,help='physical tokens for ours/exact_sparse incl. sink page and recent 64')
     p.add_argument('--shadowkv-budget',type=int,default=SHADOWKV_BUDGET,help='ShadowKV routed tokens (outliers and local tail are extra)')
+    p.add_argument('--page-size',type=int,default=PAGE_SIZE,choices=(1,2,4,8,16,32),help='decode-time routing page size for ours/exact_sparse')
+    p.add_argument('--pinned-pages',type=int,default=PINNED_PAGES,help='sink pages pinned inside the budget (0 = no sink; e.g. 32 at page size 1 = a 32-token sink)')
+    p.add_argument('--allow-bank-sink-mismatch',action='store_true',help='diagnostic: run a bank fitted with a different pinned-sink exclusion (recorded in the spec)')
     args=p.parse_args();configure();torch.manual_seed(0)
     LRQK_TOPK, LOKI_TOPK, LOKI_RECENT = args.lrqk_topk, args.loki_topk, args.loki_recent
-    OURS_BUDGET, SHADOWKV_BUDGET, BENCHMARK = args.ours_budget, args.shadowkv_budget, args.benchmark
-    assert OURS_BUDGET>=96 and OURS_BUDGET%32==0 and SHADOWKV_BUDGET>0 and SHADOWKV_BUDGET%8==0
+    OURS_BUDGET, SHADOWKV_BUDGET, BENCHMARK, PAGE_SIZE, PINNED_PAGES = args.ours_budget, args.shadowkv_budget, args.benchmark, args.page_size, args.pinned_pages
+    assert OURS_BUDGET>=64+(PINNED_PAGES+1)*PAGE_SIZE and OURS_BUDGET%PAGE_SIZE==0 and SHADOWKV_BUDGET>0 and SHADOWKV_BUDGET%8==0
     shadowkv_adapter.SHADOWKV_BUDGET=SHADOWKV_BUDGET
     assert LRQK_TOPK > 0 and LOKI_TOPK > 0 and LOKI_RECENT >= 0
     requested_arms=tuple(x.strip() for x in args.arms.split(',') if x.strip())

@@ -89,6 +89,7 @@ def parse_args(spec: Qwen35PrivateAGBuildSpec = GDN_BUILD_SPEC) -> argparse.Name
         choices=("bfloat16", "float16", "float32"),
         default="bfloat16",
     )
+    parser.add_argument("--work-dtype", choices=("float32", "float64"), default="float64")
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--torch-num-threads", type=int, default=4)
     return parser.parse_args()
@@ -99,6 +100,7 @@ def _dtype(name: str) -> torch.dtype:
         "bfloat16": torch.bfloat16,
         "float16": torch.float16,
         "float32": torch.float32,
+        "float64": torch.float64,
     }[name]
 
 
@@ -235,15 +237,11 @@ def main(spec: Qwen35PrivateAGBuildSpec = GDN_BUILD_SPEC) -> None:
             encoder_sweeps=args.encoder_sweeps,
             minimum_encoder_sweeps=args.minimum_encoder_sweeps,
             covariance_damping=args.covariance_damping,
-            decoder_relative_jitter=args.decoder_relative_jitter,
-            encoder_relative_damping=args.encoder_relative_damping,
-            encoder_cg_relative_tolerance=args.encoder_cg_relative_tolerance,
-            encoder_cg_max_iterations=args.encoder_cg_max_iterations,
-            encoder_cg_fixed_iterations=args.encoder_cg_fixed_iterations,
             encoder_relative_tolerance=args.encoder_relative_tolerance,
             encoder_patience=args.encoder_patience,
             maximum_backtracks=args.maximum_backtracks,
             factor_dtype=factor_dtype,
+            work_dtype=_dtype(args.work_dtype),
         )
         layer_peak = int(torch.cuda.max_memory_allocated(cuda_index))
         peak_cuda = max(peak_cuda, layer_peak)
