@@ -1,0 +1,92 @@
+[
+  {
+    "profile": "c1_b1",
+    "decode_boundary": {
+      "matched_graph_launches": 127,
+      "total_graph_launches": 127,
+      "principal_decoder_gemm_us_mean": 87.57391769192913,
+      "boundary_collective_us_mean": 20.383666092519686,
+      "note": "Profiled kernels, not operator or wall time. For batches >1, graph replay batch sizes can vary as requests finish.",
+      "pre_allgather_kernel_us_mean": 1.8074703494094488
+    },
+    "decode_graph": {
+      "launches": 127,
+      "total_kernel_ms": 2650.6683399999783,
+      "category_ms": {
+        "other": 95.47862800000371,
+        "allreduce": 304.8356919999994,
+        "gemm_gemv": 2003.1066539999824,
+        "attention": 81.56892799999208,
+        "allgather": 165.67843800000077
+      },
+      "category_percent": {
+        "other": 3.6020586415577167,
+        "allreduce": 11.5003332329386,
+        "gemm_gemv": 75.56987133290312,
+        "attention": 3.0772966488894173,
+        "allgather": 6.250440143711156
+      }
+    },
+    "note": "Rank-zero profiled GPU kernel durations, not wall time. Graph replay batch sizes can vary for submitted batches >1."
+  },
+  {
+    "profile": "c1_b256",
+    "decode_boundary": {
+      "matched_graph_launches": 148,
+      "total_graph_launches": 148,
+      "principal_decoder_gemm_us_mean": 100.5681202491554,
+      "boundary_collective_us_mean": 137.42704539695944,
+      "note": "Profiled kernels, not operator or wall time. For batches >1, graph replay batch sizes can vary as requests finish.",
+      "pre_allgather_kernel_us_mean": 296.8716075802365
+    },
+    "decode_graph": {
+      "launches": 148,
+      "total_kernel_ms": 9489.16671300007,
+      "category_ms": {
+        "other": 190.73763100003356,
+        "allreduce": 2367.6525529999963,
+        "gemm_gemv": 2766.1482809999925,
+        "attention": 2862.919274000043,
+        "allgather": 1301.708974000004
+      },
+      "category_percent": {
+        "other": 2.010056696956591,
+        "allreduce": 24.951111352657914,
+        "gemm_gemv": 29.150592087399993,
+        "attention": 30.170397049488763,
+        "allgather": 13.71784281349673
+      }
+    },
+    "note": "Rank-zero profiled GPU kernel durations, not wall time. Graph replay batch sizes can vary for submitted batches >1."
+  },
+  {
+    "profile": "c1_b32",
+    "decode_boundary": {
+      "matched_graph_launches": 127,
+      "total_graph_launches": 127,
+      "principal_decoder_gemm_us_mean": 102.44055265748032,
+      "boundary_collective_us_mean": 58.642284571850396,
+      "note": "Profiled kernels, not operator or wall time. For batches >1, graph replay batch sizes can vary as requests finish.",
+      "pre_allgather_kernel_us_mean": 2.620052657480315
+    },
+    "decode_graph": {
+      "launches": 127,
+      "total_kernel_ms": 4274.350351999994,
+      "category_ms": {
+        "other": 117.08338099997809,
+        "allreduce": 777.3678460000011,
+        "gemm_gemv": 2207.5407580000074,
+        "attention": 695.7138780000101,
+        "allgather": 476.64448899999763
+      },
+      "category_percent": {
+        "other": 2.7392088003547506,
+        "allreduce": 18.18680692929783,
+        "gemm_gemv": 51.64622869454503,
+        "attention": 16.276482288694034,
+        "allgather": 11.151273287108364
+      }
+    },
+    "note": "Rank-zero profiled GPU kernel durations, not wall time. Graph replay batch sizes can vary for submitted batches >1."
+  }
+]

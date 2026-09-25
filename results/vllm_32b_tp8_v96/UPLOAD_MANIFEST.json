@@ -1,0 +1,233 @@
+{
+  "created_at": "2026-09-25T04:31:43.892503+00:00",
+  "scope": "V96 results only; code and unrelated experiments unchanged",
+  "github_branch": "main",
+  "commit_message": "add Qwen3-32B TP8 V96 benchmark results",
+  "github_files": [
+    "results/vllm_32b_tp8_v96/RESULTS_SUMMARY.md",
+    "results/vllm_32b_tp8_v96/formal/summary.csv",
+    "results/vllm_32b_tp8_v96/formal/profile_summary.json",
+    "results/vllm_32b_tp8_v96/formal/profiles/c1_b1.kernels.csv",
+    "results/vllm_32b_tp8_v96/formal/profiles/c1_b32.kernels.csv",
+    "results/vllm_32b_tp8_v96/formal/profiles/c1_b256.kernels.csv",
+    "results/vllm_32b_tp8_v96/8k_b128/summary.csv",
+    "results/vllm_32b_tp8_v96/8k_b256/summary.csv",
+    "results/vllm_32b_tp8_v96/UPLOAD_MANIFEST.json"
+  ],
+  "hf_repository": "alexz949/BasisServe-CALS",
+  "hf_repo_type": "model",
+  "hf_revision": "3cd67a4d96070a1cb8ce6c15512359b17638cd64",
+  "hf_directory": "system_benchmarks/vllm_32b_tp8_v96",
+  "hf_url": "https://huggingface.co/alexz949/BasisServe-CALS/tree/3cd67a4d96070a1cb8ce6c15512359b17638cd64/system_benchmarks/vllm_32b_tp8_v96",
+  "remote_verification": "All file paths and sizes match; no SHA256 checks",
+  "raw_file_count": 50,
+  "raw_total_bytes": 63858818,
+  "files": [
+    {
+      "path": "8k_b128/c1.json",
+      "bytes": 1241814
+    },
+    {
+      "path": "8k_b128/c1.log",
+      "bytes": 53926
+    },
+    {
+      "path": "8k_b128/dense.json",
+      "bytes": 1235955
+    },
+    {
+      "path": "8k_b128/dense.log",
+      "bytes": 56162
+    },
+    {
+      "path": "8k_b128/grid.log",
+      "bytes": 144
+    },
+    {
+      "path": "8k_b128/profile_summary.json",
+      "bytes": 3
+    },
+    {
+      "path": "8k_b128/run.sh",
+      "bytes": 1364
+    },
+    {
+      "path": "8k_b128/source.tar.gz",
+      "bytes": 18419
+    },
+    {
+      "path": "8k_b128/summary.csv",
+      "bytes": 543
+    },
+    {
+      "path": "8k_b128/summary.log",
+      "bytes": 6448
+    },
+    {
+      "path": "8k_b128/summary.md",
+      "bytes": 6447
+    },
+    {
+      "path": "8k_b256/c1.json",
+      "bytes": 2465701
+    },
+    {
+      "path": "8k_b256/c1.log",
+      "bytes": 68979
+    },
+    {
+      "path": "8k_b256/dense.json",
+      "bytes": 2459674
+    },
+    {
+      "path": "8k_b256/dense.log",
+      "bytes": 76085
+    },
+    {
+      "path": "8k_b256/grid.log",
+      "bytes": 144
+    },
+    {
+      "path": "8k_b256/profile_summary.json",
+      "bytes": 3
+    },
+    {
+      "path": "8k_b256/run.sh",
+      "bytes": 1364
+    },
+    {
+      "path": "8k_b256/source.tar.gz",
+      "bytes": 18423
+    },
+    {
+      "path": "8k_b256/summary.csv",
+      "bytes": 546
+    },
+    {
+      "path": "8k_b256/summary.log",
+      "bytes": 6449
+    },
+    {
+      "path": "8k_b256/summary.md",
+      "bytes": 6448
+    },
+    {
+      "path": "README.md",
+      "bytes": 6713
+    },
+    {
+      "path": "RESULTS_SUMMARY.md",
+      "bytes": 6752
+    },
+    {
+      "path": "formal/RUN_STATUS.md",
+      "bytes": 1332
+    },
+    {
+      "path": "formal/c1.json",
+      "bytes": 4979286
+    },
+    {
+      "path": "formal/c1.log",
+      "bytes": 96188
+    },
+    {
+      "path": "formal/dense.json",
+      "bytes": 1038283
+    },
+    {
+      "path": "formal/dense.log",
+      "bytes": 80851
+    },
+    {
+      "path": "formal/grid.log",
+      "bytes": 143
+    },
+    {
+      "path": "formal/profile_summary.json",
+      "bytes": 3398
+    },
+    {
+      "path": "formal/profiles/c1_b1.kernels.csv",
+      "bytes": 10644
+    },
+    {
+      "path": "formal/profiles/c1_b1.trace.json.gz",
+      "bytes": 5033226
+    },
+    {
+      "path": "formal/profiles/c1_b256.kernels.csv",
+      "bytes": 15079
+    },
+    {
+      "path": "formal/profiles/c1_b256.trace.json.gz",
+      "bytes": 35703516
+    },
+    {
+      "path": "formal/profiles/c1_b32.kernels.csv",
+      "bytes": 13994
+    },
+    {
+      "path": "formal/profiles/c1_b32.trace.json.gz",
+      "bytes": 8971867
+    },
+    {
+      "path": "formal/summary.csv",
+      "bytes": 2681
+    },
+    {
+      "path": "kernels/decode.json",
+      "bytes": 8128
+    },
+    {
+      "path": "kernels/decode.log",
+      "bytes": 6739
+    },
+    {
+      "path": "kernels/factors.log",
+      "bytes": 93
+    },
+    {
+      "path": "kernels/prefill.json",
+      "bytes": 29548
+    },
+    {
+      "path": "kernels/prefill.log",
+      "bytes": 22093
+    },
+    {
+      "path": "kernels/tests-confirmed.log",
+      "bytes": 179
+    },
+    {
+      "path": "kernels/tests.log",
+      "bytes": 1957
+    },
+    {
+      "path": "kernels/tp8-output-confirmed.log",
+      "bytes": 541
+    },
+    {
+      "path": "kernels/tp8-output.log",
+      "bytes": 11570
+    },
+    {
+      "path": "smoke/c1.json",
+      "bytes": 25999
+    },
+    {
+      "path": "smoke/c1.log",
+      "bytes": 38041
+    },
+    {
+      "path": "source.tar.gz",
+      "bytes": 24936
+    }
+  ],
+  "dense_4k_baseline": {
+    "hf_revision": "f1ad6c3c6d0144d4f27a127ee194bb2da320bac1",
+    "path": "system_benchmarks/vllm_32b_tp8_sm89_4k_budget8k/dense.json",
+    "note": "Reused complete baseline; local formal/dense.json is an interrupted audit rerun, not the baseline"
+  },
+  "paired_8k_dense": "Included as required controls for the V96 B128/B256 comparisons"
+}
