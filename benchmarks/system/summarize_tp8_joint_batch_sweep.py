@@ -18,9 +18,9 @@ def main():
     config = manifest['config']
     assert config['phase'] == 'formal' and config['repeats'] == 1
     expected = {(m, n, b, a) for m in config['models'] for n in config['contexts']
-                for b in config['batches'] for a in config['arms']}
+                for b in config['context_batches'][str(n)] for a in config['arms']}
     indexed = {(r['model'], r['length'], r['batch'], r['arm']): r for r in manifest['trials']}
-    assert set(indexed) == expected and len(manifest['trials']) == len(expected) == 72
+    assert set(indexed) == expected and len(manifest['trials']) == len(expected)
     prompts = {}
     validated = 0
     for key, record in indexed.items():
@@ -41,7 +41,7 @@ def main():
     pairs = []
     for model in config['models']:
         for length in config['contexts']:
-            for batch in config['batches']:
+            for batch in config['context_batches'][str(length)]:
                 dense, basis = [indexed[(model, length, batch, a)] for a in config['arms']]
                 pair = {'model': model, 'context': length, 'batch': batch}
                 for label, record in [('dense', dense), ('basis', basis)]:
@@ -141,7 +141,7 @@ def main():
               '- Per-trial commands/status/metrics: `formal/manifest.json` and `formal/summary.csv`.',
               '- Paired machine-readable table: `comparison.csv`; per-trial raw data and logs under `formal/`.',
               '- No SHA256 validation or generated-token equivalence check was performed.',
-              '- Publication links and raw artifact availability are recorded in [README](README.md).']
+              '- See [README](README.md) for publication status, raw data links and reproduction requirements.']
     (args.output / 'RESULTS_SUMMARY.md').write_text('\n'.join(lines) + '\n')
     print(json.dumps({'attempts': len(indexed), 'successes': completed, 'gpu_oom': len(indexed)-completed,
                       'validated_ranks': validated, 'summary': str(args.output / 'RESULTS_SUMMARY.md')}))

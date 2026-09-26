@@ -17,6 +17,12 @@ QWEN_SNAPSHOT = Path('/workspace/.cache/huggingface/hub/models--alexz949--BasisS
 MODELS = ('llama', 'qwen')
 ARMS = ('dense', 'basis_joint')
 BATCHES = (1, 2, 4, 6, 8, 10, 12, 14, 16)
+QWEN8_SNAPSHOT = Path('/workspace/.cache/huggingface/hub/models--alexz949--BasisServe-CALS/snapshots/8d96d7b135cd82647727fd5ca0675222adb29c1c')
+
+
+def batches_by_context(lengths, batches, max_batch_128k):
+    return {str(n): [b for b in batches if n != 130048 or b <= max_batch_128k]
+            for n in lengths}
 
 
 def command_for(model, arm, length, batch, output, conditioning, measured):
@@ -28,6 +34,14 @@ def command_for(model, arm, length, batch, output, conditioning, measured):
     if model == 'llama':
         command += ['--tokens', str(PROMPTS / f'p{length}_c0.safetensors'),
                     '--prompt-manifest', str(PROMPTS / f'p{length}_c0.json')]
+    elif model == 'qwen8':
+        bank = QWEN8_SNAPSHOT / 'checkpoints/attention_c1/qwen3_8b_post_uniform_v96_128k_als6_retrievalmix'
+        command += [
+            '--model', '/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B/snapshots/b968826d9c46dd6066d109eabc6255188de91218',
+            '--factor-root', '/workspace/runs/qwen3-8b-joint-v96/factors',
+            '--router-root', str(bank / 'router_b16r16'),
+            '--tokens', str(QWEN8_SNAPSHOT / 'calibration/qwen3-8b-post-128k/c4-48x128k/windows.safetensors'),
+        ]
     else:
         assert model == 'qwen'
         command += [
@@ -103,6 +117,8 @@ def save(manifest, output):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--phase', choices=('smoke', 'formal'), required=True)
+    parser.add_argument('--models', nargs='+', choices=(*MODELS, 'qwen8'), default=list(MODELS))
+    parser.add_argument('--max-batch-128k', type=int, choices=BATCHES, default=16)
     parser.add_argument('--output', type=Path, default=ROOT / 'results/system_benchmarks/tp8_joint_batch_sweep')
     args = parser.parse_args()
     smoke = args.phase == 'smoke'
@@ -110,7 +126,9 @@ def main():
     conditioning, measured = (2, 8) if smoke else (16, 128)
     output = args.output.resolve() / args.phase
     output.mkdir(parents=True, exist_ok=True)
-    config = {'models': list(MODELS), 'arms': list(ARMS), 'contexts': lengths,
+    context_batches = batches_by_context(lengths, batches, args.max_batch_128k)
+    config = {'models': args.models, 'arms': list(ARMS), 'contexts': lengths,
+              'context_batches': context_batches,
               'batches': batches, 'conditioning_steps': conditioning, 'measure_steps': measured,
               'repeats': 1, 'stop_after_oom': False, 'phase': args.phase}
     path = output / 'manifest.json'
@@ -121,9 +139,9 @@ def main():
         manifest = {'config': config, 'created_at': datetime.now(timezone.utc).isoformat(),
                     'status': 'running', 'trials': []}
     indexed = {(r['model'], r['length'], r['batch'], r['arm']): r for r in manifest['trials']}
-    for model in MODELS:
+    for model in args.models:
         for length in lengths:
-            for batch in batches:
+            for batch in context_batches[str(length)]:
                 for arm in ARMS:
                     key = (model, length, batch, arm)
                     previous = indexed.get(key)
