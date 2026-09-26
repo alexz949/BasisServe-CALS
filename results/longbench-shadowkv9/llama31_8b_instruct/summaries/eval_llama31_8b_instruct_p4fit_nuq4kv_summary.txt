@@ -1,0 +1,20 @@
+# Llama-3.1-8B-Instruct LongBench-9: BF16 vs FP8 (E4M3) vs KVQuant NUQ4 KV cache, Full-K and B16R16 page-4 (256 + recent 64); 2026-09-25 21:04 EDT
+n per arm: {'full_bf16': 1543, 'ours_bf16': 1543, 'full_fp8': 1543, 'ours_fp8': 1543, 'full_nuq4': 1543, 'ours_nuq4': 1543}  common: 1543
+task                       full_bf16 ours_bf16  full_fp8  ours_fp8 full_nuq4 ours_nuq4   (each arm over its own samples)
+dureader                       32.34     28.95     33.06     30.41     31.87     28.83
+gov_report                     32.76     31.47     33.06     31.45     32.63     31.48
+hotpotqa                       52.23     52.51     52.32     52.62     52.78     52.81
+lcc                            52.22     54.05     51.34     52.62     52.83     53.43
+multifieldqa_en                50.25     51.02     50.37     50.98     50.05     49.79
+musique                        31.32     30.70     31.29     30.71     31.49     30.52
+narrativeqa                    28.06     29.05     28.73     28.76     28.62     28.14
+passage_retrieval_en           99.50     99.50     99.00     99.50     99.50     99.50
+samsum                         44.50     44.90     45.05     44.55     45.37     43.96
+9-task mean                    47.02     46.91     47.14     46.85     47.24     46.50
+6-task mean                    51.21     51.66     51.26     51.31     51.50     51.05
+paired on 1543 common samples (task-balanced 9-task mean):
+  ours_bf16 - full_bf16: -0.11  95% CI [-0.63, +0.45]  win/loss 266/332
+  full_fp8 - full_bf16: +0.12  95% CI [-0.23, +0.44]  win/loss 201/192
+  ours_fp8 - full_bf16: -0.17  95% CI [-0.73, +0.40]  win/loss 270/335
+  full_nuq4 - full_bf16: +0.22  95% CI [-0.19, +0.66]  win/loss 253/243
+  ours_nuq4 - full_bf16: -0.52  95% CI [-1.07, +0.05]  win/loss 260/354

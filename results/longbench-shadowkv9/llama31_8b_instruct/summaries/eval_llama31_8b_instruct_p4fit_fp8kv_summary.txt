@@ -1,0 +1,18 @@
+# Llama-3.1-8B-Instruct LongBench-9: BF16 KV vs simulated FP8 (E4M3) KV, Full-K and B16R16 page-4 (256 + recent 64); 2026-09-25 19:53 EDT
+n per arm: {'full_bf16': 1543, 'ours_bf16': 1543, 'full_fp8': 1543, 'ours_fp8': 1543}  common: 1543
+task                       full_bf16 ours_bf16  full_fp8  ours_fp8   (each arm over its own samples)
+dureader                       32.34     28.95     33.06     30.41
+gov_report                     32.76     31.47     33.06     31.45
+hotpotqa                       52.23     52.51     52.32     52.62
+lcc                            52.22     54.05     51.34     52.62
+multifieldqa_en                50.25     51.02     50.37     50.98
+musique                        31.32     30.70     31.29     30.71
+narrativeqa                    28.06     29.05     28.73     28.76
+passage_retrieval_en           99.50     99.50     99.00     99.50
+samsum                         44.50     44.90     45.05     44.55
+9-task mean                    47.02     46.91     47.14     46.85
+6-task mean                    51.21     51.66     51.26     51.31
+paired on 1543 common samples (task-balanced 9-task mean):
+  ours_bf16 - full_bf16: -0.11  95% CI [-0.63, +0.45]  win/loss 266/332
+  full_fp8 - full_bf16: +0.12  95% CI [-0.23, +0.44]  win/loss 201/192
+  ours_fp8 - full_bf16: -0.17  95% CI [-0.73, +0.40]  win/loss 270/335

@@ -33,12 +33,15 @@ from basisserve.kernels.compressed_v_decode_attention import (
     compressed_v_prefill_attention,
 )
 
-ARMS = ('full','exact_sparse','lrqk','shadowkv','loki','ours')
+ARMS = ('full','exact_sparse','lrqk','shadowkv','loki','ours','quest')
 LRQK_TOPK, LOKI_TOPK, LOKI_RECENT = 2048, 2048, 64
 # Physical KV budgets: 'ours'/'exact_sparse' page routing (sink page + recent 64 inside) and ShadowKV routed tokens.
 OURS_BUDGET, SHADOWKV_BUDGET = 2048, 2048
 # Decode-time page size for ours/exact_sparse (the router factors are per-token; the bank was fitted with page-32 statistics).
 PAGE_SIZE = 32
+KV_FP8 = False
+KV_NUQ4 = None
+QUEST_PAGE_SIZE, QUEST_BUDGET, QUEST_DENSE_LAYERS = 16, 2048, 2
 PINNED_PAGES = 1
 # 'ruler' (frozen RULER prompts, substring metrics) or 'longbench' (ShadowKV 9-task LongBench-v1 subset, official metrics).
 BENCHMARK = 'ruler'
@@ -148,12 +151,26 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
     previous = past_key_values.get_seq_length(self.layer_idx)
     assert previous == 0 or length == 1
     assert attention_mask is None or length == 1
+    if KV_FP8:
+        # Simulated E4M3 cache: what is stored (and read at decode) is the dequantized FP8 K and V latent; the routing
+        # sidecar stays BF16, its Base term computed from the stored V latent and its residual code from the BF16 K.
+        from evaluation.kv_fp8_simulation import fp8_key_roundtrip, fp8_value_roundtrip
+        k_store, v_store = fp8_key_roundtrip(k), fp8_value_roundtrip(v, PAGE_SIZE)
+    elif KV_NUQ4 is not None:
+        # Simulated KVQuant NUQ4 cache: pre-RoPE K quantized per channel (RoPE applied after dequantization), V latent per token.
+        from evaluation.kvquant_nuq4_simulation import nuq4_key_roundtrip, nuq4_value_roundtrip
+        upstream, quantizers = KV_NUQ4[0], KV_NUQ4[1]
+        pre_store = nuq4_key_roundtrip(pre, quantizers[f'{self.layer_idx}.k'], upstream)
+        k_store = apply_rotary_pos_emb(pre_store, pre_store, cos, sin)[1]
+        v_store = nuq4_value_roundtrip(v, quantizers[f'{self.layer_idx}.v'], upstream)
+    else:
+        k_store, v_store = k, v
     if self._routing_arm == 'ours':
         t = self._routing_factors
         if self._routing_base_rank==0:
             current=torch.einsum('bhtd,hdr->bhtr',k,t['residual_encoder'].to(k.dtype))
         else:
-            current = build_conditional_routing_sidecar(v,k,base_left=t['base_left'],
+            current = build_conditional_routing_sidecar(v_store,k,base_left=t['base_left'],
                 base_right=t['base_right'],base_bias=t['base_bias'],
                 residual_encoder=t['residual_encoder'],cos=cos,sin=sin)
         past_key_values.sidecars[self.layer_idx] = (torch.cat((past_key_values.sidecars[self.layer_idx],current),2)
@@ -163,7 +180,13 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
         current = build_routing_sidecar(k, self._loki_projector)
         past_key_values.sidecars[self.layer_idx] = (torch.cat((past_key_values.sidecars[self.layer_idx], current), 2)
             if previous else current)
-    k,v = past_key_values.update(k,v,self.layer_idx)
+    elif self._routing_arm == 'quest':
+        from evaluation.quest_page_routing import append_minmax, page_minmax
+        past_key_values.sidecars[self.layer_idx] = (page_minmax(k_store, QUEST_PAGE_SIZE) if previous == 0 else
+            append_minmax(past_key_values.sidecars[self.layer_idx], k_store, QUEST_PAGE_SIZE, previous))
+    k_cache,v_cache = past_key_values.update(k_store,v_store,self.layer_idx)
+    if previous:
+        k,v = k_cache,v_cache          # decode reads the cache (dequantized FP8 under --kv-fp8); prefill keeps the fresh BF16 K/V
     if previous == 0:
         output = (flash_prefill_attention(q,k,v,scale=self.scaling) if self.config.model_type == 'qwen3'
                   else compressed_v_prefill_attention(q,k,v,scale=self.scaling))
@@ -175,6 +198,14 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
             past_key_values.sidecars[self.layer_idx], top_k=LOKI_TOPK, recent_tokens=LOKI_RECENT, scale=self.scaling)
         output = result.output
         past_key_values.statistics[self.layer_idx] = result.statistics
+    elif self._routing_arm == 'quest':
+        from evaluation.quest_page_routing import quest_select, union_per_group
+        from basisserve.kernels.split_indexed_attention import split_indexed_attention
+        selected = quest_select(q, past_key_values.sidecars[self.layer_idx], QUEST_PAGE_SIZE, QUEST_BUDGET, k.shape[2])
+        output = split_indexed_attention(q, k, v, selected, scale=self.scaling)
+        past_key_values.statistics[self.layer_idx] = dict(selected_per_query_head=int((selected[0, 0] >= 0).sum()),
+            physical_union_per_kv_group=union_per_group(selected, self.num_key_value_heads), page_size=QUEST_PAGE_SIZE,
+            token_budget_per_query_head=QUEST_BUDGET, recent_tokens=0, pinned_pages=0)
     else:
         if self._routing_arm == 'exact_sparse':
             # FP32 identity routing gives an exact-QK Page-mass oracle with the same GQA rule.
@@ -249,8 +280,9 @@ def install(model, checkpoint, manifest, arm, bank, *, dense_v=False):
             layer.mixer=replacement
         else:
             layer.self_attn=replacement
-        if arm in ('full','exact_sparse','ours','loki'):
-            replacement._routing_arm=arm
+        if arm in ('full','exact_sparse','ours','loki','quest'):
+            # Quest keeps its first QUEST_DENSE_LAYERS layers dense (Tang et al.: sparsity below 10% there).
+            replacement._routing_arm='full' if arm=='quest' and record['layer']<QUEST_DENSE_LAYERS else arm
             if arm == 'loki':
                 replacement._loki_projector = bank[record['layer']]['projector'].to(device=device, dtype=torch.bfloat16)
             if arm=='ours':
@@ -423,6 +455,19 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
         sequence_length=args.sequence_length,samples=len(rows),samples_per_task=samples_per_task,benchmark=BENCHMARK,
         ours_budget=OURS_BUDGET,shadowkv_budget=SHADOWKV_BUDGET,runtime_page_size=PAGE_SIZE,runtime_pinned_pages=PINNED_PAGES,bank_page_size=bank_page_size,allow_bank_sink_mismatch=args.allow_bank_sink_mismatch,
         task_names=list(task_names),dtype='bfloat16',generation='greedy, native EOS, official caps',
+        **({'quest':dict(page_size=QUEST_PAGE_SIZE,token_budget_per_query_head=QUEST_BUDGET,dense_layers=list(range(QUEST_DENSE_LAYERS)),
+            selection='per query head: top-K pages by the upper bound sum_i max(q_i min_i, q_i max_i) over post-RoPE Keys (K = budget / page_size); no recent window, no pinned pages; GQA union measured, not capped',
+            metadata='per page and channel min/max of post-RoPE K, FP32', reference='Tang et al., Quest, ICML 2024')} if 'quest' in ARMS else {}),
+        **({'kv_cache':dict(format='simulated float8_e4m3fn (quantize-dequantize, BF16 storage)',key='post-RoPE K, one FP32 absmax scale per token and KV head',
+            value=f'V latent, one FP32 absmax scale per page of {PAGE_SIZE} tokens and KV head (decode tokens: single-token pages)',
+            prefill='attention on the fresh BF16 K/V; the cache is written quantized', decode='dequantized FP8 K and V latent',
+            routing_sidecar='BF16; Base from the dequantized V latent, residual code from BF16 K',
+            source_sha256=sha256(ROOT/'evaluation/kv_fp8_simulation.py'))} if KV_FP8 else
+          {'kv_cache':dict(format='simulated KVQuant NUQ4 (quantize-dequantize, BF16 storage)',**KV_NUQ4[2]['protocol'],
+            calibration=KV_NUQ4[2]['calibration'],quantizers_sha256=KV_NUQ4[3],upstream=KV_NUQ4[2]['upstream'],
+            prefill='attention on the fresh BF16 K/V; the cache is written quantized', decode='dequantized NUQ4 K and V latent',
+            routing_sidecar='BF16; Base from the dequantized V latent, residual code from BF16 K',
+            source_sha256=sha256(ROOT/'evaluation/kvquant_nuq4_simulation.py'))} if KV_NUQ4 is not None else {}),
         prefill=('full causal FlashAttention-2 on all arms' if args.dense_v else
                  'full causal FlashAttention with zero-padded compact V (sm_120)' if runtime_config.model_type == 'qwen3' else
                  'full causal FlashAttention-2 for equal QKV widths, C1 Triton for compact V'),rank_schedule=identity['layer_ranks'],
@@ -596,7 +641,7 @@ def audit_smoke(args,rows,spec,bank_hashes):
 
 
 def main():
-    global ARMS, LRQK_TOPK, LOKI_TOPK, LOKI_RECENT, OURS_BUDGET, SHADOWKV_BUDGET, BENCHMARK, PAGE_SIZE, PINNED_PAGES
+    global ARMS, LRQK_TOPK, LOKI_TOPK, LOKI_RECENT, OURS_BUDGET, SHADOWKV_BUDGET, BENCHMARK, PAGE_SIZE, PINNED_PAGES, KV_FP8, KV_NUQ4, QUEST_PAGE_SIZE, QUEST_BUDGET, QUEST_DENSE_LAYERS
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('stage',choices=['smoke','audit-smoke','evaluate','summarize'])
     p.add_argument('--arm',choices=ARMS,default='full')
@@ -626,6 +671,11 @@ def main():
     p.add_argument('--prompt-layout',choices=('completion','chat_nn_no_prefix','chat_answer_prefix'),default='completion')
     p.add_argument('--chat-template-kwargs',help='JSON kwargs for apply_chat_template, e.g. {"enable_thinking": false} for Qwen3')
     p.add_argument('--benchmark',choices=('ruler','longbench'),default='ruler')
+    p.add_argument('--kv-fp8',action='store_true',help='simulated E4M3 KV cache (evaluation/kv_fp8_simulation.py): decode reads dequantized FP8 K and V latent')
+    p.add_argument('--quest-page-size',type=int,default=16)
+    p.add_argument('--quest-budget',type=int,default=2048,help='Quest token budget per query head (pages = budget / page size)')
+    p.add_argument('--quest-dense-layers',type=int,default=2,help='Quest: leading layers kept dense')
+    p.add_argument('--kv-nuq4',type=Path,help='simulated KVQuant NUQ4 KV cache: directory with quantizers.pt + manifest.json from evaluation/calibrate_llama_v96_kvquant.py')
     p.add_argument('--ours-budget',type=int,default=OURS_BUDGET,help='physical tokens for ours/exact_sparse incl. sink page and recent 64')
     p.add_argument('--shadowkv-budget',type=int,default=SHADOWKV_BUDGET,help='ShadowKV routed tokens (outliers and local tail are extra)')
     p.add_argument('--page-size',type=int,default=PAGE_SIZE,choices=(1,2,4,8,16,32),help='decode-time routing page size for ours/exact_sparse')
@@ -634,6 +684,15 @@ def main():
     args=p.parse_args();configure();torch.manual_seed(0)
     LRQK_TOPK, LOKI_TOPK, LOKI_RECENT = args.lrqk_topk, args.loki_topk, args.loki_recent
     OURS_BUDGET, SHADOWKV_BUDGET, BENCHMARK, PAGE_SIZE, PINNED_PAGES = args.ours_budget, args.shadowkv_budget, args.benchmark, args.page_size, args.pinned_pages
+    KV_FP8 = args.kv_fp8
+    QUEST_PAGE_SIZE, QUEST_BUDGET, QUEST_DENSE_LAYERS = args.quest_page_size, args.quest_budget, args.quest_dense_layers
+    assert QUEST_BUDGET % QUEST_PAGE_SIZE == 0
+    assert not (args.kv_fp8 and args.kv_nuq4 is not None)
+    if args.kv_nuq4 is not None:
+        from evaluation.kvquant_nuq4_simulation import load_quantizers, load_upstream
+        quantizers, nuq_manifest = load_quantizers(args.kv_nuq4)
+        assert nuq_manifest['identity_sha256'] == sha256(args.identity) and not nuq_manifest['smoke']
+        KV_NUQ4 = (load_upstream(), {k: tuple(v) for k, v in quantizers.items()}, nuq_manifest, sha256(args.kv_nuq4/'quantizers.pt'))
     assert OURS_BUDGET>=64+(PINNED_PAGES+1)*PAGE_SIZE and OURS_BUDGET%PAGE_SIZE==0 and SHADOWKV_BUDGET>0 and SHADOWKV_BUDGET%8==0
     shadowkv_adapter.SHADOWKV_BUDGET=SHADOWKV_BUDGET
     assert LRQK_TOPK > 0 and LOKI_TOPK > 0 and LOKI_RECENT >= 0
