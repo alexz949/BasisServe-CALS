@@ -223,6 +223,7 @@ def _eval_ppl_fp32_loss(
     batch_size: int,
     max_samples: int | None,
     max_tokens: int | None,
+    input_ids: torch.Tensor | None = None,
 ) -> dict[str, Any]:
     """Evaluate chunked PPL while accumulating cross entropy in float32.
 
@@ -231,7 +232,13 @@ def _eval_ppl_fp32_loss(
     quantized at the model dtype's coarse magnitude-dependent resolution.
     """
 
-    input_ids = _token_ids(tokenizer, dataset, split, max_tokens)
+    if input_ids is None:
+        input_ids = _token_ids(tokenizer, dataset, split, max_tokens)
+    else:
+        assert (input_ids.ndim == 1 or (input_ids.ndim == 2 and input_ids.shape[0] == 1))
+        assert input_ids.dtype == torch.long
+        assert max_tokens is None, 'Pre-tokenized evaluation input must already be bounded'
+        input_ids = input_ids.reshape(1, -1)
     nsamples_total = int(input_ids.numel() // seqlen)
     nsamples = (
         nsamples_total
@@ -286,6 +293,10 @@ def _eval_ppl_fp32_loss(
         "nll_sum": nll_sum,
         "loss_dtype": "float32",
         "ppl": math.exp(nll_sum / token_count),
+        "available_tokens": int(input_ids.numel()),
+        "complete_chunks_available": nsamples_total,
+        "discarded_tail_tokens": int(input_ids.numel() % seqlen),
+        "unused_complete_chunks": nsamples_total - nsamples,
     }
 
 
