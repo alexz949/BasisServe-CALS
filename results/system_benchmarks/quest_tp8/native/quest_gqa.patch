@@ -1,0 +1,358 @@
+diff --git a/kernels/include/decode/decode_attn.cuh b/kernels/include/decode/decode_attn.cuh
+index b180d59..249a40a 100644
+--- a/kernels/include/decode/decode_attn.cuh
++++ b/kernels/include/decode/decode_attn.cuh
+@@ -452,10 +452,11 @@ BatchDecodeWithPagedKVCacheKernel(DTypeIn* __restrict__ q,
+ 
+ 	constexpr uint32_t head_dim = bdx * vec_size;
+ 	const uint32_t batch_idx = blockIdx.x;
+-	const uint32_t kv_head_idx =
+-		blockIdx.y; // Use kv_head_idx as another dimention in page indices.
+-	const uint32_t qo_head_idx = kv_head_idx * bdy + threadIdx.y;
+-	const uint32_t num_qo_heads = gridDim.y * bdy;
++	// Independent page lists require a separate tile per query head.
++	static_assert(bdy == 1);
++	const uint32_t qo_head_idx = blockIdx.y;
++	const uint32_t num_qo_heads = gridDim.y;
++	const uint32_t kv_head_idx = qo_head_idx / (num_qo_heads / paged_kv.num_heads);
+ 	// Number of pages is identical since all heads share same latency budget.
+ 	const uint32_t cur_page_indptr_begin = paged_kv.indptr[batch_idx],
+ 				   cur_page_indptr_end = paged_kv.indptr[batch_idx + 1];
+@@ -512,6 +513,7 @@ BatchDecodeWithPagedKVCacheKernel(DTypeIn* __restrict__ q,
+ 		k_ptrs_smem[((j * bdz + tz) * bdy + ty) * bdx + tx] = paged_kv.protective_get_k_ptr_heads(
+ 			cur_page_indptr_begin + (((j * bdz + tz) * bdy + ty) * bdx + tx) / paged_kv.page_size,
+ 			kv_head_idx,
++			qo_head_idx,
+ 			(((j * bdz + tz) * bdy + ty) * bdx + tx) % paged_kv.page_size,
+ 			0,
+ 			last_indptr);
+@@ -563,6 +565,7 @@ BatchDecodeWithPagedKVCacheKernel(DTypeIn* __restrict__ q,
+ 							 ((j * bdz + tz) * bdy + ty) * bdx + tx) /
+ 								paged_kv.page_size,
+ 						kv_head_idx,
++						qo_head_idx,
+ 						((iter + num_stages_smem) * tile_size_per_bdx * bdy * bdz +
+ 						 ((j * bdz + tz) * bdy + ty) * bdx + tx) %
+ 							paged_kv.page_size,
+@@ -822,11 +825,10 @@ BatchDecodeWithPagedKVCacheWorkEstimation(uint32_t& tmp_size,
+ 				constexpr uint32_t num_stages_smem = 2U;
+ 				constexpr uint32_t bdx = HEAD_DIM / vec_size;
+ 				static_assert(bdx <= 32);
+-				constexpr uint32_t bdy = GROUP_SIZE;
++				constexpr uint32_t bdy = 1;
+ 				constexpr uint32_t num_threads = std::max(128U, bdx * bdy);
+ 				constexpr uint32_t bdz = num_threads / (bdx * bdy);
+-				constexpr uint32_t tile_size_per_bdx =
+-					GROUP_SIZE == 1 ? (sizeof(DTypeIn) == 1 ? 2U : 4U) : 1U;
++				constexpr uint32_t tile_size_per_bdx = sizeof(DTypeIn) == 1 ? 2U : 4U;
+ 				const uint32_t smem_size =
+ 					2 * num_stages_smem * tile_size_per_bdx * bdy * bdz * head_dim *
+ 						sizeof(DTypeIn) +
+@@ -856,7 +858,7 @@ BatchDecodeWithPagedKVCacheWorkEstimation(uint32_t& tmp_size,
+ 				FLASHINFER_CUDA_CALL(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+ 					&num_blocks_per_sm, partition_kv_kernel, num_threads, smem_size));
+ 				max_grid_size = num_blocks_per_sm * num_sm;
+-				if(batch_size * num_kv_heads >= max_grid_size) {
++				if(batch_size * num_qo_heads >= max_grid_size) {
+ 					// do not use partition-kv kernel
+ 					tmp_size = 0;
+ 					new_batch_size = batch_size;
+@@ -877,7 +879,7 @@ BatchDecodeWithPagedKVCacheWorkEstimation(uint32_t& tmp_size,
+ 					}
+ 					std::tie(max_num_pages_per_batch, new_batch_size) =
+ 						PartitionPagedKVCacheBinarySearchMinNumPagePerBatch(
+-							max_grid_size, num_kv_heads, num_pages, 128 / page_size);
++							max_grid_size, num_qo_heads, num_pages, 128 / page_size);
+ 					// Here we manully append the last page to a new batch
+ 					new_batch_size += 1;
+ 					if(new_batch_size == batch_size) {
+@@ -921,17 +923,17 @@ BatchDecodeWithPagedKVCacheDispatched(DTypeIn* q,
+ 	constexpr uint32_t num_stages_smem = 2U;
+ 	constexpr uint32_t bdx = HEAD_DIM / vec_size;
+ 	static_assert(bdx <= 32);
+-	constexpr uint32_t bdy = GROUP_SIZE;
++	constexpr uint32_t bdy = 1;
+ 	constexpr uint32_t num_threads = std::max(128U, bdx * bdy);
+ 	constexpr uint32_t bdz = num_threads / (bdx * bdy);
+-	constexpr uint32_t tile_size_per_bdx = GROUP_SIZE == 1 ? (sizeof(DTypeIn) == 1 ? 2U : 4U) : 1U;
++	constexpr uint32_t tile_size_per_bdx = sizeof(DTypeIn) == 1 ? 2U : 4U;
+ 	const uint32_t smem_size =
+ 		2 * num_stages_smem * tile_size_per_bdx * bdy * bdz * HEAD_DIM * sizeof(DTypeIn) +
+ 		std::max(tile_size_per_bdx * num_threads * sizeof(DTypeIn*), 2 * bdy * bdz * sizeof(float));
+ 
+ 	if(tmp == nullptr) {
+ 		// do not use partition-kv kernel
+-		dim3 nblks(batch_size, num_kv_heads);
++		dim3 nblks(batch_size, num_qo_heads);
+ 		dim3 nthrs(bdx, bdy, bdz);
+ 		auto kernel = BatchDecodeWithPagedKVCacheKernel</*partition_kv=*/false,
+ 														ROTARY_MODE,
+@@ -985,7 +987,7 @@ BatchDecodeWithPagedKVCacheDispatched(DTypeIn* q,
+ 						(void*)&sm_scale,
+ 						(void*)&rope_rcp_scale,
+ 						(void*)&rope_rcp_theta};
+-		dim3 nblks(batch_size, num_kv_heads);
++		dim3 nblks(batch_size, num_qo_heads);
+ 		dim3 nthrs(bdx, bdy, bdz);
+ 		FLASHINFER_CUDA_CALL(
+ 			cudaLaunchKernel((void*)partition_kv_kernel, nblks, nthrs, args, smem_size, stream));
+diff --git a/kernels/include/decode/decode_handler.cuh b/kernels/include/decode/decode_handler.cuh
+index 93ac3e1..83df355 100644
+--- a/kernels/include/decode/decode_handler.cuh
++++ b/kernels/include/decode/decode_handler.cuh
+@@ -80,7 +80,7 @@ public:
+ 		// TODO: Support more general cases.
+ 		static_assert(page_storage == PageStorage::kIndices,
+ 					  "Only support PageStorage::kIndices for now.");
+-		assert(num_qo_heads == num_kv_heads); // Need to modify page layout for general cases.
++		assert(num_kv_heads > 0 && num_qo_heads % num_kv_heads == 0);
+ 		batch_size_before_partition_ = batch_size;
+ 		uint32_t tmp_size, max_grid_size, max_num_pages_per_batch, new_batch_size;
+ 		auto work_estimation_func = BatchDecodeWithPagedKVCacheWorkEstimation<page_storage,
+diff --git a/kernels/include/decode/decode_page.cuh b/kernels/include/decode/decode_page.cuh
+index f4b07ce..017b4bf 100644
+--- a/kernels/include/decode/decode_page.cuh
++++ b/kernels/include/decode/decode_page.cuh
+@@ -24,6 +24,7 @@
+ #define FLASHINFER_PAGE_CUH_
+ 
+ #include <cuda_fp16.h>
++#include <math_constants.h>
+ #include <vector>
+ 
+ #include "flashinfer/layout.cuh"
+@@ -97,9 +98,7 @@ struct paged_kv_t {
+ 	// [max_num_pages, 2, num_heads, page_size, head_dim] if layout == HND
+ 	// [max_num_pages, 2, page_size, num_heads, head_dim] if layout == NHD
+ 	DType* data;
+-	// [num_heads, page_budget(nnz_pages)] The page indices array, used when page_storage == kIndices
+-	// TODO: Currently GROUP_SIZE == 1. The num_heads are not equal actually
+-	// num_heads dimension is added for dynamic selection which is individual for heads.
++	// [num_query_heads, page_budget] for per-query selection; data keeps num_kv_heads.
+ 	IdType* indices;
+ 	// [nnz_pages] The page pointers array, used when page_storage == kPointer
+ 	// Deprecated in current implemenation of Dynamic Selection.
+@@ -324,6 +323,7 @@ struct paged_kv_t {
+ 
+ 	__device__ __forceinline__ DType* protective_get_k_ptr_heads(IdType page_iter,
+ 																 uint32_t head_idx,
++																 uint32_t query_head_idx,
+ 																 uint32_t entry_idx,
+ 																 uint32_t feat_idx,
+ 																 IdType last_indptr) const {
+@@ -333,11 +333,11 @@ struct paged_kv_t {
+ 				return data + get_k_elem_offset(last_page_idx, head_idx, entry_idx, feat_idx);
+ 			} else {
+ 				// Note (Yilong):
+-				// indices: [num_kv_heads, page_budget - 1]. Manully exclude the last page for sake of Top-k.
++				// Page lists are indexed by query head; data is indexed by KV head.
+ 				// Therefore, boundary check is last_indptr - 1 (since last_indptr is the last page index).
+ 				if(page_iter < last_indptr - 1) {
+ 					return data +
+-						   get_k_elem_offset(__ldg(indices + page_iter + head_idx * page_budget),
++						   get_k_elem_offset(__ldg(indices + page_iter + query_head_idx * page_budget),
+ 											 head_idx,
+ 											 entry_idx,
+ 											 feat_idx);
+@@ -377,6 +377,19 @@ __device__ __forceinline__ void vec_reduct(vec_t<half, vec_size>& tgt_vec,
+ 	}
+ }
+ 
++template <size_t vec_size, bool getMax>
++__device__ __forceinline__ void vec_reduct(vec_t<nv_bfloat16, vec_size>& tgt_vec,
++                                         vec_t<nv_bfloat16, vec_size>& src_vec) {
++#pragma unroll
++    for(size_t idx = 0; idx < vec_size; ++idx) {
++        if constexpr(getMax) {
++            tgt_vec[idx] = __hmax(tgt_vec[idx], src_vec[idx]);
++        } else {
++            tgt_vec[idx] = __hmin(tgt_vec[idx], src_vec[idx]);
++        }
++    }
++}
++
+ /*!
+  * \brief CUDA kernel to append new keys/values to the paged key-value cache in the decode phase
+  * \tparam head_dim The dimension of each head
+@@ -427,8 +440,8 @@ AppendPagedKVCacheDecodeKernel(paged_kv_t<page_storage, layout, DType, IdType> p
+ 		local_min.cast_load(
+ 			candidate_kv.get_v_ptr(candidate_ptr, head_idx, candidate_entry_idx, tx * vec_size));
+ 	} else {
+-		local_max.fill(-CUDART_MAX_NORMAL_FP16);
+-		local_min.fill(CUDART_MAX_NORMAL_FP16);
++		local_max.fill(static_cast<DType>(-CUDART_INF_F));
++		local_min.fill(static_cast<DType>(CUDART_INF_F));
+ 	}
+ 
+ 	// load the append value
+@@ -518,8 +531,8 @@ AppendPagedKVCachePrefillKernel(paged_kv_t<page_storage, layout, DType, IdType>
+ 									   candidate_entry_idx,
+ 									   tx * vec_size));
+ 		} else {
+-			local_max.fill(-CUDART_MAX_NORMAL_FP16);
+-			local_min.fill(CUDART_MAX_NORMAL_FP16);
++			local_max.fill(static_cast<DType>(-CUDART_INF_F));
++			local_min.fill(static_cast<DType>(CUDART_INF_F));
+ 		}
+ 
+ 		for(int32_t entry_idx = start_entry_idx; entry_idx < end_entry_idx; ++entry_idx) {
+diff --git a/kernels/include/topk/decode_select_k.cuh b/kernels/include/topk/decode_select_k.cuh
+index 2a2562a..2935b45 100644
+--- a/kernels/include/topk/decode_select_k.cuh
++++ b/kernels/include/topk/decode_select_k.cuh
+@@ -1,3 +1,12 @@
++#include <cuda_bf16.h>
++#include "raft/util/vectorized.cuh"
++
++// This pinned RAFT version has no BF16 vector-load storage trait.
++namespace raft {
++template <int N>
++struct IOType<nv_bfloat16, N> : IOType<uint16_t, N> {};
++}
++
+ #include "raft/matrix/detail/select_k-inl.cuh"
+ #include <cuda_runtime.h>
+ 
+@@ -22,7 +31,7 @@ using namespace raft::matrix::detail::select::radix::impl;
+    * \param out_idx [batch_size, k] output index
+    * \param greater whether to select top-k or bottom-k
+    */
+-template <typename T, typename IdxT, int batch_size>
++template <typename T, typename IdxT>
+ void decode_select_k(const T* in,
+ 					 const IdxT* in_idx,
+                 char* bufs,
+@@ -30,6 +39,7 @@ void decode_select_k(const T* in,
+ 					 IdxT k,
+ 					 T* out,
+ 					 IdxT* out_idx,
++					 int batch_size,
+ 					 bool greater = true,
+ 					 raft::matrix::SelectAlgo _algo = raft::matrix::SelectAlgo::kRadix8bits) {
+    // Parameters from kRadix8Bits
+@@ -59,4 +69,4 @@ void decode_select_k(const T* in,
+                                                    !greater,
+                                                    bufs);
+    }
+-}
+\ No newline at end of file
++}
+diff --git a/kernels/src/bench/bench_decode_select_k.cu b/kernels/src/bench/bench_decode_select_k.cu
+index fb06419..4ac4faf 100644
+--- a/kernels/src/bench/bench_decode_select_k.cu
++++ b/kernels/src/bench/bench_decode_select_k.cu
+@@ -30,13 +30,14 @@ void bench_decode_select_k(nvbench::state& state) {
+ 	thrust::device_vector<char> buf(buf_size_bytes);
+ 
+ 	state.exec(nvbench::exec_tag::sync, [&](nvbench::launch& launch) {
+-		decode_select_k<d_type, idx_type, num_heads>(thrust::raw_pointer_cast(d_in.data()),
++		decode_select_k<d_type, idx_type>(thrust::raw_pointer_cast(d_in.data()),
+ 													 thrust::raw_pointer_cast(d_in_idx.data()),
+ 													 thrust::raw_pointer_cast(buf.data()),
+ 													 seq_len,
+ 													 k,
+ 													 thrust::raw_pointer_cast(d_out.data()),
+ 													 thrust::raw_pointer_cast(d_out_idx.data()),
++													 num_heads,
+ 													 true,
+ 													 _algo);
+ 	});
+@@ -53,4 +54,4 @@ void bench_decode_select_k(nvbench::state& state) {
+ 		.add_int64_axis("k", {64, 128, 256})                                  \
+ 		.add_int64_axis("algo", {0})
+ 
+-BENCH_DECODE_SELECT_K(__nv_half, uint32_t);
+\ No newline at end of file
++BENCH_DECODE_SELECT_K(__nv_half, uint32_t);
+diff --git a/quest/ops/csrc/estimate.cu b/quest/ops/csrc/estimate.cu
+index aecb5bd..2c2cb7b 100644
+--- a/quest/ops/csrc/estimate.cu
++++ b/quest/ops/csrc/estimate.cu
+@@ -29,20 +29,23 @@ void estimate_attn_score(torch::Tensor q,
+ 	#endif
+ 
+ 	size_t num_heads = q.size(1);
++	size_t num_kv_heads;
+ 	size_t head_dim = q.size(2);
+ 	size_t page_size;
+ 
+ 	QKVLayout kv_layout = static_cast<QKVLayout>(layout);
+ 	if(kv_layout == QKVLayout::kHND) {
+ 		page_size = metadata_data.size(3);
++		num_kv_heads = metadata_data.size(2);
+ 		#ifdef BSK_TORCH_CHECK
+-		CHECK_EQ(metadata_data.size(2), num_heads);
++		assert(num_kv_heads > 0 && num_heads % num_kv_heads == 0);
+ 		CHECK_EQ(metadata_data.size(4), head_dim);
+ 		#endif
+ 	} else {
+ 		page_size = metadata_data.size(2);
++		num_kv_heads = metadata_data.size(3);
+ 		#ifdef BSK_TORCH_CHECK
+-		CHECK_EQ(metadata_data.size(3), num_heads);
++		assert(num_kv_heads > 0 && num_heads % num_kv_heads == 0);
+ 		CHECK_EQ(metadata_data.size(4), head_dim);
+ 		#endif
+ 	}
+@@ -54,7 +57,7 @@ void estimate_attn_score(torch::Tensor q,
+ 	bool success = DISPATCH_PYTORCH_DTYPE_TO_CTYPE(q.scalar_type(), c_type, [&] {
+ 		SWITCH_LAYOUT(kv_layout, KV_LAYOUT, {
+ 			paged_kv_t<PageStorage::kIndices, KV_LAYOUT, c_type, int32_t> paged_kv(
+-				num_heads,
++				num_kv_heads,
+ 				page_size,
+ 				head_dim,
+ 				batch_size,
+@@ -81,4 +84,4 @@ void estimate_attn_score(torch::Tensor q,
+ 		return true;
+ 	});
+ 	TORCH_CHECK(success, "Estimate_attn_score failed to dispatch with dtype ", q.scalar_type());
+-}
+\ No newline at end of file
++}
+diff --git a/quest/ops/csrc/pytorch_extension_utils.h b/quest/ops/csrc/pytorch_extension_utils.h
+index d8bf7f9..5d72512 100644
+--- a/quest/ops/csrc/pytorch_extension_utils.h
++++ b/quest/ops/csrc/pytorch_extension_utils.h
+@@ -29,6 +29,10 @@
+ 			using c_type = nv_half;                                 \
+ 			return __VA_ARGS__();                                   \
+ 		}                                                           \
++		case at::ScalarType::BFloat16: {                            \
++			using c_type = nv_bfloat16;                             \
++			return __VA_ARGS__();                                   \
++		}                                                           \
+ 		default:                                                    \
+ 			return false;                                           \
+ 		}                                                           \
+diff --git a/quest/ops/csrc/topk.cu b/quest/ops/csrc/topk.cu
+index 2e87645..83f5435 100644
+--- a/quest/ops/csrc/topk.cu
++++ b/quest/ops/csrc/topk.cu
+@@ -25,13 +25,12 @@ void topk_filtering(torch::Tensor estimated_value,
+ 	CHECK_EQ(num_heads, estimated_indices.size(0));
+ 	CHECK_GE(num_pages, page_budget);
+ 	CHECK_EQ(estimated_indices.scalar_type(), torch::kInt32);
+-	CHECK_EQ(32, num_heads); // Not necessary, but for Llama-7b
+ 	CHECK_EQ(page_budget, d_out.size(1));
+ 	CHECK_EQ(page_budget, indices_out.size(1));
+ 	#endif
+ 
+ 	bool success = DISPATCH_PYTORCH_DTYPE_TO_CTYPE(estimated_value.scalar_type(), c_type, [&] {
+-		decode_select_k<c_type, int32_t, 32>(
++		decode_select_k<c_type, int32_t>(
+ 			static_cast<c_type*>(estimated_value.data_ptr()),
+ 			static_cast<int32_t*>(estimated_indices.data_ptr()),
+ 			static_cast<char*>(buf.data_ptr()),
+@@ -39,8 +38,9 @@ void topk_filtering(torch::Tensor estimated_value,
+ 			page_budget,
+ 			static_cast<c_type*>(d_out.data_ptr()),
+ 			static_cast<int32_t*>(indices_out.data_ptr()),
++			num_heads,
+ 			true);
+ 		return true;
+ 	});
+ 	TORCH_CHECK(success, "Top-k filtering failed to dispatch with dtype ", estimated_value.scalar_type());
+-}
+\ No newline at end of file
++}
