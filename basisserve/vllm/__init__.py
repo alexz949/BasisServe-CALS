@@ -18,6 +18,12 @@ def register() -> None:
 
     from vllm import ModelRegistry
 
+    if "BasisServeQwen3NUQ4ForCausalLM" not in ModelRegistry.get_supported_archs():
+        ModelRegistry.register_model(
+            "BasisServeQwen3NUQ4ForCausalLM",
+            "basisserve.vllm.qwen3_nuq4:BasisServeQwen3NUQ4ForCausalLM",
+        )
+
     if QWEN3_32B_TP8_C1_MODEL_ARCHITECTURE not in ModelRegistry.get_supported_archs():
         ModelRegistry.register_model(
             QWEN3_32B_TP8_C1_MODEL_ARCHITECTURE,

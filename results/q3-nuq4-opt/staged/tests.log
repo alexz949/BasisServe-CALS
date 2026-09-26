@@ -1,0 +1,330 @@
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+________ test_bounded_staging_with_prefixes_and_interleaved_decode[32] _________
+
+width = 32
+
+    @pytest.mark.parametrize("width", [32, 48, 64, 80, 96, 112, 128])
+    def test_bounded_staging_with_prefixes_and_interleaved_decode(width):
+        torch.manual_seed(width)
+        lengths, queries = [67, 35, 49, 17], [1, 17, 0, 5]
+        pages = [(n + 15) // 16 for n in lengths]
+        lo = torch.full((128,), -4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kc = NUQ4PagedCache(sum(pages), NUQ4Layout(128), lo, -lo, lut)
+        vc = NUQ4PagedCache(sum(pages), NUQ4Layout(width), lo[:width], -lo[:width], lut, dynamic=True)
+        physical = torch.randperm(sum(pages), device="cuda", dtype=torch.int32)
+        table = torch.zeros((len(pages), max(pages)), device="cuda", dtype=torch.int32)
+        slots, offset = [], 0
+        for seq, (length, count) in enumerate(zip(lengths, pages)):
+            table[seq, :count] = physical[offset:offset+count]
+            pos = torch.arange(length, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            offset += count
+        slots = torch.cat(slots)
+        full_v = torch.randn(sum(lengths), width*8, device="cuda", dtype=torch.bfloat16)
+        kc.append(torch.randn(sum(lengths), 128, device="cuda", dtype=torch.bfloat16), slots)
+        vc.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kc.check()
+        vc.check()
+        angles = torch.arange(max(lengths), device="cuda")[:, None] * (
+            10000 ** (-torch.arange(64, device="cuda").float() / 64))[None]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu_cpu = torch.tensor([0, *torch.tensor(queries).cumsum(0).tolist()], dtype=torch.int32)
+        cu = cu_cpu.cuda()
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+        expected = nuq4_attention(query, kc, vc, rope, cu, lens, table)
+        output = torch.full_like(expected, float("nan"))
+        workspace = PrefillWorkspace(sum(queries), 48, query.device)
+        chunks = plan_prefill(cu_cpu, torch.tensor(lengths) + 3, lens, workspace.capacity)
+>       assert len(chunks) == 2 and workspace.capacity == 64
+E       AssertionError: assert (2 == 2 and 48 == 64)
+E        +  where 2 = len([PrefillChunk(records=tensor([[1, 0, 0]], device='cuda:0', dtype=torch.int32), cu_query=tensor([ 0, 17], device='cuda:...ch.int32), table=tensor([[0, 1]], device='cuda:0', dtype=torch.int32), query_tokens=5, max_kv_len=20, max_query_len=5)])
+E        +  and   48 = <basisserve.kernels.nuq4_prefill.PrefillWorkspace object at 0x7c83441c23c0>.capacity
+
+tests/test_nuq4_prefill.py:44: AssertionError
+________ test_bounded_staging_with_prefixes_and_interleaved_decode[48] _________
+
+width = 48
+
+    @pytest.mark.parametrize("width", [32, 48, 64, 80, 96, 112, 128])
+    def test_bounded_staging_with_prefixes_and_interleaved_decode(width):
+        torch.manual_seed(width)
+        lengths, queries = [67, 35, 49, 17], [1, 17, 0, 5]
+        pages = [(n + 15) // 16 for n in lengths]
+        lo = torch.full((128,), -4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kc = NUQ4PagedCache(sum(pages), NUQ4Layout(128), lo, -lo, lut)
+        vc = NUQ4PagedCache(sum(pages), NUQ4Layout(width), lo[:width], -lo[:width], lut, dynamic=True)
+        physical = torch.randperm(sum(pages), device="cuda", dtype=torch.int32)
+        table = torch.zeros((len(pages), max(pages)), device="cuda", dtype=torch.int32)
+        slots, offset = [], 0
+        for seq, (length, count) in enumerate(zip(lengths, pages)):
+            table[seq, :count] = physical[offset:offset+count]
+            pos = torch.arange(length, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            offset += count
+        slots = torch.cat(slots)
+        full_v = torch.randn(sum(lengths), width*8, device="cuda", dtype=torch.bfloat16)
+        kc.append(torch.randn(sum(lengths), 128, device="cuda", dtype=torch.bfloat16), slots)
+        vc.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kc.check()
+        vc.check()
+        angles = torch.arange(max(lengths), device="cuda")[:, None] * (
+            10000 ** (-torch.arange(64, device="cuda").float() / 64))[None]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu_cpu = torch.tensor([0, *torch.tensor(queries).cumsum(0).tolist()], dtype=torch.int32)
+        cu = cu_cpu.cuda()
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+        expected = nuq4_attention(query, kc, vc, rope, cu, lens, table)
+        output = torch.full_like(expected, float("nan"))
+        workspace = PrefillWorkspace(sum(queries), 48, query.device)
+        chunks = plan_prefill(cu_cpu, torch.tensor(lengths) + 3, lens, workspace.capacity)
+>       assert len(chunks) == 2 and workspace.capacity == 64
+E       AssertionError: assert (2 == 2 and 48 == 64)
+E        +  where 2 = len([PrefillChunk(records=tensor([[1, 0, 0]], device='cuda:0', dtype=torch.int32), cu_query=tensor([ 0, 17], device='cuda:...ch.int32), table=tensor([[0, 1]], device='cuda:0', dtype=torch.int32), query_tokens=5, max_kv_len=20, max_query_len=5)])
+E        +  and   48 = <basisserve.kernels.nuq4_prefill.PrefillWorkspace object at 0x7c8344083530>.capacity
+
+tests/test_nuq4_prefill.py:44: AssertionError
+________ test_bounded_staging_with_prefixes_and_interleaved_decode[64] _________
+
+width = 64
+
+    @pytest.mark.parametrize("width", [32, 48, 64, 80, 96, 112, 128])
+    def test_bounded_staging_with_prefixes_and_interleaved_decode(width):
+        torch.manual_seed(width)
+        lengths, queries = [67, 35, 49, 17], [1, 17, 0, 5]
+        pages = [(n + 15) // 16 for n in lengths]
+        lo = torch.full((128,), -4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kc = NUQ4PagedCache(sum(pages), NUQ4Layout(128), lo, -lo, lut)
+        vc = NUQ4PagedCache(sum(pages), NUQ4Layout(width), lo[:width], -lo[:width], lut, dynamic=True)
+        physical = torch.randperm(sum(pages), device="cuda", dtype=torch.int32)
+        table = torch.zeros((len(pages), max(pages)), device="cuda", dtype=torch.int32)
+        slots, offset = [], 0
+        for seq, (length, count) in enumerate(zip(lengths, pages)):
+            table[seq, :count] = physical[offset:offset+count]
+            pos = torch.arange(length, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            offset += count
+        slots = torch.cat(slots)
+        full_v = torch.randn(sum(lengths), width*8, device="cuda", dtype=torch.bfloat16)
+        kc.append(torch.randn(sum(lengths), 128, device="cuda", dtype=torch.bfloat16), slots)
+        vc.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kc.check()
+        vc.check()
+        angles = torch.arange(max(lengths), device="cuda")[:, None] * (
+            10000 ** (-torch.arange(64, device="cuda").float() / 64))[None]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu_cpu = torch.tensor([0, *torch.tensor(queries).cumsum(0).tolist()], dtype=torch.int32)
+        cu = cu_cpu.cuda()
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+        expected = nuq4_attention(query, kc, vc, rope, cu, lens, table)
+        output = torch.full_like(expected, float("nan"))
+        workspace = PrefillWorkspace(sum(queries), 48, query.device)
+        chunks = plan_prefill(cu_cpu, torch.tensor(lengths) + 3, lens, workspace.capacity)
+>       assert len(chunks) == 2 and workspace.capacity == 64
+E       AssertionError: assert (2 == 2 and 48 == 64)
+E        +  where 2 = len([PrefillChunk(records=tensor([[1, 0, 0]], device='cuda:0', dtype=torch.int32), cu_query=tensor([ 0, 17], device='cuda:...ch.int32), table=tensor([[0, 1]], device='cuda:0', dtype=torch.int32), query_tokens=5, max_kv_len=20, max_query_len=5)])
+E        +  and   48 = <basisserve.kernels.nuq4_prefill.PrefillWorkspace object at 0x7c833fc49850>.capacity
+
+tests/test_nuq4_prefill.py:44: AssertionError
+________ test_bounded_staging_with_prefixes_and_interleaved_decode[80] _________
+
+width = 80
+
+    @pytest.mark.parametrize("width", [32, 48, 64, 80, 96, 112, 128])
+    def test_bounded_staging_with_prefixes_and_interleaved_decode(width):
+        torch.manual_seed(width)
+        lengths, queries = [67, 35, 49, 17], [1, 17, 0, 5]
+        pages = [(n + 15) // 16 for n in lengths]
+        lo = torch.full((128,), -4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kc = NUQ4PagedCache(sum(pages), NUQ4Layout(128), lo, -lo, lut)
+        vc = NUQ4PagedCache(sum(pages), NUQ4Layout(width), lo[:width], -lo[:width], lut, dynamic=True)
+        physical = torch.randperm(sum(pages), device="cuda", dtype=torch.int32)
+        table = torch.zeros((len(pages), max(pages)), device="cuda", dtype=torch.int32)
+        slots, offset = [], 0
+        for seq, (length, count) in enumerate(zip(lengths, pages)):
+            table[seq, :count] = physical[offset:offset+count]
+            pos = torch.arange(length, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            offset += count
+        slots = torch.cat(slots)
+        full_v = torch.randn(sum(lengths), width*8, device="cuda", dtype=torch.bfloat16)
+        kc.append(torch.randn(sum(lengths), 128, device="cuda", dtype=torch.bfloat16), slots)
+        vc.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kc.check()
+        vc.check()
+        angles = torch.arange(max(lengths), device="cuda")[:, None] * (
+            10000 ** (-torch.arange(64, device="cuda").float() / 64))[None]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu_cpu = torch.tensor([0, *torch.tensor(queries).cumsum(0).tolist()], dtype=torch.int32)
+        cu = cu_cpu.cuda()
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+        expected = nuq4_attention(query, kc, vc, rope, cu, lens, table)
+        output = torch.full_like(expected, float("nan"))
+        workspace = PrefillWorkspace(sum(queries), 48, query.device)
+        chunks = plan_prefill(cu_cpu, torch.tensor(lengths) + 3, lens, workspace.capacity)
+>       assert len(chunks) == 2 and workspace.capacity == 64
+E       AssertionError: assert (2 == 2 and 48 == 64)
+E        +  where 2 = len([PrefillChunk(records=tensor([[1, 0, 0]], device='cuda:0', dtype=torch.int32), cu_query=tensor([ 0, 17], device='cuda:...ch.int32), table=tensor([[0, 1]], device='cuda:0', dtype=torch.int32), query_tokens=5, max_kv_len=20, max_query_len=5)])
+E        +  and   48 = <basisserve.kernels.nuq4_prefill.PrefillWorkspace object at 0x7c83440819d0>.capacity
+
+tests/test_nuq4_prefill.py:44: AssertionError
+________ test_bounded_staging_with_prefixes_and_interleaved_decode[96] _________
+
+width = 96
+
+    @pytest.mark.parametrize("width", [32, 48, 64, 80, 96, 112, 128])
+    def test_bounded_staging_with_prefixes_and_interleaved_decode(width):
+        torch.manual_seed(width)
+        lengths, queries = [67, 35, 49, 17], [1, 17, 0, 5]
+        pages = [(n + 15) // 16 for n in lengths]
+        lo = torch.full((128,), -4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kc = NUQ4PagedCache(sum(pages), NUQ4Layout(128), lo, -lo, lut)
+        vc = NUQ4PagedCache(sum(pages), NUQ4Layout(width), lo[:width], -lo[:width], lut, dynamic=True)
+        physical = torch.randperm(sum(pages), device="cuda", dtype=torch.int32)
+        table = torch.zeros((len(pages), max(pages)), device="cuda", dtype=torch.int32)
+        slots, offset = [], 0
+        for seq, (length, count) in enumerate(zip(lengths, pages)):
+            table[seq, :count] = physical[offset:offset+count]
+            pos = torch.arange(length, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            offset += count
+        slots = torch.cat(slots)
+        full_v = torch.randn(sum(lengths), width*8, device="cuda", dtype=torch.bfloat16)
+        kc.append(torch.randn(sum(lengths), 128, device="cuda", dtype=torch.bfloat16), slots)
+        vc.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kc.check()
+        vc.check()
+        angles = torch.arange(max(lengths), device="cuda")[:, None] * (
+            10000 ** (-torch.arange(64, device="cuda").float() / 64))[None]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu_cpu = torch.tensor([0, *torch.tensor(queries).cumsum(0).tolist()], dtype=torch.int32)
+        cu = cu_cpu.cuda()
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+        expected = nuq4_attention(query, kc, vc, rope, cu, lens, table)
+        output = torch.full_like(expected, float("nan"))
+        workspace = PrefillWorkspace(sum(queries), 48, query.device)
+        chunks = plan_prefill(cu_cpu, torch.tensor(lengths) + 3, lens, workspace.capacity)
+>       assert len(chunks) == 2 and workspace.capacity == 64
+E       AssertionError: assert (2 == 2 and 48 == 64)
+E        +  where 2 = len([PrefillChunk(records=tensor([[1, 0, 0]], device='cuda:0', dtype=torch.int32), cu_query=tensor([ 0, 17], device='cuda:...ch.int32), table=tensor([[0, 1]], device='cuda:0', dtype=torch.int32), query_tokens=5, max_kv_len=20, max_query_len=5)])
+E        +  and   48 = <basisserve.kernels.nuq4_prefill.PrefillWorkspace object at 0x7c8436ea3920>.capacity
+
+tests/test_nuq4_prefill.py:44: AssertionError
+________ test_bounded_staging_with_prefixes_and_interleaved_decode[112] ________
+
+width = 112
+
+    @pytest.mark.parametrize("width", [32, 48, 64, 80, 96, 112, 128])
+    def test_bounded_staging_with_prefixes_and_interleaved_decode(width):
+        torch.manual_seed(width)
+        lengths, queries = [67, 35, 49, 17], [1, 17, 0, 5]
+        pages = [(n + 15) // 16 for n in lengths]
+        lo = torch.full((128,), -4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kc = NUQ4PagedCache(sum(pages), NUQ4Layout(128), lo, -lo, lut)
+        vc = NUQ4PagedCache(sum(pages), NUQ4Layout(width), lo[:width], -lo[:width], lut, dynamic=True)
+        physical = torch.randperm(sum(pages), device="cuda", dtype=torch.int32)
+        table = torch.zeros((len(pages), max(pages)), device="cuda", dtype=torch.int32)
+        slots, offset = [], 0
+        for seq, (length, count) in enumerate(zip(lengths, pages)):
+            table[seq, :count] = physical[offset:offset+count]
+            pos = torch.arange(length, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            offset += count
+        slots = torch.cat(slots)
+        full_v = torch.randn(sum(lengths), width*8, device="cuda", dtype=torch.bfloat16)
+        kc.append(torch.randn(sum(lengths), 128, device="cuda", dtype=torch.bfloat16), slots)
+        vc.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kc.check()
+        vc.check()
+        angles = torch.arange(max(lengths), device="cuda")[:, None] * (
+            10000 ** (-torch.arange(64, device="cuda").float() / 64))[None]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu_cpu = torch.tensor([0, *torch.tensor(queries).cumsum(0).tolist()], dtype=torch.int32)
+        cu = cu_cpu.cuda()
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+        expected = nuq4_attention(query, kc, vc, rope, cu, lens, table)
+        output = torch.full_like(expected, float("nan"))
+        workspace = PrefillWorkspace(sum(queries), 48, query.device)
+        chunks = plan_prefill(cu_cpu, torch.tensor(lengths) + 3, lens, workspace.capacity)
+>       assert len(chunks) == 2 and workspace.capacity == 64
+E       AssertionError: assert (2 == 2 and 48 == 64)
+E        +  where 2 = len([PrefillChunk(records=tensor([[1, 0, 0]], device='cuda:0', dtype=torch.int32), cu_query=tensor([ 0, 17], device='cuda:...ch.int32), table=tensor([[0, 1]], device='cuda:0', dtype=torch.int32), query_tokens=5, max_kv_len=20, max_query_len=5)])
+E        +  and   48 = <basisserve.kernels.nuq4_prefill.PrefillWorkspace object at 0x7c833518aff0>.capacity
+
+tests/test_nuq4_prefill.py:44: AssertionError
+________ test_bounded_staging_with_prefixes_and_interleaved_decode[128] ________
+
+width = 128
+
+    @pytest.mark.parametrize("width", [32, 48, 64, 80, 96, 112, 128])
+    def test_bounded_staging_with_prefixes_and_interleaved_decode(width):
+        torch.manual_seed(width)
+        lengths, queries = [67, 35, 49, 17], [1, 17, 0, 5]
+        pages = [(n + 15) // 16 for n in lengths]
+        lo = torch.full((128,), -4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kc = NUQ4PagedCache(sum(pages), NUQ4Layout(128), lo, -lo, lut)
+        vc = NUQ4PagedCache(sum(pages), NUQ4Layout(width), lo[:width], -lo[:width], lut, dynamic=True)
+        physical = torch.randperm(sum(pages), device="cuda", dtype=torch.int32)
+        table = torch.zeros((len(pages), max(pages)), device="cuda", dtype=torch.int32)
+        slots, offset = [], 0
+        for seq, (length, count) in enumerate(zip(lengths, pages)):
+            table[seq, :count] = physical[offset:offset+count]
+            pos = torch.arange(length, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            offset += count
+        slots = torch.cat(slots)
+        full_v = torch.randn(sum(lengths), width*8, device="cuda", dtype=torch.bfloat16)
+        kc.append(torch.randn(sum(lengths), 128, device="cuda", dtype=torch.bfloat16), slots)
+        vc.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kc.check()
+        vc.check()
+        angles = torch.arange(max(lengths), device="cuda")[:, None] * (
+            10000 ** (-torch.arange(64, device="cuda").float() / 64))[None]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu_cpu = torch.tensor([0, *torch.tensor(queries).cumsum(0).tolist()], dtype=torch.int32)
+        cu = cu_cpu.cuda()
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+        expected = nuq4_attention(query, kc, vc, rope, cu, lens, table)
+        output = torch.full_like(expected, float("nan"))
+        workspace = PrefillWorkspace(sum(queries), 48, query.device)
+        chunks = plan_prefill(cu_cpu, torch.tensor(lengths) + 3, lens, workspace.capacity)
+>       assert len(chunks) == 2 and workspace.capacity == 64
+E       AssertionError: assert (2 == 2 and 48 == 64)
+E        +  where 2 = len([PrefillChunk(records=tensor([[1, 0, 0]], device='cuda:0', dtype=torch.int32), cu_query=tensor([ 0, 17], device='cuda:...ch.int32), table=tensor([[0, 1]], device='cuda:0', dtype=torch.int32), query_tokens=5, max_kv_len=20, max_query_len=5)])
+E        +  and   48 = <basisserve.kernels.nuq4_prefill.PrefillWorkspace object at 0x7c832c132c60>.capacity
+
+tests/test_nuq4_prefill.py:44: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_nuq4_prefill.py::test_bounded_staging_with_prefixes_and_interleaved_decode[32]
+FAILED tests/test_nuq4_prefill.py::test_bounded_staging_with_prefixes_and_interleaved_decode[48]
+FAILED tests/test_nuq4_prefill.py::test_bounded_staging_with_prefixes_and_interleaved_decode[64]
+FAILED tests/test_nuq4_prefill.py::test_bounded_staging_with_prefixes_and_interleaved_decode[80]
+FAILED tests/test_nuq4_prefill.py::test_bounded_staging_with_prefixes_and_interleaved_decode[96]
+FAILED tests/test_nuq4_prefill.py::test_bounded_staging_with_prefixes_and_interleaved_decode[112]
+FAILED tests/test_nuq4_prefill.py::test_bounded_staging_with_prefixes_and_interleaved_decode[128]
+7 failed in 8.43s
+ERROR conda.cli.main_run:execute(148): `conda run python -m pytest -q tests/test_nuq4_prefill.py` failed. (See above for error)
+.......                                                                  [100%]
+7 passed in 16.86s
+................................................................         [100%]
+=============================== warnings summary ===============================
+../miniforge3/envs/basis/lib/python3.12/site-packages/torch/jit/_script.py:365: 14 warnings
+  /workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+64 passed, 14 warnings in 9.05s

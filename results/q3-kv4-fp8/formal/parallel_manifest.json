@@ -1,0 +1,69 @@
+{
+  "created_utc": "2026-09-25T15:18:12.418928+00:00",
+  "command": "evaluation/run_qwen3_kv4_fp8_parallel.py --output results/q3-kv4-fp8/formal",
+  "handoff": {
+    "status": "handoff",
+    "pid": 482887,
+    "quantizers": "results/q3-kv4-fp8/formal/r64/quantizers.pt",
+    "completed_kv4_windows": 3,
+    "reason": "switch to independent single-GPU workers after calibration persisted"
+  },
+  "tasks": [
+    {
+      "rank": 96,
+      "task": "calibrate",
+      "arm": "bf16",
+      "gpu": 1
+    },
+    {
+      "rank": 64,
+      "task": "evaluate",
+      "arm": "kv4",
+      "gpu": 0
+    },
+    {
+      "rank": 64,
+      "task": "evaluate",
+      "arm": "fp8",
+      "gpu": 2
+    },
+    {
+      "rank": 64,
+      "task": "evaluate",
+      "arm": "kv4_fp8",
+      "gpu": 3
+    },
+    {
+      "rank": 96,
+      "task": "evaluate",
+      "arm": "bf16",
+      "gpu": 4
+    },
+    {
+      "rank": 96,
+      "task": "evaluate",
+      "arm": "fp8",
+      "gpu": 5
+    },
+    {
+      "rank": 96,
+      "task": "evaluate",
+      "arm": "kv4",
+      "gpu": 6
+    },
+    {
+      "rank": 96,
+      "task": "evaluate",
+      "arm": "kv4_fp8",
+      "gpu": 7
+    }
+  ],
+  "reused": [
+    "r64/bf16.json",
+    "r64/quantizers.pt"
+  ],
+  "protocol": "unchanged manifest.json",
+  "scheduling_only": true,
+  "environment": "basis",
+  "threads_per_worker": 2
+}

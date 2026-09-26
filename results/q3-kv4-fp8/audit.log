@@ -1,0 +1,25 @@
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (299078 > 131072). Running this sequence through the model will result in indexing errors
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights: 100%|██████████| 399/399 [00:00<00:00, 9653.93it/s]
+AUDIT bf16_first
+PPL 1/2 61.189486
+PPL 2/2 26.406772
+AUDIT bf16_repeat
+PPL 1/2 61.189486
+PPL 2/2 26.406772
+AUDIT identity
+PPL 1/2 61.189486
+PPL 2/2 26.406772
+AUDIT kv4
+PPL 1/2 9.781700
+PPL 2/2 10.666617
+AUDIT bf16_after_kv4
+PPL 1/2 61.189486
+PPL 2/2 26.406772
+FP8_CALIBRATION 1/1
+AUDIT fp8
+PPL 1/2 9.447436
+PPL 2/2 10.403244
+AUDIT bf16_after_fp8
+PPL 1/2 61.189486
+PPL 2/2 26.406772
+AUDIT_COMPLETE passed {'bf16_first': 0.0, 'bf16_repeat': 0.0, 'identity': 0.0, 'bf16_after_kv4': 0.0, 'bf16_after_fp8': 0.0}

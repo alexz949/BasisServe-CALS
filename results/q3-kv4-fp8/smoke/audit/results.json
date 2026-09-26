@@ -1,0 +1,70 @@
+{
+  "status": "passed",
+  "results": {
+    "bf16_first": {
+      "ppl": 26.406771825255134,
+      "nll_sum": 1669.5464477539062,
+      "tokens": 510,
+      "windows": 2,
+      "requested_windows": 2,
+      "seqlen": 256
+    },
+    "bf16_repeat": {
+      "ppl": 26.406771825255134,
+      "nll_sum": 1669.5464477539062,
+      "tokens": 510,
+      "windows": 2,
+      "requested_windows": 2,
+      "seqlen": 256
+    },
+    "identity": {
+      "ppl": 26.406771825255134,
+      "nll_sum": 1669.5464477539062,
+      "tokens": 510,
+      "windows": 2,
+      "requested_windows": 2,
+      "seqlen": 256
+    },
+    "kv4": {
+      "ppl": 10.666616651585894,
+      "nll_sum": 1207.2306518554688,
+      "tokens": 510,
+      "windows": 2,
+      "requested_windows": 2,
+      "seqlen": 256
+    },
+    "bf16_after_kv4": {
+      "ppl": 26.406771825255134,
+      "nll_sum": 1669.5464477539062,
+      "tokens": 510,
+      "windows": 2,
+      "requested_windows": 2,
+      "seqlen": 256
+    },
+    "fp8": {
+      "ppl": 10.403244497823021,
+      "nll_sum": 1194.4800415039062,
+      "tokens": 510,
+      "windows": 2,
+      "requested_windows": 2,
+      "seqlen": 256
+    },
+    "bf16_after_fp8": {
+      "ppl": 26.406771825255134,
+      "nll_sum": 1669.5464477539062,
+      "tokens": 510,
+      "windows": 2,
+      "requested_windows": 2,
+      "seqlen": 256
+    }
+  },
+  "control_nll_deltas": {
+    "bf16_first": 0.0,
+    "bf16_repeat": 0.0,
+    "identity": 0.0,
+    "bf16_after_kv4": 0.0,
+    "bf16_after_fp8": 0.0
+  },
+  "projection_weights_unchanged": true,
+  "scope": "two-window smoke audit, not full PPL"
+}

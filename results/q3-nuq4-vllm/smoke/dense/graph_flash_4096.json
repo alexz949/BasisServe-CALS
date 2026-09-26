@@ -1,0 +1,219 @@
+{
+  "environment": "basis",
+  "command": "evaluation/benchmark_vllm_qwen3_nuq4.py --phase smoke --arm dense --prefill-tokens 4096 --output results/q3-nuq4-vllm",
+  "phase": "smoke",
+  "arm": "dense",
+  "nominal_rank": null,
+  "torch": "2.13.0+cu130",
+  "vllm": "0.29.0",
+  "configuration": {
+    "model": "/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "tensor_parallel_size": 8,
+    "dtype": "bfloat16",
+    "max_model_len": 4100,
+    "max_num_seqs": 2,
+    "max_num_batched_tokens": 8192,
+    "block_size": 16,
+    "enable_chunked_prefill": true,
+    "enable_prefix_caching": false,
+    "async_scheduling": false,
+    "gpu_memory_utilization": 0.2,
+    "enforce_eager": false,
+    "disable_log_stats": false,
+    "seed": 0,
+    "compilation_config": {
+      "mode": "NONE",
+      "cudagraph_mode": "FULL_DECODE_ONLY",
+      "cudagraph_capture_sizes": [
+        1,
+        2
+      ],
+      "cudagraph_num_of_warmups": 1
+    },
+    "hf_overrides": {},
+    "worker_extension_cls": "basisserve.vllm.worker_extension.BasisServeWorkerExtension",
+    "attention_config": {
+      "backend": "FLASH_ATTN"
+    }
+  },
+  "value_ranks": null,
+  "batches": [
+    {
+      "batch": 1,
+      "runs": [
+        {
+          "wall_seconds": 0.29403197998180985,
+          "preemptions": 0,
+          "output_tokens_per_second": 13.603962399761611,
+          "ttft_ms": {
+            "mean": 272.2914698533714,
+            "median": 272.2914698533714,
+            "p95": 272.2914698533714,
+            "min": 272.2914698533714,
+            "max": 272.2914698533714
+          },
+          "tpot_ms": {
+            "mean": 6.982310985525449,
+            "median": 6.982310985525449,
+            "p95": 6.982310985525449,
+            "min": 6.982310985525449,
+            "max": 6.982310985525449
+          },
+          "requests": [
+            {
+              "request_id": "1",
+              "queued_ts": 3729257.213557612,
+              "scheduled_ts": 3729257.21368384,
+              "first_token_ts": 3729257.485849082,
+              "last_token_ts": 3729257.506796015,
+              "ttft_ms": 272.2914698533714,
+              "tpot_ms": 6.982310985525449,
+              "output_token_ids": [
+                264,
+                1614,
+                3941,
+                70403
+              ]
+            }
+          ]
+        }
+      ],
+      "workers": [
+        {
+          "peak_cuda_allocated_bytes": 9252874752,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9252874752,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9252874752,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9252874752,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9252874752,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9252874752,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9252874752,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9252874752,
+          "cuda_device": "NVIDIA L40S"
+        }
+      ]
+    },
+    {
+      "batch": 2,
+      "runs": [
+        {
+          "wall_seconds": 0.5768216880969703,
+          "preemptions": 0,
+          "output_tokens_per_second": 13.869104031773348,
+          "ttft_ms": {
+            "mean": 554.2535826098174,
+            "median": 554.2535826098174,
+            "p95": 554.2571982368827,
+            "min": 554.2499669827521,
+            "max": 554.2571982368827
+          },
+          "tpot_ms": {
+            "mean": 7.307994645088911,
+            "median": 7.307994645088911,
+            "p95": 7.307994645088911,
+            "min": 7.307994645088911,
+            "max": 7.307994645088911
+          },
+          "requests": [
+            {
+              "request_id": "4",
+              "queued_ts": 3729258.097933808,
+              "scheduled_ts": 3729258.098072095,
+              "first_token_ts": 3729258.652191006,
+              "last_token_ts": 3729258.67411499,
+              "ttft_ms": 554.2571982368827,
+              "tpot_ms": 7.307994645088911,
+              "output_token_ids": [
+                264,
+                1614,
+                3941,
+                70403
+              ]
+            },
+            {
+              "request_id": "5",
+              "queued_ts": 3729258.097941039,
+              "scheduled_ts": 3729258.098072095,
+              "first_token_ts": 3729258.652191006,
+              "last_token_ts": 3729258.67411499,
+              "ttft_ms": 554.2499669827521,
+              "tpot_ms": 7.307994645088911,
+              "output_token_ids": [
+                264,
+                1614,
+                3941,
+                70403
+              ]
+            }
+          ]
+        }
+      ],
+      "workers": [
+        {
+          "peak_cuda_allocated_bytes": 9458395648,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9458395648,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9458395648,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9458395648,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9458395648,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9458395648,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9458395648,
+          "cuda_device": "NVIDIA L40S"
+        },
+        {
+          "peak_cuda_allocated_bytes": 9458395648,
+          "cuda_device": "NVIDIA L40S"
+        }
+      ]
+    }
+  ],
+  "exceptions_per_token": 0,
+  "decode_kernel": "FLASH_ATTN",
+  "metric_notes": {
+    "throughput": "All output tokens / cohort wall seconds, including prefill",
+    "ttft": "First token minus queued timestamp, including paused admission time",
+    "tpot": "Last minus first token timestamp / (output length - 1)",
+    "output_length": 4,
+    "decode_forwards": 3,
+    "smoke": "20% memory budget, one repeat, may overlap CPU calibration; not a speed conclusion"
+  },
+  "notes": "Original Qwen3-8B-Base, full BF16 K/V on GPU, FlashAttention; no SHA256.",
+  "status": "complete"
+}

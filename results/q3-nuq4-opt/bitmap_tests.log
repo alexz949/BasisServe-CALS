@@ -1,0 +1,1865 @@
+FF......FF...........F....F......                                        [100%]
+=================================== FAILURES ===================================
+_________ test_official_reconstruction_and_incremental_pages[False-16] _________
+
+upstream = <module 'kvquant_cache_reference' from '/workspace/BasisServe-CALS/external/KVQuant/quant/kvquant/simquant_module_quantizer.py'>
+width = 16, dynamic = False
+
+    @pytest.mark.parametrize("width", [16, 32, 48, 64, 80, 96, 112, 128])
+    @pytest.mark.parametrize("dynamic", [False, True])
+    def test_official_reconstruction_and_incremental_pages(upstream, width, dynamic):
+        torch.manual_seed(9)
+        values = torch.randn(29, width * (8 if dynamic else 1), device="cuda", dtype=torch.bfloat16)
+        values[0, 0], values[7, 3] = 12, -12
+        lower = torch.full((width,), -3.0, device="cuda")
+        upper = torch.full((width,), 3.0, device="cuda")
+        # Deliberately unsorted: ties must follow original LUT order.
+        lut = torch.tensor(np.random.default_rng(2).permutation(np.linspace(-1, 1, 16)),
+                           device="cuda", dtype=torch.float32)
+        stats = nuq4_value_stats(values) if dynamic else None
+        source = values[:, :width]
+        cache = NUQ4PagedCache(4, NUQ4Layout(width), lower, upper, lut, dynamic=dynamic)
+        slots = torch.cat((torch.arange(32, 48), torch.arange(0, 13))).cuda()
+        cache.append(source[:19], slots[:19], stats[:19] if dynamic else None)
+        cache.append(source[19:], slots[19:], stats[19:] if dynamic else None)
+        expected = reference(upstream, values, lower, upper, lut, dynamic)[:, :width]
+>       actual = cache.gather_for_validation(slots)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_cache.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_cache.py:267: in gather_for_validation
+    _gather[(triton.cdiv(slots.numel(), 16),)](self.storage, self.lower, self.upper,
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:327: in compile
+    next_module = compile_ir(module, metadata)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:549: in <lambda>
+    stages["ttgir"] = lambda src, metadata: self.make_ttgir(src, metadata, options, capability)
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mod = <triton._C.libtriton.ir.module object at 0x701635e2c770>
+metadata = {'hash': 'fd4e020b786dcda0b06bdcf76c131c193a1f78ddccbb525f46efa3c116f07b82', 'target': GPUTarget(backend='cuda', arch=89, warp_size=32), 'num_warps': 4, 'num_ctas': 1, ...}
+opt = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+capability = 89
+
+    @staticmethod
+    def make_ttgir(mod, metadata, opt, capability):
+        # Set maxnreg on all kernels, if it was provided.
+        if opt.maxnreg is not None:
+            mod.set_attr("ttg.maxnreg", ir.builder(mod.context).get_int32_attr(opt.maxnreg))
+    
+        pm = ir.pass_manager(mod.context)
+        dump_enabled = pm.enable_debug()
+        emuTF32 = (capability // 10 >= 8)
+        passes.ttir.add_convert_to_ttgpuir(pm, f"cuda:{capability}", opt.num_warps, 32, opt.num_ctas)
+        # optimize TTGIR
+        passes.ttgpuir.add_coalesce(pm)
+        passes.ttgpuir.add_f32_dot_tc(pm, emuTF32)
+        # TODO(Qingyi): Move PlanCTAPass to the front of CoalescePass
+        nvidia.passes.ttnvgpuir.add_plan_cta(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_thread_locality(pm)
+        passes.ttgpuir.add_accelerate_matmul(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        nvidia.passes.ttnvgpuir.add_optimize_descriptor_encoding(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        if capability // 10 in [8, 9]:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            nvidia.passes.hopper.add_hopper_warpspec(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+        elif capability // 10 >= 10:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.ttgpuir.add_optimize_accumulator_init(pm)
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, False)
+            nvidia.passes.ttnvgpuir.add_promote_lhs_to_tmem(pm)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_warp_specialize(pm, opt.num_stages)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_optimize_partition_warps(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            # hoist again and allow hoisting out of if statements
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, True)
+            nvidia.passes.ttnvgpuir.add_remove_tmem_tokens(pm)
+        else:
+            passes.ttir.add_triton_licm(pm)
+        passes.common.add_canonicalizer(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.ttgpuir.add_prefetch(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        passes.ttgpuir.add_coalesce_async_copy(pm)
+        nvidia.passes.ttnvgpuir.add_optimize_tmem_layouts(pm)
+        if capability // 10 >= 9:
+            nvidia.passes.ttnvgpuir.add_tma_lowering(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        nvidia.passes.ttnvgpuir.add_interleave_tmem(pm)
+        passes.ttgpuir.add_reduce_data_duplication(pm)
+        passes.ttgpuir.add_reorder_instructions(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.common.add_symbol_dce(pm)
+        nvidia.passes.ttnvgpuir.add_fence_insertion(pm, capability)
+        nvidia.passes.ttnvgpuir.add_lower_mma(pm)
+        passes.common.add_sccp(pm)
+        passes.common.add_cse(pm)
+        passes.common.add_canonicalizer(pm)
+    
+>       pm.run(mod, 'make_ttgir')
+E       RuntimeError: PassManager::run failed
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:321: RuntimeError
+----------------------------- Captured stderr call -----------------------------
+python: /project/lib/Dialect/TritonGPU/Transforms/OptimizeThreadLocality.cpp:220: LogicalResult mlir::triton::gpu::setOptimizedGatherLayout(GatherOp, RewriterBase &): Assertion `GatherLoweringHelper(op).isWarpLocal()' failed.
+module {
+  tt.func public @_gather(%arg0: !tt.ptr<i8> {tt.divisibility = 16 : i32}, %arg1: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg2: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg3: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg4: !tt.ptr<i64> {tt.divisibility = 16 : i32}, %arg5: !tt.ptr<bf16> {tt.divisibility = 16 : i32}) attributes {noinline = false} {
+    %cst = arith.constant dense<16> : tensor<16xi64>
+    %cst_0 = arith.constant dense<624> : tensor<16xi64>
+    %cst_1 = arith.constant dense<8> : tensor<16x1xi64>
+    %cst_2 = arith.constant dense<2> : tensor<1x16xi32>
+    %cst_3 = arith.constant dense<0> : tensor<16x16xi32>
+    %cst_4 = arith.constant dense<4> : tensor<1x16xi32>
+    %cst_5 = arith.constant dense<15> : tensor<16x16xi32>
+    %cst_6 = arith.constant dense<144> : tensor<16x1xi32>
+    %cst_7 = arith.constant dense<2> : tensor<16x1xi64>
+    %cst_8 = arith.constant dense<2> : tensor<1x2xi32>
+    %cst_9 = arith.constant dense<8> : tensor<16xi32>
+    %cst_10 = arith.constant dense<8> : tensor<1x16xi32>
+    %cst_11 = arith.constant dense<1> : tensor<16x16xi32>
+    %cst_12 = arith.constant dense<1> : tensor<1x16xi32>
+    %cst_13 = arith.constant dense<176> : tensor<16xi32>
+    %cst_14 = arith.constant dense<4> : tensor<16xi64>
+    %cst_15 = arith.constant dense<0> : tensor<16xi32>
+    %cst_16 = arith.constant dense<368> : tensor<16x1xi32>
+    %cst_17 = arith.constant dense<128> : tensor<16x16xi32>
+    %cst_18 = arith.constant dense<16> : tensor<16xi32>
+    %cst_19 = arith.constant dense<5.000000e-01> : tensor<1x16xf32>
+    %cst_20 = arith.constant dense<0.000000e+00> : tensor<16x16xf32>
+    %cst_21 = arith.constant dense<0> : tensor<16x16xi8>
+    %cst_22 = arith.constant dense<0> : tensor<16x2xi8>
+    %cst_23 = arith.constant dense<0.000000e+00> : tensor<16x16xbf16>
+    %cst_24 = arith.constant dense<0.000000e+00> : tensor<16xf32>
+    %cst_25 = arith.constant dense<0> : tensor<16xi64>
+    %cst_26 = arith.constant dense<-1> : tensor<16xi64>
+    %cst_27 = arith.constant dense<16> : tensor<1x16xi32>
+    %cst_28 = arith.constant dense<29> : tensor<16x1xi32>
+    %cst_29 = arith.constant dense<16> : tensor<16x1xi32>
+    %cst_30 = arith.constant dense<29> : tensor<16xi32>
+    %c16_i32 = arith.constant 16 : i32
+    %0 = tt.get_program_id x : i32
+    %1 = arith.muli %0, %c16_i32 : i32
+    %2 = tt.make_range {end = 16 : i32, start = 0 : i32} : tensor<16xi32>
+    %3 = tt.splat %1 : i32 -> tensor<16xi32>
+    %4 = arith.addi %3, %2 : tensor<16xi32>
+    %5 = tt.splat %arg4 : !tt.ptr<i64> -> tensor<16x!tt.ptr<i64>>
+    %6 = tt.addptr %5, %4 : tensor<16x!tt.ptr<i64>>, tensor<16xi32>
+    %7 = arith.cmpi slt, %4, %cst_30 : tensor<16xi32>
+    %8 = tt.load %6, %7, %cst_26 : tensor<16x!tt.ptr<i64>>
+    %9 = arith.cmpi sge, %8, %cst_25 : tensor<16xi64>
+    %10 = arith.andi %7, %9 : tensor<16xi1>
+    %11 = arith.divsi %8, %cst : tensor<16xi64>
+    %12 = arith.muli %11, %cst_0 : tensor<16xi64>
+    %13 = tt.splat %arg0 : !tt.ptr<i8> -> tensor<16x!tt.ptr<i8>>
+    %14 = tt.addptr %13, %12 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %15 = arith.remsi %8, %cst : tensor<16xi64>
+    %16 = tt.expand_dims %10 {axis = 1 : i32} : tensor<16xi1> -> tensor<16x1xi1>
+    %17 = tt.expand_dims %2 {axis = 0 : i32} : tensor<16xi32> -> tensor<1x16xi32>
+    %18 = arith.cmpi slt, %17, %cst_27 : tensor<1x16xi32>
+    %19 = tt.broadcast %16 : tensor<16x1xi1> -> tensor<16x16xi1>
+    %20 = tt.broadcast %18 : tensor<1x16xi1> -> tensor<16x16xi1>
+    %21 = arith.andi %19, %20 : tensor<16x16xi1>
+    %22 = tt.expand_dims %14 {axis = 1 : i32} : tensor<16x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<i8>>
+    %23 = tt.addptr %22, %cst_29 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %24 = tt.expand_dims %15 {axis = 1 : i32} : tensor<16xi64> -> tensor<16x1xi64>
+    %25 = arith.muli %24, %cst_1 : tensor<16x1xi64>
+    %26 = tt.addptr %23, %25 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %27 = arith.divsi %17, %cst_2 : tensor<1x16xi32>
+    %28 = tt.broadcast %26 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x16x!tt.ptr<i8>>
+    %29 = tt.broadcast %27 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %30 = tt.addptr %28, %29 : tensor<16x16x!tt.ptr<i8>>, tensor<16x16xi32>
+    %31 = tt.load %30, %21, %cst_21 : tensor<16x16x!tt.ptr<i8>>
+    %32 = arith.extui %31 : tensor<16x16xi8> to tensor<16x16xi32>
+    %33 = arith.remsi %17, %cst_2 : tensor<1x16xi32>
+    %34 = arith.muli %33, %cst_4 : tensor<1x16xi32>
+    %35 = tt.broadcast %34 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %36 = arith.shrsi %32, %35 : tensor<16x16xi32>
+    %37 = arith.andi %36, %cst_5 : tensor<16x16xi32>
+    %38 = tt.make_range {end = 2 : i32, start = 0 : i32} : tensor<2xi32>
+    %39 = tt.addptr %22, %cst_6 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %40 = arith.muli %24, %cst_7 : tensor<16x1xi64>
+    %41 = tt.addptr %39, %40 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %42 = tt.expand_dims %38 {axis = 0 : i32} : tensor<2xi32> -> tensor<1x2xi32>
+    %43 = tt.broadcast %41 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x2x!tt.ptr<i8>>
+    %44 = tt.broadcast %42 : tensor<1x2xi32> -> tensor<16x2xi32>
+    %45 = tt.addptr %43, %44 : tensor<16x2x!tt.ptr<i8>>, tensor<16x2xi32>
+    %46 = arith.cmpi slt, %42, %cst_8 : tensor<1x2xi32>
+    %47 = tt.broadcast %16 : tensor<16x1xi1> -> tensor<16x2xi1>
+    %48 = tt.broadcast %46 : tensor<1x2xi1> -> tensor<16x2xi1>
+    %49 = arith.andi %47, %48 : tensor<16x2xi1>
+    %50 = tt.load %45, %49, %cst_22 : tensor<16x2x!tt.ptr<i8>>
+    %51 = arith.extui %50 : tensor<16x2xi8> to tensor<16x2xi32>
+    %52 = tt.extern_elementwise %51 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x2xi32>) -> tensor<16x2xi32>
+    %53 = "tt.scan"(%52) <{axis = 1 : i32, reverse = false}> ({
+    ^bb0(%arg6: i32, %arg7: i32):
+      %122 = arith.addi %arg6, %arg7 : i32
+      tt.scan.return %122 : i32
+    }) : (tensor<16x2xi32>) -> tensor<16x2xi32>
+    %54 = arith.subi %53, %52 : tensor<16x2xi32>
+    %55 = arith.divsi %2, %cst_9 : tensor<16xi32>
+    %56 = tt.expand_dims %55 {axis = 0 : i32} : tensor<16xi32> -> tensor<1x16xi32>
+    %57 = tt.broadcast %56 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %58 = tt.gather %51[%57] {axis = 1 : i32} : (tensor<16x2xi32>, tensor<16x16xi32>) -> tensor<16x16xi32>
+    %59 = arith.remsi %17, %cst_10 : tensor<1x16xi32>
+    %60 = tt.broadcast %59 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %61 = arith.shrsi %58, %60 : tensor<16x16xi32>
+    %62 = arith.andi %61, %cst_11 : tensor<16x16xi32>
+    %63 = arith.cmpi ne, %62, %cst_3 : tensor<16x16xi32>
+    %64 = tt.gather %54[%57] {axis = 1 : i32} : (tensor<16x2xi32>, tensor<16x16xi32>) -> tensor<16x16xi32>
+    %65 = arith.shli %cst_12, %59 : tensor<1x16xi32>
+    %66 = arith.subi %65, %cst_12 : tensor<1x16xi32>
+    %67 = tt.broadcast %66 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %68 = arith.andi %58, %67 : tensor<16x16xi32>
+    %69 = tt.extern_elementwise %68 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x16xi32>) -> tensor<16x16xi32>
+    %70 = arith.addi %64, %69 : tensor<16x16xi32>
+    %71 = tt.addptr %14, %cst_13 : tensor<16x!tt.ptr<i8>>, tensor<16xi32>
+    %72 = arith.muli %15, %cst_14 : tensor<16xi64>
+    %73 = tt.addptr %71, %72 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %74 = tt.bitcast %73 : tensor<16x!tt.ptr<i8>> -> tensor<16x!tt.ptr<i32>>
+    %75 = tt.load %74, %10, %cst_15 : tensor<16x!tt.ptr<i32>>
+    %76 = tt.addptr %22, %cst_16 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %77 = tt.bitcast %76 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<bf16>>
+    %78 = tt.expand_dims %75 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %79 = tt.addptr %77, %78 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %80 = tt.broadcast %79 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x16x!tt.ptr<bf16>>
+    %81 = tt.addptr %80, %70 : tensor<16x16x!tt.ptr<bf16>>, tensor<16x16xi32>
+    %82 = arith.andi %21, %63 : tensor<16x16xi1>
+    %83 = tt.broadcast %78 : tensor<16x1xi32> -> tensor<16x16xi32>
+    %84 = arith.addi %83, %70 : tensor<16x16xi32>
+    %85 = arith.cmpi slt, %84, %cst_17 : tensor<16x16xi32>
+    %86 = arith.andi %82, %85 : tensor<16x16xi1>
+    %87 = tt.load %81, %86, %cst_23 : tensor<16x16x!tt.ptr<bf16>>
+    %88 = arith.extf %87 : tensor<16x16xbf16> to tensor<16x16xf32>
+    %89 = tt.splat %arg1 : !tt.ptr<f32> -> tensor<16x!tt.ptr<f32>>
+    %90 = tt.addptr %89, %2 : tensor<16x!tt.ptr<f32>>, tensor<16xi32>
+    %91 = arith.cmpi slt, %2, %cst_18 : tensor<16xi32>
+    %92 = tt.load %90, %91, %cst_24 : tensor<16x!tt.ptr<f32>>
+    %93 = tt.expand_dims %92 {axis = 0 : i32} : tensor<16xf32> -> tensor<1x16xf32>
+    %94 = tt.splat %arg2 : !tt.ptr<f32> -> tensor<16x!tt.ptr<f32>>
+    %95 = tt.addptr %94, %2 : tensor<16x!tt.ptr<f32>>, tensor<16xi32>
+    %96 = tt.load %95, %91, %cst_24 : tensor<16x!tt.ptr<f32>>
+    %97 = tt.expand_dims %96 {axis = 0 : i32} : tensor<16xf32> -> tensor<1x16xf32>
+    %98 = arith.subf %97, %93 : tensor<1x16xf32>
+    %99 = arith.mulf %98, %cst_19 : tensor<1x16xf32>
+    %100 = arith.addf %97, %93 : tensor<1x16xf32>
+    %101 = arith.mulf %100, %cst_19 : tensor<1x16xf32>
+    %102 = tt.splat %arg3 : !tt.ptr<f32> -> tensor<16x16x!tt.ptr<f32>>
+    %103 = tt.addptr %102, %37 : tensor<16x16x!tt.ptr<f32>>, tensor<16x16xi32>
+    %104 = tt.load %103 : tensor<16x16x!tt.ptr<f32>>
+    %105 = tt.broadcast %99 : tensor<1x16xf32> -> tensor<16x16xf32>
+    %106 = arith.mulf %104, %105 : tensor<16x16xf32>
+    %107 = tt.broadcast %101 : tensor<1x16xf32> -> tensor<16x16xf32>
+    %108 = arith.addf %106, %107 : tensor<16x16xf32>
+    %109 = arith.select %63, %88, %108 : tensor<16x16xi1>, tensor<16x16xf32>
+    %110 = arith.select %21, %109, %cst_20 : tensor<16x16xi1>, tensor<16x16xf32>
+    %111 = arith.truncf %110 : tensor<16x16xf32> to tensor<16x16xbf16>
+    %112 = tt.expand_dims %4 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %113 = arith.muli %112, %cst_29 : tensor<16x1xi32>
+    %114 = tt.splat %arg5 : !tt.ptr<bf16> -> tensor<16x1x!tt.ptr<bf16>>
+    %115 = tt.addptr %114, %113 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %116 = tt.broadcast %115 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x16x!tt.ptr<bf16>>
+    %117 = tt.broadcast %17 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %118 = tt.addptr %116, %117 : tensor<16x16x!tt.ptr<bf16>>, tensor<16x16xi32>
+    %119 = arith.cmpi slt, %112, %cst_28 : tensor<16x1xi32>
+    %120 = tt.broadcast %119 : tensor<16x1xi1> -> tensor<16x16xi1>
+    %121 = arith.andi %120, %20 : tensor<16x16xi1>
+    tt.store %118, %111, %121 : tensor<16x16x!tt.ptr<bf16>>
+    tt.return
+  }
+}
+
+{-#
+  external_resources: {
+    mlir_reproducer: {
+      pipeline: "builtin.module(convert-triton-to-tritongpu{enable-source-remat=false num-ctas=1 num-warps=4 target=cuda:89 threads-per-warp=32}, tritongpu-coalesce, tritongpu-F32DotTC{emu-tf32=true}, triton-nvidia-gpu-plan-cta, tritongpu-remove-layout-conversions, tritongpu-optimize-thread-locality, tritongpu-accelerate-matmul, tritongpu-remove-layout-conversions, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, triton-nvidia-optimize-descriptor-encoding, triton-loop-aware-cse, tritongpu-fuse-nested-loops, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-licm, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, tritongpu-combine-tensor-select-and-if, nvgpu-warp-specialization{dump-intermediate-steps=false num-stages=3}, tritongpu-assign-latencies{num-stages=3}, tritongpu-schedule-loops, tritongpu-pipeline{dump-intermediate-steps=false num-stages=3}, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-loop-aware-cse, tritongpu-prefetch, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, tritongpu-coalesce-async-copy, triton-nvidia-optimize-tmem-layouts, tritongpu-remove-layout-conversions, triton-nvidia-interleave-tmem, tritongpu-reduce-data-duplication, tritongpu-reorder-instructions, triton-loop-aware-cse, symbol-dce, triton-nvidia-gpu-fence-insertion{compute-capability=89}, triton-nvidia-mma-lowering, sccp, cse, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true})",
+      disable_threading: true,
+      verify_each: true
+    }
+  }
+#-}
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: error: Failures have been detected while processing an MLIR pass pipeline
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: note: Pipeline failed while executing [`TritonGPUOptimizeThreadLocality` on 'builtin.module' operation]: reproducer generated at `std::errs, please share the reproducer above with Triton project.`
+_________ test_official_reconstruction_and_incremental_pages[False-32] _________
+
+upstream = <module 'kvquant_cache_reference' from '/workspace/BasisServe-CALS/external/KVQuant/quant/kvquant/simquant_module_quantizer.py'>
+width = 32, dynamic = False
+
+    @pytest.mark.parametrize("width", [16, 32, 48, 64, 80, 96, 112, 128])
+    @pytest.mark.parametrize("dynamic", [False, True])
+    def test_official_reconstruction_and_incremental_pages(upstream, width, dynamic):
+        torch.manual_seed(9)
+        values = torch.randn(29, width * (8 if dynamic else 1), device="cuda", dtype=torch.bfloat16)
+        values[0, 0], values[7, 3] = 12, -12
+        lower = torch.full((width,), -3.0, device="cuda")
+        upper = torch.full((width,), 3.0, device="cuda")
+        # Deliberately unsorted: ties must follow original LUT order.
+        lut = torch.tensor(np.random.default_rng(2).permutation(np.linspace(-1, 1, 16)),
+                           device="cuda", dtype=torch.float32)
+        stats = nuq4_value_stats(values) if dynamic else None
+        source = values[:, :width]
+        cache = NUQ4PagedCache(4, NUQ4Layout(width), lower, upper, lut, dynamic=dynamic)
+        slots = torch.cat((torch.arange(32, 48), torch.arange(0, 13))).cuda()
+        cache.append(source[:19], slots[:19], stats[:19] if dynamic else None)
+        cache.append(source[19:], slots[19:], stats[19:] if dynamic else None)
+        expected = reference(upstream, values, lower, upper, lut, dynamic)[:, :width]
+>       actual = cache.gather_for_validation(slots)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_cache.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_cache.py:267: in gather_for_validation
+    _gather[(triton.cdiv(slots.numel(), 16),)](self.storage, self.lower, self.upper,
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:327: in compile
+    next_module = compile_ir(module, metadata)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:549: in <lambda>
+    stages["ttgir"] = lambda src, metadata: self.make_ttgir(src, metadata, options, capability)
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mod = <triton._C.libtriton.ir.module object at 0x701635e2c590>
+metadata = {'hash': 'd86b6eb0f78a0caf29c8880c2842b5b524a0531b51962b049827bc32dcb65ee9', 'target': GPUTarget(backend='cuda', arch=89, warp_size=32), 'num_warps': 4, 'num_ctas': 1, ...}
+opt = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+capability = 89
+
+    @staticmethod
+    def make_ttgir(mod, metadata, opt, capability):
+        # Set maxnreg on all kernels, if it was provided.
+        if opt.maxnreg is not None:
+            mod.set_attr("ttg.maxnreg", ir.builder(mod.context).get_int32_attr(opt.maxnreg))
+    
+        pm = ir.pass_manager(mod.context)
+        dump_enabled = pm.enable_debug()
+        emuTF32 = (capability // 10 >= 8)
+        passes.ttir.add_convert_to_ttgpuir(pm, f"cuda:{capability}", opt.num_warps, 32, opt.num_ctas)
+        # optimize TTGIR
+        passes.ttgpuir.add_coalesce(pm)
+        passes.ttgpuir.add_f32_dot_tc(pm, emuTF32)
+        # TODO(Qingyi): Move PlanCTAPass to the front of CoalescePass
+        nvidia.passes.ttnvgpuir.add_plan_cta(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_thread_locality(pm)
+        passes.ttgpuir.add_accelerate_matmul(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        nvidia.passes.ttnvgpuir.add_optimize_descriptor_encoding(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        if capability // 10 in [8, 9]:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            nvidia.passes.hopper.add_hopper_warpspec(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+        elif capability // 10 >= 10:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.ttgpuir.add_optimize_accumulator_init(pm)
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, False)
+            nvidia.passes.ttnvgpuir.add_promote_lhs_to_tmem(pm)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_warp_specialize(pm, opt.num_stages)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_optimize_partition_warps(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            # hoist again and allow hoisting out of if statements
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, True)
+            nvidia.passes.ttnvgpuir.add_remove_tmem_tokens(pm)
+        else:
+            passes.ttir.add_triton_licm(pm)
+        passes.common.add_canonicalizer(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.ttgpuir.add_prefetch(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        passes.ttgpuir.add_coalesce_async_copy(pm)
+        nvidia.passes.ttnvgpuir.add_optimize_tmem_layouts(pm)
+        if capability // 10 >= 9:
+            nvidia.passes.ttnvgpuir.add_tma_lowering(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        nvidia.passes.ttnvgpuir.add_interleave_tmem(pm)
+        passes.ttgpuir.add_reduce_data_duplication(pm)
+        passes.ttgpuir.add_reorder_instructions(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.common.add_symbol_dce(pm)
+        nvidia.passes.ttnvgpuir.add_fence_insertion(pm, capability)
+        nvidia.passes.ttnvgpuir.add_lower_mma(pm)
+        passes.common.add_sccp(pm)
+        passes.common.add_cse(pm)
+        passes.common.add_canonicalizer(pm)
+    
+>       pm.run(mod, 'make_ttgir')
+E       RuntimeError: PassManager::run failed
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:321: RuntimeError
+----------------------------- Captured stderr call -----------------------------
+python: /project/lib/Dialect/TritonGPU/Transforms/OptimizeThreadLocality.cpp:220: LogicalResult mlir::triton::gpu::setOptimizedGatherLayout(GatherOp, RewriterBase &): Assertion `GatherLoweringHelper(op).isWarpLocal()' failed.
+module {
+  tt.func public @_gather(%arg0: !tt.ptr<i8> {tt.divisibility = 16 : i32}, %arg1: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg2: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg3: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg4: !tt.ptr<i64> {tt.divisibility = 16 : i32}, %arg5: !tt.ptr<bf16> {tt.divisibility = 16 : i32}) attributes {noinline = false} {
+    %cst = arith.constant dense<16> : tensor<16xi64>
+    %cst_0 = arith.constant dense<784> : tensor<16xi64>
+    %cst_1 = arith.constant dense<16> : tensor<16x1xi32>
+    %cst_2 = arith.constant dense<16> : tensor<16x1xi64>
+    %cst_3 = arith.constant dense<2> : tensor<1x32xi32>
+    %cst_4 = arith.constant dense<0> : tensor<16x32xi32>
+    %cst_5 = arith.constant dense<4> : tensor<1x32xi32>
+    %cst_6 = arith.constant dense<15> : tensor<16x32xi32>
+    %cst_7 = arith.constant dense<272> : tensor<16x1xi32>
+    %cst_8 = arith.constant dense<4> : tensor<16x1xi64>
+    %cst_9 = arith.constant dense<4> : tensor<1x4xi32>
+    %cst_10 = arith.constant dense<8> : tensor<32xi32>
+    %cst_11 = arith.constant dense<8> : tensor<1x32xi32>
+    %cst_12 = arith.constant dense<1> : tensor<16x32xi32>
+    %cst_13 = arith.constant dense<1> : tensor<1x32xi32>
+    %cst_14 = arith.constant dense<336> : tensor<16xi32>
+    %cst_15 = arith.constant dense<4> : tensor<16xi64>
+    %cst_16 = arith.constant dense<0> : tensor<16xi32>
+    %cst_17 = arith.constant dense<528> : tensor<16x1xi32>
+    %cst_18 = arith.constant dense<128> : tensor<16x32xi32>
+    %cst_19 = arith.constant dense<32> : tensor<32xi32>
+    %cst_20 = arith.constant dense<5.000000e-01> : tensor<1x32xf32>
+    %cst_21 = arith.constant dense<0.000000e+00> : tensor<16x32xf32>
+    %cst_22 = arith.constant dense<0> : tensor<16x32xi8>
+    %cst_23 = arith.constant dense<0> : tensor<16x4xi8>
+    %cst_24 = arith.constant dense<0.000000e+00> : tensor<16x32xbf16>
+    %cst_25 = arith.constant dense<0.000000e+00> : tensor<32xf32>
+    %cst_26 = arith.constant dense<0> : tensor<16xi64>
+    %cst_27 = arith.constant dense<-1> : tensor<16xi64>
+    %cst_28 = arith.constant dense<32> : tensor<1x32xi32>
+    %cst_29 = arith.constant dense<29> : tensor<16x1xi32>
+    %cst_30 = arith.constant dense<32> : tensor<16x1xi32>
+    %cst_31 = arith.constant dense<29> : tensor<16xi32>
+    %c16_i32 = arith.constant 16 : i32
+    %0 = tt.get_program_id x : i32
+    %1 = arith.muli %0, %c16_i32 : i32
+    %2 = tt.make_range {end = 16 : i32, start = 0 : i32} : tensor<16xi32>
+    %3 = tt.splat %1 : i32 -> tensor<16xi32>
+    %4 = arith.addi %3, %2 : tensor<16xi32>
+    %5 = tt.splat %arg4 : !tt.ptr<i64> -> tensor<16x!tt.ptr<i64>>
+    %6 = tt.addptr %5, %4 : tensor<16x!tt.ptr<i64>>, tensor<16xi32>
+    %7 = arith.cmpi slt, %4, %cst_31 : tensor<16xi32>
+    %8 = tt.load %6, %7, %cst_27 : tensor<16x!tt.ptr<i64>>
+    %9 = arith.cmpi sge, %8, %cst_26 : tensor<16xi64>
+    %10 = arith.andi %7, %9 : tensor<16xi1>
+    %11 = tt.make_range {end = 32 : i32, start = 0 : i32} : tensor<32xi32>
+    %12 = arith.divsi %8, %cst : tensor<16xi64>
+    %13 = arith.muli %12, %cst_0 : tensor<16xi64>
+    %14 = tt.splat %arg0 : !tt.ptr<i8> -> tensor<16x!tt.ptr<i8>>
+    %15 = tt.addptr %14, %13 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %16 = arith.remsi %8, %cst : tensor<16xi64>
+    %17 = tt.expand_dims %10 {axis = 1 : i32} : tensor<16xi1> -> tensor<16x1xi1>
+    %18 = tt.expand_dims %11 {axis = 0 : i32} : tensor<32xi32> -> tensor<1x32xi32>
+    %19 = arith.cmpi slt, %18, %cst_28 : tensor<1x32xi32>
+    %20 = tt.broadcast %17 : tensor<16x1xi1> -> tensor<16x32xi1>
+    %21 = tt.broadcast %19 : tensor<1x32xi1> -> tensor<16x32xi1>
+    %22 = arith.andi %20, %21 : tensor<16x32xi1>
+    %23 = tt.expand_dims %15 {axis = 1 : i32} : tensor<16x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<i8>>
+    %24 = tt.addptr %23, %cst_1 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %25 = tt.expand_dims %16 {axis = 1 : i32} : tensor<16xi64> -> tensor<16x1xi64>
+    %26 = arith.muli %25, %cst_2 : tensor<16x1xi64>
+    %27 = tt.addptr %24, %26 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %28 = arith.divsi %18, %cst_3 : tensor<1x32xi32>
+    %29 = tt.broadcast %27 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x32x!tt.ptr<i8>>
+    %30 = tt.broadcast %28 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %31 = tt.addptr %29, %30 : tensor<16x32x!tt.ptr<i8>>, tensor<16x32xi32>
+    %32 = tt.load %31, %22, %cst_22 : tensor<16x32x!tt.ptr<i8>>
+    %33 = arith.extui %32 : tensor<16x32xi8> to tensor<16x32xi32>
+    %34 = arith.remsi %18, %cst_3 : tensor<1x32xi32>
+    %35 = arith.muli %34, %cst_5 : tensor<1x32xi32>
+    %36 = tt.broadcast %35 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %37 = arith.shrsi %33, %36 : tensor<16x32xi32>
+    %38 = arith.andi %37, %cst_6 : tensor<16x32xi32>
+    %39 = tt.make_range {end = 4 : i32, start = 0 : i32} : tensor<4xi32>
+    %40 = tt.addptr %23, %cst_7 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %41 = arith.muli %25, %cst_8 : tensor<16x1xi64>
+    %42 = tt.addptr %40, %41 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %43 = tt.expand_dims %39 {axis = 0 : i32} : tensor<4xi32> -> tensor<1x4xi32>
+    %44 = tt.broadcast %42 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x4x!tt.ptr<i8>>
+    %45 = tt.broadcast %43 : tensor<1x4xi32> -> tensor<16x4xi32>
+    %46 = tt.addptr %44, %45 : tensor<16x4x!tt.ptr<i8>>, tensor<16x4xi32>
+    %47 = arith.cmpi slt, %43, %cst_9 : tensor<1x4xi32>
+    %48 = tt.broadcast %17 : tensor<16x1xi1> -> tensor<16x4xi1>
+    %49 = tt.broadcast %47 : tensor<1x4xi1> -> tensor<16x4xi1>
+    %50 = arith.andi %48, %49 : tensor<16x4xi1>
+    %51 = tt.load %46, %50, %cst_23 : tensor<16x4x!tt.ptr<i8>>
+    %52 = arith.extui %51 : tensor<16x4xi8> to tensor<16x4xi32>
+    %53 = tt.extern_elementwise %52 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x4xi32>) -> tensor<16x4xi32>
+    %54 = "tt.scan"(%53) <{axis = 1 : i32, reverse = false}> ({
+    ^bb0(%arg6: i32, %arg7: i32):
+      %123 = arith.addi %arg6, %arg7 : i32
+      tt.scan.return %123 : i32
+    }) : (tensor<16x4xi32>) -> tensor<16x4xi32>
+    %55 = arith.subi %54, %53 : tensor<16x4xi32>
+    %56 = arith.divsi %11, %cst_10 : tensor<32xi32>
+    %57 = tt.expand_dims %56 {axis = 0 : i32} : tensor<32xi32> -> tensor<1x32xi32>
+    %58 = tt.broadcast %57 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %59 = tt.gather %52[%58] {axis = 1 : i32} : (tensor<16x4xi32>, tensor<16x32xi32>) -> tensor<16x32xi32>
+    %60 = arith.remsi %18, %cst_11 : tensor<1x32xi32>
+    %61 = tt.broadcast %60 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %62 = arith.shrsi %59, %61 : tensor<16x32xi32>
+    %63 = arith.andi %62, %cst_12 : tensor<16x32xi32>
+    %64 = arith.cmpi ne, %63, %cst_4 : tensor<16x32xi32>
+    %65 = tt.gather %55[%58] {axis = 1 : i32} : (tensor<16x4xi32>, tensor<16x32xi32>) -> tensor<16x32xi32>
+    %66 = arith.shli %cst_13, %60 : tensor<1x32xi32>
+    %67 = arith.subi %66, %cst_13 : tensor<1x32xi32>
+    %68 = tt.broadcast %67 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %69 = arith.andi %59, %68 : tensor<16x32xi32>
+    %70 = tt.extern_elementwise %69 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x32xi32>) -> tensor<16x32xi32>
+    %71 = arith.addi %65, %70 : tensor<16x32xi32>
+    %72 = tt.addptr %15, %cst_14 : tensor<16x!tt.ptr<i8>>, tensor<16xi32>
+    %73 = arith.muli %16, %cst_15 : tensor<16xi64>
+    %74 = tt.addptr %72, %73 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %75 = tt.bitcast %74 : tensor<16x!tt.ptr<i8>> -> tensor<16x!tt.ptr<i32>>
+    %76 = tt.load %75, %10, %cst_16 : tensor<16x!tt.ptr<i32>>
+    %77 = tt.addptr %23, %cst_17 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %78 = tt.bitcast %77 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<bf16>>
+    %79 = tt.expand_dims %76 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %80 = tt.addptr %78, %79 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %81 = tt.broadcast %80 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x32x!tt.ptr<bf16>>
+    %82 = tt.addptr %81, %71 : tensor<16x32x!tt.ptr<bf16>>, tensor<16x32xi32>
+    %83 = arith.andi %22, %64 : tensor<16x32xi1>
+    %84 = tt.broadcast %79 : tensor<16x1xi32> -> tensor<16x32xi32>
+    %85 = arith.addi %84, %71 : tensor<16x32xi32>
+    %86 = arith.cmpi slt, %85, %cst_18 : tensor<16x32xi32>
+    %87 = arith.andi %83, %86 : tensor<16x32xi1>
+    %88 = tt.load %82, %87, %cst_24 : tensor<16x32x!tt.ptr<bf16>>
+    %89 = arith.extf %88 : tensor<16x32xbf16> to tensor<16x32xf32>
+    %90 = tt.splat %arg1 : !tt.ptr<f32> -> tensor<32x!tt.ptr<f32>>
+    %91 = tt.addptr %90, %11 : tensor<32x!tt.ptr<f32>>, tensor<32xi32>
+    %92 = arith.cmpi slt, %11, %cst_19 : tensor<32xi32>
+    %93 = tt.load %91, %92, %cst_25 : tensor<32x!tt.ptr<f32>>
+    %94 = tt.expand_dims %93 {axis = 0 : i32} : tensor<32xf32> -> tensor<1x32xf32>
+    %95 = tt.splat %arg2 : !tt.ptr<f32> -> tensor<32x!tt.ptr<f32>>
+    %96 = tt.addptr %95, %11 : tensor<32x!tt.ptr<f32>>, tensor<32xi32>
+    %97 = tt.load %96, %92, %cst_25 : tensor<32x!tt.ptr<f32>>
+    %98 = tt.expand_dims %97 {axis = 0 : i32} : tensor<32xf32> -> tensor<1x32xf32>
+    %99 = arith.subf %98, %94 : tensor<1x32xf32>
+    %100 = arith.mulf %99, %cst_20 : tensor<1x32xf32>
+    %101 = arith.addf %98, %94 : tensor<1x32xf32>
+    %102 = arith.mulf %101, %cst_20 : tensor<1x32xf32>
+    %103 = tt.splat %arg3 : !tt.ptr<f32> -> tensor<16x32x!tt.ptr<f32>>
+    %104 = tt.addptr %103, %38 : tensor<16x32x!tt.ptr<f32>>, tensor<16x32xi32>
+    %105 = tt.load %104 : tensor<16x32x!tt.ptr<f32>>
+    %106 = tt.broadcast %100 : tensor<1x32xf32> -> tensor<16x32xf32>
+    %107 = arith.mulf %105, %106 : tensor<16x32xf32>
+    %108 = tt.broadcast %102 : tensor<1x32xf32> -> tensor<16x32xf32>
+    %109 = arith.addf %107, %108 : tensor<16x32xf32>
+    %110 = arith.select %64, %89, %109 : tensor<16x32xi1>, tensor<16x32xf32>
+    %111 = arith.select %22, %110, %cst_21 : tensor<16x32xi1>, tensor<16x32xf32>
+    %112 = arith.truncf %111 : tensor<16x32xf32> to tensor<16x32xbf16>
+    %113 = tt.expand_dims %4 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %114 = arith.muli %113, %cst_30 : tensor<16x1xi32>
+    %115 = tt.splat %arg5 : !tt.ptr<bf16> -> tensor<16x1x!tt.ptr<bf16>>
+    %116 = tt.addptr %115, %114 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %117 = tt.broadcast %116 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x32x!tt.ptr<bf16>>
+    %118 = tt.broadcast %18 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %119 = tt.addptr %117, %118 : tensor<16x32x!tt.ptr<bf16>>, tensor<16x32xi32>
+    %120 = arith.cmpi slt, %113, %cst_29 : tensor<16x1xi32>
+    %121 = tt.broadcast %120 : tensor<16x1xi1> -> tensor<16x32xi1>
+    %122 = arith.andi %121, %21 : tensor<16x32xi1>
+    tt.store %119, %112, %122 : tensor<16x32x!tt.ptr<bf16>>
+    tt.return
+  }
+}
+
+{-#
+  external_resources: {
+    mlir_reproducer: {
+      pipeline: "builtin.module(convert-triton-to-tritongpu{enable-source-remat=false num-ctas=1 num-warps=4 target=cuda:89 threads-per-warp=32}, tritongpu-coalesce, tritongpu-F32DotTC{emu-tf32=true}, triton-nvidia-gpu-plan-cta, tritongpu-remove-layout-conversions, tritongpu-optimize-thread-locality, tritongpu-accelerate-matmul, tritongpu-remove-layout-conversions, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, triton-nvidia-optimize-descriptor-encoding, triton-loop-aware-cse, tritongpu-fuse-nested-loops, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-licm, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, tritongpu-combine-tensor-select-and-if, nvgpu-warp-specialization{dump-intermediate-steps=false num-stages=3}, tritongpu-assign-latencies{num-stages=3}, tritongpu-schedule-loops, tritongpu-pipeline{dump-intermediate-steps=false num-stages=3}, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-loop-aware-cse, tritongpu-prefetch, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, tritongpu-coalesce-async-copy, triton-nvidia-optimize-tmem-layouts, tritongpu-remove-layout-conversions, triton-nvidia-interleave-tmem, tritongpu-reduce-data-duplication, tritongpu-reorder-instructions, triton-loop-aware-cse, symbol-dce, triton-nvidia-gpu-fence-insertion{compute-capability=89}, triton-nvidia-mma-lowering, sccp, cse, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true})",
+      disable_threading: true,
+      verify_each: true
+    }
+  }
+#-}
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: error: Failures have been detected while processing an MLIR pass pipeline
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: note: Pipeline failed while executing [`TritonGPUOptimizeThreadLocality` on 'builtin.module' operation]: reproducer generated at `std::errs, please share the reproducer above with Triton project.`
+_________ test_official_reconstruction_and_incremental_pages[True-16] __________
+
+upstream = <module 'kvquant_cache_reference' from '/workspace/BasisServe-CALS/external/KVQuant/quant/kvquant/simquant_module_quantizer.py'>
+width = 16, dynamic = True
+
+    @pytest.mark.parametrize("width", [16, 32, 48, 64, 80, 96, 112, 128])
+    @pytest.mark.parametrize("dynamic", [False, True])
+    def test_official_reconstruction_and_incremental_pages(upstream, width, dynamic):
+        torch.manual_seed(9)
+        values = torch.randn(29, width * (8 if dynamic else 1), device="cuda", dtype=torch.bfloat16)
+        values[0, 0], values[7, 3] = 12, -12
+        lower = torch.full((width,), -3.0, device="cuda")
+        upper = torch.full((width,), 3.0, device="cuda")
+        # Deliberately unsorted: ties must follow original LUT order.
+        lut = torch.tensor(np.random.default_rng(2).permutation(np.linspace(-1, 1, 16)),
+                           device="cuda", dtype=torch.float32)
+        stats = nuq4_value_stats(values) if dynamic else None
+        source = values[:, :width]
+        cache = NUQ4PagedCache(4, NUQ4Layout(width), lower, upper, lut, dynamic=dynamic)
+        slots = torch.cat((torch.arange(32, 48), torch.arange(0, 13))).cuda()
+        cache.append(source[:19], slots[:19], stats[:19] if dynamic else None)
+        cache.append(source[19:], slots[19:], stats[19:] if dynamic else None)
+        expected = reference(upstream, values, lower, upper, lut, dynamic)[:, :width]
+>       actual = cache.gather_for_validation(slots)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_cache.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_cache.py:267: in gather_for_validation
+    _gather[(triton.cdiv(slots.numel(), 16),)](self.storage, self.lower, self.upper,
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:327: in compile
+    next_module = compile_ir(module, metadata)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:549: in <lambda>
+    stages["ttgir"] = lambda src, metadata: self.make_ttgir(src, metadata, options, capability)
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mod = <triton._C.libtriton.ir.module object at 0x70160a2bc110>
+metadata = {'hash': 'f01019207871774bcc6681270575fb781c1032338d8490edaaf4c0fafa4564da', 'target': GPUTarget(backend='cuda', arch=89, warp_size=32), 'num_warps': 4, 'num_ctas': 1, ...}
+opt = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+capability = 89
+
+    @staticmethod
+    def make_ttgir(mod, metadata, opt, capability):
+        # Set maxnreg on all kernels, if it was provided.
+        if opt.maxnreg is not None:
+            mod.set_attr("ttg.maxnreg", ir.builder(mod.context).get_int32_attr(opt.maxnreg))
+    
+        pm = ir.pass_manager(mod.context)
+        dump_enabled = pm.enable_debug()
+        emuTF32 = (capability // 10 >= 8)
+        passes.ttir.add_convert_to_ttgpuir(pm, f"cuda:{capability}", opt.num_warps, 32, opt.num_ctas)
+        # optimize TTGIR
+        passes.ttgpuir.add_coalesce(pm)
+        passes.ttgpuir.add_f32_dot_tc(pm, emuTF32)
+        # TODO(Qingyi): Move PlanCTAPass to the front of CoalescePass
+        nvidia.passes.ttnvgpuir.add_plan_cta(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_thread_locality(pm)
+        passes.ttgpuir.add_accelerate_matmul(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        nvidia.passes.ttnvgpuir.add_optimize_descriptor_encoding(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        if capability // 10 in [8, 9]:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            nvidia.passes.hopper.add_hopper_warpspec(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+        elif capability // 10 >= 10:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.ttgpuir.add_optimize_accumulator_init(pm)
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, False)
+            nvidia.passes.ttnvgpuir.add_promote_lhs_to_tmem(pm)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_warp_specialize(pm, opt.num_stages)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_optimize_partition_warps(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            # hoist again and allow hoisting out of if statements
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, True)
+            nvidia.passes.ttnvgpuir.add_remove_tmem_tokens(pm)
+        else:
+            passes.ttir.add_triton_licm(pm)
+        passes.common.add_canonicalizer(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.ttgpuir.add_prefetch(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        passes.ttgpuir.add_coalesce_async_copy(pm)
+        nvidia.passes.ttnvgpuir.add_optimize_tmem_layouts(pm)
+        if capability // 10 >= 9:
+            nvidia.passes.ttnvgpuir.add_tma_lowering(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        nvidia.passes.ttnvgpuir.add_interleave_tmem(pm)
+        passes.ttgpuir.add_reduce_data_duplication(pm)
+        passes.ttgpuir.add_reorder_instructions(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.common.add_symbol_dce(pm)
+        nvidia.passes.ttnvgpuir.add_fence_insertion(pm, capability)
+        nvidia.passes.ttnvgpuir.add_lower_mma(pm)
+        passes.common.add_sccp(pm)
+        passes.common.add_cse(pm)
+        passes.common.add_canonicalizer(pm)
+    
+>       pm.run(mod, 'make_ttgir')
+E       RuntimeError: PassManager::run failed
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:321: RuntimeError
+----------------------------- Captured stderr call -----------------------------
+python: /project/lib/Dialect/TritonGPU/Transforms/OptimizeThreadLocality.cpp:220: LogicalResult mlir::triton::gpu::setOptimizedGatherLayout(GatherOp, RewriterBase &): Assertion `GatherLoweringHelper(op).isWarpLocal()' failed.
+module {
+  tt.func public @_gather(%arg0: !tt.ptr<i8> {tt.divisibility = 16 : i32}, %arg1: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg2: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg3: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg4: !tt.ptr<i64> {tt.divisibility = 16 : i32}, %arg5: !tt.ptr<bf16> {tt.divisibility = 16 : i32}) attributes {noinline = false} {
+    %cst = arith.constant dense<16> : tensor<16xi64>
+    %cst_0 = arith.constant dense<624> : tensor<16xi64>
+    %cst_1 = arith.constant dense<8> : tensor<16x1xi64>
+    %cst_2 = arith.constant dense<2> : tensor<1x16xi32>
+    %cst_3 = arith.constant dense<0> : tensor<16x16xi32>
+    %cst_4 = arith.constant dense<4> : tensor<1x16xi32>
+    %cst_5 = arith.constant dense<15> : tensor<16x16xi32>
+    %cst_6 = arith.constant dense<144> : tensor<16x1xi32>
+    %cst_7 = arith.constant dense<2> : tensor<16x1xi64>
+    %cst_8 = arith.constant dense<2> : tensor<1x2xi32>
+    %cst_9 = arith.constant dense<8> : tensor<16xi32>
+    %cst_10 = arith.constant dense<8> : tensor<1x16xi32>
+    %cst_11 = arith.constant dense<1> : tensor<16x16xi32>
+    %cst_12 = arith.constant dense<1> : tensor<1x16xi32>
+    %cst_13 = arith.constant dense<176> : tensor<16xi32>
+    %cst_14 = arith.constant dense<4> : tensor<16xi64>
+    %cst_15 = arith.constant dense<0> : tensor<16xi32>
+    %cst_16 = arith.constant dense<368> : tensor<16x1xi32>
+    %cst_17 = arith.constant dense<128> : tensor<16x16xi32>
+    %cst_18 = arith.constant dense<240> : tensor<16xi32>
+    %cst_19 = arith.constant dense<8> : tensor<16xi64>
+    %cst_20 = arith.constant dense<1> : tensor<16xi32>
+    %cst_21 = arith.constant dense<0.000000e+00> : tensor<16x16xf32>
+    %cst_22 = arith.constant dense<0> : tensor<16x16xi8>
+    %cst_23 = arith.constant dense<0> : tensor<16x2xi8>
+    %cst_24 = arith.constant dense<0.000000e+00> : tensor<16x16xbf16>
+    %cst_25 = arith.constant dense<0.000000e+00> : tensor<16xf32>
+    %cst_26 = arith.constant dense<0> : tensor<16xi64>
+    %cst_27 = arith.constant dense<-1> : tensor<16xi64>
+    %cst_28 = arith.constant dense<16> : tensor<1x16xi32>
+    %cst_29 = arith.constant dense<29> : tensor<16x1xi32>
+    %cst_30 = arith.constant dense<16> : tensor<16x1xi32>
+    %cst_31 = arith.constant dense<29> : tensor<16xi32>
+    %c16_i32 = arith.constant 16 : i32
+    %0 = tt.get_program_id x : i32
+    %1 = arith.muli %0, %c16_i32 : i32
+    %2 = tt.make_range {end = 16 : i32, start = 0 : i32} : tensor<16xi32>
+    %3 = tt.splat %1 : i32 -> tensor<16xi32>
+    %4 = arith.addi %3, %2 : tensor<16xi32>
+    %5 = tt.splat %arg4 : !tt.ptr<i64> -> tensor<16x!tt.ptr<i64>>
+    %6 = tt.addptr %5, %4 : tensor<16x!tt.ptr<i64>>, tensor<16xi32>
+    %7 = arith.cmpi slt, %4, %cst_31 : tensor<16xi32>
+    %8 = tt.load %6, %7, %cst_27 : tensor<16x!tt.ptr<i64>>
+    %9 = arith.cmpi sge, %8, %cst_26 : tensor<16xi64>
+    %10 = arith.andi %7, %9 : tensor<16xi1>
+    %11 = arith.divsi %8, %cst : tensor<16xi64>
+    %12 = arith.muli %11, %cst_0 : tensor<16xi64>
+    %13 = tt.splat %arg0 : !tt.ptr<i8> -> tensor<16x!tt.ptr<i8>>
+    %14 = tt.addptr %13, %12 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %15 = arith.remsi %8, %cst : tensor<16xi64>
+    %16 = tt.expand_dims %10 {axis = 1 : i32} : tensor<16xi1> -> tensor<16x1xi1>
+    %17 = tt.expand_dims %2 {axis = 0 : i32} : tensor<16xi32> -> tensor<1x16xi32>
+    %18 = arith.cmpi slt, %17, %cst_28 : tensor<1x16xi32>
+    %19 = tt.broadcast %16 : tensor<16x1xi1> -> tensor<16x16xi1>
+    %20 = tt.broadcast %18 : tensor<1x16xi1> -> tensor<16x16xi1>
+    %21 = arith.andi %19, %20 : tensor<16x16xi1>
+    %22 = tt.expand_dims %14 {axis = 1 : i32} : tensor<16x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<i8>>
+    %23 = tt.addptr %22, %cst_30 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %24 = tt.expand_dims %15 {axis = 1 : i32} : tensor<16xi64> -> tensor<16x1xi64>
+    %25 = arith.muli %24, %cst_1 : tensor<16x1xi64>
+    %26 = tt.addptr %23, %25 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %27 = arith.divsi %17, %cst_2 : tensor<1x16xi32>
+    %28 = tt.broadcast %26 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x16x!tt.ptr<i8>>
+    %29 = tt.broadcast %27 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %30 = tt.addptr %28, %29 : tensor<16x16x!tt.ptr<i8>>, tensor<16x16xi32>
+    %31 = tt.load %30, %21, %cst_22 : tensor<16x16x!tt.ptr<i8>>
+    %32 = arith.extui %31 : tensor<16x16xi8> to tensor<16x16xi32>
+    %33 = arith.remsi %17, %cst_2 : tensor<1x16xi32>
+    %34 = arith.muli %33, %cst_4 : tensor<1x16xi32>
+    %35 = tt.broadcast %34 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %36 = arith.shrsi %32, %35 : tensor<16x16xi32>
+    %37 = arith.andi %36, %cst_5 : tensor<16x16xi32>
+    %38 = tt.make_range {end = 2 : i32, start = 0 : i32} : tensor<2xi32>
+    %39 = tt.addptr %22, %cst_6 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %40 = arith.muli %24, %cst_7 : tensor<16x1xi64>
+    %41 = tt.addptr %39, %40 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %42 = tt.expand_dims %38 {axis = 0 : i32} : tensor<2xi32> -> tensor<1x2xi32>
+    %43 = tt.broadcast %41 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x2x!tt.ptr<i8>>
+    %44 = tt.broadcast %42 : tensor<1x2xi32> -> tensor<16x2xi32>
+    %45 = tt.addptr %43, %44 : tensor<16x2x!tt.ptr<i8>>, tensor<16x2xi32>
+    %46 = arith.cmpi slt, %42, %cst_8 : tensor<1x2xi32>
+    %47 = tt.broadcast %16 : tensor<16x1xi1> -> tensor<16x2xi1>
+    %48 = tt.broadcast %46 : tensor<1x2xi1> -> tensor<16x2xi1>
+    %49 = arith.andi %47, %48 : tensor<16x2xi1>
+    %50 = tt.load %45, %49, %cst_23 : tensor<16x2x!tt.ptr<i8>>
+    %51 = arith.extui %50 : tensor<16x2xi8> to tensor<16x2xi32>
+    %52 = tt.extern_elementwise %51 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x2xi32>) -> tensor<16x2xi32>
+    %53 = "tt.scan"(%52) <{axis = 1 : i32, reverse = false}> ({
+    ^bb0(%arg6: i32, %arg7: i32):
+      %118 = arith.addi %arg6, %arg7 : i32
+      tt.scan.return %118 : i32
+    }) : (tensor<16x2xi32>) -> tensor<16x2xi32>
+    %54 = arith.subi %53, %52 : tensor<16x2xi32>
+    %55 = arith.divsi %2, %cst_9 : tensor<16xi32>
+    %56 = tt.expand_dims %55 {axis = 0 : i32} : tensor<16xi32> -> tensor<1x16xi32>
+    %57 = tt.broadcast %56 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %58 = tt.gather %51[%57] {axis = 1 : i32} : (tensor<16x2xi32>, tensor<16x16xi32>) -> tensor<16x16xi32>
+    %59 = arith.remsi %17, %cst_10 : tensor<1x16xi32>
+    %60 = tt.broadcast %59 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %61 = arith.shrsi %58, %60 : tensor<16x16xi32>
+    %62 = arith.andi %61, %cst_11 : tensor<16x16xi32>
+    %63 = arith.cmpi ne, %62, %cst_3 : tensor<16x16xi32>
+    %64 = tt.gather %54[%57] {axis = 1 : i32} : (tensor<16x2xi32>, tensor<16x16xi32>) -> tensor<16x16xi32>
+    %65 = arith.shli %cst_12, %59 : tensor<1x16xi32>
+    %66 = arith.subi %65, %cst_12 : tensor<1x16xi32>
+    %67 = tt.broadcast %66 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %68 = arith.andi %58, %67 : tensor<16x16xi32>
+    %69 = tt.extern_elementwise %68 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x16xi32>) -> tensor<16x16xi32>
+    %70 = arith.addi %64, %69 : tensor<16x16xi32>
+    %71 = tt.addptr %14, %cst_13 : tensor<16x!tt.ptr<i8>>, tensor<16xi32>
+    %72 = arith.muli %15, %cst_14 : tensor<16xi64>
+    %73 = tt.addptr %71, %72 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %74 = tt.bitcast %73 : tensor<16x!tt.ptr<i8>> -> tensor<16x!tt.ptr<i32>>
+    %75 = tt.load %74, %10, %cst_15 : tensor<16x!tt.ptr<i32>>
+    %76 = tt.addptr %22, %cst_16 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %77 = tt.bitcast %76 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<bf16>>
+    %78 = tt.expand_dims %75 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %79 = tt.addptr %77, %78 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %80 = tt.broadcast %79 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x16x!tt.ptr<bf16>>
+    %81 = tt.addptr %80, %70 : tensor<16x16x!tt.ptr<bf16>>, tensor<16x16xi32>
+    %82 = arith.andi %21, %63 : tensor<16x16xi1>
+    %83 = tt.broadcast %78 : tensor<16x1xi32> -> tensor<16x16xi32>
+    %84 = arith.addi %83, %70 : tensor<16x16xi32>
+    %85 = arith.cmpi slt, %84, %cst_17 : tensor<16x16xi32>
+    %86 = arith.andi %82, %85 : tensor<16x16xi1>
+    %87 = tt.load %81, %86, %cst_24 : tensor<16x16x!tt.ptr<bf16>>
+    %88 = arith.extf %87 : tensor<16x16xbf16> to tensor<16x16xf32>
+    %89 = tt.addptr %14, %cst_18 : tensor<16x!tt.ptr<i8>>, tensor<16xi32>
+    %90 = arith.muli %15, %cst_19 : tensor<16xi64>
+    %91 = tt.addptr %89, %90 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %92 = tt.bitcast %91 : tensor<16x!tt.ptr<i8>> -> tensor<16x!tt.ptr<f32>>
+    %93 = tt.load %92, %10, %cst_25 : tensor<16x!tt.ptr<f32>>
+    %94 = tt.expand_dims %93 {axis = 1 : i32} : tensor<16xf32> -> tensor<16x1xf32>
+    %95 = tt.addptr %92, %cst_20 : tensor<16x!tt.ptr<f32>>, tensor<16xi32>
+    %96 = tt.load %95, %10, %cst_25 : tensor<16x!tt.ptr<f32>>
+    %97 = tt.expand_dims %96 {axis = 1 : i32} : tensor<16xf32> -> tensor<16x1xf32>
+    %98 = tt.splat %arg3 : !tt.ptr<f32> -> tensor<16x16x!tt.ptr<f32>>
+    %99 = tt.addptr %98, %37 : tensor<16x16x!tt.ptr<f32>>, tensor<16x16xi32>
+    %100 = tt.load %99 : tensor<16x16x!tt.ptr<f32>>
+    %101 = tt.broadcast %94 : tensor<16x1xf32> -> tensor<16x16xf32>
+    %102 = arith.mulf %100, %101 : tensor<16x16xf32>
+    %103 = tt.broadcast %97 : tensor<16x1xf32> -> tensor<16x16xf32>
+    %104 = arith.addf %102, %103 : tensor<16x16xf32>
+    %105 = arith.select %63, %88, %104 : tensor<16x16xi1>, tensor<16x16xf32>
+    %106 = arith.select %21, %105, %cst_21 : tensor<16x16xi1>, tensor<16x16xf32>
+    %107 = arith.truncf %106 : tensor<16x16xf32> to tensor<16x16xbf16>
+    %108 = tt.expand_dims %4 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %109 = arith.muli %108, %cst_30 : tensor<16x1xi32>
+    %110 = tt.splat %arg5 : !tt.ptr<bf16> -> tensor<16x1x!tt.ptr<bf16>>
+    %111 = tt.addptr %110, %109 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %112 = tt.broadcast %111 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x16x!tt.ptr<bf16>>
+    %113 = tt.broadcast %17 : tensor<1x16xi32> -> tensor<16x16xi32>
+    %114 = tt.addptr %112, %113 : tensor<16x16x!tt.ptr<bf16>>, tensor<16x16xi32>
+    %115 = arith.cmpi slt, %108, %cst_29 : tensor<16x1xi32>
+    %116 = tt.broadcast %115 : tensor<16x1xi1> -> tensor<16x16xi1>
+    %117 = arith.andi %116, %20 : tensor<16x16xi1>
+    tt.store %114, %107, %117 : tensor<16x16x!tt.ptr<bf16>>
+    tt.return
+  }
+}
+
+{-#
+  external_resources: {
+    mlir_reproducer: {
+      pipeline: "builtin.module(convert-triton-to-tritongpu{enable-source-remat=false num-ctas=1 num-warps=4 target=cuda:89 threads-per-warp=32}, tritongpu-coalesce, tritongpu-F32DotTC{emu-tf32=true}, triton-nvidia-gpu-plan-cta, tritongpu-remove-layout-conversions, tritongpu-optimize-thread-locality, tritongpu-accelerate-matmul, tritongpu-remove-layout-conversions, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, triton-nvidia-optimize-descriptor-encoding, triton-loop-aware-cse, tritongpu-fuse-nested-loops, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-licm, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, tritongpu-combine-tensor-select-and-if, nvgpu-warp-specialization{dump-intermediate-steps=false num-stages=3}, tritongpu-assign-latencies{num-stages=3}, tritongpu-schedule-loops, tritongpu-pipeline{dump-intermediate-steps=false num-stages=3}, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-loop-aware-cse, tritongpu-prefetch, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, tritongpu-coalesce-async-copy, triton-nvidia-optimize-tmem-layouts, tritongpu-remove-layout-conversions, triton-nvidia-interleave-tmem, tritongpu-reduce-data-duplication, tritongpu-reorder-instructions, triton-loop-aware-cse, symbol-dce, triton-nvidia-gpu-fence-insertion{compute-capability=89}, triton-nvidia-mma-lowering, sccp, cse, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true})",
+      disable_threading: true,
+      verify_each: true
+    }
+  }
+#-}
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: error: Failures have been detected while processing an MLIR pass pipeline
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: note: Pipeline failed while executing [`TritonGPUOptimizeThreadLocality` on 'builtin.module' operation]: reproducer generated at `std::errs, please share the reproducer above with Triton project.`
+_________ test_official_reconstruction_and_incremental_pages[True-32] __________
+
+upstream = <module 'kvquant_cache_reference' from '/workspace/BasisServe-CALS/external/KVQuant/quant/kvquant/simquant_module_quantizer.py'>
+width = 32, dynamic = True
+
+    @pytest.mark.parametrize("width", [16, 32, 48, 64, 80, 96, 112, 128])
+    @pytest.mark.parametrize("dynamic", [False, True])
+    def test_official_reconstruction_and_incremental_pages(upstream, width, dynamic):
+        torch.manual_seed(9)
+        values = torch.randn(29, width * (8 if dynamic else 1), device="cuda", dtype=torch.bfloat16)
+        values[0, 0], values[7, 3] = 12, -12
+        lower = torch.full((width,), -3.0, device="cuda")
+        upper = torch.full((width,), 3.0, device="cuda")
+        # Deliberately unsorted: ties must follow original LUT order.
+        lut = torch.tensor(np.random.default_rng(2).permutation(np.linspace(-1, 1, 16)),
+                           device="cuda", dtype=torch.float32)
+        stats = nuq4_value_stats(values) if dynamic else None
+        source = values[:, :width]
+        cache = NUQ4PagedCache(4, NUQ4Layout(width), lower, upper, lut, dynamic=dynamic)
+        slots = torch.cat((torch.arange(32, 48), torch.arange(0, 13))).cuda()
+        cache.append(source[:19], slots[:19], stats[:19] if dynamic else None)
+        cache.append(source[19:], slots[19:], stats[19:] if dynamic else None)
+        expected = reference(upstream, values, lower, upper, lut, dynamic)[:, :width]
+>       actual = cache.gather_for_validation(slots)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_cache.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_cache.py:267: in gather_for_validation
+    _gather[(triton.cdiv(slots.numel(), 16),)](self.storage, self.lower, self.upper,
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:327: in compile
+    next_module = compile_ir(module, metadata)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:549: in <lambda>
+    stages["ttgir"] = lambda src, metadata: self.make_ttgir(src, metadata, options, capability)
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mod = <triton._C.libtriton.ir.module object at 0x70160a2be030>
+metadata = {'hash': '99634eb298b27dcd837174fb867eba08dbdf6dec40f7b18f2c88322f888753a7', 'target': GPUTarget(backend='cuda', arch=89, warp_size=32), 'num_warps': 4, 'num_ctas': 1, ...}
+opt = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+capability = 89
+
+    @staticmethod
+    def make_ttgir(mod, metadata, opt, capability):
+        # Set maxnreg on all kernels, if it was provided.
+        if opt.maxnreg is not None:
+            mod.set_attr("ttg.maxnreg", ir.builder(mod.context).get_int32_attr(opt.maxnreg))
+    
+        pm = ir.pass_manager(mod.context)
+        dump_enabled = pm.enable_debug()
+        emuTF32 = (capability // 10 >= 8)
+        passes.ttir.add_convert_to_ttgpuir(pm, f"cuda:{capability}", opt.num_warps, 32, opt.num_ctas)
+        # optimize TTGIR
+        passes.ttgpuir.add_coalesce(pm)
+        passes.ttgpuir.add_f32_dot_tc(pm, emuTF32)
+        # TODO(Qingyi): Move PlanCTAPass to the front of CoalescePass
+        nvidia.passes.ttnvgpuir.add_plan_cta(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_thread_locality(pm)
+        passes.ttgpuir.add_accelerate_matmul(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        nvidia.passes.ttnvgpuir.add_optimize_descriptor_encoding(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        if capability // 10 in [8, 9]:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            nvidia.passes.hopper.add_hopper_warpspec(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+        elif capability // 10 >= 10:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.ttgpuir.add_optimize_accumulator_init(pm)
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, False)
+            nvidia.passes.ttnvgpuir.add_promote_lhs_to_tmem(pm)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_warp_specialize(pm, opt.num_stages)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_optimize_partition_warps(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            # hoist again and allow hoisting out of if statements
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, True)
+            nvidia.passes.ttnvgpuir.add_remove_tmem_tokens(pm)
+        else:
+            passes.ttir.add_triton_licm(pm)
+        passes.common.add_canonicalizer(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.ttgpuir.add_prefetch(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        passes.ttgpuir.add_coalesce_async_copy(pm)
+        nvidia.passes.ttnvgpuir.add_optimize_tmem_layouts(pm)
+        if capability // 10 >= 9:
+            nvidia.passes.ttnvgpuir.add_tma_lowering(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        nvidia.passes.ttnvgpuir.add_interleave_tmem(pm)
+        passes.ttgpuir.add_reduce_data_duplication(pm)
+        passes.ttgpuir.add_reorder_instructions(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.common.add_symbol_dce(pm)
+        nvidia.passes.ttnvgpuir.add_fence_insertion(pm, capability)
+        nvidia.passes.ttnvgpuir.add_lower_mma(pm)
+        passes.common.add_sccp(pm)
+        passes.common.add_cse(pm)
+        passes.common.add_canonicalizer(pm)
+    
+>       pm.run(mod, 'make_ttgir')
+E       RuntimeError: PassManager::run failed
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:321: RuntimeError
+----------------------------- Captured stderr call -----------------------------
+python: /project/lib/Dialect/TritonGPU/Transforms/OptimizeThreadLocality.cpp:220: LogicalResult mlir::triton::gpu::setOptimizedGatherLayout(GatherOp, RewriterBase &): Assertion `GatherLoweringHelper(op).isWarpLocal()' failed.
+module {
+  tt.func public @_gather(%arg0: !tt.ptr<i8> {tt.divisibility = 16 : i32}, %arg1: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg2: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg3: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg4: !tt.ptr<i64> {tt.divisibility = 16 : i32}, %arg5: !tt.ptr<bf16> {tt.divisibility = 16 : i32}) attributes {noinline = false} {
+    %cst = arith.constant dense<16> : tensor<16xi64>
+    %cst_0 = arith.constant dense<784> : tensor<16xi64>
+    %cst_1 = arith.constant dense<16> : tensor<16x1xi32>
+    %cst_2 = arith.constant dense<16> : tensor<16x1xi64>
+    %cst_3 = arith.constant dense<2> : tensor<1x32xi32>
+    %cst_4 = arith.constant dense<0> : tensor<16x32xi32>
+    %cst_5 = arith.constant dense<4> : tensor<1x32xi32>
+    %cst_6 = arith.constant dense<15> : tensor<16x32xi32>
+    %cst_7 = arith.constant dense<272> : tensor<16x1xi32>
+    %cst_8 = arith.constant dense<4> : tensor<16x1xi64>
+    %cst_9 = arith.constant dense<4> : tensor<1x4xi32>
+    %cst_10 = arith.constant dense<8> : tensor<32xi32>
+    %cst_11 = arith.constant dense<8> : tensor<1x32xi32>
+    %cst_12 = arith.constant dense<1> : tensor<16x32xi32>
+    %cst_13 = arith.constant dense<1> : tensor<1x32xi32>
+    %cst_14 = arith.constant dense<336> : tensor<16xi32>
+    %cst_15 = arith.constant dense<4> : tensor<16xi64>
+    %cst_16 = arith.constant dense<0> : tensor<16xi32>
+    %cst_17 = arith.constant dense<528> : tensor<16x1xi32>
+    %cst_18 = arith.constant dense<128> : tensor<16x32xi32>
+    %cst_19 = arith.constant dense<400> : tensor<16xi32>
+    %cst_20 = arith.constant dense<8> : tensor<16xi64>
+    %cst_21 = arith.constant dense<1> : tensor<16xi32>
+    %cst_22 = arith.constant dense<0.000000e+00> : tensor<16x32xf32>
+    %cst_23 = arith.constant dense<0> : tensor<16x32xi8>
+    %cst_24 = arith.constant dense<0> : tensor<16x4xi8>
+    %cst_25 = arith.constant dense<0.000000e+00> : tensor<16x32xbf16>
+    %cst_26 = arith.constant dense<0.000000e+00> : tensor<16xf32>
+    %cst_27 = arith.constant dense<0> : tensor<16xi64>
+    %cst_28 = arith.constant dense<-1> : tensor<16xi64>
+    %cst_29 = arith.constant dense<32> : tensor<1x32xi32>
+    %cst_30 = arith.constant dense<29> : tensor<16x1xi32>
+    %cst_31 = arith.constant dense<32> : tensor<16x1xi32>
+    %cst_32 = arith.constant dense<29> : tensor<16xi32>
+    %c16_i32 = arith.constant 16 : i32
+    %0 = tt.get_program_id x : i32
+    %1 = arith.muli %0, %c16_i32 : i32
+    %2 = tt.make_range {end = 16 : i32, start = 0 : i32} : tensor<16xi32>
+    %3 = tt.splat %1 : i32 -> tensor<16xi32>
+    %4 = arith.addi %3, %2 : tensor<16xi32>
+    %5 = tt.splat %arg4 : !tt.ptr<i64> -> tensor<16x!tt.ptr<i64>>
+    %6 = tt.addptr %5, %4 : tensor<16x!tt.ptr<i64>>, tensor<16xi32>
+    %7 = arith.cmpi slt, %4, %cst_32 : tensor<16xi32>
+    %8 = tt.load %6, %7, %cst_28 : tensor<16x!tt.ptr<i64>>
+    %9 = arith.cmpi sge, %8, %cst_27 : tensor<16xi64>
+    %10 = arith.andi %7, %9 : tensor<16xi1>
+    %11 = tt.make_range {end = 32 : i32, start = 0 : i32} : tensor<32xi32>
+    %12 = arith.divsi %8, %cst : tensor<16xi64>
+    %13 = arith.muli %12, %cst_0 : tensor<16xi64>
+    %14 = tt.splat %arg0 : !tt.ptr<i8> -> tensor<16x!tt.ptr<i8>>
+    %15 = tt.addptr %14, %13 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %16 = arith.remsi %8, %cst : tensor<16xi64>
+    %17 = tt.expand_dims %10 {axis = 1 : i32} : tensor<16xi1> -> tensor<16x1xi1>
+    %18 = tt.expand_dims %11 {axis = 0 : i32} : tensor<32xi32> -> tensor<1x32xi32>
+    %19 = arith.cmpi slt, %18, %cst_29 : tensor<1x32xi32>
+    %20 = tt.broadcast %17 : tensor<16x1xi1> -> tensor<16x32xi1>
+    %21 = tt.broadcast %19 : tensor<1x32xi1> -> tensor<16x32xi1>
+    %22 = arith.andi %20, %21 : tensor<16x32xi1>
+    %23 = tt.expand_dims %15 {axis = 1 : i32} : tensor<16x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<i8>>
+    %24 = tt.addptr %23, %cst_1 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %25 = tt.expand_dims %16 {axis = 1 : i32} : tensor<16xi64> -> tensor<16x1xi64>
+    %26 = arith.muli %25, %cst_2 : tensor<16x1xi64>
+    %27 = tt.addptr %24, %26 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %28 = arith.divsi %18, %cst_3 : tensor<1x32xi32>
+    %29 = tt.broadcast %27 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x32x!tt.ptr<i8>>
+    %30 = tt.broadcast %28 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %31 = tt.addptr %29, %30 : tensor<16x32x!tt.ptr<i8>>, tensor<16x32xi32>
+    %32 = tt.load %31, %22, %cst_23 : tensor<16x32x!tt.ptr<i8>>
+    %33 = arith.extui %32 : tensor<16x32xi8> to tensor<16x32xi32>
+    %34 = arith.remsi %18, %cst_3 : tensor<1x32xi32>
+    %35 = arith.muli %34, %cst_5 : tensor<1x32xi32>
+    %36 = tt.broadcast %35 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %37 = arith.shrsi %33, %36 : tensor<16x32xi32>
+    %38 = arith.andi %37, %cst_6 : tensor<16x32xi32>
+    %39 = tt.make_range {end = 4 : i32, start = 0 : i32} : tensor<4xi32>
+    %40 = tt.addptr %23, %cst_7 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %41 = arith.muli %25, %cst_8 : tensor<16x1xi64>
+    %42 = tt.addptr %40, %41 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %43 = tt.expand_dims %39 {axis = 0 : i32} : tensor<4xi32> -> tensor<1x4xi32>
+    %44 = tt.broadcast %42 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x4x!tt.ptr<i8>>
+    %45 = tt.broadcast %43 : tensor<1x4xi32> -> tensor<16x4xi32>
+    %46 = tt.addptr %44, %45 : tensor<16x4x!tt.ptr<i8>>, tensor<16x4xi32>
+    %47 = arith.cmpi slt, %43, %cst_9 : tensor<1x4xi32>
+    %48 = tt.broadcast %17 : tensor<16x1xi1> -> tensor<16x4xi1>
+    %49 = tt.broadcast %47 : tensor<1x4xi1> -> tensor<16x4xi1>
+    %50 = arith.andi %48, %49 : tensor<16x4xi1>
+    %51 = tt.load %46, %50, %cst_24 : tensor<16x4x!tt.ptr<i8>>
+    %52 = arith.extui %51 : tensor<16x4xi8> to tensor<16x4xi32>
+    %53 = tt.extern_elementwise %52 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x4xi32>) -> tensor<16x4xi32>
+    %54 = "tt.scan"(%53) <{axis = 1 : i32, reverse = false}> ({
+    ^bb0(%arg6: i32, %arg7: i32):
+      %119 = arith.addi %arg6, %arg7 : i32
+      tt.scan.return %119 : i32
+    }) : (tensor<16x4xi32>) -> tensor<16x4xi32>
+    %55 = arith.subi %54, %53 : tensor<16x4xi32>
+    %56 = arith.divsi %11, %cst_10 : tensor<32xi32>
+    %57 = tt.expand_dims %56 {axis = 0 : i32} : tensor<32xi32> -> tensor<1x32xi32>
+    %58 = tt.broadcast %57 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %59 = tt.gather %52[%58] {axis = 1 : i32} : (tensor<16x4xi32>, tensor<16x32xi32>) -> tensor<16x32xi32>
+    %60 = arith.remsi %18, %cst_11 : tensor<1x32xi32>
+    %61 = tt.broadcast %60 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %62 = arith.shrsi %59, %61 : tensor<16x32xi32>
+    %63 = arith.andi %62, %cst_12 : tensor<16x32xi32>
+    %64 = arith.cmpi ne, %63, %cst_4 : tensor<16x32xi32>
+    %65 = tt.gather %55[%58] {axis = 1 : i32} : (tensor<16x4xi32>, tensor<16x32xi32>) -> tensor<16x32xi32>
+    %66 = arith.shli %cst_13, %60 : tensor<1x32xi32>
+    %67 = arith.subi %66, %cst_13 : tensor<1x32xi32>
+    %68 = tt.broadcast %67 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %69 = arith.andi %59, %68 : tensor<16x32xi32>
+    %70 = tt.extern_elementwise %69 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x32xi32>) -> tensor<16x32xi32>
+    %71 = arith.addi %65, %70 : tensor<16x32xi32>
+    %72 = tt.addptr %15, %cst_14 : tensor<16x!tt.ptr<i8>>, tensor<16xi32>
+    %73 = arith.muli %16, %cst_15 : tensor<16xi64>
+    %74 = tt.addptr %72, %73 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %75 = tt.bitcast %74 : tensor<16x!tt.ptr<i8>> -> tensor<16x!tt.ptr<i32>>
+    %76 = tt.load %75, %10, %cst_16 : tensor<16x!tt.ptr<i32>>
+    %77 = tt.addptr %23, %cst_17 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %78 = tt.bitcast %77 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<bf16>>
+    %79 = tt.expand_dims %76 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %80 = tt.addptr %78, %79 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %81 = tt.broadcast %80 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x32x!tt.ptr<bf16>>
+    %82 = tt.addptr %81, %71 : tensor<16x32x!tt.ptr<bf16>>, tensor<16x32xi32>
+    %83 = arith.andi %22, %64 : tensor<16x32xi1>
+    %84 = tt.broadcast %79 : tensor<16x1xi32> -> tensor<16x32xi32>
+    %85 = arith.addi %84, %71 : tensor<16x32xi32>
+    %86 = arith.cmpi slt, %85, %cst_18 : tensor<16x32xi32>
+    %87 = arith.andi %83, %86 : tensor<16x32xi1>
+    %88 = tt.load %82, %87, %cst_25 : tensor<16x32x!tt.ptr<bf16>>
+    %89 = arith.extf %88 : tensor<16x32xbf16> to tensor<16x32xf32>
+    %90 = tt.addptr %15, %cst_19 : tensor<16x!tt.ptr<i8>>, tensor<16xi32>
+    %91 = arith.muli %16, %cst_20 : tensor<16xi64>
+    %92 = tt.addptr %90, %91 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %93 = tt.bitcast %92 : tensor<16x!tt.ptr<i8>> -> tensor<16x!tt.ptr<f32>>
+    %94 = tt.load %93, %10, %cst_26 : tensor<16x!tt.ptr<f32>>
+    %95 = tt.expand_dims %94 {axis = 1 : i32} : tensor<16xf32> -> tensor<16x1xf32>
+    %96 = tt.addptr %93, %cst_21 : tensor<16x!tt.ptr<f32>>, tensor<16xi32>
+    %97 = tt.load %96, %10, %cst_26 : tensor<16x!tt.ptr<f32>>
+    %98 = tt.expand_dims %97 {axis = 1 : i32} : tensor<16xf32> -> tensor<16x1xf32>
+    %99 = tt.splat %arg3 : !tt.ptr<f32> -> tensor<16x32x!tt.ptr<f32>>
+    %100 = tt.addptr %99, %38 : tensor<16x32x!tt.ptr<f32>>, tensor<16x32xi32>
+    %101 = tt.load %100 : tensor<16x32x!tt.ptr<f32>>
+    %102 = tt.broadcast %95 : tensor<16x1xf32> -> tensor<16x32xf32>
+    %103 = arith.mulf %101, %102 : tensor<16x32xf32>
+    %104 = tt.broadcast %98 : tensor<16x1xf32> -> tensor<16x32xf32>
+    %105 = arith.addf %103, %104 : tensor<16x32xf32>
+    %106 = arith.select %64, %89, %105 : tensor<16x32xi1>, tensor<16x32xf32>
+    %107 = arith.select %22, %106, %cst_22 : tensor<16x32xi1>, tensor<16x32xf32>
+    %108 = arith.truncf %107 : tensor<16x32xf32> to tensor<16x32xbf16>
+    %109 = tt.expand_dims %4 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %110 = arith.muli %109, %cst_31 : tensor<16x1xi32>
+    %111 = tt.splat %arg5 : !tt.ptr<bf16> -> tensor<16x1x!tt.ptr<bf16>>
+    %112 = tt.addptr %111, %110 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %113 = tt.broadcast %112 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x32x!tt.ptr<bf16>>
+    %114 = tt.broadcast %18 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %115 = tt.addptr %113, %114 : tensor<16x32x!tt.ptr<bf16>>, tensor<16x32xi32>
+    %116 = arith.cmpi slt, %109, %cst_30 : tensor<16x1xi32>
+    %117 = tt.broadcast %116 : tensor<16x1xi1> -> tensor<16x32xi1>
+    %118 = arith.andi %117, %21 : tensor<16x32xi1>
+    tt.store %115, %108, %118 : tensor<16x32x!tt.ptr<bf16>>
+    tt.return
+  }
+}
+
+{-#
+  external_resources: {
+    mlir_reproducer: {
+      pipeline: "builtin.module(convert-triton-to-tritongpu{enable-source-remat=false num-ctas=1 num-warps=4 target=cuda:89 threads-per-warp=32}, tritongpu-coalesce, tritongpu-F32DotTC{emu-tf32=true}, triton-nvidia-gpu-plan-cta, tritongpu-remove-layout-conversions, tritongpu-optimize-thread-locality, tritongpu-accelerate-matmul, tritongpu-remove-layout-conversions, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, triton-nvidia-optimize-descriptor-encoding, triton-loop-aware-cse, tritongpu-fuse-nested-loops, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-licm, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, tritongpu-combine-tensor-select-and-if, nvgpu-warp-specialization{dump-intermediate-steps=false num-stages=3}, tritongpu-assign-latencies{num-stages=3}, tritongpu-schedule-loops, tritongpu-pipeline{dump-intermediate-steps=false num-stages=3}, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-loop-aware-cse, tritongpu-prefetch, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, tritongpu-coalesce-async-copy, triton-nvidia-optimize-tmem-layouts, tritongpu-remove-layout-conversions, triton-nvidia-interleave-tmem, tritongpu-reduce-data-duplication, tritongpu-reorder-instructions, triton-loop-aware-cse, symbol-dce, triton-nvidia-gpu-fence-insertion{compute-capability=89}, triton-nvidia-mma-lowering, sccp, cse, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true})",
+      disable_threading: true,
+      verify_each: true
+    }
+  }
+#-}
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: error: Failures have been detected while processing an MLIR pass pipeline
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: note: Pipeline failed while executing [`TritonGPUOptimizeThreadLocality` on 'builtin.module' operation]: reproducer generated at `std::errs, please share the reproducer above with Triton project.`
+__________________ test_full_attention_packed_tiles[False-32] __________________
+
+width = 32, decode = False
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+        actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+        kr = kcache.gather_for_validation(slots).float()
+>       vr = vcache.gather_for_validation(slots)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_cache.py:267: in gather_for_validation
+    _gather[(triton.cdiv(slots.numel(), 16),)](self.storage, self.lower, self.upper,
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:327: in compile
+    next_module = compile_ir(module, metadata)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:549: in <lambda>
+    stages["ttgir"] = lambda src, metadata: self.make_ttgir(src, metadata, options, capability)
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mod = <triton._C.libtriton.ir.module object at 0x7015e9e4fd70>
+metadata = {'hash': '4f13dfb71a8d28875dd60e8307c7a9b6d6b8d48339c064f7947ad72897f702b2', 'target': GPUTarget(backend='cuda', arch=89, warp_size=32), 'num_warps': 4, 'num_ctas': 1, ...}
+opt = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+capability = 89
+
+    @staticmethod
+    def make_ttgir(mod, metadata, opt, capability):
+        # Set maxnreg on all kernels, if it was provided.
+        if opt.maxnreg is not None:
+            mod.set_attr("ttg.maxnreg", ir.builder(mod.context).get_int32_attr(opt.maxnreg))
+    
+        pm = ir.pass_manager(mod.context)
+        dump_enabled = pm.enable_debug()
+        emuTF32 = (capability // 10 >= 8)
+        passes.ttir.add_convert_to_ttgpuir(pm, f"cuda:{capability}", opt.num_warps, 32, opt.num_ctas)
+        # optimize TTGIR
+        passes.ttgpuir.add_coalesce(pm)
+        passes.ttgpuir.add_f32_dot_tc(pm, emuTF32)
+        # TODO(Qingyi): Move PlanCTAPass to the front of CoalescePass
+        nvidia.passes.ttnvgpuir.add_plan_cta(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_thread_locality(pm)
+        passes.ttgpuir.add_accelerate_matmul(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        nvidia.passes.ttnvgpuir.add_optimize_descriptor_encoding(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        if capability // 10 in [8, 9]:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            nvidia.passes.hopper.add_hopper_warpspec(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+        elif capability // 10 >= 10:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.ttgpuir.add_optimize_accumulator_init(pm)
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, False)
+            nvidia.passes.ttnvgpuir.add_promote_lhs_to_tmem(pm)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_warp_specialize(pm, opt.num_stages)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_optimize_partition_warps(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            # hoist again and allow hoisting out of if statements
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, True)
+            nvidia.passes.ttnvgpuir.add_remove_tmem_tokens(pm)
+        else:
+            passes.ttir.add_triton_licm(pm)
+        passes.common.add_canonicalizer(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.ttgpuir.add_prefetch(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        passes.ttgpuir.add_coalesce_async_copy(pm)
+        nvidia.passes.ttnvgpuir.add_optimize_tmem_layouts(pm)
+        if capability // 10 >= 9:
+            nvidia.passes.ttnvgpuir.add_tma_lowering(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        nvidia.passes.ttnvgpuir.add_interleave_tmem(pm)
+        passes.ttgpuir.add_reduce_data_duplication(pm)
+        passes.ttgpuir.add_reorder_instructions(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.common.add_symbol_dce(pm)
+        nvidia.passes.ttnvgpuir.add_fence_insertion(pm, capability)
+        nvidia.passes.ttnvgpuir.add_lower_mma(pm)
+        passes.common.add_sccp(pm)
+        passes.common.add_cse(pm)
+        passes.common.add_canonicalizer(pm)
+    
+>       pm.run(mod, 'make_ttgir')
+E       RuntimeError: PassManager::run failed
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:321: RuntimeError
+----------------------------- Captured stderr call -----------------------------
+python: /project/lib/Dialect/TritonGPU/Transforms/OptimizeThreadLocality.cpp:220: LogicalResult mlir::triton::gpu::setOptimizedGatherLayout(GatherOp, RewriterBase &): Assertion `GatherLoweringHelper(op).isWarpLocal()' failed.
+module {
+  tt.func public @_gather(%arg0: !tt.ptr<i8> {tt.divisibility = 16 : i32}, %arg1: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg2: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg3: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg4: !tt.ptr<i64> {tt.divisibility = 16 : i32}, %arg5: !tt.ptr<bf16> {tt.divisibility = 16 : i32}) attributes {noinline = false} {
+    %cst = arith.constant dense<16> : tensor<16xi64>
+    %cst_0 = arith.constant dense<784> : tensor<16xi64>
+    %cst_1 = arith.constant dense<16> : tensor<16x1xi32>
+    %cst_2 = arith.constant dense<16> : tensor<16x1xi64>
+    %cst_3 = arith.constant dense<2> : tensor<1x32xi32>
+    %cst_4 = arith.constant dense<0> : tensor<16x32xi32>
+    %cst_5 = arith.constant dense<4> : tensor<1x32xi32>
+    %cst_6 = arith.constant dense<15> : tensor<16x32xi32>
+    %cst_7 = arith.constant dense<272> : tensor<16x1xi32>
+    %cst_8 = arith.constant dense<4> : tensor<16x1xi64>
+    %cst_9 = arith.constant dense<4> : tensor<1x4xi32>
+    %cst_10 = arith.constant dense<8> : tensor<32xi32>
+    %cst_11 = arith.constant dense<8> : tensor<1x32xi32>
+    %cst_12 = arith.constant dense<1> : tensor<16x32xi32>
+    %cst_13 = arith.constant dense<1> : tensor<1x32xi32>
+    %cst_14 = arith.constant dense<336> : tensor<16xi32>
+    %cst_15 = arith.constant dense<4> : tensor<16xi64>
+    %cst_16 = arith.constant dense<0> : tensor<16xi32>
+    %cst_17 = arith.constant dense<528> : tensor<16x1xi32>
+    %cst_18 = arith.constant dense<128> : tensor<16x32xi32>
+    %cst_19 = arith.constant dense<400> : tensor<16xi32>
+    %cst_20 = arith.constant dense<8> : tensor<16xi64>
+    %cst_21 = arith.constant dense<1> : tensor<16xi32>
+    %cst_22 = arith.constant dense<0.000000e+00> : tensor<16x32xf32>
+    %cst_23 = arith.constant dense<0> : tensor<16x32xi8>
+    %cst_24 = arith.constant dense<0> : tensor<16x4xi8>
+    %cst_25 = arith.constant dense<0.000000e+00> : tensor<16x32xbf16>
+    %cst_26 = arith.constant dense<0.000000e+00> : tensor<16xf32>
+    %cst_27 = arith.constant dense<0> : tensor<16xi64>
+    %cst_28 = arith.constant dense<-1> : tensor<16xi64>
+    %cst_29 = arith.constant dense<32> : tensor<1x32xi32>
+    %cst_30 = arith.constant dense<102> : tensor<16x1xi32>
+    %cst_31 = arith.constant dense<32> : tensor<16x1xi32>
+    %cst_32 = arith.constant dense<102> : tensor<16xi32>
+    %c16_i32 = arith.constant 16 : i32
+    %0 = tt.get_program_id x : i32
+    %1 = arith.muli %0, %c16_i32 : i32
+    %2 = tt.make_range {end = 16 : i32, start = 0 : i32} : tensor<16xi32>
+    %3 = tt.splat %1 : i32 -> tensor<16xi32>
+    %4 = arith.addi %3, %2 : tensor<16xi32>
+    %5 = tt.splat %arg4 : !tt.ptr<i64> -> tensor<16x!tt.ptr<i64>>
+    %6 = tt.addptr %5, %4 : tensor<16x!tt.ptr<i64>>, tensor<16xi32>
+    %7 = arith.cmpi slt, %4, %cst_32 : tensor<16xi32>
+    %8 = tt.load %6, %7, %cst_28 : tensor<16x!tt.ptr<i64>>
+    %9 = arith.cmpi sge, %8, %cst_27 : tensor<16xi64>
+    %10 = arith.andi %7, %9 : tensor<16xi1>
+    %11 = tt.make_range {end = 32 : i32, start = 0 : i32} : tensor<32xi32>
+    %12 = arith.divsi %8, %cst : tensor<16xi64>
+    %13 = arith.muli %12, %cst_0 : tensor<16xi64>
+    %14 = tt.splat %arg0 : !tt.ptr<i8> -> tensor<16x!tt.ptr<i8>>
+    %15 = tt.addptr %14, %13 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %16 = arith.remsi %8, %cst : tensor<16xi64>
+    %17 = tt.expand_dims %10 {axis = 1 : i32} : tensor<16xi1> -> tensor<16x1xi1>
+    %18 = tt.expand_dims %11 {axis = 0 : i32} : tensor<32xi32> -> tensor<1x32xi32>
+    %19 = arith.cmpi slt, %18, %cst_29 : tensor<1x32xi32>
+    %20 = tt.broadcast %17 : tensor<16x1xi1> -> tensor<16x32xi1>
+    %21 = tt.broadcast %19 : tensor<1x32xi1> -> tensor<16x32xi1>
+    %22 = arith.andi %20, %21 : tensor<16x32xi1>
+    %23 = tt.expand_dims %15 {axis = 1 : i32} : tensor<16x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<i8>>
+    %24 = tt.addptr %23, %cst_1 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %25 = tt.expand_dims %16 {axis = 1 : i32} : tensor<16xi64> -> tensor<16x1xi64>
+    %26 = arith.muli %25, %cst_2 : tensor<16x1xi64>
+    %27 = tt.addptr %24, %26 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %28 = arith.divsi %18, %cst_3 : tensor<1x32xi32>
+    %29 = tt.broadcast %27 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x32x!tt.ptr<i8>>
+    %30 = tt.broadcast %28 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %31 = tt.addptr %29, %30 : tensor<16x32x!tt.ptr<i8>>, tensor<16x32xi32>
+    %32 = tt.load %31, %22, %cst_23 : tensor<16x32x!tt.ptr<i8>>
+    %33 = arith.extui %32 : tensor<16x32xi8> to tensor<16x32xi32>
+    %34 = arith.remsi %18, %cst_3 : tensor<1x32xi32>
+    %35 = arith.muli %34, %cst_5 : tensor<1x32xi32>
+    %36 = tt.broadcast %35 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %37 = arith.shrsi %33, %36 : tensor<16x32xi32>
+    %38 = arith.andi %37, %cst_6 : tensor<16x32xi32>
+    %39 = tt.make_range {end = 4 : i32, start = 0 : i32} : tensor<4xi32>
+    %40 = tt.addptr %23, %cst_7 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %41 = arith.muli %25, %cst_8 : tensor<16x1xi64>
+    %42 = tt.addptr %40, %41 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %43 = tt.expand_dims %39 {axis = 0 : i32} : tensor<4xi32> -> tensor<1x4xi32>
+    %44 = tt.broadcast %42 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x4x!tt.ptr<i8>>
+    %45 = tt.broadcast %43 : tensor<1x4xi32> -> tensor<16x4xi32>
+    %46 = tt.addptr %44, %45 : tensor<16x4x!tt.ptr<i8>>, tensor<16x4xi32>
+    %47 = arith.cmpi slt, %43, %cst_9 : tensor<1x4xi32>
+    %48 = tt.broadcast %17 : tensor<16x1xi1> -> tensor<16x4xi1>
+    %49 = tt.broadcast %47 : tensor<1x4xi1> -> tensor<16x4xi1>
+    %50 = arith.andi %48, %49 : tensor<16x4xi1>
+    %51 = tt.load %46, %50, %cst_24 : tensor<16x4x!tt.ptr<i8>>
+    %52 = arith.extui %51 : tensor<16x4xi8> to tensor<16x4xi32>
+    %53 = tt.extern_elementwise %52 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x4xi32>) -> tensor<16x4xi32>
+    %54 = "tt.scan"(%53) <{axis = 1 : i32, reverse = false}> ({
+    ^bb0(%arg6: i32, %arg7: i32):
+      %119 = arith.addi %arg6, %arg7 : i32
+      tt.scan.return %119 : i32
+    }) : (tensor<16x4xi32>) -> tensor<16x4xi32>
+    %55 = arith.subi %54, %53 : tensor<16x4xi32>
+    %56 = arith.divsi %11, %cst_10 : tensor<32xi32>
+    %57 = tt.expand_dims %56 {axis = 0 : i32} : tensor<32xi32> -> tensor<1x32xi32>
+    %58 = tt.broadcast %57 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %59 = tt.gather %52[%58] {axis = 1 : i32} : (tensor<16x4xi32>, tensor<16x32xi32>) -> tensor<16x32xi32>
+    %60 = arith.remsi %18, %cst_11 : tensor<1x32xi32>
+    %61 = tt.broadcast %60 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %62 = arith.shrsi %59, %61 : tensor<16x32xi32>
+    %63 = arith.andi %62, %cst_12 : tensor<16x32xi32>
+    %64 = arith.cmpi ne, %63, %cst_4 : tensor<16x32xi32>
+    %65 = tt.gather %55[%58] {axis = 1 : i32} : (tensor<16x4xi32>, tensor<16x32xi32>) -> tensor<16x32xi32>
+    %66 = arith.shli %cst_13, %60 : tensor<1x32xi32>
+    %67 = arith.subi %66, %cst_13 : tensor<1x32xi32>
+    %68 = tt.broadcast %67 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %69 = arith.andi %59, %68 : tensor<16x32xi32>
+    %70 = tt.extern_elementwise %69 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x32xi32>) -> tensor<16x32xi32>
+    %71 = arith.addi %65, %70 : tensor<16x32xi32>
+    %72 = tt.addptr %15, %cst_14 : tensor<16x!tt.ptr<i8>>, tensor<16xi32>
+    %73 = arith.muli %16, %cst_15 : tensor<16xi64>
+    %74 = tt.addptr %72, %73 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %75 = tt.bitcast %74 : tensor<16x!tt.ptr<i8>> -> tensor<16x!tt.ptr<i32>>
+    %76 = tt.load %75, %10, %cst_16 : tensor<16x!tt.ptr<i32>>
+    %77 = tt.addptr %23, %cst_17 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %78 = tt.bitcast %77 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<bf16>>
+    %79 = tt.expand_dims %76 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %80 = tt.addptr %78, %79 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %81 = tt.broadcast %80 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x32x!tt.ptr<bf16>>
+    %82 = tt.addptr %81, %71 : tensor<16x32x!tt.ptr<bf16>>, tensor<16x32xi32>
+    %83 = arith.andi %22, %64 : tensor<16x32xi1>
+    %84 = tt.broadcast %79 : tensor<16x1xi32> -> tensor<16x32xi32>
+    %85 = arith.addi %84, %71 : tensor<16x32xi32>
+    %86 = arith.cmpi slt, %85, %cst_18 : tensor<16x32xi32>
+    %87 = arith.andi %83, %86 : tensor<16x32xi1>
+    %88 = tt.load %82, %87, %cst_25 : tensor<16x32x!tt.ptr<bf16>>
+    %89 = arith.extf %88 : tensor<16x32xbf16> to tensor<16x32xf32>
+    %90 = tt.addptr %15, %cst_19 : tensor<16x!tt.ptr<i8>>, tensor<16xi32>
+    %91 = arith.muli %16, %cst_20 : tensor<16xi64>
+    %92 = tt.addptr %90, %91 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %93 = tt.bitcast %92 : tensor<16x!tt.ptr<i8>> -> tensor<16x!tt.ptr<f32>>
+    %94 = tt.load %93, %10, %cst_26 : tensor<16x!tt.ptr<f32>>
+    %95 = tt.expand_dims %94 {axis = 1 : i32} : tensor<16xf32> -> tensor<16x1xf32>
+    %96 = tt.addptr %93, %cst_21 : tensor<16x!tt.ptr<f32>>, tensor<16xi32>
+    %97 = tt.load %96, %10, %cst_26 : tensor<16x!tt.ptr<f32>>
+    %98 = tt.expand_dims %97 {axis = 1 : i32} : tensor<16xf32> -> tensor<16x1xf32>
+    %99 = tt.splat %arg3 : !tt.ptr<f32> -> tensor<16x32x!tt.ptr<f32>>
+    %100 = tt.addptr %99, %38 : tensor<16x32x!tt.ptr<f32>>, tensor<16x32xi32>
+    %101 = tt.load %100 : tensor<16x32x!tt.ptr<f32>>
+    %102 = tt.broadcast %95 : tensor<16x1xf32> -> tensor<16x32xf32>
+    %103 = arith.mulf %101, %102 : tensor<16x32xf32>
+    %104 = tt.broadcast %98 : tensor<16x1xf32> -> tensor<16x32xf32>
+    %105 = arith.addf %103, %104 : tensor<16x32xf32>
+    %106 = arith.select %64, %89, %105 : tensor<16x32xi1>, tensor<16x32xf32>
+    %107 = arith.select %22, %106, %cst_22 : tensor<16x32xi1>, tensor<16x32xf32>
+    %108 = arith.truncf %107 : tensor<16x32xf32> to tensor<16x32xbf16>
+    %109 = tt.expand_dims %4 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %110 = arith.muli %109, %cst_31 : tensor<16x1xi32>
+    %111 = tt.splat %arg5 : !tt.ptr<bf16> -> tensor<16x1x!tt.ptr<bf16>>
+    %112 = tt.addptr %111, %110 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %113 = tt.broadcast %112 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x32x!tt.ptr<bf16>>
+    %114 = tt.broadcast %18 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %115 = tt.addptr %113, %114 : tensor<16x32x!tt.ptr<bf16>>, tensor<16x32xi32>
+    %116 = arith.cmpi slt, %109, %cst_30 : tensor<16x1xi32>
+    %117 = tt.broadcast %116 : tensor<16x1xi1> -> tensor<16x32xi1>
+    %118 = arith.andi %117, %21 : tensor<16x32xi1>
+    tt.store %115, %108, %118 : tensor<16x32x!tt.ptr<bf16>>
+    tt.return
+  }
+}
+
+{-#
+  external_resources: {
+    mlir_reproducer: {
+      pipeline: "builtin.module(convert-triton-to-tritongpu{enable-source-remat=false num-ctas=1 num-warps=4 target=cuda:89 threads-per-warp=32}, tritongpu-coalesce, tritongpu-F32DotTC{emu-tf32=true}, triton-nvidia-gpu-plan-cta, tritongpu-remove-layout-conversions, tritongpu-optimize-thread-locality, tritongpu-accelerate-matmul, tritongpu-remove-layout-conversions, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, triton-nvidia-optimize-descriptor-encoding, triton-loop-aware-cse, tritongpu-fuse-nested-loops, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-licm, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, tritongpu-combine-tensor-select-and-if, nvgpu-warp-specialization{dump-intermediate-steps=false num-stages=3}, tritongpu-assign-latencies{num-stages=3}, tritongpu-schedule-loops, tritongpu-pipeline{dump-intermediate-steps=false num-stages=3}, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-loop-aware-cse, tritongpu-prefetch, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, tritongpu-coalesce-async-copy, triton-nvidia-optimize-tmem-layouts, tritongpu-remove-layout-conversions, triton-nvidia-interleave-tmem, tritongpu-reduce-data-duplication, tritongpu-reorder-instructions, triton-loop-aware-cse, symbol-dce, triton-nvidia-gpu-fence-insertion{compute-capability=89}, triton-nvidia-mma-lowering, sccp, cse, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true})",
+      disable_threading: true,
+      verify_each: true
+    }
+  }
+#-}
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: error: Failures have been detected while processing an MLIR pass pipeline
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: note: Pipeline failed while executing [`TritonGPUOptimizeThreadLocality` on 'builtin.module' operation]: reproducer generated at `std::errs, please share the reproducer above with Triton project.`
+__________________ test_full_attention_packed_tiles[True-32] ___________________
+
+width = 32, decode = True
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+        actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+        kr = kcache.gather_for_validation(slots).float()
+>       vr = vcache.gather_for_validation(slots)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_cache.py:267: in gather_for_validation
+    _gather[(triton.cdiv(slots.numel(), 16),)](self.storage, self.lower, self.upper,
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:327: in compile
+    next_module = compile_ir(module, metadata)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:549: in <lambda>
+    stages["ttgir"] = lambda src, metadata: self.make_ttgir(src, metadata, options, capability)
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mod = <triton._C.libtriton.ir.module object at 0x7015e5ce1eb0>
+metadata = {'hash': '4f13dfb71a8d28875dd60e8307c7a9b6d6b8d48339c064f7947ad72897f702b2', 'target': GPUTarget(backend='cuda', arch=89, warp_size=32), 'num_warps': 4, 'num_ctas': 1, ...}
+opt = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+capability = 89
+
+    @staticmethod
+    def make_ttgir(mod, metadata, opt, capability):
+        # Set maxnreg on all kernels, if it was provided.
+        if opt.maxnreg is not None:
+            mod.set_attr("ttg.maxnreg", ir.builder(mod.context).get_int32_attr(opt.maxnreg))
+    
+        pm = ir.pass_manager(mod.context)
+        dump_enabled = pm.enable_debug()
+        emuTF32 = (capability // 10 >= 8)
+        passes.ttir.add_convert_to_ttgpuir(pm, f"cuda:{capability}", opt.num_warps, 32, opt.num_ctas)
+        # optimize TTGIR
+        passes.ttgpuir.add_coalesce(pm)
+        passes.ttgpuir.add_f32_dot_tc(pm, emuTF32)
+        # TODO(Qingyi): Move PlanCTAPass to the front of CoalescePass
+        nvidia.passes.ttnvgpuir.add_plan_cta(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_thread_locality(pm)
+        passes.ttgpuir.add_accelerate_matmul(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        nvidia.passes.ttnvgpuir.add_optimize_descriptor_encoding(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        if capability // 10 in [8, 9]:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            nvidia.passes.hopper.add_hopper_warpspec(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+        elif capability // 10 >= 10:
+            passes.ttgpuir.add_fuse_nested_loops(pm)
+            passes.common.add_canonicalizer(pm)
+            passes.ttir.add_triton_licm(pm)
+            passes.ttgpuir.add_optimize_accumulator_init(pm)
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, False)
+            nvidia.passes.ttnvgpuir.add_promote_lhs_to_tmem(pm)
+            passes.ttgpuir.add_assign_latencies(pm, opt.num_stages)
+            passes.ttgpuir.add_schedule_loops(pm)
+            passes.ttgpuir.add_warp_specialize(pm, opt.num_stages)
+            passes.ttgpuir.add_pipeline(pm, opt.num_stages, dump_enabled)
+            passes.ttgpuir.add_optimize_partition_warps(pm)
+            passes.ttgpuir.add_combine_tensor_select_and_if(pm)
+            # hoist again and allow hoisting out of if statements
+            passes.ttgpuir.add_hoist_tmem_alloc(pm, True)
+            nvidia.passes.ttnvgpuir.add_remove_tmem_tokens(pm)
+        else:
+            passes.ttir.add_triton_licm(pm)
+        passes.common.add_canonicalizer(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.ttgpuir.add_prefetch(pm)
+        passes.ttgpuir.add_optimize_dot_operands(pm, capability >= 80)
+        passes.ttgpuir.add_coalesce_async_copy(pm)
+        nvidia.passes.ttnvgpuir.add_optimize_tmem_layouts(pm)
+        if capability // 10 >= 9:
+            nvidia.passes.ttnvgpuir.add_tma_lowering(pm)
+        passes.ttgpuir.add_remove_layout_conversions(pm)
+        nvidia.passes.ttnvgpuir.add_interleave_tmem(pm)
+        passes.ttgpuir.add_reduce_data_duplication(pm)
+        passes.ttgpuir.add_reorder_instructions(pm)
+        passes.ttir.add_loop_aware_cse(pm)
+        passes.common.add_symbol_dce(pm)
+        nvidia.passes.ttnvgpuir.add_fence_insertion(pm, capability)
+        nvidia.passes.ttnvgpuir.add_lower_mma(pm)
+        passes.common.add_sccp(pm)
+        passes.common.add_cse(pm)
+        passes.common.add_canonicalizer(pm)
+    
+>       pm.run(mod, 'make_ttgir')
+E       RuntimeError: PassManager::run failed
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/backends/nvidia/compiler.py:321: RuntimeError
+----------------------------- Captured stderr call -----------------------------
+python: /project/lib/Dialect/TritonGPU/Transforms/OptimizeThreadLocality.cpp:220: LogicalResult mlir::triton::gpu::setOptimizedGatherLayout(GatherOp, RewriterBase &): Assertion `GatherLoweringHelper(op).isWarpLocal()' failed.
+module {
+  tt.func public @_gather(%arg0: !tt.ptr<i8> {tt.divisibility = 16 : i32}, %arg1: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg2: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg3: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg4: !tt.ptr<i64> {tt.divisibility = 16 : i32}, %arg5: !tt.ptr<bf16> {tt.divisibility = 16 : i32}) attributes {noinline = false} {
+    %cst = arith.constant dense<16> : tensor<16xi64>
+    %cst_0 = arith.constant dense<784> : tensor<16xi64>
+    %cst_1 = arith.constant dense<16> : tensor<16x1xi32>
+    %cst_2 = arith.constant dense<16> : tensor<16x1xi64>
+    %cst_3 = arith.constant dense<2> : tensor<1x32xi32>
+    %cst_4 = arith.constant dense<0> : tensor<16x32xi32>
+    %cst_5 = arith.constant dense<4> : tensor<1x32xi32>
+    %cst_6 = arith.constant dense<15> : tensor<16x32xi32>
+    %cst_7 = arith.constant dense<272> : tensor<16x1xi32>
+    %cst_8 = arith.constant dense<4> : tensor<16x1xi64>
+    %cst_9 = arith.constant dense<4> : tensor<1x4xi32>
+    %cst_10 = arith.constant dense<8> : tensor<32xi32>
+    %cst_11 = arith.constant dense<8> : tensor<1x32xi32>
+    %cst_12 = arith.constant dense<1> : tensor<16x32xi32>
+    %cst_13 = arith.constant dense<1> : tensor<1x32xi32>
+    %cst_14 = arith.constant dense<336> : tensor<16xi32>
+    %cst_15 = arith.constant dense<4> : tensor<16xi64>
+    %cst_16 = arith.constant dense<0> : tensor<16xi32>
+    %cst_17 = arith.constant dense<528> : tensor<16x1xi32>
+    %cst_18 = arith.constant dense<128> : tensor<16x32xi32>
+    %cst_19 = arith.constant dense<400> : tensor<16xi32>
+    %cst_20 = arith.constant dense<8> : tensor<16xi64>
+    %cst_21 = arith.constant dense<1> : tensor<16xi32>
+    %cst_22 = arith.constant dense<0.000000e+00> : tensor<16x32xf32>
+    %cst_23 = arith.constant dense<0> : tensor<16x32xi8>
+    %cst_24 = arith.constant dense<0> : tensor<16x4xi8>
+    %cst_25 = arith.constant dense<0.000000e+00> : tensor<16x32xbf16>
+    %cst_26 = arith.constant dense<0.000000e+00> : tensor<16xf32>
+    %cst_27 = arith.constant dense<0> : tensor<16xi64>
+    %cst_28 = arith.constant dense<-1> : tensor<16xi64>
+    %cst_29 = arith.constant dense<32> : tensor<1x32xi32>
+    %cst_30 = arith.constant dense<102> : tensor<16x1xi32>
+    %cst_31 = arith.constant dense<32> : tensor<16x1xi32>
+    %cst_32 = arith.constant dense<102> : tensor<16xi32>
+    %c16_i32 = arith.constant 16 : i32
+    %0 = tt.get_program_id x : i32
+    %1 = arith.muli %0, %c16_i32 : i32
+    %2 = tt.make_range {end = 16 : i32, start = 0 : i32} : tensor<16xi32>
+    %3 = tt.splat %1 : i32 -> tensor<16xi32>
+    %4 = arith.addi %3, %2 : tensor<16xi32>
+    %5 = tt.splat %arg4 : !tt.ptr<i64> -> tensor<16x!tt.ptr<i64>>
+    %6 = tt.addptr %5, %4 : tensor<16x!tt.ptr<i64>>, tensor<16xi32>
+    %7 = arith.cmpi slt, %4, %cst_32 : tensor<16xi32>
+    %8 = tt.load %6, %7, %cst_28 : tensor<16x!tt.ptr<i64>>
+    %9 = arith.cmpi sge, %8, %cst_27 : tensor<16xi64>
+    %10 = arith.andi %7, %9 : tensor<16xi1>
+    %11 = tt.make_range {end = 32 : i32, start = 0 : i32} : tensor<32xi32>
+    %12 = arith.divsi %8, %cst : tensor<16xi64>
+    %13 = arith.muli %12, %cst_0 : tensor<16xi64>
+    %14 = tt.splat %arg0 : !tt.ptr<i8> -> tensor<16x!tt.ptr<i8>>
+    %15 = tt.addptr %14, %13 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %16 = arith.remsi %8, %cst : tensor<16xi64>
+    %17 = tt.expand_dims %10 {axis = 1 : i32} : tensor<16xi1> -> tensor<16x1xi1>
+    %18 = tt.expand_dims %11 {axis = 0 : i32} : tensor<32xi32> -> tensor<1x32xi32>
+    %19 = arith.cmpi slt, %18, %cst_29 : tensor<1x32xi32>
+    %20 = tt.broadcast %17 : tensor<16x1xi1> -> tensor<16x32xi1>
+    %21 = tt.broadcast %19 : tensor<1x32xi1> -> tensor<16x32xi1>
+    %22 = arith.andi %20, %21 : tensor<16x32xi1>
+    %23 = tt.expand_dims %15 {axis = 1 : i32} : tensor<16x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<i8>>
+    %24 = tt.addptr %23, %cst_1 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %25 = tt.expand_dims %16 {axis = 1 : i32} : tensor<16xi64> -> tensor<16x1xi64>
+    %26 = arith.muli %25, %cst_2 : tensor<16x1xi64>
+    %27 = tt.addptr %24, %26 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %28 = arith.divsi %18, %cst_3 : tensor<1x32xi32>
+    %29 = tt.broadcast %27 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x32x!tt.ptr<i8>>
+    %30 = tt.broadcast %28 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %31 = tt.addptr %29, %30 : tensor<16x32x!tt.ptr<i8>>, tensor<16x32xi32>
+    %32 = tt.load %31, %22, %cst_23 : tensor<16x32x!tt.ptr<i8>>
+    %33 = arith.extui %32 : tensor<16x32xi8> to tensor<16x32xi32>
+    %34 = arith.remsi %18, %cst_3 : tensor<1x32xi32>
+    %35 = arith.muli %34, %cst_5 : tensor<1x32xi32>
+    %36 = tt.broadcast %35 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %37 = arith.shrsi %33, %36 : tensor<16x32xi32>
+    %38 = arith.andi %37, %cst_6 : tensor<16x32xi32>
+    %39 = tt.make_range {end = 4 : i32, start = 0 : i32} : tensor<4xi32>
+    %40 = tt.addptr %23, %cst_7 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %41 = arith.muli %25, %cst_8 : tensor<16x1xi64>
+    %42 = tt.addptr %40, %41 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi64>
+    %43 = tt.expand_dims %39 {axis = 0 : i32} : tensor<4xi32> -> tensor<1x4xi32>
+    %44 = tt.broadcast %42 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x4x!tt.ptr<i8>>
+    %45 = tt.broadcast %43 : tensor<1x4xi32> -> tensor<16x4xi32>
+    %46 = tt.addptr %44, %45 : tensor<16x4x!tt.ptr<i8>>, tensor<16x4xi32>
+    %47 = arith.cmpi slt, %43, %cst_9 : tensor<1x4xi32>
+    %48 = tt.broadcast %17 : tensor<16x1xi1> -> tensor<16x4xi1>
+    %49 = tt.broadcast %47 : tensor<1x4xi1> -> tensor<16x4xi1>
+    %50 = arith.andi %48, %49 : tensor<16x4xi1>
+    %51 = tt.load %46, %50, %cst_24 : tensor<16x4x!tt.ptr<i8>>
+    %52 = arith.extui %51 : tensor<16x4xi8> to tensor<16x4xi32>
+    %53 = tt.extern_elementwise %52 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x4xi32>) -> tensor<16x4xi32>
+    %54 = "tt.scan"(%53) <{axis = 1 : i32, reverse = false}> ({
+    ^bb0(%arg6: i32, %arg7: i32):
+      %119 = arith.addi %arg6, %arg7 : i32
+      tt.scan.return %119 : i32
+    }) : (tensor<16x4xi32>) -> tensor<16x4xi32>
+    %55 = arith.subi %54, %53 : tensor<16x4xi32>
+    %56 = arith.divsi %11, %cst_10 : tensor<32xi32>
+    %57 = tt.expand_dims %56 {axis = 0 : i32} : tensor<32xi32> -> tensor<1x32xi32>
+    %58 = tt.broadcast %57 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %59 = tt.gather %52[%58] {axis = 1 : i32} : (tensor<16x4xi32>, tensor<16x32xi32>) -> tensor<16x32xi32>
+    %60 = arith.remsi %18, %cst_11 : tensor<1x32xi32>
+    %61 = tt.broadcast %60 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %62 = arith.shrsi %59, %61 : tensor<16x32xi32>
+    %63 = arith.andi %62, %cst_12 : tensor<16x32xi32>
+    %64 = arith.cmpi ne, %63, %cst_4 : tensor<16x32xi32>
+    %65 = tt.gather %55[%58] {axis = 1 : i32} : (tensor<16x4xi32>, tensor<16x32xi32>) -> tensor<16x32xi32>
+    %66 = arith.shli %cst_13, %60 : tensor<1x32xi32>
+    %67 = arith.subi %66, %cst_13 : tensor<1x32xi32>
+    %68 = tt.broadcast %67 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %69 = arith.andi %59, %68 : tensor<16x32xi32>
+    %70 = tt.extern_elementwise %69 {libname = "", libpath = "", pure = true, symbol = "__nv_popc"} : (tensor<16x32xi32>) -> tensor<16x32xi32>
+    %71 = arith.addi %65, %70 : tensor<16x32xi32>
+    %72 = tt.addptr %15, %cst_14 : tensor<16x!tt.ptr<i8>>, tensor<16xi32>
+    %73 = arith.muli %16, %cst_15 : tensor<16xi64>
+    %74 = tt.addptr %72, %73 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %75 = tt.bitcast %74 : tensor<16x!tt.ptr<i8>> -> tensor<16x!tt.ptr<i32>>
+    %76 = tt.load %75, %10, %cst_16 : tensor<16x!tt.ptr<i32>>
+    %77 = tt.addptr %23, %cst_17 : tensor<16x1x!tt.ptr<i8>>, tensor<16x1xi32>
+    %78 = tt.bitcast %77 : tensor<16x1x!tt.ptr<i8>> -> tensor<16x1x!tt.ptr<bf16>>
+    %79 = tt.expand_dims %76 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %80 = tt.addptr %78, %79 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %81 = tt.broadcast %80 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x32x!tt.ptr<bf16>>
+    %82 = tt.addptr %81, %71 : tensor<16x32x!tt.ptr<bf16>>, tensor<16x32xi32>
+    %83 = arith.andi %22, %64 : tensor<16x32xi1>
+    %84 = tt.broadcast %79 : tensor<16x1xi32> -> tensor<16x32xi32>
+    %85 = arith.addi %84, %71 : tensor<16x32xi32>
+    %86 = arith.cmpi slt, %85, %cst_18 : tensor<16x32xi32>
+    %87 = arith.andi %83, %86 : tensor<16x32xi1>
+    %88 = tt.load %82, %87, %cst_25 : tensor<16x32x!tt.ptr<bf16>>
+    %89 = arith.extf %88 : tensor<16x32xbf16> to tensor<16x32xf32>
+    %90 = tt.addptr %15, %cst_19 : tensor<16x!tt.ptr<i8>>, tensor<16xi32>
+    %91 = arith.muli %16, %cst_20 : tensor<16xi64>
+    %92 = tt.addptr %90, %91 : tensor<16x!tt.ptr<i8>>, tensor<16xi64>
+    %93 = tt.bitcast %92 : tensor<16x!tt.ptr<i8>> -> tensor<16x!tt.ptr<f32>>
+    %94 = tt.load %93, %10, %cst_26 : tensor<16x!tt.ptr<f32>>
+    %95 = tt.expand_dims %94 {axis = 1 : i32} : tensor<16xf32> -> tensor<16x1xf32>
+    %96 = tt.addptr %93, %cst_21 : tensor<16x!tt.ptr<f32>>, tensor<16xi32>
+    %97 = tt.load %96, %10, %cst_26 : tensor<16x!tt.ptr<f32>>
+    %98 = tt.expand_dims %97 {axis = 1 : i32} : tensor<16xf32> -> tensor<16x1xf32>
+    %99 = tt.splat %arg3 : !tt.ptr<f32> -> tensor<16x32x!tt.ptr<f32>>
+    %100 = tt.addptr %99, %38 : tensor<16x32x!tt.ptr<f32>>, tensor<16x32xi32>
+    %101 = tt.load %100 : tensor<16x32x!tt.ptr<f32>>
+    %102 = tt.broadcast %95 : tensor<16x1xf32> -> tensor<16x32xf32>
+    %103 = arith.mulf %101, %102 : tensor<16x32xf32>
+    %104 = tt.broadcast %98 : tensor<16x1xf32> -> tensor<16x32xf32>
+    %105 = arith.addf %103, %104 : tensor<16x32xf32>
+    %106 = arith.select %64, %89, %105 : tensor<16x32xi1>, tensor<16x32xf32>
+    %107 = arith.select %22, %106, %cst_22 : tensor<16x32xi1>, tensor<16x32xf32>
+    %108 = arith.truncf %107 : tensor<16x32xf32> to tensor<16x32xbf16>
+    %109 = tt.expand_dims %4 {axis = 1 : i32} : tensor<16xi32> -> tensor<16x1xi32>
+    %110 = arith.muli %109, %cst_31 : tensor<16x1xi32>
+    %111 = tt.splat %arg5 : !tt.ptr<bf16> -> tensor<16x1x!tt.ptr<bf16>>
+    %112 = tt.addptr %111, %110 : tensor<16x1x!tt.ptr<bf16>>, tensor<16x1xi32>
+    %113 = tt.broadcast %112 : tensor<16x1x!tt.ptr<bf16>> -> tensor<16x32x!tt.ptr<bf16>>
+    %114 = tt.broadcast %18 : tensor<1x32xi32> -> tensor<16x32xi32>
+    %115 = tt.addptr %113, %114 : tensor<16x32x!tt.ptr<bf16>>, tensor<16x32xi32>
+    %116 = arith.cmpi slt, %109, %cst_30 : tensor<16x1xi32>
+    %117 = tt.broadcast %116 : tensor<16x1xi1> -> tensor<16x32xi1>
+    %118 = arith.andi %117, %21 : tensor<16x32xi1>
+    tt.store %115, %108, %118 : tensor<16x32x!tt.ptr<bf16>>
+    tt.return
+  }
+}
+
+{-#
+  external_resources: {
+    mlir_reproducer: {
+      pipeline: "builtin.module(convert-triton-to-tritongpu{enable-source-remat=false num-ctas=1 num-warps=4 target=cuda:89 threads-per-warp=32}, tritongpu-coalesce, tritongpu-F32DotTC{emu-tf32=true}, triton-nvidia-gpu-plan-cta, tritongpu-remove-layout-conversions, tritongpu-optimize-thread-locality, tritongpu-accelerate-matmul, tritongpu-remove-layout-conversions, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, triton-nvidia-optimize-descriptor-encoding, triton-loop-aware-cse, tritongpu-fuse-nested-loops, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-licm, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, tritongpu-combine-tensor-select-and-if, nvgpu-warp-specialization{dump-intermediate-steps=false num-stages=3}, tritongpu-assign-latencies{num-stages=3}, tritongpu-schedule-loops, tritongpu-pipeline{dump-intermediate-steps=false num-stages=3}, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true}, triton-loop-aware-cse, tritongpu-prefetch, tritongpu-optimize-dot-operands{hoist-layout-conversion=true}, tritongpu-coalesce-async-copy, triton-nvidia-optimize-tmem-layouts, tritongpu-remove-layout-conversions, triton-nvidia-interleave-tmem, tritongpu-reduce-data-duplication, tritongpu-reorder-instructions, triton-loop-aware-cse, symbol-dce, triton-nvidia-gpu-fence-insertion{compute-capability=89}, triton-nvidia-mma-lowering, sccp, cse, canonicalize{  max-iterations=10 max-num-rewrites=-1 region-simplify=normal test-convergence=false top-down=true})",
+      disable_threading: true,
+      verify_each: true
+    }
+  }
+#-}
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: error: Failures have been detected while processing an MLIR pass pipeline
+/workspace/BasisServe-CALS/basisserve/kernels/nuq4_cache.py:211:0: note: Pipeline failed while executing [`TritonGPUOptimizeThreadLocality` on 'builtin.module' operation]: reproducer generated at `std::errs, please share the reproducer above with Triton project.`
+=========================== short test summary info ============================
+FAILED tests/test_nuq4_cache.py::test_official_reconstruction_and_incremental_pages[False-16]
+FAILED tests/test_nuq4_cache.py::test_official_reconstruction_and_incremental_pages[False-32]
+FAILED tests/test_nuq4_cache.py::test_official_reconstruction_and_incremental_pages[True-16]
+FAILED tests/test_nuq4_cache.py::test_official_reconstruction_and_incremental_pages[True-32]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[False-32]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[True-32]
+6 failed, 27 passed in 51.08s
+ERROR conda.cli.main_run:execute(148): `conda run python -m pytest -q tests/test_nuq4_cache.py tests/test_nuq4_attention.py` failed. (See above for error)
+.....................................                                    [100%]
+37 passed in 45.58s

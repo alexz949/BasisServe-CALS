@@ -1,0 +1,41 @@
+{
+  "rank": 64,
+  "command": "evaluation/prepare_qwen3_a8_tp8.py --output results/q3-a8-tp8",
+  "widths": {
+    "0": [
+      320,
+      320,
+      320,
+      320,
+      320,
+      320,
+      320,
+      320
+    ],
+    "18": [
+      256,
+      256,
+      256,
+      256,
+      256,
+      256,
+      256,
+      256
+    ],
+    "35": [
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128
+    ]
+  },
+  "sample_start": 1809044,
+  "sample_length": 256,
+  "source": "WT2 train",
+  "calibration": "previous frozen per-layer scales",
+  "hashes": false
+}

@@ -1,0 +1,338 @@
+............................FF...FF.F                                    [100%]
+=================================== FAILURES ===================================
+__________________ test_full_attention_packed_tiles[False-96] __________________
+
+width = 96, decode = False
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:83: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:760: in run
+    launch_metadata = kernel.launch_metadata(grid, stream, *bound_args.values())
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:485: in launch_metadata
+    self._init_handles()
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:459: in _init_handles
+    raise_(OutOfResources(self.metadata.shared, max_shared, "shared memory"))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+err = OutOfResources(106880, 101376, 'shared memory')
+
+    def raise_(err):
+        # clone the exception object so that the one saved in the closure
+        # of the partial function below doesn't get assigned a stack trace
+        # after the subsequent raise. otherwise, the CompiledKernel instance
+        # saved in the (global) kernel cache will keep references to all the
+        # locals in the traceback via the exception instance in the closure.
+        cloned_err = copy.deepcopy(err)
+        self._run = functools.partial(_raise_error, cloned_err)
+>       raise err
+E       triton.runtime.errors.OutOfResources: out of resource: shared memory, Required: 106880, Hardware limit: 101376. Reducing block sizes or `num_stages` may help.
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:451: OutOfResources
+_________________ test_full_attention_packed_tiles[False-128] __________________
+
+width = 128, decode = False
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:83: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:760: in run
+    launch_metadata = kernel.launch_metadata(grid, stream, *bound_args.values())
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:485: in launch_metadata
+    self._init_handles()
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:459: in _init_handles
+    raise_(OutOfResources(self.metadata.shared, max_shared, "shared memory"))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+err = OutOfResources(106880, 101376, 'shared memory')
+
+    def raise_(err):
+        # clone the exception object so that the one saved in the closure
+        # of the partial function below doesn't get assigned a stack trace
+        # after the subsequent raise. otherwise, the CompiledKernel instance
+        # saved in the (global) kernel cache will keep references to all the
+        # locals in the traceback via the exception instance in the closure.
+        cloned_err = copy.deepcopy(err)
+        self._run = functools.partial(_raise_error, cloned_err)
+>       raise err
+E       triton.runtime.errors.OutOfResources: out of resource: shared memory, Required: 106880, Hardware limit: 101376. Reducing block sizes or `num_stages` may help.
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:451: OutOfResources
+__________________ test_full_attention_packed_tiles[True-96] ___________________
+
+width = 96, decode = True
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:83: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:760: in run
+    launch_metadata = kernel.launch_metadata(grid, stream, *bound_args.values())
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:485: in launch_metadata
+    self._init_handles()
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:459: in _init_handles
+    raise_(OutOfResources(self.metadata.shared, max_shared, "shared memory"))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+err = OutOfResources(106880, 101376, 'shared memory')
+
+    def raise_(err):
+        # clone the exception object so that the one saved in the closure
+        # of the partial function below doesn't get assigned a stack trace
+        # after the subsequent raise. otherwise, the CompiledKernel instance
+        # saved in the (global) kernel cache will keep references to all the
+        # locals in the traceback via the exception instance in the closure.
+        cloned_err = copy.deepcopy(err)
+        self._run = functools.partial(_raise_error, cloned_err)
+>       raise err
+E       triton.runtime.errors.OutOfResources: out of resource: shared memory, Required: 106880, Hardware limit: 101376. Reducing block sizes or `num_stages` may help.
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:451: OutOfResources
+__________________ test_full_attention_packed_tiles[True-128] __________________
+
+width = 128, decode = True
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:83: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:760: in run
+    launch_metadata = kernel.launch_metadata(grid, stream, *bound_args.values())
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:485: in launch_metadata
+    self._init_handles()
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:459: in _init_handles
+    raise_(OutOfResources(self.metadata.shared, max_shared, "shared memory"))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+err = OutOfResources(106880, 101376, 'shared memory')
+
+    def raise_(err):
+        # clone the exception object so that the one saved in the closure
+        # of the partial function below doesn't get assigned a stack trace
+        # after the subsequent raise. otherwise, the CompiledKernel instance
+        # saved in the (global) kernel cache will keep references to all the
+        # locals in the traceback via the exception instance in the closure.
+        cloned_err = copy.deepcopy(err)
+        self._run = functools.partial(_raise_error, cloned_err)
+>       raise err
+E       triton.runtime.errors.OutOfResources: out of resource: shared memory, Required: 106880, Hardware limit: 101376. Reducing block sizes or `num_stages` may help.
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:451: OutOfResources
+_____________________ test_4k_prefill_decode_and_graph[96] _____________________
+
+width = 96
+
+    @pytest.mark.parametrize("width", [64, 96])
+    def test_4k_prefill_decode_and_graph(width):
+        torch.manual_seed(42)
+        n = 4096
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kc = NUQ4PagedCache(257, NUQ4Layout(128), lower, upper, lut)
+        vc = NUQ4PagedCache(257, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        keys = torch.randn(n+1, 128, device="cuda", dtype=torch.bfloat16)
+        global_v = torch.randn(n+1, width*8, device="cuda", dtype=torch.bfloat16)
+        slots = torch.arange(n+1, device="cuda")
+        stats = nuq4_value_stats(global_v)
+        kc.append(keys[:n], slots[:n])
+        vc.append(global_v[:n, :width], slots[:n], stats[:n])
+        table = torch.arange(257, device="cuda", dtype=torch.int32)[None]
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = torch.arange(n+1, device="cuda")[:, None] * freq[None]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(n, 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, n], device="cuda", dtype=torch.int32)
+        lens = torch.tensor([n], device="cuda", dtype=torch.int32)
+>       prefill = nuq4_attention(query, kc, vc, rope, cu, lens, table)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:119: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:83: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:760: in run
+    launch_metadata = kernel.launch_metadata(grid, stream, *bound_args.values())
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:485: in launch_metadata
+    self._init_handles()
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:459: in _init_handles
+    raise_(OutOfResources(self.metadata.shared, max_shared, "shared memory"))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+err = OutOfResources(106880, 101376, 'shared memory')
+
+    def raise_(err):
+        # clone the exception object so that the one saved in the closure
+        # of the partial function below doesn't get assigned a stack trace
+        # after the subsequent raise. otherwise, the CompiledKernel instance
+        # saved in the (global) kernel cache will keep references to all the
+        # locals in the traceback via the exception instance in the closure.
+        cloned_err = copy.deepcopy(err)
+        self._run = functools.partial(_raise_error, cloned_err)
+>       raise err
+E       triton.runtime.errors.OutOfResources: out of resource: shared memory, Required: 106880, Hardware limit: 101376. Reducing block sizes or `num_stages` may help.
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:451: OutOfResources
+=========================== short test summary info ============================
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[False-96]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[False-128]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[True-96]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[True-128]
+FAILED tests/test_nuq4_attention.py::test_4k_prefill_decode_and_graph[96] - t...
+5 failed, 32 passed in 30.69s
+ERROR conda.cli.main_run:execute(148): `conda run python -m pytest -q tests/test_nuq4_cache.py tests/test_nuq4_attention.py` failed. (See above for error)
+.....................................                                    [100%]
+37 passed in 31.24s

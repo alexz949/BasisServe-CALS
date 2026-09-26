@@ -1,0 +1,22 @@
+{
+  "command": "evaluation/benchmark_qwen3_a8_tp8.py --phase smoke --output results/q3-a8-tp8",
+  "environment": "basis",
+  "torch": "2.13.0+cu130",
+  "cuda": "13.0",
+  "gpu": "NVIDIA L40S",
+  "tp": 8,
+  "layers": [
+    18
+  ],
+  "batches": [
+    1,
+    16
+  ],
+  "cohorts": [
+    0
+  ],
+  "warmup": 2,
+  "repeats": 5,
+  "scope": "real transport plus decoder, not full model",
+  "hashes": false
+}

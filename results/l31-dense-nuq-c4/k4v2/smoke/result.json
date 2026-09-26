@@ -1,0 +1,59 @@
+{
+  "status": "complete",
+  "protocol": {
+    "model": "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+    "checkpoint": "dense full-rank K/V; no C1 factors",
+    "historical_reference": "/workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/quality/L31-8B-I-Dense/c4.json",
+    "historical_c4_bf16_ppl": 9.773998300290936,
+    "arm": "k4v2",
+    "k_bits": 4,
+    "v_bits": 2,
+    "nominal_kv_compression": 5.333333333333333,
+    "phase": "smoke",
+    "environment": "basis",
+    "gpu": "NVIDIA L40S",
+    "torch": "2.13.0+cu130",
+    "calibration_split": "WT2 train",
+    "calibration_dataset_revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+    "calibration_length": 128,
+    "calibration_starts": [
+      1440882
+    ],
+    "evaluation_split": "C4 validation",
+    "evaluation_windows": "/workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/calibration/c4_validation_128x2048/windows.safetensors",
+    "windows": 2,
+    "seqlen": 2048,
+    "scored_tokens": 4094,
+    "batch_size": 1,
+    "tp": 1,
+    "kv": "official Fisher-weighted NUQ (K4/V2) + 0.99 outlier rule; no rotation or first-token exclusion",
+    "k": "static per-channel pre-RoPE over 1024 channels",
+    "v": "dynamic per-token over all 1024 dense V channels",
+    "other_modules": "BF16; no A8, FP8 GEMM, sparse routing or MLP change",
+    "packed_cache": false,
+    "performance_benchmark": false
+  },
+  "results": {
+    "bf16": {
+      "ppl": 12.090564069925207,
+      "nll_sum": 10203.9892578125,
+      "tokens": 4094,
+      "windows": 2,
+      "requested_windows": 2,
+      "seqlen": 2048,
+      "evaluation_wall_seconds": 0.3909506448544562
+    },
+    "k4v2": {
+      "ppl": 13.436510264410364,
+      "nll_sum": 10636.1123046875,
+      "tokens": 4094,
+      "windows": 2,
+      "requested_windows": 2,
+      "seqlen": 2048,
+      "evaluation_wall_seconds": 0.6247612698934972
+    }
+  },
+  "delta_ppl": 1.3459461944851565,
+  "relative_ppl_percent": 11.13220348282297,
+  "source_bytes_match": true
+}

@@ -1,0 +1,984 @@
+..................FF                                                     [100%]
+=================================== FAILURES ===================================
+________________________ test_frozen_qwen_codebooks[64] ________________________
+
+upstream = <module 'kvquant_cache_reference' from '/workspace/BasisServe-CALS/external/KVQuant/quant/kvquant/simquant_module_quantizer.py'>
+rank = 64
+
+    @pytest.mark.parametrize("rank", [64, 96])
+    def test_frozen_qwen_codebooks(upstream, rank):
+        codes = torch.load(ROOT / f"results/q3-kv4-fp8/formal/r{rank}/quantizers.pt",
+                           weights_only=False, map_location="cpu")
+        torch.manual_seed(rank)
+        for layer in (0, 18, 35):
+            hi, lo, lut = codes[f"{layer}.k"]
+            lower, upper = lo.flatten()[:128].cuda().float(), hi.flatten()[:128].cuda().float()
+            poles = torch.as_tensor(lut[0], device="cuda", dtype=torch.float32)
+            values = ((upper + lower)[None, :] / 2 + torch.randn(16, 128, device="cuda")
+                       * (upper - lower)[None, :] / 6).to(torch.bfloat16)
+            slots = torch.arange(16, device="cuda")
+>           cache = NUQ4PagedCache(1, NUQ4Layout(128), lower, upper, poles)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_cache.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <basisserve.kernels.nuq4_cache.NUQ4PagedCache object at 0x70d866602300>
+pages = 1, layout = NUQ4Layout(width=128, block=16, exceptions_per_token=8)
+lower = tensor([-6.2500e+00,  2.3535e-01,  8.9062e-01, -8.0078e-01, -5.1562e+00,
+        -1.5312e+00, -2.2370e+00, -1.2734e+00...0, -1.9219e+00, -3.4219e+00, -1.2891e+00, -1.8212e-01,
+        -6.0625e+00, -1.6732e+00, -2.5156e+00], device='cuda:0')
+upper = tensor([-4.0312e+00,  4.2500e+00,  3.9219e+00,  3.3151e+00, -3.1406e+00,
+         3.4219e+00,  2.1562e+00,  3.8438e+00...0,  3.5781e+00,  2.6875e+00,  2.0938e+00,  4.6250e+00,
+        -1.1237e+00,  2.4062e+00,  1.6497e+00], device='cuda:0')
+lut = tensor([[ 0.9490],
+        [ 0.0625],
+        [-0.4427],
+        [ 0.4162],
+        [-0.9078],
+        [-0.1162],
+    ...0250],
+        [ 0.7991],
+        [ 0.1747],
+        [-0.5778],
+        [ 0.5331],
+        [-0.2190]], device='cuda:0')
+dynamic = False
+
+    def __init__(self, pages, layout, lower, upper, lut, *, dynamic=False):
+        assert lower.is_cuda and lower.dtype == upper.dtype == lut.dtype == torch.float32
+>       assert lower.shape == upper.shape == (layout.width,) and lut.shape == (16,)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+basisserve/kernels/nuq4_cache.py:222: AssertionError
+________________________ test_frozen_qwen_codebooks[96] ________________________
+
+upstream = <module 'kvquant_cache_reference' from '/workspace/BasisServe-CALS/external/KVQuant/quant/kvquant/simquant_module_quantizer.py'>
+rank = 96
+
+    @pytest.mark.parametrize("rank", [64, 96])
+    def test_frozen_qwen_codebooks(upstream, rank):
+        codes = torch.load(ROOT / f"results/q3-kv4-fp8/formal/r{rank}/quantizers.pt",
+                           weights_only=False, map_location="cpu")
+        torch.manual_seed(rank)
+        for layer in (0, 18, 35):
+            hi, lo, lut = codes[f"{layer}.k"]
+            lower, upper = lo.flatten()[:128].cuda().float(), hi.flatten()[:128].cuda().float()
+            poles = torch.as_tensor(lut[0], device="cuda", dtype=torch.float32)
+            values = ((upper + lower)[None, :] / 2 + torch.randn(16, 128, device="cuda")
+                       * (upper - lower)[None, :] / 6).to(torch.bfloat16)
+            slots = torch.arange(16, device="cuda")
+>           cache = NUQ4PagedCache(1, NUQ4Layout(128), lower, upper, poles)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_cache.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <basisserve.kernels.nuq4_cache.NUQ4PagedCache object at 0x70d86ae893a0>
+pages = 1, layout = NUQ4Layout(width=128, block=16, exceptions_per_token=8)
+lower = tensor([-6.2500e+00,  2.3535e-01,  8.9062e-01, -8.0078e-01, -5.1562e+00,
+        -1.5312e+00, -2.2370e+00, -1.2734e+00...0, -1.9219e+00, -3.4219e+00, -1.2891e+00, -1.8212e-01,
+        -6.0625e+00, -1.6732e+00, -2.5156e+00], device='cuda:0')
+upper = tensor([-4.0312e+00,  4.2500e+00,  3.9219e+00,  3.3151e+00, -3.1406e+00,
+         3.4219e+00,  2.1562e+00,  3.8438e+00...0,  3.5781e+00,  2.6875e+00,  2.0938e+00,  4.6250e+00,
+        -1.1237e+00,  2.4062e+00,  1.6497e+00], device='cuda:0')
+lut = tensor([[ 0.0119],
+        [-0.5167],
+        [ 0.6128],
+        [-0.2729],
+        [ 0.3607],
+        [ 0.9341],
+    ...6962],
+        [ 0.7754],
+        [-0.0672],
+        [ 0.0887],
+        [ 0.4709],
+        [ 0.2662]], device='cuda:0')
+dynamic = False
+
+    def __init__(self, pages, layout, lower, upper, lut, *, dynamic=False):
+        assert lower.is_cuda and lower.dtype == upper.dtype == lut.dtype == torch.float32
+>       assert lower.shape == upper.shape == (layout.width,) and lut.shape == (16,)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+basisserve/kernels/nuq4_cache.py:222: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_nuq4_cache.py::test_frozen_qwen_codebooks[64] - AssertionError
+FAILED tests/test_nuq4_cache.py::test_frozen_qwen_codebooks[96] - AssertionError
+2 failed, 18 passed in 17.05s
+ERROR conda.cli.main_run:execute(148): `conda run python -m pytest -q tests/test_nuq4_cache.py` failed. (See above for error)
+....................FFFFFFFFFF                                           [100%]
+=================================== FAILURES ===================================
+__________________ test_full_attention_packed_tiles[False-32] __________________
+
+width = 32, decode = False
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:81: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <triton.compiler.compiler.ASTSource object at 0x7a19f03396d0>
+target = GPUTarget(backend='cuda', arch=89, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': <function convert_custom_float8_sm80 at 0x7a1a23c60cc0>, 'min_dot_size': <function min_dot_size.<locals>.check_dot_compatibility at 0x7a19f0330c20>}
+module_map = {'triton.language.extra.libdevice': <module 'triton.language.extra.cuda.libdevice' from '/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/triton/language/extra/cuda/libdevice.py'>}
+context = <triton._C.libtriton.ir.context object at 0x7a19fb9ba9f0>
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+>       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 30:12:
+E                        qpos[:, None] < qlen, 0)
+E           context = kvlen - qlen
+E           prefix = tl.minimum(kvlen, context + (local + 1) * BQ)
+E           maximum = tl.full((BM,), -float("inf"), tl.float32)
+E           denom = tl.full((BM,), 1.0, tl.float32)
+E           acc = tl.zeros((BM, BV), tl.float32)
+E           for tile in range(tl.cdiv(prefix, BN)):
+E               pos = tile * BN + tl.arange(0, BN)
+E               valid = pos < prefix
+E               physical = tl.load(TABLE + seq * TS + pos // KL[1], valid, 0).to(tl.int64)
+E               slots = physical * KL[1] + pos % KL[1]
+E               k = load_nuq4_tile(KC, KLO, KHI, KLUT, slots, valid, False, *KL).to(tl.float32)
+E                   ^
+E       AssertionError()
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError
+__________________ test_full_attention_packed_tiles[False-64] __________________
+
+width = 64, decode = False
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:81: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <triton.compiler.compiler.ASTSource object at 0x7a19f01768d0>
+target = GPUTarget(backend='cuda', arch=89, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': <function convert_custom_float8_sm80 at 0x7a1a23c60cc0>, 'min_dot_size': <function min_dot_size.<locals>.check_dot_compatibility at 0x7a19f01800e0>}
+module_map = {'triton.language.extra.libdevice': <module 'triton.language.extra.cuda.libdevice' from '/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/triton/language/extra/cuda/libdevice.py'>}
+context = <triton._C.libtriton.ir.context object at 0x7a19a53e6ff0>
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+>       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 30:12:
+E                        qpos[:, None] < qlen, 0)
+E           context = kvlen - qlen
+E           prefix = tl.minimum(kvlen, context + (local + 1) * BQ)
+E           maximum = tl.full((BM,), -float("inf"), tl.float32)
+E           denom = tl.full((BM,), 1.0, tl.float32)
+E           acc = tl.zeros((BM, BV), tl.float32)
+E           for tile in range(tl.cdiv(prefix, BN)):
+E               pos = tile * BN + tl.arange(0, BN)
+E               valid = pos < prefix
+E               physical = tl.load(TABLE + seq * TS + pos // KL[1], valid, 0).to(tl.int64)
+E               slots = physical * KL[1] + pos % KL[1]
+E               k = load_nuq4_tile(KC, KLO, KHI, KLUT, slots, valid, False, *KL).to(tl.float32)
+E                   ^
+E       AssertionError()
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError
+__________________ test_full_attention_packed_tiles[False-80] __________________
+
+width = 80, decode = False
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:81: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <triton.compiler.compiler.ASTSource object at 0x7a19f035a6f0>
+target = GPUTarget(backend='cuda', arch=89, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': <function convert_custom_float8_sm80 at 0x7a1a23c60cc0>, 'min_dot_size': <function min_dot_size.<locals>.check_dot_compatibility at 0x7a19f0331f80>}
+module_map = {'triton.language.extra.libdevice': <module 'triton.language.extra.cuda.libdevice' from '/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/triton/language/extra/cuda/libdevice.py'>}
+context = <triton._C.libtriton.ir.context object at 0x7a19f01f9d70>
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+>       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 30:12:
+E                        qpos[:, None] < qlen, 0)
+E           context = kvlen - qlen
+E           prefix = tl.minimum(kvlen, context + (local + 1) * BQ)
+E           maximum = tl.full((BM,), -float("inf"), tl.float32)
+E           denom = tl.full((BM,), 1.0, tl.float32)
+E           acc = tl.zeros((BM, BV), tl.float32)
+E           for tile in range(tl.cdiv(prefix, BN)):
+E               pos = tile * BN + tl.arange(0, BN)
+E               valid = pos < prefix
+E               physical = tl.load(TABLE + seq * TS + pos // KL[1], valid, 0).to(tl.int64)
+E               slots = physical * KL[1] + pos % KL[1]
+E               k = load_nuq4_tile(KC, KLO, KHI, KLUT, slots, valid, False, *KL).to(tl.float32)
+E                   ^
+E       AssertionError()
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError
+__________________ test_full_attention_packed_tiles[False-96] __________________
+
+width = 96, decode = False
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:81: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <triton.compiler.compiler.ASTSource object at 0x7a19f024cf20>
+target = GPUTarget(backend='cuda', arch=89, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': <function convert_custom_float8_sm80 at 0x7a1a23c60cc0>, 'min_dot_size': <function min_dot_size.<locals>.check_dot_compatibility at 0x7a19f0182200>}
+module_map = {'triton.language.extra.libdevice': <module 'triton.language.extra.cuda.libdevice' from '/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/triton/language/extra/cuda/libdevice.py'>}
+context = <triton._C.libtriton.ir.context object at 0x7a19f00831b0>
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+>       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 30:12:
+E                        qpos[:, None] < qlen, 0)
+E           context = kvlen - qlen
+E           prefix = tl.minimum(kvlen, context + (local + 1) * BQ)
+E           maximum = tl.full((BM,), -float("inf"), tl.float32)
+E           denom = tl.full((BM,), 1.0, tl.float32)
+E           acc = tl.zeros((BM, BV), tl.float32)
+E           for tile in range(tl.cdiv(prefix, BN)):
+E               pos = tile * BN + tl.arange(0, BN)
+E               valid = pos < prefix
+E               physical = tl.load(TABLE + seq * TS + pos // KL[1], valid, 0).to(tl.int64)
+E               slots = physical * KL[1] + pos % KL[1]
+E               k = load_nuq4_tile(KC, KLO, KHI, KLUT, slots, valid, False, *KL).to(tl.float32)
+E                   ^
+E       AssertionError()
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError
+_________________ test_full_attention_packed_tiles[False-128] __________________
+
+width = 128, decode = False
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:81: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <triton.compiler.compiler.ASTSource object at 0x7a19f024d880>
+target = GPUTarget(backend='cuda', arch=89, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': <function convert_custom_float8_sm80 at 0x7a1a23c60cc0>, 'min_dot_size': <function min_dot_size.<locals>.check_dot_compatibility at 0x7a19f0331ee0>}
+module_map = {'triton.language.extra.libdevice': <module 'triton.language.extra.cuda.libdevice' from '/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/triton/language/extra/cuda/libdevice.py'>}
+context = <triton._C.libtriton.ir.context object at 0x7a19f00c35b0>
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+>       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 30:12:
+E                        qpos[:, None] < qlen, 0)
+E           context = kvlen - qlen
+E           prefix = tl.minimum(kvlen, context + (local + 1) * BQ)
+E           maximum = tl.full((BM,), -float("inf"), tl.float32)
+E           denom = tl.full((BM,), 1.0, tl.float32)
+E           acc = tl.zeros((BM, BV), tl.float32)
+E           for tile in range(tl.cdiv(prefix, BN)):
+E               pos = tile * BN + tl.arange(0, BN)
+E               valid = pos < prefix
+E               physical = tl.load(TABLE + seq * TS + pos // KL[1], valid, 0).to(tl.int64)
+E               slots = physical * KL[1] + pos % KL[1]
+E               k = load_nuq4_tile(KC, KLO, KHI, KLUT, slots, valid, False, *KL).to(tl.float32)
+E                   ^
+E       AssertionError()
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError
+__________________ test_full_attention_packed_tiles[True-32] ___________________
+
+width = 32, decode = True
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:81: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <triton.compiler.compiler.ASTSource object at 0x7a19f018d9a0>
+target = GPUTarget(backend='cuda', arch=89, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': <function convert_custom_float8_sm80 at 0x7a1a23c60cc0>, 'min_dot_size': <function min_dot_size.<locals>.check_dot_compatibility at 0x7a19f0182ac0>}
+module_map = {'triton.language.extra.libdevice': <module 'triton.language.extra.cuda.libdevice' from '/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/triton/language/extra/cuda/libdevice.py'>}
+context = <triton._C.libtriton.ir.context object at 0x7a19a530a970>
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+>       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 30:12:
+E                        qpos[:, None] < qlen, 0)
+E           context = kvlen - qlen
+E           prefix = tl.minimum(kvlen, context + (local + 1) * BQ)
+E           maximum = tl.full((BM,), -float("inf"), tl.float32)
+E           denom = tl.full((BM,), 1.0, tl.float32)
+E           acc = tl.zeros((BM, BV), tl.float32)
+E           for tile in range(tl.cdiv(prefix, BN)):
+E               pos = tile * BN + tl.arange(0, BN)
+E               valid = pos < prefix
+E               physical = tl.load(TABLE + seq * TS + pos // KL[1], valid, 0).to(tl.int64)
+E               slots = physical * KL[1] + pos % KL[1]
+E               k = load_nuq4_tile(KC, KLO, KHI, KLUT, slots, valid, False, *KL).to(tl.float32)
+E                   ^
+E       AssertionError()
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError
+__________________ test_full_attention_packed_tiles[True-64] ___________________
+
+width = 64, decode = True
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:81: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <triton.compiler.compiler.ASTSource object at 0x7a19f01c4770>
+target = GPUTarget(backend='cuda', arch=89, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': <function convert_custom_float8_sm80 at 0x7a1a23c60cc0>, 'min_dot_size': <function min_dot_size.<locals>.check_dot_compatibility at 0x7a19f0331260>}
+module_map = {'triton.language.extra.libdevice': <module 'triton.language.extra.cuda.libdevice' from '/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/triton/language/extra/cuda/libdevice.py'>}
+context = <triton._C.libtriton.ir.context object at 0x7a19a541b2f0>
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+>       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 30:12:
+E                        qpos[:, None] < qlen, 0)
+E           context = kvlen - qlen
+E           prefix = tl.minimum(kvlen, context + (local + 1) * BQ)
+E           maximum = tl.full((BM,), -float("inf"), tl.float32)
+E           denom = tl.full((BM,), 1.0, tl.float32)
+E           acc = tl.zeros((BM, BV), tl.float32)
+E           for tile in range(tl.cdiv(prefix, BN)):
+E               pos = tile * BN + tl.arange(0, BN)
+E               valid = pos < prefix
+E               physical = tl.load(TABLE + seq * TS + pos // KL[1], valid, 0).to(tl.int64)
+E               slots = physical * KL[1] + pos % KL[1]
+E               k = load_nuq4_tile(KC, KLO, KHI, KLUT, slots, valid, False, *KL).to(tl.float32)
+E                   ^
+E       AssertionError()
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError
+__________________ test_full_attention_packed_tiles[True-80] ___________________
+
+width = 80, decode = True
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:81: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <triton.compiler.compiler.ASTSource object at 0x7a19f021a870>
+target = GPUTarget(backend='cuda', arch=89, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': <function convert_custom_float8_sm80 at 0x7a1a23c60cc0>, 'min_dot_size': <function min_dot_size.<locals>.check_dot_compatibility at 0x7a19f0183100>}
+module_map = {'triton.language.extra.libdevice': <module 'triton.language.extra.cuda.libdevice' from '/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/triton/language/extra/cuda/libdevice.py'>}
+context = <triton._C.libtriton.ir.context object at 0x7a19a5296d70>
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+>       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 30:12:
+E                        qpos[:, None] < qlen, 0)
+E           context = kvlen - qlen
+E           prefix = tl.minimum(kvlen, context + (local + 1) * BQ)
+E           maximum = tl.full((BM,), -float("inf"), tl.float32)
+E           denom = tl.full((BM,), 1.0, tl.float32)
+E           acc = tl.zeros((BM, BV), tl.float32)
+E           for tile in range(tl.cdiv(prefix, BN)):
+E               pos = tile * BN + tl.arange(0, BN)
+E               valid = pos < prefix
+E               physical = tl.load(TABLE + seq * TS + pos // KL[1], valid, 0).to(tl.int64)
+E               slots = physical * KL[1] + pos % KL[1]
+E               k = load_nuq4_tile(KC, KLO, KHI, KLUT, slots, valid, False, *KL).to(tl.float32)
+E                   ^
+E       AssertionError()
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError
+__________________ test_full_attention_packed_tiles[True-96] ___________________
+
+width = 96, decode = True
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:81: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <triton.compiler.compiler.ASTSource object at 0x7a19f018c3b0>
+target = GPUTarget(backend='cuda', arch=89, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': <function convert_custom_float8_sm80 at 0x7a1a23c60cc0>, 'min_dot_size': <function min_dot_size.<locals>.check_dot_compatibility at 0x7a19f0332520>}
+module_map = {'triton.language.extra.libdevice': <module 'triton.language.extra.cuda.libdevice' from '/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/triton/language/extra/cuda/libdevice.py'>}
+context = <triton._C.libtriton.ir.context object at 0x7a19a5287cf0>
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+>       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 30:12:
+E                        qpos[:, None] < qlen, 0)
+E           context = kvlen - qlen
+E           prefix = tl.minimum(kvlen, context + (local + 1) * BQ)
+E           maximum = tl.full((BM,), -float("inf"), tl.float32)
+E           denom = tl.full((BM,), 1.0, tl.float32)
+E           acc = tl.zeros((BM, BV), tl.float32)
+E           for tile in range(tl.cdiv(prefix, BN)):
+E               pos = tile * BN + tl.arange(0, BN)
+E               valid = pos < prefix
+E               physical = tl.load(TABLE + seq * TS + pos // KL[1], valid, 0).to(tl.int64)
+E               slots = physical * KL[1] + pos % KL[1]
+E               k = load_nuq4_tile(KC, KLO, KHI, KLUT, slots, valid, False, *KL).to(tl.float32)
+E                   ^
+E       AssertionError()
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError
+__________________ test_full_attention_packed_tiles[True-128] __________________
+
+width = 128, decode = True
+
+    @pytest.mark.parametrize("width", [32, 64, 80, 96, 128])
+    @pytest.mark.parametrize("decode", [False, True])
+    def test_full_attention_packed_tiles(width, decode):
+        torch.manual_seed(width)
+        lengths = [67, 35]
+        queries = [1, 1] if decode else [33, 17]
+        lower, upper = torch.full((128,), -4.0, device="cuda"), torch.full((128,), 4.0, device="cuda")
+        lut = torch.linspace(-1, 1, 16, device="cuda")
+        kcache = NUQ4PagedCache(8, NUQ4Layout(128), lower, upper, lut)
+        vcache = NUQ4PagedCache(8, NUQ4Layout(width), lower[:width], upper[:width], lut, dynamic=True)
+        table = torch.tensor([[4, 2, 0, 7, 6], [1, 5, 3, 0, 0]], device="cuda", dtype=torch.int32)
+        slots, key_rows, value_rows = [], [], []
+        for seq, n in enumerate(lengths):
+            pos = torch.arange(n, device="cuda")
+            slots.append(table[seq, pos // 16].long() * 16 + pos % 16)
+            key_rows.append(torch.randn(n, 128, device="cuda", dtype=torch.bfloat16))
+            value_rows.append(torch.randn(n, width * 8, device="cuda", dtype=torch.bfloat16))
+        slots = torch.cat(slots)
+        keys, full_v = torch.cat(key_rows), torch.cat(value_rows)
+        kcache.append(keys, slots)
+        vcache.append(full_v[:, :width], slots, nuq4_value_stats(full_v))
+        kcache.check()
+        vcache.check()
+        pos = torch.arange(max(lengths), device="cuda").float()
+        freq = 10000 ** (-torch.arange(64, device="cuda").float() / 64)
+        angles = pos[:, None] * freq[None, :]
+        rope = torch.cat((angles.cos(), angles.sin()), 1).to(torch.bfloat16)
+        query = torch.randn(sum(queries), 4, 128, device="cuda", dtype=torch.bfloat16)
+        cu = torch.tensor([0, queries[0], sum(queries)], device="cuda", dtype=torch.int32)
+        lens = torch.tensor(lengths, device="cuda", dtype=torch.int32)
+>       actual = nuq4_attention(query, kcache, vcache, rope, cu, lens, table)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nuq4_attention.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+basisserve/kernels/nuq4_attention.py:81: in nuq4_attention
+    _attention[(query.shape[0] // (bm // 4) + seq_lens.numel(),)](
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:370: in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <triton.compiler.compiler.ASTSource object at 0x7a19f0202cf0>
+target = GPUTarget(backend='cuda', arch=89, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm89', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': <function convert_custom_float8_sm80 at 0x7a1a23c60cc0>, 'min_dot_size': <function min_dot_size.<locals>.check_dot_compatibility at 0x7a19f01836a0>}
+module_map = {'triton.language.extra.libdevice': <module 'triton.language.extra.cuda.libdevice' from '/workspace/miniforge3/envs/basis/lib/python3.12/site-packages/triton/language/extra/cuda/libdevice.py'>}
+context = <triton._C.libtriton.ir.context object at 0x7a19a53dafb0>
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+>       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 30:12:
+E                        qpos[:, None] < qlen, 0)
+E           context = kvlen - qlen
+E           prefix = tl.minimum(kvlen, context + (local + 1) * BQ)
+E           maximum = tl.full((BM,), -float("inf"), tl.float32)
+E           denom = tl.full((BM,), 1.0, tl.float32)
+E           acc = tl.zeros((BM, BV), tl.float32)
+E           for tile in range(tl.cdiv(prefix, BN)):
+E               pos = tile * BN + tl.arange(0, BN)
+E               valid = pos < prefix
+E               physical = tl.load(TABLE + seq * TS + pos // KL[1], valid, 0).to(tl.int64)
+E               slots = physical * KL[1] + pos % KL[1]
+E               k = load_nuq4_tile(KC, KLO, KHI, KLUT, slots, valid, False, *KL).to(tl.float32)
+E                   ^
+E       AssertionError()
+
+../miniforge3/envs/basis/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError
+=========================== short test summary info ============================
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[False-32]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[False-64]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[False-80]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[False-96]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[False-128]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[True-32]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[True-64]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[True-80]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[True-96]
+FAILED tests/test_nuq4_attention.py::test_full_attention_packed_tiles[True-128]
+10 failed, 20 passed in 5.38s
+ERROR conda.cli.main_run:execute(148): `conda run python -m pytest -q tests/test_nuq4_cache.py tests/test_nuq4_attention.py` failed. (See above for error)
+..............................                                           [100%]
+30 passed in 11.12s
+..................................                                       [100%]
+34 passed in 8.71s
+.........................................                                [100%]
+=============================== warnings summary ===============================
+../miniforge3/envs/basis/lib/python3.12/site-packages/torch/jit/_script.py:365: 14 warnings
+  /workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+41 passed, 14 warnings in 11.53s
+.........................................                                [100%]
+=============================== warnings summary ===============================
+../miniforge3/envs/basis/lib/python3.12/site-packages/torch/jit/_script.py:365: 14 warnings
+  /workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+41 passed, 14 warnings in 16.18s
+.........................................                                [100%]
+=============================== warnings summary ===============================
+../miniforge3/envs/basis/lib/python3.12/site-packages/torch/jit/_script.py:365: 14 warnings
+  /workspace/miniforge3/envs/basis/lib/python3.12/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+41 passed, 14 warnings in 20.88s

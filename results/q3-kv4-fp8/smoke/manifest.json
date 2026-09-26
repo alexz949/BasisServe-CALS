@@ -1,0 +1,48 @@
+{
+  "protocol": {
+    "model": "/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "checkpoint_root": "/workspace/.cache/huggingface/hub/models--alexz949--BasisServe-CALS/snapshots/3df8ff71c718ebcb096f479209baf95cd46abc60/ICLR-results/qwen3-8b/checkpoints",
+    "hf_revision": "3df8ff71c718ebcb096f479209baf95cd46abc60",
+    "tp": 1,
+    "batch_size": 1,
+    "environment": "basis",
+    "gpu": "NVIDIA L40S",
+    "torch": "2.13.0+cu130",
+    "cuda": "13.0",
+    "dataset": "WikiText2",
+    "dataset_revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+    "evaluation_split": "test",
+    "seqlen": 256,
+    "windows": 2,
+    "calibration_split": "train",
+    "calibration_length": 128,
+    "calibration_starts": [
+      11924
+    ],
+    "arms": [
+      "bf16",
+      "kv4",
+      "fp8",
+      "kv4_fp8"
+    ],
+    "factor_validation": "structure only; no SHA256",
+    "ranks": [
+      64,
+      96
+    ],
+    "kv": "official NUQ4; 0.99 percentile outlier rule; no first-token exclusion; no rotation",
+    "key_location": "after k_norm, before RoPE; static per-channel",
+    "value_location": "active C1 latent coordinates; dynamic per-token over all KV heads",
+    "fisher": "BF16 C1 arm-specific squared activation gradients; frozen across quantized arms",
+    "projections": "folded V encoder and output decoder only; padded HF V/O slots",
+    "fp8": "actual E4M3 W8A8 scaled GEMM; BF16 output; use_fast_accum=False",
+    "fp8_scales": "tensorwise weights; static per-projection training absmax activation scales; matching KV setting",
+    "other_modules": "BF16; full attention; no sparse routing; no MLP quantization",
+    "packed_cache": false,
+    "performance_benchmark": false,
+    "upstream_commit": "57a238357f0ffe50084670fcd5781c9848f80ea2"
+  },
+  "command": "evaluation/eval_qwen3_kv4_fp8_ppl.py --phase smoke --ranks 64 96 --output results/q3-kv4-fp8",
+  "created_utc": "2026-09-25T14:56:56.058975+00:00",
+  "source_commit": "bab891d3e108d4280eeee65e7bb6c07f86dea83a"
+}

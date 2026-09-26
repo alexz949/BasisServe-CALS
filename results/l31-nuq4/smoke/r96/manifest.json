@@ -1,0 +1,18 @@
+{
+  "command": "evaluation/calibrate_llama_nuq4.py --phase smoke --rank 96 --output results/l31-nuq4",
+  "environment": "basis",
+  "phase": "smoke",
+  "rank": 96,
+  "model": "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+  "factors": "/workspace/BasisServe-CALS/ICLR-results/llama31-8b-instruct/c1/factor-banks/R96-S6-D0",
+  "calibration_split": "WT2 train",
+  "starts": [
+    1440882
+  ],
+  "length": 128,
+  "quantizer": "official Fisher-weighted NUQ4, outlier threshold 0.99, no first-token exclusion",
+  "k": "static per-channel, pre-RoPE",
+  "v": "dynamic per-token, all eight KV heads",
+  "scale": "static per-layer decoder input absmax, matching KV4, BF16 encoder/decoder",
+  "factor_validation": "structure only; no SHA256"
+}

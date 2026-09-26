@@ -1,0 +1,133 @@
+{
+  "environment": "basis",
+  "rows": [
+    {
+      "width": 64,
+      "shape": "decode1",
+      "production": true,
+      "ms": 0.0479495574160951
+    },
+    {
+      "width": 64,
+      "shape": "decode1",
+      "bn": 32,
+      "warps": 4,
+      "stages": 1,
+      "ms": 0.047907689038444966,
+      "registers": 255,
+      "spills": 34,
+      "shared": 16384,
+      "max_abs": 0.0,
+      "splits": 32
+    },
+    {
+      "width": 64,
+      "shape": "decode1",
+      "bn": 16,
+      "warps": 8,
+      "stages": 1,
+      "ms": 0.02106082459800264,
+      "registers": 116,
+      "spills": 0,
+      "shared": 12288,
+      "max_abs": 0.0001220703125,
+      "splits": 32
+    },
+    {
+      "width": 64,
+      "shape": "decode16",
+      "production": true,
+      "ms": 0.09672268577243971
+    },
+    {
+      "width": 64,
+      "shape": "decode16",
+      "bn": 32,
+      "warps": 4,
+      "stages": 1,
+      "ms": 0.0966520384540708,
+      "registers": 255,
+      "spills": 34,
+      "shared": 16384,
+      "max_abs": 0.0,
+      "splits": 32
+    },
+    {
+      "width": 64,
+      "shape": "decode16",
+      "bn": 16,
+      "warps": 8,
+      "stages": 1,
+      "ms": 0.04895107067183943,
+      "registers": 116,
+      "spills": 0,
+      "shared": 12288,
+      "max_abs": 0.00048828125,
+      "splits": 32
+    },
+    {
+      "width": 96,
+      "shape": "decode1",
+      "production": true,
+      "ms": 0.03032466061494449
+    },
+    {
+      "width": 96,
+      "shape": "decode1",
+      "bn": 32,
+      "warps": 4,
+      "stages": 1,
+      "ms": 0.030337577067630392,
+      "registers": 247,
+      "spills": 0,
+      "shared": 20480,
+      "max_abs": 0.0,
+      "splits": 32
+    },
+    {
+      "width": 96,
+      "shape": "decode1",
+      "bn": 16,
+      "warps": 8,
+      "stages": 1,
+      "ms": 0.02142218494914589,
+      "registers": 119,
+      "spills": 0,
+      "shared": 12288,
+      "max_abs": 0.00048828125,
+      "splits": 32
+    },
+    {
+      "width": 96,
+      "shape": "decode16",
+      "production": true,
+      "ms": 0.062078703870947195
+    },
+    {
+      "width": 96,
+      "shape": "decode16",
+      "bn": 32,
+      "warps": 4,
+      "stages": 1,
+      "ms": 0.06206456198777355,
+      "registers": 247,
+      "spills": 0,
+      "shared": 20480,
+      "max_abs": 0.0,
+      "splits": 32
+    },
+    {
+      "width": 96,
+      "shape": "decode16",
+      "bn": 16,
+      "warps": 8,
+      "stages": 1,
+      "ms": 0.05186721335370373,
+      "registers": 119,
+      "spills": 0,
+      "shared": 12288,
+      "max_abs": 0.00048828125,
+      "splits": 32
+    }
+  ]
+}

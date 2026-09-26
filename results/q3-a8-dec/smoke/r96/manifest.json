@@ -1,0 +1,441 @@
+{
+  "command": "/workspace/BasisServe-CALS/evaluation/eval_qwen3_latent_a8.py --phase smoke --prior /workspace/BasisServe-CALS/results/q3-kv4-fp8/formal --output results/q3-a8-dec --rank 96",
+  "phase": "smoke",
+  "prior": "/workspace/BasisServe-CALS/results/q3-kv4-fp8/formal",
+  "nominal_rank": 96,
+  "schedule": [
+    [
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112
+    ],
+    [
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64
+    ],
+    [
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48
+    ],
+    [
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64
+    ],
+    [
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64
+    ],
+    [
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64
+    ],
+    [
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    [
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80
+    ],
+    [
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112
+    ],
+    [
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112
+    ],
+    [
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112
+    ],
+    [
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112
+    ],
+    [
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80
+    ],
+    [
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64
+    ],
+    [
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    [
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    [
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    [
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112
+    ],
+    [
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112
+    ],
+    [
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112
+    ],
+    [
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    [
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    [
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128
+    ],
+    [
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128
+    ],
+    [
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128
+    ],
+    [
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80
+    ],
+    [
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112
+    ],
+    [
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    [
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80
+    ],
+    [
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    [
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112,
+      112
+    ],
+    [
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80
+    ],
+    [
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    [
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128
+    ],
+    [
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128
+    ],
+    [
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64,
+      64
+    ]
+  ],
+  "windows": 2,
+  "protocol": {
+    "model": "/workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "checkpoint_root": "/workspace/.cache/huggingface/hub/models--alexz949--BasisServe-CALS/snapshots/3df8ff71c718ebcb096f479209baf95cd46abc60/ICLR-results/qwen3-8b/checkpoints",
+    "hf_revision": "3df8ff71c718ebcb096f479209baf95cd46abc60",
+    "tp": 1,
+    "batch_size": 1,
+    "environment": "basis",
+    "gpu": "NVIDIA L40S",
+    "torch": "2.13.0+cu130",
+    "cuda": "13.0",
+    "dataset": "WikiText2",
+    "dataset_revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+    "evaluation_split": "test",
+    "seqlen": 2048,
+    "windows": 146,
+    "calibration_split": "train",
+    "calibration_length": 2048,
+    "calibration_starts": [
+      1809044,
+      2193114,
+      1737433,
+      2513760,
+      2015463,
+      875379,
+      26677,
+      240253,
+      244372,
+      762683,
+      1048851,
+      164866,
+      2207006,
+      2099274,
+      213128,
+      2008376
+    ],
+    "arms": [
+      "bf16",
+      "kv4",
+      "fp8",
+      "kv4_fp8"
+    ],
+    "factor_validation": "structure only; no SHA256",
+    "ranks": [
+      64,
+      96
+    ],
+    "kv": "official NUQ4; 0.99 percentile outlier rule; no first-token exclusion; no rotation",
+    "key_location": "after k_norm, before RoPE; static per-channel",
+    "value_location": "active C1 latent coordinates; dynamic per-token over all KV heads",
+    "fisher": "BF16 C1 arm-specific squared activation gradients; frozen across quantized arms",
+    "projections": "folded V encoder and output decoder only; padded HF V/O slots",
+    "fp8": "actual E4M3 W8A8 scaled GEMM; BF16 output; use_fast_accum=False",
+    "fp8_scales": "tensorwise weights; static per-projection training absmax activation scales; matching KV setting",
+    "other_modules": "BF16; full attention; no sparse routing; no MLP quantization",
+    "packed_cache": false,
+    "performance_benchmark": false,
+    "upstream_commit": "57a238357f0ffe50084670fcd5781c9848f80ea2"
+  },
+  "overrides": {
+    "encoder": "BF16 in every arm",
+    "kv": "fixed previous formal NUQ4",
+    "latent": "decoder input after attention; scalar per-layer E4M3 scale",
+    "scales": "reused train-only kv4_fp8 decoder scales; shared unchanged across new arms",
+    "arms": [
+      "bf16",
+      "a8",
+      "w8a8"
+    ],
+    "tp": 1,
+    "collectives": false,
+    "performance_benchmark": false
+  }
+}

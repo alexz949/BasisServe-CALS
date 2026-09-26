@@ -1,0 +1,218 @@
+[
+  {
+    "rank": 64,
+    "layer": 18,
+    "rows": 1,
+    "latent_width": 2048,
+    "output_width": 4096,
+    "latency_ms": {
+      "bf16": 0.02006400004029274,
+      "a8_bf16": 0.04062400013208389,
+      "w8a8": 0.02755199931561947,
+      "quantize": 0.031967999413609505,
+      "quantize_a8_bf16": 0.06823999807238579,
+      "quantize_w8a8": 0.06919999793171883
+    },
+    "error_vs_bf16": {
+      "bf16": {
+        "relative_rmse": 0.0,
+        "mean_absolute_error": 0.0,
+        "maximum_absolute_error": 0.0,
+        "cosine_similarity": 1.0
+      },
+      "a8_bf16": {
+        "relative_rmse": 0.014991394244134426,
+        "mean_absolute_error": 0.0028120146598666906,
+        "maximum_absolute_error": 0.03515625,
+        "cosine_similarity": 0.9999006986618042
+      },
+      "w8a8": {
+        "relative_rmse": 0.03112656995654106,
+        "mean_absolute_error": 0.005970288068056107,
+        "maximum_absolute_error": 0.0546875,
+        "cosine_similarity": 0.9995328187942505
+      },
+      "quantize_a8_bf16": {
+        "relative_rmse": 0.014991394244134426,
+        "mean_absolute_error": 0.0028120146598666906,
+        "maximum_absolute_error": 0.03515625,
+        "cosine_similarity": 0.9999006986618042
+      },
+      "quantize_w8a8": {
+        "relative_rmse": 0.03112656995654106,
+        "mean_absolute_error": 0.005970288068056107,
+        "maximum_absolute_error": 0.0546875,
+        "cosine_similarity": 0.9995328187942505
+      }
+    },
+    "decoder_speedup": 0.7282230160668697,
+    "quantize_decoder_speedup": 0.28994220577998187,
+    "latent_bytes": {
+      "bf16": 4096,
+      "fp8": 2048,
+      "static_scale_bytes": 4
+    }
+  },
+  {
+    "rank": 64,
+    "layer": 18,
+    "rows": 16,
+    "latent_width": 2048,
+    "output_width": 4096,
+    "latency_ms": {
+      "bf16": 0.01953599974513054,
+      "a8_bf16": 0.04095999896526337,
+      "w8a8": 0.026800000108778477,
+      "quantize": 0.031536001712083817,
+      "quantize_a8_bf16": 0.07019200176000595,
+      "quantize_w8a8": 0.06943999975919724
+    },
+    "error_vs_bf16": {
+      "bf16": {
+        "relative_rmse": 0.0,
+        "mean_absolute_error": 0.0,
+        "maximum_absolute_error": 0.0,
+        "cosine_similarity": 1.0
+      },
+      "a8_bf16": {
+        "relative_rmse": 0.03223612904548645,
+        "mean_absolute_error": 0.004713704809546471,
+        "maximum_absolute_error": 0.09375,
+        "cosine_similarity": 0.999481201171875
+      },
+      "w8a8": {
+        "relative_rmse": 0.04589476436376572,
+        "mean_absolute_error": 0.006782774813473225,
+        "maximum_absolute_error": 0.09619140625,
+        "cosine_similarity": 0.9989473819732666
+      },
+      "quantize_a8_bf16": {
+        "relative_rmse": 0.03223612904548645,
+        "mean_absolute_error": 0.004713704809546471,
+        "maximum_absolute_error": 0.09375,
+        "cosine_similarity": 0.999481201171875
+      },
+      "quantize_w8a8": {
+        "relative_rmse": 0.04589476436376572,
+        "mean_absolute_error": 0.006782774813473225,
+        "maximum_absolute_error": 0.09619140625,
+        "cosine_similarity": 0.9989473819732666
+      }
+    },
+    "decoder_speedup": 0.7289552114117873,
+    "quantize_decoder_speedup": 0.281336402835212,
+    "latent_bytes": {
+      "bf16": 65536,
+      "fp8": 32768,
+      "static_scale_bytes": 4
+    }
+  },
+  {
+    "rank": 96,
+    "layer": 18,
+    "rows": 1,
+    "latent_width": 3584,
+    "output_width": 4096,
+    "latency_ms": {
+      "bf16": 0.052799999713897705,
+      "a8_bf16": 0.07470399886369705,
+      "w8a8": 0.027439999394118786,
+      "quantize": 0.032175999134778976,
+      "quantize_a8_bf16": 0.10211199894547462,
+      "quantize_w8a8": 0.07131199911236763
+    },
+    "error_vs_bf16": {
+      "bf16": {
+        "relative_rmse": 0.0,
+        "mean_absolute_error": 0.0,
+        "maximum_absolute_error": 0.0,
+        "cosine_similarity": 0.9999999403953552
+      },
+      "a8_bf16": {
+        "relative_rmse": 0.01867607608437538,
+        "mean_absolute_error": 0.003378315130248666,
+        "maximum_absolute_error": 0.072265625,
+        "cosine_similarity": 0.9998267292976379
+      },
+      "w8a8": {
+        "relative_rmse": 0.03183160722255707,
+        "mean_absolute_error": 0.006105796899646521,
+        "maximum_absolute_error": 0.076171875,
+        "cosine_similarity": 0.9994943141937256
+      },
+      "quantize_a8_bf16": {
+        "relative_rmse": 0.01867607608437538,
+        "mean_absolute_error": 0.003378315130248666,
+        "maximum_absolute_error": 0.072265625,
+        "cosine_similarity": 0.9998267292976379
+      },
+      "quantize_w8a8": {
+        "relative_rmse": 0.03183160722255707,
+        "mean_absolute_error": 0.006105796899646521,
+        "maximum_absolute_error": 0.076171875,
+        "cosine_similarity": 0.9994943141937256
+      }
+    },
+    "decoder_speedup": 1.9241982827891144,
+    "quantize_decoder_speedup": 0.7404083516253663,
+    "latent_bytes": {
+      "bf16": 7168,
+      "fp8": 3584,
+      "static_scale_bytes": 4
+    }
+  },
+  {
+    "rank": 96,
+    "layer": 18,
+    "rows": 16,
+    "latent_width": 3584,
+    "output_width": 4096,
+    "latency_ms": {
+      "bf16": 0.028880000114440918,
+      "a8_bf16": 0.05087999999523163,
+      "w8a8": 0.026704000309109688,
+      "quantize": 0.03182400017976761,
+      "quantize_a8_bf16": 0.07956800237298012,
+      "quantize_w8a8": 0.0692639984190464
+    },
+    "error_vs_bf16": {
+      "bf16": {
+        "relative_rmse": 0.0,
+        "mean_absolute_error": 0.0,
+        "maximum_absolute_error": 0.0,
+        "cosine_similarity": 1.0
+      },
+      "a8_bf16": {
+        "relative_rmse": 0.033355433493852615,
+        "mean_absolute_error": 0.005177988205105066,
+        "maximum_absolute_error": 0.10302734375,
+        "cosine_similarity": 0.9994442462921143
+      },
+      "w8a8": {
+        "relative_rmse": 0.047521404922008514,
+        "mean_absolute_error": 0.007397654466331005,
+        "maximum_absolute_error": 0.115234375,
+        "cosine_similarity": 0.9988706111907959
+      },
+      "quantize_a8_bf16": {
+        "relative_rmse": 0.033355433493852615,
+        "mean_absolute_error": 0.005177988205105066,
+        "maximum_absolute_error": 0.10302734375,
+        "cosine_similarity": 0.9994442462921143
+      },
+      "quantize_w8a8": {
+        "relative_rmse": 0.047521404922008514,
+        "mean_absolute_error": 0.007397654466331005,
+        "maximum_absolute_error": 0.115234375,
+        "cosine_similarity": 0.9988706111907959
+      }
+    },
+    "decoder_speedup": 1.081485911479297,
+    "quantize_decoder_speedup": 0.41695542812468384,
+    "latent_bytes": {
+      "bf16": 114688,
+      "fp8": 57344,
+      "static_scale_bytes": 4
+    }
+  }
+]

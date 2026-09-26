@@ -1,0 +1,1562 @@
+{
+  "64": {
+    "bf16": {
+      "ppl": 8.258728043390969,
+      "nll_sum": 630978.5498046875,
+      "tokens": 298862,
+      "windows": 146,
+      "requested_windows": 146,
+      "seqlen": 2048,
+      "wall_seconds": 31.08181962510571,
+      "quant_kv": false,
+      "fp8_gemm": false,
+      "fp8_projection_stats": {},
+      "delta_ppl": 0.0,
+      "relative_ppl_percent": 0.0
+    },
+    "kv4": {
+      "ppl": 8.277446301671233,
+      "nll_sum": 631655.1486816406,
+      "tokens": 298862,
+      "windows": 146,
+      "requested_windows": 146,
+      "seqlen": 2048,
+      "wall_seconds": 44.323856534902006,
+      "quant_kv": true,
+      "fp8_gemm": false,
+      "fp8_projection_stats": {},
+      "delta_ppl": 0.01871825828026452,
+      "relative_ppl_percent": 0.22664819790554347
+    },
+    "fp8": {
+      "ppl": 8.388992982568858,
+      "nll_sum": 635655.7106933594,
+      "tokens": 298862,
+      "windows": 146,
+      "requested_windows": 146,
+      "seqlen": 2048,
+      "wall_seconds": 33.036702597979456,
+      "quant_kv": false,
+      "fp8_gemm": true,
+      "fp8_projection_stats": {
+        "0.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 7
+        },
+        "0.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "1.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "1.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 15
+        },
+        "2.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "2.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "3.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "3.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "4.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "4.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 6
+        },
+        "5.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "5.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "6.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "6.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 10
+        },
+        "7.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "7.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 14
+        },
+        "8.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 36
+        },
+        "8.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 6
+        },
+        "9.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 14
+        },
+        "9.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "10.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "10.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "11.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "11.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "12.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "12.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "13.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 31
+        },
+        "13.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "14.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 11
+        },
+        "14.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "15.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 18
+        },
+        "15.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 7
+        },
+        "16.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 24
+        },
+        "16.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "17.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "17.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "18.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "18.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 23
+        },
+        "19.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "19.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 22
+        },
+        "20.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "20.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 13
+        },
+        "21.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "21.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "22.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "22.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 20
+        },
+        "23.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 6
+        },
+        "23.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 11
+        },
+        "24.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "24.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 24
+        },
+        "25.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 8
+        },
+        "25.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "26.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 6
+        },
+        "26.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 89
+        },
+        "27.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "27.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 8
+        },
+        "28.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "28.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 79
+        },
+        "29.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 6
+        },
+        "29.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 19
+        },
+        "30.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "30.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 6
+        },
+        "31.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 42
+        },
+        "31.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "32.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 18
+        },
+        "32.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 22
+        },
+        "33.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 53
+        },
+        "33.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 7
+        },
+        "34.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 6
+        },
+        "34.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "35.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 24
+        },
+        "35.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 11
+        }
+      },
+      "delta_ppl": 0.13026493917788962,
+      "relative_ppl_percent": 1.5773002633514999
+    },
+    "kv4_fp8": {
+      "ppl": 8.300388784748685,
+      "nll_sum": 632482.3544921875,
+      "tokens": 298862,
+      "windows": 146,
+      "requested_windows": 146,
+      "seqlen": 2048,
+      "wall_seconds": 44.81563242804259,
+      "quant_kv": true,
+      "fp8_gemm": true,
+      "fp8_projection_stats": {
+        "0.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 7
+        },
+        "0.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "1.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "1.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 10
+        },
+        "2.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "2.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "3.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "3.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "4.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "4.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "5.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "5.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "6.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "6.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "7.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "7.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 17
+        },
+        "8.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 43
+        },
+        "8.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 8
+        },
+        "9.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 19
+        },
+        "9.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 14
+        },
+        "10.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "10.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "11.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "11.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "12.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 11
+        },
+        "12.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "13.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 27
+        },
+        "13.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "14.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "14.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "15.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 15
+        },
+        "15.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 11
+        },
+        "16.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 21
+        },
+        "16.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "17.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "17.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "18.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "18.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 31
+        },
+        "19.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "19.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 18
+        },
+        "20.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "20.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 12
+        },
+        "21.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "21.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 11
+        },
+        "22.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 8
+        },
+        "22.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 16
+        },
+        "23.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 24
+        },
+        "23.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 15
+        },
+        "24.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 10
+        },
+        "24.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 25
+        },
+        "25.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 12
+        },
+        "25.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "26.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "26.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 87
+        },
+        "27.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "27.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 7
+        },
+        "28.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "28.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 73
+        },
+        "29.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "29.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 19
+        },
+        "30.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "30.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "31.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 29
+        },
+        "31.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "32.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 12
+        },
+        "32.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 13
+        },
+        "33.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 38
+        },
+        "33.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "34.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "34.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "35.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 17
+        },
+        "35.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 33
+        }
+      },
+      "delta_ppl": 0.0416607413577168,
+      "relative_ppl_percent": 0.504445008224419
+    }
+  },
+  "96": {
+    "bf16": {
+      "ppl": 7.283357465419742,
+      "nll_sum": 593417.9802246094,
+      "tokens": 298862,
+      "windows": 146,
+      "requested_windows": 146,
+      "seqlen": 2048,
+      "wall_seconds": 31.950021968223155,
+      "quant_kv": false,
+      "fp8_gemm": false,
+      "fp8_projection_stats": {},
+      "delta_ppl": 0.0,
+      "relative_ppl_percent": 0.0
+    },
+    "kv4": {
+      "ppl": 7.338056264541473,
+      "nll_sum": 595654.0798339844,
+      "tokens": 298862,
+      "windows": 146,
+      "requested_windows": 146,
+      "seqlen": 2048,
+      "wall_seconds": 45.088671839330345,
+      "quant_kv": true,
+      "fp8_gemm": false,
+      "fp8_projection_stats": {},
+      "delta_ppl": 0.0546987991217307,
+      "relative_ppl_percent": 0.7510107719061132
+    },
+    "fp8": {
+      "ppl": 7.294730149127339,
+      "nll_sum": 593884.2778320312,
+      "tokens": 298862,
+      "windows": 146,
+      "requested_windows": 146,
+      "seqlen": 2048,
+      "wall_seconds": 32.590029675047845,
+      "quant_kv": false,
+      "fp8_gemm": true,
+      "fp8_projection_stats": {
+        "0.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 7
+        },
+        "0.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "1.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "1.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 18
+        },
+        "2.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "2.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "3.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "3.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "4.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "4.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 10
+        },
+        "5.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "5.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "6.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "6.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "7.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 9
+        },
+        "7.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 23
+        },
+        "8.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 33
+        },
+        "8.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 16
+        },
+        "9.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 17
+        },
+        "9.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "10.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "10.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "11.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "11.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "12.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 8
+        },
+        "12.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "13.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 23
+        },
+        "13.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "14.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "14.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 6
+        },
+        "15.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 10
+        },
+        "15.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "16.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 9
+        },
+        "16.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "17.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "17.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 7
+        },
+        "18.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "18.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 26
+        },
+        "19.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "19.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 20
+        },
+        "20.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "20.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 28
+        },
+        "21.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "21.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 9
+        },
+        "22.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "22.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 7
+        },
+        "23.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "23.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 19
+        },
+        "24.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "24.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 6
+        },
+        "25.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "25.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "26.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "26.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 55
+        },
+        "27.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "27.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "28.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "28.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 10
+        },
+        "29.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "29.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "30.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "30.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 19
+        },
+        "31.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "31.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "32.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "32.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 8
+        },
+        "33.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "33.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 20
+        },
+        "34.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "34.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "35.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 10
+        },
+        "35.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        }
+      },
+      "delta_ppl": 0.01137268370759692,
+      "relative_ppl_percent": 0.15614616969705786
+    },
+    "kv4_fp8": {
+      "ppl": 7.354979978091612,
+      "nll_sum": 596342.5498046875,
+      "tokens": 298862,
+      "windows": 146,
+      "requested_windows": 146,
+      "seqlen": 2048,
+      "wall_seconds": 46.981105206068605,
+      "quant_kv": true,
+      "fp8_gemm": true,
+      "fp8_projection_stats": {
+        "0.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 7
+        },
+        "0.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "1.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "1.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 40
+        },
+        "2.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "2.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 5
+        },
+        "3.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "3.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 7
+        },
+        "4.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "4.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 12
+        },
+        "5.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "5.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "6.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "6.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "7.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "7.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 30
+        },
+        "8.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 22
+        },
+        "8.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 11
+        },
+        "9.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 23
+        },
+        "9.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "10.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "10.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "11.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "11.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "12.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 9
+        },
+        "12.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "13.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 24
+        },
+        "13.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "14.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "14.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "15.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 9
+        },
+        "15.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 6
+        },
+        "16.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 10
+        },
+        "16.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "17.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "17.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 20
+        },
+        "18.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 6
+        },
+        "18.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 56
+        },
+        "19.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "19.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 40
+        },
+        "20.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "20.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 39
+        },
+        "21.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "21.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 8
+        },
+        "22.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "22.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 20
+        },
+        "23.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "23.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 10
+        },
+        "24.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "24.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "25.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "25.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "26.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 4
+        },
+        "26.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 37
+        },
+        "27.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "27.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "28.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "28.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 18
+        },
+        "29.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "29.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "30.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 2
+        },
+        "30.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 15
+        },
+        "31.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "31.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 3
+        },
+        "32.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "32.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 9
+        },
+        "33.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "33.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 15
+        },
+        "34.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 1
+        },
+        "34.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 0
+        },
+        "35.encoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 32
+        },
+        "35.decoder": {
+          "calls": 146,
+          "input_elements": 1224736768,
+          "clipped_elements": 11
+        }
+      },
+      "delta_ppl": 0.07162251267186992,
+      "relative_ppl_percent": 0.9833722017891233
+    }
+  }
+}
