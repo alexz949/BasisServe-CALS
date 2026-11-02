@@ -71,7 +71,8 @@ from evaluation.allocate_llama2_mha_c1_global_kl import (  # noqa: E402
     _select_windows,
     _sha256,
 )
-from evaluation.fit_llama2_mha_c1_joint import (  # noqa: E402
+from basisserve.compression import ValueGeometry
+from basisserve.compression.value import (  # noqa: E402
     _activation_covariance_blocks,
     _load_snapshot_layer,
     _snapshot_manifest,
@@ -136,7 +137,9 @@ def _log(message: str, *, all_ranks: bool = False) -> None:
 
 
 def _parse_ranks(raw: str) -> tuple[int, ...]:
-    ranks = tuple(sorted({int(piece.strip()) for piece in raw.split(",") if piece.strip()}))
+    ranks = tuple(
+        sorted({int(piece.strip()) for piece in raw.split(",") if piece.strip()})
+    )
     if not ranks or any(rank <= 0 for rank in ranks):
         raise ValueError("candidate ranks must be positive")
     return ranks
@@ -248,7 +251,10 @@ def _fisher_curvature(
     if not probe_derivatives or sample_count <= 0:
         raise ValueError("Fisher curvature needs probes and a positive sample count")
     values = torch.stack(
-        [torch.as_tensor(value, dtype=torch.float64).square() for value in probe_derivatives]
+        [
+            torch.as_tensor(value, dtype=torch.float64).square()
+            for value in probe_derivatives
+        ]
     )
     if not bool(torch.isfinite(values).all()):
         raise ValueError("Fisher probe derivatives must be finite")
@@ -370,17 +376,22 @@ def _broadcast_covariance(
         HIDDEN_SIZE, HIDDEN_SIZE, dtype=torch.float16, device="cpu"
     )
     if _rank() == 0:
-        fit_manifest = _snapshot_manifest(snapshot_dir)
-        validation_manifest = _snapshot_manifest(validation_snapshot_dir)
+        geometry = ValueGeometry.from_snapshot(snapshot_dir)
+        fit_manifest = _snapshot_manifest(snapshot_dir, geometry=geometry)
+        validation_manifest = _snapshot_manifest(
+            validation_snapshot_dir, geometry=geometry
+        )
         fit_activation, weight, _ = _load_snapshot_layer(
-            snapshot_dir, fit_manifest, layer
+            snapshot_dir, fit_manifest, layer, geometry=geometry
         )
         validation_activation, validation_weight, _ = _load_snapshot_layer(
-            validation_snapshot_dir, validation_manifest, layer
+            validation_snapshot_dir, validation_manifest, layer, geometry=geometry
         )
         if not torch.equal(weight, validation_weight):
             raise ValueError("fit and validation snapshot weights differ")
-        fit_rows = fit_windows * int(fit_manifest["calibration"]["positions_per_window"])
+        fit_rows = fit_windows * int(
+            fit_manifest["calibration"]["positions_per_window"]
+        )
         validation_positions = int(
             validation_manifest["calibration"]["positions_per_window"]
         )
@@ -392,6 +403,8 @@ def _broadcast_covariance(
                 device=device,
                 dtype=torch.float64,
                 row_chunk_size=row_chunk_size,
+                num_heads=geometry.num_heads,
+                head_dim=geometry.head_dim,
             )
         )
         validation_covariance.copy_(
@@ -402,6 +415,8 @@ def _broadcast_covariance(
                 device=device,
                 dtype=torch.float64,
                 row_chunk_size=row_chunk_size,
+                num_heads=geometry.num_heads,
+                head_dim=geometry.head_dim,
             )
         )
         dense_weight.copy_(weight.to(dtype=torch.float16))
@@ -490,7 +505,9 @@ def _collect_anchor_vjps(
             )
         result.append(
             VJPWindow(
-                anchor_output=leaf.detach().to(device="cpu", dtype=torch.float16).contiguous(),
+                anchor_output=leaf.detach()
+                .to(device="cpu", dtype=torch.float16)
+                .contiguous(),
                 kl_gradient=kl_gradient.detach().float().cpu().contiguous(),
                 fisher_gradients=tuple(fisher_gradients),
                 fisher_sample_count=int(labels.numel()),
@@ -594,7 +611,9 @@ def _top_sources(
     key: str,
     limit: int = 4,
 ) -> list[int]:
-    selected = [record for record in records if int(record["candidate_rank"]) == candidate_rank]
+    selected = [
+        record for record in records if int(record["candidate_rank"]) == candidate_rank
+    ]
     return [
         int(record["source"])
         for record in sorted(
@@ -667,8 +686,7 @@ def _summary(result: Mapping[str, Any]) -> str:
     )
     for rank, row in result["analysis"]["top_sources"].items():
         lines.append(
-            f"| {rank} | {row['exact']} | {row['fisher_taylor']} | "
-            f"{row['overlap']} |"
+            f"| {rank} | {row['exact']} | {row['fisher_taylor']} | {row['overlap']} |"
         )
     lines.extend(["", "## Command", "", f"`{result['command']}`", ""])
     return "\n".join(lines)
@@ -729,13 +747,17 @@ def main() -> None:
         raise ValueError("requested sequence length exceeds the stored windows")
     profile_sequences = profile_sequences[:, : args.sequence_length].contiguous()
 
-    model = AutoModelForCausalLM.from_pretrained(
-        str(model_path),
-        dtype=torch.float16,
-        low_cpu_mem_usage=True,
-        local_files_only=args.local_files_only,
-        attn_implementation="sdpa",
-    ).to(device).eval()
+    model = (
+        AutoModelForCausalLM.from_pretrained(
+            str(model_path),
+            dtype=torch.float16,
+            low_cpu_mem_usage=True,
+            local_files_only=args.local_files_only,
+            attn_implementation="sdpa",
+        )
+        .to(device)
+        .eval()
+    )
     model.config.use_cache = False
     if (
         model.config.model_type != "llama"
@@ -812,7 +834,9 @@ def main() -> None:
         row_chunk_size=args.covariance_row_chunk_size,
         device=device,
     )
-    if not torch.equal(snapshot_weight, banks[args.layer].dense_o.to(dtype=torch.float16)):
+    if not torch.equal(
+        snapshot_weight, banks[args.layer].dense_o.to(dtype=torch.float16)
+    ):
         raise ValueError("snapshot O weight differs from the model")
     fit_covariance, absolute_damping = covariance_with_trace_damping(
         fit_covariance,
@@ -840,9 +864,7 @@ def main() -> None:
     mapping = torch.arange(NUM_HEADS, dtype=torch.long, device=device)
     maximum_rank = max(required_ranks)
     interventions = [
-        (source, rank)
-        for source in range(TP_SIZE)
-        for rank in candidate_ranks
+        (source, rank) for source in range(TP_SIZE) for rank in candidate_ranks
     ]
     local_records = []
     for local_index, (source, candidate_rank) in enumerate(
@@ -1069,7 +1091,9 @@ def main() -> None:
                 "conda_environment": os.environ.get("CONDA_DEFAULT_ENV"),
                 "torch": torch.__version__,
                 "cuda_device": torch.cuda.get_device_name(device),
-                "peak_cuda_allocated_bytes": int(torch.cuda.max_memory_allocated(device)),
+                "peak_cuda_allocated_bytes": int(
+                    torch.cuda.max_memory_allocated(device)
+                ),
             },
         }
         output_dir.mkdir(parents=True, exist_ok=False)

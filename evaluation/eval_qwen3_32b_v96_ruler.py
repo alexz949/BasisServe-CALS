@@ -123,7 +123,7 @@ def factor_identity(model_path, factors):
     path = factors / "results.json"
     result = read_json(path)
     fit = result["fit_config"]
-    assert result["format"] == "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
+    assert result["format"] == "basiskv.value_factors.v1"
     assert result["status"] == "complete"
     assert result["layers"] == list(range(64))
     assert set(map(int, result["artifacts"])) == set(range(64))

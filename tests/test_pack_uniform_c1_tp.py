@@ -9,7 +9,7 @@ import torch
 
 from basisserve.core.c1_tp_decode import C1TPFactorLoader, file_sha256
 from evaluation.pack_qwen3_32b_uniform_c1_tp import (
-    LEGACY_UNIFORM_C1_LAYER_FORMAT,
+    UNIFORM_C1_LAYER_FORMAT,
     pack_uniform_c1_checkpoint,
 )
 
@@ -56,7 +56,7 @@ def _write_uniform_checkpoint(root: Path) -> tuple[Path, Path]:
         }
         save_file(tensors, str(tensor_path))
         payload = {
-            "format": LEGACY_UNIFORM_C1_LAYER_FORMAT,
+            "format": UNIFORM_C1_LAYER_FORMAT,
             "layer": layer,
             "fit_config": fit_config,
             "artifact": {

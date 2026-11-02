@@ -45,7 +45,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from evaluation.fit_llama2_mha_c1_joint import (  # noqa: E402
+from basisserve.compression.value import (  # noqa: E402
     FORMAT as C1_FORMAT,
 )
 from evaluation.fit_llama2_mha_recalkv_global_ovc import (  # noqa: E402

@@ -505,7 +505,7 @@ def effective_config(model_path: Path):
 def factor_identity(model_path: Path, factors: Path):
     result = read_json(factors / "results.json")
     fit = result["fit_config"]
-    assert result["format"] == "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
+    assert result["format"] == "basiskv.value_factors.v1"
     assert result["status"] == "complete"
     assert result["layers"] == list(range(64))
     assert fit["cache_rank_per_head"] == VALUE_DIM

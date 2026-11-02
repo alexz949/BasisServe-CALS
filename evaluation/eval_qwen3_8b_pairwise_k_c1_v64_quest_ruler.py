@@ -60,7 +60,7 @@ from evaluation.ruler_v1 import (  # noqa: E402
 FORMAT = "basisserve.qwen3_8b.pairwise_k_c1_v64_quest.ruler_v1.v1"
 RANK_FORMAT = "basisserve.qwen3_8b.pairwise_k_c1_v64_quest.ruler_v1.rank.v1"
 BASELINE_FORMAT = "basisserve.qwen3_8b.c1_quest.ruler_v1.v1"
-C1_FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.v1"
+C1_FORMAT = "basiskv.value_factors.v1"
 DENSE_ARM = "dense_k_c1_v64"
 FULL_ARM = "pairwise_full_support"
 SPARSE_ARM = "pairwise_quest_b512"

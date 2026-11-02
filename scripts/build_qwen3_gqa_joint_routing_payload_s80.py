@@ -54,7 +54,7 @@ from basisserve.core.gqa_joint_routing_payload_s80_fisher import (  # noqa: E402
 
 
 STATS_FORMAT = "basisserve.qwen3.gqa_joint_routing_payload_s80_stats.v2"
-C1_FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.v1"
+C1_FORMAT = "basiskv.value_factors.v1"
 KQ_FORMAT = "basisserve.qwen3_8b.post_rope_kqsvd.v1"
 
 

@@ -22,7 +22,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from evaluation import fit_llama2_mha_c1_joint as joint  # noqa: E402
+from basisserve.compression import ValueGeometry
+from basisserve.compression import value as joint  # noqa: E402
 
 
 FORMAT = "basisserve.qwen3_8b.section3.activation_group_svd.v1"
@@ -69,19 +70,22 @@ def _direct_svd_audit(
     *,
     rank: int,
     groups: int,
+    geometry: ValueGeometry,
 ) -> list[dict[str, Any]]:
     rows = []
-    for group in range(min(groups, joint.NUM_KV_HEADS)):
+    for group in range(min(groups, geometry.num_kv_heads)):
         heads = torch.nonzero(mapping == group, as_tuple=False).flatten()
-        dense = target.index_select(0, heads).permute(1, 0, 2).reshape(
-            joint.HEAD_DIM, -1
+        dense = (
+            target.index_select(0, heads)
+            .permute(1, 0, 2)
+            .reshape(geometry.head_dim, -1)
         )
         pooled = covariance[heads, heads].mean(dim=0)
         pooled = 0.5 * (pooled + pooled.T)
         damped = pooled + float(
             initialization[group]["effective_absolute_ridge"]
         ) * torch.eye(
-            joint.HEAD_DIM,
+            geometry.head_dim,
             device=pooled.device,
             dtype=pooled.dtype,
         )
@@ -114,64 +118,66 @@ def _direct_svd_audit(
 
 @torch.no_grad()
 def build(args: argparse.Namespace) -> int:
-    joint.activate_model_profile("qwen3_8b")
     torch.set_num_threads(args.torch_num_threads)
     device = torch.device(args.device)
-    if not _check(device.type == "cuda" and torch.cuda.is_available(), "CUDA is required"):
+    if not _check(
+        device.type == "cuda" and torch.cuda.is_available(), "CUDA is required"
+    ):
         return 2
     torch.cuda.set_device(device)
     snapshot_dir = Path(args.snapshot_dir).expanduser().resolve()
     output_dir = Path(args.output_dir).expanduser().resolve()
     if not _check(not output_dir.exists(), f"output already exists: {output_dir}"):
         return 2
-    manifest = joint._snapshot_manifest(snapshot_dir)
+    geometry = ValueGeometry.from_snapshot(snapshot_dir)
+    manifest = joint._snapshot_manifest(snapshot_dir, geometry=geometry)
     if not _check(
         manifest.get("format") == joint.COVARIANCE_SNAPSHOT_FORMAT,
         "Section-3 group SVD requires a covariance snapshot with held-out statistics",
     ):
         return 2
-    layers = joint._parse_layers(args.layers)
+    layers = joint._parse_layers(args.layers, geometry=geometry)
     factor_dtype = joint._factor_dtype(args.factor_dtype)
-    mapping = joint._head_to_kv_group(device=device)
+    mapping = joint._head_to_kv_group(device=device, geometry=geometry)
     output_dir.mkdir(parents=True)
     records = []
     started = time.perf_counter()
     for layer in layers:
         layer_started = time.perf_counter()
         fit_matrix, heldout_matrix, weight, source = joint._load_covariance_layer(
-            snapshot_dir, manifest, layer
+            snapshot_dir, manifest, layer, geometry=geometry
         )
         fit_covariance = joint._covariance_matrix_to_blocks(
-            fit_matrix, device=device, dtype=torch.float64
+            fit_matrix, device=device, dtype=torch.float64, geometry=geometry
         )
         heldout_covariance = joint._covariance_matrix_to_blocks(
-            heldout_matrix, device=device, dtype=torch.float64
+            heldout_matrix, device=device, dtype=torch.float64, geometry=geometry
         )
         target = joint._dense_head_targets(
-            weight, device=device, dtype=torch.float64
+            weight, device=device, dtype=torch.float64, geometry=geometry
         )
         initialized = joint.initialize_group_pooled_routed_svd(
             covariance=fit_covariance,
             target=target,
             head_to_kv_group=mapping,
-            group_ranks=(args.rank,) * joint.NUM_KV_HEADS,
+            group_ranks=(args.rank,) * geometry.num_kv_heads,
             covariance_ridge=args.covariance_ridge,
         )
         encoders = initialized.A_unique
         initialization = [asdict(item) for item in initialized.groups]
         decoders = target.new_empty(
-            joint.NUM_HEADS,
+            geometry.num_heads,
             args.rank,
-            joint.HIDDEN_SIZE,
+            geometry.hidden_size,
         )
-        for group in range(joint.NUM_KV_HEADS):
+        for group in range(geometry.num_kv_heads):
             heads = torch.nonzero(mapping == group, as_tuple=False).flatten()
             pooled = fit_covariance[heads, heads].mean(dim=0)
             pooled = 0.5 * (pooled + pooled.T)
             damped = pooled + float(
                 initialization[group]["effective_absolute_ridge"]
             ) * torch.eye(
-                joint.HEAD_DIM,
+                geometry.head_dim,
                 device=device,
                 dtype=torch.float64,
             )
@@ -214,6 +220,7 @@ def build(args: argparse.Namespace) -> int:
             initialization,
             rank=args.rank,
             groups=args.direct_svd_audit_groups,
+            geometry=geometry,
         )
         artifact_path = output_dir / f"layer_{layer:03d}.safetensors"
         tensors = {
@@ -227,8 +234,8 @@ def build(args: argparse.Namespace) -> int:
             "source_snapshot": source,
             "method": "per_kv_group_activation_weighted_svd",
             "rank_per_kv_head": args.rank,
-            "physical_kv_groups": joint.NUM_KV_HEADS,
-            "query_heads_per_group": joint.NUM_HEADS // joint.NUM_KV_HEADS,
+            "physical_kv_groups": geometry.num_kv_heads,
+            "query_heads_per_group": geometry.num_heads // geometry.num_kv_heads,
             "fit_factor_dtype_relative_mse": joint._relative_loss(
                 fit_loss, fit_objective.constant
             ),
@@ -293,12 +300,12 @@ def build(args: argparse.Namespace) -> int:
         "model_label": joint.MODEL_LABEL,
         "model_type": joint.MODEL_TYPE,
         "attention_type": joint.ATTENTION_TYPE,
-        "num_query_heads": joint.NUM_HEADS,
-        "num_physical_kv_heads": joint.NUM_KV_HEADS,
-        "head_dim": joint.HEAD_DIM,
-        "hidden_size": joint.HIDDEN_SIZE,
+        "num_query_heads": geometry.num_heads,
+        "num_physical_kv_heads": geometry.num_kv_heads,
+        "head_dim": geometry.head_dim,
+        "hidden_size": geometry.hidden_size,
         "num_hidden_layers": joint.NUM_LAYERS,
-        "v_retained_ratio": args.rank / joint.HEAD_DIM,
+        "v_retained_ratio": args.rank / geometry.head_dim,
         "factor_dtype": args.factor_dtype,
         "work_dtype": "float64",
         "objective": "independent per-physical-KV-group activation-weighted SVD under pooled diagonal attention-output covariance",
@@ -310,7 +317,9 @@ def build(args: argparse.Namespace) -> int:
     payload = {
         "format": joint.FORMAT,
         "section3_format": FORMAT,
-        "status": "complete" if layers == tuple(range(joint.NUM_LAYERS)) else "smoke_complete",
+        "status": "complete"
+        if layers == tuple(range(joint.NUM_LAYERS))
+        else "smoke_complete",
         "command": shlex.join(sys.argv),
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "layers": list(layers),

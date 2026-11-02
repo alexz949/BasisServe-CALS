@@ -19,7 +19,7 @@ HEAD_DIM = 128
 VALUE_RANK = 64
 LOCAL_WIDTH = 256
 GLOBAL_WIDTH = 2048
-FACTOR_FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.v1"
+FACTOR_FORMAT = "basiskv.value_factors.v1"
 
 
 def file_sha256(path: Path) -> str:
@@ -39,8 +39,7 @@ def load_manifest(root: Path, expected_sha256: str | None, *, validation="sha256
     fit = manifest["fit_config"]
     geometry = (fit["hidden_size"], fit["num_query_heads"], fit["num_hidden_layers"])
     assert geometry in ((4096, 32, 36), (5120, 64, 64))
-    expected_format = FACTOR_FORMAT if geometry[0] == 4096 else "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
-    assert manifest["format"] == expected_format and manifest["status"] == "complete"
+    assert manifest["format"] == FACTOR_FORMAT and manifest["status"] == "complete"
     assert manifest["layers"] == list(range(geometry[2]))
     assert (fit["cache_rank_per_head"], fit["head_dim"], fit["hidden_size"],
             fit["num_query_heads"], fit["num_physical_kv_heads"]) == (64, 128, geometry[0], geometry[1], 8)

@@ -72,7 +72,7 @@ CAPTURE_FORMAT = "basisserve.qwen3_32b.c1_all_layer_streaming_tsqr.v1"
 FIT_CHECKPOINT_FORMAT = (
     "basisserve.qwen3_32b.c1_all_layer_streaming_tsqr_fit.v1"
 )
-LAYER_FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.layer.v1"
+LAYER_FORMAT = "basiskv.value_factors.layer.v1"
 NUM_LAYERS = 64
 FIT_ROWS = 65_536
 HELDOUT_ROWS = 8_192

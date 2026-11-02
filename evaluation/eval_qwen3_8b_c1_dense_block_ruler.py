@@ -60,7 +60,7 @@ from evaluation.ruler_v1 import (  # noqa: E402
 
 FORMAT = "basisserve.qwen3_8b.c1_dense_block.ruler_v1.v1"
 RANK_FORMAT = "basisserve.qwen3_8b.c1_dense_block.ruler_v1.rank.v1"
-C1_FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.v1"
+C1_FORMAT = "basiskv.value_factors.v1"
 ONESHOT_ARM = "dense_k_c1_v64"
 BLOCK_ARM = "dense_k_c1_v64_block128"
 QUEST_ARM = "exact_k_quest_b512_block128"

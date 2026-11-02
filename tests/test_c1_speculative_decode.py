@@ -359,7 +359,7 @@ def test_transformers_qwen3_c1_identity_shadow_matches_exact_greedy(
             "sha256": file_sha256(artifact_path),
         }
     manifest = {
-        "format": "basisserve.qwen3_32b.gqa_c1_v96_joint.v1",
+        "format": "basiskv.value_factors.v1",
         "status": "complete",
         "layers": list(range(config.num_hidden_layers)),
         "fit_config": {

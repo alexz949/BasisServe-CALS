@@ -40,7 +40,7 @@ from scripts.eval_svdllm_safetensors_ppl_accelerate import _token_ids  # noqa: E
 
 
 FORMAT = "basisserve.qwen3_8b.pairwise_k_c1_v64_ppl.v1"
-C1_FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.v1"
+C1_FORMAT = "basiskv.value_factors.v1"
 ARMS = ("dense", "independent", "pairwise")
 HEAD_DIM = 128
 VALUE_RANK = 64

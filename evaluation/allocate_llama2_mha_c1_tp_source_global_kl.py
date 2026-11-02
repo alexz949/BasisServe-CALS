@@ -67,7 +67,8 @@ from evaluation.allocate_palu_llama2_global_kl import (  # noqa: E402
     _evaluate_teacher_metrics,
     _paired_delta,
 )
-from evaluation.fit_llama2_mha_c1_joint import (  # noqa: E402
+from basisserve.compression import ValueGeometry
+from basisserve.compression.value import (  # noqa: E402
     _activation_covariance_blocks,
     _load_snapshot_layer,
     _snapshot_manifest,
@@ -132,9 +133,7 @@ def parse_args() -> argparse.Namespace:
             "decoder after every sweep; zero preserves the allocation-only path"
         ),
     )
-    parser.add_argument(
-        "--post-allocation-minimum-encoder-sweeps", type=int, default=2
-    )
+    parser.add_argument("--post-allocation-minimum-encoder-sweeps", type=int, default=2)
     parser.add_argument(
         "--post-allocation-encoder-relative-tolerance", type=float, default=1.0e-6
     )
@@ -147,12 +146,8 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=1.0e-8,
     )
-    parser.add_argument(
-        "--post-allocation-encoder-cg-iterations", type=int, default=16
-    )
-    parser.add_argument(
-        "--post-allocation-maximum-backtracks", type=int, default=10
-    )
+    parser.add_argument("--post-allocation-encoder-cg-iterations", type=int, default=16)
+    parser.add_argument("--post-allocation-maximum-backtracks", type=int, default=10)
     parser.add_argument("--vocab-chunk-size", type=int, default=8192)
     parser.add_argument("--eval-seqlen", type=int, default=2048)
     parser.add_argument("--eval-max-chunks", type=int, default=146)
@@ -175,7 +170,9 @@ def _log(message: str, *, all_ranks: bool = False) -> None:
 
 
 def _parse_ranks(raw: str) -> tuple[int, ...]:
-    ranks = tuple(sorted({int(piece.strip()) for piece in raw.split(",") if piece.strip()}))
+    ranks = tuple(
+        sorted({int(piece.strip()) for piece in raw.split(",") if piece.strip()})
+    )
     if not ranks or any(rank <= 0 or rank > HEAD_DIM for rank in ranks):
         raise ValueError("candidate ranks must lie inside the Value-head width")
     return ranks
@@ -277,7 +274,10 @@ def _is_contiguous_layout(
     head_groups_by_layer: Sequence[Sequence[Sequence[int]]],
 ) -> bool:
     contiguous = _contiguous_head_groups()
-    return all(tuple(tuple(group) for group in layer) == contiguous for layer in head_groups_by_layer)
+    return all(
+        tuple(tuple(group) for group in layer) == contiguous
+        for layer in head_groups_by_layer
+    )
 
 
 @dataclass(frozen=True)
@@ -335,7 +335,9 @@ class _DecoderClosedHeldoutSelector:
 
     def selected(self) -> tuple[Tensor, Tensor]:
         if self.best_A is None or self.best_D is None:
-            raise RuntimeError("post-allocation sweep produced no decoder-closed checkpoint")
+            raise RuntimeError(
+                "post-allocation sweep produced no decoder-closed checkpoint"
+            )
         return self.best_A, self.best_D
 
 
@@ -346,7 +348,9 @@ def _source_ordered_encoder_groups(
 ) -> tuple[int, ...]:
     order = tuple(int(head) for group in head_groups for head in group)
     if len(order) != num_heads or sorted(order) != list(range(num_heads)):
-        raise ValueError("TP-source groups must partition every encoder group exactly once")
+        raise ValueError(
+            "TP-source groups must partition every encoder group exactly once"
+        )
     return order
 
 
@@ -388,7 +392,9 @@ def _require_zero_sweep_factor_banks(
         if reference is None:
             reference = current
         elif current != reference:
-            raise ValueError("zero-sweep factor banks disagree on fit/held-out snapshots")
+            raise ValueError(
+                "zero-sweep factor banks disagree on fit/held-out snapshots"
+            )
         per_rank[str(rank)] = {
             "encoder_sweeps": sweeps,
             "minimum_encoder_sweeps": minimum,
@@ -541,8 +547,11 @@ def _broadcast_fit_covariance(
     shape = (NUM_HEADS, NUM_HEADS, HEAD_DIM, HEAD_DIM)
     covariance = torch.empty(shape, dtype=torch.float64, device=device)
     if _rank() == 0:
-        manifest = _snapshot_manifest(snapshot_dir)
-        activation, weight, _ = _load_snapshot_layer(snapshot_dir, manifest, layer)
+        geometry = ValueGeometry.from_snapshot(snapshot_dir)
+        manifest = _snapshot_manifest(snapshot_dir, geometry=geometry)
+        activation, weight, _ = _load_snapshot_layer(
+            snapshot_dir, manifest, layer, geometry=geometry
+        )
         positions = int(manifest["calibration"]["positions_per_window"])
         rows = fit_windows * positions
         if rows <= 0 or rows > len(activation):
@@ -555,6 +564,8 @@ def _broadcast_fit_covariance(
                 device=device,
                 dtype=torch.float64,
                 row_chunk_size=row_chunk_size,
+                num_heads=geometry.num_heads,
+                head_dim=geometry.head_dim,
             )
         )
         del activation, weight
@@ -576,8 +587,11 @@ def _snapshot_covariance_rows(
 
     if row_start < 0 or rows <= 0:
         raise ValueError("snapshot covariance row range is invalid")
-    manifest = _snapshot_manifest(snapshot_dir)
-    activation, weight, _ = _load_snapshot_layer(snapshot_dir, manifest, layer)
+    geometry = ValueGeometry.from_snapshot(snapshot_dir)
+    manifest = _snapshot_manifest(snapshot_dir, geometry=geometry)
+    activation, weight, _ = _load_snapshot_layer(
+        snapshot_dir, manifest, layer, geometry=geometry
+    )
     row_stop = row_start + rows
     if row_stop > len(activation):
         raise ValueError("snapshot covariance row range exceeds stored activations")
@@ -588,6 +602,8 @@ def _snapshot_covariance_rows(
         device=device,
         dtype=torch.float64,
         row_chunk_size=row_chunk_size,
+        num_heads=geometry.num_heads,
+        head_dim=geometry.head_dim,
     )
     del activation, weight
     return covariance
@@ -661,9 +677,7 @@ def _schedule_accounting(
     if anchor_rank <= 0:
         raise ValueError("anchor rank must be positive")
     ideal_by_layer = [HEADS_PER_SOURCE * sum(layer) for layer in selected]
-    padded_by_layer = [
-        TP_SIZE * HEADS_PER_SOURCE * max(layer) for layer in selected
-    ]
+    padded_by_layer = [TP_SIZE * HEADS_PER_SOURCE * max(layer) for layer in selected]
     uniform_width = NUM_HEADS * anchor_rank
     dense_width = NUM_HEADS * HEAD_DIM
     flat = [rank for layer in selected for rank in layer]
@@ -1165,9 +1179,9 @@ def main() -> None:
     if post_allocation_enabled:
         zero_sweep_sources = _require_zero_sweep_factor_banks(factor_results)
         requested_snapshot = args.snapshot_dir.expanduser().resolve()
-        recorded_snapshot = Path(
-            str(zero_sweep_sources["snapshot_dir"])
-        ).expanduser().resolve()
+        recorded_snapshot = (
+            Path(str(zero_sweep_sources["snapshot_dir"])).expanduser().resolve()
+        )
         if requested_snapshot != recorded_snapshot:
             raise ValueError(
                 "post-allocation fit snapshot differs from the zero-sweep banks"
@@ -1184,20 +1198,26 @@ def main() -> None:
     if args.sequence_length > profile_sequences.shape[1]:
         raise ValueError("requested sequence length exceeds stored C4 windows")
     profile_sequences = profile_sequences[:, : args.sequence_length].contiguous()
-    confirmation_sequences = confirmation_sequences[:, : args.sequence_length].contiguous()
+    confirmation_sequences = confirmation_sequences[
+        :, : args.sequence_length
+    ].contiguous()
 
     tokenizer = AutoTokenizer.from_pretrained(
         str(model_path),
         local_files_only=args.local_files_only,
         use_fast=True,
     )
-    model = AutoModelForCausalLM.from_pretrained(
-        str(model_path),
-        dtype=torch.float16,
-        low_cpu_mem_usage=True,
-        local_files_only=args.local_files_only,
-        attn_implementation="sdpa",
-    ).to(device).eval()
+    model = (
+        AutoModelForCausalLM.from_pretrained(
+            str(model_path),
+            dtype=torch.float16,
+            low_cpu_mem_usage=True,
+            local_files_only=args.local_files_only,
+            attn_implementation="sdpa",
+        )
+        .to(device)
+        .eval()
+    )
     model.config.use_cache = False
     if (
         model.config.model_type != "llama"
@@ -1374,12 +1394,10 @@ def main() -> None:
                     "nll_delta": delta["nll"],
                     "fit_relative_mse": float(fit_loss / objective.constant),
                     "ideal_width_delta": (
-                        cost["ideal_allgather_width"]
-                        - NUM_HEADS * args.anchor_rank
+                        cost["ideal_allgather_width"] - NUM_HEADS * args.anchor_rank
                     ),
                     "padded_width_delta": (
-                        cost["padded_allgather_width"]
-                        - NUM_HEADS * args.anchor_rank
+                        cost["padded_allgather_width"] - NUM_HEADS * args.anchor_rank
                     ),
                     "decoder_solve": {
                         "relative_residual": closure.decoder.relative_residuals[0],
@@ -1474,8 +1492,7 @@ def main() -> None:
             vocab_chunk_size=args.vocab_chunk_size,
         )
         _log(
-            f"confirmation {label}: "
-            f"KL={confirmation[label]['terminal_kl']['mean']:.9g}"
+            f"confirmation {label}: KL={confirmation[label]['terminal_kl']['mean']:.9g}"
         )
 
     allocation_selected_name = min(
@@ -1494,7 +1511,9 @@ def main() -> None:
             head_groups_by_layer=head_groups_by_layer,
             validation_snapshot_dir=Path(
                 str(zero_sweep_sources["validation_snapshot_dir"])
-            ).expanduser().resolve(),
+            )
+            .expanduser()
+            .resolve(),
             validation_row_start=int(zero_sweep_sources["validation_row_start"]),
             validation_rows=int(zero_sweep_sources["validation_rows"]),
             row_chunk_size=args.covariance_row_chunk_size,
@@ -1505,12 +1524,8 @@ def main() -> None:
             ),
             patience=args.post_allocation_encoder_patience,
             decoder_relative_jitter=args.decoder_relative_jitter,
-            encoder_relative_damping=(
-                args.post_allocation_encoder_relative_damping
-            ),
-            cg_relative_tolerance=(
-                args.post_allocation_encoder_cg_relative_tolerance
-            ),
+            encoder_relative_damping=(args.post_allocation_encoder_relative_damping),
+            cg_relative_tolerance=(args.post_allocation_encoder_cg_relative_tolerance),
             cg_iterations=args.post_allocation_encoder_cg_iterations,
             maximum_backtracks=args.post_allocation_maximum_backtracks,
             device=device,
@@ -1549,16 +1564,12 @@ def main() -> None:
             ),
             "decoder_closure": "full-layer after every complete encoder sweep",
             "maximum_encoder_sweeps": args.post_allocation_encoder_sweeps,
-            "minimum_encoder_sweeps": (
-                args.post_allocation_minimum_encoder_sweeps
-            ),
+            "minimum_encoder_sweeps": (args.post_allocation_minimum_encoder_sweeps),
             "encoder_relative_tolerance": (
                 args.post_allocation_encoder_relative_tolerance
             ),
             "encoder_patience": args.post_allocation_encoder_patience,
-            "encoder_relative_damping": (
-                args.post_allocation_encoder_relative_damping
-            ),
+            "encoder_relative_damping": (args.post_allocation_encoder_relative_damping),
             "encoder_cg_relative_tolerance": (
                 args.post_allocation_encoder_cg_relative_tolerance
             ),
@@ -1566,8 +1577,7 @@ def main() -> None:
             "encoder_cg_fixed_iterations": True,
             "maximum_backtracks": args.post_allocation_maximum_backtracks,
             "heldout_selection": (
-                "earliest minimum attention-output MSE among decoder-closed "
-                "checkpoints"
+                "earliest minimum attention-output MSE among decoder-closed checkpoints"
             ),
             "layers": swept_diagnostics,
         }
@@ -1731,7 +1741,9 @@ def main() -> None:
                 "conda_environment": os.environ.get("CONDA_DEFAULT_ENV"),
                 "torch": torch.__version__,
                 "cuda_device": torch.cuda.get_device_name(device),
-                "peak_cuda_allocated_bytes": int(torch.cuda.max_memory_allocated(device)),
+                "peak_cuda_allocated_bytes": int(
+                    torch.cuda.max_memory_allocated(device)
+                ),
             },
         }
         (output_dir / "result.json").write_text(

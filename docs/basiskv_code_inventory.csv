@@ -1,0 +1,1004 @@
+﻿path,group,status,tracked,purpose,referenced_by,note
+basisserve/__init__.py,12 共用依赖,静态导入依赖，待提取,yes,Minimal CALS extraction of the BasisServe low-rank implementation.,basisserve/analysis/activated_wo_topk_chebyshev.py; basisserve/analysis/common_private_collective.py; basisserve/analysis/o_proj_collective_ppl.py; basisserve/calibration/gqa_joint_routing_payload_s80_stats.py; basisserve/calibration/mlp_polynomial_snapshots.py; basisserve/calibration/mlp_snapshots.py; basisserve/checkpoint/__init__.py; basisserve/checkpoint/c1_lrqk_qwen3.py; basisserve/checkpoint/c1_shadowkv_qwen3.py; basisserve/checkpoint/gqa_vo_group_rank_llama.py; basisserve/checkpoint/gqa_vo_group_rank_qwen3.py; basisserve/checkpoint/gqa_vo_nemotron_h.py; basisserve/checkpoint/gqa_vo_qwen3.py; basisserve/core/__init__.py; basisserve/core/c1_block_commit.py; basisserve/core/c1_conditional_page_attention.py; basisserve/core/c1_conditional_recent_attention.py; basisserve/core/c1_k_offload.py; basisserve/core/c1_k_reverse_shadow.py; basisserve/core/c1_k_routing_sidecar.py; basisserve/core/c1_loki_attention.py; basisserve/core/c1_lrqk.py; basisserve/core/c1_shadowkv.py; basisserve/core/c1_tp_decode.py; basisserve/core/c1_tp_feature_decode.py; basisserve/core/decoder_closed_rank_candidates.py; basisserve/core/fp8_value_latent.py; basisserve/core/gqa_joint_routing_payload_s80.py; basisserve/core/gqa_joint_routing_payload_s80_ablation.py; basisserve/core/gqa_joint_routing_payload_s80_fisher.py; basisserve/core/gqa_routed_ov_joint.py; basisserve/core/llama31_8b_tp8_combined.py; basisserve/core/llama_nuq4_quality.py; basisserve/core/qwen35_full_attention_private_ag_runtime.py; basisserve/core/qwen35_gated_v_als.py; basisserve/core/qwen35_gdn_private_ag.py; basisserve/core/qwen35_gdn_private_ag_runtime.py; basisserve/core/qwen35_hybrid_output_runtime.py; basisserve/core/qwen35_k_routing_runtime.py; basisserve/core/qwen35_postgate_topk.py; basisserve/core/qwen35_vllm_hybrid.py; basisserve/core/qwen3_32b_tp4_decode.py; basisserve/core/qwen3_32b_vllm_c1.py; basisserve/core/qwen3_kv4_fp8_quality.py; basisserve/core/residual_kl_replay.py; basisserve/core/topk_all_gather.py; basisserve/core/tp_source_wo_fit.py; basisserve/kernels/c1_r32_routing.py; basisserve/kernels/compressed_v_decode_attention.py; basisserve/kernels/feature_ragged_allgather.py; basisserve/kernels/gqa_slot_attention.py; basisserve/kernels/sageattention.py; basisserve/vllm/compact_v_backend.py; basisserve/vllm/diffkv_attention.py; basisserve/vllm/prepared_c1_output.py; basisserve/vllm/qwen35_hybrid.py; basisserve/vllm/qwen3_32b_tp8_c1.py; basisserve/vllm/qwen3_8b_c1.py; benchmarks/system/bench_llama31_8b_tp8_combined.py; evaluation/allocate_qwen3_32b_c1_tp_source_global_kl.py; evaluation/analyze_qwen35_activated_wo_topk_chebyshev.py; evaluation/analyze_qwen35_common_private_collective.py; evaluation/analyze_qwen35_gated_attention_sparsity.py; evaluation/analyze_qwen35_gdn_silu_sparsity.py; evaluation/analyze_qwen35_mlp_topk_chebyshev.py; evaluation/analyze_qwen3_o_proj_collective_endpoints.py; evaluation/assemble_qwen35_128k_v_bank.py; evaluation/assemble_qwen35_k_routing_v.py; evaluation/benchmark_vllm_qwen3_32b_c1.py; evaluation/benchmark_vllm_qwen3_8b_c1.py; evaluation/build_qwen3_8b_c1_lr_ar_phase1.py; evaluation/build_qwen3_8b_c1_two_sided_factorized_kl_schedule.py; evaluation/calibrate_llama_nuq4.py; evaluation/calibration_routing_quality.py; evaluation/capture_k_routing.py; evaluation/capture_qwen35_k_routing.py; evaluation/compact_routing_sidecar.py; evaluation/diagnose_conjunctive_pages.py; evaluation/eval_attention_o_proj_collective_ppl.py; evaluation/eval_c1_block_scheduled_ppl.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_llama_adaptive_nuq4_c4.py; evaluation/eval_llama_dense_v_routing128.py; evaluation/eval_longbench_c1_fourarm.py; evaluation/eval_qwen35_128k_ruler.py; evaluation/eval_qwen35_hybrid_gsm8k.py; evaluation/eval_qwen35_hybrid_private_ag_ppl.py; evaluation/eval_qwen35_k_routing_ruler.py; evaluation/eval_qwen3_32b_c1_wikitext.py; evaluation/eval_qwen3_8b_r80_generation_vllm.py; evaluation/eval_qwen3_8b_residual_rank_ruler.py; evaluation/eval_qwen3_8b_v80_base16_page32_budget_sweep.py; evaluation/eval_qwen3_8b_v80_conditional_residual_router.py; evaluation/eval_qwen3_8b_v80_fisher_base.py; evaluation/eval_qwen3_8b_v80_pre_rope_fisher_base.py; evaluation/eval_qwen3_c1_k_reverse_shadow_ppl.py; evaluation/eval_qwen3_c1_quest_ruler.py; evaluation/eval_qwen3_kv4_fp8_ppl.py; evaluation/fit_attention_o_proj_ppl_factors.py; evaluation/fit_k_routing_streaming.py; evaluation/fit_llama2_mha_c1_joint.py; evaluation/fit_qwen35_128k_k_routing.py; evaluation/fit_qwen35_128k_v.py; evaluation/fit_qwen35_k_routing_v.py; evaluation/fit_qwen3_8b_q8_fisher_residual.py; evaluation/fit_qwen3_8b_qaware_base_fisher_bank.py; evaluation/fit_qwen3_8b_v80_base16_r8_nonsink_page32.py; evaluation/install_nemotron_h_wo.py; evaluation/k_routing_capture_windows.py; evaluation/kv_fp8_simulation.py; evaluation/llama_baseline_prefill.py; evaluation/llama_sink_recent_routing.py; evaluation/llama_sink_recent_routing_p16.py; evaluation/longbench_exact_pages.py; evaluation/official_shadowkv_cpu.py; evaluation/pack_qwen3_32b_uniform_c1_tp.py; evaluation/page_granularity_sweep.py; evaluation/prepare_llama31_8b_tp8_combined_factors.py; evaluation/prepare_qwen35_128k_identity.py; evaluation/profile_qwen3_8b_residual_two_sided_kl.py; evaluation/qwen35_hybrid_banks.py; evaluation/qwen35_hybrid_common.py; evaluation/refit_router_from_statistics.py; evaluation/run_qwen35_hybrid.py; evaluation/run_qwen3_32b_c1_layer_global_kl_sharded.py; evaluation/run_qwen3_32b_c1_tp_source_global_kl_sharded.py; evaluation/section4_v_to_k_information.py; evaluation/select_query_positions.py; evaluation/streaming_k_statistics.py; palu/model/modules/svd_linear.py; scripts/build_qwen35_full_attention_private_ag_joint_factors.py; scripts/build_qwen35_gdn_private_ag_joint_factors.py; scripts/collect_qwen35_full_attention_wo_activations.py; scripts/collect_qwen35_gdn_moments.py; scripts/collect_qwen35_gdn_wo_activations.py; scripts/eval_qwen35_projected_gdn_nll.py; scripts/query_position_capture.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/analysis/__init__.py,12 共用依赖,静态导入依赖，待提取,yes,Analysis helpers required by the preserved experiment entrypoints.,basisserve/analysis/activated_wo_topk_chebyshev.py; basisserve/analysis/common_private_collective.py; basisserve/analysis/o_proj_collective_ppl.py; evaluation/analyze_qwen35_activated_wo_topk_chebyshev.py; evaluation/analyze_qwen35_common_private_collective.py; evaluation/analyze_qwen35_mlp_topk_chebyshev.py; evaluation/analyze_qwen3_o_proj_collective_endpoints.py; evaluation/build_qwen3_8b_c1_lr_ar_phase1.py; evaluation/eval_attention_o_proj_collective_ppl.py; evaluation/fit_attention_o_proj_ppl_factors.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/analysis/activated_wo_topk_chebyshev.py,12 共用依赖,静态导入依赖，待提取,yes,Gate-family-aware polynomial primitives for activated output projections.,evaluation/analyze_qwen35_activated_wo_topk_chebyshev.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/analysis/c1_rigorous.py,12 共用依赖,静态导入依赖，待提取,yes,Canonical representation controls for rigorous C1 experiments.,evaluation/build_qwen3_8b_c1_lr_ar_phase1.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/analysis/common_private_collective.py,12 共用依赖,静态导入依赖，待提取,yes,Activation-aware common/private latent collective primitives.,evaluation/analyze_qwen35_common_private_collective.py; evaluation/analyze_qwen3_o_proj_collective_endpoints.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/analysis/mlp_topk_chebyshev.py,12 共用依赖,静态导入依赖，待提取,yes,Training-free MLP top-k and Chebyshev diagnostic primitives.,basisserve/analysis/activated_wo_topk_chebyshev.py; basisserve/analysis/common_private_collective.py; basisserve/analysis/o_proj_collective_ppl.py; evaluation/analyze_qwen35_activated_wo_topk_chebyshev.py; evaluation/analyze_qwen35_common_private_collective.py; evaluation/analyze_qwen35_mlp_topk_chebyshev.py; evaluation/analyze_qwen3_o_proj_collective_endpoints.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/analysis/neuron_repartition.py,13 未选入发布候选,本轮未选入,yes,Balanced neuron repartitioning for row-parallel MLP output projections.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/analysis/o_proj_collective_ppl.py,12 共用依赖,静态导入依赖，待提取,yes,Quality-equivalent output projections for row-parallel ``o_proj`` collectives.,evaluation/eval_attention_o_proj_collective_ppl.py; evaluation/fit_attention_o_proj_ppl_factors.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/calibration/gqa_joint_routing_payload_s80_stats.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Streaming sufficient statistics for the shared S80 GQA latent.,basisserve/core/gqa_joint_routing_payload_s80.py; basisserve/core/gqa_joint_routing_payload_s80_fisher.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/calibration/gqa_routed_ov_stats.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Streaming statistics for routed GQA Value/output factorization.,basisserve/calibration/gqa_joint_routing_payload_s80_stats.py; basisserve/core/gqa_routed_ov_joint.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/calibration/mlp_polynomial_snapshots.py,12 共用依赖,静态导入依赖，待提取,yes,Exact Qwen3.5 MLP tensors for top-k and polynomial diagnostics.,evaluation/analyze_qwen35_mlp_topk_chebyshev.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/calibration/mlp_snapshots.py,12 共用依赖,静态导入依赖，待提取,yes,Strict-split post-SwiGLU snapshots for Qwen3.5 MLP channel sketching.,basisserve/calibration/mlp_polynomial_snapshots.py; evaluation/analyze_qwen35_activated_wo_topk_chebyshev.py; evaluation/analyze_qwen35_gated_attention_sparsity.py; evaluation/analyze_qwen35_gdn_silu_sparsity.py; evaluation/analyze_qwen35_mlp_topk_chebyshev.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/checkpoint/__init__.py,12 共用依赖,静态导入依赖，待提取,yes,In-memory checkpoint conversion helpers.,basisserve/checkpoint/c1_lrqk_qwen3.py; basisserve/checkpoint/c1_shadowkv_qwen3.py; basisserve/checkpoint/gqa_vo_group_rank_llama.py; basisserve/checkpoint/gqa_vo_group_rank_qwen3.py; basisserve/checkpoint/gqa_vo_nemotron_h.py; evaluation/calibration_routing_quality.py; evaluation/diagnose_conjunctive_pages.py; evaluation/eval_c1_block_scheduled_ppl.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_llama_dense_v_routing128.py; evaluation/eval_longbench_c1_fourarm.py; evaluation/eval_qwen3_8b_residual_rank_ruler.py; evaluation/eval_qwen3_c1_k_reverse_shadow_ppl.py; evaluation/eval_qwen3_c1_quest_ruler.py; evaluation/fit_k_routing_streaming.py; evaluation/llama_baseline_prefill.py; evaluation/page_granularity_sweep.py; evaluation/profile_qwen3_8b_residual_two_sided_kl.py; evaluation/section4_v_to_k_information.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/checkpoint/c1_attention_layers.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Locate attention modules without treating recurrent blocks as attention.,basisserve/checkpoint/c1_lrqk_qwen3.py; basisserve/checkpoint/c1_shadowkv_qwen3.py; evaluation/calibration_routing_quality.py; evaluation/diagnose_conjunctive_pages.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_llama_dense_v_routing128.py; evaluation/fit_k_routing_streaming.py; evaluation/page_granularity_sweep.py; evaluation/section4_v_to_k_information.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/checkpoint/c1_lrqk_qwen3.py,10 论文基线,候选入口或实现,yes,"Single-stream, unpadded Qwen3 C1 inference with cache-owned LRQK state.",evaluation/diagnose_conjunctive_pages.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/llama_baseline_prefill.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/checkpoint/c1_shadowkv_qwen3.py,10 论文基线,候选入口或实现,yes,Qwen3 norm/RoPE-preserving ShadowKV adapter with resident C1 payload.,evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/checkpoint/gqa_joint_routing_payload_s80_qwen3.py,13 未选入发布候选,本轮未选入,yes,Qwen3 checkpoint and reference runtime for the S80-R32 latent.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/checkpoint/gqa_vo_group_rank_llama.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Quality-reference runtime for per-KV-group Llama GQA V/O ranks.,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/checkpoint/gqa_vo_group_rank_qwen3.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Quality-reference runtime for per-KV-group GQA V/O ranks.,basisserve/checkpoint/gqa_vo_group_rank_llama.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/checkpoint/gqa_vo_nemotron_h.py,12 共用依赖,静态导入依赖，待提取,yes,C1 value coordinates at Nemotron-H's unrotated full-attention boundary.,evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/checkpoint/gqa_vo_qwen3.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Install folded GQA-tied V/O factors into Hugging Face Qwen3 attention.,basisserve/checkpoint/c1_lrqk_qwen3.py; basisserve/checkpoint/c1_shadowkv_qwen3.py; basisserve/checkpoint/gqa_vo_group_rank_qwen3.py; basisserve/checkpoint/gqa_vo_nemotron_h.py; evaluation/eval_c1_block_scheduled_ppl.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_longbench_c1_fourarm.py; evaluation/eval_qwen3_8b_residual_rank_ruler.py; evaluation/eval_qwen3_c1_k_reverse_shadow_ppl.py; evaluation/eval_qwen3_c1_quest_ruler.py; evaluation/profile_qwen3_8b_residual_two_sided_kl.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/checkpoint/pairwise_k_qwen3.py,13 未选入发布候选,本轮未选入,yes,Reference Qwen3 runtime for pairwise cross-layer historical Key caches.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/__init__.py,12 共用依赖,静态导入依赖，待提取,yes,Portable BASISServe runtime configuration and communication primitives.,basisserve/calibration/mlp_snapshots.py; basisserve/checkpoint/__init__.py; basisserve/checkpoint/c1_lrqk_qwen3.py; basisserve/checkpoint/c1_shadowkv_qwen3.py; basisserve/checkpoint/gqa_vo_qwen3.py; basisserve/core/__init__.py; basisserve/core/c1_block_commit.py; basisserve/core/c1_k_reverse_shadow.py; basisserve/core/c1_k_routing_sidecar.py; basisserve/core/c1_loki_attention.py; basisserve/core/c1_tp_feature_decode.py; basisserve/core/decoder_closed_rank_candidates.py; basisserve/core/gqa_joint_routing_payload_s80.py; basisserve/core/gqa_joint_routing_payload_s80_ablation.py; basisserve/core/gqa_joint_routing_payload_s80_fisher.py; basisserve/core/gqa_routed_ov_joint.py; basisserve/core/llama_nuq4_quality.py; basisserve/core/qwen35_full_attention_private_ag_runtime.py; basisserve/core/qwen35_gated_v_als.py; basisserve/core/qwen35_gdn_private_ag.py; basisserve/core/qwen35_gdn_private_ag_runtime.py; basisserve/core/qwen35_hybrid_output_runtime.py; basisserve/core/qwen35_k_routing_runtime.py; basisserve/core/qwen35_postgate_topk.py; basisserve/core/qwen35_vllm_hybrid.py; basisserve/core/qwen3_32b_vllm_c1.py; basisserve/core/residual_kl_replay.py; basisserve/core/topk_all_gather.py; basisserve/core/tp_source_wo_fit.py; basisserve/vllm/qwen35_hybrid.py; basisserve/vllm/qwen3_8b_c1.py; benchmarks/system/bench_llama31_8b_tp8_combined.py; evaluation/allocate_qwen3_32b_c1_tp_source_global_kl.py; evaluation/analyze_qwen35_gated_attention_sparsity.py; evaluation/analyze_qwen35_gdn_silu_sparsity.py; evaluation/assemble_qwen35_128k_v_bank.py; evaluation/assemble_qwen35_k_routing_v.py; evaluation/benchmark_vllm_qwen3_32b_c1.py; evaluation/benchmark_vllm_qwen3_8b_c1.py; evaluation/build_qwen3_8b_c1_lr_ar_phase1.py; evaluation/build_qwen3_8b_c1_two_sided_factorized_kl_schedule.py; evaluation/calibrate_llama_nuq4.py; evaluation/calibration_routing_quality.py; evaluation/capture_k_routing.py; evaluation/capture_qwen35_k_routing.py; evaluation/compact_routing_sidecar.py; evaluation/diagnose_conjunctive_pages.py; evaluation/eval_c1_block_scheduled_ppl.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_llama_adaptive_nuq4_c4.py; evaluation/eval_llama_dense_v_routing128.py; evaluation/eval_longbench_c1_fourarm.py; evaluation/eval_qwen35_128k_ruler.py; evaluation/eval_qwen35_hybrid_gsm8k.py; evaluation/eval_qwen35_hybrid_private_ag_ppl.py; evaluation/eval_qwen35_k_routing_ruler.py; evaluation/eval_qwen3_32b_c1_wikitext.py; evaluation/eval_qwen3_8b_residual_rank_ruler.py; evaluation/eval_qwen3_8b_v80_base16_page32_budget_sweep.py; evaluation/eval_qwen3_8b_v80_conditional_residual_router.py; evaluation/eval_qwen3_8b_v80_fisher_base.py; evaluation/eval_qwen3_8b_v80_pre_rope_fisher_base.py; evaluation/eval_qwen3_c1_k_reverse_shadow_ppl.py; evaluation/eval_qwen3_kv4_fp8_ppl.py; evaluation/fit_k_routing_streaming.py; evaluation/fit_llama2_mha_c1_joint.py; evaluation/fit_qwen35_128k_k_routing.py; evaluation/fit_qwen35_128k_v.py; evaluation/fit_qwen35_k_routing_v.py; evaluation/fit_qwen3_8b_q8_fisher_residual.py; evaluation/fit_qwen3_8b_qaware_base_fisher_bank.py; evaluation/fit_qwen3_8b_v80_base16_r8_nonsink_page32.py; evaluation/install_nemotron_h_wo.py; evaluation/k_routing_capture_windows.py; evaluation/kv_fp8_simulation.py; evaluation/llama_baseline_prefill.py; evaluation/llama_sink_recent_routing.py; evaluation/llama_sink_recent_routing_p16.py; evaluation/longbench_exact_pages.py; evaluation/pack_qwen3_32b_uniform_c1_tp.py; evaluation/prepare_llama31_8b_tp8_combined_factors.py; evaluation/prepare_qwen35_128k_identity.py; evaluation/profile_qwen3_8b_residual_two_sided_kl.py; evaluation/qwen35_hybrid_banks.py; evaluation/qwen35_hybrid_common.py; evaluation/refit_router_from_statistics.py; evaluation/run_qwen35_hybrid.py; evaluation/run_qwen3_32b_c1_layer_global_kl_sharded.py; evaluation/run_qwen3_32b_c1_tp_source_global_kl_sharded.py; evaluation/select_query_positions.py; evaluation/streaming_k_statistics.py; palu/model/modules/svd_linear.py; scripts/build_qwen35_full_attention_private_ag_joint_factors.py; scripts/build_qwen35_gdn_private_ag_joint_factors.py; scripts/collect_qwen35_full_attention_wo_activations.py; scripts/collect_qwen35_gdn_moments.py; scripts/collect_qwen35_gdn_wo_activations.py; scripts/eval_qwen35_projected_gdn_nll.py; scripts/query_position_capture.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/attention_tp_layout.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Attention-layout checks for MHA/GQA/MQA tensor parallelism.,basisserve/core/__init__.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/c1_block_commit.py,12 共用依赖,静态导入依赖，待提取,yes,Exact C1 block-schedule diagnostics and teacher-forced NLL evaluation.,evaluation/eval_c1_block_scheduled_ppl.py; evaluation/eval_qwen3_c1_k_reverse_shadow_ppl.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/c1_conditional_page_attention.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Full-query Page32 attention for a C1 conditional Key router.,basisserve/checkpoint/gqa_vo_qwen3.py; basisserve/core/qwen35_k_routing_runtime.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_qwen3_8b_residual_rank_ruler.py; evaluation/llama_sink_recent_routing.py; evaluation/llama_sink_recent_routing_p16.py; evaluation/longbench_exact_pages.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/c1_conditional_recent_attention.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Accuracy reference: unchanged page routing plus an exact recent64 token union.,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/c1_e2e_latency.py,13 未选入发布候选,本轮未选入,yes,Trace-driven latency algebra for the C1 TP8 decode serving path.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/c1_k_offload.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,Pinned-CPU exact-Key offload with GPU-resident KQ routing and C1 Values.,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/c1_k_output_closure.py,13 未选入发布候选,本轮未选入,yes,Output-aware post-RoPE K/Q closure for compressed-V GQA attention.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/c1_k_proxy_fit.py,13 未选入发布候选,本轮未选入,yes,Training-free raw-score fitting for post-RoPE C1 Key proxies.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/c1_k_refine.py,12 共用依赖,静态导入依赖，待提取,yes,C1-KRefine correctness oracles for low-rank Key proxies.,basisserve/core/c1_k_reverse_shadow.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/c1_k_reverse_shadow.py,12 共用依赖,静态导入依赖，待提取,yes,Correctness oracle for K-only Reverse ShadowKV with resident C1 Values.,basisserve/checkpoint/gqa_vo_qwen3.py; evaluation/eval_qwen3_c1_k_reverse_shadow_ppl.py; evaluation/profile_qwen3_8b_residual_two_sided_kl.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/c1_k_routing_sidecar.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Low-dimensional post-RoPE Key sidecars for exact-Key page offload.,basisserve/checkpoint/gqa_vo_qwen3.py; basisserve/core/c1_k_reverse_shadow.py; basisserve/core/c1_loki_attention.py; basisserve/core/residual_kl_replay.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_longbench_c1_fourarm.py; evaluation/eval_qwen3_8b_residual_rank_ruler.py; evaluation/llama_baseline_prefill.py; evaluation/profile_qwen3_8b_residual_two_sided_kl.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/c1_loki_attention.py,10 论文基线,候选入口或实现,yes,Loki PCA Top-K attention with a resident compressed C1 Value cache.,basisserve/checkpoint/gqa_vo_qwen3.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_llama_dense_v_routing128.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/c1_lrqk.py,10 论文基线,候选入口或实现,yes,LRQK factor equations with resident exact K / C1-V payload (quality reference).,basisserve/checkpoint/c1_lrqk_qwen3.py; basisserve/core/qwen35_k_routing_runtime.py; evaluation/diagnose_conjunctive_pages.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/c1_official_quest.py,13 未选入发布候选,本轮未选入,yes,Call the unmodified upstream QUEST accuracy forward on Qwen3 C1 tensors.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/c1_prompt_core.py,13 未选入发布候选,本轮未选入,yes,"Fixed-subspace prompt core: exact damped quadratic solves, no optimizer.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/c1_residual_spectral.py,13 未选入发布候选,本轮未选入,yes,Closed-form shared-query-metric rank-r residual projection.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/c1_routing_comparison.py,13 未选入发布候选,本轮未选入,yes,Matched-budget routing baselines with the existing C1 attention module.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/c1_shadow_kv.py,12 共用依赖,静态导入依赖，待提取,yes,Reference shadow-Key quantization and transactional C1 KV cache.,basisserve/core/c1_block_commit.py; evaluation/eval_c1_block_scheduled_ppl.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/c1_shadowkv.py,10 论文基线,候选入口或实现,yes,ShadowKV accuracy equations with resident C1 values.,basisserve/checkpoint/c1_shadowkv_qwen3.py; basisserve/core/qwen35_k_routing_runtime.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/c1_speculative_decode.py,13 未选入发布候选,本轮未选入,yes,Greedy shadow-Key speculative verification for a deployed C1 model.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/c1_strict_recent_decode.py,13 未选入发布候选,本轮未选入,no,Triton C1 routing/decode with sink32 and two recent physical Page32s.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/c1_tp_decode.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,C1 factor loading and the post-attention TP decode boundary.,basisserve/core/c1_tp_feature_decode.py; evaluation/eval_c1_block_scheduled_ppl.py; evaluation/pack_qwen3_32b_uniform_c1_tp.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/c1_tp_feature_decode.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,Feature-major transport backend for the validated C1 TP serving boundary.,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/c1_v_conditional_k_router.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,V-conditioned predictive-base and residual-Key routing primitives.,basisserve/checkpoint/gqa_vo_qwen3.py; evaluation/calibration_routing_quality.py; evaluation/compact_routing_sidecar.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_qwen3_8b_v80_conditional_residual_router.py; evaluation/eval_qwen3_8b_v80_fisher_base.py; evaluation/eval_qwen3_8b_v80_pre_rope_fisher_base.py; evaluation/fit_k_routing_streaming.py; evaluation/fit_qwen3_8b_q8_fisher_residual.py; evaluation/fit_qwen3_8b_qaware_base_fisher_bank.py; evaluation/fit_qwen3_8b_v80_base16_r8_nonsink_page32.py; evaluation/profile_qwen3_8b_residual_two_sided_kl.py; evaluation/streaming_k_statistics.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/c1_v_k_index.py,12 共用依赖,静态导入依赖，待提取,yes,C1-Value-derived retrieval indexes for exact Key page selection.,basisserve/core/qwen35_k_routing_runtime.py; evaluation/eval_qwen3_8b_v80_conditional_residual_router.py; evaluation/fit_qwen35_128k_k_routing.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/c1_variable_v_attention.py,13 未选入发布候选,本轮未选入,yes,Rank-local C1 attention with a variable-width Value cache.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/chunk8_fisher_routing.py,13 未选入发布候选,本轮未选入,yes,Chunk8 landmark routing with a hard physical-token budget.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/chunk_fisher_landmark.py,13 未选入发布候选,本轮未选入,yes,Direct Chunk8 Fisher landmarks for GQA Key routing.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/compact_v_flash.py,12 共用依赖,静态导入依赖，待提取,yes,Fused attention over selected exact K and compact V support.,basisserve/core/qwen35_k_routing_runtime.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/decoder_closed_rank_candidates.py,12 共用依赖,静态导入依赖，待提取,yes,"Utilities for decoder-closed, budget-preserving GQA rank candidates.",evaluation/allocate_qwen3_32b_c1_tp_source_global_kl.py; evaluation/pack_qwen3_32b_uniform_c1_tp.py; evaluation/run_qwen3_32b_c1_layer_global_kl_sharded.py; evaluation/run_qwen3_32b_c1_tp_source_global_kl_sharded.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/deepseek_v2_lite_tp4_c1.py,13 未选入发布候选,本轮未选入,yes,DeepSeek-V2-Lite TP4 C1 attention-output communication runtime.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/exact_qk_v_offload.py,12 共用依赖,静态导入依赖，待提取,yes,Exact-QK selection primitives for Value-offload quality ceilings.,basisserve/core/c1_k_reverse_shadow.py; basisserve/core/c1_k_routing_sidecar.py; basisserve/core/gqa_joint_routing_payload_s80_fisher.py; evaluation/eval_qwen3_8b_v80_base16_page32_budget_sweep.py; evaluation/eval_qwen3_8b_v80_conditional_residual_router.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/fp8_value_latent.py,12 共用依赖,静态导入依赖，待提取,yes,Page-scaled E4M3 storage for routing-aligned Value coordinates.,evaluation/kv_fp8_simulation.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/global_rank_sensitivity.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,End-to-end teacher metrics and pairwise rank-schedule moves.,basisserve/core/__init__.py; evaluation/allocate_qwen3_32b_c1_tp_source_global_kl.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/gqa_joint_routing_payload_s80.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Joint Store80/Route32/Payload80 optimization for GQA attention.,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/gqa_joint_routing_payload_s80_ablation.py,12 共用依赖,静态导入依赖，待提取,yes,Page-Fisher router refits used by Store80 capacity-sharing ablations.,evaluation/eval_qwen3_8b_v80_conditional_residual_router.py; evaluation/eval_qwen3_8b_v80_fisher_base.py; evaluation/eval_qwen3_8b_v80_pre_rope_fisher_base.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/gqa_joint_routing_payload_s80_fisher.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Forward-only token and page Fisher routing for the shared Store80 latent.,basisserve/core/gqa_joint_routing_payload_s80.py; basisserve/core/gqa_joint_routing_payload_s80_ablation.py; evaluation/eval_qwen3_8b_v80_base16_page32_budget_sweep.py; evaluation/eval_qwen3_8b_v80_conditional_residual_router.py; evaluation/eval_qwen3_8b_v80_fisher_base.py; evaluation/eval_qwen3_8b_v80_pre_rope_fisher_base.py; evaluation/fit_k_routing_streaming.py; evaluation/fit_qwen35_128k_k_routing.py; evaluation/fit_qwen3_8b_q8_fisher_residual.py; evaluation/fit_qwen3_8b_v80_base16_r8_nonsink_page32.py; evaluation/refit_router_from_statistics.py; evaluation/streaming_k_statistics.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/gqa_page_output_pullback.py,13 未选入发布候选,本轮未选入,yes,C1-aware Page64 output-pullback metrics for K-only routing.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/gqa_routed_ov_joint.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Anchor-agnostic routed GQA Value/output joint factorization.,basisserve/core/decoder_closed_rank_candidates.py; basisserve/core/gqa_joint_routing_payload_s80.py; basisserve/core/gqa_joint_routing_payload_s80_ablation.py; basisserve/core/qwen35_gated_v_als.py; basisserve/core/tp_source_wo_fit.py; evaluation/allocate_qwen3_32b_c1_tp_source_global_kl.py; evaluation/fit_llama2_mha_c1_joint.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/gqa_vo_svdllm.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,GQA-tied weight-only and activation-whitened V/O factorization utilities.,basisserve/core/__init__.py; basisserve/core/gqa_routed_ov_joint.py; evaluation/eval_qwen3_32b_c1_wikitext.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/iterative_least_squares.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Matrix-free least-squares solvers.,basisserve/core/gqa_joint_routing_payload_s80.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/joint_aa_gqa_o.py,13 未选入发布候选,本轮未选入,yes,Joint activation-aware GQA-structured ``o_proj`` factorization.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/kq_svd.py,12 共用依赖,静态导入依赖，待提取,yes,Closed-form post-RoPE Key/Query compression for grouped-query attention.,basisserve/checkpoint/gqa_vo_qwen3.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/latent_a8_tp.py,13 未选入发布候选,本轮未选入,yes,Prepared exact-width latent transport and BF16/FP8 decoder boundary.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/layer_ahead_prefetch.py,13 未选入发布候选,本轮未选入,yes,Utilities for layer-ahead exact-Key page prefetch oracles.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/llama31_8b_tp8_combined.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,Llama-3.1-8B TP8 Joint-ALS V96 with B16R16 exact-K routing.,benchmarks/system/bench_llama31_8b_tp8_combined.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/llama_adaptive_nuq4_quality.py,12 共用依赖,静态导入依赖，待提取,yes,Structure-validated Llama adaptive C1 factors for NUQ4 quality evaluation.,evaluation/eval_llama_adaptive_nuq4_c4.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/llama_c1_ruler.py,13 未选入发布候选,本轮未选入,no,Llama C1 runtime with exact K and two recent physical pages in sparse decode.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/llama_nuq4_quality.py,12 共用依赖,静态导入依赖，待提取,yes,Structure-only Llama C1 factors and the frozen NUQ4 quality protocol.,evaluation/calibrate_llama_nuq4.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/llama_tp4_c1_system.py,13 未选入发布候选,本轮未选入,yes,Llama TP4 C1 serving with transformed split V and exact local/mapped K.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/llama_tp4_k_offload.py,13 未选入发布候选,本轮未选入,yes,"Llama K128 TP4 caches, dense prefill and B16R16 mapped-host decode.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/low_rank_config.py,12 共用依赖,静态导入依赖，待提取,yes,Portable low-rank KV metadata used by BASISServe integrations.,basisserve/core/__init__.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/metric_rank_allocation.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Exact metric-and-rank allocation with paired multi-domain risk controls.,evaluation/allocate_qwen3_32b_c1_tp_source_global_kl.py; evaluation/build_qwen3_8b_c1_two_sided_factorized_kl_schedule.py; evaluation/run_qwen3_32b_c1_layer_global_kl_sharded.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/mlp_coordinate_c1.py,13 未选入发布候选,本轮未选入,yes,Coordinate-selected C1 decoders for row-parallel MLP outputs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/mlp_down_c1.py,13 未选入发布候选,本轮未选入,yes,Shared-code C1 compression for row-parallel MLP ``down_proj`` layers.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/mlp_gram_srrqr.py,13 未选入发布候选,本轮未选入,yes,Static TP-local MLP channel selection from contribution Gram matrices.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/nemotron_h_c1.py,13 未选入发布候选,本轮未选入,yes,Nemotron-H hybrid-layer adapters for TP-source C1 output projections.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/page_routing_decomposition.py,13 未选入发布候选,本轮未选入,yes,Diagnostics for page-logit linearization and Top-page boundaries.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/page_selection_comparison.py,13 未选入发布候选,本轮未选入,yes,Audit physical page sets against an exact-QK GQA-max selector.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/pairwise_k_sparse.py,13 未选入发布候选,本轮未选入,yes,QUEST page sparsity over completed pairwise/independent latent K history.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/pairwise_kq_svd.py,13 未选入发布候选,本轮未选入,yes,Closed-form activation-aware KQ-SVD for adjacent-layer shared Key codes.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/pairwise_qr.py,13 未选入发布候选,本轮未选入,yes,Pairwise tall-skinny QR reduction.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/query_cpqr_audit.py,13 未选入发布候选,本轮未选入,yes,Compare feature-space CPQR with the existing position-Gram selector.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/query_position_sampling.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,"Deterministic stratified pivots of uncentered, head-whitened Query Grams.",evaluation/capture_k_routing.py; evaluation/capture_qwen35_k_routing.py; evaluation/fit_k_routing_streaming.py; evaluation/fit_qwen35_128k_k_routing.py; evaluation/k_routing_capture_windows.py; evaluation/select_query_positions.py; scripts/query_position_capture.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/query_srrqr_audit.py,13 未选入发布候选,本轮未选入,yes,Full-Gram isometry for query-position strong-RRQR diagnostics.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen35_fp8_private_ag.py,13 未选入发布候选,本轮未选入,yes,Static-scaled FP8 communication simulation for Qwen3.5 Private AllGather.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen35_full_attention_private_ag_runtime.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Private-AllGather runtime for Qwen3.5 gated full-attention outputs.,basisserve/core/qwen35_hybrid_output_runtime.py; evaluation/eval_qwen35_hybrid_private_ag_ppl.py; scripts/build_qwen35_full_attention_private_ag_joint_factors.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/qwen35_gated_v_als.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Group-shared V reconstruction with token-dependent output gates.,evaluation/fit_qwen35_128k_v.py; evaluation/fit_qwen35_k_routing_v.py; evaluation/run_qwen35_hybrid.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/qwen35_gated_v_runtime.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Compact V-only attention adapter for Transformers' layered hybrid cache.,basisserve/core/qwen35_hybrid_output_runtime.py; basisserve/core/qwen35_k_routing_runtime.py; evaluation/assemble_qwen35_128k_v_bank.py; evaluation/assemble_qwen35_k_routing_v.py; evaluation/eval_qwen35_hybrid_gsm8k.py; evaluation/fit_qwen35_128k_k_routing.py; evaluation/qwen35_hybrid_banks.py; evaluation/qwen35_hybrid_common.py; evaluation/run_qwen35_hybrid.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/qwen35_gated_wo_foldability.py,12 共用依赖,静态导入依赖，待提取,yes,U=I foldability oracles for Qwen3.5 gated full-attention outputs.,evaluation/analyze_qwen35_gated_attention_sparsity.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/qwen35_gdn_foldability.py,12 共用依赖,静态导入依赖，待提取,yes,"State, RMSNorm, and SiLU-gate foldability oracles for Qwen3.5 GDN.",evaluation/analyze_qwen35_gdn_silu_sparsity.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/qwen35_gdn_private_ag.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Decoder-closed C1 ALS factors for Qwen3.5 GDN output wires.,scripts/build_qwen35_gdn_private_ag_joint_factors.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/qwen35_gdn_private_ag_runtime.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Single-process equivalent runtime for Qwen3.5 GDN Private AllGather.,basisserve/core/qwen35_full_attention_private_ag_runtime.py; basisserve/core/qwen35_hybrid_output_runtime.py; basisserve/core/qwen35_vllm_hybrid.py; evaluation/eval_qwen35_128k_ruler.py; evaluation/eval_qwen35_hybrid_private_ag_ppl.py; evaluation/fit_qwen35_128k_k_routing.py; evaluation/prepare_qwen35_128k_identity.py; scripts/build_qwen35_gdn_private_ag_joint_factors.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/qwen35_gdn_runtime.py,12 共用依赖,静态导入依赖，待提取,yes,No-cache projected-state runtime for Qwen3.5 Gated DeltaNet.,basisserve/calibration/mlp_snapshots.py; basisserve/core/qwen35_full_attention_private_ag_runtime.py; basisserve/core/qwen35_gdn_private_ag_runtime.py; basisserve/core/qwen35_postgate_topk.py; scripts/eval_qwen35_projected_gdn_nll.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/qwen35_gdn_state.py,12 共用依赖,静态导入依赖，待提取,yes,Projected recurrent-state algebra for Qwen3.5 Gated DeltaNet.,scripts/collect_qwen35_gdn_moments.py; scripts/collect_qwen35_gdn_wo_activations.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/qwen35_global_aa_svd.py,13 未选入发布候选,本轮未选入,yes,Global activation-aware SVD for Qwen3.5 TP output AllReduce.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen35_hybrid_output_runtime.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Compose frozen compact V with the existing single-process Private AG.,evaluation/eval_qwen35_hybrid_gsm8k.py; evaluation/run_qwen35_hybrid.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/qwen35_k_routing_runtime.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Qwen3.5 routing policies with shared full Flash prefill and exact selected attention.,evaluation/eval_qwen35_128k_ruler.py; evaluation/eval_qwen35_k_routing_ruler.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/qwen35_mlp_tp_cp.py,13 未选入发布候选,本轮未选入,yes,Logical-group TP-coupled latent MLPs for Qwen3.5.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen35_postgate_topk.py,12 共用依赖,静态导入依赖，待提取,yes,Runtime post-gate Top-K interventions for Qwen3.5 hybrid layers.,evaluation/eval_qwen35_hybrid_private_ag_ppl.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/qwen35_vllm_hybrid.py,12 共用依赖,静态导入依赖，待提取,yes,Gated V computation in standard-width cache slots for vLLM quality tests.,basisserve/vllm/qwen35_hybrid.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/qwen35_wo_wire.py,12 共用依赖,静态导入依赖，待提取,yes,Spectrum utilities for Qwen3.5 GDN output-projection wires.,scripts/collect_qwen35_full_attention_wo_activations.py; scripts/collect_qwen35_gdn_wo_activations.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/qwen3_32b_tp4_decode.py,12 共用依赖,静态导入依赖，待提取,yes,Qwen3-32B TP4 static-cache runtime for dense and ragged C1 attention.,basisserve/core/qwen3_32b_vllm_c1.py; evaluation/benchmark_vllm_qwen3_32b_c1.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/qwen3_32b_vllm_c1.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,Serving-ready C1 factors for the Qwen3-32B vLLM integration.,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/qwen3_8b_tp4_decode.py,13 未选入发布候选,本轮未选入,yes,Qwen3-8B TP4 static-cache runtime for dense and C1 attention.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen3_8b_tp4_k_offload.py,13 未选入发布候选,本轮未选入,yes,Mapped-host exact-Key offload for the Qwen3-8B TP4 C1 runtime.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen3_8b_vllm_c1.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,Validated uniform R64 factors for Qwen3-8B and Qwen3-32B TP8 serving.,basisserve/vllm/qwen3_8b_c1.py; evaluation/benchmark_vllm_qwen3_8b_c1.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/qwen3_8b_vllm_folded_c1.py,13 未选入发布候选,本轮未选入,yes,Authenticated Qwen3-8B C1 folding for a standard vLLM KV cache.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen3_8b_vllm_folded_palu.py,13 未选入发布候选,本轮未选入,yes,Authenticated Qwen3-8B PaLU M/G2/G4 folding for standard vLLM.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen3_8b_wo_tp4.py,13 未选入发布候选,本轮未选入,yes,Actual TP4 runtime for Qwen3-8B Wo-only collective compression.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen3_kv4_fp8_quality.py,12 共用依赖,静态导入依赖，待提取,yes,Single-GPU NUQ cache simulation and real E4M3 encoder/decoder GEMMs.,basisserve/core/llama_nuq4_quality.py; evaluation/calibrate_llama_nuq4.py; evaluation/eval_llama_adaptive_nuq4_c4.py; evaluation/eval_qwen3_kv4_fp8_ppl.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/qwen3_latent_a8_quality.py,13 未选入发布候选,本轮未选入,yes,Isolate latent wire quantization from decoder weight quantization.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen3_nuq4_artifacts.py,13 未选入发布候选,本轮未选入,yes,Structure-only serving inputs from the frozen Qwen3-8B-Base PPL run.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen3_tp4_quant_quality.py,13 未选入发布候选,本轮未选入,yes,TP4 quality reference: KVQuant NUQ4 numerics plus real INT4/FP8 wire.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/qwen3_tp8_v_only.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,Qwen3 TP8 full-attention memory placement for STAR-KV V-only and Basis V64.,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/qwen_suffix_replay.py,12 共用依赖,静态导入依赖，待提取,yes,Exact batch-local suffix replay for Qwen-style decoder models.,evaluation/run_qwen3_32b_c1_layer_global_kl_sharded.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/residual_kl_replay.py,12 共用依赖,静态导入依赖，待提取,yes,Read-only prefix forks and exact layer-suffix replay for routing KL probes.,evaluation/eval_longbench_c1_fourarm.py; evaluation/eval_qwen3_8b_residual_rank_ruler.py; evaluation/profile_qwen3_8b_residual_two_sided_kl.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/residual_mass_recall.py,13 未选入发布候选,本轮未选入,yes,Teacher-query attention-mass diagnostics for the deployed page selector.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/residual_page_ranking.py,13 未选入发布候选,本轮未选入,yes,Local alternating least-squares repair of physical GQA page misrankings.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/routed_decoder_design.py,13 未选入发布候选,本轮未选入,yes,Numerically stable design-matrix solvers for routed output decoders.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/routing_basis.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Invertible C1 change of coordinates with exact Base coordinates first.,evaluation/prepare_llama31_8b_tp8_combined_factors.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/sampled_terminal_kl.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Exact terminal-KL statistics on nested samples of token positions.,evaluation/run_qwen3_32b_c1_layer_global_kl_sharded.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/sequential_rank_exchange.py,12 共用依赖,静态导入依赖，待提取,yes,Pure helpers for sequential exact-budget rank-pair exchange.,basisserve/core/__init__.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/shadowkv_tp8.py,13 未选入发布候选,本轮未选入,yes,Owner-rotated global ShadowKV factor construction for TP8.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/shadowkv_tp8_attention.py,13 未选入发布候选,本轮未选入,yes,TP8 model adapter around the official ShadowKV CPU-offload cache.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/strong_rrqr.py,12 共用依赖,静态导入依赖，待提取,yes,Deterministic strong-RRQR bases for activation-aware low-rank maps.,palu/model/modules/svd_linear.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/topk_all_gather.py,12 共用依赖,静态导入依赖，待提取,yes,Fixed-size Top-K packets for source-local tensor-parallel AllGather.,basisserve/core/__init__.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/core/tp_output.py,10 论文基线,候选入口或实现,yes,Low-rank communication for tensor-parallel output projections.,basisserve/checkpoint/__init__.py; basisserve/core/__init__.py; basisserve/core/topk_all_gather.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/tp_source_svd.py,13 未选入发布候选,本轮未选入,yes,Unregularized independent SVD with full within-TP-source second moments.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/tp_source_wo_c1.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,TP-source C1 factors at the post-attention ``W_o`` boundary.,basisserve/core/qwen35_gdn_private_ag.py; basisserve/core/tp_source_wo_fit.py; evaluation/build_qwen3_8b_c1_lr_ar_phase1.py; evaluation/install_nemotron_h_wo.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/tp_source_wo_fit.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Generic activation-aware C1 fitting for TP-source output projections.,basisserve/core/qwen35_gdn_private_ag.py; evaluation/build_qwen3_8b_c1_lr_ar_phase1.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/core/v_k_linear_probe.py,13 未选入发布候选,本轮未选入,yes,Headwise linear probes from Value features to Key features.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/core/v_qk_score_probe.py,13 未选入发布候选,本轮未选入,yes,Head-specific linear Value-to-QK routing probes.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/diagnostics/qwen35_gated_attention_sparsity.py,12 共用依赖,静态导入依赖，待提取,yes,Offline effective-sparsity diagnostics for Qwen3.5 gated attention.,evaluation/analyze_qwen35_activated_wo_topk_chebyshev.py; evaluation/analyze_qwen35_common_private_collective.py; evaluation/analyze_qwen35_gated_attention_sparsity.py; evaluation/analyze_qwen35_gdn_silu_sparsity.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/diagnostics/similarity.py,13 未选入发布候选,本轮未选入,yes,Numerically explicit representation-similarity diagnostics.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/kernels/c1_r32_routing.py,12 共用依赖,静态导入依赖，待提取,yes,CUDA routing kernels for the Qwen3 GQA4 R32 page selector.,basisserve/checkpoint/gqa_vo_qwen3.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/kernels/compact_base_routing.py,05 推理内核与 TP 通信,候选入口或实现,yes,"Score a compact [Base4 V-code, Residual16 code] cache without materialized Base K.",,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/compressed_v_decode_attention.py,05 推理内核与 TP 通信,候选入口或实现,yes,Fused GQA for dense keys and compressed Value caches.,basisserve/checkpoint/c1_lrqk_qwen3.py; basisserve/checkpoint/c1_shadowkv_qwen3.py; basisserve/checkpoint/gqa_vo_qwen3.py; basisserve/core/c1_lrqk.py; basisserve/core/c1_shadowkv.py; basisserve/core/qwen3_32b_tp4_decode.py; basisserve/vllm/compact_v_backend.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/official_shadowkv_cpu.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/compressed_v_decode_cuda.py,05 推理内核与 TP 通信,候选入口或实现,yes,JIT loader for exact-rank grouped-GQA CUDA decode attention.,basisserve/kernels/c1_r32_routing.py; basisserve/kernels/compressed_v_decode_attention.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/c1_r32_routing.cu,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/kernels/csrc/compressed_v_decode_attention.cpp,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/compressed_v_decode_attention.cu,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/compressed_v_decode_attention_traits.cuh,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/conditional_router_page32.cu,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/feature_ragged_allgather.cpp,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/feature_ragged_allgather_common.h,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/feature_ragged_allgather_pack.cu,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/feature_uniform_allgather_ipc.cu,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/fused_decode_postprocess.cu,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/mapped_host_paged_attention.cpp,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/mapped_host_paged_attention.cu,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/persistent_key_slots.cu,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/ragged_allgather.cpp,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/ragged_allgather_common.h,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/ragged_allgather_pack.cu,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/csrc/selected_key_reuse.cu,05 推理内核与 TP 通信,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/diffkv_decode.py,05 推理内核与 TP 通信,候选入口或实现,yes,SM89 decode attention for QK128 GQA with four or eight local heads.,basisserve/vllm/diffkv_attention.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/diffkv_prefill.py,05 推理内核与 TP 通信,候选入口或实现,yes,SM89 QK128 paged prefill specialization for V64 and V96.,basisserve/vllm/diffkv_attention.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/feature_ragged_allgather.py,05 推理内核与 TP 通信,候选入口或实现,yes,Feature-major TP transport for compact C1 coordinates.,basisserve/core/c1_tp_feature_decode.py; basisserve/core/llama31_8b_tp8_combined.py; basisserve/core/qwen3_32b_tp4_decode.py; basisserve/vllm/prepared_c1_output.py; benchmarks/system/bench_llama31_8b_tp8_combined.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/fp32_matmul.py,05 推理内核与 TP 通信,候选入口或实现,yes,"Explicit FP32-input, FP32-accumulation TF32x3 matrix multiplication.",,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/fp8_wire.py,12 共用依赖,静态导入依赖，待提取,yes,Static-scaled E4M3 communication-wire utilities.,basisserve/core/fp8_value_latent.py; basisserve/core/qwen3_32b_tp4_decode.py; basisserve/core/qwen3_kv4_fp8_quality.py; basisserve/kernels/feature_ragged_allgather.py; evaluation/kv_fp8_simulation.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/kernels/gqa_slot_attention.py,05 推理内核与 TP 通信,候选入口或实现,yes,Shared-KV GQA split attention with independent K-slot and V-token indices.,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/indexed_sparse_decode_attention.py,05 推理内核与 TP 通信,候选入口或实现,yes,GQA-aware sparse routing and attention kernels for one-token decode.,basisserve/core/c1_conditional_page_attention.py; basisserve/core/c1_conditional_recent_attention.py; basisserve/core/c1_loki_attention.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/int4_wire.py,13 未选入发布候选,本轮未选入,yes,Reference packed INT4 latent communication (not KVQuant NUQ).,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/kernels/latent_a8_pack.py,13 未选入发布候选,本轮未选入,yes,Fused E4M3 conversion into/out of the feature-major communication arena.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/kernels/mapped_host_paged_attention.py,05 推理内核与 TP 通信,候选入口或实现,yes,GPU-driven paged K128 attention over CUDA-mapped host memory.,basisserve/core/c1_conditional_page_attention.py; basisserve/core/c1_conditional_recent_attention.py; basisserve/core/llama31_8b_tp8_combined.py; benchmarks/system/bench_llama31_8b_tp8_combined.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/nuq4_attention.py,13 未选入发布候选,本轮未选入,yes,Full-context attention reading packed NUQ4 pages directly.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/kernels/nuq4_cache.py,13 未选入发布候选,本轮未选入,yes,Packed NUQ4 pages with lossless BF16 exceptions.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/kernels/nuq4_decode.py,13 未选入发布候选,本轮未选入,yes,GQA4 split-K decode directly from packed NUQ4 pages.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/kernels/nuq4_prefill.py,13 未选入发布候选,本轮未选入,yes,"Bounded, layer-local BF16 staging from quantized pages for prefill only.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/kernels/output_sharded_decoder.py,13 未选入发布候选,本轮未选入,yes,Output-sharded tensor-parallel decoder collectives.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/kernels/pipelined_allgather_decoder.py,13 未选入发布候选,本轮未选入,yes,Overlap uniform tensor-parallel AllGather waves with partial decoding.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/kernels/ragged_allgather.py,05 推理内核与 TP 通信,候选入口或实现,yes,Compiled static-ragged NCCL AllGather and decode runtime.,basisserve/core/c1_tp_decode.py; basisserve/core/llama31_8b_tp8_combined.py; basisserve/core/qwen3_32b_tp4_decode.py; basisserve/kernels/feature_ragged_allgather.py; basisserve/vllm/prepared_c1_output.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/rank_major_decoder.py,13 未选入发布候选,本轮未选入,yes,Decoder GEMM over tensor-parallel rank-major AllGather output.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/kernels/sageattention.py,12 共用依赖,静态导入依赖，待提取,yes,Optional SageAttention bridge for compressed-Value attention.,basisserve/checkpoint/gqa_vo_group_rank_qwen3.py; basisserve/checkpoint/gqa_vo_qwen3.py; basisserve/kernels/sageattention.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/kernels/selected_key_compaction.py,05 推理内核与 TP 通信,候选入口或实现,yes,Compact fetch requests while retaining each query's original support map.,basisserve/core/c1_k_offload.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/slot_indexed_attention.py,05 推理内核与 TP 通信,候选入口或实现,yes,Indexed attention with separate persistent K slots and original V token IDs.,basisserve/core/llama31_8b_tp8_combined.py; basisserve/kernels/gqa_slot_attention.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/kernels/split_indexed_attention.py,12 共用依赖,静态导入依赖，待提取,yes,Split-K indexed attention over resident BF16 K and compact V.,evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_llama_dense_v_routing128.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/kernels/vllm_sparse_decode_attention.py,13 未选入发布候选,本轮未选入,yes,Sparse one-token attention over a vLLM Page32 KV cache.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/sketching/coordinate_selection.py,12 共用依赖,静态导入依赖，待提取,yes,POD-guided selection of real activation coordinates.,basisserve/analysis/common_private_collective.py; basisserve/analysis/o_proj_collective_ppl.py; evaluation/analyze_qwen35_common_private_collective.py; evaluation/analyze_qwen35_mlp_topk_chebyshev.py; evaluation/analyze_qwen3_o_proj_collective_endpoints.py,可能来自可选或历史分支；不自动批准整文件迁入
+basisserve/vllm/__init__.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,vLLM plugin registration for BasisServe models.,basisserve/vllm/qwen3_32b_tp8_c1.py; basisserve/vllm/qwen3_8b_c1.py; evaluation/benchmark_vllm_qwen3_32b_c1.py; evaluation/benchmark_vllm_qwen3_8b_c1.py; evaluation/eval_qwen3_8b_r80_generation_vllm.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/vllm/compact_v_backend.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,Paged K128/dynamic-V attention for the BasisServe vLLM integration.,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/vllm/deepseek_v2_lite_c1.py,13 未选入发布候选,本轮未选入,yes,DeepSeek-V2-Lite uniform-R128 C1 model for vLLM 0.18.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/vllm/diffkv_attention.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,C1 DiffKV prefill and decode specializations for L40S.,basisserve/vllm/qwen3_8b_c1.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/vllm/nuq4_attention.py,13 未选入发布候选,本轮未选入,yes,Byte-accurate vLLM cache specifications for packed NUQ4 full attention.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/vllm/nuq4_boundary.py,13 未选入发布候选,本轮未选入,yes,Prepared global V statistics and A8 decoder transport for sequential layers.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/vllm/prepared_c1_output.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,Stream-bound prepared NCCL AllGather and one replicated decoder GEMM.,basisserve/vllm/qwen3_8b_c1.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/vllm/qwen35_hybrid.py,07 Qwen3.5 混合架构,候选入口或实现,yes,TP1 vLLM Qwen3.5 gated V+Wo quality runtime with padded V cache slots.,,已按功能初筛；不代表所有分支都应原样发布
+basisserve/vllm/qwen3_32b_folded.py,13 未选入发布候选,本轮未选入,yes,Tensor-parallel Qwen3-32B quality evaluation with authenticated factors.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/vllm/qwen3_32b_tp8_c1.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,"Qwen3-32B uses the same folded-V64, prepared-NCCL TP8 path as Qwen3-8B.",,已按功能初筛；不代表所有分支都应原样发布
+basisserve/vllm/qwen3_8b_c1.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,Qwen3-8B TP8 compact V64 serving with prepared NCCL and CUDA Graphs.,basisserve/vllm/qwen3_32b_tp8_c1.py,已按功能初筛；不代表所有分支都应原样发布
+basisserve/vllm/qwen3_8b_folded_c1.py,13 未选入发布候选,本轮未选入,yes,Qwen3-8B C1 quality-evaluation model for the pinned vLLM 0.18 build.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/vllm/qwen3_8b_folded_palu.py,13 未选入发布候选,本轮未选入,yes,Qwen3-8B PaLU-M quality-evaluation model for the pinned vLLM build.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/vllm/qwen3_8b_sparse_c1.py,13 未选入发布候选,本轮未选入,yes,Qwen3-8B C1-V80 with native vLLM sparse-Key decode.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/vllm/qwen3_8b_sparse_c1_backend.py,13 未选入发布候选,本轮未选入,yes,vLLM Page32 backend for Qwen3-8B C1-V80 sparse-Key decode.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/vllm/qwen3_c1.py,13 未选入发布候选,本轮未选入,yes,Qwen3-32B uniform-C1 model implementation for vLLM 0.18.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/vllm/qwen3_dense_diffkv.py,13 未选入发布候选,本轮未选入,yes,Qwen3-32B dense V128 control using the BasisServe Triton attention path.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/vllm/qwen3_nuq4.py,13 未选入发布候选,本轮未选入,yes,"Qwen3-8B-Base TP8, adaptive C1, packed NUQ4 and A8/W8 decoder.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+basisserve/vllm/worker_extension.py,06 TP 运行时与 vLLM 接入,候选入口或实现,yes,Worker-side inspection calls for BasisServe vLLM models.,,已按功能初筛；不代表所有分支都应原样发布
+benchmarks/ampere/assets.py,13 未选入发布候选,本轮未选入,no,Pin the Llama V96 and B16R16 assets used by the Ampere TP8 runner.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/ampere/build_kernels.py,13 未选入发布候选,本轮未选入,no,Prepare the TP8 Ampere extensions in a single-GPU Slurm allocation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/ampere/full_decode_smoke.py,13 未选入发布候选,本轮未选入,no,Check fixed-capacity V96 decode masking against a dense FP32 reference.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/ampere/kernel_smoke.py,13 未选入发布候选,本轮未选入,no,Single GPU correctness smoke for the Ampere joint routing pipeline.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/ampere/prefill_smoke.py,13 未选入发布候选,本轮未选入,no,Check native V96 prefill correctness and latency on an Ampere GPU.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/ampere/summarize_decode.py,13 未选入发布候选,本轮未选入,no,Verify and summarize a completed three-arm Experiment B workload.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/ampere/tp8_joint.py,13 未选入发布候选,本轮未选入,no,Llama-3.1-8B-Instruct TP8 decode smoke and Ampere benchmark runner.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/ampere/two_stage.py,13 未选入发布候选,本轮未选入,no,Compile the Page32 candidate router from the Ampere WMMA kernel.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/bench_feature_ragged_allgather.py,13 未选入发布候选,本轮未选入,yes,TP correctness and latency harness for the C1 ragged output boundary.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/bench_output_sharded_decoder.py,13 未选入发布候选,本轮未选入,yes,"Benchmark replicated, output-sharded, restored, and FP8 TP decoders.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/bench_pipelined_allgather_decoder.py,13 未选入发布候选,本轮未选入,yes,Benchmark big versus 2/4-wave NCCL AllGather-decoder boundaries.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/bench_source_partial_decoder.py,13 未选入发布候选,本轮未选入,yes,Measure the GEMM cost of consuming 1/2/4/8 C1 source groups.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/bench_uniform_allgather.py,13 未选入发布候选,本轮未选入,yes,Measure the fixed-width feature-major AllGather boundary without a decoder.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/analyze_profiles.py,13 未选入发布候选,本轮未选入,yes,Export official profiler tables without interpreting overlap as additive time.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/audit_e2e_extension.py,13 未选入发布候选,本轮未选入,yes,Audit and summarize a separately recorded extension of the TP4 model grid.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/audit_results.py,13 未选入发布候选,本轮未选入,yes,"Check recorded evidence and grid coverage, without certifying missing work.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/audit_tp1_capacity.py,13 未选入发布候选,本轮未选入,yes,"Check trial completeness, active batch, metrics and exact-Dense parity.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/audit_tp1_request.py,12 共用依赖,静态导入依赖，待提取,yes,"Instrumented request smoke; timings are diagnostic, not formal E2E results.",benchmarks/system/bench_tp1_offline_request.py,可能来自可选或历史分支；不自动批准整文件迁入
+benchmarks/system/basis_router.py,13 未选入发布候选,本轮未选入,yes,Use the production CUDA B16R16 scanner with an isolated Base prefix cache.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_cache_reuse.py,13 未选入发布候选,本轮未选入,yes,"Cache reuse ablation, preserving each method's selected support.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_common_offload.py,13 未选入发布候选,本轮未选入,yes,Native router support through one deduplicating exact-K/split-V backend.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_e2e_tp4.py,13 未选入发布候选,本轮未选入,yes,"One isolated full-model Llama-base TP4 run, real KL V ranks and split Base16.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_k_offload.py,13 未选入发布候选,本轮未选入,yes,"Real selected Page32 K fetch, staged breakdown and separate fused total.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_llama31_8b_tp8_combined.py,09 论文性能 Benchmark,候选入口或实现,yes,"Fixed-batch TP8 benchmark for Dense, Joint-ALS V96, and Basis joint routing.",,已按功能初筛；不代表所有分支都应原样发布
+benchmarks/system/bench_llama31_8b_tp8_request.py,13 未选入发布候选,本轮未选入,yes,Fresh-process TP8 ShadowKV request and steady-decode trial.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_local_kernels.py,13 未选入发布候选,本轮未选入,yes,Matched continuous-state A/B and uninstrumented decode for local kernels.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_lrqk_frozen_pipeline.py,13 未选入发布候选,本轮未选入,yes,"Supplementary fixed-state cuSOLVER timings, with native support unchanged.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_lrqk_frozen_update.py,13 未选入发布候选,本轮未选入,yes,Allocator-excluded replay of the native update at one frozen online state.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_persistent_slots.py,13 未选入发布候选,本轮未选入,yes,Persistent K slots and direct GPU V reads in the matched Llama runtime.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_qwen3_8b_tp8_v_only_memory.py,13 未选入发布候选,本轮未选入,yes,TP8 decode-ready GPU memory for Qwen3 Basis V64 and STAR-KV V-only.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_register_router.py,13 未选入发布候选,本轮未选入,yes,Reuse matched decode harness with current production versus register router.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_router.py,13 未选入发布候选,本轮未选入,yes,Router microbenchmarks. Each method keeps its native support semantics.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_router_append_v6.py,13 未选入发布候选,本轮未选入,yes,Matched SM89 microbenchmark for the production router and decode append.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_sanity.py,13 未选入发布候选,本轮未选入,yes,TP4 default NCCL collectives and NUMA-local pinned H2D sanity checks.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_shadow_native.py,13 未选入发布候选,本轮未选入,yes,Measure the upstream single-GPU ShadowKV CPU-cache serving path.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_sparse_attention_operator.py,13 未选入发布候选,本轮未选入,yes,Four real layer-3 attention paths; routing included in sparse totals.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_tp1_capacity.py,13 未选入发布候选,本轮未选入,yes,Fixed active-batch decode with sequential prompt admission and independent KV.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_tp1_dense_full_v6.py,13 未选入发布候选,本轮未选入,yes,"TP1 Llama-3.1-8B dense attention with local, K-only, or KV offload.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_tp1_lrqk_local.py,13 未选入发布候选,本轮未选入,yes,GPU-resident LRQK storage control using the frozen request timing protocol.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_tp1_offline_request.py,09 论文性能 Benchmark,候选入口或实现,yes,"Fresh-state TP1 requests and steady decode, with separate diagnostic profiles.",,已按功能初筛；不代表所有分支都应原样发布
+benchmarks/system/bench_tp1_router_config.py,09 论文性能 Benchmark,候选入口或实现,yes,Isolated execution-configuration experiments against the frozen TP1 router.,,已按功能初筛；不代表所有分支都应原样发布
+benchmarks/system/bench_tp1_sparse_full_v6.py,13 未选入发布候选,本轮未选入,yes,End-to-end TP1 Llama-3.1-8B sparse-decode benchmark.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_tp_collective.py,13 未选入发布候选,本轮未选入,yes,"Real C1 layer ranks: dense output AR, global-coordinate C1 AR, and C1 AG.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_tp_collective_uniform.py,13 未选入发布候选,本轮未选入,yes,TP-generic attention-output collective benchmark for uniform C1 checkpoints.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/bench_two_stage.py,13 未选入发布候选,本轮未选入,yes,"Three-way real-query quality and full routing latency, with incremental metadata.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/capture.py,13 未选入发布候选,本轮未选入,yes,Capture real dense-model inputs to one attention layer for system benchmarks.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/chunked_prefill_rope.py,13 未选入发布候选,本轮未选入,yes,Bound inference-only RoPE temporaries using the existing elementwise operator.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/collect_hardware_info.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/collective_audit.py,13 未选入发布候选,本轮未选入,yes,Observe PyTorch tensor collectives for one untimed/warmup model step.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/common.py,09 论文性能 Benchmark,候选入口或实现,yes,Reproducibility metadata shared by the L40S system benchmarks.,benchmarks/system/bench_llama31_8b_tp8_combined.py; benchmarks/system/hardware.py,已按功能初筛；不代表所有分支都应原样发布
+benchmarks/system/diagnose_lrqk_reference.py,13 未选入发布候选,本轮未选入,yes,Inspect a native BF16 versus independent FP32 top-k disagreement.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/fused_append.py,13 未选入发布候选,本轮未选入,yes,Single-CTA V/Base/Residual append and historical Page32 summary update.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/fused_candidates.py,13 未选入发布候选,本轮未选入,yes,GQA normalization and top512 compaction into ascending page IDs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/hardware.py,09 论文性能 Benchmark,候选入口或实现,yes,Capture actual GPU topology without interpreting Slurm allocation as idleness.,,已按功能初筛；不代表所有分支都应原样发布
+benchmarks/system/k_fetch.py,13 未选入发布候选,本轮未选入,yes,Shared split-V exact selected attention with staged or fused mapped CPU K.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/local_kernel_candidates.py,12 共用依赖,静态导入依赖，待提取,yes,Build isolated A/B candidates without changing serving cache policy.,benchmarks/system/register_router.py,可能来自可选或历史分支；不自动批准整文件迁入
+benchmarks/system/lrqk_router.py,13 未选入发布候选,本轮未选入,yes,Official LRQK's final routing point after a continuous 64-token teacher tail.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/native_basis_cache.py,13 未选入发布候选,本轮未选入,yes,Dense-V Basis K offload inside the upstream ShadowKV Llama runtime.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/numa_memory.py,12 共用依赖,静态导入依赖，待提取,yes,"Bind future host allocations, then verify their actual sampled page locations.",benchmarks/system/bench_llama31_8b_tp8_combined.py,可能来自可选或历史分支；不自动批准整文件迁入
+benchmarks/system/other_routers.py,13 未选入发布候选,本轮未选入,yes,"Repository Loki and upstream ShadowKV routing, independent per-query support.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/paper_faithful_compat.py,12 共用依赖,静态导入依赖，待提取,yes,Runtime-only adapters for the official ShadowKV and LRQK sources.,benchmarks/system/audit_tp1_request.py,可能来自可选或历史分支；不自动批准整文件迁入
+benchmarks/system/plot_figures.py,13 未选入发布候选,本轮未选入,yes,Paper figures from measured CSV rows only. Additional figures follow their data.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/prepare_loki.py,13 未选入发布候选,本轮未选入,yes,Derive the repository's pre-RoPE centered PCA from existing fit moments.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/profile_e2e.py,13 未选入发布候选,本轮未选入,yes,"Nsight capture wrapper: unchanged E2E implementation, four steady steps.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/profile_router.py,13 未选入发布候选,本轮未选入,yes,Profile one validated real 64K Basis scan; no full-model NCU replay.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/profile_router_cycles.py,13 未选入发布候选,本轮未选入,yes,Isolated clock64 instrumentation of the existing fused Page-LSE kernel.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/profile_router_phases.py,13 未选入发布候选,本轮未选入,yes,Real-query phase attribution and transformed-query feasibility experiment.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/profile_shadow_matched.py,13 未选入发布候选,本轮未选入,yes,Measure request wall time and optional decode stages in the matched runtime.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/profile_two_stage.py,13 未选入发布候选,本轮未选入,yes,Nested CUDA-event attribution on the actual continuous two-stage decode path.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/recheck_lrqk_capacity.py,13 未选入发布候选,本轮未选入,yes,Repeat setup OOM cases after releasing redundant input assembly buffers.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/record_inputs.py,13 未选入发布候选,本轮未选入,yes,"Content identity of model, fitted factors and transformed coordinates.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/register_router.py,12 共用依赖,静态导入依赖，待提取,yes,Build the register-consumed MMA router against the current serving baseline.,benchmarks/system/bench_llama31_8b_tp8_combined.py,可能来自可选或历史分支；不自动批准整文件迁入
+benchmarks/system/register_router_body.cuh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_cache_reuse.py,13 未选入发布候选,本轮未选入,yes,Run matched reuse/reload ablations in fresh GPU processes.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_e2e_tp4.py,13 未选入发布候选,本轮未选入,yes,"Run the prescribed full-model grid in fresh TP4 processes, recording OOMs.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_fused_append.py,13 未选入发布候选,本轮未选入,yes,Smoke and ABBA continuous-decode comparison for the fused append candidate.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_fused_candidates.py,13 未选入发布候选,本轮未选入,yes,Smoke and ABBA continuous-decode comparison for the fused candidate selector.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_llama31_8b_tp8_decode_grid.py,13 未选入发布候选,本轮未选入,yes,Run the frozen TP8 pure-decode grid in fresh processes.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_llama31_8b_tp8_request_grid.py,13 未选入发布候选,本轮未选入,yes,Run fresh TP8 request and steady-decode trials with every attempt retained.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_local_decode.py,13 未选入发布候选,本轮未选入,yes,Paired baseline/optimized continuous-decode runs in one GPU allocation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_lrqk_routers.py,13 未选入发布候选,本轮未选入,yes,Independent processes prevent one LRQK setup OOM from killing other cases.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_persistent_slots.py,13 未选入发布候选,本轮未选入,yes,Validate then benchmark persistent-slot K caching.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_qwen3_8b_tp8_v_only_batch_sweep.py,13 未选入发布候选,本轮未选入,yes,"Run the fixed 16K prefill, 128-output-token TP8 V-only batch sweep.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_qwen3_8b_tp8_v_only_memory_grid.py,13 未选入发布候选,本轮未选入,yes,Run the fixed Qwen3 TP8 V-only capacity grid and preserve every attempt.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_register_router.py,13 未选入发布候选,本轮未选入,yes,Sequential real-query checks or matched ABBA decode on one allocated GPU.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_shadow_matched.py,13 未选入发布候选,本轮未选入,yes,Run native ShadowKV and native Dense in fresh single-GPU processes.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_shadow_native.py,13 未选入发布候选,本轮未选入,yes,Run native ShadowKV and native Dense in fresh single-GPU processes.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_tp1_capacity.py,13 未选入发布候选,本轮未选入,yes,"Run isolated TP1 capacity trials, retaining OOM phase and all logs.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_tp1_dense_comparison_v6.py,13 未选入发布候选,本轮未选入,yes,Run dense controls and matched TP1 attention-component measurements.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_tp1_lrqk_local.py,13 未选入发布候选,本轮未选入,yes,Serial GPU-local LRQK supplement; preserve the original frozen grid.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_tp1_offline_grid.py,13 未选入发布候选,本轮未选入,yes,"Serial TP1 offline-representation grid with resumable, explicit outcomes.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_tp1_paper_scaling.py,09 论文性能 Benchmark,候选入口或实现,yes,Seven-point TP1 scaling sweep using the archived formal full-scan runtime.,,已按功能初筛；不代表所有分支都应原样发布
+benchmarks/system/run_tp1_sparse_full_v6.py,13 未选入发布候选,本轮未选入,yes,Run the matched TP1 BasisKV full-model matrix on eight local GPUs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/run_tp8_joint_batch_sweep.py,09 论文性能 Benchmark,候选入口或实现,yes,Single-trial Dense Flash/Basis Joint sweep for Llama-8B and Qwen-32B.,benchmarks/system/summarize_tp8_joint_batch_sweep.py,已按功能初筛；不代表所有分支都应原样发布
+benchmarks/system/run_two_stage.py,13 未选入发布候选,本轮未选入,yes,"Sequential smoke, multi-window diagnostics, or matched serving comparisons.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/shadow_binding.cpp,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize.py,13 未选入发布候选,本轮未选入,yes,Merge available measurements without inventing absent methods or stages.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_llama31_8b_tp8_decode_grid.py,13 未选入发布候选,本轮未选入,yes,Validate and summarize the Llama-3.1-8B TP8 combined decode grid.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_llama31_8b_tp8_optimization.py,13 未选入发布候选,本轮未选入,yes,Summarize the specialized TP8 Basis-joint decode optimization grid.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_qwen3_8b_tp8_v_only_batch_sweep.py,13 未选入发布候选,本轮未选入,yes,Validate and summarize the fixed 16K TP8 V-only batch sweep.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_qwen3_8b_tp8_v_only_memory.py,13 未选入发布候选,本轮未选入,yes,Validate and summarize the Qwen3 TP8 V-only GPU memory/OOM grid.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_register_router.py,13 未选入发布候选,本轮未选入,yes,Record measured router and continuous-decode results without mixing scopes.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_tp1_capacity.py,13 未选入发布候选,本轮未选入,yes,Summarize measured active-batch throughput without interpolating OOM points.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_tp1_lrqk_local.py,13 未选入发布候选,本轮未选入,yes,Validate and compare the GPU-local supplement with the frozen CPU baseline.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_tp1_offline.py,13 未选入发布候选,本轮未选入,yes,Three-cohort TP1 tables and figures; keep request and profile scopes separate.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_tp8_full_scan.py,13 未选入发布候选,本轮未选入,yes,Validate the frozen full-scan TP8 grid and summarize all three cohorts.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_tp8_joint_batch_sweep.py,09 论文性能 Benchmark,候选入口或实现,yes,Validate and summarize the single-trial TP8 Joint batch sweep.,,已按功能初筛；不代表所有分支都应原样发布
+benchmarks/system/summarize_tp8_path_run.py,13 未选入发布候选,本轮未选入,yes,Validate and summarize the corrected TP8 decode pilot without file hashing.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_tp8_shadowkv_request.py,13 未选入发布候选,本轮未选入,yes,"Validate raw TP8 ShadowKV trials and prepare request, decode, and memory tables.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/summarize_two_stage.py,13 未选入发布候选,本轮未选入,yes,"Summarize coverage, lost mass, output fidelity, and matched timing scopes.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/timing.py,09 论文性能 Benchmark,候选入口或实现,yes,GPU-event timing of a prebuilt CUDA graph; allocations are captured once.,,已按功能初筛；不代表所有分支都应原样发布
+benchmarks/system/tp8_request_timing.py,13 未选入发布候选,本轮未选入,yes,Aggregate nonoverlapping TP8 request phases on one host's monotonic clock.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/transformed_query_router.py,13 未选入发布候选,本轮未选入,yes,Diagnostic transformed-query router; omits legacy intermediate BF16 rounding.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/two_stage_router.py,13 未选入发布候选,本轮未选入,yes,Exact-K Page32 metadata and candidate-only register MMA routing.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/two_stage_runtime.py,13 未选入发布候选,本轮未选入,yes,Install the validated two-stage router with per-request cache reset.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/validate_basis.py,13 未选入发布候选,本轮未选入,yes,"Audit all fitted layers: invertibility, Base prefix and decoded output.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/validate_e2e_smoke.py,13 未选入发布候选,本轮未选入,yes,Cross-mode prefill and local/offload generation gates for the full model.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/validate_fused_append.py,13 未选入发布候选,本轮未选入,yes,"Check real fitted factors, ring wrap/page boundaries, batches, and append latency.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/validate_fused_candidates.py,13 未选入发布候选,本轮未选入,yes,"Candidate support, forced pages, ties, boundaries, and operator latency.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/validate_local_kernels.py,13 未选入发布候选,本轮未选入,yes,Synthetic correctness checks for local kernel candidates.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/validate_lrqk_reference.py,13 未选入发布候选,本轮未选入,yes,Validate native selection and FP32 score bounds on smoke and rounding case.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/validate_numa.py,13 未选入发布候选,本轮未选入,yes,Validate NUMA residency independently of CUDA pinning on all four GPUs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/validate_persistent_slots.py,13 未选入发布候选,本轮未选入,yes,"Exercise cold fill, full hits, evictions, invalid slots and repeated reuse.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/validate_register_router.py,13 未选入发布候选,本轮未选入,yes,Independent rounded mathematical reference and current-kernel A/B.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/validate_two_stage.py,13 未选入发布候选,本轮未选入,yes,"Check incremental historical metadata, original-position fine scan, and selection.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/verify_tp1_offline.py,13 未选入发布候选,本轮未选入,yes,Audit completed TP1 records and frozen sources without content hashes.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+benchmarks/system/write_summary.py,13 未选入发布候选,本轮未选入,yes,Render available measurements; missing evidence stays explicitly pending.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/aggregate_qwen3_8b_c1_kq_routing_ppl.py,13 未选入发布候选,本轮未选入,yes,Merge disjoint window shards from the KQ-routing PPL evaluator.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/allocate_llama2_mha_c1_global_kl.py,13 未选入发布候选,本轮未选入,yes,Allocate layerwise Llama-2 MHA C1 Value ranks with exact terminal KL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/allocate_llama2_mha_c1_tp_source_global_kl.py,13 未选入发布候选,本轮未选入,yes,Allocate Llama-2 C1 ranks over TP sources with exact terminal KL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/allocate_nemotron_h_v96.py,13 未选入发布候选,本轮未选入,yes,Allocate Nemotron-H attention V ranks using native full-forward two-sided KL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/allocate_palu_llama2_global_kl.py,13 未选入发布候选,本轮未选入,yes,Allocate PaLU Llama-2-7B G-LRD ranks with forward-only terminal KL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/allocate_qwen3_32b_c1_tp_source_global_kl.py,12 共用依赖,静态导入依赖，待提取,yes,Allocate Qwen3-32B C1 ranks over eight physical TP Value sources.,evaluation/eval_qwen3_32b_c1_c4_ppl_shard.py; evaluation/eval_qwen3_32b_c1_wikitext.py; evaluation/run_qwen3_32b_c1_layer_global_kl_sharded.py; evaluation/run_qwen3_32b_c1_tp_source_global_kl_sharded.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/analyze_conjunctive_pages.py,13 未选入发布候选,本轮未选入,yes,"Conditional analysis of diagnose_conjunctive_pages shards: accuracy given all/partial/none required pages found,",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/analyze_gsm8k_filter_disagreements.py,13 未选入发布候选,本轮未选入,yes,Analyze paired GSM8K strict/flexible sample logs from lm-eval 0.4.11.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/analyze_llama2_mha_c1_cka_head_allocation.py,13 未选入发布候选,本轮未选入,yes,Screen activation-CKA head packing for TP-aware Llama-2 C1 ranks.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/analyze_qwen35_activated_wo_topk_chebyshev.py,12 共用依赖,静态导入依赖，待提取,yes,Compare post-gate top-k and degree-8 gate folding at Qwen3.5 Wo inputs.,evaluation/analyze_qwen35_common_private_collective.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/analyze_qwen35_common_private_collective.py,12 共用依赖,静态导入依赖，待提取,yes,Run the Qwen3.5 common/private latent collective quality oracle.,evaluation/analyze_qwen3_o_proj_collective_endpoints.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/analyze_qwen35_gated_attention_sparsity.py,12 共用依赖,静态导入依赖，待提取,yes,Measure Qwen3.5 gated-attention token-dependent effective sparsity offline.,evaluation/analyze_qwen35_activated_wo_topk_chebyshev.py; evaluation/analyze_qwen35_common_private_collective.py; evaluation/analyze_qwen35_gdn_silu_sparsity.py; evaluation/analyze_qwen3_o_proj_collective_endpoints.py; evaluation/capture_attention_o_proj_ppl_snapshots.py; evaluation/eval_attention_o_proj_collective_ppl.py; evaluation/eval_qwen3_8b_wo_c1_lr_ar_quality.py; evaluation/finalize_attention_o_proj_ppl_snapshot.py; evaluation/fit_attention_o_proj_ppl_factors.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/analyze_qwen35_gdn_silu_sparsity.py,12 共用依赖,静态导入依赖，待提取,yes,Measure post-state Qwen3.5 GDN SiLU effective sparsity offline.,evaluation/analyze_qwen35_activated_wo_topk_chebyshev.py; evaluation/analyze_qwen35_common_private_collective.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/analyze_qwen35_mlp_topk_chebyshev.py,12 共用依赖,静态导入依赖，待提取,yes,Run the corrected Qwen3.5 MLP top-k/Chebyshev Phase-1 diagnostic.,evaluation/analyze_qwen35_activated_wo_topk_chebyshev.py; evaluation/analyze_qwen35_common_private_collective.py; evaluation/analyze_qwen3_o_proj_collective_endpoints.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/analyze_qwen3_8b_all_group_v_pre_k.py,13 未选入发布候选,本轮未选入,yes,Measure local/all-group raw-V and C1-V affine pre-K ceilings.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/analyze_qwen3_8b_interlayer_k_prefetch.py,13 未选入发布候选,本轮未选入,yes,Measure post-RoPE Key similarity and layer-ahead page prefetch quality.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/analyze_qwen3_8b_page_router_boundary.py,13 未选入发布候选,本轮未选入,yes,Decompose Page-Fisher and Top-page behavior for two Qwen3-8B routers.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/analyze_qwen3_8b_raw_v_vs_c1_pre_k.py,13 未选入发布候选,本轮未选入,yes,Compare unrestricted raw-V128 and C1-V80 prediction of pre-RoPE K.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/analyze_qwen3_8b_v80_pre_k_spectra.py,13 未选入发布候选,本轮未选入,yes,Analyze C1-V80 to pre/post-RoPE Key predictive spectra.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/analyze_qwen3_8b_wo_source_subspaces.py,13 未选入发布候选,本轮未选入,yes,Analyze real Qwen3-8B Wo-C1 TP-source decoder subspaces.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/analyze_qwen3_o_proj_collective_endpoints.py,12 共用依赖,静态导入依赖，待提取,yes,Compare equal-wire pure AllReduce and AllGather for attention Wo.,evaluation/capture_attention_o_proj_ppl_snapshots.py; evaluation/finalize_attention_o_proj_ppl_snapshot.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/assemble_mixed_calibration_windows.py,02 校准数据与统计采集,候选入口或实现,yes,Assemble the 50/50 C4 + synthetic-retrieval calibration window bank from two existing banks.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/assemble_qwen35_128k_v_bank.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Assemble the uniform gated-V bank (basisserve.qwen35.gated_v_als.v1) from the per-layer 128K fits of ``fit_qwen35_128k_v.py``.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/assemble_qwen35_k_routing_v.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Assemble the ALS12/32K V192 bank from two-sided terminal-KL probes.,evaluation/eval_qwen35_k_routing_ruler.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/audit_k_routing_fit.py,13 未选入发布候选,本轮未选入,yes,"Independently verify all frozen payload, capture, query and router artifacts.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_llama_dense_prefill.py,13 未选入发布候选,本轮未选入,yes,Compare native single-GPU Full-K prefill with routing and archived TP2 tokens.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_llama_nuq4.py,13 未选入发布候选,本轮未选入,yes,Check completed train-only Llama calibration artifacts without hashes.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_longbench_c1.py,13 未选入发布候选,本轮未选入,yes,Independently verify frozen source IDs/prompts/tokens and all four-arm predictions.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_lrqk_selection.py,13 未选入发布候选,本轮未选入,yes,Observe LRQK after selection; exact-QK diagnostic scores never feed routing.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_nemotron_h_covariances.py,13 未选入发布候选,本轮未选入,yes,Check every formal native covariance artifact before rank-bank fitting.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_nemotron_h_wo.py,13 未选入发布候选,本轮未选入,yes,Audit every fitted Nemotron-H Mamba Wo artifact.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_query_cpqr.py,13 未选入发布候选,本轮未选入,yes,Audit existing fit-only candidate captures without model execution.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_query_srrqr.py,13 未选入发布候选,本轮未选入,yes,Fixed-Q32 strong-RRQR versus the completed query CPQR audit.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_qwen35_gsm8k_answers.py,13 未选入发布候选,本轮未选入,yes,Triage saved answers without inference or changing the official scores.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_qwen3_32b_densev_128k_fit.py,13 未选入发布候选,本轮未选入,yes,Verify all Qwen3-32B Dense-V Base16/Residual16 128K routing factors.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_qwen3_kv4_fp8_ppl.py,13 未选入发布候选,本轮未选入,yes,Short R64 order/weight-mutation audit; not a formal quality benchmark.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_shadowkv_reference.py,13 未选入发布候选,本轮未选入,yes,Compare the upstream accuracy-cache equations with our resident adapter.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/audit_streaming_k_fit.py,13 未选入发布候选,本轮未选入,yes,Verify complete 64K routing factors and their Base/V/data provenance.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/base_rank_sweep.py,13 未选入发布候选,本轮未选入,yes,How much Key energy the Base (V -> K affine reduced-rank map) explains as a function of Base rank.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_c1_dense_gqa_v96_decode_attention.py,13 未选入发布候选,本轮未选入,yes,Benchmark dense shared-GQA exact-K128/C1-V96 decode attention.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_c1_paged_sparse_decode_attention.py,13 未选入发布候选,本轮未选入,yes,Benchmark shared-GQA C1-V96 attention over packed exact-Key pages.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_c1_r32_routing.py,13 未选入发布候选,本轮未选入,yes,Benchmark fused R32 page routing against the former eager PyTorch path.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_compressed_v_decode_attention.py,13 未选入发布候选,本轮未选入,yes,Autotune architecture-specialized CUDA split-K decode against Triton.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_deepseek_v2_lite_tp4_prefill.py,13 未选入发布候选,本轮未选入,yes,Benchmark DeepSeek-V2-Lite dense and C1 TP4 prefill plus decode.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_dense_v128_attention_backends.py,13 未选入发布候选,本轮未选入,yes,Compare dense V128 SDPA backends with the deployed Triton attention paths.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_diffkv_decode.py,13 未选入发布候选,本轮未选入,yes,Single-GPU correctness and launch sweep for SM89 QK128 DiffKV decode.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_diffkv_prefill.py,13 未选入发布候选,本轮未选入,yes,"Small, single-GPU correctness and tile sweep for SM89 paged DiffKV prefill.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_fp8_feature_decoder.py,13 未选入发布候选,本轮未选入,yes,Microbenchmark BF16 versus cast-based and direct-FP8 feature decoders.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_int4_wire.py,13 未选入发布候选,本轮未选入,yes,"Synthetic, real multi-GPU communication smoke; not a model PPL test.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_k_offload.py,13 未选入发布候选,本轮未选入,yes,Matched K128 sparse-attention benchmark: resident CUDA/Triton versus mapped host.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen35_fit_matmul.py,13 未选入发布候选,本轮未选入,yes,Check the numerical error and actual benefit before choosing TF32x3.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen35_sparse_attention.py,13 未选入发布候选,本轮未选入,yes,Compare the current gather/Flash path to resident indexed Triton attention.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_32b_c1_tp_decode.py,13 未选入发布候选,本轮未选入,yes,Benchmark the real Qwen3-32B C1 post-attention TP8 decode boundary.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_32b_c1_variable_v_decode.py,13 未选入发布候选,本轮未选入,yes,Profile the rank-local Qwen3-32B C1 variable-width V-cache decode path.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_32b_tp4_prefill.py,13 未选入发布候选,本轮未选入,yes,Benchmark real Qwen3-32B TP4 prefill plus greedy decode on four GPUs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_32b_tp8_decode_components.py,13 未选入发布候选,本轮未选入,yes,Profile the unchanged Qwen3-32B TP8 decode components on one GPU.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_8b_c1_k_offload.py,13 未选入发布候选,本轮未选入,yes,Benchmark a 32K Qwen3-8B K-only offload decode kernel.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_8b_c1_kq_sidecar_decode.py,13 未选入发布候选,本轮未选入,yes,Compare dense BF16 decode with C1 dense and KQ-routed sparse decode.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_8b_c1_v96_triton_decode.py,13 未选入发布候选,本轮未选入,yes,Compare dense BF16 with a selected dense C1-V96 decode kernel.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_8b_tp4_decode.py,13 未选入发布候选,本轮未选入,yes,Measure full Qwen3-8B TP4 autoregressive decode on four GPUs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_8b_tp4_k_offload.py,13 未选入发布候选,本轮未选入,yes,Benchmark dense and exact-K-offload Qwen3-8B TP4 decode paths.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_8b_tp4_prefill.py,13 未选入发布候选,本轮未选入,yes,Measure Qwen3-8B TP4 prefill-heavy inference on four GPUs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_8b_wo_collectives_tp4.py,13 未选入发布候选,本轮未选入,yes,Benchmark the isolated collectives in the Qwen3-8B Wo-only TP4 design.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_8b_wo_cuda_graph.py,13 未选入发布候选,本轮未选入,yes,Benchmark one full fixed-context Qwen3-8B Wo-only TP4 decode graph.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_8b_wo_decoder_gemm.py,13 未选入发布候选,本轮未选入,yes,Benchmark Qwen3-8B Wo decoder GEMMs for the C1 uniform-rank sweep.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_8b_wo_tp4.py,13 未选入发布候选,本轮未选入,yes,Benchmark actual Qwen3-8B TP4 Wo collectives end to end on four GPUs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_a8_tp8.py,13 未选入发布候选,本轮未选入,yes,"Real TP8 exact-width NCCL transport plus replicated decoder, eager and graph.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_qwen3_latent_decoder.py,13 未选入发布候选,本轮未选入,yes,Single-GPU compact global decoder timings using real C1 weights and latents.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_rank_major_decoder.py,13 未选入发布候选,本轮未选入,yes,Validate and benchmark fused rank-major C1 decoder GEMM on one GPU.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_residual_statistics.py,13 未选入发布候选,本轮未选入,yes,Small real-capture oracle/timing check for window-major Fisher statistics.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_sparse_decode_kernels.py,13 未选入发布候选,本轮未选入,yes,Validate and time one-token sparse routing kernels at RULER geometry.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_tp4_interconnect.py,13 未选入发布候选,本轮未选入,yes,Measure the real four-GPU NCCL transport used by TP decode.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_vllm_qwen3_32b_c1.py,09 论文性能 Benchmark,候选入口或实现,yes,Benchmark fixed-batch Qwen3-32B TP4 serving in vLLM.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/benchmark_vllm_qwen3_8b_c1.py,09 论文性能 Benchmark,候选入口或实现,yes,"Fixed-cohort TP8 dense/C1 benchmark, with separate rank-zero profiles.",,已按功能初筛；不代表所有分支都应原样发布
+evaluation/benchmark_vllm_qwen3_8b_c1_seqlen.py,13 未选入发布候选,本轮未选入,yes,Fixed-batch TP8 dense/C1 sweep over prompt lengths.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/benchmark_vllm_qwen3_nuq4.py,13 未选入发布候选,本轮未选入,yes,Qwen3-8B-Base TP8 packed NUQ4 + A8/W8 full-request benchmark.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_c1_iclr_checkpoint.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Finalize a two-sided-KL C1 allocation as an ICLR matrix checkpoint.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_gqa_palu_m_fisher_checkpoint.py,10 论文基线,候选入口或实现,yes,Build a K- or V-only PaLU-M checkpoint from a Fisher-uniform schedule.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_llama2_7b_iclr_v_checkpoint.py,13 未选入发布候选,本轮未选入,yes,Build Llama-2-7B V-side checkpoints for the ICLR experiment matrix.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_llama2_7b_palu_m_checkpoint.py,13 未选入发布候选,本轮未选入,yes,Build the matched V-only PaLU-M checkpoint for Llama-2-7B.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_llama31_70b_iclr_v_checkpoint.py,13 未选入发布候选,本轮未选入,yes,Build Llama-3.1-70B V-side checkpoints for the ICLR experiment matrix.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_llama31_70b_palu_m_checkpoint.py,13 未选入发布候选,本轮未选入,yes,Build the matched V-only PaLU-M checkpoint for Llama-3.1-70B.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_llama31_8b_iclr_v_checkpoint.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Build Llama-3.1-8B V-side checkpoints for the ICLR experiment matrix.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_llama31_8b_palu_m_checkpoint.py,10 论文基线,候选入口或实现,yes,Build the activation-aware PaLU-M V-cache checkpoint for Llama-3.1-8B.,evaluation/build_c1_iclr_checkpoint.py; evaluation/build_gqa_palu_m_fisher_checkpoint.py; evaluation/build_qwen3_32b_palu_m_checkpoint.py; evaluation/build_qwen3_8b_c1_uniform_checkpoint.py; evaluation/build_qwen3_8b_iclr_v_checkpoint.py; evaluation/build_qwen3_8b_palu_m_checkpoint.py; evaluation/build_qwen3_8b_section3_palu.py; evaluation/collect_gqa_palu_fisher.py; evaluation/prepare_qwen35_9b_c1_windows.py; evaluation/prepare_qwen3_32b_c1_windows.py; evaluation/prepare_qwen3_32b_global_kl_windows.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_llama_section4_base_sweep.py,11 附录消融与量化兼容评测,候选入口或实现,yes,Build the Dense-V Base-only banks for the Section 4 rank sweep.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_lrqk_cpp.py,13 未选入发布候选,本轮未选入,yes,Build the unchanged upstream CPU gather extension for the active PyTorch.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_nemotron_h_8b_checkpoint.py,13 未选入发布候选,本轮未选入,yes,Assemble a self-contained Nemotron-H C1 V and Mamba-Wo checkpoint.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_qwen35_mixed48_bank.py,13 未选入发布候选,本轮未选入,yes,"Build the 48-window Qwen3.5 recalibration bank: fit windows 0-31 = the 16 C4 + 16 synthetic-retrieval mix, validation",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_qwen35_reasoning_fixed_schedule_bank.py,13 未选入发布候选,本轮未选入,yes,Assemble a reasoning-calibrated Qwen3.5 V bank with the frozen C4 schedule.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_qwen3_32b_c1_hybrid_decoder_checkpoint.py,13 未选入发布候选,本轮未选入,yes,Compose a uniform C1 checkpoint with guarded per-layer decoder fallback.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_qwen3_32b_iclr_v_checkpoint.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Build Qwen3-32B V-side checkpoints for the ICLR experiment matrix.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_qwen3_32b_palu_m_checkpoint.py,10 论文基线,候选入口或实现,yes,Build the matched V-only PaLU-M checkpoint for Qwen3-32B.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_qwen3_8b_c1_lr_ar_phase1.py,10 论文基线,候选入口或实现,yes,Fit Wo-only C1-AllGather and strong LR-AllReduce controls for Qwen3-8B.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_qwen3_8b_c1_palu_fisher_schedule.py,13 未选入发布候选,本轮未选入,yes,Build a Qwen3-8B C1 rank schedule from PaLU layer Fisher importance.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_qwen3_8b_c1_terminal_readout_schedules.py,13 未选入发布候选,本轮未选入,yes,Build P0/P1 C1 schedules from an existing Qwen3-8B Full oracle.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_qwen3_8b_c1_two_sided_factorized_kl_schedule.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Build a two-sided factorized terminal-KL rank schedule for Qwen3-8B.,evaluation/assemble_qwen35_k_routing_v.py; evaluation/profile_qwen3_8b_residual_two_sided_kl.py; evaluation/qwen35_hybrid_banks.py; evaluation/run_qwen3_32b_c1_layer_global_kl_sharded.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_qwen3_8b_c1_uniform_checkpoint.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Build a manifest-only Qwen3-8B uniform C1-R80 checkpoint.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_qwen3_8b_iclr_v_checkpoint.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Build 8B-model V-side checkpoints for the ICLR experiment matrix.,evaluation/build_llama31_8b_iclr_v_checkpoint.py; evaluation/build_qwen3_32b_iclr_v_checkpoint.py; evaluation/build_qwen3_8b_c1_uniform_checkpoint.py; evaluation/build_qwen3_8b_section3_palu.py; evaluation/eval_qwen3_8b_iclr_quality.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_qwen3_8b_loki_pca.py,10 论文基线,候选入口或实现,yes,Fit repository-faithful pre-RoPE Loki Key PCA.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_qwen3_8b_pairwise_k_identity_control.py,13 未选入发布候选,本轮未选入,yes,Build the algebraically exact pair-rank256 Qwen3 Key runtime control.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_qwen3_8b_pairwise_kqsvd.py,13 未选入发布候选,本轮未选入,yes,Fit matched-storage independent and adjacent-layer pairwise Qwen3 KQ-SVD.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_qwen3_8b_palu_m_checkpoint.py,10 论文基线,候选入口或实现,yes,Build the matched V-only PaLU-M checkpoint for Qwen3-8B-Base.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_qwen3_8b_post_rope_kqsvd.py,13 未选入发布候选,本轮未选入,yes,Fit post-RoPE rank-64 K-SVD and KQ-SVD factors for Qwen3-8B.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/build_qwen3_8b_section3_group_svd.py,11 附录消融与量化兼容评测,候选入口或实现,yes,Build the activation-aware per-KV-group truncated-SVD baseline.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/build_qwen3_8b_section3_palu.py,11 附录消融与量化兼容评测,候选入口或实现,yes,Build Qwen3-8B Section-3 PaLU M-LRD/G4-LRD factors from WT2 statistics.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/calibrate_llama_nuq4.py,12 共用依赖,静态导入依赖，待提取,yes,Train-only Llama NUQ4 codebooks and decoder-input A8 scales.,evaluation/eval_llama_adaptive_nuq4_c4.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/calibrate_llama_v96_kvquant.py,11 附录消融与量化兼容评测,候选入口或实现,yes,KVQuant NUQ4 quantizers for the deployed Llama V96 model (evaluation/kvquant_nuq4_simulation.py consumes them).,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/calibrate_qwen3_32b_fp8_wire_from_snapshots.py,13 未选入发布候选,本轮未选入,yes,Derive Qwen3-32B C1 FP8 wire scales from saved pre-o_proj activations.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/calibrate_qwen3_32b_router_128k.py,13 未选入发布候选,本轮未选入,yes,Qwen3-32B Base16/Fisher-R16 router calibration on 32 x 128K C4 windows.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/calibrate_qwen3_8b_tp4_fp8_wire.py,13 未选入发布候选,本轮未选入,yes,Calibrate static per-layer/per-TP-source E4M3 wire scales for Qwen3-8B C1.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/calibrate_uniform96_router.py,13 未选入发布候选,本轮未选入,yes,Layerwise in-memory dense-teacher calibration of Base16 and Fisher R16.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/calibrate_v96kl_router.py,13 未选入发布候选,本轮未选入,yes,Layerwise in-memory dense-teacher calibration of Base16 and Fisher R16.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/calibration_routing_quality.py,12 共用依赖,静态导入依赖，待提取,yes,"Calibration-side routing quality of the page router for several rank allocations, on held-out windows only.",evaluation/page_granularity_sweep.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/capture_attention_o_proj_covariances.py,02 校准数据与统计采集,候选入口或实现,yes,Stream full-token attention ``o_proj`` covariance sufficient statistics.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/capture_attention_o_proj_ppl_snapshots.py,02 校准数据与统计采集,候选入口或实现,yes,Capture all-layer attention ``o_proj`` inputs for collective PPL fitting.,evaluation/capture_attention_o_proj_covariances.py; evaluation/finalize_attention_o_proj_ppl_snapshot.py; evaluation/fit_attention_o_proj_ppl_factors.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/capture_chunk8_fisher_landmark_bank.py,13 未选入发布候选,本轮未选入,yes,Capture reusable all-layer direct Chunk8 Fisher fitting inputs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/capture_chunk8_mean_fisher_statistics.py,13 未选入发布候选,本轮未选入,yes,Capture exact compact Mean-128 Chunk8 Fisher statistics for many layers.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/capture_k_routing.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Capture dense teacher activations with streamed weights and window sharding.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/capture_llama_section4_objective_statistics.py,13 未选入发布候选,本轮未选入,yes,Capture Residual-MSE and Score-MSE sufficient statistics for Section 4.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/capture_llama_section4_score_only_statistics.py,13 未选入发布候选,本轮未选入,yes,"Capture clean, unweighted causal QK-score statistics for Section 4.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/capture_mlp_down_output_covariances.py,13 未选入发布候选,本轮未选入,yes,Stream complete post-``down_proj`` MLP output second moments.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/capture_nemotron_h_covariances.py,13 未选入发布候选,本轮未选入,yes,Collect dense-teacher attention and Mamba Wo covariances in one model pass.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/capture_nemotron_h_covariances_128k.py,13 未选入发布候选,本轮未选入,yes,Collect dense-teacher attention and Mamba Wo covariances at 128K in one single-GPU model pass.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/capture_query_cpqr.py,13 未选入发布候选,本轮未选入,yes,"Recapture fit-only dense-teacher Q; independent window shards, no fitting.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/capture_qwen35_128k_v.py,07 Qwen3.5 混合架构,候选入口或实现,yes,"Native gated-V captures (z = attention output, gate = sigmoid attention gate, target = o_proj output) on 128K windows.",,已按功能初筛；不代表所有分支都应原样发布
+evaluation/capture_qwen35_k_routing.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Window-sharded native Qwen3.5 Q/K/V inputs for both router capacities.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/capture_qwen3_8b_c1_k_refine.py,13 未选入发布候选,本轮未选入,yes,Capture real Qwen3-8B post-RoPE Q/exact-K/C1-V layer replays.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/check_compressed_v_prefill_attention.py,13 未选入发布候选,本轮未选入,yes,Check compact-Value Triton prefill against the causal PyTorch reference.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/check_linear_base_bias.py,13 未选入发布候选,本轮未选入,yes,Layer-0 K Base ablation: freeze linear weights and fit only an intercept.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/check_qwen35_vllm_reference.py,13 未选入发布候选,本轮未选入,yes,Compare real vLLM smoke continuations with the existing HF hybrid runtime.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/check_qwen35_wo_code.py,13 未选入发布候选,本轮未选入,yes,Independent matrix and covariance checks of exported Wo artifacts.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/check_qwen3_32b_c1_layer23_qr0_fp64.py,13 未选入发布候选,本轮未选入,yes,Check whether FP32 roundoff explains the layer-23 QR(0) failure.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/chunked_attention_output.py,13 未选入发布候选,本轮未选入,yes,Project head-major attention output without a full transposed copy.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/chunked_llama_rope.py,13 未选入发布候选,本轮未选入,yes,Bound prefill RoPE temporaries on inference-owned Q/K tensors.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/chunked_prefill_mlp.py,12 共用依赖,静态导入依赖，待提取,yes,Bound tokenwise MLP intermediates while preserving dispatched forwards.,basisserve/core/llama31_8b_tp8_combined.py; benchmarks/system/audit_tp1_request.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_llama_dense_v_routing128.py; evaluation/llama_baseline_prefill.py; evaluation/nemotron_h_scan_layout.py; evaluation/official_shadowkv_cpu.py; evaluation/run_qwen3_32b_c1_tp_source_global_kl_sharded.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/chunked_rope.py,13 未选入发布候选,本轮未选入,yes,Token-blocked in-place RoPE for inference-only Q/K projection outputs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/collect_gqa_palu_fisher.py,10 论文基线,候选入口或实现,yes,Collect PaLU Fisher importance and allocate K- or V-only M-LRD ranks.,evaluation/build_gqa_palu_m_fisher_checkpoint.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/collect_palu_c1matched_fisher.py,13 未选入发布候选,本轮未选入,yes,Window-sharded PaLU V Fisher on exactly the existing C1 32 x 32K fit tokens.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/compact_routing_sidecar.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Reconstruct Base K from resident C1 V and retain only residual codes.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/compare_nemotron_arms.py,13 未选入发布候选,本轮未选入,yes,"Paired 11-task comparison on the Nemotron frozen prompts: main five arms plus the B8R24 rerun, matched by (task, ordinal).",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/compare_qwen3_32b_arms.py,13 未选入发布候选,本轮未选入,yes,"Paired 11-task comparison on the Qwen3-32B 64K frozen prompts: main five arms plus the B8R24 rerun, matched by (task, ordinal).",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/compare_qwen3_32b_c1_pairwise_qr.py,13 未选入发布候选,本轮未选入,yes,Compare normal-equation and pairwise-QR C1 decoder solves at fixed A.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/compare_qwen3_8b_arms.py,13 未选入发布候选,本轮未选入,yes,"Paired 11-task comparison on the Qwen3-8B 128K frozen prompts: main five arms plus the B8R24 rerun, matched by (task, ordinal).",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/compare_qwen3_8b_post_arms.py,13 未选入发布候选,本轮未选入,yes,"Paired 11-task comparison on the Qwen3-8B (post-trained) 128K frozen prompts: main five arms plus the B8R24 rerun, matched by (task, ordinal).",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/compare_rank_ablation.py,13 未选入发布候选,本轮未选入,yes,"Paired comparison of the rank-allocation ablation (B8R24, B0R32) against the main run's Full-K and B16R16 on the",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/compare_residual_selected_pages.py,13 未选入发布候选,本轮未选入,yes,Saved-page audit on shared C4 diagnostic queries; no fitting/model forward.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/convert_qwen35_hf_router.py,13 未选入发布候选,本轮未选入,yes,Convert the released Qwen3.5-9B 128K B16R16 Page-Fisher router (HF ``routers/b16r16/l{layer:02d}.pt``) into the,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/deterministic_evaluation.py,08 质量评测与数据准备,候选入口或实现,yes,Explicit numerical settings for reproducible evaluation runs.,evaluation/eval_llama_dense_v_routing128.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/diagnose_c1_covariance_psd.py,13 未选入发布候选,本轮未选入,yes,Measure numerical PSD margins of stored C1 covariance matrices.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_c1_module_lifetime.py,13 未选入发布候选,本轮未选入,yes,Check displaced C1 attention lifetime with real Accelerate dispatch hooks.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_c1_prefill_kernel.py,13 未选入发布候选,本轮未选入,yes,Read-only numerical diagnosis of actual C1 prefill tensors and trajectories.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_c1_prompt_core.py,13 未选入发布候选,本轮未选入,yes,Prompt-local identity/diagonal/full residual-core diagnostic on frozen C1 trajectories.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_c1_prompt_spectral.py,13 未选入发布候选,本轮未选入,yes,Three hard prompts: closed-form shared-query-metric residual rank8.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_c1_prompt_subspace.py,13 未选入发布候选,本轮未选入,yes,Three baseline-selected hard prompts: fixed-E U refit and joint rank8 references.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_chunk8_landmark_geometry.py,13 未选入发布候选,本轮未选入,yes,No-fit Chunk8 routing geometry for Llama-3.1-8B-Instruct B16R16.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_compact_page_gqa.py,13 未选入发布候选,本轮未选入,yes,Compare compact and expanded Page32 routing at the 64K Qwen geometry.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_compressed_v_decode_memory.py,13 未选入发布候选,本轮未选入,yes,Attribute persistent and peak memory around compressed-V CUDA loading.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_compressed_v_valid_length.py,13 未选入发布候选,本轮未选入,yes,Check fixed-capacity compressed-V Triton decode against a sliced cache.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_conjunctive_pages.py,12 共用依赖,静态导入依赖，待提取,yes,All-required-page recall on niah_multikey_2: does the router retrieve every page the needle lives on?,evaluation/calibration_routing_quality.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/diagnose_gqa_palu_finiteness.py,13 未选入发布候选,本轮未选入,yes,Locate the first non-finite activation in a GQA PaLU checkpoint.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_lbv2_lrqk.py,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_llama31_c1_decoder.py,13 未选入发布候选,本轮未选入,no,Inspect the failed layer-zero reduced normal equations without writing factors.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_llama_router_mass.py,13 未选入发布候选,本轮未选入,yes,Matched attention mass and output errors on held-out native dense replay.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_loki_online_output.py,13 未选入发布候选,本轮未选入,yes,Layer-local continuous Loki output error on the dense teacher tail.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_lrqk_fp16.py,13 未选入发布候选,本轮未选入,yes,Reproduce a failed FP16 prompt without altering LRQK arithmetic.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_lrqk_online_output.py,13 未选入发布候选,本轮未选入,yes,Continuous official LRQK state versus fitted routers on the same dense teacher tail.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_nemotron_h_device.py,13 未选入发布候选,本轮未选入,yes,Compare native Mamba replay on the default and a non-default CUDA device.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_nemotron_h_dt_stride.py,13 未选入发布候选,本轮未选入,yes,Isolate native dt scan addressing at Nemotron's actual projection stride.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_nemotron_h_nonfinite.py,13 未选入发布候选,本轮未选入,yes,Replay a recorded nonfinite Mamba block with independent scan implementations.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_page_landmarks.py,13 未选入发布候选,本轮未选入,yes,Parameter-free Page32 landmark diagnostic for the fitted Llama B16R16 router.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_qwen35_base_only.py,13 未选入发布候选,本轮未选入,yes,Base-only ablation with frozen factors and the current recent64 page rule.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_qwen35_encoder_pcg.py,13 未选入发布候选,本轮未选入,yes,"Compare preconditioners on the same captured, gated linear subproblem.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_qwen35_gsm8k_generation.py,13 未选入发布候选,本轮未选入,yes,Check actual long GSM8K prompts in the pre-existing HF compressed runtime.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_qwen35_k_routing.py,13 未选入发布候选,本轮未选入,yes,Held-out K rel-MSE and attention-mass recall using the deployed page rule.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_qwen3_32b_c1_finiteness.py,13 未选入发布候选,本轮未选入,yes,Locate the first non-finite activation in a folded Qwen3-32B C1 checkpoint.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_qwen3_8b_c1_generation.py,13 未选入发布候选,本轮未选入,yes,Diagnose Qwen3-8B Dense versus two-sided-KL C1-R80 generation drift.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_qwen3_8b_s80_chunked_prefill.py,13 未选入发布候选,本轮未选入,yes,Compare dense and Store80 full/chunked prefill logits on one RULER prompt.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_qwen3_k_routing.py,13 未选入发布候选,本轮未选入,yes,Recompute matching diagnostic metrics for the frozen Qwen3-8B Q64 router.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_qwen3_quant_anomaly.py,13 未选入发布候选,本轮未选入,yes,Read-only model diagnostic for the anomalous two-window quantization smoke.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_qwen_memory.py,13 未选入发布候选,本轮未选入,yes,Trace the frozen two-GPU evaluator without changing its numerical protocol.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_residual_sidecar.py,13 未选入发布候选,本轮未选入,yes,Verify reconstructed historical Base K across prefill and decode shapes.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_shadowkv_fwe.py,13 未选入发布候选,本轮未选入,yes,Isolate ShadowKV reconstruction and C1 value compression on frozen FWE.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/diagnose_shadowkv_online_output.py,13 未选入发布候选,本轮未选入,yes,Layer-local continuous ShadowKV adapter output error on the dense teacher tail.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_all_v_key_information.py,13 未选入发布候选,本轮未选入,yes,"All eight V groups -> each K group, with matched held-out local controls.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_all_v_rank_sweep.py,13 未选入发布候选,本轮未选入,yes,Per-target-head rank sweep with all same-token V heads as input.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_attention_o_proj_collective_ppl.py,12 共用依赖,静态导入依赖，待提取,yes,Evaluate WikiText-2 PPL for activation-aware AR/AG ``o_proj`` factors.,evaluation/allocate_qwen3_32b_c1_tp_source_global_kl.py; evaluation/eval_gqa_palu_m_wikitext.py; evaluation/eval_qwen3_32b_c1_wikitext.py; evaluation/eval_qwen3_8b_iclr_quality.py; evaluation/eval_qwen3_8b_section3_short.py; evaluation/eval_qwen3_8b_wo_c1_ag_ar_mcq.py; evaluation/eval_qwen3_8b_wo_c1_lr_ar_quality.py; evaluation/eval_qwen3_c1_kvquant.py; evaluation/run_qwen3_32b_c1_tp_source_global_kl_sharded.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_c1_block_commit_numerics.py,13 未选入发布候选,本轮未选入,yes,Compare exact-proposal C1 block commits with sequential BF16 execution.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_c1_block_scheduled_ppl.py,12 共用依赖,静态导入依赖，待提取,yes,Evaluate teacher-forced C1 NLL/PPL under sequential and block KV schedules.,evaluation/eval_qwen3_c1_k_reverse_shadow_ppl.py; evaluation/eval_qwen3_c1_quest_ruler.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_c1_shadow_k_speculative.py,13 未选入发布候选,本轮未选入,yes,Evaluate the C1 shadow-Key speculative correctness/acceptance oracle.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_deepseek_v2_lite_tp8_c1_wikitext.py,13 未选入发布候选,本轮未选入,yes,Evaluate dense or TP8 post-attention C1 DeepSeek-V2-Lite PPL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_gqa_palu_m_c4_ppl.py,13 未选入发布候选,本轮未选入,yes,Evaluate a GQA PaLU-M checkpoint on fixed C4-validation documents.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_gqa_palu_m_lm_eval.py,13 未选入发布候选,本轮未选入,yes,Run lm-eval zero-shot MCQ tasks on dense or PaLU-M GQA models.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_gqa_palu_m_wikitext.py,12 共用依赖,静态导入依赖，待提取,yes,Evaluate a compact K- or V-only GQA PaLU factor checkpoint on WikiText-2.,evaluation/eval_qwen3_8b_iclr_quality.py; evaluation/eval_qwen3_8b_section3_short.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_k_routing_host_transfer.py,13 未选入发布候选,本轮未选入,yes,Run routing evaluation with explicitly recorded host-mediated GPU transfers.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_k_routing_ruler.py,08 质量评测与数据准备,候选入口或实现,yes,"Paired full-K, exact-page, LRQK, ShadowKV and Base16/R16 RULER evaluation.",evaluation/calibrate_llama_v96_kvquant.py; evaluation/diagnose_conjunctive_pages.py; evaluation/eval_llama_dense_v_routing128.py; evaluation/eval_llama_section4_longbench.py; evaluation/eval_llama_section4_ruler.py; evaluation/fit_k_routing_streaming.py; evaluation/llama_baseline_prefill.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_k_routing_ruler_dense.py,13 未选入发布候选,本轮未选入,yes,"Paired full-K, exact-page, LRQK, ShadowKV and Base16/R16 RULER evaluation.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_k_routing_ruler_p16.py,12 共用依赖,静态导入依赖，待提取,yes,"Paired full-K, exact-page, LRQK, ShadowKV and Base16/R16 RULER evaluation.",evaluation/calibrate_llama_v96_kvquant.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_k_routing_ruler_v96.py,13 未选入发布候选,本轮未选入,yes,"Llama V96 RULER baselines (Full-K, LRQK, ShadowKV, Loki) on frozen prompts shared with the",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_linear_base_mass_recall.py,13 未选入发布候选,本轮未选入,yes,Compare layer-0 Base-only routing with frozen affine/linear/bias factors.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama2_7b_iclr_quality.py,13 未选入发布候选,本轮未选入,yes,Run the complete Llama-2-7B ICLR quality protocol on one matrix arm.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama2_c1_lm_eval.py,13 未选入发布候选,本轮未选入,yes,Run lm-evaluation-harness on dense or folded-C1 Llama-2-7B.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama2_mha_v25_comparison.py,13 未选入发布候选,本轮未选入,yes,Prepare and evaluate the matched-budget Llama-2-7B MHA K/V25 study.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama31_70b_iclr_quality.py,13 未选入发布候选,本轮未选入,yes,Run the complete Llama-3.1-70B ICLR quality protocol on one matrix arm.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama31_8b_iclr_quality.py,08 质量评测与数据准备,候选入口或实现,yes,Run the complete Llama-3.1-8B ICLR quality protocol on one matrix arm.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_llama31_shadow.py,13 未选入发布候选,本轮未选入,yes,Llama-3.1-8B Base: exact V with full K versus ShadowKV reconstructed K.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama31_shadow_v96.py,13 未选入发布候选,本轮未选入,yes,Paired KL96 payload extension of the frozen Llama Base exact-V experiment.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_adaptive_nuq4_c4.py,11 附录消融与量化兼容评测,候选入口或实现,yes,Paired BF16/KV4 C4 PPL for archived Llama Two-Sided KL V64/V96 allocations.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_llama_base_ablation.py,13 未选入发布候选,本轮未选入,yes,"Single-L40S B0R16/B4R16 RULER comparison, with cross-hardware BF16 differences allowed.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_budget1024.py,13 未选入发布候选,本轮未选入,yes,1024-budget LRQK/Base+Residual comparison against the completed Dense V baseline.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_cal128.py,13 未选入发布候选,本轮未选入,yes,Llama V96 at 128k: Full-K reference evaluation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_cal128_fullk.py,13 未选入发布候选,本轮未选入,yes,Llama V96 at 128k: Full-K-only evaluation (calibration-domain study; no routing arms).,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_cal128_p1.py,13 未选入发布候选,本轮未选入,yes,Llama V96 at 128k: Full-K reference and page routing with configurable page size / pinned sink pages / token budget,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_chunk8_fisher_ruler.py,13 未选入发布候选,本轮未选入,yes,Paired Llama-3.1-8B-Instruct 64K RULER88 Chunk8 routing pilot.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_chunk8_recent64_ruler.py,13 未选入发布候选,本轮未选入,yes,RULER88 with 2048 routed historical tokens plus an external recent64.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_dense128.py,13 未选入发布候选,本轮未选入,yes,Original dense-V128 Full-K Llama-3.1-8B-Instruct on RULER-128K with TP2.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_dense_nuq_c4.py,13 未选入发布候选,本轮未选入,yes,Paired BF16/low-bit NUQ C4 PPL for dense (full-rank) Llama-3.1-8B-Instruct K/V.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_dense_v_routing128.py,11 附录消融与量化兼容评测,候选入口或实现,yes,Dense-V128 Llama routing comparison on the shared 11 x 30 RULER prompts.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_llama_exact_topk.py,13 未选入发布候选,本轮未选入,yes,"Exact post-RoPE QK token Top2048 per query head, without pinned tokens.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_instruct_loki.py,13 未选入发布候选,本轮未选入,yes,Add rank-32 Loki to the frozen Instruct Dense-V RULER comparison.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_instruct_loki4k.py,13 未选入发布候选,本轮未选入,yes,Add rank-32 Loki to the frozen Instruct Dense-V RULER comparison.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_nuq4_ppl.py,13 未选入发布候选,本轮未选入,yes,Llama-3.1-8B-Instruct V96 KV4 PPL with frozen train-only NUQ4 codebooks.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_pre_post_rope_base.py,13 未选入发布候选,本轮未选入,yes,Controlled Dense-V rank-16 pre-RoPE versus direct post-RoPE Base ablation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_section4_diagnostics.py,13 未选入发布候选,本轮未选入,yes,Unified held-out routing diagnostics for the Dense-V Section 4 ablations.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_section4_hard_ruler.py,13 未选入发布候选,本轮未选入,yes,Paired 300-prompt hard-task RULER comparison of B16R16 objectives.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_section4_longbench.py,08 质量评测与数据准备,候选入口或实现,yes,Paired Dense-V LongBench evaluation for the Section 4 routing objectives.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_llama_section4_ruler.py,08 质量评测与数据准备,候选入口或实现,yes,Paired Dense-V RULER-64K evaluation for the Section 4 routing ablations.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_llama_v96_fp8_compatibility.py,13 未选入发布候选,本轮未选入,yes,Numerical FP8 compatibility pilot for routing-aligned Llama V96.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_llama_v96_fp8_sparse_ruler.py,13 未选入发布候选,本轮未选入,yes,RULER-64K with Page32 sparse exact-QK attention and an FP8 V96 cache.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_denseprefill.py,13 未选入发布候选,本轮未选入,yes,"Original dense prefill, then compact C1-V80 full-exact-K decode.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_fourarm.py,12 共用依赖,静态导入依赖，待提取,yes,"Paired LongBench-v1 C1-V80: full K, exact sparse K, Gram-Q32, terminal-Q32.",evaluation/eval_llama_section4_longbench.py; evaluation/eval_qwen35_longbench.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_longbench_c1_kl_router.py,13 未选入发布候选,本轮未选入,yes,Dense prefill then allocated C1 + matched Base16/R8 sparse decode.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_lrqk.py,13 未选入发布候选,本轮未选入,yes,LRQK-equation token routing + frozen C1-V96 on the existing LongBench pilot.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_sparse_fp16.py,13 未选入发布候选,本轮未选入,yes,Matched V100/FP16 C1-V96 Base16/R8 control for LRQK budget experiments.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_twosided_denseprefill.py,13 未选入发布候选,本轮未选入,yes,"Frozen two-sided-KL rank80 allocation, original dense prefill, compact C1 decode.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_v96.py,13 未选入发布候选,本轮未选入,yes,Frozen LongBench pilot: uniform C1-V96 prefill and full-exact-K decode.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_v96_page16_fp16.py,13 未选入发布候选,本轮未选入,yes,C1-V96 prefill followed by matched Base16/R16 page-sparse decoding.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_v96_q64_fp16.py,13 未选入发布候选,本轮未选入,yes,C1-V96 prefill followed by matched Base16/R16 page-sparse decoding.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_v96_r16.py,13 未选入发布候选,本轮未选入,yes,C1-V96 prefill followed by matched Base16/R16 page-sparse decoding.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_v96_r16_fp16.py,13 未选入发布候选,本轮未选入,yes,C1-V96 prefill followed by matched Base16/R16 page-sparse decoding.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_v96_router.py,13 未选入发布候选,本轮未选入,yes,C1-V96 prefill followed by matched Base16/R8 page-sparse decoding.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_v96_spectral.py,13 未选入发布候选,本轮未选入,yes,LongBench with fixed Base16 and prompt-specific closed-form residual R8.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_c1_v96_terminal32.py,13 未选入发布候选,本轮未选入,yes,C1-V96 prefill followed by matched Base16/R16 page-sparse decoding.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_dense.py,13 未选入发布候选,本轮未选入,yes,Unmodified BF16 K128/V128 baseline on the frozen C1 LongBench pilot.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_lrqk_fp16.py,13 未选入发布候选,本轮未选入,yes,V100 FP16 pilot: matched full-K and LRQK arms; separate from BF16 artifacts.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_lrqk_fp32route.py,13 未选入发布候选,本轮未选入,yes,FP16 C1 payload/model with FP32 LRQK state; reuse the completed FP16 full-K control.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_longbench_palu.py,13 未选入发布候选,本轮未选入,yes,Matched-calibration PaLU M/G4 full-exact-K LongBench quality controls.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_nemotron_h_8b_quality.py,13 未选入发布候选,本轮未选入,yes,Evaluate Nemotron-H dense or C1 V+Wo on the Qwen3-8B quality protocol.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_nemotron_h_palu_quality.py,13 未选入发布候选,本轮未选入,yes,Evaluate Nemotron-H PaLU V-only checkpoints on the matched quality protocol.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen35_128k_ruler.py,08 质量评测与数据准备,候选入口或实现,yes,Qwen3.5-9B 128K RULER (11 tasks x 100 examples) on the deployed uniform V192 + GDN Wo75 model.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen35_c1_fp8_wikitext.py,13 未选入发布候选,本轮未选入,yes,Calibrate static C1 FP8 wire scales and evaluate WikiText-2 test PPL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen35_global_aa_svd_ppl.py,13 未选入发布候选,本轮未选入,yes,Evaluate Qwen3.5 global AA-SVD AllReduce factors on frozen PPL windows.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen35_hybrid_gsm8k.py,08 质量评测与数据准备,候选入口或实现,yes,GSM8K generation evaluation for immutable Qwen3.5 V and V+Wo banks.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen35_hybrid_gsm8k_vllm.py,13 未选入发布候选,本轮未选入,yes,Non-thinking generation benchmarks and smoke for the Qwen3.5 vLLM adapter.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen35_hybrid_private_ag_ppl.py,08 质量评测与数据准备,候选入口或实现,yes,Evaluate Qwen3.5 GDN/full-attention Private-AG and sparse-gate hybrids.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen35_k_routing_ruler.py,12 共用依赖,静态导入依赖，待提取,yes,Paired Qwen3.5 64K RULER88 with original Wo and allocated compact V.,evaluation/eval_qwen35_longbench.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen35_longbench.py,08 质量评测与数据准备,候选入口或实现,yes,Seven paired Qwen3.5 routing arms on the frozen LongBench100 pilot.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen35_longbench_v2.py,13 未选入发布候选,本轮未选入,yes,Paired LongBench-v2 CoT on complete 32K-64K inputs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen35_longbench_v2_base.py,13 未选入发布候选,本轮未选入,yes,Paired LongBench-v2 CoT on complete 32K-64K inputs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen35_longbench_v2_split.py,13 未选入发布候选,本轮未选入,yes,Paired LongBench-v2 CoT on complete 32K-64K inputs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen35_mlp_predown_topk_wikitext.py,13 未选入发布候选,本轮未选入,yes,Evaluate Qwen3.5 MLP pre-down-projection Top-K on WikiText-2.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen35_postgate_topk_crossdomain.py,13 未选入发布候选,本轮未选入,yes,Evaluate Qwen3.5 post-gate Top-K on WikiText-2 and local MCQ tasks.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen35_wo_compression_wikitext.py,13 未选入发布候选,本轮未选入,yes,Evaluate Qwen3.5 Wo compression checkpoints on WikiText-2 test PPL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_32b_bbh_mbpp3_vllm.py,13 未选入发布候选,本轮未选入,yes,Matched L40S TP2 BBH stop fix and MBPP+ pass@3 comparison.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_32b_c1_c4_ppl_shard.py,12 共用依赖,静态导入依赖，待提取,yes,Evaluate a subset of dense/C1 Qwen3-32B arms on C4-validation PPL.,evaluation/eval_qwen3_8b_iclr_quality.py; evaluation/eval_qwen3_8b_wo_c1_lr_ar_quality.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_32b_c1_fixed_c4_ppl.py,13 未选入发布候选,本轮未选入,yes,Evaluate one fixed uniform Qwen3-32B C1 checkpoint on C4 validation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_32b_c1_layer23_decoder_ppl.py,13 未选入发布候选,本轮未选入,yes,Evaluate layer-23 TSQR decoder overrides in a full Qwen3-32B C1 model.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_32b_c1_layer_schedules_c4.py,13 未选入发布候选,本轮未选入,yes,Compare frozen Qwen3-32B per-layer C1 schedules on full C4 documents.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_32b_c1_lm_eval.py,13 未选入发布候选,本轮未选入,yes,Run lm-eval zero-shot tasks on a finalized Qwen3-32B C1 allocation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_32b_c1_wikitext.py,12 共用依赖,静态导入依赖，待提取,yes,Evaluate folded Qwen3-32B GQA C1 factors on WikiText-2.,evaluation/eval_qwen3_32b_c1_c4_ppl_shard.py; evaluation/eval_qwen3_8b_section3_short.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_32b_hard_generation_vllm.py,08 质量评测与数据准备,候选入口或实现,yes,"Matched Qwen3-32B R80 MATH500, full MBPP+, and BBH generation.",,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen3_32b_hard_l40s_vllm.py,13 未选入发布候选,本轮未选入,yes,Qwen3-32B hard-generation protocol on two L40S GPUs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_32b_iclr_quality.py,08 质量评测与数据准备,候选入口或实现,yes,Run the complete Qwen3-32B ICLR quality protocol on one matrix arm.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen3_32b_r80_generation_vllm.py,12 共用依赖,静态导入依赖，待提取,yes,Qwen3-32B R80 generation comparison using the shared lm-eval protocol.,evaluation/eval_qwen3_32b_hard_generation_vllm.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_32b_v96_lrqk_tp2.py,13 未选入发布候选,本轮未选入,yes,Qwen3-32B V96 LRQK RULER evaluation with one TP2 replica; key codes stay on GPU.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_32b_v96_ruler.py,13 未选入发布候选,本轮未选入,yes,"Evaluate Qwen3-32B V96 ShadowKV, LRQK, and Loki on frozen 128K RULER.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_c1_conditional_page_ppl.py,13 未选入发布候选,本轮未选入,yes,Full WikiText-2 PPL for Qwen3 C1-V80 conditional Page routing.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_c1_dense_block_ruler.py,13 未选入发布候选,本轮未选入,yes,RULER control for one-shot versus block-scheduled Dense-K+C1-V64.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_c1_k_routing_sidecar_sweep.py,13 未选入发布候选,本轮未选入,yes,Evaluate C1-V64 + low-rank K-routing sidecars from 1K through 32K.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_c1_kq_routing_ppl.py,13 未选入发布候选,本轮未选入,yes,Window NLL/PPL for C1 Value compression plus routed exact-Key support.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_c1_kq_routing_ruler.py,13 未选入发布候选,本轮未选入,yes,RULER-v1 generation for C1-V plus KQ-routed exact-Key pages.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_c1_layer_schedules_c4.py,13 未选入发布候选,本轮未选入,yes,Compare frozen Qwen3-8B per-layer C1 schedules on full C4 documents.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_c1_lm_eval.py,13 未选入发布候选,本轮未选入,yes,Run lm-eval zero-shot tasks on a finalized Qwen3-8B C1 allocation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_c1_loki_ppl.py,13 未选入发布候选,本轮未选入,yes,Full WikiText-2 PPL for repository-faithful Loki on Qwen3 C1-V80.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_c1_wikitext.py,13 未选入发布候选,本轮未选入,yes,Evaluate folded Qwen3-8B GQA C1 factors on WikiText-2.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_dense_controls_ruler_vllm.py,13 未选入发布候选,本轮未选入,yes,Evaluate dense-K Qwen3-8B V-side controls with native vLLM.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_dense_v_conditional_page_ppl.py,13 未选入发布候选,本轮未选入,yes,Full WikiText-2 PPL for the conditional Page router with dense Values.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_dense_v_k_proxy.py,13 未选入发布候选,本轮未选入,yes,Probe whether same-layer dense Value linearly contains Key information.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_dense_v_loki_ppl.py,13 未选入发布候选,本轮未选入,yes,Full WikiText-2 PPL for exact Top-K and Loki with dense Values.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_exact_qk_v_offload_ceiling.py,13 未选入发布候选,本轮未选入,yes,Evaluate exact-QK token/page selection ceilings for Qwen3 Value offload.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_iclr_quality.py,08 质量评测与数据准备,候选入口或实现,yes,Run the complete Qwen3-8B ICLR quality protocol on one matrix arm.,evaluation/eval_llama31_8b_iclr_quality.py; evaluation/eval_qwen3_32b_iclr_quality.py; evaluation/eval_qwen3_8b_section3_short.py; evaluation/eval_qwen3_8b_wo_c1_ag_ar_mcq.py; evaluation/eval_qwen3_c1_kvquant.py; evaluation/merge_iclr_quality_shards.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen3_8b_mlp_coordinate_c1_wikitext.py,13 未选入发布候选,本轮未选入,yes,Fit and evaluate Qwen3-8B coordinate-selected MLP C1 decoders.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_mlp_down_c1_wikitext.py,13 未选入发布候选,本轮未选入,yes,Evaluate Qwen3-8B MLP ``down_proj`` C1 factors on WikiText-2.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_mlp_down_c1_windows.py,13 未选入发布候选,本轮未选入,yes,Evaluate Qwen3-8B MLP C1 factors on exact tokenized C4 windows.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_mlp_gram_srrqr_wikitext.py,13 未选入发布候选,本轮未选入,yes,Evaluate Qwen3-8B static TP-local MLP Gram/SRRQR on WikiText-2.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_official_quest_ruler.py,13 未选入发布候选,本轮未选入,yes,"Official QUEST accuracy forward versus C1 routing, with two full layers.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_pairwise_k_c1_v64_ppl.py,13 未选入发布候选,本轮未选入,yes,Evaluate matched-storage independent/pairwise K with fixed Qwen3 C1-V64.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_pairwise_k_c1_v64_quest_ppl.py,13 未选入发布候选,本轮未选入,yes,Evaluate latent-QUEST pairwise K with fixed resident Qwen3 C1-V64.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_pairwise_k_c1_v64_quest_ruler.py,13 未选入发布候选,本轮未选入,yes,Block-scheduled RULER-v1 for pairwise KQ-SVD + QUEST + C1-V64.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_pairwise_k_dense_v_ppl.py,13 未选入发布候选,本轮未选入,yes,"Evaluate dense V with dense, independent-K64, and pairwise-K128 history.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_post_rope_kqsvd_c1_wikitext.py,13 未选入发布候选,本轮未选入,yes,Evaluate dense or compressed K/Q combined with uniform C1-V on WikiText-2.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_r80_generation_pilot.py,13 未选入发布候选,本轮未选入,yes,Evaluate Qwen3-8B R80 pilot arms on IFEval and GSM8K.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_r80_generation_vllm.py,12 共用依赖,静态导入依赖，待提取,yes,Evaluate Qwen3-8B Dense and C1 generation arms with local vLLM.,evaluation/eval_qwen3_32b_r80_generation_vllm.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_8b_residual_mass_recall.py,13 未选入发布候选,本轮未选入,yes,Frozen residual schedule versus uniform R8 on shared teacher queries.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_residual_rank_ruler.py,12 共用依赖,静态导入依赖，待提取,yes,Paired RULER pilot: frozen Base16 + uniform Fisher R8 vs exact K.,evaluation/eval_longbench_c1_fourarm.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_8b_routing_baselines_ruler.py,13 未选入发布候选,本轮未选入,yes,"C1-V80 RULER comparison: conditional R8, QUEST and Loki PCA routing.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_s80_page_fisher_synergy.py,13 未选入发布候选,本轮未选入,yes,Evaluate Store80 sharing against branch drops and equal-storage hard splits.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_s80_routing_diagnostics.py,13 未选入发布候选,本轮未选入,yes,Compare Store80/Route32 checkpoints on one direct routing capture.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_s80_routing_ruler.py,13 未选入发布候选,本轮未选入,yes,Paired RULER-v1 evaluation of exact-K Store80 and Store80 Route32.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_s80_wikitext.py,13 未选入发布候选,本轮未选入,yes,Evaluate Qwen3-8B Dense-K + Store80 latent on full WikiText-2.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_section3_long_ppl.py,13 未选入发布候选,本轮未选入,yes,Evaluate exact dense-attention 128K PPL with position-bucket NLL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_section3_short.py,11 附录消融与量化兼容评测,候选入口或实现,yes,"Evaluate Dense, C1, group-SVD, and PaLU with one Section-3 quality path.",,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen3_8b_sparse_c1_ruler_vllm.py,13 未选入发布候选,本轮未选入,yes,Evaluate Qwen3-8B C1-V80 sparse-Key RULER with native vLLM.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_tp4_k_offload_ruler.py,13 未选入发布候选,本轮未选入,yes,Evaluate dense or mapped-host TP4 attention on fixed hard RULER samples.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_v80_base16_page32_budget_sweep.py,12 共用依赖,静态导入依赖，待提取,yes,Evaluate single-stage Base16 Page32 routing over physical GQA budgets.,evaluation/eval_qwen3_8b_v80_base16_page32_sink_diagnostics.py; evaluation/fit_qwen3_8b_v80_base16_r8_nonsink_page32.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_8b_v80_base16_page32_sink_diagnostics.py,12 共用依赖,静态导入依赖，待提取,yes,Diagnose attention-sink failures in 32K Base16 Page32 routing.,evaluation/fit_qwen3_8b_v80_base16_r8_nonsink_page32.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_8b_v80_base16_r8_recall.py,13 未选入发布候选,本轮未选入,yes,Evaluate fixed-sink Base16 and Base16+R8 routing recall.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_v80_base_rank_routing.py,13 未选入发布候选,本轮未选入,yes,Evaluate the C1-V80 pre-K base-rank routing curve on fresh captures.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_v80_conditional_residual_router.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Fit and evaluate V-conditioned residual-Key routers on Qwen3-8B.,evaluation/eval_qwen3_8b_v80_base16_page32_budget_sweep.py; evaluation/eval_qwen3_8b_v80_base16_page32_sink_diagnostics.py; evaluation/eval_qwen3_8b_v80_exact_query_weighted_rrr.py; evaluation/eval_qwen3_8b_v80_fisher_base.py; evaluation/eval_qwen3_8b_v80_pre_rope_fisher_base.py; evaluation/fit_k_routing_streaming.py; evaluation/fit_qwen3_8b_q8_fisher_residual.py; evaluation/fit_qwen3_8b_qaware_base_fisher_bank.py; evaluation/fit_qwen3_8b_residual_kl_bank.py; evaluation/fit_qwen3_8b_v80_base16_r8_nonsink_page32.py; evaluation/refit_router_from_statistics.py; scripts/capture_qwen3_8b_q16.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen3_8b_v80_exact_query_weighted_rrr.py,12 共用依赖,静态导入依赖，待提取,yes,Fit pre-RoPE Base16 with exact per-query/per-position QK regression.,evaluation/fit_qwen3_8b_qaware_base_fisher_bank.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_8b_v80_fisher_base.py,12 共用依赖,静态导入依赖，待提取,yes,"Compare MSE, query-weighted, and Page-Fisher C1-V80 routing bases.",evaluation/eval_qwen3_8b_v80_exact_query_weighted_rrr.py; evaluation/eval_qwen3_8b_v80_pre_rope_fisher_base.py; evaluation/fit_qwen3_8b_q8_fisher_residual.py; evaluation/fit_qwen3_8b_qaware_base_fisher_bank.py; scripts/capture_qwen3_8b_q16.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_8b_v80_pre_rope_fisher_base.py,12 共用依赖,静态导入依赖，待提取,yes,Fit a fair pre-RoPE C1-V80 Base16 with multi-query Page-Fisher.,evaluation/eval_qwen3_8b_v80_exact_query_weighted_rrr.py; evaluation/fit_qwen3_8b_qaware_base_fisher_bank.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_8b_v_qk_centered_score_proxy.py,13 未选入发布候选,本轮未选入,yes,Fit and evaluate head-specific Dense/C1-Value QK score proxies.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_wo_c1_ag_ar_mcq.py,10 论文基线,候选入口或实现,yes,Evaluate one communication-matched Wo-C1 AllGather/AllReduce arm.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen3_8b_wo_c1_cross_source_covariance_ppl.py,13 未选入发布候选,本轮未选入,yes,Evaluate Experiment-J Wo-C1 covariance arms on WikiText-2.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_wo_c1_lr_ar_quality.py,10 论文基线,候选入口或实现,yes,Evaluate whole-model quality for the Qwen3-8B Wo-only Phase-1 arms.,evaluation/eval_qwen3_8b_wo_c1_ag_ar_mcq.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen3_8b_wo_c1_uniform_rank_quality.py,13 未选入发布候选,本轮未选入,yes,Evaluate one Qwen3-8B Wo-only uniform-rank factor bank on WikiText-2.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_wo_latent_basis_invariance.py,13 未选入发布候选,本轮未选入,yes,Test real Qwen3-8B Wo-C1 invariance to private latent rotations.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_8b_wo_source_permutations.py,13 未选入发布候选,本轮未选入,yes,Exhaustively permute fitted Qwen3-8B Wo-C1 TP-source factor pairs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_c1_k_refine_oracle.py,13 未选入发布候选,本轮未选入,yes,Replay captured C1 attention tensors through the C1-KRefine oracle.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_c1_k_reverse_shadow_oracle.py,13 未选入发布候选,本轮未选入,yes,Replay captured Qwen3 C1 tensors through the Reverse ShadowKV oracle.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_c1_k_reverse_shadow_ppl.py,12 共用依赖,静态导入依赖，待提取,yes,End-to-end teacher-forced NLL/PPL for block-scheduled Reverse ShadowKV.,evaluation/eval_qwen3_c1_quest_ruler.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_c1_kvquant.py,11 附录消融与量化兼容评测,候选入口或实现,yes,KVQuant NUQ4 numerical adaptation for Qwen3 C1 Value coordinates; no packed cache.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/eval_qwen3_c1_layer_ahead_prefetch_oracle.py,13 未选入发布候选,本轮未选入,yes,Evaluate InfiniGen-style layer-ahead exact-K page prefetch for Qwen3-8B.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_c1_quest_ruler.py,12 共用依赖,静态导入依赖，待提取,yes,Paired RULER-v1 generation for dense K and physical-shared QUEST K.,evaluation/eval_qwen3_8b_residual_rank_ruler.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_c1_v_k_page_oracle.py,13 未选入发布候选,本轮未选入,yes,Evaluate a same-layer C1-Value-derived Key page index on captured Qwen3 data.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_dense_ruler.py,13 未选入发布候选,本轮未选入,yes,Official RULER-v1 generation for dense Qwen3-8B-Base.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_kv4_fp8_ppl.py,12 共用依赖,静态导入依赖，待提取,yes,"WT2 PPL: same C1 checkpoint, NUQ4 K/V, and actual E4M3 W8A8 GEMMs.",evaluation/calibrate_llama_nuq4.py; evaluation/eval_llama_adaptive_nuq4_c4.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/eval_qwen3_latent_a8.py,13 未选入发布候选,本轮未选入,yes,"Fixed NUQ4, BF16 encoder: BF16 latent, A8 latent, or A8 + W8 decoder.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_page_output_pullback_components.py,13 未选入发布候选,本轮未选入,yes,Report output-pullback and Page-Fisher components without mixing them.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_page_output_pullback_router.py,13 未选入发布候选,本轮未选入,yes,Evaluate a K-only output-pullback router on exact 32K direct captures.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_qwen3_tp4_quant_ppl.py,13 未选入发布候选,本轮未选入,yes,Same-checkpoint NUQ4 K/V and INT4/FP8 wire WT2 PPL on real TP4.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_ruler_c1_v96_r16.py,13 未选入发布候选,本轮未选入,yes,RULER V96/Base16/R16 matched to completed V100 exact-K and LRQK arms.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_ruler_c1_v96_recent64.py,13 未选入发布候选,本轮未选入,yes,RULER V96/Base16/R16 matched to completed V100 exact-K and LRQK arms.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_ruler_c1_v96_recent64_fixed.py,13 未选入发布候选,本轮未选入,yes,RULER V96/Base16/R16 matched to completed V100 exact-K and LRQK arms.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_ruler_kl96.py,13 未选入发布候选,本轮未选入,yes,"Fresh paired RULER pilot: HF KL96 payload, five BF16 attention arms.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_ruler_lrqk_v96.py,13 未选入发布候选,本轮未选入,yes,Matched V100 FP16 RULER: exact K versus FP32-state LRQK k1152.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_ruler_shadowkv_v96.py,13 未选入发布候选,本轮未选入,yes,L40S BF16 RULER: ShadowKV K reconstruction/routing with resident C1-V96.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_ruler_v96_l40s.py,13 未选入发布候选,本轮未选入,yes,"Matched L40S BF16 RULER: exact K, BF16-state LRQK and Base16/R16+recent64.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_starkv_v50_adaptive_mcq.py,13 未选入发布候选,本轮未选入,yes,Evaluate the fused STAR-KV V50 adaptive checkpoint on seven MCQ tasks.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_starkv_v50_adaptive_ppl.py,13 未选入发布候选,本轮未选入,yes,Matched WikiText2/C4 PPL for a fused STAR-KV V50 adaptive checkpoint.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_starkv_v_adaptive_mcq.py,13 未选入发布候选,本轮未选入,yes,Evaluate the fused STAR-KV adaptive-rank checkpoint on seven MCQ tasks.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_starkv_v_adaptive_ppl.py,13 未选入发布候选,本轮未选入,yes,Matched WikiText2/C4 PPL for a fused STAR-KV adaptive-rank checkpoint.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_two_stage_ruler.py,13 未选入发布候选,本轮未选入,yes,Paired RULER evaluation in the measured native K-offload runtime.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_uniform96_compare.py,13 未选入发布候选,本轮未选入,yes,Complete uniform96 RULER controls beside the frozen ShadowKV results.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_uniform96_shadow.py,13 未选入发布候选,本轮未选入,yes,Uniform C1 V96 ShadowKV on the frozen local KL96 RULER prompts.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_v96kl_longbench.py,13 未选入发布候选,本轮未选入,yes,"Full LongBench-v1: matched C1-KL96 full-K, Base16/R16, and LRQK.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_v96kl_queue.py,13 未选入发布候选,本轮未选入,yes,Distribute unchanged V96-KL evaluation samples with per-sample OS locks.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/eval_v_key_information.py,13 未选入发布候选,本轮未选入,yes,Held-out local V->pre-RoPE K information with shuffled and PCA controls.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/export_eval_records.py,13 未选入发布候选,本轮未选入,yes,Export evaluator sample records into the compact results layout used under results/: predictions/<arm>.jsonl (prompt token ids,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/export_page_rankings.py,13 未选入发布候选,本轮未选入,yes,Export all valid page ranks for one saved layer/group/window/query to CSV.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/extend_query_gram64.py,13 未选入发布候选,本轮未选入,yes,Extend the frozen Q32 Gram pivot sequence to Q64 without new whitening.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/extract_qgram64_fit.py,13 未选入发布候选,本轮未选入,yes,"Extract Q64 fit queries from immutable BF16 candidate captures, no model forward.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/extract_qgram_terminal32_fit.py,13 未选入发布候选,本轮未选入,yes,"Extract terminal Q32 fit queries from immutable BF16 candidate captures, no model forward.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/finalize_attention_o_proj_ppl_snapshot.py,02 校准数据与统计采集,候选入口或实现,yes,Finalize a complete attention snapshot left after a capture timeout.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/fit_attention_o_proj_ppl_factors.py,12 共用依赖,静态导入依赖，待提取,yes,Fit activation-aware equal-byte AR/AG factors for end-to-end PPL.,evaluation/eval_attention_o_proj_collective_ppl.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/fit_c1_kl_base_residual.py,13 未选入发布候选,本轮未选入,yes,Fit closed-form Base16 and Page-Fisher R8 in an allocated C1 latent.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_c1_v96_base_residual.py,13 未选入发布候选,本轮未选入,yes,Fit closed-form Base16 and non-sink Page-Fisher R8 for frozen uniform V96.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_c1_v96_r16_page16.py,13 未选入发布候选,本轮未选入,yes,Fit closed-form Base16 and non-sink Page-Fisher R16 for frozen uniform V96.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_c1_v96_r16_qgram64.py,13 未选入发布候选,本轮未选入,yes,Fit closed-form Base16 and non-sink Page-Fisher R16 for frozen uniform V96.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_c1_v96_r16_residual.py,13 未选入发布候选,本轮未选入,yes,Fit closed-form Base16 and non-sink Page-Fisher R16 for frozen uniform V96.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_c1_v96_r16_s50p150.py,13 未选入发布候选,本轮未选入,yes,Fit closed-form Base16 and non-sink Page-Fisher R16 for frozen uniform V96.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_c1_v96_r16_terminal32.py,13 未选入发布候选,本轮未选入,yes,Fit closed-form Base16 and non-sink Page-Fisher R16 for frozen uniform V96.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_chunk8_fisher_landmark.py,13 未选入发布候选,本轮未选入,yes,Smoke-test direct MeanResidual and FlatResidual Chunk8 Fisher ALS.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_chunk8_fisher_landmark_formal.py,13 未选入发布候选,本轮未选入,yes,Formal packed-window direct Chunk8 Fisher fitting for Llama-3.1-8B-Instruct.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_chunk8_mean_fisher_statistics.py,13 未选入发布候选,本轮未选入,yes,Fit Mean-128 Chunk8 landmarks from exact compact Fisher statistics.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_deepseek_v2_lite_tp8_c1_joint.py,13 未选入发布候选,本轮未选入,yes,Fit DeepSeek-V2-Lite TP8 post-attention C1 ``W_o`` factors.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_k_routing.py,13 未选入发布候选,本轮未选入,yes,Layer-sharded Base16/Page-Fisher R16 fitting for frozen allocated C1 payloads.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_k_routing_captures.py,13 未选入发布候选,本轮未选入,yes,Fit Base16/Residual16 from dense window shards without loading the teacher.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_k_routing_fisher_base.py,13 未选入发布候选,本轮未选入,yes,Fisher-trained Value Base for the B16R16 K router: sequential (Fisher-B16 then Fisher-R16) and joint / alternating,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_k_routing_streaming.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Two replays for C1/Base moments and packed Page-Fisher; no raw capture.,evaluation/build_llama_section4_base_sweep.py; evaluation/calibration_routing_quality.py; evaluation/eval_llama_dense_v_routing128.py; evaluation/eval_qwen35_128k_ruler.py; evaluation/fit_qwen35_128k_k_routing.py; evaluation/page_granularity_sweep.py; evaluation/section4_v_to_k_information.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/fit_k_routing_windowed.py,13 未选入发布候选,本轮未选入,yes,Window-sharded variant of fit_k_routing_streaming: one replay per calibration window covers EVERY attention layer.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_llama2_mha_c1_joint.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Fit foldable Llama-2-7B MHA C1 V/Wo factors.,evaluation/build_qwen3_8b_section3_group_svd.py; evaluation/fit_llama31_8b_c1_joint.py; evaluation/fit_qwen3_32b_c1_joint.py; evaluation/fit_qwen3_8b_c1_joint.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/fit_llama2_mha_recalkv_global_ovc.py,13 未选入发布候选,本轮未选入,yes,Fit the ReCalKV global-OVC dense-reconstruction reference for Llama-2-7B.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_llama2_mha_recalkv_glrd_ovc.py,13 未选入发布候选,本轮未选入,yes,Fit an unofficial fusion-compatible ReCalKV G-LRD Value reference.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_llama2_mha_recalkv_paper_controlled_ovc.py,13 未选入发布候选,本轮未选入,yes,"Fit a controlled, code-faithful ReCalKV OVC reference on Llama-2-7B.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_llama31_70b_c1_joint.py,13 未选入发布候选,本轮未选入,yes,Fit Llama-3.1-70B GQA C1 factors at the fixed sweep-6 endpoint.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_llama31_8b_128k_loki.py,13 未选入发布候选,本轮未选入,yes,Fit Llama-3.1-8B-Instruct Loki Key PCA (rank 32) on post-RoPE Keys over 32 x 128K C4 windows.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_llama31_8b_c1_joint.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Fit Llama-3.1-8B GQA C1 factors at the fixed sweep-6 endpoint.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/fit_llama_loki_4k.py,13 未选入发布候选,本轮未选入,yes,Fit Loki rank32 on the first two 4096-token segments of each of 64 frozen fit windows.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_llama_section4_qgram_score_only.py,13 未选入发布候选,本轮未选入,yes,Fit Fisher-free Score-MSE using the existing Query-Gram position coreset.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_llama_section4_residual_objective.py,13 未选入发布候选,本轮未选入,yes,Fit the Section 4 Residual-MSE and Score-MSE B16R16 controls.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_llama_section4_score_only.py,13 未选入发布候选,本轮未选入,yes,Fit the clean Score-only Section 4 B16R16 checkpoint.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_nemotron_h_128k_loki.py,13 未选入发布候选,本轮未选入,yes,Fit Nemotron-H Loki Key PCA (rank 32) on the dense model's attention Keys over the 128K fit windows.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_nemotron_h_c1_joint.py,13 未选入发布候选,本轮未选入,yes,Fit a Nemotron-H attention V bank with configurable ALS and fixed CG16.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_nemotron_h_wo.py,13 未选入发布候选,本轮未选入,yes,Fit Mamba Wo factors at a frozen attention C1 AllGather wire budget.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen35_128k_k_routing.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Qwen3.5-9B 128K K-routing fitter on the deployed V192 + GDN-Wo75 model (Score-MSE or Page-Fisher residual objective).,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/fit_qwen35_128k_loki.py,13 未选入发布候选,本轮未选入,yes,"Qwen3.5-9B 128K Loki Key PCA (rank 32) on the dense model, streamed from the router's calibration windows.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen35_128k_v.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Fit uniform gated V (rank 192 by default) per full-attention layer from the 128K captures of ``capture_qwen35_128k_v.py``.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/fit_qwen35_dense_mixed_wo.py,13 未选入发布候选,本轮未选入,yes,Fit GDN rank 768 and reuse Dense-calibrated full-attention rank 512.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen35_k_router.py,13 未选入发布候选,本轮未选入,yes,Fit one Qwen3.5 Base/Residual capacity from completed native captures.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen35_k_routing_v.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Fit gated V on all 64 native 32K C4 windows with bounded row reads.,evaluation/fit_qwen35_128k_v.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/fit_qwen35_loki.py,13 未选入发布候选,本轮未选入,yes,"Centered pre-RoPE Key PCA for Loki, from the same 64 native C4 windows.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen3_32b_128k_loki.py,13 未选入发布候选,本轮未选入,yes,Fit Qwen3-32B Loki Key PCA on post-RoPE Keys over the 32 x 128K C4 windows.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen3_32b_64k_loki.py,13 未选入发布候选,本轮未选入,yes,Fit Qwen3-32B Loki Key PCA (rank 32) on the dense model over the 32 fit windows of a calibration bank.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen3_32b_c1_joint.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Fit Qwen3-32B GQA C1 factors with true encoder/decoder ALS.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/fit_qwen3_32b_c1_ragged_schedule_als.py,13 未选入发布候选,本轮未选入,yes,Refine a frozen Qwen3-32B Global-KL rank schedule with ragged C1 ALS.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen3_8b_c1_joint.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Fit Qwen3-8B GQA C1 factors with decoder-closed ALS.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/fit_qwen3_8b_c1_k_output_closure.py,13 未选入发布候选,本轮未选入,yes,Fit output-aware post-RoPE K/Q factors with fixed Qwen3-8B C1-V factors.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen3_8b_mlp_down_c1.py,13 未选入发布候选,本轮未选入,yes,Fit Qwen3-8B MLP ``down_proj`` shared-decoder C1 factors.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen3_8b_mlp_down_c1_sequential.py,13 未选入发布候选,本轮未选入,yes,Fit Qwen3-8B MLP C1 factors by sequential dense-teacher closure.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen3_8b_q8_fisher_residual.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Freeze Base16 and refit uniform R8 with captured causal Q positions.,evaluation/fit_k_routing_streaming.py; evaluation/fit_qwen35_128k_k_routing.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/fit_qwen3_8b_qaware_base_fisher_bank.py,12 共用依赖,静态导入依赖，待提取,yes,"Fit per-query Q-aware Base16, then refit its Page-Fisher residual bank.",evaluation/fit_qwen3_8b_q8_fisher_residual.py; scripts/capture_qwen3_8b_q16.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/fit_qwen3_8b_residual_kl_bank.py,12 共用依赖,静态导入依赖，待提取,yes,Complete the fixed-Base16 R4/R8/R16 bank for two-sided terminal KL.,evaluation/eval_longbench_c1_fourarm.py; evaluation/eval_qwen3_8b_residual_rank_ruler.py; evaluation/fit_qwen3_8b_q8_fisher_residual.py; evaluation/fit_qwen3_8b_qaware_base_fisher_bank.py; evaluation/prepare_longbench_c1.py; evaluation/profile_qwen3_8b_residual_two_sided_kl.py; evaluation/select_query_positions.py; scripts/capture_qwen3_8b_q16.py; scripts/query_position_capture.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/fit_qwen3_8b_uniform_q16_base_fisher.py,13 未选入发布候选,本轮未选入,yes,Refit Base16 and Page-Fisher R8 with Q16 spanning the full 32K context.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen3_8b_v80_base16_r8_nonsink_page32.py,12 共用依赖,静态导入依赖，待提取,yes,Fit a pinned-sink Page32 residual-rank router sweep for Qwen3-8B.,evaluation/eval_qwen3_8b_v80_fisher_base.py; evaluation/eval_qwen3_8b_v80_pre_rope_fisher_base.py; evaluation/fit_qwen3_8b_residual_kl_bank.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/fit_qwen3_8b_wo_c1_cross_source_covariance.py,13 未选入发布候选,本轮未选入,yes,Ablate cross-source covariance in fixed-encoder Qwen3-8B Wo-C1 decoders.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen3_8b_wo_c1_independent_local.py,13 未选入发布候选,本轮未选入,yes,Compare independent-local and joint-final-output Wo-C1 fitting on Qwen3-8B.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/fit_qwen3_c1_k_proxy.py,13 未选入发布候选,本轮未选入,yes,Fit C1-K proxy factors from captured valid post-RoPE Q/K pairs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/hf_legacy_dataset_compat.py,13 未选入发布候选,本轮未选入,yes,"Compatibility for legacy, unnamespaced Hugging Face dataset aliases.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/host_staged_dispatch.py,13 未选入发布候选,本轮未选入,yes,Explicit host-mediated transfers for models dispatched across PCIe GPUs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/inspect_nemotron_h_model.py,13 未选入发布候选,本轮未选入,yes,Check pinned Nemotron checkpoint geometry against the native meta model.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/inspect_qwen35_longbench_v2.py,13 未选入发布候选,本轮未选入,yes,Inventory LongBench-v2 lengths before selecting a paired routing pilot.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/install_nemotron_h_wo.py,12 共用依赖,静态导入依赖，待提取,yes,Install audited folded Mamba Wo factors for paired quality evaluation.,evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/fit_k_routing_streaming.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/k_routing_capture_windows.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Read one immutable captured activation window at a time.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/k_routing_config.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,"Explicit, bounded runtime position configuration for routing experiments.",evaluation/calibrate_llama_v96_kvquant.py; evaluation/calibration_routing_quality.py; evaluation/capture_k_routing.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_llama_dense_v_routing128.py; evaluation/fit_k_routing_streaming.py; evaluation/page_granularity_sweep.py; evaluation/section4_v_to_k_information.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/kv_fp8_simulation.py,11 附录消融与量化兼容评测,候选入口或实现,yes,"Simulated FP8 (E4M3) KV cache for the routing evaluators: quantize -> dequantize, BF16 storage.",evaluation/eval_k_routing_ruler_p16.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/kvquant_nuq4_simulation.py,11 附录消融与量化兼容评测,候选入口或实现,yes,"Simulated KVQuant NUQ4 KV cache for the routing evaluators (quantize -> dequantize, BF16 storage).",evaluation/calibrate_llama_v96_kvquant.py; evaluation/eval_k_routing_ruler_p16.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/llama31_instruct_c1_64k.py,13 未选入发布候选,本轮未选入,no,C4 preparation and full-token C1 covariance capture for Llama Instruct 64K.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/llama31_instruct_router_64k.py,13 未选入发布候选,本轮未选入,no,"Fit-only Q64 Query-Gram selection, closed-form Base16, Page-Fisher R8.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/llama31_instruct_ruler_64k.py,13 未选入发布候选,本轮未选入,no,Paired 64K RULER: uniform C1-V96 full K versus Triton Base16/R8 routing.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/llama31_instruct_ruler_data.py,13 未选入发布候选,本轮未选入,no,"Official RULER Llama-3 Instruct prompts: 64K, 11 tasks, 30 samples each.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/llama_b16r16_k_offload.py,13 未选入发布候选,本轮未选入,yes,Llama page routing (Base+Residual or Residual-only sidecar) with GPU routing/V96 and pinned-CPU exact K.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/llama_b16r16_k_offload_p1.py,13 未选入发布候选,本轮未选入,yes,"Llama page routing with GPU routing/V96 and pinned-CPU exact K; page size, pinned sink pages and token budget are module globals",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/llama_baseline_prefill.py,12 共用依赖,静态导入依赖，待提取,yes,Bound baseline prefill memory; restore exact cached tensors before decode.,evaluation/eval_llama_dense_v_routing128.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/llama_prefill_memory.py,13 未选入发布候选,本轮未选入,yes,Bound tokenwise normalization and rotary intermediates for long prefills.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/llama_resident_prefill.py,13 未选入发布候选,本轮未选入,yes,Memory-bounded Llama 128k prefills with all cache and routing state resident on GPU.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/llama_single_gpu_prefill.py,13 未选入发布候选,本轮未选入,yes,Query-blocked native FlashAttention prefill; unchanged indexed Triton decode.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/llama_sink_recent_routing.py,12 共用依赖,静态导入依赖，待提取,yes,Llama Page32 routing with sink32 and recent64 inside a hard 2048 budget.,evaluation/calibration_routing_quality.py; evaluation/diagnose_conjunctive_pages.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_llama_dense_v_routing128.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/llama_sink_recent_routing_p16.py,12 共用依赖,静态导入依赖，待提取,yes,"Page routing with one pinned sink page and recent64 inside a hard budget; page size 32 (default), 16, 8, 4, 2 or 1.",evaluation/eval_k_routing_ruler_p16.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/llama_tp4_capacity_trial.py,13 未选入发布候选,本轮未选入,yes,One isolated full-model TP4 capacity trial; failures are classified by its parent.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/lm_eval_task_specs.py,08 质量评测与数据准备,候选入口或实现,yes,Build lm-eval task specifications with optional per-task few-shot counts.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/longbench_exact_pages.py,12 共用依赖,静态导入依赖，待提取,yes,Exact-QK page-selection control using the unchanged native C1 sparse payload path.,evaluation/eval_longbench_c1_fourarm.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/longbench_metrics.py,12 共用依赖,静态导入依赖，待提取,yes,Official LongBench-v1 scoring for one sample.,evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_qwen35_128k_ruler.py; evaluation/prepare_longbench_shadowkv9.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/longbench_official/metrics.py,08 质量评测与数据准备,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/lrqk_chunked_prefill.py,13 未选入发布候选,本轮未选入,yes,Head-blocked LRQK prefill with shared iteration and stopping decisions.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/merge_iclr_quality_shards.py,08 质量评测与数据准备,候选入口或实现,yes,Merge parallel two-GPU ICLR quality shards into one audited result.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/merge_lm_eval_task_shards.py,13 未选入发布候选,本轮未选入,yes,Merge disjoint lm-eval task shards emitted by BasisServe evaluators.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/merge_nemotron_h_covariance_shards.py,13 未选入发布候选,本轮未选入,yes,Merge memory-bounded Nemotron-H covariance captures without data copies.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/merge_qwen3_32b_c1_c4_ppl.py,13 未选入发布候选,本轮未选入,yes,Merge two Qwen3-32B C4-validation PPL shards and compute paired deltas.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/nemotron_h_palu.py,13 未选入发布候选,本轮未选入,yes,Collect PaLU Fisher scores and build Nemotron-H MLRD/GLRD4 V factors.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/nemotron_h_runtime.py,12 共用依赖,静态导入依赖，待提取,yes,Device-correct native Mamba launches for dispatched Nemotron models.,evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/nemotron_h_scan_layout.py,12 共用依赖,静态导入依赖，待提取,yes,Pack dt before scan kernels whose stride arithmetic uses 32-bit offsets.,evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/nemotron_h_triton_mamba.py,12 共用依赖,静态导入依赖，待提取,yes,Triton chunk-scan drop-in for transformers' Nemotron-H Mamba2 mixer.,evaluation/calibration_routing_quality.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/fit_k_routing_streaming.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/official_lrqk_state.py,10 论文基线,候选入口或实现,yes,Call upstream LRQK cache unchanged from the common evaluation attention hook.,evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/official_shadowkv_cpu.py,10 论文基线,候选入口或实现,yes,Load the upstream CPU-offload cache and its CUDA wrappers without model extras.,evaluation/eval_llama_dense_v_routing128.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/pack_qwen3_32b_uniform_c1_tp.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Pack legacy uniform C1 layer artifacts into the canonical TP factor format.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/package_c1_uniform_checkpoint.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Package a merged uniform-rank C1 ALS factor bank into the K-routing evaluator's checkpoint contract.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/package_llama31_8b_c1_checkpoint.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Package a merged Llama-3.1-8B C1 ALS factor bank for eval_llama_cal128's loader.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/page_granularity_sweep.py,11 附录消融与量化兼容评测,候选入口或实现,yes,"Captured exact attention mass versus routing page size, with the router factors fixed (no refit).",,已按功能初筛；不代表所有分支都应原样发布
+evaluation/pilot_llama2_mha_c1_per_head_fisher_kl.py,13 未选入发布候选,本轮未选入,yes,Compare reverse-mode Fisher and exact terminal KL for C1 TP-source ranks.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/plot_k_routing_diagnostics.py,13 未选入发布候选,本轮未选入,yes,"Plot complete, matched held-out router diagnostics for Qwen3 and Qwen3.5.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/plot_qwen35_k_routing.py,13 未选入发布候选,本轮未选入,yes,Plot held-out Qwen3.5 K reconstruction and matched page recall.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/preflight_qwen35_9b_c1_v100.py,13 未选入发布候选,本轮未选入,yes,Preflight Qwen3.5-9B output-wire capture on one CUDA device.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_deepseek_v2_lite_c1_windows.py,13 未选入发布候选,本轮未选入,yes,Prepare document-disjoint C4 windows for DeepSeek-V2-Lite C1.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_dense_k_routing_identity.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Freeze a dense-V model identity for K-routing fitting and evaluation.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_k_routing_llama.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,"Fetch and audit frozen allocated V96 payloads, optionally prepare C4 windows.",,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_llama128k_windows.py,02 校准数据与统计采集,候选入口或实现,yes,Prepare 32x128K C4 fit windows plus 16x128K held-out windows.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_llama2_7b_c1_windows.py,13 未选入发布候选,本轮未选入,yes,Prepare document-disjoint C4 windows for Llama-2-7B C1.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_llama31_70b_c1_windows.py,13 未选入发布候选,本轮未选入,yes,Prepare document-disjoint C4 windows for Llama-3.1-70B C1.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_llama31_70b_c4_ppl_windows.py,13 未选入发布候选,本轮未选入,yes,Prepare independent C4-validation documents for Llama-3.1-70B PPL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_llama31_70b_global_kl_windows.py,13 未选入发布候选,本轮未选入,yes,Extend the audited Llama-3.1-70B C4 bank with Global-KL documents.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_llama31_8b_c1_windows.py,02 校准数据与统计采集,候选入口或实现,yes,Prepare document-disjoint C4 windows for Llama-3.1-8B C1.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_llama31_8b_c4_128k_windows.py,02 校准数据与统计采集,候选入口或实现,yes,Document-disjoint 128K C4 windows for Llama-3.1-8B-Instruct C1 calibration.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_llama31_8b_tp8_combined_factors.py,03 Checkpoint 构建与模型接入,候选入口或实现,yes,Materialize the V96 coordinate change shared by TP8 ALS and Basis arms.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_llama31_tp8_benchmark_prompts.py,13 未选入发布候选,本轮未选入,yes,Freeze three distinct real-text prompt cohorts for the TP8 benchmark grid.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_llama64k_windows.py,13 未选入发布候选,本轮未选入,yes,Prepare genuine C4 64x64K fit plus 16x64K held-out packed windows.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_llama_dense_v.py,13 未选入发布候选,本轮未选入,yes,Bind exact V128 factors and shared 64K moments to the Dense V control.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_llama_instruct_dense.py,13 未选入发布候选,本轮未选入,yes,Prepare Instruct identity V factors and reuse verified C4 token windows.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_llama_section4_longbench.py,13 未选入发布候选,本轮未选入,yes,Freeze the paired Llama-3.1-Instruct LongBench pilot for Section 4.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_local_k_routing_identity.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Verify a local two-sided KL checkpoint and bind it to a routing experiment.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_longbench_c1.py,12 共用依赖,静态导入依赖，待提取,yes,"Freeze a deterministic LongBench-v1 pilot, official prompts, and token inputs.",evaluation/eval_longbench_c1_fourarm.py; evaluation/prepare_v96kl_data.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/prepare_longbench_shadowkv9.py,08 质量评测与数据准备,候选入口或实现,yes,LongBench-v1 rows for the ShadowKV nine-task protocol.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_nemotron_c1_windows.py,13 未选入发布候选,本轮未选入,yes,Prepare pinned C4 documents for Nemotron V fitting and KL allocation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_nemotron_h_quality_windows.py,13 未选入发布候选,本轮未选入,yes,Prepare the Qwen3-8B-matched C4-validation PPL bank for Nemotron-H.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen35_128k_identity.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Build the Qwen3.5-9B 128K identity record for the K-routing fitter and evaluator.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_qwen35_9b_c1_windows.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Prepare fixed document-disjoint C4 splits for Qwen3.5-9B C1 ALS.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_qwen35_hybrid_data.py,13 未选入发布候选,本轮未选入,yes,Freeze document-disjoint C4 calibration and validation PPL windows.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen35_longbench.py,08 质量评测与数据准备,候选入口或实现,yes,"Freeze a 100-question, five-task LongBench-v1 Qwen3.5 pilot.",evaluation/eval_qwen35_longbench.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_qwen35_longbench_v2.py,13 未选入发布候选,本轮未选入,yes,Freeze up to 100 untruncated 32K-64K LongBench-v2 CoT inputs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen35_mixed_reasoning_calibration.py,02 校准数据与统计采集,候选入口或实现,yes,Build target-model mixed reasoning calibration for Qwen3.5-9B.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_qwen38_identity.py,13 未选入发布候选,本轮未选入,yes,Authenticate the pinned Qwen3.8-27B download and calibration inputs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen3_32b_128k_smoke_windows.py,13 未选入发布候选,本轮未选入,yes,Pack existing Qwen3-32B 32K windows into one fit and one held-out 128K smoke window.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen3_32b_c1_windows.py,02 校准数据与统计采集,候选入口或实现,yes,Prepare document-disjoint C4 fit and held-out windows for Qwen3-32B C1.,evaluation/prepare_llama31_8b_c1_windows.py; evaluation/prepare_qwen3_8b_c1_windows.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_qwen3_32b_c4_ppl_windows.py,13 未选入发布候选,本轮未选入,yes,Prepare independent C4-validation documents for Qwen3-32B PPL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen3_32b_global_kl_windows.py,02 校准数据与统计采集,候选入口或实现,yes,Extend the audited Qwen3-32B C4 bank with 16 Global-KL documents.,evaluation/prepare_qwen3_8b_global_kl_windows.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_qwen3_32b_joint_v96.py,13 未选入发布候选,本轮未选入,yes,Validate the matched 128K Qwen banks and materialize routing coordinates.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen3_8b_c1_k_reverse_shadow_windows.py,13 未选入发布候选,本轮未选入,yes,Prepare the fixed 16x4096 C4-validation bank for Reverse ShadowKV.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen3_8b_c1_windows.py,02 校准数据与统计采集,候选入口或实现,yes,Prepare document-disjoint C4 fit and held-out windows for Qwen3-8B C1.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_qwen3_8b_global_kl_windows.py,02 校准数据与统计采集,候选入口或实现,yes,Extend the audited Qwen3-8B C4 bank with Global-KL documents.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_qwen3_8b_kqsvd_32k_windows.py,13 未选入发布候选,本轮未选入,yes,Pack document-disjoint C4 calibration windows without changing tokens.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen3_8b_pairwise_kqsvd_windows.py,13 未选入发布候选,本轮未选入,yes,Prepare the fixed 128x4096 C4-train bank for Pairwise KQ-SVD.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen3_8b_section3_windows.py,11 附录消融与量化兼容评测,候选入口或实现,yes,Prepare audited WikiText-2 and equal-token long-context Section-3 windows.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_qwen3_8b_wikitext_length_sweep.py,13 未选入发布候选,本轮未选入,yes,Prepare disjoint WikiText-2 windows for C1+K-routing evaluation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen3_a8_tp8.py,13 未选入发布候选,本轮未选入,yes,"Export real decoder weights and train-only latent fixtures, without hashes.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_qwen3_ruler_v1.py,08 质量评测与数据准备,候选入口或实现,yes,Generate the official RULER-v1 base-model dataset for a local tokenizer.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_qwen3_tp8_memory_prompts.py,13 未选入发布候选,本轮未选入,yes,Freeze Qwen-tokenized LongBench-v2 cohorts for the TP8 V-only memory grid.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_retrieval_calibration_windows.py,02 校准数据与统计采集,候选入口或实现,yes,Generic synthetic long-range retrieval calibration windows (default 128K; --sequence-length overrides).,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/prepare_terminal_q8.py,13 未选入发布候选,本轮未选入,yes,Derive a matched terminal-Q8 pair from immutable existing Q captures; no forward.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/prepare_v96kl_data.py,12 共用依赖,静态导入依赖，待提取,yes,Prepare audited C4 windows and every LongBench-v1 task/example.,evaluation/prepare_k_routing_llama.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/profile_qwen35_k_routing_v.py,13 未选入发布候选,本轮未选入,yes,Terminal-KL probes for the 32K ALS12 gated-V experiment.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/profile_qwen3_8b_residual_two_sided_kl.py,12 共用依赖,静态导入依赖，待提取,yes,Three-point residual-rank KL allocation after a shared dense-C1 prefix.,evaluation/eval_longbench_c1_fourarm.py; evaluation/eval_qwen3_8b_residual_rank_ruler.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/profile_qwen3_8b_tp4_decode_breakdown.py,13 未选入发布候选,本轮未选入,yes,Profile real Qwen3-8B TP4 one-token decode at fixed context lengths.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/query_ablation_metrics.py,13 未选入发布候选,本轮未选入,yes,Base4-only query controls with identical causal support constraints.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/quest_page_routing.py,12 共用依赖,静态导入依赖，待提取,yes,"Quest page selection (Tang et al., ICML 2024) on post-RoPE Keys for the routing evaluators.",evaluation/eval_k_routing_ruler_p16.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/qwen35_base_routing.py,13 未选入发布候选,本轮未选入,yes,"Base16-only routing, with no residual codes or residual scoring.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/qwen35_hybrid_banks.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Assemble immutable C1 banks and two-sided terminal-KL schedules.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/qwen35_hybrid_common.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Shared immutable artifacts and model loading for the Qwen3.5 hybrid run.,basisserve/vllm/qwen35_hybrid.py; evaluation/assemble_qwen35_128k_v_bank.py; evaluation/assemble_qwen35_k_routing_v.py; evaluation/capture_qwen35_128k_v.py; evaluation/capture_qwen35_k_routing.py; evaluation/eval_qwen35_128k_ruler.py; evaluation/eval_qwen35_hybrid_gsm8k.py; evaluation/eval_qwen35_k_routing_ruler.py; evaluation/eval_qwen35_longbench.py; evaluation/fit_qwen35_128k_k_routing.py; evaluation/fit_qwen35_128k_v.py; evaluation/fit_qwen35_k_routing_v.py; evaluation/prepare_qwen35_128k_identity.py; evaluation/prepare_qwen35_longbench.py; evaluation/prepare_qwen35_mixed_reasoning_calibration.py; evaluation/qwen35_hybrid_banks.py; evaluation/run_qwen35_hybrid.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/qwen35_hybrid_local_errors.py,13 未选入发布候选,本轮未选入,yes,"Common-input local error decomposition, separate from trajectory PPL.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/qwen35_hybrid_palu.py,13 未选入发布候选,本轮未选入,yes,Matched PaLU Fisher collection and grouped activation-aware V factors.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/qwen35_hybrid_queue.py,13 未选入发布候选,本轮未选入,yes,Continue V-only bank assembly and PPL as independent factor workers finish.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/qwen35_hybrid_wo.py,13 未选入发布候选,本轮未选入,yes,Stage B: frozen-V recapture and reuse of source-private C1 output ALS.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/qwen35_k_routing_v.py,13 未选入发布候选,本轮未选入,yes,Native 32K gated-V captures for the Qwen3.5 K-routing experiment.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/qwen35_split_routing.py,13 未选入发布候选,本轮未选入,yes,Qwen3.5 decode adapter using split indexed attention; frozen routing rules.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/qwen35_v_capture_reader.py,12 共用依赖,静态导入依赖，待提取,yes,Read native gated-V captures in bounded row slices.,evaluation/fit_qwen35_128k_v.py; evaluation/fit_qwen35_k_routing_v.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/qwen3_32b_v96_baseline_offload.py,13 未选入发布候选,本轮未选入,yes,Sparse payload offload for one-GPU Qwen3-32B V96 evaluation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/refit_router_from_statistics.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Refit the Base/Fisher residual router from persisted statistics; no teacher.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/refit_streaming_residual.py,13 未选入发布候选,本轮未选入,yes,"Refit residual rank using verified, unchanged Base0 Fisher statistics.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/reproduce_palu_paper_llama2_distributed.py,12 共用依赖,静态导入依赖，待提取,yes,Reproduce the PaLU Llama-2-7B G-LRD quality anchor with data parallel calibration.,evaluation/build_llama31_8b_palu_m_checkpoint.py; evaluation/build_qwen3_8b_iclr_v_checkpoint.py; evaluation/collect_gqa_palu_fisher.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/routing_diagnostics.py,13 未选入发布候选,本轮未选入,yes,Matched full-router K reconstruction and causal selected attention mass.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/ruler_v1.py,08 质量评测与数据准备,候选入口或实现,yes,"Small, dependency-free helpers for the official RULER-v1 protocol.",evaluation/diagnose_conjunctive_pages.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_llama_dense_v_routing128.py; evaluation/eval_qwen35_128k_ruler.py; evaluation/eval_qwen35_k_routing_ruler.py; evaluation/eval_qwen3_8b_residual_rank_ruler.py; evaluation/eval_qwen3_c1_quest_ruler.py; evaluation/prepare_qwen3_ruler_v1.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/run_c1_synthetic_controlled_angles.py,13 未选入发布候选,本轮未选入,yes,Run the deterministic FP64 controlled-angle C1 representation experiment.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_deepseek_v2_lite_c1_layer_global_kl.py,13 未选入发布候选,本轮未选入,yes,Allocate DeepSeek-V2-Lite TP-source ranks by post-ALS layer Global-KL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_llama2_7b_c1_two_sided_factorized_kl_sharded.py,13 未选入发布候选,本轮未选入,yes,Allocate Llama-2-7B C1 ranks with two-sided factorized terminal KL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_llama31_70b_c1_two_sided_factorized_kl_sharded.py,13 未选入发布候选,本轮未选入,yes,Allocate Llama-3.1-70B C1 ranks with two-sided factorized terminal KL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_llama31_8b_c1_two_sided_factorized_kl_sharded.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Allocate Llama-3.1-8B C1 ranks with two-sided factorized terminal KL.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/run_llama_base_ablation.py,13 未选入发布候选,本轮未选入,yes,Four independent single-L40S workers and paired RULER aggregation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_llama_ruler100.py,13 未选入发布候选,本轮未选入,yes,Run and audit 1100-prompt original-V128 and C1-V96 RULER comparisons.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_low_rank_allreduce.py,13 未选入发布候选,本轮未选入,yes,Benchmark dense vs low-rank tensor-parallel output communication.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_nemotron_h_c1_wo_pilot.py,13 未选入发布候选,本轮未选入,yes,Run a two-layer Nemotron-H Mamba/attention C1-Wo quality pilot.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_qwen35_9b_c1_layer_global_kl.py,13 未选入发布候选,本轮未选入,yes,Profile and allocate Qwen3.5-9B layer-ragged C1 ranks by terminal KL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_qwen35_hybrid.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Staged Qwen3.5 gated V fitting and evaluation; no implicit large jobs.,evaluation/capture_qwen35_128k_v.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/run_qwen3_32b_bbh_mbpp3.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_qwen3_32b_c1_all_layer_tsqr_checkpoint.py,13 未选入发布候选,本轮未选入,yes,Refit every Qwen3-32B uniform-C1 decoder with a 64k-row TSQR solve.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_qwen3_32b_c1_layer23_tsqr_scaling.py,13 未选入发布候选,本轮未选入,yes,Capture layer-23 streaming TSQR checkpoints and run QR(0) sample scaling.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_qwen3_32b_c1_layer_global_kl_sharded.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Allocate Qwen3-32B C1 ranks with whole-layer Global-KL interventions.,evaluation/run_llama31_8b_c1_two_sided_factorized_kl_sharded.py; evaluation/run_qwen3_8b_c1_two_sided_factorized_kl_sharded.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/run_qwen3_32b_c1_tp_source_global_kl_sharded.py,12 共用依赖,静态导入依赖，待提取,yes,Run Qwen3-32B TP-source Global-KL with independent profile replicas.,evaluation/eval_qwen3_32b_c1_c4_ppl_shard.py; evaluation/run_qwen3_32b_c1_layer_global_kl_sharded.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/run_qwen3_32b_hard_generation.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_qwen3_32b_hard_l40s.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_qwen3_32b_tp8_sm89.sh,09 论文性能 Benchmark,候选入口或实现,yes,,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/run_qwen3_8b_c1_two_sided_factorized_kl_sharded.py,01 Value 联合拟合与秩分配,候选入口或实现,yes,Allocate Qwen3-8B C1 ranks with two-sided factorized terminal KL.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/run_qwen3_8b_mlp_down_c1_layer_global_kl.py,13 未选入发布候选,本轮未选入,yes,Allocate Qwen3-8B MLP AASVD ranks by per-layer terminal-logits KL.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_qwen3_kv4_fp8_parallel.py,13 未选入发布候选,本轮未选入,yes,Run independent single-GPU PPL arms without changing the frozen evaluator.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_qwen3_starkv_v50_adaptive.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_tp_source_svd.py,13 未选入发布候选,本轮未选入,yes,"Fit/evaluate independent full-covariance TP-source SVD, without KV compression.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/run_v96_objective.py,13 未选入发布候选,本轮未选入,yes,Matched GQA-shared V96 independent versus joint objective quality ablation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/scan_llama_tp4_capacity.py,13 未选入发布候选,本轮未选入,yes,"Fresh torchrun per capacity trial; CUDA OOM is recorded, other failures stop the scan.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/section4_base_residual_summary.py,11 附录消融与量化兼容评测,候选入口或实现,yes,"Section 4, experiment 2: Base / residual component ablation table from saved RULER-128K records and the routing diagnostic.",,已按功能初筛；不代表所有分支都应原样发布
+evaluation/section4_page_granularity_summary.py,11 附录消融与量化兼容评测,候选入口或实现,yes,"Section 4, experiment 3: page-granularity tables and plots from the no-sink page_granularity_sweep.py JSON (3A) and the",,已按功能初筛；不代表所有分支都应原样发布
+evaluation/section4_v_to_k_information.py,11 附录消融与量化兼容评测,候选入口或实现,yes,"Section 4, experiment 1: how much of the pre-RoPE Key is affinely predictable from the Value representation.",,已按功能初筛；不代表所有分支都应原样发布
+evaluation/select_qgram_terminal32.py,13 未选入发布候选,本轮未选入,yes,"Select terminal Q32 from the original fit-only, full-window-whitened Gram.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/select_query_positions.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Select immutable per-layer Q positions using only fit-window candidate Q.,evaluation/fit_qwen3_8b_q8_fisher_residual.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/simulate_qwen3_32b_c1_full_decode.py,13 未选入发布候选,本轮未选入,yes,Compose a full Qwen3-32B TP8 single-token decode latency trace.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/simulate_qwen3_32b_c1_tp_decode.py,13 未选入发布候选,本轮未选入,yes,Single-GPU semantic simulation of the Qwen3-32B C1 TP8 decode boundary.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/smoke_llama_sink_recent.py,13 未选入发布候选,本轮未选入,yes,Check Llama-sized indexed attention against explicit selected-token attention.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/smoke_nemotron_h_full.py,13 未选入发布候选,本轮未选入,yes,Validate native multi-GPU loading and cached decode of the pinned dense model.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/smoke_nemotron_h_native.py,13 未选入发布候选,本轮未选入,yes,Exercise real checkpoint Mamba/attention blocks with prefill and cached decode.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/smoke_qwen35_k_routing_v.py,13 未选入发布候选,本轮未选入,yes,Real-model BF16 compact-V execution checks with native output projections.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/smoke_residual_page_ranking.py,13 未选入发布候选,本轮未选入,yes,"Single-layer, single-GQA-group real-cache boundary-repair smoke.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/smoke_vllm_deepseek_v2_lite_c1.py,13 未选入发布候选,本轮未选入,yes,Smoke-test dense or uniform-R128 C1 DeepSeek-V2-Lite in vLLM TP4.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/smoke_vllm_qwen3_32b_c1.py,13 未选入发布候选,本轮未选入,yes,Run a minimal Qwen3-32B uniform-C1 request through vLLM serving.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/smoke_vllm_qwen3_8b_c1.py,13 未选入发布候选,本轮未选入,yes,"Smoke real TP8 compact-C1 requests, chunked prefill and decode CUDA Graphs.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/streaming_k_statistics.py,04 Value 辅助 Key 路由与 Page-Fisher,候选入口或实现,yes,Small sufficient statistics for affine V-to-K regression and packed Fisher.,evaluation/build_llama_section4_base_sweep.py; evaluation/fit_k_routing_streaming.py; evaluation/fit_qwen35_128k_k_routing.py,已按功能初筛；不代表所有分支都应原样发布
+evaluation/summarize_chunk8_fisher_landmark.py,13 未选入发布候选,本轮未选入,yes,Summarize all 32 formal direct Chunk8 Fisher layer fits.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_chunk8_fisher_pilot.py,13 未选入发布候选,本轮未选入,yes,Summarize the early/middle/late direct Chunk8 Fisher convergence pilot.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_chunk8_mean_fisher_statistics.py,13 未选入发布候选,本轮未选入,yes,Summarize the all-layer Mean-128 Chunk8 Fisher fit.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_conjunctive_pages.py,13 未选入发布候选,本轮未选入,yes,Merge diagnose_conjunctive_pages shards and print the all-required-page recall tables.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_fisher_base.py,13 未选入发布候选,本轮未选入,yes,"Pilot table of the Fisher-trained Value Base experiment: per layer, fit / held-out Fisher NMSE (loss / exact-score energy) of",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_iclr_quality.py,08 质量评测与数据准备,候选入口或实现,yes,Audit one complete ICLR quality matrix and render its result table.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/summarize_lbv2_lrqk.py,13 未选入发布候选,本轮未选入,yes,Report completed LRQK questions and explicit Slurm failures separately.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_llama_dense_v128.py,13 未选入发布候选,本轮未选入,yes,"Audit the V128 experiment, retaining evidence of TP2 prefill differences.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_llama_section4_ablation.py,13 未选入发布候选,本轮未选入,yes,"Export the Section 4 mechanism ablations as paper-facing CSV, plots, and Markdown.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_llama_section4_score_sampling.py,13 未选入发布候选,本轮未选入,yes,Export the Fisher-free Section 4 query-sampling ablation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_llama_v96_fp8_compatibility.py,13 未选入发布候选,本轮未选入,yes,Export compact phase-1/2/3 artifacts for the V96 FP8 pilot.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_multikey_trace.py,13 未选入发布候选,本轮未选入,yes,Summarize the three fixed RULER regressions without causal attribution.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_nemotron_h_palu.py,13 未选入发布候选,本轮未选入,yes,Audit and summarize Nemotron-H PaLU M-LRD/G-LRD4 quality results.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_nemotron_h_quality.py,13 未选入发布候选,本轮未选入,yes,Summarize audited Nemotron-H C1 checkpoints and paired quality runs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_page_overlap.py,13 未选入发布候选,本轮未选入,yes,Validate saved page sets and report unweighted all-layer overlap.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen35_128k_ruler.py,13 未选入发布候选,本轮未选入,yes,Summarize Qwen3.5-9B 128K RULER arms from eval_qwen35_128k_ruler.py outputs and compare with the HF Page-Fisher release.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen35_gsm8k.py,13 未选入发布候选,本轮未选入,yes,Audit paired complete GSM8K results and their immutable inputs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen35_gsm8k_v96.py,13 未选入发布候选,本轮未选入,yes,"Audit complete V96 runs, optionally including the full Wo compression arms.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen35_hard_tasks.py,13 未选入发布候选,本轮未选入,yes,Audit matched Qwen3.5 non-thinking task runs and summarize their scores.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen35_hybrid.py,13 未选入发布候选,本轮未选入,yes,Audit all requested arms before writing a completed experiment summary.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen35_hybrid_baselines.py,13 未选入发布候选,本轮未选入,yes,Validate and summarize the completed dense and nine PaLU PPL results.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen35_k_routing.py,13 未选入发布候选,本轮未选入,yes,Audit all 7 x 88 paired RULER records before reporting task scores.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen35_long_generation.py,13 未选入发布候选,本轮未选入,yes,Audit full V128+Wo task reruns with increased generation limits.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen35_mixed_shards.py,13 未选入发布候选,本轮未选入,yes,Audit and summarize the eight Qwen3.5 mixed-calibration eval shards.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen35_postgate_topk_crossdomain.py,13 未选入发布候选,本轮未选入,yes,Merge Qwen3.5 WikiText-2/MCQ post-gate Top-K quality results.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen35_reasoning_v128_wo.py,13 未选入发布候选,本轮未选入,yes,Audit and summarize the Qwen3.5 reasoning-only V128+Wo run.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen3_8b_four_v_pre_k_ceilings.py,13 未选入发布候选,本轮未选入,yes,Validate and summarize the completed four-ceiling experiment; no model forward.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen3_8b_section3.py,11 附录消融与量化兼容评测,候选入口或实现,yes,Build Section-3 appendix CSVs and plots from immutable result JSONs.,,已按功能初筛；不代表所有分支都应原样发布
+evaluation/summarize_qwen3_8b_tp4_decode.py,13 未选入发布候选,本轮未选入,yes,"Merge dense, uniform-C1, and Global-KL-C1 TP4 decode benchmarks.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen3_8b_tp4_decode_breakdown.py,13 未选入发布候选,本轮未选入,yes,"Merge TP4 interconnect, dense, and attention-C1 decode profiles.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen3_8b_tp4_k_offload_ruler.py,13 未选入发布候选,本轮未选入,yes,Combine the four frozen TP4 exact-K placement/routing RULER arms.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen3_8b_tp4_uniform_comparison.py,13 未选入发布候选,本轮未选入,yes,"Compare dense, mean-DP avg-R64, and uniform-R64 TP4 decode profiles.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen3_8b_wo_c1_ag_ar_rank_sweep.py,13 未选入发布候选,本轮未选入,yes,Create paper-table and plotting data for the Wo-C1 collective sweep.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen3_8b_wo_c1_uniform_rank_sweep.py,13 未选入发布候选,本轮未选入,yes,Summarize Qwen3-8B Wo-only uniform-rank quality into a Pareto table.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen3_8b_wo_cuda_graph.py,13 未选入发布候选,本轮未选入,yes,Merge the five matched Qwen3-8B Wo-only CUDA Graph arms.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_qwen3_nuq4.py,13 未选入发布候选,本轮未选入,yes,"Summarize matched Qwen NUQ4 TP8 request benchmarks, without mixing phases.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_r16_page16.py,13 未选入发布候选,本轮未选入,yes,Compare verified FP16 offline R16 solver-budget runs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_r16_query_gram64.py,13 未选入发布候选,本轮未选入,yes,Compare verified FP16 offline R16 Query-Gram count runs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_r16_solver_budget.py,13 未选入发布候选,本轮未选入,yes,Compare verified FP16 offline R16 solver-budget runs.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_uniform96_compare.py,13 未选入发布候选,本轮未选入,yes,Write the paired uniform96 comparison report after both audits complete.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_vllm_qwen3_8b_c1.py,13 未选入发布候选,本轮未选入,yes,Summarize the paired fixed-cohort benchmark without mixing profile timings.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/summarize_vllm_qwen3_8b_c1_seqlen.py,13 未选入发布候选,本轮未选入,yes,Summarize the fixed-batch prompt-length sweep and separate profiles.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/sweep_lrqk_topk.py,13 未选入发布候选,本轮未选入,yes,Measure LRQK's physical token union per KV group for a per-query-head top-k on a few RULER prompts.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/tasks/mbpp_plus_full/utils.py,13 未选入发布候选,本轮未选入,yes,lm-eval generation with EvalPlus 0.3.1 base and augmented scoring.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/tasks/mbpp_plus_pass3/utils.py,13 未选入发布候选,本轮未选入,yes,"Three independently sampled solutions, scored with the existing EvalPlus oracle.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/trace_multikey_pages.py,13 未选入发布候选,本轮未选入,yes,"Three-arm, same-state selected-page audit of fixed RULER regressions.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/train_qwen3_starkv_v50_adaptive.py,13 未选入发布候选,本轮未选入,yes,STAR-KV V-only adaptive-rank training at 50% V-cache compression.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/train_qwen3_starkv_v_adaptive.py,13 未选入发布候选,本轮未选入,yes,Train Qwen3-8B STAR-KV V-only checkpoints at an adaptive global-rank budget.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/tune_nuq4_prefill.py,13 未选入发布候选,本轮未选入,yes,Numerical and latency sweep for packed NUQ4 prefill tiles on SM89.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/tune_nuq4_simt.py,13 未选入发布候选,本轮未选入,yes,Compare GQA4 SIMT decode with the serving tensor-core kernel.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/tune_nuq4_staging.py,13 未选入发布候选,本轮未选入,yes,Kernel-only timing of bounded prefill staging; includes dequantization and copies.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/uniform96_common.py,13 未选入发布候选,本轮未选入,yes,Shared uniform C1 checkpoints and norm-preserving attention installation.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/v96kl_common.py,12 共用依赖,静态导入依赖，待提取,yes,Artifact checks shared by the V96-KL calibration and LongBench run.,evaluation/assemble_mixed_calibration_windows.py; evaluation/build_llama_section4_base_sweep.py; evaluation/calibrate_llama_v96_kvquant.py; evaluation/calibration_routing_quality.py; evaluation/capture_k_routing.py; evaluation/deterministic_evaluation.py; evaluation/diagnose_conjunctive_pages.py; evaluation/eval_k_routing_ruler.py; evaluation/eval_k_routing_ruler_p16.py; evaluation/eval_llama_dense_v_routing128.py; evaluation/eval_qwen35_128k_ruler.py; evaluation/eval_qwen3_c1_kvquant.py; evaluation/fit_k_routing_streaming.py; evaluation/fit_qwen35_128k_k_routing.py; evaluation/install_nemotron_h_wo.py; evaluation/k_routing_capture_windows.py; evaluation/k_routing_config.py; evaluation/page_granularity_sweep.py; evaluation/prepare_dense_k_routing_identity.py; evaluation/prepare_k_routing_llama.py; evaluation/prepare_llama128k_windows.py; evaluation/prepare_llama31_8b_c4_128k_windows.py; evaluation/prepare_local_k_routing_identity.py; evaluation/prepare_longbench_shadowkv9.py; evaluation/prepare_qwen35_128k_identity.py; evaluation/prepare_retrieval_calibration_windows.py; evaluation/prepare_v96kl_data.py; evaluation/refit_router_from_statistics.py; evaluation/section4_base_residual_summary.py; evaluation/section4_page_granularity_summary.py; evaluation/section4_v_to_k_information.py,可能来自可选或历史分支；不自动批准整文件迁入
+evaluation/validate_conditional_router_page32_lse.py,13 未选入发布候选,本轮未选入,yes,Validate cached-Base16 routing and the fused single-token append kernel.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/validate_mapped_host_paged_attention.py,13 未选入发布候选,本轮未选入,yes,Validate mapped-host Page32/K128/V80 CUDA attention against FP32.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/validate_mbpp_plus_full.py,13 未选入发布候选,本轮未选入,yes,Run on a Slurm worker: verify exported augmented tests against references.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+evaluation/wrap_qwen35_gdn_bank.py,13 未选入发布候选,本轮未选入,yes,Wrap the payload of scripts/build_qwen35_gdn_private_ag_joint_factors.py into the released bank layout,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+palu/model/modules/hadamard_utils.py,10 论文基线,候选入口或实现,yes,,palu/model/modules/svd_linear.py,已按功能初筛；不代表所有分支都应原样发布
+palu/model/modules/quant.py,10 论文基线,候选入口或实现,yes,,palu/model/modules/svd_linear.py,已按功能初筛；不代表所有分支都应原样发布
+palu/model/modules/svd_linear.py,10 论文基线,候选入口或实现,yes,,evaluation/build_llama31_8b_palu_m_checkpoint.py; evaluation/build_qwen3_8b_iclr_v_checkpoint.py; evaluation/eval_gqa_palu_m_wikitext.py,已按功能初筛；不代表所有分支都应原样发布
+scripts/benchmark_ragged_allgather.py,13 未选入发布候选,本轮未选入,yes,Benchmark the compiled ragged NCCL AllGather on a static TP schedule.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/benchmark_ragged_allgather_algorithms.py,13 未选入发布候选,本轮未选入,yes,Compare exact-size NCCL schedules against native padded AllGather.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/benchmark_topk_all_gather.py,13 未选入发布候选,本轮未选入,yes,Benchmark one-packet fixed Top-K AllGather against dense AllGather.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/build_qwen35_full_attention_private_ag_joint_factors.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Build decoder-closed ALS factors for Qwen3.5 full-attention Wo wires.,,已按功能初筛；不代表所有分支都应原样发布
+scripts/build_qwen35_gdn_private_ag_joint_factors.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Build decoder-closed ALS factors for all Qwen3.5 GDN output wires.,scripts/build_qwen35_full_attention_private_ag_joint_factors.py,已按功能初筛；不代表所有分支都应原样发布
+scripts/build_qwen35_global_aa_svd_allreduce_factors.py,13 未选入发布候选,本轮未选入,yes,Build communication-matched global AA-SVD factors for Qwen3.5 output wires.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/build_qwen3_decoder_closed_rank_swap_candidates.py,13 未选入发布候选,本轮未选入,yes,Build and routed-screen decoder-closed within-layer Qwen3 rank swaps.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/build_qwen3_gqa_joint_routing_payload_s80.py,13 未选入发布候选,本轮未选入,yes,Fit and export the Qwen3 S80-R32 factor bank.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/build_qwen3_gqa_routed_ov_solver_ablation.py,13 未选入发布候选,本轮未选入,yes,Build frozen-config routed GQA-OV solver-attribution endpoints.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/capture_qwen3_8b_q16.py,12 共用依赖,静态导入依赖，待提取,yes,Capture nested Q16–Q128 on existing C4 windows with exact overlap checks.,evaluation/fit_qwen3_8b_q8_fisher_residual.py; scripts/query_position_capture.py,可能来自可选或历史分支；不自动批准整文件迁入
+scripts/capture_qwen3_gqa_joint_routing_payload_s80_direct.py,13 未选入发布候选,本轮未选入,yes,Capture paired Qwen3 routing operands for the S80 BF update.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/collect_qwen35_full_attention_wo_activations.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Collect frozen-window moments for Qwen3.5 full-attention Wo wires.,scripts/build_qwen35_full_attention_private_ag_joint_factors.py,已按功能初筛；不代表所有分支都应原样发布
+scripts/collect_qwen35_gdn_moments.py,12 共用依赖,静态导入依赖，待提取,yes,Collect compact Qwen3.5 GDN state/gate interface moments.,scripts/collect_qwen35_full_attention_wo_activations.py; scripts/collect_qwen35_gdn_wo_activations.py; scripts/eval_qwen35_projected_gdn_nll.py,可能来自可选或历史分支；不自动批准整文件迁入
+scripts/collect_qwen35_gdn_wo_activations.py,07 Qwen3.5 混合架构,候选入口或实现,yes,Collect frozen-window post-gate moments for Qwen3.5 GDN Wo wires.,evaluation/eval_qwen35_hybrid_private_ag_ppl.py; scripts/build_qwen35_gdn_private_ag_joint_factors.py; scripts/collect_qwen35_full_attention_wo_activations.py,已按功能初筛；不代表所有分支都应原样发布
+scripts/collect_qwen3_gqa_joint_routing_payload_s80_stats.py,13 未选入发布候选,本轮未选入,yes,Collect paired payload/routing sufficient statistics for Qwen3 S80.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/compact_qwen3_s80_softmax_fisher.py,13 未选入发布候选,本轮未选入,yes,Convert raw Qwen3 Store80 routing captures to compact Fisher Grams.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/eval_qwen35_mlp_tp_cp_mcq.py,13 未选入发布候选,本轮未选入,yes,Evaluate dense and TP-coupled Qwen3.5 MLPs on local likelihood MCQ files.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/eval_qwen35_projected_gdn_nll.py,12 共用依赖,静态导入依赖，待提取,yes,Evaluate Qwen3.5 projected GDN state ranks on frozen JSONL windows.,evaluation/eval_qwen35_hybrid_private_ag_ppl.py,可能来自可选或历史分支；不自动批准整文件迁入
+scripts/eval_svdllm_safetensors_ppl_accelerate.py,12 共用依赖,静态导入依赖，待提取,yes,Evaluate PPL for dense or converted SVDLLM safetensors checkpoints.,evaluation/calibrate_llama_nuq4.py; evaluation/eval_attention_o_proj_collective_ppl.py; evaluation/eval_c1_block_scheduled_ppl.py; evaluation/eval_llama_adaptive_nuq4_c4.py; evaluation/eval_qwen3_kv4_fp8_ppl.py,可能来自可选或历史分支；不自动批准整文件迁入
+scripts/fit_qwen3_page_output_pullback_router.py,13 未选入发布候选,本轮未选入,yes,Fit a post-RoPE K-only Route32 router with Page-output pullback.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/materialize_qwen3_decoder_closed_rank_swap.py,13 未选入发布候选,本轮未选入,yes,Materialize an accepted DC-GKL one-swap endpoint as a full rank bank.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/merge_qwen3_gqa_joint_routing_payload_s80_banks.py,13 未选入发布候选,本轮未选入,yes,Merge disjoint Qwen3 S80 layer banks into one factor bank.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/merge_qwen3_s80_page_fisher_synergy.py,13 未选入发布候选,本轮未选入,yes,Merge disjoint Qwen3 Store80 Page-Fisher synergy result shards.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/query_position_capture.py,12 共用依赖,静态导入依赖，待提取,yes,Q-only candidate and manifest-selected modes for the existing Q capture CLI.,scripts/capture_qwen3_8b_q16.py,可能来自可选或历史分支；不自动批准整文件迁入
+scripts/resolve_qwen3_adaptive_schedule_with_routed_ov.py,13 未选入发布候选,本轮未选入,yes,Coordinate a fixed ragged Qwen3 GQA V/O schedule with the routed objective.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_llama31i_c1_64k.sh,13 未选入发布候选,本轮未选入,no,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_llama31i_router_64k.sh,13 未选入发布候选,本轮未选入,no,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_llama31i_ruler_64k.sh,13 未选入发布候选,本轮未选入,no,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_qwen35_dense_v_wo.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_qwen35_gsm8k_diagnosis.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_qwen35_hard_tasks.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_qwen35_v128_g768_f512.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_qwen35_v128_ppl.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_qwen38_cg16_s12_l07.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_qwen38_uniform128_g1152_f768.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_qwen38_v128_g1152_f768.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_uniform_allgather_sweep.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/run_v96kl_longbench.sh,13 未选入发布候选,本轮未选入,yes,,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/upload_iclr_checkpoints_hf.py,13 未选入发布候选,本轮未选入,yes,"Upload final ICLR checkpoints and referenced factors, then verify Hub hashes.",,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/upload_iclr_uniform_hf.py,13 未选入发布候选,本轮未选入,yes,Prepare all completed ICLR uniform C1 checkpoints; optionally validate and upload.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/upload_nemotron_h_hf.py,13 未选入发布候选,本轮未选入,yes,Upload and verify final Nemotron-H C1 and PaLU checkpoints.,,不是删除清单；动态导入、子进程和冻结源码仍需核对
+scripts/validate_qwen3_s80_compact_fisher.py,13 未选入发布候选,本轮未选入,yes,Compare raw and compact Store80 softmax-Fisher statistics.,,不是删除清单；动态导入、子进程和冻结源码仍需核对

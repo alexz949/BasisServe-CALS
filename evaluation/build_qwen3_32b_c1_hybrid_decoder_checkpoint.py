@@ -19,7 +19,7 @@ from safetensors import safe_open
 import torch
 
 
-FACTOR_FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
+FACTOR_FORMAT = "basiskv.value_factors.v1"
 HYBRID_FORMAT = "basisserve.qwen3_32b.gqa_c1_decoder_hybrid.v1"
 
 

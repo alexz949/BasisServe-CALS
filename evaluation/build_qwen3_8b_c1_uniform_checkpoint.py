@@ -72,7 +72,7 @@ def build(args: argparse.Namespace) -> int:
     records = result.get("records", ())
     valid = all(
         (
-            _check(result.get("format") == "basisserve.qwen3_8b.gqa_c1_joint.v1", "factor-bank format mismatch"),
+            _check(result.get("format") == "basiskv.value_factors.v1", "factor-bank format mismatch"),
             _check(result.get("status") == "complete", "factor bank is incomplete"),
             _check(fit_config.get("model_config_sha256") == model_metadata["config_sha256"], "factor-bank model hash mismatch"),
             _check(int(fit_config.get("cache_rank_per_head", 0)) == RANK, "factor bank is not uniform R80"),

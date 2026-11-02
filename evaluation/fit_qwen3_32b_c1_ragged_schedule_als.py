@@ -38,10 +38,9 @@ from basisserve.core.gqa_routed_ov_joint import (  # noqa: E402
     quadratic_from_target,
 )
 from evaluation import allocate_qwen3_32b_c1_tp_source_global_kl as allocation  # noqa: E402
-from evaluation import fit_llama2_mha_c1_joint as uniform  # noqa: E402
+from basisserve.compression import ValueGeometry
+from basisserve.compression import value as uniform  # noqa: E402
 
-
-uniform.activate_model_profile("qwen3_32b")
 
 FORMAT = "basisserve.qwen3_32b.gqa_c1.ragged_schedule_als.v1"
 LAYER_FORMAT = "basisserve.qwen3_32b.gqa_c1.ragged_schedule_als.layer.v1"
@@ -59,7 +58,10 @@ def _load_allocation(
         raise FileNotFoundError(path)
     result = json.loads(path.read_text(encoding="utf-8"))
     allocation_format = result.get("format")
-    if allocation_format not in {ALLOCATION_FORMAT, LAYER_ALLOCATION_FORMAT} or result.get("status") != "complete":
+    if (
+        allocation_format not in {ALLOCATION_FORMAT, LAYER_ALLOCATION_FORMAT}
+        or result.get("status") != "complete"
+    ):
         raise ValueError("Global-KL allocation is incomplete or incompatible")
     if result.get("model_config_sha256") != model_config_sha256:
         raise ValueError("Global-KL allocation belongs to another model")
@@ -71,9 +73,7 @@ def _load_allocation(
         len(layer) != allocation.NUM_KV_HEADS for layer in schedule
     ):
         raise ValueError("Global-KL allocation has an incomplete rank schedule")
-    candidates = tuple(
-        int(rank) for rank in result["selection"]["candidate_ranks"]
-    )
+    candidates = tuple(int(rank) for rank in result["selection"]["candidate_ranks"])
     if any(rank not in candidates for layer in schedule for rank in layer):
         raise ValueError("selected schedule contains a rank outside the candidate grid")
     if allocation_format == LAYER_ALLOCATION_FORMAT and any(
@@ -101,9 +101,12 @@ def _fit_config(
         or int(calibration.get("heldout_windows", -1)) != args.validation_windows
         or int(calibration.get("positions_per_window", -1)) != 2048
     ):
-        raise ValueError("ragged ALS requires the 256-fit/64-heldout full-2048 snapshot")
+        raise ValueError(
+            "ragged ALS requires the 256-fit/64-heldout full-2048 snapshot"
+        )
     flat = [int(rank) for layer in schedule for rank in layer]
     return {
+        "geometry": ValueGeometry.from_snapshot(snapshot_dir).to_dict(),
         "model": str(Path(snapshot_manifest["model"]["path"]).resolve()),
         "model_config_sha256": snapshot_manifest["model"]["config_sha256"],
         "snapshot_dir": str(snapshot_dir),
@@ -115,14 +118,10 @@ def _fit_config(
             "selected_candidate"
         ],
         "rank_schedule": [list(map(int, layer)) for layer in schedule],
-        "rank_histogram": {
-            str(rank): flat.count(rank) for rank in sorted(set(flat))
-        },
+        "rank_histogram": {str(rank): flat.count(rank) for rank in sorted(set(flat))},
         "source_rank_sum": sum(flat),
         "dense_source_rank_sum": (
-            allocation.NUM_LAYERS
-            * allocation.NUM_KV_HEADS
-            * allocation.HEAD_DIM
+            allocation.NUM_LAYERS * allocation.NUM_KV_HEADS * allocation.HEAD_DIM
         ),
         "fit_windows": args.fit_windows,
         "validation_windows": args.validation_windows,
@@ -160,6 +159,7 @@ def _fit_layer(
     args: argparse.Namespace,
     device: torch.device,
 ) -> dict[str, Any]:
+    geometry = ValueGeometry.from_snapshot(snapshot_dir)
     started = time.perf_counter()
     artifact_path = output_dir / f"layer_{layer:03d}.safetensors"
     record_path = output_dir / f"layer_{layer:03d}.json"
@@ -168,8 +168,7 @@ def _fit_layer(
         if (
             prior.get("format") != LAYER_FORMAT
             or prior.get("fit_config") != fit_config
-            or prior.get("artifact", {}).get("sha256")
-            != uniform._sha256(artifact_path)
+            or prior.get("artifact", {}).get("sha256") != uniform._sha256(artifact_path)
         ):
             raise ValueError(f"incompatible ragged ALS checkpoint at layer {layer}")
         print(f"[Qwen3 ragged ALS] layer={layer} resume=verified", flush=True)
@@ -178,28 +177,20 @@ def _fit_layer(
         raise FileExistsError(f"partial layer output exists for layer {layer}")
 
     fit_matrix, heldout_matrix, weight, source = uniform._load_covariance_layer(
-        snapshot_dir,
-        snapshot_manifest,
-        layer,
+        snapshot_dir, snapshot_manifest, layer, geometry=geometry
     )
     fit_raw = uniform._covariance_matrix_to_blocks(
-        fit_matrix,
-        device=device,
-        dtype=torch.float32,
+        fit_matrix, device=device, dtype=torch.float32, geometry=geometry
     )
     heldout_covariance = uniform._covariance_matrix_to_blocks(
-        heldout_matrix,
-        device=device,
-        dtype=torch.float32,
+        heldout_matrix, device=device, dtype=torch.float32, geometry=geometry
     )
     fit_covariance, absolute_damping = covariance_with_trace_damping(
         fit_raw,
         relative_damping=args.covariance_damping,
     )
     target = uniform._dense_head_targets(
-        weight,
-        device=device,
-        dtype=torch.float32,
+        weight, device=device, dtype=torch.float32, geometry=geometry
     )
     fit_objective = quadratic_from_target(
         covariance=fit_covariance,
@@ -213,7 +204,7 @@ def _fit_layer(
         name=f"qwen3_32b_ragged_als_heldout_layer_{layer:03d}",
         trace_normalize=False,
     )
-    mapping = uniform._head_to_kv_group(device=device)
+    mapping = uniform._head_to_kv_group(device=device, geometry=geometry)
     initialization = initialize_group_pooled_routed_svd(
         covariance=fit_objective.covariance,
         target=target,
@@ -309,9 +300,7 @@ def _fit_layer(
             "checkpoints": selector.records,
         },
         "fit": {
-            "relative_mse": uniform._relative_loss(
-                fit_loss, fit_objective.constant
-            ),
+            "relative_mse": uniform._relative_loss(fit_loss, fit_objective.constant),
             "factor_dtype_relative_mse": uniform._relative_loss(
                 artifact_fit, fit_objective.constant
             ),
@@ -349,7 +338,10 @@ def _fit_layer(
 
 
 def _fit_shard(args: argparse.Namespace) -> None:
-    if args.layer_shard_count <= 0 or not 0 <= args.layer_shard_index < args.layer_shard_count:
+    if (
+        args.layer_shard_count <= 0
+        or not 0 <= args.layer_shard_index < args.layer_shard_count
+    ):
         raise ValueError("invalid layer shard")
     if args.minimum_encoder_sweeps > args.encoder_sweeps:
         raise ValueError("minimum encoder sweeps exceed maximum sweeps")
@@ -361,7 +353,8 @@ def _fit_shard(args: argparse.Namespace) -> None:
     torch.cuda.reset_peak_memory_stats(device)
 
     snapshot_dir = Path(args.snapshot_dir).expanduser().resolve()
-    snapshot_manifest = uniform._snapshot_manifest(snapshot_dir)
+    geometry = ValueGeometry.from_snapshot(snapshot_dir)
+    snapshot_manifest = uniform._snapshot_manifest(snapshot_dir, geometry=geometry)
     allocation_dir = Path(args.allocation_dir).expanduser().resolve()
     allocation_result, schedule = _load_allocation(
         allocation_dir,
@@ -375,7 +368,7 @@ def _fit_shard(args: argparse.Namespace) -> None:
         allocation_result=allocation_result,
         schedule=schedule,
     )
-    requested = uniform._parse_layers(args.layers)
+    requested = uniform._parse_layers(args.layers, geometry=geometry)
     layers = tuple(
         layer
         for position, layer in enumerate(requested)
@@ -432,7 +425,8 @@ def _merge(args: argparse.Namespace) -> None:
     result_path = output_dir / "result.json"
     if result_path.exists():
         raise FileExistsError(result_path)
-    layers = uniform._parse_layers(args.layers)
+    geometry = ValueGeometry.from_factors(output_dir)
+    layers = uniform._parse_layers(args.layers, geometry=geometry)
     records = []
     fit_config = None
     for layer in layers:
@@ -441,7 +435,10 @@ def _merge(args: argparse.Namespace) -> None:
         if not record_path.is_file() or not artifact_path.is_file():
             raise FileNotFoundError(f"missing layer {layer} output")
         record = json.loads(record_path.read_text(encoding="utf-8"))
-        if record.get("format") != LAYER_FORMAT or int(record.get("layer", -1)) != layer:
+        if (
+            record.get("format") != LAYER_FORMAT
+            or int(record.get("layer", -1)) != layer
+        ):
             raise ValueError(f"invalid layer record {record_path}")
         if record["artifact"]["sha256"] != uniform._sha256(artifact_path):
             raise ValueError(f"artifact hash mismatch at layer {layer}")
@@ -467,13 +464,11 @@ def _merge(args: argparse.Namespace) -> None:
         "records": records,
         "aggregate": {
             "mean_fit_factor_dtype_relative_mse": sum(
-                float(row["fit"]["factor_dtype_relative_mse"])
-                for row in records
+                float(row["fit"]["factor_dtype_relative_mse"]) for row in records
             )
             / len(records),
             "mean_heldout_factor_dtype_relative_mse": sum(
-                float(row["heldout"]["factor_dtype_relative_mse"])
-                for row in records
+                float(row["heldout"]["factor_dtype_relative_mse"]) for row in records
             )
             / len(records),
         },

@@ -1,17 +1,5 @@
 #!/usr/bin/env python3
-"""Fit foldable Llama-2-7B MHA C1 V/Wo factors.
-
-The dense attention ``o_proj`` input is split into 32 head blocks.  Each head
-keeps a rank-96 Value coordinate encoder, while all 32 output decoders are
-solved jointly against the complete attention-output MSE, including
-cross-head error cancellation.  Encoders and decoders alternate under the
-same deterministic routed-OV solver used by the Qwen3 C1 experiment.
-
-The fit and held-out C4 windows are document-disjoint. Held-out loss is recorded
-only as a diagnostic; every checkpoint exports the decoder-refitted endpoint
-after exactly six FP32 encoder sweeps. The final WikiText-2 test set is never
-touched here.
-"""
+"""Fit and export Value factors using explicit attention geometry."""
 
 from __future__ import annotations
 
@@ -33,10 +21,6 @@ import torch
 from torch import Tensor
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
 from basisserve.core.gqa_routed_ov_joint import (  # noqa: E402
     covariance_with_trace_damping,
     evaluate_quadratic,
@@ -47,87 +31,20 @@ from basisserve.core.gqa_routed_ov_joint import (  # noqa: E402
 )
 
 
-FORMAT = "basisserve.llama2_7b.mha_c1_v96_joint.v1"
-LAYER_FORMAT = "basisserve.llama2_7b.mha_c1_v96_joint.layer.v1"
+from basisserve.compression.geometry import ValueGeometry
+
+
+FORMAT = "basiskv.value_factors.v1"
+LAYER_FORMAT = "basiskv.value_factors.layer.v1"
 SNAPSHOT_FORMAT = "basisserve.attention_o_proj_ppl_snapshots.v1"
 COVARIANCE_SNAPSHOT_FORMAT = "basisserve.attention_o_proj_covariances.v1"
-MODEL_LABEL = "Llama-2-7B"
-MODEL_TYPE = "llama"
-ATTENTION_TYPE = "mha"
-NUM_LAYERS = 32
-NUM_HEADS = 32
-NUM_KV_HEADS = 32
-HEAD_DIM = 128
-HIDDEN_SIZE = 4096
-FORMAL_ENCODER_SWEEPS = 6
-FORMAL_ENCODER_CG_ITERATIONS = 16
-ATTENTION_LAYERS: tuple[int, ...] | None = None
 
 
-def activate_model_profile(name: str) -> None:
-    """Select a fixed, audited attention geometry for this fitting entrypoint."""
-
-    global FORMAT, LAYER_FORMAT, MODEL_LABEL, MODEL_TYPE, ATTENTION_TYPE
-    global NUM_LAYERS, NUM_HEADS, NUM_KV_HEADS, HEAD_DIM, HIDDEN_SIZE
-    global ATTENTION_LAYERS, FORMAL_ENCODER_SWEEPS
-    ATTENTION_LAYERS = None
-    FORMAL_ENCODER_SWEEPS = 6
-    if name == "llama2_7b":
-        return
-    if name == "qwen3_32b":
-        FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
-        LAYER_FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.layer.v1"
-        MODEL_LABEL = "Qwen3-32B"
-        MODEL_TYPE = "qwen3"
-        ATTENTION_TYPE = "gqa"
-        NUM_LAYERS = 64
-        NUM_HEADS = 64
-        NUM_KV_HEADS = 8
-        HEAD_DIM = 128
-        HIDDEN_SIZE = 5120
-        return
-    if name == "qwen3_8b":
-        FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.v1"
-        LAYER_FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.layer.v1"
-        MODEL_LABEL = "Qwen3-8B-Base"
-        MODEL_TYPE = "qwen3"
-        ATTENTION_TYPE = "gqa"
-        NUM_LAYERS = 36
-        NUM_HEADS = 32
-        NUM_KV_HEADS = 8
-        HEAD_DIM = 128
-        HIDDEN_SIZE = 4096
-        return
-    if name == "llama31_8b":
-        FORMAT = "basisserve.llama31_8b.gqa_c1_joint.v1"
-        LAYER_FORMAT = "basisserve.llama31_8b.gqa_c1_joint.layer.v1"
-        MODEL_LABEL = "Llama-3.1-8B"
-        MODEL_TYPE = "llama"
-        ATTENTION_TYPE = "gqa"
-        NUM_LAYERS = 32
-        NUM_HEADS = 32
-        NUM_KV_HEADS = 8
-        HEAD_DIM = 128
-        HIDDEN_SIZE = 4096
-        return
-    if name == "llama31_70b":
-        FORMAT = "basisserve.llama31_70b.gqa_c1_joint.v1"
-        LAYER_FORMAT = "basisserve.llama31_70b.gqa_c1_joint.layer.v1"
-        MODEL_LABEL = "Llama-3.1-70B"
-        MODEL_TYPE = "llama"
-        ATTENTION_TYPE = "gqa"
-        NUM_LAYERS = 80
-        NUM_HEADS = 64
-        NUM_KV_HEADS = 8
-        HEAD_DIM = 128
-        HIDDEN_SIZE = 8192
-        return
-    raise ValueError(f"unknown C1 model profile: {name}")
-
-
-def _head_to_kv_group(*, device: torch.device | str = "cpu") -> Tensor:
-    return torch.arange(NUM_HEADS, device=device, dtype=torch.long) // (
-        NUM_HEADS // NUM_KV_HEADS
+def _head_to_kv_group(
+    *, device: torch.device | str = "cpu", geometry: ValueGeometry
+) -> Tensor:
+    return torch.arange(geometry.num_heads, device=device, dtype=torch.long) // (
+        geometry.num_heads // geometry.num_kv_heads
     )
 
 
@@ -206,9 +123,7 @@ def _cg_diagnostics_payload(
             "maximum_iterations": max(
                 (step["iterations"] for step in flat_steps), default=0
             ),
-            "converged_at_tolerance": sum(
-                step["converged"] for step in flat_steps
-            ),
+            "converged_at_tolerance": sum(step["converged"] for step in flat_steps),
             "negative_curvature": sum(
                 step["negative_curvature"] for step in flat_steps
             ),
@@ -242,41 +157,13 @@ def _atomic_safetensors(path: Path, payload: Mapping[str, Tensor]) -> None:
     os.replace(temporary, path)
 
 
-def activate_nemotron_h_profile(
-    attention_layers: Sequence[int],
-    *,
-    num_layers: int = 98,
-    hidden_size: int = 8192,
-    num_heads: int = 64,
-    num_kv_heads: int = 8,
-    head_dim: int = 128,
-    encoder_sweeps: int = 12,
-    model_label: str = "Nemotron-H",
-) -> None:
-    """Select a Nemotron-H geometry using layers discovered by native audit."""
-    global FORMAT, LAYER_FORMAT, MODEL_LABEL, MODEL_TYPE, ATTENTION_TYPE
-    global NUM_LAYERS, NUM_HEADS, NUM_KV_HEADS, HEAD_DIM, HIDDEN_SIZE
-    global ATTENTION_LAYERS, FORMAL_ENCODER_SWEEPS
-    layers = tuple(map(int, attention_layers))
-    assert layers and layers == tuple(sorted(set(layers)))
-    assert min(layers) >= 0 and max(layers) < num_layers
-    FORMAT = 'basisserve.nemotron_h.gqa_c1_joint.v2'
-    LAYER_FORMAT = 'basisserve.nemotron_h.gqa_c1_joint.layer.v2'
-    MODEL_LABEL, MODEL_TYPE, ATTENTION_TYPE = model_label, 'nemotron_h', 'gqa'
-    NUM_LAYERS, NUM_HEADS, NUM_KV_HEADS, HEAD_DIM, HIDDEN_SIZE = (
-        num_layers, num_heads, num_kv_heads, head_dim, hidden_size
-    )
-    ATTENTION_LAYERS = layers
-    FORMAL_ENCODER_SWEEPS = encoder_sweeps
+def _attention_layers(*, geometry: ValueGeometry) -> tuple[int, ...]:
+    return geometry.attention_layers
 
 
-def _attention_layers() -> tuple[int, ...]:
-    return tuple(range(NUM_LAYERS)) if ATTENTION_LAYERS is None else ATTENTION_LAYERS
-
-
-def _parse_layers(raw: str) -> tuple[int, ...]:
+def _parse_layers(raw: str, *, geometry: ValueGeometry) -> tuple[int, ...]:
     if raw.strip().lower() == "all":
-        return _attention_layers()
+        return _attention_layers(geometry=geometry)
     layers: set[int] = set()
     for piece in raw.split(","):
         piece = piece.strip()
@@ -284,22 +171,24 @@ def _parse_layers(raw: str) -> tuple[int, ...]:
             continue
         if "-" in piece:
             first, last = map(int, piece.split("-", 1))
-            if last < first:
-                raise ValueError(f"descending layer range: {piece}")
+            assert not (last < first), f"descending layer range: {piece}"
             layers.update(range(first, last + 1))
         else:
             layers.add(int(piece))
     selected = tuple(sorted(layers))
-    if not selected or min(selected) < 0 or max(selected) >= NUM_LAYERS:
-        raise ValueError(f"selected layers are outside {MODEL_LABEL}")
-    assert set(selected) <= set(_attention_layers())
+    assert not (
+        not selected or min(selected) < 0 or max(selected) >= geometry.num_layers
+    ), f"selected layers are outside {geometry.model_type}"
+    assert set(selected) <= set(_attention_layers(geometry=geometry))
     return selected
 
 
 def _parse_checkpoint_sweeps(raw: str | None, maximum: int) -> tuple[int, ...]:
     if raw is None or not raw.strip():
         return ()
-    sweeps = tuple(sorted({int(piece.strip()) for piece in raw.split(",") if piece.strip()}))
+    sweeps = tuple(
+        sorted({int(piece.strip()) for piece in raw.split(",") if piece.strip()})
+    )
     if any(sweep < 0 or sweep > maximum for sweep in sweeps):
         print(
             f"[Error] checkpoint export sweeps must lie in [0, {maximum}]",
@@ -325,8 +214,7 @@ def _factor_dtype(name: str) -> torch.dtype:
 def _canonicalize_basis_signs(value: Tensor) -> Tensor:
     """Choose deterministic signs for the columns of a two-dimensional basis."""
 
-    if value.ndim != 2:
-        raise ValueError("basis sign canonicalization requires a matrix")
+    assert not (value.ndim != 2), "basis sign canonicalization requires a matrix"
     if value.shape[1] == 0:
         return value
     pivots = value.abs().argmax(dim=0)
@@ -338,20 +226,20 @@ def _canonicalize_basis_signs(value: Tensor) -> Tensor:
 
 @torch.no_grad()
 def _weight_only_encoder_initialization(
-    target: Tensor,
-    *,
-    rank: int,
-    mapping: Tensor,
+    target: Tensor, *, rank: int, mapping: Tensor, geometry: ValueGeometry
 ) -> tuple[Tensor, list[dict[str, Any]]]:
     """Return one pooled weight-only left singular subspace per KV group."""
 
-    if target.ndim != 3 or tuple(target.shape[:2]) != (NUM_HEADS, HEAD_DIM):
-        raise ValueError("weight-only initialization received an invalid target")
-    if not 0 < rank <= HEAD_DIM:
-        raise ValueError("weight-only initialization rank is invalid")
-    encoders = target.new_empty(NUM_KV_HEADS, HEAD_DIM, rank)
+    assert not (
+        target.ndim != 3
+        or tuple(target.shape[:2]) != (geometry.num_heads, geometry.head_dim)
+    ), "weight-only initialization received an invalid target"
+    assert not (not 0 < rank <= geometry.head_dim), (
+        "weight-only initialization rank is invalid"
+    )
+    encoders = target.new_empty(geometry.num_kv_heads, geometry.head_dim, rank)
     diagnostics: list[dict[str, Any]] = []
-    for group in range(NUM_KV_HEADS):
+    for group in range(geometry.num_kv_heads):
         heads = torch.nonzero(mapping == group, as_tuple=False).flatten()
         block = target.index_select(0, heads)
         gram = torch.einsum("hio,hjo->ij", block, block)
@@ -359,9 +247,7 @@ def _weight_only_encoder_initialization(
         eigenvalues, eigenvectors = torch.linalg.eigh(gram)
         order = torch.argsort(eigenvalues, descending=True)
         eigenvalues = eigenvalues.index_select(0, order).clamp_min(0)
-        basis = _canonicalize_basis_signs(
-            eigenvectors.index_select(1, order[:rank])
-        )
+        basis = _canonicalize_basis_signs(eigenvectors.index_select(1, order[:rank]))
         encoders[group].copy_(basis)
         singular_values = torch.sqrt(eigenvalues)
         total_energy = float(eigenvalues.sum())
@@ -375,7 +261,7 @@ def _weight_only_encoder_initialization(
                 "leading_singular_values": singular_values[:rank].tolist(),
                 "boundary_singular_value": float(singular_values[rank - 1]),
                 "next_singular_value": (
-                    float(singular_values[rank]) if rank < HEAD_DIM else None
+                    float(singular_values[rank]) if rank < geometry.head_dim else None
                 ),
                 "weight_tail_energy_fraction": (
                     tail_energy / total_energy if total_energy > 0 else 0.0
@@ -392,16 +278,18 @@ def _random_orthogonal_encoder_initialization(
     seed: int,
     device: torch.device,
     dtype: torch.dtype,
+    geometry: ValueGeometry,
 ) -> tuple[Tensor, list[dict[str, Any]]]:
     """Return reproducible independent Haar-subspace controls for all heads."""
 
-    if not 0 < rank <= HEAD_DIM:
-        raise ValueError("random initialization rank is invalid")
+    assert not (not 0 < rank <= geometry.head_dim), (
+        "random initialization rank is invalid"
+    )
     generator = torch.Generator(device="cpu")
     generator.manual_seed(seed)
     random = torch.randn(
-        NUM_KV_HEADS,
-        HEAD_DIM,
+        geometry.num_kv_heads,
+        geometry.head_dim,
         rank,
         generator=generator,
         device="cpu",
@@ -409,8 +297,8 @@ def _random_orthogonal_encoder_initialization(
     )
     encoders = torch.empty_like(random)
     diagnostics: list[dict[str, Any]] = []
-    mapping = _head_to_kv_group()
-    for group in range(NUM_KV_HEADS):
+    mapping = _head_to_kv_group(geometry=geometry)
+    for group in range(geometry.num_kv_heads):
         basis, _ = torch.linalg.qr(random[group], mode="reduced")
         basis = _canonicalize_basis_signs(basis)
         encoders[group].copy_(basis)
@@ -433,13 +321,15 @@ def _random_orthogonal_encoder_initialization(
     return encoders.to(device=device, dtype=dtype), diagnostics
 
 
-def _snapshot_manifest(snapshot_dir: Path) -> dict[str, Any]:
+def _snapshot_manifest(
+    snapshot_dir: Path, *, geometry: ValueGeometry
+) -> dict[str, Any]:
     path = snapshot_dir / "manifest.json"
-    if not path.is_file():
-        raise FileNotFoundError(path)
+    assert not (not path.is_file()), path
     manifest = json.loads(path.read_text(encoding="utf-8"))
-    if manifest.get("format") not in {SNAPSHOT_FORMAT, COVARIANCE_SNAPSHOT_FORMAT}:
-        raise ValueError("incompatible attention snapshot format")
+    assert not (
+        manifest.get("format") not in {SNAPSHOT_FORMAT, COVARIANCE_SNAPSHOT_FORMAT}
+    ), "incompatible attention snapshot format"
     model = manifest.get("model", {})
     observed = (
         model.get("model_type"),
@@ -451,18 +341,21 @@ def _snapshot_manifest(snapshot_dir: Path) -> dict[str, Any]:
         int(model.get("hidden_size", -1)),
     )
     expected = (
-        MODEL_TYPE,
-        ATTENTION_TYPE,
-        NUM_LAYERS,
-        NUM_HEADS,
-        NUM_KV_HEADS,
-        HEAD_DIM,
-        HIDDEN_SIZE,
+        geometry.model_type,
+        geometry.attention_type,
+        geometry.num_layers,
+        geometry.num_heads,
+        geometry.num_kv_heads,
+        geometry.head_dim,
+        geometry.hidden_size,
     )
-    if observed != expected:
-        raise ValueError(f"unexpected {MODEL_LABEL} snapshot geometry: {observed}")
-    if tuple(map(int, manifest.get("layers", ()))) != _attention_layers():
-        raise ValueError(f"snapshot must cover every {MODEL_LABEL} decoder layer")
+    assert not (observed != expected), (
+        f"unexpected {geometry.model_type} snapshot geometry: {observed}"
+    )
+    assert not (
+        tuple(map(int, manifest.get("layers", ())))
+        != _attention_layers(geometry=geometry)
+    ), f"snapshot must cover every {geometry.model_type} decoder layer"
     return manifest
 
 
@@ -473,20 +366,22 @@ def _resolve_window_partition(
     validation_windows: int,
     validation_window_start: int | None,
 ) -> int:
-    if min(snapshot_windows, fit_windows, validation_windows) <= 0:
-        raise ValueError("snapshot, fit, and validation partitions must be nonempty")
+    assert not (min(snapshot_windows, fit_windows, validation_windows) <= 0), (
+        "snapshot, fit, and validation partitions must be nonempty"
+    )
     if validation_window_start is None:
-        if fit_windows + validation_windows != snapshot_windows:
-            raise ValueError(
-                "fit and validation windows must exactly partition the snapshot "
-                "unless --validation-window-start is explicit"
-            )
+        assert not (fit_windows + validation_windows != snapshot_windows), (
+            "fit and validation windows must exactly partition the snapshot "
+            "unless --validation-window-start is explicit"
+        )
         return fit_windows
     start = int(validation_window_start)
-    if start < fit_windows:
-        raise ValueError("validation windows overlap the leading fit partition")
-    if start + validation_windows > snapshot_windows:
-        raise ValueError("validation windows exceed the snapshot")
+    assert not (start < fit_windows), (
+        "validation windows overlap the leading fit partition"
+    )
+    assert not (start + validation_windows > snapshot_windows), (
+        "validation windows exceed the snapshot"
+    )
     return start
 
 
@@ -495,8 +390,9 @@ def _snapshot_shape(manifest: Mapping[str, Any]) -> tuple[int, int, int]:
     rows = int(calibration["rows_per_layer"])
     windows = int(calibration["window_count"])
     positions = int(calibration["positions_per_window"])
-    if rows != windows * positions:
-        raise ValueError("snapshot rows do not factor into windows and positions")
+    assert not (rows != windows * positions), (
+        "snapshot rows do not factor into windows and positions"
+    )
     return rows, windows, positions
 
 
@@ -507,43 +403,47 @@ def _fit_config(
     *,
     validation_snapshot_dir: Path | None = None,
     validation_manifest: Mapping[str, Any] | None = None,
+    geometry: ValueGeometry,
 ) -> dict[str, Any]:
     cg_max_iterations = (
         args.encoder_cg_max_iterations
         if args.encoder_cg_max_iterations is not None
         else args.encoder_cg_fixed_iterations
     )
-    if cg_max_iterations <= 0:
-        raise ValueError("encoder CG maximum iterations must be positive")
-    if args.encoder_cg_relative_tolerance <= 0:
-        raise ValueError("encoder CG relative tolerance must be positive")
-    if args.encoder_initialization_seed < 0:
-        raise ValueError("encoder initialization seed must be non-negative")
+    assert not (cg_max_iterations <= 0), (
+        "encoder CG maximum iterations must be positive"
+    )
+    assert not (args.encoder_cg_relative_tolerance <= 0), (
+        "encoder CG relative tolerance must be positive"
+    )
+    assert not (args.encoder_initialization_seed < 0), (
+        "encoder initialization seed must be non-negative"
+    )
     _, windows, positions = _snapshot_shape(manifest)
-    if not 0 < args.fit_windows <= windows:
-        raise ValueError("fit windows exceed the fit snapshot")
+    assert not (not 0 < args.fit_windows <= windows), (
+        "fit windows exceed the fit snapshot"
+    )
     separate_validation = validation_manifest is not None
-    if separate_validation != (validation_snapshot_dir is not None):
-        raise ValueError("validation snapshot path and manifest must be provided together")
+    assert not (separate_validation != (validation_snapshot_dir is not None)), (
+        "validation snapshot path and manifest must be provided together"
+    )
     if separate_validation:
         assert validation_manifest is not None
         assert validation_snapshot_dir is not None
         _, validation_snapshot_windows, validation_positions = _snapshot_shape(
             validation_manifest
         )
-        if (
+        assert not (
             manifest["model"]["config_sha256"]
             != validation_manifest["model"]["config_sha256"]
             or manifest["model"]["path"] != validation_manifest["model"]["path"]
-        ):
-            raise ValueError("fit and validation snapshots use different models")
+        ), "fit and validation snapshots use different models"
         validation_window_start = int(args.validation_window_start or 0)
-        if (
+        assert not (
             validation_window_start < 0
             or validation_window_start + args.validation_windows
             > validation_snapshot_windows
-        ):
-            raise ValueError("validation windows exceed the validation snapshot")
+        ), "validation windows exceed the validation snapshot"
     else:
         validation_snapshot_windows = windows
         validation_positions = positions
@@ -553,8 +453,9 @@ def _fit_config(
             validation_windows=args.validation_windows,
             validation_window_start=args.validation_window_start,
         )
-    if not 0 < args.cache_rank <= HEAD_DIM:
-        raise ValueError("cache rank is outside the attention head width")
+    assert not (not 0 < args.cache_rank <= geometry.head_dim), (
+        "cache rank is outside the attention head width"
+    )
     config = {
         "model": str(Path(manifest["model"]["path"]).expanduser().resolve()),
         "model_config_sha256": manifest["model"]["config_sha256"],
@@ -567,21 +468,23 @@ def _fit_config(
         "fit_rows": args.fit_windows * positions,
         "validation_rows": args.validation_windows * validation_positions,
         "cache_rank_per_head": args.cache_rank,
-        "model_label": MODEL_LABEL,
-        "model_type": MODEL_TYPE,
-        "attention_type": ATTENTION_TYPE,
-        "num_query_heads": NUM_HEADS,
-        "num_physical_kv_heads": NUM_KV_HEADS,
-        "head_dim": HEAD_DIM,
-        "hidden_size": HIDDEN_SIZE,
-        "num_hidden_layers": NUM_LAYERS,
-        "total_v_cache_rank": NUM_KV_HEADS * args.cache_rank,
-        "dense_v_cache_rank": NUM_KV_HEADS * HEAD_DIM,
-        "v_retained_ratio": args.cache_rank / HEAD_DIM,
+        "model_label": geometry.model_type,
+        "geometry": geometry.to_dict(),
+        "model_type": geometry.model_type,
+        "attention_type": geometry.attention_type,
+        "num_query_heads": geometry.num_heads,
+        "num_physical_kv_heads": geometry.num_kv_heads,
+        "head_dim": geometry.head_dim,
+        "hidden_size": geometry.hidden_size,
+        "num_hidden_layers": geometry.num_layers,
+        "total_v_cache_rank": geometry.num_kv_heads * args.cache_rank,
+        "dense_v_cache_rank": geometry.num_kv_heads * geometry.head_dim,
+        "v_retained_ratio": args.cache_rank / geometry.head_dim,
         "total_kv_retained_ratio_with_dense_k": (
-            NUM_KV_HEADS * HEAD_DIM + NUM_KV_HEADS * args.cache_rank
+            geometry.num_kv_heads * geometry.head_dim
+            + geometry.num_kv_heads * args.cache_rank
         )
-        / (2 * NUM_KV_HEADS * HEAD_DIM),
+        / (2 * geometry.num_kv_heads * geometry.head_dim),
         "work_dtype": args.work_dtype,
         "allow_tf32": args.allow_tf32,
         "factor_dtype": args.factor_dtype,
@@ -658,20 +561,25 @@ def _load_snapshot_layer(
     snapshot_dir: Path,
     manifest: Mapping[str, Any],
     layer: int,
+    *,
+    geometry: ValueGeometry,
 ) -> tuple[Tensor, Tensor, dict[str, Any]]:
     record = manifest["artifacts"][str(layer)]
     path = snapshot_dir / record["file"]
-    if _sha256(path) != record["sha256"]:
-        raise ValueError(f"snapshot hash mismatch at layer {layer}")
+    assert not (_sha256(path) != record["sha256"]), (
+        f"snapshot hash mismatch at layer {layer}"
+    )
     payload = load_file(str(path), device="cpu")
     activation = payload["activation"].contiguous()
     weight = payload["weight"].contiguous()
     expected_rows = int(manifest["calibration"]["rows_per_layer"])
-    query_width = NUM_HEADS * HEAD_DIM
-    if tuple(activation.shape) != (expected_rows, query_width):
-        raise ValueError(f"unexpected activation shape at layer {layer}")
-    if tuple(weight.shape) != (HIDDEN_SIZE, query_width):
-        raise ValueError(f"unexpected o_proj shape at layer {layer}")
+    query_width = geometry.num_heads * geometry.head_dim
+    assert not (tuple(activation.shape) != (expected_rows, query_width)), (
+        f"unexpected activation shape at layer {layer}"
+    )
+    assert not (tuple(weight.shape) != (geometry.hidden_size, query_width)), (
+        f"unexpected o_proj shape at layer {layer}"
+    )
     return activation, weight, {"path": str(path), **record}
 
 
@@ -679,36 +587,50 @@ def _load_covariance_layer(
     snapshot_dir: Path,
     manifest: Mapping[str, Any],
     layer: int,
+    *,
+    geometry: ValueGeometry,
 ) -> tuple[Tensor, Tensor, Tensor, dict[str, Any]]:
-    if manifest.get("format") != COVARIANCE_SNAPSHOT_FORMAT:
-        raise ValueError("snapshot does not contain covariance sufficient statistics")
+    assert not (manifest.get("format") != COVARIANCE_SNAPSHOT_FORMAT), (
+        "snapshot does not contain covariance sufficient statistics"
+    )
     record = manifest["artifacts"][str(layer)]
     path = snapshot_dir / record["file"]
-    if _sha256(path) != record["sha256"]:
-        raise ValueError(f"covariance snapshot hash mismatch at layer {layer}")
+    assert not (_sha256(path) != record["sha256"]), (
+        f"covariance snapshot hash mismatch at layer {layer}"
+    )
     payload = load_file(str(path), device="cpu")
-    expected_width = NUM_HEADS * HEAD_DIM
+    expected_width = geometry.num_heads * geometry.head_dim
     fit = payload["fit_covariance"].contiguous()
     heldout = payload["heldout_covariance"].contiguous()
     weight = payload["weight"].contiguous()
-    if tuple(fit.shape) != (expected_width, expected_width):
-        raise ValueError(f"unexpected fit covariance shape at layer {layer}")
-    if tuple(heldout.shape) != (expected_width, expected_width):
-        raise ValueError(f"unexpected held-out covariance shape at layer {layer}")
-    if tuple(weight.shape) != (HIDDEN_SIZE, expected_width):
-        raise ValueError(f"unexpected o_proj shape at layer {layer}")
+    assert not (tuple(fit.shape) != (expected_width, expected_width)), (
+        f"unexpected fit covariance shape at layer {layer}"
+    )
+    assert not (tuple(heldout.shape) != (expected_width, expected_width)), (
+        f"unexpected held-out covariance shape at layer {layer}"
+    )
+    assert not (tuple(weight.shape) != (geometry.hidden_size, expected_width)), (
+        f"unexpected o_proj shape at layer {layer}"
+    )
     return fit, heldout, weight, {"path": str(path), **record}
 
 
 def _covariance_matrix_to_blocks(
-    covariance: Tensor, *, device: torch.device, dtype: torch.dtype
+    covariance: Tensor,
+    *,
+    device: torch.device,
+    dtype: torch.dtype,
+    geometry: ValueGeometry,
 ) -> Tensor:
-    width = NUM_HEADS * HEAD_DIM
-    if tuple(covariance.shape) != (width, width):
-        raise ValueError("covariance matrix has incompatible attention width")
+    width = geometry.num_heads * geometry.head_dim
+    assert not (tuple(covariance.shape) != (width, width)), (
+        "covariance matrix has incompatible attention width"
+    )
     work = covariance.to(device=device, dtype=dtype)
     blocks = (
-        work.reshape(NUM_HEADS, HEAD_DIM, NUM_HEADS, HEAD_DIM)
+        work.reshape(
+            geometry.num_heads, geometry.head_dim, geometry.num_heads, geometry.head_dim
+        )
         .permute(0, 2, 1, 3)
         .contiguous()
     )
@@ -759,25 +681,25 @@ def _activation_covariance_blocks(
     *,
     device: torch.device,
     dtype: torch.dtype,
-    num_heads: int = NUM_HEADS,
-    head_dim: int = HEAD_DIM,
+    num_heads: int,
+    head_dim: int,
     row_chunk_size: int | None = None,
 ) -> Tensor:
     """Return E[x_h^T x_k] as [head, head, d, d] blocks."""
 
     hidden_size = num_heads * head_dim
-    if activation.ndim != 2 or int(activation.shape[1]) != hidden_size:
-        raise ValueError(f"activation must have shape [rows, {hidden_size}]")
+    assert not (activation.ndim != 2 or int(activation.shape[1]) != hidden_size), (
+        f"activation must have shape [rows, {hidden_size}]"
+    )
     rows = int(activation.shape[0])
-    if row_chunk_size is not None and row_chunk_size <= 0:
-        raise ValueError("covariance row chunk size must be positive")
+    assert not (row_chunk_size is not None and row_chunk_size <= 0), (
+        "covariance row chunk size must be positive"
+    )
     if row_chunk_size is None or row_chunk_size >= rows:
         work = activation.to(device=device, dtype=dtype)
         gram = work.transpose(0, 1) @ work
     else:
-        gram = torch.zeros(
-            hidden_size, hidden_size, device=device, dtype=dtype
-        )
+        gram = torch.zeros(hidden_size, hidden_size, device=device, dtype=dtype)
         for start in range(0, rows, row_chunk_size):
             stop = min(start + row_chunk_size, rows)
             work = activation[start:stop].to(device=device, dtype=dtype)
@@ -792,13 +714,17 @@ def _activation_covariance_blocks(
     return 0.5 * (blocks + blocks.permute(1, 0, 3, 2))
 
 
-def _dense_head_targets(weight: Tensor, *, device: torch.device, dtype: torch.dtype) -> Tensor:
-    if tuple(weight.shape) != (HIDDEN_SIZE, NUM_HEADS * HEAD_DIM):
-        raise ValueError("dense o_proj weight has incompatible attention geometry")
+def _dense_head_targets(
+    weight: Tensor, *, device: torch.device, dtype: torch.dtype, geometry: ValueGeometry
+) -> Tensor:
+    assert not (
+        tuple(weight.shape)
+        != (geometry.hidden_size, geometry.num_heads * geometry.head_dim)
+    ), "dense o_proj weight has incompatible attention geometry"
     return (
         weight.to(device=device, dtype=dtype)
         .transpose(0, 1)
-        .reshape(NUM_HEADS, HEAD_DIM, HIDDEN_SIZE)
+        .reshape(geometry.num_heads, geometry.head_dim, geometry.hidden_size)
         .contiguous()
     )
 
@@ -850,11 +776,7 @@ class _CheckpointRecorder:
         sweep = int(checkpoint.sweep)
         if not decoder_closed or sweep not in self.export_sweeps:
             return
-        if (
-            self.export_root is None
-            or self.layer is None
-            or self.factor_dtype is None
-        ):
+        if self.export_root is None or self.layer is None or self.factor_dtype is None:
             return
         export_dir = self.export_root / f"sweep_{sweep:03d}"
         export_dir.mkdir(parents=True, exist_ok=True)
@@ -911,16 +833,21 @@ class _CheckpointRecorder:
         }
 
 
-def _verified_prior(path: Path, artifact: Path, layer: int, fit_config: Mapping[str, Any]) -> dict[str, Any] | None:
+def _verified_prior(
+    path: Path, artifact: Path, layer: int, fit_config: Mapping[str, Any]
+) -> dict[str, Any] | None:
     if not path.is_file() or not artifact.is_file():
         return None
     record = json.loads(path.read_text(encoding="utf-8"))
-    if record.get("format") != LAYER_FORMAT or int(record.get("layer", -1)) != layer:
-        raise ValueError(f"incompatible layer checkpoint: {path}")
-    if record.get("fit_config") != fit_config:
-        raise ValueError(f"layer checkpoint configuration changed: {path}")
-    if record.get("artifact", {}).get("sha256") != _sha256(artifact):
-        raise ValueError(f"layer artifact hash changed: {artifact}")
+    assert not (
+        record.get("format") != LAYER_FORMAT or int(record.get("layer", -1)) != layer
+    ), f"incompatible layer checkpoint: {path}"
+    assert not (record.get("fit_config") != fit_config), (
+        f"layer checkpoint configuration changed: {path}"
+    )
+    assert not (record.get("artifact", {}).get("sha256") != _sha256(artifact)), (
+        f"layer artifact hash changed: {artifact}"
+    )
     return record
 
 
@@ -936,20 +863,22 @@ def _write_exact_full_rank_layer(
     args: argparse.Namespace,
     factor_dtype: torch.dtype,
     started: float,
+    geometry: ValueGeometry,
 ) -> dict[str, Any]:
     """Materialize the analytic dense endpoint when rank equals head width."""
 
-    if args.cache_rank != HEAD_DIM:
-        raise ValueError("exact dense endpoint requires cache rank equal to head_dim")
+    assert not (args.cache_rank != geometry.head_dim), (
+        "exact dense endpoint requires cache rank equal to head_dim"
+    )
     artifact_A = (
-        torch.eye(HEAD_DIM, dtype=factor_dtype)
+        torch.eye(geometry.head_dim, dtype=factor_dtype)
         .unsqueeze(0)
-        .repeat(NUM_KV_HEADS, 1, 1)
+        .repeat(geometry.num_kv_heads, 1, 1)
         .contiguous()
     )
     artifact_D = (
         weight.transpose(0, 1)
-        .reshape(NUM_HEADS, HEAD_DIM, HIDDEN_SIZE)
+        .reshape(geometry.num_heads, geometry.head_dim, geometry.hidden_size)
         .to(dtype=factor_dtype)
         .contiguous()
     )
@@ -989,7 +918,7 @@ def _write_exact_full_rank_layer(
         "validation_loss": 0.0,
         "validation_relative_mse": 0.0,
     }
-    group_heads = NUM_HEADS // NUM_KV_HEADS
+    group_heads = geometry.num_heads // geometry.num_kv_heads
     empty_cg = {
         "mode": str(fit_config["encoder_cg_mode"]),
         "relative_tolerance": float(fit_config["encoder_cg_relative_tolerance"]),
@@ -1037,10 +966,10 @@ def _write_exact_full_rank_layer(
                 "logical_heads": list(
                     range(group * group_heads, (group + 1) * group_heads)
                 ),
-                "rank": HEAD_DIM,
+                "rank": geometry.head_dim,
                 "method": "identity_dense_endpoint",
             }
-            for group in range(NUM_KV_HEADS)
+            for group in range(geometry.num_kv_heads)
         ],
         "initialization_summary": {
             "method": "identity_dense_endpoint",
@@ -1075,7 +1004,7 @@ def _write_exact_full_rank_layer(
     }
     _atomic_json(record_path, record)
     print(
-        f"[{MODEL_LABEL} C1] layer={layer} complete exact_dense_endpoint "
+        f"[{geometry.model_type} C1] layer={layer} complete exact_dense_endpoint "
         f"seconds={record['elapsed_seconds']:.2f}",
         flush=True,
     )
@@ -1094,6 +1023,7 @@ def _fit_layer(
     fit_config: Mapping[str, Any],
     args: argparse.Namespace,
     device: torch.device,
+    geometry: ValueGeometry,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     artifact_path = output_dir / f"layer_{layer:03d}.safetensors"
@@ -1101,37 +1031,33 @@ def _fit_layer(
     if args.resume:
         prior = _verified_prior(record_path, artifact_path, layer, fit_config)
         if prior is not None:
-            print(f"[{MODEL_LABEL} C1] layer={layer} resume=verified", flush=True)
+            print(
+                f"[{geometry.model_type} C1] layer={layer} resume=verified", flush=True
+            )
             return prior
-    elif artifact_path.exists() or record_path.exists():
-        raise FileExistsError(f"partial layer output exists: {record_path}")
+    assert not (artifact_path.exists() or record_path.exists()), (
+        f"partial layer output exists: {record_path}"
+    )
 
     work_dtype = _dtype(args.work_dtype)
     factor_dtype = _factor_dtype(args.factor_dtype)
-    covariance_snapshot = (
-        snapshot_manifest.get("format") == COVARIANCE_SNAPSHOT_FORMAT
-    )
+    covariance_snapshot = snapshot_manifest.get("format") == COVARIANCE_SNAPSHOT_FORMAT
     if covariance_snapshot:
-        if validation_snapshot_dir != snapshot_dir:
-            raise ValueError(
-                "covariance snapshots contain their own held-out statistics"
-            )
+        assert not (validation_snapshot_dir != snapshot_dir), (
+            "covariance snapshots contain their own held-out statistics"
+        )
         calibration = snapshot_manifest["calibration"]
-        if (
+        assert not (
             int(calibration.get("fit_windows", -1)) != args.fit_windows
-            or int(calibration.get("heldout_windows", -1))
-            != args.validation_windows
-        ):
-            raise ValueError(
-                "requested fit/held-out windows differ from covariance snapshot"
-            )
+            or int(calibration.get("heldout_windows", -1)) != args.validation_windows
+        ), "requested fit/held-out windows differ from covariance snapshot"
         fit_matrix, validation_matrix, weight, fit_source = _load_covariance_layer(
-            snapshot_dir, snapshot_manifest, layer
+            snapshot_dir, snapshot_manifest, layer, geometry=geometry
         )
         validation_source = fit_source
     else:
         activation, weight, fit_source = _load_snapshot_layer(
-            snapshot_dir, snapshot_manifest, layer
+            snapshot_dir, snapshot_manifest, layer, geometry=geometry
         )
         if validation_snapshot_dir == snapshot_dir:
             validation_source_activation = activation
@@ -1142,12 +1068,14 @@ def _fit_layer(
                     validation_snapshot_dir,
                     validation_snapshot_manifest,
                     layer,
+                    geometry=geometry,
                 )
             )
-            if not torch.equal(weight, validation_weight):
-                raise ValueError(f"fit and validation weights differ at layer {layer}")
+            assert not (not torch.equal(weight, validation_weight)), (
+                f"fit and validation weights differ at layer {layer}"
+            )
             del validation_weight
-    if args.cache_rank == HEAD_DIM:
+    if args.cache_rank == geometry.head_dim:
         record = _write_exact_full_rank_layer(
             layer=layer,
             weight=weight,
@@ -1159,13 +1087,14 @@ def _fit_layer(
             args=args,
             factor_dtype=factor_dtype,
             started=started,
+            geometry=geometry,
         )
         del weight
         return record
     fit_rows = int(fit_config["fit_rows"])
     validation_rows = int(fit_config["validation_rows"])
     print(
-        f"[{MODEL_LABEL} C1] layer={layer} covariance fit={fit_rows} "
+        f"[{geometry.model_type} C1] layer={layer} covariance fit={fit_rows} "
         f"heldout={validation_rows} source="
         f"{'sufficient_statistics' if covariance_snapshot else 'activations'}",
         flush=True,
@@ -1184,24 +1113,22 @@ def _fit_layer(
         }
         if fit_psd_diagnostics["applied"] or heldout_psd_diagnostics["applied"]:
             print(
-                f"[{MODEL_LABEL} C1] layer={layer} covariance_psd_repair="
+                f"[{geometry.model_type} C1] layer={layer} covariance_psd_repair="
                 f"{covariance_psd_repair}",
                 flush=True,
             )
         fit_raw = _covariance_matrix_to_blocks(
-            fit_matrix, device=device, dtype=work_dtype
+            fit_matrix, device=device, dtype=work_dtype, geometry=geometry
         )
         fit_evaluation_raw = _covariance_matrix_to_blocks(
-            fit_matrix, device=device, dtype=torch.float64
+            fit_matrix, device=device, dtype=torch.float64, geometry=geometry
         )
         validation_covariance = _covariance_matrix_to_blocks(
-            validation_matrix, device=device, dtype=torch.float64
+            validation_matrix, device=device, dtype=torch.float64, geometry=geometry
         )
         del fit_matrix, validation_matrix
     else:
-        validation_row_start = int(
-            fit_config.get("validation_row_start", fit_rows)
-        )
+        validation_row_start = int(fit_config.get("validation_row_start", fit_rows))
         fit_activation = activation[:fit_rows]
         validation_activation = validation_source_activation[
             validation_row_start : validation_row_start + validation_rows
@@ -1210,16 +1137,16 @@ def _fit_layer(
             fit_activation,
             device=device,
             dtype=work_dtype,
-            num_heads=NUM_HEADS,
-            head_dim=HEAD_DIM,
+            num_heads=geometry.num_heads,
+            head_dim=geometry.head_dim,
             row_chunk_size=args.covariance_row_chunk_size,
         )
         validation_covariance = _activation_covariance_blocks(
             validation_activation,
             device=device,
             dtype=work_dtype,
-            num_heads=NUM_HEADS,
-            head_dim=HEAD_DIM,
+            num_heads=geometry.num_heads,
+            head_dim=geometry.head_dim,
             row_chunk_size=args.covariance_row_chunk_size,
         )
         fit_evaluation_raw = fit_raw.to(dtype=torch.float64)
@@ -1233,33 +1160,35 @@ def _fit_layer(
         relative_damping=args.covariance_damping,
     )
     del fit_evaluation_raw
-    target = _dense_head_targets(weight, device=device, dtype=work_dtype)
+    target = _dense_head_targets(
+        weight, device=device, dtype=work_dtype, geometry=geometry
+    )
     fit_objective = quadratic_from_target(
         covariance=fit_covariance,
         target=target,
-        name=f"{MODEL_TYPE}_c1_fit_layer_{layer:03d}",
+        name=f"{geometry.model_type}_c1_fit_layer_{layer:03d}",
         trace_normalize=False,
     )
     fit_evaluation_objective = quadratic_from_target(
         covariance=fit_evaluation_covariance,
         target=target.to(dtype=torch.float64),
-        name=f"{MODEL_TYPE}_c1_fit_evaluation_layer_{layer:03d}",
+        name=f"{geometry.model_type}_c1_fit_evaluation_layer_{layer:03d}",
         trace_normalize=False,
     )
     validation_objective = quadratic_from_target(
         covariance=validation_covariance.to(dtype=torch.float64),
         target=target.to(dtype=torch.float64),
-        name=f"{MODEL_TYPE}_c1_heldout_layer_{layer:03d}",
+        name=f"{geometry.model_type}_c1_heldout_layer_{layer:03d}",
         trace_normalize=False,
     )
-    mapping = _head_to_kv_group(device=device)
+    mapping = _head_to_kv_group(device=device, geometry=geometry)
     if args.decoder_objective == "full_layer":
         solver_objective = fit_objective
         solver_evaluation_objective = fit_evaluation_objective
         decoder_coupling_mode = "full_layer"
         solver_group_ranks: tuple[int, ...] | None = (
-            (args.cache_rank,) * NUM_KV_HEADS
-        )
+            args.cache_rank,
+        ) * geometry.num_kv_heads
     elif args.decoder_objective == "per_head":
         independent_covariance = mask_routed_covariance(
             fit_objective.covariance,
@@ -1269,7 +1198,7 @@ def _fit_layer(
         solver_objective = quadratic_from_target(
             covariance=independent_covariance,
             target=target,
-            name=f"{MODEL_TYPE}_a3_per_head_fit_layer_{layer:03d}",
+            name=f"{geometry.model_type}_a3_per_head_fit_layer_{layer:03d}",
             trace_normalize=False,
         )
         evaluation_independent_covariance = mask_routed_covariance(
@@ -1280,7 +1209,7 @@ def _fit_layer(
         solver_evaluation_objective = quadratic_from_target(
             covariance=evaluation_independent_covariance,
             target=target.to(dtype=torch.float64),
-            name=f"{MODEL_TYPE}_a3_per_head_fit_evaluation_layer_{layer:03d}",
+            name=f"{geometry.model_type}_a3_per_head_fit_evaluation_layer_{layer:03d}",
             trace_normalize=False,
         )
         decoder_coupling_mode = "diagonal"
@@ -1288,7 +1217,7 @@ def _fit_layer(
         # intentionally restricted to full-layer coupling.
         solver_group_ranks = None
     else:  # Defensive against programmatic callers that bypass argparse.
-        raise ValueError(f"unsupported decoder objective: {args.decoder_objective}")
+        assert False, f"unsupported decoder objective: {args.decoder_objective}"
     initialization = None
     effective_initialization_seed: int | None = None
     if args.encoder_initialization == "activation-weighted-svd":
@@ -1296,37 +1225,34 @@ def _fit_layer(
             covariance=fit_objective.covariance,
             target=target,
             head_to_kv_group=mapping,
-            group_ranks=(args.cache_rank,) * NUM_KV_HEADS,
+            group_ranks=(args.cache_rank,) * geometry.num_kv_heads,
             covariance_ridge=args.covariance_damping,
         )
         initial_A = initialization.A_unique
         initialization_groups = [asdict(item) for item in initialization.groups]
     elif args.encoder_initialization == "weight-only-svd":
         initial_A, initialization_groups = _weight_only_encoder_initialization(
-            target,
-            rank=args.cache_rank,
-            mapping=mapping,
+            target, rank=args.cache_rank, mapping=mapping, geometry=geometry
         )
     elif args.encoder_initialization == "random-orthogonal":
         effective_initialization_seed = (
             int(args.encoder_initialization_seed) + 1_000_003 * layer
         )
-        initial_A, initialization_groups = (
-            _random_orthogonal_encoder_initialization(
-                rank=args.cache_rank,
-                seed=effective_initialization_seed,
-                device=device,
-                dtype=work_dtype,
-            )
+        initial_A, initialization_groups = _random_orthogonal_encoder_initialization(
+            rank=args.cache_rank,
+            seed=effective_initialization_seed,
+            device=device,
+            dtype=work_dtype,
+            geometry=geometry,
         )
     else:  # Defensive against programmatic callers that bypass argparse.
-        raise ValueError(
+        assert False, (
             f"unsupported encoder initialization: {args.encoder_initialization}"
         )
     initial_D = torch.zeros(
-        NUM_HEADS,
+        geometry.num_heads,
         args.cache_rank,
-        HIDDEN_SIZE,
+        geometry.hidden_size,
         device=device,
         dtype=work_dtype,
     )
@@ -1343,7 +1269,7 @@ def _fit_layer(
         factor_dtype=factor_dtype,
     )
     print(
-        f"[{MODEL_LABEL} C1] layer={layer} "
+        f"[{geometry.model_type} C1] layer={layer} "
         f"encoder_initialization={args.encoder_initialization} "
         f"decoder_objective={args.decoder_objective}",
         flush=True,
@@ -1361,9 +1287,7 @@ def _fit_layer(
         patience=1,
         decoder_relative_jitter=0.0,
         encoder_relative_damping=0.0,
-        cg_relative_tolerance=float(
-            fit_config["encoder_cg_relative_tolerance"]
-        ),
+        cg_relative_tolerance=float(fit_config["encoder_cg_relative_tolerance"]),
         cg_max_iterations=int(fit_config["encoder_cg_max_iterations"]),
         cg_fixed_iterations=fit_config["encoder_cg_mode"] == "fixed",
         maximum_backtracks=0,
@@ -1378,7 +1302,9 @@ def _fit_layer(
     selected_A = result.A_unique.to(device=device, dtype=work_dtype)
     selected_D = result.D_heads.to(device=device, dtype=work_dtype)
     endpoint = result.checkpoints[-1]
-    expected_boundary = "decoder_only" if args.encoder_sweeps == 0 else "after_redecoder"
+    expected_boundary = (
+        "decoder_only" if args.encoder_sweeps == 0 else "after_redecoder"
+    )
     assert endpoint.boundary == expected_boundary
     assert endpoint.sweep == args.encoder_sweeps
     fit_loss = evaluate_quadratic(
@@ -1468,9 +1394,7 @@ def _fit_layer(
             "cg": _cg_diagnostics_payload(
                 result,
                 mode=str(fit_config["encoder_cg_mode"]),
-                relative_tolerance=float(
-                    fit_config["encoder_cg_relative_tolerance"]
-                ),
+                relative_tolerance=float(fit_config["encoder_cg_relative_tolerance"]),
                 max_iterations=int(fit_config["encoder_cg_max_iterations"]),
             ),
             "attribution": asdict(result.attribution),
@@ -1479,7 +1403,7 @@ def _fit_layer(
     }
     _atomic_json(record_path, record)
     print(
-        f"[{MODEL_LABEL} C1] layer={layer} complete "
+        f"[{geometry.model_type} C1] layer={layer} complete "
         f"heldout={record['heldout']['factor_dtype_relative_mse']:.8g} "
         f"seconds={record['elapsed_seconds']:.2f}",
         flush=True,
@@ -1503,31 +1427,35 @@ def _fit_layer(
         artifact_D,
         artifact_tensors,
     )
-    torch.cuda.empty_cache()
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
     return record
 
 
-def _fit_shard(args: argparse.Namespace) -> None:
-    if args.layer_shard_count <= 0 or not 0 <= args.layer_shard_index < args.layer_shard_count:
-        raise ValueError("invalid layer shard")
+def fit_shard(args: argparse.Namespace, *, geometry: ValueGeometry) -> None:
+    assert not (
+        args.layer_shard_count <= 0
+        or not 0 <= args.layer_shard_index < args.layer_shard_count
+    ), "invalid layer shard"
     torch.set_num_threads(args.torch_num_threads)
     torch.backends.cuda.matmul.allow_tf32 = args.allow_tf32
     torch.backends.cudnn.allow_tf32 = args.allow_tf32
     device = torch.device(args.device)
-    if device.type != "cuda" or not torch.cuda.is_available():
-        raise RuntimeError("C1 joint fitting requires CUDA")
-    torch.cuda.set_device(device)
-    torch.cuda.reset_peak_memory_stats(device)
+    assert device.type in ("cpu", "cuda")
+    if device.type == "cuda":
+        assert torch.cuda.is_available(), "CUDA is unavailable"
+        torch.cuda.set_device(device)
+        torch.cuda.reset_peak_memory_stats(device)
     snapshot_dir = Path(args.snapshot_dir).expanduser().resolve()
     output_dir = Path(args.output_dir).expanduser().resolve()
-    manifest = _snapshot_manifest(snapshot_dir)
+    manifest = _snapshot_manifest(snapshot_dir, geometry=geometry)
     validation_snapshot_dir = (
         Path(args.validation_snapshot_dir).expanduser().resolve()
         if args.validation_snapshot_dir is not None
         else snapshot_dir
     )
     validation_manifest = (
-        _snapshot_manifest(validation_snapshot_dir)
+        _snapshot_manifest(validation_snapshot_dir, geometry=geometry)
         if validation_snapshot_dir != snapshot_dir
         else manifest
     )
@@ -1536,24 +1464,20 @@ def _fit_shard(args: argparse.Namespace) -> None:
         snapshot_dir,
         manifest,
         validation_snapshot_dir=(
-            validation_snapshot_dir
-            if validation_snapshot_dir != snapshot_dir
-            else None
+            validation_snapshot_dir if validation_snapshot_dir != snapshot_dir else None
         ),
         validation_manifest=(
-            validation_manifest
-            if validation_snapshot_dir != snapshot_dir
-            else None
+            validation_manifest if validation_snapshot_dir != snapshot_dir else None
         ),
+        geometry=geometry,
     )
-    requested = _parse_layers(args.layers)
+    requested = _parse_layers(args.layers, geometry=geometry)
     layers = tuple(
         layer
         for position, layer in enumerate(requested)
         if position % args.layer_shard_count == args.layer_shard_index
     )
-    if not layers:
-        raise ValueError("layer shard is empty")
+    assert not (not layers), "layer shard is empty"
     output_dir.mkdir(parents=True, exist_ok=True)
     records = []
     started = time.perf_counter()
@@ -1569,6 +1493,7 @@ def _fit_shard(args: argparse.Namespace) -> None:
                 fit_config=fit_config,
                 args=args,
                 device=device,
+                geometry=geometry,
             )
         )
     shard = {
@@ -1586,28 +1511,38 @@ def _fit_shard(args: argparse.Namespace) -> None:
             "conda_environment": os.environ.get("CONDA_DEFAULT_ENV"),
             "python": sys.version,
             "torch": torch.__version__,
-            "cuda_device": torch.cuda.get_device_name(device),
-            "peak_cuda_allocated_bytes": int(torch.cuda.max_memory_allocated(device)),
+            "device": str(device),
+            "cuda_device": torch.cuda.get_device_name(device)
+            if device.type == "cuda"
+            else None,
+            "peak_cuda_allocated_bytes": int(torch.cuda.max_memory_allocated(device))
+            if device.type == "cuda"
+            else None,
             "torch_num_threads": torch.get_num_threads(),
         },
     }
     _atomic_json(output_dir / f"shard_{args.layer_shard_index:02d}.json", shard)
     print(
-        f"[{MODEL_LABEL} C1] shard={args.layer_shard_index}/{args.layer_shard_count} complete",
+        f"[{geometry.model_type} C1] shard={args.layer_shard_index}/{args.layer_shard_count} complete",
         flush=True,
     )
 
 
-def _summary(records: Sequence[Mapping[str, Any]], config: Mapping[str, Any]) -> str:
+def _summary(
+    records: Sequence[Mapping[str, Any]],
+    config: Mapping[str, Any],
+    *,
+    geometry: ValueGeometry,
+) -> str:
     heldout = [float(row["heldout"]["factor_dtype_relative_mse"]) for row in records]
     cache_rank = int(config["cache_rank_per_head"])
     total_retention = float(config["total_kv_retained_ratio_with_dense_k"])
     lines = [
-        f"# {MODEL_LABEL} {ATTENTION_TYPE.upper()} C1 V{cache_rank} joint fit",
+        f"# {geometry.model_type} {geometry.attention_type.upper()} C1 V{cache_rank} joint fit",
         "",
         (
-            f"- K remains dense; every one of {NUM_KV_HEADS} physical V heads retains "
-            f"rank {cache_rank}/{HEAD_DIM}."
+            f"- K remains dense; every one of {geometry.num_kv_heads} physical V heads retains "
+            f"rank {cache_rank}/{geometry.head_dim}."
         ),
         (
             f"- Total KV-cache retention is {100 * total_retention:.6g}% "
@@ -1644,6 +1579,7 @@ def _merge_exported_checkpoints(
     records: Sequence[Mapping[str, Any]],
     fit_config: Mapping[str, Any],
     parent_result_path: Path,
+    geometry: ValueGeometry,
 ) -> None:
     requested = tuple(map(int, fit_config.get("export_checkpoint_sweeps", ())))
     if not requested:
@@ -1724,40 +1660,43 @@ def _merge_exported_checkpoints(
         result_path = export_dir / "results.json"
         _atomic_json(result_path, payload)
         (export_dir / "summary.md").write_text(
-            _summary(exported_records, checkpoint_config),
+            _summary(exported_records, checkpoint_config, geometry=geometry),
             encoding="utf-8",
         )
         print(
-            f"[{MODEL_LABEL} C1] exported decoder-closed sweep={sweep} "
+            f"[{geometry.model_type} C1] exported decoder-closed sweep={sweep} "
             f"to {result_path}",
             flush=True,
         )
 
 
-def _merge(args: argparse.Namespace) -> None:
+def merge(args: argparse.Namespace, *, geometry: ValueGeometry) -> None:
     output_dir = Path(args.output_dir).expanduser().resolve()
-    if not output_dir.is_dir():
-        raise FileNotFoundError(output_dir)
+    assert not (not output_dir.is_dir()), output_dir
     result_path = output_dir / "results.json"
-    if result_path.exists():
-        raise FileExistsError(result_path)
-    layers = _parse_layers(args.layers)
+    assert not (result_path.exists()), result_path
+    layers = _parse_layers(args.layers, geometry=geometry)
     records = []
     fit_config = None
     for layer in layers:
         record_path = output_dir / f"layer_{layer:03d}.json"
         artifact_path = output_dir / f"layer_{layer:03d}.safetensors"
-        if not record_path.is_file() or not artifact_path.is_file():
-            raise FileNotFoundError(f"missing layer {layer} output")
+        assert not (not record_path.is_file() or not artifact_path.is_file()), (
+            f"missing layer {layer} output"
+        )
         record = json.loads(record_path.read_text(encoding="utf-8"))
-        if record.get("format") != LAYER_FORMAT or int(record.get("layer", -1)) != layer:
-            raise ValueError(f"invalid layer record {record_path}")
-        if record["artifact"]["sha256"] != _sha256(artifact_path):
-            raise ValueError(f"artifact hash mismatch at layer {layer}")
+        assert not (
+            record.get("format") != LAYER_FORMAT
+            or int(record.get("layer", -1)) != layer
+        ), f"invalid layer record {record_path}"
+        assert not (record["artifact"]["sha256"] != _sha256(artifact_path)), (
+            f"artifact hash mismatch at layer {layer}"
+        )
         if fit_config is None:
             fit_config = record["fit_config"]
-        elif record["fit_config"] != fit_config:
-            raise ValueError("layer fit configurations differ")
+        assert not (record["fit_config"] != fit_config), (
+            "layer fit configurations differ"
+        )
         records.append(record)
     assert fit_config is not None
     payload = {
@@ -1782,140 +1721,16 @@ def _merge(args: argparse.Namespace) -> None:
     }
     _atomic_json(result_path, payload)
     (output_dir / "summary.md").write_text(
-        _summary(records, fit_config), encoding="utf-8"
+        _summary(records, fit_config, geometry=geometry), encoding="utf-8"
     )
     _merge_exported_checkpoints(
         output_dir=output_dir,
         records=records,
         fit_config=fit_config,
         parent_result_path=result_path,
+        geometry=geometry,
     )
-    print(f"[{MODEL_LABEL} C1] merged {len(records)} layers into {result_path}", flush=True)
-
-
-def _add_common(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--snapshot-dir", required=True)
-    parser.add_argument(
-        "--validation-snapshot-dir",
-        help="Optional separate snapshot used only for held-out evaluation",
+    print(
+        f"[{geometry.model_type} C1] merged {len(records)} layers into {result_path}",
+        flush=True,
     )
-    parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--layers", default="all")
-    parser.add_argument("--fit-windows", type=int, default=48)
-    parser.add_argument("--validation-windows", type=int, default=16)
-    parser.add_argument(
-        "--validation-window-start",
-        type=int,
-        help=(
-            "Explicit zero-based validation-window offset inside a larger "
-            "snapshot; omitted means fit and validation exactly partition it"
-        ),
-    )
-    parser.add_argument("--cache-rank", type=int, default=96)
-    parser.add_argument("--work-dtype", choices=("float32", "float64"), default="float64")
-    parser.add_argument("--allow-tf32", action="store_true")
-    parser.add_argument(
-        "--factor-dtype",
-        choices=("float16", "bfloat16", "float32"),
-        default="float16",
-    )
-    parser.add_argument(
-        "--encoder-initialization",
-        choices=(
-            "activation-weighted-svd",
-            "weight-only-svd",
-            "random-orthogonal",
-        ),
-        default="activation-weighted-svd",
-        help=(
-            "Initial encoder subspace; every choice is followed by the same "
-            "closed-form decoder refit"
-        ),
-    )
-    parser.add_argument(
-        "--encoder-initialization-seed",
-        type=int,
-        default=0,
-        help=(
-            "Base seed for random-orthogonal initialization; the effective "
-            "seed is deterministically offset by layer"
-        ),
-    )
-    parser.add_argument(
-        "--encoder-sweeps",
-        type=int,
-        choices=range(0, 129),
-        default=FORMAL_ENCODER_SWEEPS,
-        metavar="N",
-        help="Exact number of full encoder/decoder ALS sweeps",
-    )
-    parser.add_argument(
-        "--export-checkpoint-sweeps",
-        help=(
-            "Comma-separated decoder-closed sweep endpoints to export as "
-            "complete factor banks; sweep 0 is the initialization decoder closure"
-        ),
-    )
-    parser.add_argument("--covariance-damping", type=float, default=1.0e-7)
-    parser.add_argument(
-        "--covariance-row-chunk-size",
-        type=int,
-        help="CPU-offloaded activation rows transferred per covariance update",
-    )
-    parser.add_argument(
-        "--decoder-objective",
-        choices=("full_layer", "per_head"),
-        default="full_layer",
-        help=(
-            "full_layer jointly fits all head decoders to aggregate attention output; "
-            "per_head reproduces the A3-style sum of independent head-output losses"
-        ),
-    )
-    parser.add_argument(
-        "--encoder-cg-mode",
-        choices=("fixed", "tolerance"),
-        default="fixed",
-    )
-    parser.add_argument(
-        "--encoder-cg-relative-tolerance", type=float, default=1.0e-8
-    )
-    parser.add_argument(
-        "--encoder-cg-max-iterations",
-        type=int,
-        help="Maximum CG iterations; defaults to --encoder-cg-fixed-iterations",
-    )
-    parser.add_argument(
-        "--encoder-cg-fixed-iterations",
-        type=int,
-        default=FORMAL_ENCODER_CG_ITERATIONS,
-        help="Legacy fixed CG budget and fallback maximum iteration count",
-    )
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
-    subparsers = parser.add_subparsers(dest="command_name", required=True)
-    fit = subparsers.add_parser("fit-shard")
-    _add_common(fit)
-    fit.add_argument("--layer-shard-index", type=int, required=True)
-    fit.add_argument("--layer-shard-count", type=int, required=True)
-    fit.add_argument("--device", default="cuda:0")
-    fit.add_argument("--torch-num-threads", type=int, default=4)
-    fit.add_argument("--resume", action="store_true")
-    merge = subparsers.add_parser("merge")
-    merge.add_argument("--output-dir", required=True)
-    merge.add_argument("--layers", default="all")
-    return parser.parse_args()
-
-
-def main() -> None:
-    args = parse_args()
-    if args.command_name == "fit-shard":
-        assert args.decoder_objective == "full_layer"
-        _fit_shard(args)
-    else:
-        _merge(args)
-
-
-if __name__ == "__main__":
-    main()

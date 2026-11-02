@@ -46,8 +46,7 @@ from basisserve.kernels.sageattention import sage_attention_with_compressed_valu
 
 UNIFORM_ALS_EXPORT_FORMATS = frozenset(
     {
-        "basisserve.qwen3_8b.gqa_c1_joint.v1",
-        "basisserve.qwen3_32b.gqa_c1_v96_joint.v1",
+        "basiskv.value_factors.v1",
     }
 )
 

@@ -8,6 +8,8 @@ from safetensors.torch import load_file
 import torch
 from torch import nn
 
+from basisserve.compression import ValueGeometry
+
 from basisserve.core.gqa_vo_svdllm import GQAVOLayout
 from evaluation.capture_attention_o_proj_ppl_snapshots import _validate_attention
 from evaluation.eval_qwen3_32b_c1_wikitext import (
@@ -126,16 +128,12 @@ def test_qwen_c1_padding_preserves_routed_function() -> None:
     physical = (inputs @ padded_v.T).reshape(
         len(inputs), layout.num_key_value_heads, layout.head_dim
     )
-    routed = physical.repeat_interleave(
-        layout.query_heads_per_kv_group, dim=1
-    )
+    routed = physical.repeat_interleave(layout.query_heads_per_kv_group, dim=1)
     actual = routed.reshape(len(inputs), layout.query_width) @ padded_o.T
     expected = torch.zeros_like(actual)
     for head in range(layout.num_attention_heads):
         group = head // layout.query_heads_per_kv_group
-        dense_head = dense_v[
-            group * layout.head_dim : (group + 1) * layout.head_dim
-        ]
+        dense_head = dense_v[group * layout.head_dim : (group + 1) * layout.head_dim]
         latent = inputs @ dense_head.T @ encoders[group]
         expected.add_(latent @ decoders[head])
     torch.testing.assert_close(actual, expected, rtol=1e-5, atol=1e-5)
@@ -146,10 +144,10 @@ def test_qwen_c1_padding_preserves_routed_function() -> None:
 
 
 def test_qwen_profile_has_eight_physical_encoder_groups() -> None:
-    from evaluation import fit_llama2_mha_c1_joint as fitter
+    from basisserve.compression import value as fitter
 
-    fitter.activate_model_profile("qwen3_32b")
-    mapping = fitter._head_to_kv_group()
+    geometry = ValueGeometry("qwen3", 64, 64, 8, 128, 5120, tuple(range(64)))
+    mapping = fitter._head_to_kv_group(geometry=geometry)
     assert tuple(mapping.shape) == (64,)
     assert mapping.unique(sorted=True).tolist() == list(range(8))
     assert torch.bincount(mapping).tolist() == [8] * 8
@@ -190,12 +188,9 @@ def test_qwen_ragged_wikitext_loader_requires_exact_frozen_schedule(
 
 
 def test_full_rank_bank_uses_exact_identity_endpoint(tmp_path, monkeypatch) -> None:
-    from evaluation import fit_llama2_mha_c1_joint as fitter
+    from basisserve.compression import value as fitter
 
-    monkeypatch.setattr(fitter, "NUM_HEADS", 4)
-    monkeypatch.setattr(fitter, "NUM_KV_HEADS", 2)
-    monkeypatch.setattr(fitter, "HEAD_DIM", 3)
-    monkeypatch.setattr(fitter, "HIDDEN_SIZE", 5)
+    geometry = ValueGeometry("qwen3", 1, 4, 2, 3, 5, (0,))
     weight = torch.arange(60, dtype=torch.float32).reshape(5, 12)
     artifact_path = tmp_path / "layer_000.safetensors"
     record_path = tmp_path / "layer_000.json"
@@ -211,6 +206,7 @@ def test_full_rank_bank_uses_exact_identity_endpoint(tmp_path, monkeypatch) -> N
         "encoder_cg_max_iterations": 16,
     }
     record = fitter._write_exact_full_rank_layer(
+        geometry=geometry,
         layer=0,
         weight=weight,
         fit_source={"file": "fit"},
@@ -267,23 +263,21 @@ def test_streaming_covariance_capture_uses_every_token_position() -> None:
     assert capture.rows == {"fit": 8, "heldout": 4}
     for layer in modules:
         torch.testing.assert_close(capture.sums["fit"][layer], expected_fit)
-        torch.testing.assert_close(
-            capture.sums["heldout"][layer], expected_heldout
-        )
+        torch.testing.assert_close(capture.sums["heldout"][layer], expected_heldout)
 
 
 def test_covariance_matrix_to_head_blocks_matches_raw_activations(
     monkeypatch,
 ) -> None:
-    from evaluation import fit_llama2_mha_c1_joint as fitter
+    from basisserve.compression import value as fitter
 
-    monkeypatch.setattr(fitter, "NUM_HEADS", 2)
-    monkeypatch.setattr(fitter, "HEAD_DIM", 3)
+    geometry = ValueGeometry("qwen3", 1, 2, 1, 3, 5, (0,))
     torch.manual_seed(20260823)
     activation = torch.randn(17, 6, dtype=torch.float64)
     matrix = activation.T @ activation / len(activation)
     from_matrix = fitter._covariance_matrix_to_blocks(
         matrix,
+        geometry=geometry,
         device=torch.device("cpu"),
         dtype=torch.float64,
     )

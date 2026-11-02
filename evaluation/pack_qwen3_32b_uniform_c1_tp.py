@@ -34,9 +34,7 @@ from basisserve.core.decoder_closed_rank_candidates import (  # noqa: E402
 )
 
 
-LEGACY_UNIFORM_C1_LAYER_FORMAT = (
-    "basisserve.qwen3_32b.gqa_c1_v96_joint.layer.v1"
-)
+UNIFORM_C1_LAYER_FORMAT = "basiskv.value_factors.layer.v1"
 SOURCE_TENSORS = {
     "value_coordinate_encoders",
     "head_output_decoders",
@@ -288,7 +286,7 @@ def pack_uniform_c1_checkpoint(
     output_dir: str | Path,
     uniform_rank: int,
     tp_size: int = 8,
-    expected_source_format: str = LEGACY_UNIFORM_C1_LAYER_FORMAT,
+    expected_source_format: str = UNIFORM_C1_LAYER_FORMAT,
     command: Sequence[str] = (),
 ) -> dict[str, Any]:
     """Validate and atomically pack a complete legacy uniform C1 checkpoint."""
@@ -453,7 +451,7 @@ def main() -> None:
     parser.add_argument("--tp-size", type=int, default=8)
     parser.add_argument(
         "--expected-source-format",
-        default=LEGACY_UNIFORM_C1_LAYER_FORMAT,
+        default=UNIFORM_C1_LAYER_FORMAT,
     )
     args = parser.parse_args()
     result = pack_uniform_c1_checkpoint(

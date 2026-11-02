@@ -32,7 +32,7 @@ def test_tp8_coordinate_order_matches_sum_of_physical_sources(local_heads):
 
 def test_structure_validation_never_hashes(tmp_path, monkeypatch):
     manifest = {
-        "format": "basisserve.qwen3_32b.gqa_c1_v96_joint.v1",
+        "format": "basiskv.value_factors.v1",
         "status": "complete", "layers": list(range(64)),
         "fit_config": {"hidden_size": 5120, "num_query_heads": 64,
                        "num_hidden_layers": 64, "cache_rank_per_head": 64,

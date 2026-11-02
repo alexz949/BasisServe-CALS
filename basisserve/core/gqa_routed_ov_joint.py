@@ -852,9 +852,13 @@ def _cholesky_with_jitter(
             matrix + absolute * identity,
             check_errors=False,
         )
-        if int(info.max()) != 0:
+        # CUDA can report success for a non-finite factor of an indefinite
+        # system. Such a factor must not bypass the existing jitter search.
+        if int(info.max()) != 0 or not bool(torch.isfinite(chol).all()):
             continue
         solution = torch.cholesky_solve(rhs, chol)
+        if not bool(torch.isfinite(solution).all()):
+            continue
         diagonal = torch.diagonal(chol).abs()
         condition = float(
             (

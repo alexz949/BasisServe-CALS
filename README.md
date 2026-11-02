@@ -31,7 +31,7 @@ are retained as ablations. Encoder sweeps are optional; zero sweeps means
 |---|---|
 | C1 objective, decoder closure, encoder CG/ALS | basisserve/core/gqa_routed_ov_joint.py |
 | Activation-aware V/Wo geometry | basisserve/core/gqa_vo_svdllm.py |
-| Llama-2 C1 fitting | evaluation/fit_llama2_mha_c1_joint.py |
+| Model-independent MHA/GQA Value fitting | scripts/fit_value.py, basisserve/compression/ |
 | Calibration capture/finalization | evaluation/capture_attention_o_proj_ppl_snapshots.py, evaluation/finalize_attention_o_proj_ppl_snapshot.py |
 | WikiText-2 PPL and PaLU comparison | evaluation/eval_llama2_mha_v25_comparison.py |
 | Layer-wise Global-KL | evaluation/allocate_llama2_mha_c1_global_kl.py |
@@ -54,9 +54,9 @@ provenance and [RESULTS.md](RESULTS.md) for the promoted results.
 Use the existing environment:
 
 ~~~bash
-conda activate lowrankarena
-cd /home/lz299/BasisServe/CALS
-export PYTHONPATH=.
+conda activate lowrank
+cd BasisServe-CALS
+python -m pip install -e . --no-deps
 ~~~
 
 requirements.txt lists the direct Python dependencies. The ragged kernel is
@@ -69,24 +69,42 @@ First inspect the exact CLI for the preserved revision:
 
 ~~~bash
 python evaluation/capture_attention_o_proj_ppl_snapshots.py --help
-python evaluation/fit_llama2_mha_c1_joint.py --help
+python scripts/fit_value.py --help
 python evaluation/eval_llama2_mha_v25_comparison.py --help
 ~~~
 
-A full C1 fit is sharded by layer. One shard has the following form:
+Value fitting uses one entrypoint for MHA/GQA calibration snapshots. Model
+dimensions and attention-layer indices come from `manifest.json`; there is no
+model-name profile or fixed head/layer count. Covariance snapshots also provide
+the fit/held-out window counts. Raw activation snapshots require explicit
+`--fit-windows` and `--validation-windows`.
+
+For a single worker:
 
 ~~~bash
-python evaluation/fit_llama2_mha_c1_joint.py fit-shard \
+python scripts/fit_value.py fit-shard \
+  --snapshot-dir SNAPSHOTS --output-dir FACTORS --rank 96
+python scripts/fit_value.py merge --output-dir FACTORS
+~~~
+
+Defaults are six ALS sweeps, CG16, FP32 fitting and BF16 factors. The rank is
+required. `--device cpu` supports small local inputs; substantial GPU fitting
+should run through the cluster scheduler. The CLI itself does not submit jobs
+or choose a machine, GPU allocation, model path, or output path.
+
+A larger fit can be sharded by layer. One shard has the following form:
+
+~~~bash
+python scripts/fit_value.py fit-shard \
   --snapshot-dir SNAPSHOTS \
   --validation-snapshot-dir VALIDATION_SNAPSHOTS \
   --output-dir FACTORS \
   --fit-windows 128 --validation-windows 64 \
-  --cache-rank 96 \
+  --rank 96 \
   --work-dtype float64 --factor-dtype bfloat16 \
   --encoder-initialization activation-weighted-svd \
   --decoder-objective full_layer \
-  --encoder-sweeps 0 --minimum-encoder-sweeps 0 \
-  --selection-boundaries decoder-closed \
+  --encoder-sweeps 6 \
   --layer-shard-index 0 --layer-shard-count 4 \
   --device cuda:0
 ~~~
@@ -94,9 +112,16 @@ python evaluation/fit_llama2_mha_c1_joint.py fit-shard \
 Run shard indices 0 through 3, then merge:
 
 ~~~bash
-python evaluation/fit_llama2_mha_c1_joint.py merge \
+python scripts/fit_value.py merge \
   --output-dir FACTORS --layers all
 ~~~
+
+The fitted bank uses `basiskv.value_factors.v1`, with model geometry saved in
+`fit_config.geometry`; layer records use `basiskv.value_factors.layer.v1`.
+Merge reads that geometry from the layer records and does not require the
+original model files or calibration directory. Old model-specific fit entrypoints
+and factor-format tags have been removed. Historical result archives retain their
+original commands and formats and are not converted by this change.
 
 Evaluate the same folded C1 weights on WikiText-2:
 

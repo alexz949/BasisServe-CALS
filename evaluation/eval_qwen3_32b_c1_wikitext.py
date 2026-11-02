@@ -44,7 +44,7 @@ from evaluation.eval_attention_o_proj_collective_ppl import _eval_ppl_fp32_loss
 
 
 FORMAT = "basisserve.qwen3_32b.gqa_c1_wikitext2_ppl.v1"
-FACTOR_FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
+FACTOR_FORMAT = "basiskv.value_factors.v1"
 RAGGED_FACTOR_FORMAT = "basisserve.qwen3_32b.gqa_c1.ragged_schedule_als.v1"
 LAYER_ALLOCATION_FORMAT = (
     "basisserve.qwen3_32b.gqa_c1.layer_global_kl_allocation.v1"
@@ -61,11 +61,11 @@ def activate_model_profile(name: str) -> None:
     if name == "qwen3_32b":
         slug = "qwen3_32b"
         MODEL_LABEL = "Qwen3-32B"
-        FACTOR_FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
+        FACTOR_FORMAT = "basiskv.value_factors.v1"
     elif name == "qwen3_8b":
         slug = "qwen3_8b"
         MODEL_LABEL = "Qwen3-8B-Base"
-        FACTOR_FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.v1"
+        FACTOR_FORMAT = "basiskv.value_factors.v1"
     else:
         raise ValueError(f"unknown Qwen3 C1 model profile: {name}")
     HEAD_DIM = allocation_common.HEAD_DIM

@@ -35,7 +35,7 @@ from vllm.model_executor.models.utils import AutoWeightsLoader
 
 
 MODEL_ARCHITECTURE = "BasisServeQwen3_8BSparseC1ForCausalLM"
-VALUE_FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.v1"
+VALUE_FORMAT = "basiskv.value_factors.v1"
 CONDITIONAL_FORMAT = "basisserve.qwen3_8b.v80_base16_r8_nonsink_page32.v1"
 LOKI_FORMAT = "basisserve.qwen3_8b.loki_key_pca.v1"
 NUM_LAYERS = 36

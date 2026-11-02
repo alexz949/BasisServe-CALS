@@ -65,7 +65,7 @@ from evaluation.eval_attention_o_proj_collective_ppl import (  # noqa: E402
 
 
 FORMAT = "basisserve.qwen3_32b.gqa_c1.tp_source_global_kl_allocation.v1"
-FACTOR_FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
+FACTOR_FORMAT = "basiskv.value_factors.v1"
 MODEL_LABEL = "Qwen3-32B"
 MODEL_TYPE = "qwen3"
 ATTENTION_TYPE = "gqa"
@@ -95,7 +95,7 @@ def activate_model_profile(name: str) -> None:
     global HEAD_DIM, HIDDEN_SIZE, QUERY_WIDTH
     if name == "qwen3_32b":
         FORMAT = "basisserve.qwen3_32b.gqa_c1.tp_source_global_kl_allocation.v1"
-        FACTOR_FORMAT = "basisserve.qwen3_32b.gqa_c1_v96_joint.v1"
+        FACTOR_FORMAT = "basiskv.value_factors.v1"
         MODEL_LABEL = "Qwen3-32B"
         MODEL_TYPE = "qwen3"
         ATTENTION_TYPE = "gqa"
@@ -106,7 +106,7 @@ def activate_model_profile(name: str) -> None:
         HIDDEN_SIZE = 5120
     elif name == "qwen3_8b":
         FORMAT = "basisserve.qwen3_8b.gqa_c1.tp_source_global_kl_allocation.v1"
-        FACTOR_FORMAT = "basisserve.qwen3_8b.gqa_c1_joint.v1"
+        FACTOR_FORMAT = "basiskv.value_factors.v1"
         MODEL_LABEL = "Qwen3-8B-Base"
         MODEL_TYPE = "qwen3"
         ATTENTION_TYPE = "gqa"
@@ -117,7 +117,7 @@ def activate_model_profile(name: str) -> None:
         HIDDEN_SIZE = 4096
     elif name == "llama31_8b":
         FORMAT = "basisserve.llama31_8b.gqa_c1.tp_source_global_kl_allocation.v1"
-        FACTOR_FORMAT = "basisserve.llama31_8b.gqa_c1_joint.v1"
+        FACTOR_FORMAT = "basiskv.value_factors.v1"
         MODEL_LABEL = "Llama-3.1-8B"
         MODEL_TYPE = "llama"
         ATTENTION_TYPE = "gqa"
@@ -128,7 +128,7 @@ def activate_model_profile(name: str) -> None:
         HIDDEN_SIZE = 4096
     elif name == "llama31_70b":
         FORMAT = "basisserve.llama31_70b.gqa_c1.tp_source_global_kl_allocation.v1"
-        FACTOR_FORMAT = "basisserve.llama31_70b.gqa_c1_joint.v1"
+        FACTOR_FORMAT = "basiskv.value_factors.v1"
         MODEL_LABEL = "Llama-3.1-70B"
         MODEL_TYPE = "llama"
         ATTENTION_TYPE = "gqa"
@@ -139,7 +139,7 @@ def activate_model_profile(name: str) -> None:
         HIDDEN_SIZE = 8192
     elif name == "llama2_7b":
         FORMAT = "basisserve.llama2_7b.mha_c1.tp_source_global_kl_allocation.v1"
-        FACTOR_FORMAT = "basisserve.llama2_7b.mha_c1_v96_joint.v1"
+        FACTOR_FORMAT = "basiskv.value_factors.v1"
         MODEL_LABEL = "Llama-2-7B"
         MODEL_TYPE = "llama"
         ATTENTION_TYPE = "mha"
