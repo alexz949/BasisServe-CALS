@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT))
 from evaluation.v96kl_common import configure, read_json, write_json, sha256
 from evaluation.k_routing_config import routing_config, validate_residual_fisher_support
 from evaluation.ruler_v1 import parse_tasks, ruler_prompt, sample_score
+from evaluation import routing_tensor_parallel as tp
 from basisserve.checkpoint.gqa_vo_qwen3 import GQATiedVOQwen3Attention
 from basisserve.checkpoint.gqa_vo_nemotron_h import nemotron_h_c1_attention
 from basisserve.checkpoint.c1_attention_layers import c1_attention_layers
@@ -43,6 +44,9 @@ KV_FP8 = False
 KV_NUQ4 = None
 QUEST_PAGE_SIZE, QUEST_BUDGET, QUEST_DENSE_LAYERS = 16, 2048, 2
 PINNED_PAGES = 1
+# ours/exact_sparse page selection: 'group' = one page set per KV group (GQA max, budget per group); 'head' = one page set
+# per query head (budget per head, the group's physical support is the union, measured not capped).
+OURS_SELECTION = 'group'
 # 'ruler' (frozen RULER prompts, substring metrics) or 'longbench' (ShadowKV 9-task LongBench-v1 subset, official metrics).
 BENCHMARK = 'ruler'
 # Official LongBench pred.py: chat models are better off without the chat wrapper on these datasets.
@@ -98,12 +102,15 @@ def install_native_runtime(model, args, protocol):
     install_chunked_mamba_norms(model)
 
 
-def load_evaluation_model(identity, config):
+def load_evaluation_model(identity, config, mesh=None):
     options=dict(config=config,dtype=torch.bfloat16,attn_implementation='sdpa',
         local_files_only=True,trust_remote_code=False)
     count=torch.cuda.device_count()
     assert count>0
-    if count==1:
+    if mesh is not None:
+        # Head-sharded tensor parallelism; one replica spans its torchrun group (evaluation/routing_tensor_parallel.py).
+        model=AutoModelForCausalLM.from_pretrained(identity['model'],**options,**tp.load_options(mesh)).eval()
+    elif count==1:
         model=AutoModelForCausalLM.from_pretrained(identity['model'],**options).cuda().eval()
     else:
         # Leave room on each card for the dense K cache, compressed V, and prefill.
@@ -226,13 +233,23 @@ def routing_forward(self, hidden_states, position_embeddings, attention_mask=Non
             codes = torch.einsum('bhqd,hdr->bhqr', q.float(), projector.float())
             codes = codes[:, :, 0].reshape(batch, self.num_key_value_heads, group_heads, -1)
             scores = (codes @ sidecar.float().transpose(-1, -2)) * self.scaling
-            ids, valid = page_support(scores, budget=OURS_BUDGET, page_size=PAGE_SIZE, pinned=PINNED_PAGES)
-            selected = ids.masked_fill(~valid, -1).repeat_interleave(group_heads, dim=1)
+            if OURS_SELECTION == 'head':
+                ids, valid = page_support(scores.reshape(batch, self.num_attention_heads, 1, -1), budget=OURS_BUDGET,
+                                          page_size=PAGE_SIZE, pinned=PINNED_PAGES)
+                selected = ids.masked_fill(~valid, -1)
+            else:
+                ids, valid = page_support(scores, budget=OURS_BUDGET, page_size=PAGE_SIZE, pinned=PINNED_PAGES)
+                selected = ids.masked_fill(~valid, -1).repeat_interleave(group_heads, dim=1)
             output = split_indexed_attention(q, k, v, selected, scale=self.scaling)
+            # Physical support of each KV group: distinct valid token ids over its query heads (-1 marks padding).
+            grouped = selected.reshape(batch, self.num_key_value_heads, -1).sort(-1).values
+            union = (grouped[..., 1:] != grouped[..., :-1]).sum(-1) + 1 - (grouped[..., 0] < 0).long()
             past_key_values.statistics[self.layer_idx] = dict(
                 selected_tokens_mean=float(valid.sum(-1).float().mean()), sink_tokens=PAGE_SIZE*PINNED_PAGES,
-                recent_tokens=64, token_budget=OURS_BUDGET, page_size=PAGE_SIZE)
+                recent_tokens=64, token_budget=OURS_BUDGET, page_size=PAGE_SIZE, selection=OURS_SELECTION,
+                physical_union_per_kv_group_mean=float(union.float().mean()))
         else:
+            assert OURS_SELECTION == 'group'
             result = c1_conditional_page_topk_attention(route_q,route_k,route_v,sidecar,projector,
                 page_size=PAGE_SIZE,exact_token_budget=OURS_BUDGET,pinned_prefix_pages=PINNED_PAGES,scale=self.scaling,
                 query_block_size=1,attention_mask=attention_mask,collect_statistics=True)
@@ -249,6 +266,12 @@ def install(model, checkpoint, manifest, arm, bank, *, dense_v=False):
     config = model.config
     assert config.model_type in ('llama','qwen3','nemotron_h')
     hq,hkv,hidden = config.num_attention_heads,config.num_key_value_heads,config.hidden_size
+    # Under TP this rank owns a contiguous block of KV heads and their query groups; otherwise the slices are full.
+    kv_heads,query_heads = tp.head_slices(hq,hkv)
+    local_hq,local_hkv = query_heads.stop-query_heads.start,kv_heads.stop-kv_heads.start
+    sharded = local_hkv!=hkv
+    assert not sharded or (arm in ('full','exact_sparse','ours') and not dense_v and config.model_type=='qwen3')
+    local_config = tp.local_attention_config(config,local_hq,local_hkv) if sharded else None
     sources = {record['layer']:record for record in manifest['layers']}
     targets = c1_attention_layers(model)
     assert len(sources)==len(manifest['layers']) and set(sources)=={i for i,_ in targets}
@@ -270,12 +293,18 @@ def install(model, checkpoint, manifest, arm, bank, *, dense_v=False):
             assert t['source_ranks'].tolist()==record['ranks']
         assert e.shape==(hkv,dim,rank) and d.shape==(hq,rank,hidden)
         assert torch.isfinite(e).all() and torch.isfinite(d).all()
-        device=m.v_proj.weight.device
-        weight=torch.bmm(e.to(device).float().mT,m.v_proj.weight.float().reshape(hkv,dim,hidden)).reshape(hkv*rank,hidden)
-        decoder=d.to(device).float().permute(2,0,1).reshape(hidden,hq*rank)
+        e,d = e[kv_heads],d[query_heads]
+        dense_v_weight=tp.local_tensor(m.v_proj.weight)
+        device=dense_v_weight.device
+        weight=torch.bmm(e.to(device).float().mT,dense_v_weight.float().reshape(local_hkv,dim,hidden)).reshape(local_hkv*rank,hidden)
+        decoder=d.to(device).float().permute(2,0,1).reshape(hidden,local_hq*rank)
         factory = nemotron_h_c1_attention if config.model_type=='nemotron_h' else GQATiedVOQwen3Attention
+        if sharded:
+            m.config=local_config
         replacement=factory(m,v_proj_compressed_weight=weight,
             o_decoder_weight=decoder,attention_backend='triton',value_coordinate_encoder=e)
+        if sharded:
+            replacement.o_proj.register_forward_hook(tp.all_reduce_output)
         if config.model_type=='nemotron_h':
             layer.mixer=replacement
         else:
@@ -294,8 +323,9 @@ def install(model, checkpoint, manifest, arm, bank, *, dense_v=False):
                 residual_tag=residual_keys[0].removeprefix('residual_encoder_')
                 assert residual_tag.startswith(base_tag+'_r')
                 replacement._routing_factors={
-                    **{name:payload[name+'_'+base_tag].to(device) for name in ('base_left','base_right','base_bias')},
-                    **{name:payload[name+'_'+residual_tag].to(device) for name in ('residual_encoder','residual_query')}}
+                    **{name:payload[name+'_'+base_tag][kv_heads].to(device) for name in ('base_left','base_right','base_bias')},
+                    'residual_encoder':payload['residual_encoder_'+residual_tag][kv_heads].to(device),
+                    'residual_query':payload['residual_query_'+residual_tag][query_heads].to(device)}
                 replacement._routing_base_rank=int(base_tag[1:])
                 residual_query=replacement._routing_factors['residual_query']
                 replacement._routing_projector=(residual_query if replacement._routing_base_rank==0 else
@@ -495,14 +525,18 @@ def inputs(args, tokenizer, *, task_names, samples_per_task):
     else:
         assert args.native_audit is None and args.wo_bank is None
     if runtime_config.model_type in ('llama', 'qwen3', 'nemotron_h'):
-        spec['exact_sparse'] = f'FP32 exact-QK Page{PAGE_SIZE} mass, GQA max; sink{PAGE_SIZE*PINNED_PAGES} ({PINNED_PAGES} pinned page) + recent64 inside hard B{OURS_BUDGET}'
-        spec['ours'] = f'Base16/Residual16 Page{PAGE_SIZE} mass, GQA max; sink{PAGE_SIZE*PINNED_PAGES} ({PINNED_PAGES} pinned page) + recent64 inside hard B{OURS_BUDGET}'
+        rule, scope = (('GQA max', '') if OURS_SELECTION == 'group' else
+                       ('per query head, KV-group union measured not capped', ' per query head'))
+        spec['exact_sparse'] = f'FP32 exact-QK Page{PAGE_SIZE} mass, {rule}; sink{PAGE_SIZE*PINNED_PAGES} ({PINNED_PAGES} pinned page) + recent64 inside hard B{OURS_BUDGET}{scope}'
+        spec['ours'] = f'Base16/Residual16 Page{PAGE_SIZE} mass, {rule}; sink{PAGE_SIZE*PINNED_PAGES} ({PINNED_PAGES} pinned page) + recent64 inside hard B{OURS_BUDGET}{scope}'
         for name in ('evaluation/llama_sink_recent_routing.py', 'basisserve/kernels/split_indexed_attention.py'):
             spec['source_sha256'][name] = sha256(ROOT/name)
     if runtime_config.model_type in ('llama', 'qwen3'):
         spec['prefill_mlp_chunk_tokens'] = 1024
         spec['source_sha256']['evaluation/chunked_prefill_mlp.py'] = sha256(ROOT/'evaluation/chunked_prefill_mlp.py')
     spec['value_mode'] = 'dense original V and Wo' if args.dense_v else 'allocated C1 V'
+    spec['tensor_parallel'] = args.tensor_parallel
+    spec['source_sha256']['evaluation/routing_tensor_parallel.py'] = sha256(ROOT/'evaluation/routing_tensor_parallel.py')
     if BENCHMARK=='longbench':
         spec['longbench']=dict(data_protocol=data['protocol'],model_tag=data['model_tag'],
             scoring='official LongBench eval.py per-sample scorer: max over references; first non-empty line for samsum/trec/triviaqa/lsht',
@@ -564,7 +598,8 @@ def generate(model,tokenizer,row,arm,cap):
         if arm=='lrqk':stats.append(cache.lrqk_states[i].statistics(m.num_key_value_heads))
         elif arm=='shadowkv':stats.append(cache.shadow_states[i].statistics())
         else:stats.append(cache.statistics.get(i,{}))
-    return ids,first,stats,ids[-1] in eos
+    tp.assert_same_tokens(ids)
+    return ids,first,tp.merge_layer_statistics(stats),ids[-1] in eos
 
 
 def summarize(args,rows,spec,tokenizer,bank_hashes,identity):
@@ -641,7 +676,7 @@ def audit_smoke(args,rows,spec,bank_hashes):
 
 
 def main():
-    global ARMS, LRQK_TOPK, LOKI_TOPK, LOKI_RECENT, OURS_BUDGET, SHADOWKV_BUDGET, BENCHMARK, PAGE_SIZE, PINNED_PAGES, KV_FP8, KV_NUQ4, QUEST_PAGE_SIZE, QUEST_BUDGET, QUEST_DENSE_LAYERS
+    global ARMS, LRQK_TOPK, LOKI_TOPK, LOKI_RECENT, OURS_BUDGET, OURS_SELECTION, SHADOWKV_BUDGET, BENCHMARK, PAGE_SIZE, PINNED_PAGES, KV_FP8, KV_NUQ4, QUEST_PAGE_SIZE, QUEST_BUDGET, QUEST_DENSE_LAYERS
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('stage',choices=['smoke','audit-smoke','evaluate','summarize'])
     p.add_argument('--arm',choices=ARMS,default='full')
@@ -677,14 +712,18 @@ def main():
     p.add_argument('--quest-dense-layers',type=int,default=2,help='Quest: leading layers kept dense')
     p.add_argument('--kv-nuq4',type=Path,help='simulated KVQuant NUQ4 KV cache: directory with quantizers.pt + manifest.json from evaluation/calibrate_llama_v96_kvquant.py')
     p.add_argument('--ours-budget',type=int,default=OURS_BUDGET,help='physical tokens for ours/exact_sparse incl. sink page and recent 64')
+    p.add_argument('--ours-selection',choices=('group','head'),default=OURS_SELECTION,help='ours/exact_sparse pages: one set per KV group (GQA max) or per query head (budget per head, union measured)')
     p.add_argument('--shadowkv-budget',type=int,default=SHADOWKV_BUDGET,help='ShadowKV routed tokens (outliers and local tail are extra)')
     p.add_argument('--page-size',type=int,default=PAGE_SIZE,choices=(1,2,4,8,16,32),help='decode-time routing page size for ours/exact_sparse')
     p.add_argument('--pinned-pages',type=int,default=PINNED_PAGES,help='sink pages pinned inside the budget (0 = no sink; e.g. 32 at page size 1 = a 32-token sink)')
+    p.add_argument('--sample-indices',help='evaluate stage: comma list of row indices to run (default all rows)')
+    p.add_argument('--tensor-parallel',type=int,default=1,help='TP size of one replica (launch with torchrun --nproc-per-node N); summarize/audit-smoke run without torchrun')
     p.add_argument('--allow-bank-sink-mismatch',action='store_true',help='diagnostic: run a bank fitted with a different pinned-sink exclusion (recorded in the spec)')
     args=p.parse_args();configure();torch.manual_seed(0)
     LRQK_TOPK, LOKI_TOPK, LOKI_RECENT = args.lrqk_topk, args.loki_topk, args.loki_recent
     OURS_BUDGET, SHADOWKV_BUDGET, BENCHMARK, PAGE_SIZE, PINNED_PAGES = args.ours_budget, args.shadowkv_budget, args.benchmark, args.page_size, args.pinned_pages
     KV_FP8 = args.kv_fp8
+    OURS_SELECTION = args.ours_selection
     QUEST_PAGE_SIZE, QUEST_BUDGET, QUEST_DENSE_LAYERS = args.quest_page_size, args.quest_budget, args.quest_dense_layers
     assert QUEST_BUDGET % QUEST_PAGE_SIZE == 0
     assert not (args.kv_fp8 and args.kv_nuq4 is not None)
@@ -721,7 +760,9 @@ def main():
         gate=read_json(args.output/'smoke_audit.json')
         assert gate['status']=='complete' and gate['protocol']==spec
     config=routing_config(identity,rope=args.rope,sequence_length=args.sequence_length)
-    model=load_evaluation_model(identity,config)
+    mesh=tp.init_mesh(args.tensor_parallel) if args.tensor_parallel>1 else None
+    assert mesh is None or (not KV_FP8 and KV_NUQ4 is None)
+    model=load_evaluation_model(identity,config,mesh)
     if config.model_type=='nemotron_h':
         install_native_runtime(model,args,spec['native'])
     install(model,Path(identity['checkpoint']),manifest,args.arm,bank,dense_v=args.dense_v)
@@ -732,17 +773,23 @@ def main():
             module._lrqk_official=True
     selected=([rows[0]['index']] if len(spec['task_names'])==1 else
               list(dict.fromkeys((rows[0]['index'],rows[-1]['index'])))) if args.stage=='smoke' else None
-    selected=[rows[i] for i in selected] if selected is not None else rows[args.shard_index::args.num_shards]
+    if selected is None and args.sample_indices:
+        selected=sorted({int(x) for x in args.sample_indices.split(',')})[args.shard_index::args.num_shards]
+    elif selected is None:
+        selected=[row['index'] for row in rows][args.shard_index::args.num_shards]
+    selected=[rows[i] for i in selected]
     for row in selected:
         stage_dir='smoke_mlp1024_deviceguard' if args.stage=='smoke' and 'prefill_mlp_chunk_tokens' in spec else args.stage
         path=args.output/args.arm/stage_dir/f"sample_{row['index']:03d}.json"
-        if path.exists():
-            saved=read_json(path)
-            assert saved['status']=='complete' and saved['protocol']==spec and saved['sample']==row
-            assert saved['bank_sha256']==bank_hashes
+        if tp.broadcast_flag(path.exists()):
+            if tp.is_writer():
+                saved=read_json(path)
+                assert saved['status']=='complete' and saved['protocol']==spec and saved['sample']==row
+                assert saved['bank_sha256']==bank_hashes
             continue
         cap=min(4,row['maximum_tokens']) if args.stage=='smoke' else row['maximum_tokens']
-        print('START',args.arm,row['index'],row['task'],len(row['input_ids']),flush=True)
+        if tp.is_writer():
+            print('START',args.arm,row['index'],row['task'],len(row['input_ids']),flush=True)
         started=time.monotonic()
         for device in range(torch.cuda.device_count()):torch.cuda.reset_peak_memory_stats(device)
         with torch.inference_mode():
@@ -754,12 +801,14 @@ def main():
         prediction=tokenizer.decode(ids,skip_special_tokens=True,clean_up_tokenization_spaces=False)
         result=dict(ids=ids,prediction=prediction,score=score_prediction(prediction,row),
             stopped=stopped,routing=stats,seconds=time.monotonic()-started,
-            peak_gib_by_device={str(i):torch.cuda.max_memory_allocated(i)/2**30
-                                for i in range(torch.cuda.device_count())})
-        write_json(path,dict(status='complete',sample=row,result=result,protocol=spec,bank_sha256=bank_hashes,
-            command=shlex.join(sys.argv),python=sys.executable,gpu=torch.cuda.get_device_name(0),
-            device_map={str(k):str(v) for k,v in getattr(model,'hf_device_map',{'':0}).items()}))
-        print('COMPLETE',args.arm,row['index'],result['score'],result['seconds'],flush=True)
+            peak_gib_by_device=(tp.peak_gib_by_rank() if mesh is not None else
+                {str(i):torch.cuda.max_memory_allocated(i)/2**30 for i in range(torch.cuda.device_count())}))
+        if tp.is_writer():
+            write_json(path,dict(status='complete',sample=row,result=result,protocol=spec,bank_sha256=bank_hashes,
+                command=shlex.join(sys.argv),python=sys.executable,gpu=torch.cuda.get_device_name(0),
+                device_map={str(k):str(v) for k,v in getattr(model,'hf_device_map',{'':0}).items()}))
+            print('COMPLETE',args.arm,row['index'],result['score'],result['seconds'],flush=True)
+    tp.finish()
 
 
 if __name__=='__main__':

@@ -112,6 +112,10 @@ def parse_args() -> argparse.Namespace:
         default="none",
     )
     parser.add_argument("--max-memory-per-gpu-gib", type=int, default=44)
+    parser.add_argument("--window-shard", type=int, default=0,
+                        help="this process captures fit windows i with i %% shards == shard, and likewise held-out windows")
+    parser.add_argument("--window-shards", type=int, default=1,
+                        help="window shards; merge the per-shard snapshots with evaluation/merge_attention_o_proj_covariances.py")
     parser.add_argument("--torch-num-threads", type=int, default=4)
     return parser.parse_args()
 
@@ -235,6 +239,14 @@ def main() -> None:
     torch.set_num_threads(args.torch_num_threads)
     if min(args.fit_windows, args.heldout_windows, args.batch_size) <= 0:
         raise ValueError("window and batch counts must be positive")
+    if not 0 <= args.window_shard < args.window_shards:
+        raise ValueError("--window-shard must lie in [0, --window-shards)")
+    shard_ids = {
+        "fit": list(range(args.fit_windows))[args.window_shard::args.window_shards],
+        "heldout": list(range(args.fit_windows, args.fit_windows + args.heldout_windows))[args.window_shard::args.window_shards],
+    }
+    if min(len(shard_ids["fit"]), len(shard_ids["heldout"])) == 0:
+        raise ValueError("every window shard needs at least one fit and one held-out window")
     if not torch.cuda.is_available():
         raise RuntimeError("streaming covariance capture requires CUDA")
     device = torch.device(args.device)
@@ -326,42 +338,37 @@ def main() -> None:
     input_device = model.get_input_embeddings().weight.device
     if input_device.type != "cuda":
         raise RuntimeError("input embeddings are not on CUDA")
+    expected_rows = {
+        split: len(ids) * sequence_length for split, ids in shard_ids.items()
+    }
     try:
-        total = len(windows)
-        start = 0
         batch_index = 0
-        while start < total:
-            boundary = args.fit_windows if start < args.fit_windows else total
-            stop = min(start + args.batch_size, boundary)
-            split = "fit" if start < args.fit_windows else "heldout"
-            input_ids = windows[start:stop].to(input_device)
-            capture.begin(split, rows=int(input_ids.numel()))
-            outputs = model(
-                input_ids=input_ids,
-                attention_mask=torch.ones_like(input_ids),
-                use_cache=False,
-                return_dict=True,
-            )
-            del outputs, input_ids
-            capture.finish()
-            batch_index += 1
-            print(
-                f"[Covariance] batch={batch_index} split={split} windows={stop}/{total}",
-                flush=True,
-            )
-            if stop == args.fit_windows:
-                capture.normalize_and_offload(
-                    "fit", expected_rows=args.fit_windows * sequence_length
+        for split in ("fit", "heldout"):
+            ids = shard_ids[split]
+            for start in range(0, len(ids), args.batch_size):
+                batch_ids = ids[start:start + args.batch_size]
+                input_ids = windows[batch_ids].to(input_device)
+                capture.begin(split, rows=int(input_ids.numel()))
+                outputs = model(
+                    input_ids=input_ids,
+                    attention_mask=torch.ones_like(input_ids),
+                    use_cache=False,
+                    return_dict=True,
                 )
+                del outputs, input_ids
+                capture.finish()
+                batch_index += 1
+                print(
+                    f"[Covariance] batch={batch_index} split={split} windows={batch_ids} "
+                    f"done={start + len(batch_ids)}/{len(ids)} shard={args.window_shard}/{args.window_shards}",
+                    flush=True,
+                )
+            if split == "fit":
+                capture.normalize_and_offload("fit", expected_rows=expected_rows["fit"])
                 print("[Covariance] offloaded normalized fit statistics", flush=True)
-            start = stop
     finally:
         capture.close()
 
-    expected_rows = {
-        "fit": args.fit_windows * sequence_length,
-        "heldout": args.heldout_windows * sequence_length,
-    }
     if capture.rows != expected_rows:
         raise RuntimeError(f"captured row counts differ: {capture.rows} != {expected_rows}")
     capture.normalize_and_offload(
@@ -418,9 +425,13 @@ def main() -> None:
             "windows_file": str(windows_path),
             "windows_sha256": _sha256(windows_path),
             "windows_manifest_format": windows_manifest.get("format"),
-            "window_count": len(windows),
-            "fit_windows": args.fit_windows,
-            "heldout_windows": args.heldout_windows,
+            "window_count": len(shard_ids["fit"]) + len(shard_ids["heldout"]),
+            "fit_windows": len(shard_ids["fit"]),
+            "heldout_windows": len(shard_ids["heldout"]),
+            "fit_window_ids": shard_ids["fit"],
+            "heldout_window_ids": shard_ids["heldout"],
+            "sharding": {"window_shard": args.window_shard, "window_shards": args.window_shards,
+                         "bank_fit_windows": args.fit_windows, "bank_heldout_windows": args.heldout_windows},
             "sequence_length": sequence_length,
             "positions_per_window": sequence_length,
             "fit_rows": expected_rows["fit"],

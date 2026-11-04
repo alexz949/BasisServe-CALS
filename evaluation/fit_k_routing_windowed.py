@@ -48,14 +48,27 @@ def part_file(root, layer, shard):
     return root / 'moments_parts' / f'layer_{layer:03d}_s{shard}.safetensors'
 
 
+def load_teacher_model(path, config):
+    """One GPU holds the whole model; otherwise balance the layers over every visible GPU (Qwen3-32B at 128K), leaving
+    room on each card for the replay activations. Hooks see each layer's tensors on that layer's device."""
+    options = dict(config=config, dtype=torch.bfloat16, attn_implementation='sdpa', local_files_only=True, trust_remote_code=False)
+    count = torch.cuda.device_count()
+    assert count > 0
+    if count == 1:
+        return AutoModelForCausalLM.from_pretrained(path, **options).eval().cuda()
+    memory = {i: f'{int(torch.cuda.get_device_properties(i).total_memory / 2 ** 30) - 12}GiB' for i in range(count)}
+    model = AutoModelForCausalLM.from_pretrained(path, device_map='balanced', max_memory=memory, **options).eval()
+    assert all(str(device) not in ('cpu', 'disk') for device in model.hf_device_map.values())
+    return model
+
+
 @torch.inference_mode()
 def replay(args, identity, windows, layers, protocol, *, fisher=False):
     config = routing_config(identity, rope=args.rope, sequence_length=args.sequence_length)
     if config.model_type == 'nemotron_h':
         from evaluation import nemotron_h_triton_mamba as triton_mamba
         triton_mamba.install()
-    model = AutoModelForCausalLM.from_pretrained(identity['model'], config=config, dtype=torch.bfloat16,
-        attn_implementation='sdpa', local_files_only=True, trust_remote_code=False).eval().cuda()
+    model = load_teacher_model(identity['model'], config)
     assert model.config.model_type in ('llama', 'qwen3', 'nemotron_h')
     if model.config.model_type == 'nemotron_h':
         triton_mamba.restore_dt_limit(model)
