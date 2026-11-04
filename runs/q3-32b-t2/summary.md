@@ -216,3 +216,16 @@ Qwen3-8B tokenizer and tokenizer_config are byte-identical to Qwen3-32B's (sha25
   the whole context is a global aggregation that a 2112-token support does not see. MK2: 7 of 19 losses are near-miss
   copies (<= 2 digits wrong, e.g. 8869382 -> 8869530), the rest a wrong needle. For scale, Qwen3-8B Page4 (group size
   4, same budget) loses 2.01 on 11 tasks (FWE -7.7, MK2 -8); Qwen3-32B has 8 query heads per KV group.
+- LongBench BasisKV (2026-11-04, `scripts/06_longbench_tp2.sh ours`, same output and gate as Full-K): B16R16 Page4,
+  256 routed + recent 64 per KV group (hard 320, GQA max, no sink). Evaluate 04:25-06:29 UTC, 18.5 s mean per prompt
+  (Full-K 17.1; the evaluator's routed decode is not a fast kernel), peak 49.4 GiB per rank, 0 tracebacks. `summarize`
+  passed (`longbench_tp2/summary.{json,md}`, log `logs/06_summarize.log`); first-token agreement 1549/1549.
+
+  | Method | NQA | MFQA | HQA | MuSiQue | DuReader | GovRep | SAMSum | PRe | LCC | 9-task | LRQK 6-task |
+  |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+  | Full-K | 29.80 | 46.35 | 54.58 | 39.12 | 23.53 | 34.38 | 36.90 | 100.00 | 12.93 | 41.95 | 43.39 |
+  | BasisKV (B16R16 Page4, 320) | 30.60 | 46.26 | 53.37 | 38.65 | 23.99 | 33.08 | 36.72 | 100.00 | 12.94 | 41.73 | 43.27 |
+
+  BasisKV - Full-K -0.22 (task-balanced), 95% bootstrap CI [-0.76, +0.33], win/loss 356/392, identical generations
+  598/1549: no significant loss at 320 tokens per KV group (Qwen3-8B Page4: -0.93, CI [-1.54, -0.26]). Largest task
+  drops GovRep -1.30 and HotpotQA -1.21; LCC is unchanged (prose-reasoning caveat above applies to both arms).
