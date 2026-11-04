@@ -201,3 +201,18 @@ Qwen3-8B tokenizer and tokenizer_config are byte-identical to Qwen3-32B's (sha25
   takes the first non-comment line, so those score 10.2 against 36.2 for the 10 code-first outputs. Qwen3-8B continues
   the code under the same prompt. SAMSum (first line scored) is less affected: 7 of 165 start in prose; the 32B often
   answers on the first line and then keeps writing few-shot dialogues to the 128-token cap.
+- BasisKV, all 1000 prompts (2026-11-03/04, `scripts/05_ruler_tp2.sh ours`, same output and gate as Full-K): B16R16
+  Page4, 2048 routed + recent 64 per KV group (hard 2112, GQA max, no sink; measured union 2111.5). Evaluate 23:03-03:55
+  UTC, 68.8 s mean per prompt (Full-K 84.8), peak 65.3 GiB per rank, 0 tracebacks. `summarize` passed (first-token
+  agreement 1000/1000; `ruler_tp2/summary.{json,md}`, log `logs/05_summarize.log`).
+
+  | Method | S1 | S2 | MK1 | MK2 | MQ | MV | QA1 | QA2 | VT | FWE | Avg. |
+  |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+  | Full-K (TP2) | 100.00 | 100.00 | 99.00 | 83.00 | 99.50 | 95.00 | 63.00 | 51.00 | 100.00 | 77.67 | 86.82 |
+  | BasisKV (B16R16 Page4, 2112) | 100.00 | 100.00 | 99.00 | 66.00 | 99.00 | 96.00 | 57.00 | 48.00 | 99.60 | 56.00 | 82.06 |
+
+  BasisKV - Full-K -4.76, 95% bootstrap CI [-6.12, -3.48], win/loss 17/96. FWE (-21.67, 3/56) and MK2 (-17, 2/19)
+  carry 3.87 of the 4.76 points. FWE losses are mostly one of three words (44 of 56 lose 1/3): the frequency count over
+  the whole context is a global aggregation that a 2112-token support does not see. MK2: 7 of 19 losses are near-miss
+  copies (<= 2 digits wrong, e.g. 8869382 -> 8869530), the rest a wrong needle. For scale, Qwen3-8B Page4 (group size
+  4, same budget) loses 2.01 on 11 tasks (FWE -7.7, MK2 -8); Qwen3-32B has 8 query heads per KV group.
