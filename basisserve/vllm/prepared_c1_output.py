@@ -1,4 +1,10 @@
-"""Stream-bound prepared NCCL AllGather and one replicated decoder GEMM."""
+"""Stream-bound C1 AllGather and one replicated decoder GEMM.
+
+On fully NVLink-connected TP groups (where vLLM enables its custom all-reduce) decode gathers run in place on one
+fixed NCCL symmetric-window arena (ncclMemAlloc + NCCL_WIN_COLL_SYMMETRIC through vLLM's TP PyNccl communicator), so
+NCCL >= 2.27 uses its one-shot NVLink kernels: 8-26 us instead of 17-34 us for the ring at 1-256 tokens on 8 x A100
+(`benchmarks/a100/bench_allgather.py`). Prefill and PCIe-only groups use the prepared NCCL plan.
+"""
 
 from __future__ import annotations
 
@@ -7,6 +13,8 @@ from torch import Tensor
 
 from basisserve.kernels.feature_ragged_allgather import FeatureRaggedCommunicator
 from basisserve.kernels.ragged_allgather import StaticRaggedPlan
+from vllm.distributed.device_communicators.pynccl_allocator import get_nccl_mem_pool
+from vllm.distributed.parallel_state import get_tp_group
 from vllm.forward_context import get_forward_context
 from vllm.model_executor.layers.attention.attention import get_attention_context
 from vllm.utils.torch_utils import direct_register_custom_op
@@ -34,6 +42,23 @@ class PreparedC1Output:
         self.capture_calls = 0
         self.eager_calls = 0
         self.direct_decode_calls = 0
+        # A100 (SM80) cuBLAS picks align-2 kernels for the transposed feature-major operand at small token counts
+        # (2.3-3x slower at 2/4/16 tokens; cuBLASLt likewise); a token-major copy restores the fast path there.
+        self.token_major_small = torch.cuda.get_device_capability(device) == (8, 0)
+        self.local_width = local_width
+        self.symmetric = None
+        tp = get_tp_group().device_communicator
+        nvlink = tp.ca_comm is not None and not tp.ca_comm.disabled
+        if nvlink and tp.pynccl_comm is not None and tp.pynccl_comm.nccl_version >= 22703:
+            pool = get_nccl_mem_pool()
+            assert pool is not None, "NCCL symmetric memory allocator unavailable"
+            with torch.cuda.use_mem_pool(pool):
+                arena = torch.empty(self.plan.total_width * max_tokens, dtype=torch.bfloat16, device=device)
+            # Collective: every rank registers the same-sized arena once, in the same order.
+            tp.pynccl_comm.register_comm_window(arena)
+            # NCCL places blocks by PyNccl rank; decoder rows follow the communicator (TP group) rank.
+            assert tp.pynccl_comm.rank == self.communicator.rank
+            self.symmetric = (tp.pynccl_comm, arena, self.communicator.rank)
 
     def _prepared(
         self,
@@ -60,10 +85,12 @@ class PreparedC1Output:
             self.eager_calls += 1
         return prepared
 
-    @staticmethod
-    def _gather_decode(prepared, decoder: Tensor) -> Tensor:
-        arena = prepared.gather_inplace_fast()
-        return torch.mm(arena.T, decoder)
+    def _decode(self, arena: Tensor, decoder: Tensor) -> Tensor:
+        """One replicated decoder GEMM over the gathered feature-major arena [total_width, tokens]."""
+        tokens = arena.T
+        if self.token_major_small and arena.shape[1] <= 16:
+            tokens = tokens.contiguous()
+        return torch.mm(tokens, decoder)
 
     def __call__(self, local: Tensor, decoder: Tensor) -> Tensor:
         prepared = self._prepared(
@@ -72,7 +99,7 @@ class PreparedC1Output:
         # Native vLLM attention emits token-major coordinates. The source-local
         # pack is currently required; the gathered arena needs no global pack.
         prepared.local_feature_major_view_fast().copy_(local.T)
-        return self._gather_decode(prepared, decoder)
+        return self._decode(prepared.gather_inplace_fast(), decoder)
 
     def attention(
         self,
@@ -89,8 +116,17 @@ class PreparedC1Output:
             attn_metadata is not None
             and attn_metadata.max_query_len <= 1
         ):
-            prepared = self._prepared(tokens, query.dtype, query.device)
-            local = prepared.local_feature_major_view_fast()
+            if self.symmetric is not None:
+                nccl, buffer, rank = self.symmetric
+                arena = buffer[: self.plan.total_width * tokens].view(self.plan.total_width, tokens)
+                local = arena[rank * self.local_width:(rank + 1) * self.local_width]
+                if torch.cuda.is_current_stream_capturing():
+                    self.capture_calls += 1
+                else:
+                    self.eager_calls += 1
+            else:
+                prepared = self._prepared(tokens, query.dtype, query.device)
+                local = prepared.local_feature_major_view_fast()
             output = local.T.view(
                 tokens, attn_layer.impl.num_heads, attn_layer.head_size_v
             )
@@ -104,7 +140,10 @@ class PreparedC1Output:
                 output,
             )
             self.direct_decode_calls += 1
-            return self._gather_decode(prepared, decoder)
+            if self.symmetric is not None:
+                nccl.all_gather(arena.view(-1), local.reshape(-1))  # in place: local is this rank's block
+                return self._decode(arena, decoder)
+            return self._decode(prepared.gather_inplace_fast(), decoder)
 
         output = torch.empty(
             (tokens, attn_layer.impl.num_heads, attn_layer.head_size_v),
@@ -124,6 +163,8 @@ class PreparedC1Output:
 
     def statistics(self):
         return dict(backend="uniform_nccl", decoder_gemms=1,
+                    decode_gather="nccl_symmetric_inplace" if self.symmetric is not None else "uniform_nccl",
+                    token_major_small=self.token_major_small,
                     capture_calls=self.capture_calls, eager_calls=self.eager_calls,
                     direct_decode_calls=self.direct_decode_calls,
                     prepared_shapes=sorted({int(key[0]) for key in self.prepared}))

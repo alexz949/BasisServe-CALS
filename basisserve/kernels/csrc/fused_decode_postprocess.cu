@@ -3,6 +3,7 @@
 #include <c10/cuda/CUDAStream.h>
 #include <cub/block/block_radix_sort.cuh>
 #include <cub/block/block_reduce.cuh>
+#include <cuda/functional>
 #include <cuda_bf16.h>
 #include <cuda_runtime.h>
 #include <cassert>
@@ -73,7 +74,7 @@ __global__ void select_and_pack_kernel(
       }
     }
     const float maximum =
-        BlockReduce(temporary.reduce).Reduce(local_maximum, cub::Max());
+        BlockReduce(temporary.reduce).Reduce(local_maximum, ::cuda::maximum<>{});
     if (thread == 0) {
       head_maximum[head] = maximum;
     }
@@ -235,7 +236,7 @@ __global__ void select_pack_plan_kernel(
       }
     }
     const float maximum =
-        BlockReduce(temporary.reduce).Reduce(local_maximum, cub::Max());
+        BlockReduce(temporary.reduce).Reduce(local_maximum, ::cuda::maximum<>{});
     if (thread == 0) {
       head_maximum[head] = maximum;
     }

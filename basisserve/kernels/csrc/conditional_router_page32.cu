@@ -5,6 +5,7 @@
 #include <cuda_runtime.h>
 #include <cub/block/block_radix_sort.cuh>
 #include <cub/block/block_reduce.cuh>
+#include <cuda/functional>
 #include <math_constants.h>
 #include <mma.h>
 
@@ -767,7 +768,7 @@ __global__ void select_fixed_group_max_pages_kernel(
       }
     }
     const float maximum =
-        BlockReduce(temporary.reduce).Reduce(local_maximum, cub::Max());
+        BlockReduce(temporary.reduce).Reduce(local_maximum, ::cuda::maximum<>{});
     if (thread == 0) {
       head_maximum[head] = maximum;
     }
