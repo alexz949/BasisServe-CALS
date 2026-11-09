@@ -21,8 +21,9 @@ class KOffloadRoutingCache(runtime.RoutingCache):
 def _offload_prefill_key(cache, layer, key):
     capacity = cache.key_capacity
     assert key.dtype == torch.bfloat16 and key.is_cuda and key.shape[2] <= capacity
+    placement = getattr(cache, 'exact_key_placement', 'cpu')
     storage = torch.empty((*key.shape[:2], capacity, key.shape[-1]),
-                          dtype=key.dtype, device='cpu', pin_memory=True)
+                          dtype=key.dtype, device=placement, pin_memory=placement == 'cpu')
     storage[:, :, :key.shape[2]].copy_(key)
     cache.key_storage[layer] = storage
     cache.layers[layer].keys = storage[:, :, :key.shape[2]]
@@ -37,6 +38,10 @@ def _append_key(cache, layer, key, previous):
 
 def _selected_attention(query, host_key, value, ids, valid, scale, cache, layer):
     from basisserve.kernels.split_indexed_attention import split_indexed_attention
+
+    if host_key.is_cuda:
+        selected_ids = ids.masked_fill(~valid, -1).repeat_interleave(query.shape[1] // host_key.shape[1], dim=1)
+        return split_indexed_attention(query, host_key, value, selected_ids, scale=scale)
 
     batch, kv_heads, count = ids.shape
     safe_cpu = ids.clamp_min(0).to(device='cpu')
@@ -85,17 +90,20 @@ def forward(self, hidden_states, position_embeddings, attention_mask=None,
     del pre
     previous = past_key_values.get_seq_length(self.layer_idx)
     assert previous == 0 or length == 1
-    factors = self._routing_factors
-    if self._routing_base_rank == 0:
-        current = torch.einsum('bhtd,hdr->bhtr', k, factors['residual_encoder'].to(k.dtype))
-    else:
-        current = runtime.build_conditional_routing_sidecar(
-            v, k, base_left=factors['base_left'], base_right=factors['base_right'],
-            base_bias=factors['base_bias'],
-            residual_encoder=factors['residual_encoder'], cos=cos, sin=sin)
+    exact = getattr(self, '_exact_page4', False)
+    if not exact:
+        factors = self._routing_factors
+        if self._routing_base_rank == 0:
+            current = torch.einsum('bhtd,hdr->bhtr', k, factors['residual_encoder'].to(k.dtype))
+        else:
+            current = runtime.build_conditional_routing_sidecar(
+                v, k, base_left=factors['base_left'], base_right=factors['base_right'],
+                base_bias=factors['base_bias'],
+                residual_encoder=factors['residual_encoder'], cos=cos, sin=sin)
     if previous:
-        past_key_values.sidecars[self.layer_idx] = torch.cat(
-            (past_key_values.sidecars[self.layer_idx], current), 2)
+        if not exact:
+            past_key_values.sidecars[self.layer_idx] = torch.cat(
+                (past_key_values.sidecars[self.layer_idx], current), 2)
         _append_key(past_key_values, self.layer_idx, k, previous)
         cached = past_key_values.layers[self.layer_idx]
         cached.values = torch.cat((cached.values, v), 2)
@@ -103,23 +111,42 @@ def forward(self, hidden_states, position_embeddings, attention_mask=None,
         if attention_mask is not None:
             assert attention_mask.shape[-2] == 1
             assert bool(attention_mask.all()) if attention_mask.dtype == torch.bool else bool((attention_mask == 0).all())
-        group_heads = self.num_attention_heads // self.num_key_value_heads
-        projector = self._routing_projector
-        codes = torch.einsum('bhqd,hdr->bhqr', q.float(), projector.float())
-        codes = codes[:, :, 0].reshape(batch, self.num_key_value_heads, group_heads, -1)
-        sidecar = past_key_values.sidecars[self.layer_idx]
-        scores = (codes @ sidecar.float().transpose(-1, -2)) * self.scaling
-        ids, valid = page_support(scores, budget=BUDGET, page_size=PAGE_SIZE, pinned=PINNED_PAGES)
+        if exact:
+            from basisserve.core.exact_page_routing import exact_page4_support
+            assert (BUDGET, PAGE_SIZE, PINNED_PAGES) == (2112, 4, 0)
+            ids, valid = exact_page4_support(q, host_key, scale=self.scaling, chunk_size=self._exact_chunk_size)
+        else:
+            group_heads = self.num_attention_heads // self.num_key_value_heads
+            projector = self._routing_projector
+            codes = torch.einsum('bhqd,hdr->bhqr', q.float(), projector.float())
+            codes = codes[:, :, 0].reshape(batch, self.num_key_value_heads, group_heads, -1)
+            sidecar = past_key_values.sidecars[self.layer_idx]
+            scores = (codes @ sidecar.float().transpose(-1, -2)) * self.scaling
+            ids, valid = page_support(scores, budget=BUDGET, page_size=PAGE_SIZE, pinned=PINNED_PAGES)
         output = _selected_attention(q, host_key, v, ids, valid, self.scaling,
                                      past_key_values, self.layer_idx)
         selected_mean = float(valid.sum(-1).float().mean())
+        old_statistics = past_key_values.statistics.get(self.layer_idx, {})
         past_key_values.statistics[self.layer_idx] = dict(
             selected_tokens_mean=selected_mean, sink_tokens=PAGE_SIZE*PINNED_PAGES, recent_tokens=64,
             token_budget=BUDGET, page_size=PAGE_SIZE, pinned_pages=PINNED_PAGES, exact_key_storage='pinned_cpu',
             routing_sidecar_storage='cuda', value_storage='cuda',
             exact_key_bytes_fetched_mean=selected_mean*self.head_dim*2)
+        if exact:
+            count = valid.sum(-1)
+            assert int(count.max()) <= 2112
+            past_key_values.statistics[self.layer_idx].update(
+                score_method='exact_full_dimensional_qk_fp32',
+                exact_key_storage='cuda' if host_key.is_cuda else 'pinned_cpu',
+                routing_sidecar_storage='unused', score_chunk_size=self._exact_chunk_size,
+                maximum_support=max(old_statistics.get('maximum_support', 0), int(count.max())),
+                minimum_support=min(old_statistics.get('minimum_support', 2112), int(count.min())),
+                decode_steps=old_statistics.get('decode_steps', 0)+1,
+                key_tokens_scanned=old_statistics.get('key_tokens_scanned', 0)+host_key.shape[2],
+                exact_key_bytes_fetched_mean=0 if host_key.is_cuda else host_key.shape[2]*self.head_dim*2)
     else:
-        past_key_values.sidecars[self.layer_idx] = current
+        if not exact:
+            past_key_values.sidecars[self.layer_idx] = current
         k, v = past_key_values.update(k, v, self.layer_idx)
         output = runtime.compressed_v_prefill_attention(q, k, v, scale=self.scaling)
         _offload_prefill_key(past_key_values, self.layer_idx, k)
