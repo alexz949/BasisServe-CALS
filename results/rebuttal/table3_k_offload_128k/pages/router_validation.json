@@ -1,0 +1,427 @@
+{
+  "status": "passed",
+  "gpu": "NVIDIA L40S",
+  "torch": "2.13.0+cu126",
+  "builds": {
+    "1": {
+      "anchors_found": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "anchors_expected": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "4": {
+      "anchors_found": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "anchors_expected": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "8": {
+      "anchors_found": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "anchors_expected": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "16": {
+      "anchors_found": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "anchors_expected": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "32": {
+      "anchors_found": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "anchors_expected": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "page_scores": [
+    {
+      "length": 1000,
+      "page_size": 4,
+      "max_abs_difference_from_token_scores": 2.384185791015625e-07,
+      "bitwise_equal_to_archived": null
+    },
+    {
+      "length": 1000,
+      "page_size": 8,
+      "max_abs_difference_from_token_scores": 4.76837158203125e-07,
+      "bitwise_equal_to_archived": null
+    },
+    {
+      "length": 1000,
+      "page_size": 16,
+      "max_abs_difference_from_token_scores": 4.76837158203125e-07,
+      "bitwise_equal_to_archived": null
+    },
+    {
+      "length": 1000,
+      "page_size": 32,
+      "max_abs_difference_from_token_scores": 4.76837158203125e-07,
+      "bitwise_equal_to_archived": true
+    },
+    {
+      "length": 4113,
+      "page_size": 4,
+      "max_abs_difference_from_token_scores": 2.384185791015625e-07,
+      "bitwise_equal_to_archived": null
+    },
+    {
+      "length": 4113,
+      "page_size": 8,
+      "max_abs_difference_from_token_scores": 4.76837158203125e-07,
+      "bitwise_equal_to_archived": null
+    },
+    {
+      "length": 4113,
+      "page_size": 16,
+      "max_abs_difference_from_token_scores": 4.76837158203125e-07,
+      "bitwise_equal_to_archived": null
+    },
+    {
+      "length": 4113,
+      "page_size": 32,
+      "max_abs_difference_from_token_scores": 4.76837158203125e-07,
+      "bitwise_equal_to_archived": true
+    },
+    {
+      "length": 24518,
+      "page_size": 4,
+      "max_abs_difference_from_token_scores": 3.5762786865234375e-07,
+      "bitwise_equal_to_archived": null
+    },
+    {
+      "length": 24518,
+      "page_size": 8,
+      "max_abs_difference_from_token_scores": 4.76837158203125e-07,
+      "bitwise_equal_to_archived": null
+    },
+    {
+      "length": 24518,
+      "page_size": 16,
+      "max_abs_difference_from_token_scores": 4.76837158203125e-07,
+      "bitwise_equal_to_archived": null
+    },
+    {
+      "length": 24518,
+      "page_size": 32,
+      "max_abs_difference_from_token_scores": 7.152557373046875e-07,
+      "bitwise_equal_to_archived": true
+    }
+  ],
+  "selection": [
+    {
+      "pattern": "random",
+      "historical": 2100,
+      "page_size": 4,
+      "pages": 525,
+      "selected_pages": 496,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "random",
+      "historical": 2100,
+      "page_size": 8,
+      "pages": 263,
+      "selected_pages": 248,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "random",
+      "historical": 2100,
+      "page_size": 16,
+      "pages": 132,
+      "selected_pages": 124,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "random",
+      "historical": 2100,
+      "page_size": 32,
+      "pages": 66,
+      "selected_pages": 62,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true,
+      "equal_to_archived_selector": true
+    },
+    {
+      "pattern": "random",
+      "historical": 24518,
+      "page_size": 4,
+      "pages": 6130,
+      "selected_pages": 496,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "random",
+      "historical": 24518,
+      "page_size": 8,
+      "pages": 3065,
+      "selected_pages": 248,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "random",
+      "historical": 24518,
+      "page_size": 16,
+      "pages": 1533,
+      "selected_pages": 124,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "random",
+      "historical": 24518,
+      "page_size": 32,
+      "pages": 767,
+      "selected_pages": 62,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true,
+      "equal_to_archived_selector": true
+    },
+    {
+      "pattern": "random",
+      "historical": 130129,
+      "page_size": 4,
+      "pages": 32533,
+      "selected_pages": 496,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "random",
+      "historical": 130129,
+      "page_size": 8,
+      "pages": 16267,
+      "selected_pages": 248,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "random",
+      "historical": 130129,
+      "page_size": 16,
+      "pages": 8134,
+      "selected_pages": 124,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "random",
+      "historical": 130129,
+      "page_size": 32,
+      "pages": 4067,
+      "selected_pages": 62,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true,
+      "equal_to_archived_selector": true
+    },
+    {
+      "pattern": "clustered",
+      "historical": 130129,
+      "page_size": 4,
+      "pages": 32533,
+      "selected_pages": 496,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "clustered",
+      "historical": 130129,
+      "page_size": 8,
+      "pages": 16267,
+      "selected_pages": 248,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "clustered",
+      "historical": 130129,
+      "page_size": 16,
+      "pages": 8134,
+      "selected_pages": 124,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true
+    },
+    {
+      "pattern": "clustered",
+      "historical": 130129,
+      "page_size": 32,
+      "pages": 4067,
+      "selected_pages": 62,
+      "pages_missing_from_reference_top_k": 0,
+      "relative_score_gap_of_last_selected": 0.0,
+      "ascending": true,
+      "support_matches_selected_pages": true,
+      "ties_take_lowest_pages": true,
+      "equal_to_archived_selector": true
+    }
+  ],
+  "per_layer_call_timing": [
+    {
+      "router": "archived",
+      "page_size": 32,
+      "historical": 130129,
+      "page_scores_ms": 0.3433634154498577,
+      "selection_ms": 0.019334634416736662
+    },
+    {
+      "router": "general",
+      "page_size": 4,
+      "historical": 130129,
+      "page_scores_ms": 0.40085709013510495,
+      "selection_ms": 0.031066100345924497
+    },
+    {
+      "router": "general",
+      "page_size": 8,
+      "historical": 130129,
+      "page_scores_ms": 0.3952289401786402,
+      "selection_ms": 0.014616474509239197
+    },
+    {
+      "router": "general",
+      "page_size": 16,
+      "historical": 130129,
+      "page_scores_ms": 0.395254495088011,
+      "selection_ms": 0.011490474571473897
+    },
+    {
+      "router": "general",
+      "page_size": 32,
+      "historical": 130129,
+      "page_scores_ms": 0.35635900509078056,
+      "selection_ms": 0.01136747479904443
+    }
+  ],
+  "timing_scope": "Wall time of one call for one layer (8 KV heads) into preallocated outputs; selection time excludes restoring its input"
+}

@@ -1,0 +1,104 @@
+{
+  "phase": "formal",
+  "contexts": [
+    130048
+  ],
+  "cohorts": [
+    0,
+    1,
+    2
+  ],
+  "created_utc": "2026-11-09T19:57:56.873757+00:00",
+  "trials": [
+    {
+      "context": 130048,
+      "cohort": 0,
+      "mode": "steady",
+      "arm": "dense_resident",
+      "page_size": null
+    },
+    {
+      "context": 130048,
+      "cohort": 0,
+      "mode": "steady",
+      "arm": "basis_resident",
+      "page_size": null
+    },
+    {
+      "context": 130048,
+      "cohort": 0,
+      "mode": "steady",
+      "arm": "basis_resident_nobase",
+      "page_size": null
+    },
+    {
+      "context": 130048,
+      "cohort": 0,
+      "mode": "steady",
+      "arm": "basis_k_offload_nobase",
+      "page_size": null
+    },
+    {
+      "context": 130048,
+      "cohort": 1,
+      "mode": "steady",
+      "arm": "dense_resident",
+      "page_size": null
+    },
+    {
+      "context": 130048,
+      "cohort": 1,
+      "mode": "steady",
+      "arm": "basis_resident",
+      "page_size": null
+    },
+    {
+      "context": 130048,
+      "cohort": 1,
+      "mode": "steady",
+      "arm": "basis_resident_nobase",
+      "page_size": null
+    },
+    {
+      "context": 130048,
+      "cohort": 1,
+      "mode": "steady",
+      "arm": "basis_k_offload_nobase",
+      "page_size": null
+    },
+    {
+      "context": 130048,
+      "cohort": 2,
+      "mode": "steady",
+      "arm": "dense_resident",
+      "page_size": null
+    },
+    {
+      "context": 130048,
+      "cohort": 2,
+      "mode": "steady",
+      "arm": "basis_resident",
+      "page_size": null
+    },
+    {
+      "context": 130048,
+      "cohort": 2,
+      "mode": "steady",
+      "arm": "basis_resident_nobase",
+      "page_size": null
+    },
+    {
+      "context": 130048,
+      "cohort": 2,
+      "mode": "steady",
+      "arm": "basis_k_offload_nobase",
+      "page_size": null
+    }
+  ],
+  "command": "/home/yl1139/miniforge3/envs/basis213/bin/python benchmarks/system/run_table3_k_offload.py --phase formal",
+  "environment": "basis213",
+  "launch_git_commit": "d17d1cca0e63ca3291533707f0c28d6c8a064d8e",
+  "runtime_manifest": "../../runtime_manifest.json",
+  "driver": "bench_table3_k_offload.py",
+  "protocol": "Archived Table 3 steady decode: same-shape warmup request, fresh state, full prefill, 16 conditioning and 128 measured decode steps (2 and 4 in smoke); token selection is outside the timed step"
+}

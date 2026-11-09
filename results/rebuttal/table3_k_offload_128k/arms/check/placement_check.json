@@ -1,0 +1,44 @@
+[
+  {
+    "reference": "basis_resident_nobase",
+    "candidate": "basis_k_offload_nobase",
+    "context_tokens": 130048,
+    "cohort": 0,
+    "forced_steps": 16,
+    "same_forced_tokens": true,
+    "same_prompt": true,
+    "cache_tokens_match": true,
+    "steps_with_identical_support": 16,
+    "steps_with_bitwise_identical_selected_keys": 16,
+    "cache_identical": {
+      "key": true,
+      "value": true,
+      "residual": true
+    },
+    "attention_max_abs_difference": 0.0,
+    "logits_max_abs_difference": 0.0,
+    "logits_mean_abs_difference": 0.0,
+    "argmax_agreement": 1.0
+  },
+  {
+    "reference": "basis_resident",
+    "candidate": "basis_resident_nobase",
+    "context_tokens": 130048,
+    "cohort": 0,
+    "forced_steps": 16,
+    "same_forced_tokens": true,
+    "same_prompt": true,
+    "cache_tokens_match": true,
+    "steps_with_identical_support": 0,
+    "steps_with_bitwise_identical_selected_keys": 0,
+    "cache_identical": {
+      "key": false,
+      "value": false,
+      "residual": false
+    },
+    "attention_max_abs_difference": 5.40234375,
+    "logits_max_abs_difference": 0.671875,
+    "logits_mean_abs_difference": 0.05681471526622772,
+    "argmax_agreement": 1.0
+  }
+]

@@ -29,8 +29,18 @@ def prepare_runtime(output):
     runtime = output / "runtime"
     runtime.mkdir(parents=True, exist_ok=True)
     members = []
+    factors = output / "factors"
+    with tarfile.open(ARCHIVE / "freeze/factors.tar.gz") as archive:
+        archive.extractall(factors, filter="data")
+    # The archived sources name the original host's model cache and factor directory.
+    relocated = {
+        "/workspace/.cache/huggingface/hub": str(Path.home() / ".cache/huggingface/hub"),
+        "/workspace/runs/l31-router-source/v128-router": str(factors),
+    }
 
     def preserve(name, data):
+        for original, local in relocated.items():
+            data = data.replace(original.encode(), local.encode())
         destination = runtime / name
         assert destination.resolve().is_relative_to(runtime.resolve())
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -54,9 +64,11 @@ def prepare_runtime(output):
     write_json(output / "runtime_manifest.json", dict(
         source_archive=str((ARCHIVE / "freeze/dependencies.tar.gz").relative_to(ROOT)),
         formal_driver_archive=str((ARCHIVE / "formal/source").relative_to(ROOT)),
-        archived_provenance=frozen, runtime_source_files=members,
-        source_policy="Byte-exact copies from archived formal full-scan runtime, not current dirty source",
-        validation="Direct bytes; no SHA256 checks"))
+        factor_archive=str((ARCHIVE / "freeze/factors.tar.gz").relative_to(ROOT)),
+        archived_provenance=frozen, runtime_source_files=members, relocated_paths=relocated,
+        source_policy="Archived formal full-scan runtime, not current dirty source; "
+                      "only the model-cache and factor-directory paths are relocated",
+        validation="Direct bytes after path relocation; no SHA256 checks"))
     prompt_source = ARCHIVE / "inputs/prompts.safetensors"
     prompts = output / "prompts.safetensors"
     if prompts.exists():
@@ -151,7 +163,7 @@ def main():
                 print(json.dumps({k: v for k, v in outcome.items() if k != "command"}), flush=True)
                 assert outcome["status"] == "complete", outcome
     prepare_runtime(output)
-    write_json(phase / "source_check.json", dict(status="passed", compared="direct bytes against archive"))
+    write_json(phase / "source_check.json", dict(status="passed", compared="direct bytes against archive after path relocation"))
     print(json.dumps(dict(phase=args.phase, completed=len(outcomes))), flush=True)
 
 
