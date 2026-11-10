@@ -1,0 +1,534 @@
+{
+  "format": "basisserve.uniform_c1_als.v1",
+  "compression": {
+    "allocation": "uniform_per_layer_per_head",
+    "rank": 64,
+    "key_cache": "dense",
+    "value_cache": "low_rank"
+  },
+  "model": {
+    "config_sha256": "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "huggingface_repo": "meta-llama/Llama-3.1-8B-Instruct"
+  },
+  "source": {
+    "huggingface_repo": "alexz949/BasisServe-CALS",
+    "revision": "63a35906f354cc239339465db97fab136ccdb1de",
+    "path": "ICLR-results/llama31-8b-instruct/c1/factor-banks/R64-S6-D0",
+    "note": "Uniform R64 factor bank used by the paper TP8 Figure 3 benchmark; manifest written locally on 2026-11-09 for the vLLM joint-ALS loader"
+  },
+  "layers": [
+    {
+      "layer": 0,
+      "file": "layer_000.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "3e6be36c7ab0fac90e3b88fb9ab3d617f1cf760cccb5a84bb19d2fcc61f3b6c2",
+      "bytes": 16908488
+    },
+    {
+      "layer": 1,
+      "file": "layer_001.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "4a0a433e8f3b243716647d458047a17aea3af41c0849bcd59d8744e6982f4e9e",
+      "bytes": 16908488
+    },
+    {
+      "layer": 2,
+      "file": "layer_002.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "25850d34782ca4e02fcca2da6e248658402a29bc9d7e6b76ae876b43d2055df8",
+      "bytes": 16908488
+    },
+    {
+      "layer": 3,
+      "file": "layer_003.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "4501070c19b3b39780ca998d54dde7cbdf9ed93972e08359a83c093817481ae3",
+      "bytes": 16908488
+    },
+    {
+      "layer": 4,
+      "file": "layer_004.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "3b00fbe769465c7dcd0c4fa099f4c7edda86728ecdf6a68cd4e3411ec6b02342",
+      "bytes": 16908488
+    },
+    {
+      "layer": 5,
+      "file": "layer_005.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "6fbfd8126428e2c6c656574551bda5c090b52915bf32dae16a52069558a26992",
+      "bytes": 16908488
+    },
+    {
+      "layer": 6,
+      "file": "layer_006.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "1a9b32073202f2a4a35a9cfddbf10f32f5be1f5a075e30da90211c24ec5892c0",
+      "bytes": 16908488
+    },
+    {
+      "layer": 7,
+      "file": "layer_007.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "1b393085f52e9df1c748e0c5c073253808b6ce9018c1a2509208eb13d4c25904",
+      "bytes": 16908488
+    },
+    {
+      "layer": 8,
+      "file": "layer_008.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "29922cbbe01ffced15104a33b3a660b45df77f4d4dc360dad0f91e4c5d7abf32",
+      "bytes": 16908488
+    },
+    {
+      "layer": 9,
+      "file": "layer_009.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "da8b71317f14c6c59fa9aad9380624fe63080a72db089b67a212a3b2570dc644",
+      "bytes": 16908488
+    },
+    {
+      "layer": 10,
+      "file": "layer_010.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "978b46b00d77475bee0297fb0079172aaf9b366ec9c2ea87c74e7e9a1067d371",
+      "bytes": 16908488
+    },
+    {
+      "layer": 11,
+      "file": "layer_011.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "75d76b742335801ee5d5871586be8adf72249e3ce03dfc2f929786a2157d1656",
+      "bytes": 16908488
+    },
+    {
+      "layer": 12,
+      "file": "layer_012.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "d3cc76efc02889468f8222df5b090e487e881bc8852ff113eab826d46e57c94a",
+      "bytes": 16908488
+    },
+    {
+      "layer": 13,
+      "file": "layer_013.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "929f88456432f8e03c43b008f150e4cb0224bca26815074ac546dac5c79e2c15",
+      "bytes": 16908488
+    },
+    {
+      "layer": 14,
+      "file": "layer_014.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "4dcef772026ecc70259fb7381c067a21127233310d59ca3e79ab4c3ae5836c2f",
+      "bytes": 16908488
+    },
+    {
+      "layer": 15,
+      "file": "layer_015.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "729b47baad11958e9cbdebe4d2c5f570cb59d3159ca2fb9e5a3c207126b8715f",
+      "bytes": 16908488
+    },
+    {
+      "layer": 16,
+      "file": "layer_016.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "6e48eb32b9f98039df593e34e216160139f1c96dd94f2f7875022d8ddd24c3fc",
+      "bytes": 16908488
+    },
+    {
+      "layer": 17,
+      "file": "layer_017.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "9077a86c5b9518d4c07bdd39aa2d92689550d85d5eb8a7b73db75c154525d38b",
+      "bytes": 16908488
+    },
+    {
+      "layer": 18,
+      "file": "layer_018.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "b5025fe63c285e42c257d5b874d834e3e7e4470d4745e60ac174b9e37778816e",
+      "bytes": 16908488
+    },
+    {
+      "layer": 19,
+      "file": "layer_019.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "12d1ab5380977ab1d46780b66b9c129729251890f142ebff774b470072476de1",
+      "bytes": 16908488
+    },
+    {
+      "layer": 20,
+      "file": "layer_020.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "1978be989c0a27f9e630377c688282b6012e3d8877c4ae38fc630988acc5fa60",
+      "bytes": 16908488
+    },
+    {
+      "layer": 21,
+      "file": "layer_021.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "5e2b73e671a56364b8a55aa3da096191b347065fac1a1ec4f136ee6364d5efb7",
+      "bytes": 16908488
+    },
+    {
+      "layer": 22,
+      "file": "layer_022.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "bc065862d824ceb9bb7c8d1ff8974d6448484b7e34c55ff47b45acdf998ca824",
+      "bytes": 16908488
+    },
+    {
+      "layer": 23,
+      "file": "layer_023.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "0c02c9c571eb99b18dbbc507e539532bcbcbae26a9069333df821832ae40a549",
+      "bytes": 16908488
+    },
+    {
+      "layer": 24,
+      "file": "layer_024.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "dc977dc0fea91265a0692a11caf189440980c2bb068c6ebecc82cb7825595caf",
+      "bytes": 16908488
+    },
+    {
+      "layer": 25,
+      "file": "layer_025.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "830b20f3e436b9da3efcf7c319216d844616468a506e24a05ad7413eaf0fb825",
+      "bytes": 16908488
+    },
+    {
+      "layer": 26,
+      "file": "layer_026.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "ac886a12ab4642322f4ca7aa90dfd0c49f8e4103c2fac43f2ddc0cd0664f5b71",
+      "bytes": 16908488
+    },
+    {
+      "layer": 27,
+      "file": "layer_027.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "ab395c8e85e52aa88960d5f97e6a26bcf11c33e914d4fab4668065dcdd067867",
+      "bytes": 16908488
+    },
+    {
+      "layer": 28,
+      "file": "layer_028.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "d874b06f6109e633115e94141ae0435bc3e7e9367a0dad9a17edd13022c39c7a",
+      "bytes": 16908488
+    },
+    {
+      "layer": 29,
+      "file": "layer_029.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "24f788cae9a65fc37b5c8f58a5f0b308383d6e715b276f6eb6809ed64bc0668c",
+      "bytes": 16908488
+    },
+    {
+      "layer": 30,
+      "file": "layer_030.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "59b7cef09e3180ffd00bc4e495c0414043430b2d91ecb91fc758f031387afbfe",
+      "bytes": 16908488
+    },
+    {
+      "layer": 31,
+      "file": "layer_031.safetensors",
+      "ranks": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "sha256": "33cdf29a9d456311c310db2bb9226c110588d1a4de22d83c3f20bed9706171ed",
+      "bytes": 16908488
+    }
+  ]
+}

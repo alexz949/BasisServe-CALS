@@ -2,12 +2,13 @@
 # PaLU G-LRD4 TP4 deployment grid: Dense, BasisKV V96/V64, PaLU-A and PaLU-B at R96/R64.
 # Usage: run_palu_g4_grid.sh <phase smoke|formal> <graph full|eager> [arm ...]
 # GRID_BATCHES overrides the formal batch list; GRID_ROOT overrides the phase directory (other hardware).
+# BASIS_ARTIFACTS and BENCH_MODEL relocate the assets (see launch_vllm_bench.sh).
 # Each cell is one fresh vLLM process (warmup trial plus three repetitions inside it); cells
 # whose summary.json is already complete are skipped so a stopped grid can resume.
 set -u
-cd /zpool-00/home/yl1139/BasisServe-CALS
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 phase=$1; graph=$2; shift 2
-checkpoints=/home/yl1139/basis_artifacts/checkpoints
+checkpoints=${BASIS_ARTIFACTS:-/home/yl1139/basis_artifacts}/checkpoints
 declare -A arm_of=(
     [dense]=dense [basis_v96]=als_full [basis_v64]=als_full
     [palu_g4_r96]=palu_g4 [palu_g4_r64]=palu_g4

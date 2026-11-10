@@ -21,8 +21,8 @@ from safetensors import safe_open
 from safetensors.torch import load_file, save_file
 
 PROMPT, TAIL, CONTINUATION = 512, 32, 32
-MODEL = Path("/home/yl1139/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct"
-             "/snapshots/0e9e39f249a16976918f6564b8830bc894c89659")
+MODEL = Path(os.environ.get("BENCH_MODEL", "/home/yl1139/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct"
+                                           "/snapshots/0e9e39f249a16976918f6564b8830bc894c89659"))
 
 
 def windows(path, count):

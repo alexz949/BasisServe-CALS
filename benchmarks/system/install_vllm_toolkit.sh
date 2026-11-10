@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
-toolkit=/home/yl1139/basis_artifacts/cuda/12.9
-downloads=/home/yl1139/basis_artifacts/cuda/downloads
+artifacts=${BASIS_ARTIFACTS:-/home/yl1139/basis_artifacts}
+toolkit=$artifacts/cuda/12.9
+downloads=$artifacts/cuda/downloads
 mkdir -p "$toolkit" "$downloads"
 while read -r component version digest; do
     archive="$component-linux-x86_64-$version-archive.tar.xz"
