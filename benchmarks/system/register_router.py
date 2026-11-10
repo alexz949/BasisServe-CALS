@@ -4,7 +4,7 @@ from torch.utils.cpp_extension import load
 from benchmarks.system.local_kernel_candidates import write_source
 
 
-def compile_register(root, rank, warps):
+def compile_register(root, rank, warps, *, value_dim=80):
     src = Path('basisserve/kernels/csrc')
     text = (src/'conditional_router_page32.cu').read_text()
     if warps:
@@ -20,8 +20,8 @@ def compile_register(root, rank, warps):
     write_source(folder/'conditional_router_page32.cu',text)
     for name in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu']:
         write_source(folder/name,(src/name).read_text())
-    return load(name=f'register_router_b{rank}_w{warps}',
+    return load(name=f'register_router_v{value_dim}_b{rank}_w{warps}',
         sources=[str(folder/name) for name in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],
         extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','--ptxas-options=-v',
-            '-DBASIS_VALUE_DIM=80','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32',
+            f'-DBASIS_VALUE_DIM={value_dim}','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32',
             f'-DBASIS_BASE_RANK={rank}',f'-DBASIS_RESIDUAL_RANK={rank}',f'-DREGISTER_WARPS={warps}'])

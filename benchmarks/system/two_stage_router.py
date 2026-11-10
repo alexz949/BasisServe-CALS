@@ -92,8 +92,8 @@ def candidates(scores,historical):
     return group.topk(512,dim=-1,sorted=False).indices.sort(dim=-1).values
 
 
-def compile_fine(root):
-    full=compile_register(root/'full',16,8)
+def compile_fine(root, *, value_dim=128):
+    full=compile_register(root/'full',16,8,value_dim=value_dim)
     folder=root/'fine';folder.mkdir(parents=True,exist_ok=True)
     src=root/'full/b16_w8'
     text=(src/'conditional_router_page32.cu').read_text()
@@ -117,5 +117,5 @@ def compile_fine(root):
     cpp=cpp.replace('pybind11::arg("query_code_prepared"));','pybind11::arg("query_code_prepared"), pybind11::arg("ids"));')
     write_source(folder/'mapped_host_paged_attention.cpp',cpp)
     write_source(folder/'mapped_host_paged_attention.cu',(src/'mapped_host_paged_attention.cu').read_text())
-    fine=load(name='two_stage_b16_w8',sources=[str(folder/n) for n in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math','-DBASIS_VALUE_DIM=128','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32','-DBASIS_BASE_RANK=16','-DBASIS_RESIDUAL_RANK=16','-DREGISTER_WARPS=8','-DBASIS_DISABLE_REGISTER_ROUTER'])
+    fine=load(name=f'two_stage_v{value_dim}_b16_w8',sources=[str(folder/n) for n in ['mapped_host_paged_attention.cpp','mapped_host_paged_attention.cu','conditional_router_page32.cu']],extra_cflags=['-O3','-std=c++17'],extra_cuda_cflags=['-O3','-std=c++17','--use_fast_math',f'-DBASIS_VALUE_DIM={value_dim}','-DBASIS_GQA=4','-DBASIS_PAGE_SIZE=32','-DBASIS_BASE_RANK=16','-DBASIS_RESIDUAL_RANK=16','-DREGISTER_WARPS=8','-DBASIS_DISABLE_REGISTER_ROUTER'])
     return full,fine

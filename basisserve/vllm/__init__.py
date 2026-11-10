@@ -24,6 +24,24 @@ def register() -> None:
             "basisserve.vllm.qwen3_nuq4:BasisServeQwen3NUQ4ForCausalLM",
         )
 
+    if "BasisServeLlamaJointALSForCausalLM" not in ModelRegistry.get_supported_archs():
+        ModelRegistry.register_model(
+            "BasisServeLlamaJointALSForCausalLM",
+            "basisserve.vllm.llama_joint_als:BasisServeLlamaJointALSForCausalLM",
+        )
+
+    if "BasisServeLlamaPaluG4ForCausalLM" not in ModelRegistry.get_supported_archs():
+        ModelRegistry.register_model(
+            "BasisServeLlamaPaluG4ForCausalLM",
+            "basisserve.vllm.llama_palu_g4:BasisServeLlamaPaluG4ForCausalLM",
+        )
+
+    if "BasisServeLlamaPaluG4ShardedForCausalLM" not in ModelRegistry.get_supported_archs():
+        ModelRegistry.register_model(
+            "BasisServeLlamaPaluG4ShardedForCausalLM",
+            "basisserve.vllm.llama_palu_g4:BasisServeLlamaPaluG4ShardedForCausalLM",
+        )
+
     if QWEN3_32B_TP8_C1_MODEL_ARCHITECTURE not in ModelRegistry.get_supported_archs():
         ModelRegistry.register_model(
             QWEN3_32B_TP8_C1_MODEL_ARCHITECTURE,
