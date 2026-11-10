@@ -1,0 +1,62 @@
+[
+  {
+    "arm": "dense",
+    "batch": 32,
+    "ranks": 4,
+    "steps": 32,
+    "profiled_step_p50_ms": 45.96921196207404,
+    "gpu_ms_per_step": 38.6796875,
+    "nccl_ms_per_step_each_rank": [
+      20.20778125,
+      27.09171875,
+      24.072375,
+      29.2045
+    ],
+    "nccl_allreduce_ms_per_step": 20.716796875,
+    "nccl_allgather_ms_per_step": 4.427296875,
+    "nccl_other_ms_per_step": 0.0,
+    "attention_ms_per_step": 6.6292109375,
+    "gemm_ms_per_step": 6.18246875,
+    "other_ms_per_step": 0.7239140624999827
+  },
+  {
+    "arm": "palu_g4_r96",
+    "batch": 32,
+    "ranks": 4,
+    "steps": 32,
+    "profiled_step_p50_ms": 42.594306520186365,
+    "gpu_ms_per_step": 39.3984375,
+    "nccl_ms_per_step_each_rank": [
+      22.8510625,
+      21.6290625,
+      22.27490625,
+      22.66534375
+    ],
+    "nccl_allreduce_ms_per_step": 18.055570312500002,
+    "nccl_allgather_ms_per_step": 4.2995234374999995,
+    "nccl_other_ms_per_step": 0.0,
+    "attention_ms_per_step": 9.3927734375,
+    "gemm_ms_per_step": 7.0268515625,
+    "other_ms_per_step": 0.623718750000009
+  },
+  {
+    "arm": "palu_g4_sharded_r96",
+    "batch": 32,
+    "ranks": 4,
+    "steps": 32,
+    "profiled_step_p50_ms": 110.40262249298394,
+    "gpu_ms_per_step": 106.5078125,
+    "nccl_ms_per_step_each_rank": [
+      87.4659375,
+      86.1994375,
+      86.87775,
+      87.54928125
+    ],
+    "nccl_allreduce_ms_per_step": 37.5208203125,
+    "nccl_allgather_ms_per_step": 49.502281249999996,
+    "nccl_other_ms_per_step": 0.0,
+    "attention_ms_per_step": 11.410546875,
+    "gemm_ms_per_step": 6.9762421875000005,
+    "other_ms_per_step": 1.0979218750000612
+  }
+]
