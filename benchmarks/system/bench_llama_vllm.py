@@ -86,7 +86,7 @@ def main():
         args.graph = "eager"
     assert Path(sys.prefix).name == "basis"
     assert os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] == "0"
-    assert os.environ["NCCL_P2P_DISABLE"] == "1"
+    assert os.environ["NCCL_P2P_DISABLE"] in ("0", "1")
     assert os.environ["NVIDIA_TF32_OVERRIDE"] == "0"
     assert torch.cuda.device_count() == args.tp
     assert args.batch > 0 and args.prompt in (4096, 16384, 65536, 130048)
@@ -159,7 +159,7 @@ def main():
         timing_scope="in-process vLLM scheduler/engine, multiprocessing TP workers; no tokenizer, detokenizer or network",
         request_boundary="common monotonic release before first scheduler step, native first/last token timestamps",
         decode_boundary="all requests fully prefilled before conditioning; one native scheduler step emits B tokens",
-        nccl_p2p_disabled=True, host_key_pool_limit_per_rank=40 * 1024**3,
+        nccl_p2p_disabled=os.environ["NCCL_P2P_DISABLE"] == "1", host_key_pool_limit_per_rank=40 * 1024**3,
         model_loaded_memory=None,
     )
     write(args.output / "config.json", metadata)

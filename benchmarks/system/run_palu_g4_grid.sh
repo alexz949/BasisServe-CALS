@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # PaLU G-LRD4 TP4 deployment grid: Dense, BasisKV V96/V64, PaLU-A and PaLU-B at R96/R64.
 # Usage: run_palu_g4_grid.sh <phase smoke|formal> <graph full|eager> [arm ...]
-# GRID_BATCHES overrides the formal batch list; GRID_ROOT overrides the phase directory (other hardware).
+# GRID_BATCHES overrides the formal batch list; GRID_EXPERIMENTS the formal experiment list (default "request decode"); GRID_ROOT overrides the phase directory (other hardware).
 # BASIS_ARTIFACTS and BENCH_MODEL relocate the assets (see launch_vllm_bench.sh).
 # Each cell is one fresh vLLM process (warmup trial plus three repetitions inside it); cells
 # whose summary.json is already complete are skipped so a stopped grid can resume.
@@ -21,7 +21,7 @@ declare -A factors_of=(
     [palu_g4_sharded_r96]=$checkpoints/palu_g4/L31-8B-I-PALUG4-R96
     [palu_g4_sharded_r64]=$checkpoints/palu_g4/L31-8B-I-PALUG4-R64)
 arms=("$@"); [[ ${#arms[@]} == 0 ]] && arms=(dense basis_v96 basis_v64 palu_g4_r96 palu_g4_r64 palu_g4_sharded_r96 palu_g4_sharded_r64)
-if [[ $phase == smoke ]]; then batches=(32); experiments=(request); extra=(--smoke); else read -r -a batches <<< "${GRID_BATCHES:-32 64 128}"; experiments=(request decode); extra=(); fi
+if [[ $phase == smoke ]]; then batches=(32); experiments=(request); extra=(--smoke); else read -r -a batches <<< "${GRID_BATCHES:-32 64 128}"; read -r -a experiments <<< "${GRID_EXPERIMENTS:-request decode}"; extra=(); fi
 root=${GRID_ROOT:-results/rebuttal/v2q8_palu_g4_tp4/$phase}/$graph
 mkdir -p "$root"
 echo "grid start $(date -u +%FT%TZ) node=${SLURMD_NODENAME:-?} physical_gpus=${SLURM_STEP_GPUS:-${SLURM_JOB_GPUS:-?}} phase=$phase graph=$graph arms=${arms[*]}"

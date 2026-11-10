@@ -26,7 +26,7 @@ done
 test "${#selected_gpus[@]}" = "$tp_size"
 export CUDA_VISIBLE_DEVICES
 CUDA_VISIBLE_DEVICES=$(IFS=,; echo "${selected_gpus[*]}")
-export NCCL_P2P_DISABLE=1 NVIDIA_TF32_OVERRIDE=0 OMP_NUM_THREADS=2
+export NCCL_P2P_DISABLE=${NCCL_P2P_DISABLE:-1} NVIDIA_TF32_OVERRIDE=0 OMP_NUM_THREADS=2
 export VLLM_WORKER_MULTIPROC_METHOD=spawn VLLM_ENABLE_V1_MULTIPROCESSING=0 HF_HUB_OFFLINE=1
 export CUDA_HOME="$artifacts/cuda/12.9"
 export PATH="$CUDA_HOME/bin:$artifacts/envs/vllm/basis/bin:$PATH"
