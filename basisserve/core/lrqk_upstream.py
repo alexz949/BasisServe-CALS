@@ -1,12 +1,12 @@
 """The upstream LRQK runtime (tenghuilee/LRQK@caf16293: load_model_hack + DynamicLRQKCache +
 LightAttentionIndicesOffloadPrefill), imported from external/LRQK without edits, with one requested placement
-deviation: Values stay on the GPU.
+deviation: Values stay on the GPU. Both placements order prefill cache parking after its producer and record
+the source tensors on the copy stream; the upstream parking method omits these stream dependencies.
 
 Upstream keeps the exact K and V of every token in one pinned CPU pool (AutoIncreaseTensorSharedKV, K and V
 concatenated) and fetches missed K and V into the GPU hit cache. The V2Q8 design offloads Keys only:
   * SplitKV takes the pool's place with the interface the factory uses (append(k, v), .data): Keys in an
-    upstream AutoIncreaseTensor in pinned host memory, Values in an upstream AutoIncreaseTensor on the GPU, with
-    the pool's capacity and 1.5x growth policy;
+    upstream AutoIncreaseTensor in pinned host memory, Values in an upstream PreAllocatedTensor on the GPU;
   * SplitKV holds the GPU Values in upstream's PreAllocatedTensor at the cache's capacity; the Key pool keeps
     upstream's 1.5x growth policy on the host;
   * KOnlyFactory.decode is upstream LightAttentionIndicesFactory.decode with its miss fetch split. The linear
@@ -46,6 +46,28 @@ def upstream():
         sys.path.insert(0, str(ROOT / "external/LRQK/cpp_kernel"))
     import lrqk_attention
     return lrqk_attention
+
+
+def ordered_offload_prefill():
+    """Upstream cache parking with producer ordering and allocator lifetime tracking."""
+    module = upstream()
+
+    class OrderedOffloadPrefill(module.LightAttentionIndicesOffloadPrefill):
+        def prefill(self, query_states, key_states, value_states):
+            module.LightAttentionIndicesFactory.prefill(self, query_states, key_states, value_states)
+            self.stream_temp = torch.cuda.Stream(query_states.device)
+            self.stream_temp.wait_stream(torch.cuda.current_stream(query_states.device))
+            with torch.cuda.stream(self.stream_temp):
+                self.Kgpu_temp = self.Kgpu.to("cpu", non_blocking=True)
+                self.Vgpu_temp = self.Vgpu.to("cpu", non_blocking=True)
+                self._A_K_data_temp = self._A_K.data.to("cpu", non_blocking=True)
+                for tensor in (self.Kgpu, self.Vgpu, self._A_K.data):
+                    tensor.record_stream(self.stream_temp)
+                self._A_K.data = None
+                self.Kgpu = None
+                self.Vgpu = None
+
+    return OrderedOffloadPrefill
 
 
 def make_classes():
@@ -169,7 +191,7 @@ def make_classes():
 
             return self.Kgpu, self.Vgpu
 
-    class KOnlyOffloadPrefill(module.LightAttentionIndicesOffloadPrefill, KOnlyFactory):
+    class KOnlyOffloadPrefill(ordered_offload_prefill(), KOnlyFactory):
         """Upstream LightAttentionIndicesOffloadPrefill (prefill parking, first-decode restore) over KOnlyFactory."""
 
     return module, SplitKV, KOnlyFactory, KOnlyOffloadPrefill

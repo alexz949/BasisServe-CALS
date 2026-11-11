@@ -80,8 +80,7 @@ ARMS = {
                                         skip_in_get_svd=("gc_collect", "empty_cache")),
     # The upstream LRQK runtime with Values kept on GPU (basisserve/core/lrqk_upstream.py).
     "lrqk_upstream_koff_v128": dict(method="lrqk_upstream", value=128),
-    # The upstream LRQK runtime in its own placement: exact K and V in one pinned host pool (no code of ours in the
-    # cache path).
+    # Upstream LRQK placement: exact K and V in one pinned host pool. Both placements use ordered prefill parking.
     "lrqk_upstream_kvoff_v128": dict(method="lrqk_upstream", value=128, kv_offload=True),
     # The two upstream LRQK runtimes with torch.compile switched off by PyTorch's own switch (the launcher sets
     # TORCH_COMPILE_DISABLE=1, so upstream's decorated solvers and index helper run as plain Python; upstream's
@@ -370,10 +369,10 @@ def build_lrqk_upstream(args, world, timers):
     import torch._dynamo
     assert torch._dynamo.config.disable == (not compiled), "TORCH_COMPILE_DISABLE must match the arm"
     if kv_offload:
-        # Upstream placement: the upstream classes themselves (shared K/V host pool, CPU gather of K and V).
+        # Upstream shared K/V pool and fetch, with the same prefill stream-order fix as K-only offload.
         module = lrqk_upstream.upstream()
         split_kv, k_only = module.AutoIncreaseTensorSharedKV, module.LightAttentionIndicesFactory
-        factory_class = module.LightAttentionIndicesOffloadPrefill
+        factory_class = lrqk_upstream.ordered_offload_prefill()
     else:
         module, split_kv, k_only, factory_class = lrqk_upstream.make_classes()
     options = dict(dtype=torch.bfloat16, attn_implementation="eager", local_files_only=True)
@@ -442,6 +441,7 @@ def build_lrqk_upstream(args, world, timers):
                            "; basisserve/core/lrqk_upstream.py splits the K/V pool (Values on GPU)"),
         lrqk=dict(lrqk_upstream.CONFIG, lambdas=1.0, init="randn"),
         prefill="whole batch in one forward (upstream)", mlp="ChunkedTokenwise(1024) as tp1_offline",
+        prefill_offload_ordering="copy stream waits for producer; source tensors record copy stream",
         tp=None if world == 1 else "HF tensor parallel; local head counts on each attention module")
     return SimpleNamespace(model=model, layers=[], forward=forward, reset=reset, place=lambda: None,
                            prefill_batch=prefill_batch, factories=factories, configuration=configuration,
