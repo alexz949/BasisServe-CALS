@@ -54,7 +54,13 @@ def _flash_attention(
     assert key.shape[1] == value.shape[1]
     batch, query_length, query_heads, head_dim = query.shape
     key_length = int(key.shape[1])
-    assert batch == 1, "paper-faithful TP1 baseline is defined for B1"
+    # Every row has the same query and key length here (upstream ShadowKV/LRQK batches equal-length rows), so the
+    # uniform cu_seqlens below describe the batch exactly; B1 is unchanged.
+    if batch > 1 and any(t.stride(0) != t.shape[1] * t.stride(1) for t in (key, value)):
+        # Decode over per-row cache buffers ([B, H, capacity, D] transposed): flattening rows would copy them every
+        # call, which upstream's flash_attn_with_kvcache does not. Read each row's buffer in place as one paged-KV
+        # block instead (vLLM FA2 block_table path; block size = buffer capacity, a multiple of 16).
+        return _flash_attention_paged(query, key, value, softmax_scale=softmax_scale, causal=causal)
     query_flat = query.reshape(batch * query_length, query_heads, head_dim)
     key_flat = key.reshape(batch * key_length, key.shape[2], head_dim)
     value_flat = value.reshape(batch * key_length, value.shape[2], value.shape[3])
@@ -71,6 +77,52 @@ def _flash_attention(
         softmax_scale=softmax_scale,
         causal=causal,
         window_size=normalized_window,
+        fa_version=2,
+    )
+    return output.reshape(batch, query_length, query_heads, value.shape[-1])
+
+
+_PAGED: dict[tuple[str, int, int, int], tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = {}
+
+
+def _flash_attention_paged(
+    query: torch.Tensor,
+    key: torch.Tensor,
+    value: torch.Tensor,
+    *,
+    softmax_scale: float | None,
+    causal: bool,
+) -> torch.Tensor:
+    from vllm.vllm_flash_attn.flash_attn_interface import flash_attn_varlen_func
+
+    batch, query_length, query_heads, head_dim = query.shape
+    key_length = int(key.shape[1])
+    blocks = []
+    for tensor in (key, value):
+        # [B, L, H, D] view of a [B, H, capacity, D] buffer: rows are contiguous within a head.
+        assert tensor.stride(-1) == 1 and tensor.stride(1) == tensor.shape[-1]
+        capacity = tensor.stride(2) // tensor.stride(1)
+        assert capacity >= key_length and capacity % 16 == 0
+        blocks.append(tensor.as_strided((batch, capacity, tensor.shape[2], tensor.shape[3]), tensor.stride()))
+    cache_key = (str(query.device), batch, query_length, key_length)
+    if cache_key not in _PAGED:
+        _PAGED[cache_key] = (
+            torch.arange(batch, device=query.device, dtype=torch.int32)[:, None],
+            _cu_seqlens(query.device, batch, query_length),
+            torch.full((batch,), key_length, device=query.device, dtype=torch.int32),
+        )
+    block_table, cu_seqlens_q, seqused_k = _PAGED[cache_key]
+    output = flash_attn_varlen_func(
+        query.reshape(batch * query_length, query_heads, head_dim),
+        blocks[0],
+        blocks[1],
+        query_length,
+        cu_seqlens_q,
+        key_length,
+        seqused_k=seqused_k,
+        softmax_scale=softmax_scale,
+        causal=causal,
+        block_table=block_table,
         fa_version=2,
     )
     return output.reshape(batch, query_length, query_heads, value.shape[-1])

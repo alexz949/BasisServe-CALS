@@ -1,0 +1,70 @@
+
+######## exp1 b1_t130048
+
+== basis_koff_v128
+  req c0: request 48.49s  batch_ready 43.54s  ttft_mean 43.54s ttft_max 43.54s placement 0.00s  decode 4.95s 38.96ms/step  peakGPU 32.73 afterdec 25.23  devused 34.30 rss 9.55  agree True
+  req c1: request 48.55s  batch_ready 43.62s  ttft_mean 43.62s ttft_max 43.62s placement 0.00s  decode 4.93s 38.79ms/step  peakGPU 32.73 afterdec 25.23  devused 34.30 rss 9.50  agree True
+  req c2: request 48.44s  batch_ready 43.47s  ttft_mean 43.47s ttft_max 43.47s placement 0.00s  decode 4.97s 39.16ms/step  peakGPU 32.73 afterdec 25.23  devused 34.30 rss 9.50  agree True
+  steady c0: wall mean 39.47 med 39.34 p95 39.94 cuda med 39.31  tok/s 25.3  prefill 43.53s  decode_ready 25.23 peak_prefill 32.73  inv gpu/rank 25.22 host/rank 7.95 host_all 7.95  rss 9.51
+  steady c1: wall mean 39.30 med 39.29 p95 39.69 cuda med 39.26  tok/s 25.4  prefill 43.71s  decode_ready 25.23 peak_prefill 32.73  inv gpu/rank 25.22 host/rank 7.95 host_all 7.95  rss 9.50
+  steady c2: wall mean 39.54 med 39.47 p95 39.98 cuda med 39.44  tok/s 25.3  prefill 43.65s  decode_ready 25.23 peak_prefill 32.73  inv gpu/rank 25.22 host/rank 7.95 host_all 7.95  rss 9.50
+  breakdown prefill (s/request): routing_codes_and_key_offload 7.512, prefill_attention 23.940, model_forward_total 43.505, other_model_work 12.053
+  breakdown decode (ms/step):    cache_append 0.96, router_scan 12.59, page_selection 1.12, key_refresh 2.28, sparse_attention 3.88, attention_block 22.73, model_forward_total 50.76, other_model_work 29.92
+
+== basis_koff_v128_reuse
+  req c0: request 48.59s  batch_ready 43.62s  ttft_mean 43.62s ttft_max 43.62s placement 0.00s  decode 4.97s 39.12ms/step  peakGPU 31.74 afterdec 24.23  devused 33.34 rss 9.56  agree True
+  req c1: request 48.28s  batch_ready 43.32s  ttft_mean 43.32s ttft_max 43.32s placement 0.00s  decode 4.96s 39.03ms/step  peakGPU 31.74 afterdec 24.23  devused 33.34 rss 9.56  agree True
+  req c2: request 48.70s  batch_ready 43.71s  ttft_mean 43.71s ttft_max 43.71s placement 0.00s  decode 4.99s 39.30ms/step  peakGPU 31.74 afterdec 24.23  devused 33.34 rss 9.58  agree True
+  steady c0: wall mean 39.45 med 39.39 p95 39.92 cuda med 39.36  tok/s 25.3  prefill 43.73s  decode_ready 24.24 peak_prefill 31.74  inv gpu/rank 24.23 host/rank 7.95 host_all 7.95  rss 9.57
+  steady c1: wall mean 39.40 med 39.40 p95 39.79 cuda med 39.37  tok/s 25.4  prefill 43.57s  decode_ready 24.24 peak_prefill 31.74  inv gpu/rank 24.23 host/rank 7.95 host_all 7.95  rss 9.59
+  steady c2: wall mean 39.64 med 39.58 p95 40.05 cuda med 39.56  tok/s 25.2  prefill 44.42s  decode_ready 24.24 peak_prefill 31.74  inv gpu/rank 24.23 host/rank 7.95 host_all 7.95  rss 9.56
+  breakdown prefill (s/request): routing_codes_and_key_offload 7.674, prefill_attention 23.942, model_forward_total 43.674, other_model_work 12.058
+  breakdown decode (ms/step):    cache_append 0.93, router_scan 12.72, page_selection 1.11, key_refresh 2.17, sparse_attention 3.90, attention_block 22.71, model_forward_total 50.26, other_model_work 29.43
+
+== shadowkv_voff_v128
+  req c0: request 50.11s  batch_ready 45.53s  ttft_mean 44.41s ttft_max 44.41s placement 1.13s  decode 4.58s 36.04ms/step  peakGPU 22.47 afterdec 17.60  devused 18.70 rss 18.05  agree True
+  req c1: request 50.14s  batch_ready 45.63s  ttft_mean 44.60s ttft_max 44.60s placement 1.03s  decode 4.51s 35.51ms/step  peakGPU 22.47 afterdec 17.60  devused 18.70 rss 18.03  agree True
+  req c2: request 50.51s  batch_ready 45.84s  ttft_mean 44.70s ttft_max 44.70s placement 1.14s  decode 4.67s 36.75ms/step  peakGPU 22.47 afterdec 17.60  devused 18.70 rss 18.07  agree True
+  steady c0: wall mean 36.58 med 36.03 p95 38.10 cuda med 36.00  tok/s 27.3  prefill 45.78s  decode_ready 17.60 peak_prefill 22.47  inv gpu/rank 17.59 host/rank 7.94 host_all 7.94  rss 18.04
+  steady c1: wall mean 36.92 med 35.72 p95 44.09 cuda med 35.68  tok/s 27.1  prefill 45.80s  decode_ready 17.60 peak_prefill 22.47  inv gpu/rank 17.59 host/rank 7.94 host_all 7.94  rss 18.04
+  steady c2: wall mean 36.88 med 36.72 p95 38.36 cuda med 36.69  tok/s 27.1  prefill 45.87s  decode_ready 17.60 peak_prefill 22.47  inv gpu/rank 17.59 host/rank 7.94 host_all 7.94  rss 18.04
+  breakdown prefill (s/request): k_gather 0.052, svd 6.404, factor_redistribution 0.001, landmarks_outliers_and_value_offload 1.073, prefill_attention 24.974, model_forward_total 44.542, post_prefill_h2d 1.064, other_model_work 12.038
+  breakdown decode (ms/step):    append_new_token 1.43, selection_landmark_scores_topk 6.29, value_miss_fetch_h2d 6.75, key_miss_reconstruct 3.80, decode_attention 4.89, model_forward_total 54.89, other_model_work 31.74
+
+== lrqk_koff_v128
+  no result
+
+######## exp2 b16_t65536
+
+== basis_koff_v128
+  req c0: request 139.08s  batch_ready 132.71s  ttft_mean 70.49s ttft_max 132.71s placement 0.00s  decode 6.38s 50.20ms/step  peakGPU 27.97 afterdec 25.42  devused 28.70 rss 17.93  agree True
+  req c1: request 138.94s  batch_ready 132.88s  ttft_mean 70.52s ttft_max 132.88s placement 0.00s  decode 6.06s 47.69ms/step  peakGPU 27.97 afterdec 25.42  devused 28.70 rss 17.88  agree True
+  req c2: request 138.38s  batch_ready 132.22s  ttft_mean 70.20s ttft_max 132.22s placement 0.00s  decode 6.17s 48.54ms/step  peakGPU 27.97 afterdec 25.42  devused 28.70 rss 17.86  agree True
+  steady c0: wall mean 48.43 med 48.36 p95 50.25 cuda med 48.34  tok/s 330.4  prefill 132.94s  decode_ready 25.43 peak_prefill 27.98  inv gpu/rank 25.41 host/rank 16.04 host_all 64.14  rss 17.85
+  steady c1: wall mean 49.08 med 48.09 p95 55.32 cuda med 48.04  tok/s 326.0  prefill 132.20s  decode_ready 25.43 peak_prefill 27.98  inv gpu/rank 25.41 host/rank 16.04 host_all 64.14  rss 17.87
+  steady c2: wall mean 49.13 med 48.33 p95 54.47 cuda med 48.31  tok/s 325.6  prefill 132.49s  decode_ready 25.43 peak_prefill 27.98  inv gpu/rank 25.41 host/rank 16.04 host_all 64.14  rss 17.86
+  breakdown prefill (s/request): routing_codes_and_key_offload 1.398, prefill_attention 1.271, model_forward_total 8.265, other_model_work 5.596
+  breakdown decode (ms/step):    cache_append 1.03, router_scan 23.86, page_selection 1.13, key_refresh 6.60, sparse_attention 5.23, attention_block 39.86, model_forward_total 72.37, other_model_work 34.51
+
+== basis_koff_v128_reuse
+  req c0: request 137.99s  batch_ready 131.74s  ttft_mean 70.14s ttft_max 131.74s placement 0.00s  decode 6.25s 49.20ms/step  peakGPU 25.97 afterdec 23.42  devused 26.74 rss 17.91  agree True
+  req c1: request 137.78s  batch_ready 131.66s  ttft_mean 70.09s ttft_max 131.66s placement 0.00s  decode 6.11s 48.13ms/step  peakGPU 25.97 afterdec 23.42  devused 26.74 rss 17.93  agree True
+  req c2: request 138.28s  batch_ready 132.00s  ttft_mean 70.03s ttft_max 132.00s placement 0.00s  decode 6.28s 49.45ms/step  peakGPU 25.97 afterdec 23.42  devused 26.74 rss 17.90  agree True
+  steady c0: wall mean 49.88 med 48.79 p95 55.24 cuda med 48.76  tok/s 320.8  prefill 132.07s  decode_ready 23.43 peak_prefill 25.97  inv gpu/rank 23.40 host/rank 16.04 host_all 64.14  rss 17.92
+  steady c1: wall mean 49.25 med 48.32 p95 54.05 cuda med 48.29  tok/s 324.8  prefill 131.91s  decode_ready 23.43 peak_prefill 25.97  inv gpu/rank 23.40 host/rank 16.04 host_all 64.14  rss 17.95
+  steady c2: wall mean 49.84 med 48.81 p95 57.10 cuda med 48.78  tok/s 321.0  prefill 132.42s  decode_ready 23.43 peak_prefill 25.97  inv gpu/rank 23.40 host/rank 16.04 host_all 64.14  rss 17.92
+  breakdown prefill (s/request): routing_codes_and_key_offload 1.377, prefill_attention 1.266, model_forward_total 8.234, other_model_work 5.591
+  breakdown decode (ms/step):    cache_append 1.11, router_scan 24.20, page_selection 1.18, key_refresh 6.38, sparse_attention 5.40, attention_block 40.31, model_forward_total 74.40, other_model_work 36.13
+
+== shadowkv_voff_v128
+  req c0: request 183.29s  batch_ready 176.48s  ttft_mean 92.65s ttft_max 174.12s placement 2.37s  decode 6.81s 53.61ms/step  peakGPU 18.62 afterdec 17.91  devused 18.80 rss 34.38  agree True
+  req c1: request 183.85s  batch_ready 176.80s  ttft_mean 92.81s ttft_max 174.46s placement 2.34s  decode 7.05s 55.53ms/step  peakGPU 18.62 afterdec 17.91  devused 18.80 rss 34.39  agree True
+  req c2: request 181.83s  batch_ready 175.31s  ttft_mean 92.35s ttft_max 173.50s placement 1.81s  decode 6.52s 51.35ms/step  peakGPU 18.62 afterdec 17.91  devused 18.80 rss 34.38  agree True
+  steady c0: wall mean 54.69 med 51.25 p95 75.36 cuda med 51.23  tok/s 292.5  prefill 176.27s  decode_ready 17.93 peak_prefill 18.63  inv gpu/rank 17.91 host/rank 16.00 host_all 64.00  rss 34.40
+  steady c1: wall mean 49.45 med 48.41 p95 52.15 cuda med 48.37  tok/s 323.6  prefill 175.95s  decode_ready 17.93 peak_prefill 18.63  inv gpu/rank 17.91 host/rank 16.00 host_all 64.00  rss 34.39
+  steady c2: wall mean 54.61 med 51.71 p95 72.01 cuda med 51.69  tok/s 293.0  prefill 176.47s  decode_ready 17.93 peak_prefill 18.63  inv gpu/rank 17.91 host/rank 16.00 host_all 64.00  rss 34.37
+  breakdown prefill (s/request): k_gather 0.121, svd 0.951, factor_redistribution 2.893, landmarks_outliers_and_value_offload 0.146, prefill_attention 1.449, model_forward_total 11.050, post_prefill_h2d 0.178, other_model_work 5.490
+  breakdown decode (ms/step):    append_new_token 1.56, selection_landmark_scores_topk 7.49, value_miss_fetch_h2d 10.63, key_miss_reconstruct 4.38, decode_attention 6.04, model_forward_total 68.67, other_model_work 38.56
+
+== lrqk_koff_v128
+  no result

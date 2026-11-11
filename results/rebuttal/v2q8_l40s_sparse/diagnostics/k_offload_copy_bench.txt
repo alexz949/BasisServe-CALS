@@ -1,0 +1,12 @@
+# Output of k_offload_copy_bench.py, GPU 0 (L40S node 2), lowrank env, CPUs of NUMA 0, OMP_NUM_THREADS=24,
+# 2026-11-10 ~21:50 UTC. Random data with the forward's real strides; all three write paths bit-identical.
+
+T=130048 kv=8: key strides (133169152, 128, 1024, 1) contiguous=False  bytes/layer 254 MiB
+  K host write  current copy_   226.3 ms (ok True) | archived append (2D strided)    10.2 ms (ok True) | contiguous + append    11.5 ms (ok True)
+  routing codes + V/base/residual cache writes    22.2 ms
+  x32 layers: current 7.95 s  (K copy 7.24 + codes 0.71) | with append 1.04 s | contiguous+append 1.08 s
+
+T=65536 kv=2: key strides (16777216, 128, 256, 1) contiguous=False  bytes/layer 32 MiB
+  K host write  current copy_    23.2 ms (ok True) | archived append (2D strided)     1.3 ms (ok True) | contiguous + append     1.3 ms (ok True)
+  routing codes + V/base/residual cache writes     9.2 ms
+  x32 layers: current 1.04 s  (K copy 0.74 + codes 0.29) | with append 0.34 s | contiguous+append 0.34 s

@@ -20,8 +20,12 @@ constexpr int kGroupPages = 8;
 constexpr int kGroupThreads = 256;
 constexpr int kMaxGroups = 4096;
 constexpr int kMaxGroupBlocks = kMaxGroups / kGroupThreads;
-constexpr int kRoutedPages = 1984 / kPageSize;
-constexpr int kPinnedPages = 32 / kPageSize;
+// Routed tokens include the pinned sink pages; the 64 recent tokens are added after them.
+// Table 3: 1984 routed with a 32-token sink. Paper Table 2 Page4: 2048 routed, no sink.
+constexpr int kRoutedPages = BASIS_ROUTED_TOKENS / kPageSize;
+constexpr int kPinnedPages = BASIS_SINK_TOKENS / kPageSize;
+static_assert(BASIS_ROUTED_TOKENS % kPageSize == 0 && BASIS_SINK_TOKENS % kPageSize == 0,
+              "routed and sink tokens must be whole pages");
 constexpr int kNeededPages = kRoutedPages - kPinnedPages;
 constexpr int kRecentTokens = 64;
 constexpr int kHistogramBins = 2048;

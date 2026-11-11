@@ -1,0 +1,6 @@
+configuration,scanned_dims_per_token_per_kv_head,persistent_routing_dims,base_state_gib,key_residual_state_gib,incremental_routing_state_gib,decode_resident_gpu_gib,host_pinned_key_gib,router_scan_ms,full_step_wall_ms,source
+b16r16_separate_base,32,32,0.993,0.993,1.986,32.975,0,11.750,37.400,table3_k_offload_128k/arms/formal basis_resident
+b16r16_value_reuse,32,16,0,0.993,0.993,31.975,0,11.896,37.830,table3_k_offload_128k/arms/formal basis_resident_nobase
+b16r16_value_reuse_k_offload,32,16,0,0.993,0.993,24.289,7.946,11.905,39.481,table3_k_offload_128k/arms/formal basis_k_offload_nobase
+r32_independent_analytical,32,32,,1.986,1.986,,,,,analytical [1;8;130193;32] BF16 x 32 layers; not measured
+dense_resident,0,0,,,0,30.859,0,,47.347,table3_k_offload_128k/arms/formal dense_resident

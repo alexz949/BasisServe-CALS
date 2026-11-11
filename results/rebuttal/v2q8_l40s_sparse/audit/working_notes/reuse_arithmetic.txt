@@ -1,0 +1,32 @@
+Base cache (16 dims):
+  prompt 130048: 1,065,353,216 B = 0.992188 GiB
+  stored 130192: 1,066,532,864 B = 0.993286 GiB
+  capacity 130193: 1,066,541,056 B = 0.993294 GiB
+  per-layer tensor 33,329,408 B -> allocator 16 x 2 MiB = 32 MiB; x32 = 1.000000 GiB
+Per-token incremental routing state (all 32 layers x 8 KV heads, BF16):
+  B16R16 separate Base (16+16): 32 dims -> 16,384 B/token; @130048: 2,130,706,432 B = 1.984375 GiB; @cap 130193: 1.986588 GiB
+  B16R16 no-Base / Value reuse (16 residual): 16 dims -> 8,192 B/token; @130048: 1,065,353,216 B = 0.992188 GiB; @cap 130193: 0.993294 GiB
+  Hypothetical independent R32 (analytical): 32 dims -> 16,384 B/token; @130048: 2,130,706,432 B = 1.984375 GiB; @cap 130193: 1.986588 GiB
+  exact K (128) reference: 128 dims -> 65,536 B/token; @130048: 8,522,825,728 B = 7.937500 GiB; @cap 130193: 7.946350 GiB
+  V96 latent reference: 96 dims -> 49,152 B/token; @130048: 6,392,119,296 B = 5.953125 GiB; @cap 130193: 5.959763 GiB
+Scan bytes per decode step (codes only) @130048, 32 dims: 1.9844 GiB
+host_key 8,532,328,448 B = 7.946350 GiB; slot_key_cache 0.125000 GiB; slot maps 143,805,440 B = 0.133929 GiB
+net GPU saving (inventory) = 7.687421 GiB
+Base saving via decode_resident_gib: basis_resident - basis_resident_nobase = 1.000000 GiB
+Base saving via post_prefill_gib: basis_resident - basis_resident_nobase = 1.000000 GiB
+Base saving via decode_peak_allocated_gib: basis_resident - basis_resident_nobase = 1.000000 GiB
+Base saving via decode_peak_reserved_gib: basis_resident - basis_resident_nobase = 1.011719 GiB
+Base saving via decode_device_used_gib: basis_resident - basis_resident_nobase = 0.976562 GiB
+Base saving via model_loaded_gib: basis_resident - basis_resident_nobase = 0.992065 GiB
+Base saving via prefill_peak_allocated_gib: basis_resident - basis_resident_nobase = 1.000000 GiB
+K-offload saving basis_k_offload_nobase: decode_resident 7.686595 GiB; host pinned 7.946350 GiB; GPU+host 32.2349 vs resident 31.9751
+K-offload saving basis_k_offload_nobase_p32: decode_resident 7.686595 GiB; host pinned 7.946350 GiB; GPU+host 32.2349 vs resident 31.9751
+K-offload saving basis_k_offload_nobase_p4: decode_resident 7.686646 GiB; host pinned 7.946350 GiB; GPU+host 32.3451 vs resident 32.0854
+basis_resident -> basis_k_offload_nobase total: 8.686595 GiB
+router_scan_ms: basis_resident 11.750  nobase 11.896  delta +0.146 (+1.24%)  k_offload_nobase 11.905
+page_selection_ms: basis_resident 0.922  nobase 1.013  delta +0.091 (+9.86%)  k_offload_nobase 1.011
+attention_block_ms: basis_resident 14.177  nobase 14.411  delta +0.234 (+1.65%)  k_offload_nobase 16.301
+full_wall_ms: basis_resident 37.400  nobase 37.830  delta +0.429 (+1.15%)  k_offload_nobase 39.481
+full_cuda_ms: basis_resident 37.378  nobase 37.801  delta +0.423 (+1.13%)  k_offload_nobase 39.458
+cache_append_ms: basis_resident 0.387  nobase 0.393  delta +0.007 (+1.75%)  k_offload_nobase 0.338
+sparse_attention_ms: basis_resident 0.805  nobase 0.807  delta +0.002 (+0.20%)  k_offload_nobase 0.786

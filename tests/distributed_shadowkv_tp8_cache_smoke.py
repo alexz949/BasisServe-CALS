@@ -20,7 +20,7 @@ from evaluation import official_shadowkv_cpu
 
 
 def gather_heads(value):
-    values = [torch.empty_like(value) for _ in range(8)]
+    values = [torch.empty_like(value) for _ in range(dist.get_world_size())]
     dist.all_gather(values, value)
     return torch.cat(values, dim=1)
 
@@ -59,7 +59,9 @@ def main():
     torch.set_num_threads(2)
     torch.backends.cuda.matmul.allow_tf32 = False
     dist.init_process_group("nccl", timeout=timedelta(minutes=10), device_id=device)
-    assert dist.get_world_size() == 8
+    world = dist.get_world_size()
+    assert world in (4, 8)
+    kv = 8 // world
     official_shadowkv_cpu.ROOT = args.upstream.resolve()
     cache_class = official_shadowkv_cpu.load_cache_class()
     length, steps = 4096, 8
@@ -71,9 +73,9 @@ def main():
     cases = []
     for batch in (1, 2):
         torch.manual_seed(2700 + rank)
-        pre_key = torch.randn(batch, 1, length, 128, device=device, dtype=torch.bfloat16)
+        pre_key = torch.randn(batch, kv, length, 128, device=device, dtype=torch.bfloat16)
         value = torch.randn_like(pre_key)
-        query = torch.randn(batch, 4, 1, 128, device=device, dtype=torch.bfloat16)
+        query = torch.randn(batch, 4 * kv, 1, 128, device=device, dtype=torch.bfloat16)
         cache = make_tp8_cache(cache_class, layers=1, batch=batch, length=length,
                                decode_steps=steps, device=device)
         build_global_factors(pre_key, 0, cache.U[0], cache.SV[0])
@@ -103,8 +105,8 @@ def main():
             assert torch.equal(positions, reference.position_ids[0])
         del pre_key, value, query, key, all_pre_key, all_value, all_query
         for step in range(steps):
-            query = torch.randn(batch, 4, 1, 128, device=device, dtype=torch.bfloat16)
-            key = torch.randn(batch, 1, 1, 128, device=device, dtype=torch.bfloat16)
+            query = torch.randn(batch, 4 * kv, 1, 128, device=device, dtype=torch.bfloat16)
+            key = torch.randn(batch, kv, 1, 128, device=device, dtype=torch.bfloat16)
             value = torch.randn_like(key)
             query, key = apply_rotary_pos_emb(query, key, cos[:, length + step:length + step + 1],
                                               sin[:, length + step:length + step + 1])

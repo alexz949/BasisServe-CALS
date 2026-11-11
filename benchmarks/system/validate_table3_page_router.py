@@ -74,7 +74,8 @@ def main():
     archived = config.build("w16u1")
     modules, builds = {}, {}
     for page_size in (1, *PAGE_SIZES):
-        modules[page_size], builds[page_size] = build(config.SNAPSHOT, folder / f"p{page_size}", page_size)
+        modules[page_size], builds[page_size] = build(config.SNAPSHOT, folder / f"p{page_size}", page_size,
+                                                      value_dim=128, routed_tokens=1984, sink_tokens=32)
 
     scores = []
     for length in (1000, 4113, 24518):

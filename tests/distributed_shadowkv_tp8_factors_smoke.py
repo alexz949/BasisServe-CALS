@@ -1,4 +1,4 @@
-"""Compare TP8 construction with unchanged upstream ShadowKV get_svd."""
+"""Compare tensor-parallel (TP4/TP8) construction with unchanged upstream ShadowKV get_svd."""
 
 import argparse
 from datetime import timedelta
@@ -29,26 +29,28 @@ def main():
     torch.set_num_threads(2)
     torch.backends.cuda.matmul.allow_tf32 = False
     dist.init_process_group("nccl", timeout=timedelta(minutes=10), device_id=device)
-    assert dist.get_world_size() == 8
+    world = dist.get_world_size()
+    assert world in (4, 8)
+    kv = 8 // world
     official_shadowkv_cpu.ROOT = args.upstream.resolve()
     cache_class = official_shadowkv_cpu.load_cache_class()
     results = []
-    cases = [(layer, 1, 512) for layer in range(8)] + [(3, 2, 2048)]
+    cases = [(layer, 1, 512) for layer in range(world)] + [(3, 2, 2048)]
     for layer, batch, length in cases:
         torch.manual_seed(1700 + rank)
-        local = torch.randn(batch, 1, length, 128, device=device, dtype=torch.bfloat16)
+        local = torch.randn(batch, kv, length, 128, device=device, dtype=torch.bfloat16)
         shared_u = torch.empty(batch, length, 160, device=device, dtype=torch.bfloat16)
-        local_sv = torch.empty(batch, 1, 128, 160, device=device, dtype=torch.bfloat16)
+        local_sv = torch.empty(batch, kv, 128, 160, device=device, dtype=torch.bfloat16)
         record = build_global_factors(local, layer, shared_u, local_sv)
         reference_u = shared_u.clone()
         dist.broadcast(reference_u, src=0)
         assert torch.equal(shared_u, reference_u)
         # The all-gather below belongs only to this small reference test.
-        all_keys = [torch.empty_like(local) for _ in range(8)]
-        all_sv = [torch.empty_like(local_sv) for _ in range(8)]
+        all_keys = [torch.empty_like(local) for _ in range(world)]
+        all_sv = [torch.empty_like(local_sv) for _ in range(world)]
         dist.all_gather(all_keys, local)
         dist.all_gather(all_sv, local_sv)
-        if rank == layer % 8:
+        if rank == layer % world:
             global_key = torch.cat(all_keys, dim=1)
             global_sv = torch.cat(all_sv, dim=1)
             for request in range(batch):

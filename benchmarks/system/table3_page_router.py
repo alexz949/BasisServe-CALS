@@ -69,8 +69,10 @@ EDITS = [
 ]
 
 
-def build(snapshot, folder, page_size):
-    """Return the extension and how many times each archived anchor was found."""
+def build(snapshot, folder, page_size, *, value_dim, routed_tokens, sink_tokens):
+    """Return the extension and how many times each archived anchor was found.
+
+    routed_tokens counts the pinned sink; Table 3 used value_dim=128, routed_tokens=1984, sink_tokens=32."""
     folder.mkdir(parents=True, exist_ok=True)
     sources, found = [], []
     for filename in SOURCES:
@@ -86,11 +88,13 @@ def build(snapshot, folder, page_size):
             path.write_text(content)
         sources.append(str(path))
     module = load(
-        name=f"table3_page_router_p{page_size}", sources=sources,
+        name=f"table3_page_router_p{page_size}_v{value_dim}_t{routed_tokens}_s{sink_tokens}",
+        sources=sources,
         extra_cflags=["-O3", "-std=c++17"],
         extra_cuda_cflags=[
             "-O3", "-std=c++17", "--use_fast_math", "--ptxas-options=-v",
-            "-DBASIS_VALUE_DIM=128", "-DBASIS_GQA=4", f"-DBASIS_PAGE_SIZE={page_size}",
+            f"-DBASIS_VALUE_DIM={value_dim}", "-DBASIS_GQA=4", f"-DBASIS_PAGE_SIZE={page_size}",
             "-DBASIS_BASE_RANK=16", "-DBASIS_RESIDUAL_RANK=16",
+            f"-DBASIS_ROUTED_TOKENS={routed_tokens}", f"-DBASIS_SINK_TOKENS={sink_tokens}",
         ], verbose=True)
     return module, dict(anchors_found=found, anchors_expected=[2, 2, 1, 1, 1, 1, 1, 1])

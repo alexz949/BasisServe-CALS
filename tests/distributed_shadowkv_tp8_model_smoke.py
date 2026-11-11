@@ -1,4 +1,4 @@
-"""Compare short real-text TP8 generation with the existing official adapter."""
+"""Compare short real-text tensor-parallel (TP4/TP8) generation with the existing official adapter."""
 
 import argparse
 import gc
@@ -27,14 +27,15 @@ from evaluation import official_shadowkv_cpu
 def full_logits(logits, vocab_size):
     if logits.shape[-1] == vocab_size:
         return logits.detach().cpu().reshape(-1)
-    assert logits.shape[-1] * 8 == vocab_size
-    shards = [torch.empty_like(logits) for _ in range(8)]
+    world = dist.get_world_size()
+    assert logits.shape[-1] * world == vocab_size
+    shards = [torch.empty_like(logits) for _ in range(world)]
     dist.all_gather(shards, logits)
     return torch.cat(shards, dim=-1).cpu().reshape(-1)
 
 
 def positions_snapshot(cache):
-    shards = [torch.empty_like(cache.position_ids) for _ in range(8)]
+    shards = [torch.empty_like(cache.position_ids) for _ in range(dist.get_world_size())]
     dist.all_gather(shards, cache.position_ids)
     return torch.cat(shards, dim=2).cpu()
 
@@ -58,7 +59,8 @@ def main():
     torch.backends.cuda.matmul.allow_tf32 = False
     bind_host_allocations(_bind_cpu(local_rank))
     dist.init_process_group("nccl", timeout=timedelta(minutes=20), device_id=device)
-    assert dist.get_world_size() == 8
+    world = dist.get_world_size()
+    assert world in (4, 8)
     official_shadowkv_cpu.ROOT = args.upstream.resolve()
     cache_class = official_shadowkv_cpu.load_cache_class()
     tokens = load_file(str(args.tokens))["input_ids"][:1, :4096].long().to(device)
@@ -67,7 +69,7 @@ def main():
 
     model = AutoModelForCausalLM.from_pretrained(
         args.model, dtype=torch.bfloat16, attn_implementation="sdpa",
-        distributed_config=DistributedConfig(tp_size=8), local_files_only=True).eval()
+        distributed_config=DistributedConfig(tp_size=world), local_files_only=True).eval()
     modules, cache = install_tp8_shadowkv(model, cache_class, batch=1, length=4096,
                                          decode_steps=args.decode_steps)
     logits_history, selection_history, generated = [], [], []
@@ -81,7 +83,7 @@ def main():
         cache.H2D()
         selection_history.append(positions_snapshot(cache))
         prefill_svd_calls = svd.call_count
-        assert prefill_svd_calls == 4
+        assert prefill_svd_calls == 32 // world
         for step in range(args.decode_steps):
             output = model(input_ids=token, position_ids=torch.tensor([[4096 + step]], device=device),
                            use_cache=False, logits_to_keep=1)
@@ -94,7 +96,7 @@ def main():
         assert svd.call_count == prefill_svd_calls
     assert all(len(module.factor_records) == 1 for module in modules)
     ids = torch.cat(generated, dim=-1)
-    rank_ids = [torch.empty_like(ids) for _ in range(8)]
+    rank_ids = [torch.empty_like(ids) for _ in range(world)]
     dist.all_gather(rank_ids, ids)
     assert all(torch.equal(ids, other) for other in rank_ids)
     ids = ids.cpu().reshape(-1).tolist()
@@ -153,7 +155,7 @@ def main():
                   "prefill_svd_calls_per_tp_rank": prefill_svd_calls,
                   "decode_svd_calls": 0, "model": str(args.model), "tokens": str(args.tokens),
                   "reference": "Existing unchanged official_shadowkv_cpu adapter; single GPU",
-                  "tp8_decode_backend": "upstream flash_attn_with_kvcache",
+                  "tp_decode_backend": "FlashAttention-2 (vLLM build), one paged block per request", "tp_world_size": world,
                   "scope": "Short real-text correctness smoke, not a quality benchmark or speed trial",
                   "command": sys.argv, "pytorch": torch.__version__}
         (args.output / "model_reference.json").write_text(json.dumps(result, indent=2) + "\n")

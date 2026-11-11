@@ -115,7 +115,7 @@ def build_runtime(args, frozen):
         harness.ROUTED_PAGES = 1984 // args.page_size
         router, build = build_page_router(
             frozen.SNAPSHOT, frozen.ROOT / "results/system_benchmarks/table3_page_router"
-            / f"p{args.page_size}", args.page_size)
+            / f"p{args.page_size}", args.page_size, value_dim=128, routed_tokens=1984, sink_tokens=32)
     else:
         router = config.build("w16u1")
     attention = harness._load_extension(value_dim=128, queries_per_kv=4, page_size=1,
