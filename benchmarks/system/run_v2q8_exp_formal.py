@@ -2,6 +2,8 @@
 
   Exp 1  TP1 (W=1, GPU 0 only, serial): 130048-token prefill + 128 decode, B1
   Exp 2  TP4 (W=4): 65536-token prefill + 128 decode, B16
+  Exp 3  TP1 (W=1, GPU 0 only, serial): 65536-token prefill + 128 decode, B1, on row 0 of the Exp 2 cohorts (added
+         after Exp 1: upstream LRQK does not fit 130048 tokens on this GPU reliably)
 Round 2 (formal_v2/, smoke_v2/): arms basis_koff_v128, basis_koff_v128_reuse, shadowkv_upstream_v128 and
 lrqk_upstream_koff_v128 (the upstream baseline runtimes, unmodified; TP4 through the minimal ports in
 basisserve/core; PyTorch's default CUDA allocator for them, as upstream). Per arm: request and steady on cohorts
@@ -25,7 +27,8 @@ import run_v2q8_exp_smoke as smoke
 ROOT = smoke.ROOT
 OUT = ROOT / "results/rebuttal/v2q8_l40s_sparse/formal_v2"
 SMOKE = smoke.OUT
-SETUP = {1: dict(gpus=[0], length=130048, batch=1), 2: dict(gpus=[0, 1, 2, 3], length=65536, batch=16)}
+SETUP = {1: dict(gpus=[0], length=130048, batch=1), 2: dict(gpus=[0, 1, 2, 3], length=65536, batch=16),
+         3: dict(gpus=[0], length=65536, batch=1, inputs=4)}
 
 
 def result(directory):
@@ -46,7 +49,7 @@ def adapter_checks(arm, experiment):
 
 
 def gates(experiment, arms):
-    stage, batch = ("exp1", 1) if experiment == 1 else ("exp2", 4)
+    stage, batch = ("exp2", 4) if experiment == 2 else ("exp1", 1)  # Exp 3 is TP1: the TP1 8192-token smoke
     decisions = {}
     for arm in arms:
         smoke_ok = all((result(SMOKE / stage / f"{arm}_{mode}_b{batch}_t8192") or {}).get("status") == "complete"
@@ -81,7 +84,8 @@ def main():
                     continue  # resume: completed runs are kept
                 script = ["benchmarks/system/bench_v2q8_tp.py", "--arm", arm, "--mode", mode,
                           "--length", str(setup["length"]), "--batch", str(setup["batch"]), "--cohort", str(cohort),
-                          "--inputs", str(smoke.INPUTS[len(setup["gpus"])]), "--output", str(output), *smoke.COMMON]
+                          "--inputs", str(smoke.INPUTS[setup.get("inputs", len(setup["gpus"]))]), "--output", str(output),
+                          *smoke.COMMON]
                 extra = smoke.arm_env(arm)
                 records.append(smoke.run(name, smoke.torchrun(script, setup["gpus"]), setup["gpus"], output,
                                          extra=extra))

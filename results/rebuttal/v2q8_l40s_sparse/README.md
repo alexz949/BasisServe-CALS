@@ -7,6 +7,13 @@
 > prefill analysis and prefill-group trials: `diagnostics/shadowkv_prefill_summary.md`. LRQK in round 2: with Keys
 > only offloaded every run is out of memory; with Keys and Values offloaded 2 of 7 Exp1 runs complete and every
 > Exp2 run is out of memory.
+>
+> **Added 2026-11-11, after round 2:** the formal Exp 3 (TP1, 65536 + 128 tokens, B1; `formal_v2/exp3/`, all 28 runs
+> complete, both LRQK placements included) and several single-run trials (ShadowKV's per-layer cleanup, the ShadowKV
+> TP SVD placement modes in `svd_modes/`, LRQK against its paper's settings, core count and `torch.compile`).
+> Numbers, status of each item and the shared-host caveat: `diagnostics/exp3_and_trials_summary.md`. The two
+> `lrqk_upstream_kvoff_nocompile_v128` runs in `formal_v2/exp3/` belong to a rerun that was stopped; they are not
+> results.
 
 2026-11-10, Vast.ai 4x L40S node 2, the same machine as `v2q8_palu_g4_tp4/l40s_node2`. The repository is at
 `abf8550`. The benchmark code for these runs is uncommitted, in the working tree: `bench_v2q8_tp.py`,

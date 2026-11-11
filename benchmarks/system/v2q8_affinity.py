@@ -17,8 +17,14 @@ def bind_to_gpu_node(device_index, slot):
     for item in Path(f"/sys/devices/system/node/node{node}/cpulist").read_text().strip().split(","):
         left, _, right = item.partition("-")
         cpus.extend(range(int(left), int(right or left) + 1))
-    assigned = cpus[slot % 2::2]
+    assigned, threads = cpus[slot % 2::2], None
+    # Trials only (not the policy above): V2Q8_TRIAL_CPUS="0-23" and V2Q8_TRIAL_THREADS="24" replace the CPU set
+    # and the thread count; the record says so.
+    trial = os.environ.get("V2Q8_TRIAL_CPUS")
+    if trial:
+        left, _, right = trial.partition("-")
+        assigned, threads = list(range(int(left), int(right or left) + 1)), int(os.environ["V2Q8_TRIAL_THREADS"])
     os.sched_setaffinity(0, assigned)
-    torch.set_num_threads(len(assigned))
+    torch.set_num_threads(threads or len(assigned))
     return dict(numa_node=node, cpus=assigned, torch_threads=torch.get_num_threads(),
-                omp_num_threads=os.environ.get("OMP_NUM_THREADS"))
+                omp_num_threads=os.environ.get("OMP_NUM_THREADS"), trial_override=bool(trial))

@@ -71,11 +71,30 @@ ARMS = {
     # algorithm, the prefill groups of 4 and everything else are those of shadowkv_upstream_v128 (centralized).
     "shadowkv_upstream_reqpar_v128": dict(method="shadowkv_upstream", value=128, svd="request_parallel"),
     "shadowkv_upstream_repl_v128": dict(method="shadowkv_upstream", value=128, svd="replicated"),
+    # Trials (requester's question: what upstream's per-layer cleanup costs): the same runtime with gc.collect and/or
+    # torch.cuda.empty_cache turned into no-ops for the duration of each get_svd call (the calls sit in upstream's
+    # get_svd before the decomposition; upstream's source is not edited). NOT the upstream runtime.
+    "shadowkv_upstream_nogc_v128": dict(method="shadowkv_upstream", value=128, skip_in_get_svd=("gc_collect",)),
+    "shadowkv_upstream_noempty_v128": dict(method="shadowkv_upstream", value=128, skip_in_get_svd=("empty_cache",)),
+    "shadowkv_upstream_nohk_v128": dict(method="shadowkv_upstream", value=128,
+                                        skip_in_get_svd=("gc_collect", "empty_cache")),
     # The upstream LRQK runtime with Values kept on GPU (basisserve/core/lrqk_upstream.py).
     "lrqk_upstream_koff_v128": dict(method="lrqk_upstream", value=128),
     # The upstream LRQK runtime in its own placement: exact K and V in one pinned host pool (no code of ours in the
     # cache path).
     "lrqk_upstream_kvoff_v128": dict(method="lrqk_upstream", value=128, kv_offload=True),
+    # The two upstream LRQK runtimes with torch.compile switched off by PyTorch's own switch (the launcher sets
+    # TORCH_COMPILE_DISABLE=1, so upstream's decorated solvers and index helper run as plain Python; upstream's
+    # source is not edited). Upstream targets PyTorch 2.5.1; on this environment's 2.13 its compiled decode solver
+    # is slower than the plain one and Dynamo gives up recompiling a PyTorch-internal router (recompile_limit).
+    "lrqk_upstream_koff_nocompile_v128": dict(method="lrqk_upstream", value=128, torch_compile=False),
+    "lrqk_upstream_kvoff_nocompile_v128": dict(method="lrqk_upstream", value=128, kv_offload=True,
+                                               torch_compile=False),
+    # Trials (requester): the same two runtimes with the settings of the LRQK paper's throughput table (arXiv
+    # 2510.23649, Table 9: r=16, top-k 1024, 16 lite tokens) instead of its RULER-128K settings (32 / 2048 / 64).
+    "lrqk_upstream_kvoff_t9_v128": dict(method="lrqk_upstream", value=128, kv_offload=True,
+                                        lrqk=dict(rank=16, topk=1024, lite=16)),
+    "lrqk_upstream_koff_t9_v128": dict(method="lrqk_upstream", value=128, lrqk=dict(rank=16, topk=1024, lite=16)),
     "lrqk_koff_v128": dict(method="lrqk", value=128),
     "lrqk_koff_v96": dict(method="lrqk", value=96),
     "dense_v128": dict(method="dense", value=128),
@@ -231,9 +250,27 @@ def build_shadowkv_upstream(args, world, timers):
                         update_kv_cache="append_new_token", get_retrieval_position_ids="selection_landmark_scores_topk",
                         get_value_cache="value_miss_fetch_h2d", get_key_cache="key_miss_reconstruct")
 
+    skip = ARMS[args.arm].get("skip_in_get_svd", ())
+
+    def without_housekeeping(function):
+        """get_svd with the named upstream cleanup calls as no-ops while it runs (they are looked up as gc.collect
+        and torch.cuda.empty_cache at call time, in upstream's get_svd and in the TP port's)."""
+        def run(*positional, **keywords):
+            saved = gc.collect, torch.cuda.empty_cache
+            if "gc_collect" in skip:
+                gc.collect = lambda *a, **k: 0
+            if "empty_cache" in skip:
+                torch.cuda.empty_cache = lambda: None
+            output = function(*positional, **keywords)
+            gc.collect, torch.cuda.empty_cache = saved
+            return output
+        return run
+
     def reset():
         upstream_tp.reset_counts()
         cache = upstream_tp.fresh_cache(llama, length=args.length, output_tokens=args.output_tokens)
+        if skip:
+            cache.get_svd = without_housekeeping(cache.get_svd)
         if instrument:
             for name, label in cache_labels.items():
                 setattr(cache, name, timed(getattr(cache, name), label))
@@ -279,7 +316,9 @@ def build_shadowkv_upstream(args, world, timers):
         implementation="upstream models.llama.Llama + ShadowKVCache_CPU + CUDA kernels "
                        "(ByteDance-Seed/ShadowKV@e51904cd), source unmodified" + (
                            "" if world == 1 else "; minimal TP port basisserve/core/shadowkv_upstream_tp.py"),
-        shadowkv=dict(rank=upstream_tp.RANK, chunk=upstream_tp.CHUNK, sparse_budget=upstream_tp.SPARSE_BUDGET),
+        shadowkv=dict(rank=upstream_tp.RANK, chunk=upstream_tp.CHUNK, sparse_budget=upstream_tp.SPARSE_BUDGET,
+                      get_svd_cleanup="upstream: synchronize + gc.collect + empty_cache before each decomposition"
+                      if not skip else "NOT upstream: " + " and ".join(skip) + " are no-ops inside get_svd (trial)"),
         prefill="upstream batch_prefill (request groups of 4; 8 for 120K-200K prompts)" if group is None else
                 f"NOT the upstream schedule: upstream batch_prefill's loop with request groups of {group} "
                 "(requester's variant; upstream uses 4, or 8 for 120K-200K prompts)",
@@ -297,7 +336,8 @@ def build_shadowkv_upstream(args, world, timers):
                            "ranks' heads) and decomposes every request itself; no Key or factor exchange")[svd_mode],
             decomposition="upstream: FP32 torch.svd of [T, 8*128] pre-RoPE Keys per request, first 160 components, "
                           "BF16 factors on host until H2D",
-            housekeeping="upstream synchronize + gc.collect + empty_cache once per get_svd call on every rank"),
+            housekeeping="upstream synchronize + gc.collect + empty_cache once per get_svd call on every rank"
+                         if not skip else "trial: " + " and ".join(skip) + " are no-ops inside get_svd"),
         generation_buffer_tokens=llama.kv_cache.k_cache_buffer.shape[-2],
         generation_buffer_policy="at least actual initial support plus output-token count; capacity only")
     def svd_runtime():
@@ -325,6 +365,10 @@ def build_lrqk_upstream(args, world, timers):
     from basisserve.core import lrqk_upstream
 
     kv_offload = bool(ARMS[args.arm].get("kv_offload"))
+    lrqk_upstream.CONFIG = dict(lrqk_upstream.CONFIG, **ARMS[args.arm].get("lrqk", {}))  # read by new_cache
+    compiled = ARMS[args.arm].get("torch_compile", True)
+    import torch._dynamo
+    assert torch._dynamo.config.disable == (not compiled), "TORCH_COMPILE_DISABLE must match the arm"
     if kv_offload:
         # Upstream placement: the upstream classes themselves (shared K/V host pool, CPU gather of K and V).
         module = lrqk_upstream.upstream()
@@ -392,7 +436,8 @@ def build_lrqk_upstream(args, world, timers):
                    "Keys offloaded: exact K in an upstream pinned host pool; Values in an upstream GPU pool; ") +
                   "GPU hit cache of top-k + lite per query head; hit cache and A_K parked in host memory during prefill",
         implementation="upstream lrqk_attention (tenghuilee/LRQK@caf16293): load_model_hack, DynamicLRQKCache, "
-                       "LightAttentionIndicesOffloadPrefill, torch.compile as upstream; source unmodified" + (
+                       "LightAttentionIndicesOffloadPrefill, " + ("torch.compile as upstream" if compiled else
+                       "torch.compile OFF (TORCH_COMPILE_DISABLE=1; NOT as upstream)") + "; source unmodified" + (
                            "" if kv_offload else
                            "; basisserve/core/lrqk_upstream.py splits the K/V pool (Values on GPU)"),
         lrqk=dict(lrqk_upstream.CONFIG, lambdas=1.0, init="randn"),

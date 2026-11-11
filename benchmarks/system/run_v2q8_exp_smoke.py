@@ -44,7 +44,10 @@ UPSTREAM_ENV = {"PYTORCH_CUDA_ALLOC_CONF": ""}
 
 
 def arm_env(arm):
-    return UPSTREAM_ENV if "upstream" in arm else None
+    if "upstream" not in arm:
+        return None
+    # *_nocompile_* arms: PyTorch's own switch, read at import, turns torch.compile into a no-op.
+    return dict(UPSTREAM_ENV, **({"TORCH_COMPILE_DISABLE": "1"} if "nocompile" in arm else {}))
 INPUTS = {1: HF / "system_benchmarks/tp1_offline/inputs/prompts.safetensors",
           4: ROOT / "results/rebuttal/v2q8_l40s_sparse/tp4_64k/inputs/prompts.safetensors"}
 COMMON = [
