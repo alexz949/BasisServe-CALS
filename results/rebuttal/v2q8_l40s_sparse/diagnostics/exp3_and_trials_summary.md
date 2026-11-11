@@ -91,14 +91,29 @@ to about 1e-8 relative; every LRQK log has Dynamo's `recompile_limit` warning.
 `torch.compile` off at the formal settings, **stopped, not a result**: arms `lrqk_upstream_kvoff_nocompile_v128`
 and `lrqk_upstream_koff_nocompile_v128` were started as a formal Exp 3 rerun. The first two runs (K+V offload,
 cohort 0, kept in `formal_v2/exp3/`) decoded at 3759 ms per step (request mean) and 1352 ms (steady median),
-several times slower than compile on, so the rerun was stopped by hand after them. Whether this is the uncompiled
-code at top-k 2048 or load from other tenants was not established when this note was written. The formal LRQK
-numbers remain the compile-on ones in section 1.
+several times slower than compile on, so the rerun was stopped by hand after them. The formal LRQK numbers remain
+the compile-on ones in section 1.
+
+Diagnosis right after (10:44 to 11:02 UTC, same geometry and formal settings, instrumented breakdown runs back to
+back, `smoke_v3/exp3/*_diag*`): the slowdown was the machine in that period, not the compile switch.
+
+| Run, in order | Decode per step | of which `empty_cache` | CPUs busy for other tenants (median) |
+|---|---|---|---|
+| compile off | 1136 ms | 355 ms | 72 |
+| compile on | 1129 ms | 327 ms | 69 |
+| compile off | 669 ms | 170 ms | 54 |
+| compile on, formal Exp 3 breakdown at 08:50 UTC, for reference | 422 ms | 86 ms | not recorded |
+
+Compile on was as slow as compile off in the same window, every component was slower by a similar factor, and
+the third run sped up as the other tenants' load fell. So the two stopped `nocompile` runs say nothing about
+`torch.compile`, and whether compile off helps at the formal settings is still open.
 
 ## 5. Caveat: the host's CPUs are shared
 
 With none of our jobs running, about 74 of the node's 192 logical CPUs were busy (load average about 80), including
 35% of the 24 CPUs a GPU-0 job is pinned to. During the LRQK runs sampled in `logs/cpu_usage_exp3_lrqk_nocompile.jsonl`
 the LRQK process used 12 to 19 CPUs in prefill and about 9 in decode while other tenants used 70 to 73. The load
-during the formal runs was not recorded. CPU-bound parts (LRQK decode, ShadowKV's `gc.collect()`) are the ones
+during the formal runs was not recorded. Between 10:20 and 11:00 UTC upstream LRQK decoded 2 to 3 times slower
+than in the formal Exp 3 two hours earlier with the same code and settings (section 4), so an LRQK timing from
+this node needs repeats spread over time. CPU-bound parts (LRQK decode, ShadowKV's `gc.collect()`) are the ones
 exposed to it; BasisKV's and ShadowKV's decode repeat within 0.1 ms across cohorts.
