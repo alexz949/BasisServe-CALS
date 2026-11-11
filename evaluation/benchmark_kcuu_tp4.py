@@ -1,4 +1,5 @@
 """One fresh-process 8K/128 TP4 E2E configuration, including request admission."""
+from evaluation.kcuu_platform import check_execution, check_devices, identity
 import argparse
 import hashlib
 import json
@@ -54,7 +55,7 @@ def main():
     parser.add_argument('--batch', type=int, choices=(16, 32, 64, 128, 256), required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    assert os.environ.get('SLURM_NNODES') == '1'
+    check_execution()
     os.environ['VLLM_USE_V2_MODEL_RUNNER'] = '0'
     import torch
     import vllm
@@ -62,8 +63,9 @@ def main():
     from basisserve.vllm import register
     register()
     assert torch.cuda.device_count() == 4
-    assert all(torch.cuda.get_device_capability(i) == (9, 0) for i in range(4))
+    check_devices()
     torch.backends.cuda.matmul.allow_tf32 = False
+    torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
     cfg = json.loads((args.model / 'config.json').read_text())
     factor_sha = file_sha256(args.factor_dir / 'results.json')
     manifest = load_manifest(args.factor_dir, factor_sha)
@@ -89,7 +91,7 @@ def main():
     previous = json.loads(args.output.read_text()) if args.output.exists() else None
     assert previous is None or previous['status'] != 'complete' or previous['source_sha256'] != source_hashes()
     payload = dict(status='initializing', command=shlex.join([sys.executable, *sys.argv]),
-        environment=os.environ.get('CONDA_DEFAULT_ENV'), job=os.environ['SLURM_JOB_ID'],
+        environment=os.environ.get('CONDA_DEFAULT_ENV'), **identity(),
         arm=args.arm, batch=args.batch, prefill_tokens=8192, output_tokens=128, repeats=3, warmups=1,
         configuration=config, model_revision=args.model.name, model_config=cfg,
         model_config_sha256=file_sha256(args.model / 'config.json'), factors_sha256=factor_sha,
@@ -147,6 +149,7 @@ def main():
         print('RUN', args.arm, args.batch, repeat, result['wall_seconds'], 'preemptions',result['preemptions'], flush=True)
     if args.arm != 'dense':
         payload['c1_workers'] = llm.collective_rpc('basisserve_c1_statistics')
+        assert all(w['decode_gather'] == 'nccl_symmetric_inplace' for w in payload['c1_workers'])
         assert all(w['loaded_value_layers'] == cfg['num_hidden_layers'] and w['value_head_size'] == 64 for w in payload['c1_workers'])
     payload['status'] = 'complete'; save()
     print('COMPLETE', args.output, flush=True)

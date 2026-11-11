@@ -1,4 +1,5 @@
 """Same-allocation TP4 smoke gates and the 30-configuration KCuu matrix."""
+from evaluation.kcuu_platform import A100, check_execution, identity
 import argparse
 import json
 import os
@@ -6,11 +7,16 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
+import time
+import fcntl
 from basisserve.core.qwen3_8b_vllm_c1 import file_sha256
 from evaluation.prepare_kcuu_llama import MODEL, FACTORS, OUTPUT, source_hashes
 from evaluation.run_gh200_tp4_smoke import MODEL as QWEN_MODEL, FACTORS as QWEN_FACTORS
 
 MODELS = {'llama': (MODEL, FACTORS), 'qwen': (QWEN_MODEL, QWEN_FACTORS[64])}
+if A100:
+    from evaluation.kcuu_platform import QWEN_MODEL, QWEN_FACTORS
+    MODELS['qwen'] = (QWEN_MODEL, QWEN_FACTORS)
 
 
 def prepare(root):
@@ -44,10 +50,12 @@ def prepare(root):
     return dict(source_sha256=source_hashes(), smoke=smoke, formal=formal,
         settings=dict(nodes=1, gpus_per_node=4, prefill_tokens=8192, output_tokens=128,
                       repeats=3, warmups=1, max_num_batched_tokens=8192,
-                      gpu_memory_utilization=0.8, cudagraph_mode='FULL_DECODE_ONLY'),
+                      gpu_memory_utilization=0.8, cudagraph_mode='FULL_DECODE_ONLY',
+                      bf16_reduced_precision_reduction=False),
         model_revisions={name:model.name for name,(model,_) in MODELS.items()},
         factor_manifest_sha256={name:file_sha256(factors/'results.json') for name,(_,factors) in MODELS.items()},
-        authorization='User authorized smoke, fixes and the full matrix within the two-hour interactive allocation',
+        execution_identity=identity(),
+        authorization='User authorized smoke, fixes and full matrix locally on four A100s' if A100 else 'Authorized two-hour Slurm allocation',
         deferred=['operator_breakdown', 'fixed_B64_decode_AB'])
 
 
@@ -87,7 +95,14 @@ def execute(job, hashes, timeout_seconds):
                                *job['command']], stdout=handle, stderr=subprocess.STDOUT).returncode
     if code:
         result = json.loads(out.read_text()) if out.exists() else {}
+        log_text = log.read_text()
+        attempt = log_text.rsplit('\nCOMMAND ', 1)[-1]
+        category = ('timeout' if code == 124 else
+                    'oom' if 'CUDA out of memory' in attempt or 'torch.OutOfMemoryError' in attempt else
+                    'environment_error' if any(s in attempt for s in ('CUDA_HOME is unset', 'ModuleNotFoundError', 'CUDA build header', 'unsupported toolchain')) else
+                    'validation_error' if 'AssertionError' in attempt else 'runtime_error')
         result.update(status='timeout' if code == 124 else 'failed', exit_code=code,
+                      failure_category=category, failure_log_tail=attempt[-16000:],
                       source_sha256=hashes, command=shlex.join(job['command']), log=str(log))
         out.write_text(json.dumps(result, indent=2)+'\n')
         print('FAILED', job['name'], code, flush=True)
@@ -104,23 +119,55 @@ def main():
     parser.add_argument('--stage', choices=('smoke', 'formal', 'all'), default='all')
     args = parser.parse_args()
     root = args.output_dir.resolve(); root.mkdir(parents=True, exist_ok=True)
+    lock = (root / 'driver.lock').open('w')
+    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    clock_path = root / 'execution_window.json'
+    if not args.prepare_only:
+        if not clock_path.exists():
+            clock_path.write_text(json.dumps(dict(start_epoch=time.time(), duration_seconds=7200,
+                identity=identity()), indent=2) + '\n')
+        clock = json.loads(clock_path.read_text())
+        deadline = clock['start_epoch'] + clock['duration_seconds']
+        def remaining(limit):
+            return max(0, min(limit, int(deadline - time.time())))
     plan = prepare(root)
+    plan_path = root / 'experiment_plan.json'
+    if plan_path.exists():
+        previous_plan = json.loads(plan_path.read_text())
+        if previous_plan['source_sha256'] != plan['source_sha256']:
+            with (root / 'experiment_plan.history.jsonl').open('a') as history:
+                history.write(json.dumps(previous_plan) + '\n')
     (root/'experiment_plan.json').write_text(json.dumps(plan, indent=2)+'\n')
     if args.prepare_only:
         for job in plan['smoke'] + plan['formal']:
             print(shlex.join(job['command']))
         return
-    assert os.environ.get('SLURM_NNODES') == '1' and os.environ.get('CONDA_DEFAULT_ENV') == 'basis'
+    check_execution()
     for job in plan['smoke']:
         if args.stage == 'formal':
             assert finished(job, plan['source_sha256']), job['name']
         else:
-            code = execute(job, plan['source_sha256'], 900)
+            budget = remaining(900)
+            if budget == 0:
+                print('Two-hour window exhausted before', job['name'], flush=True)
+                from evaluation.summarize_kcuu import summarize
+                summarize(root)
+                return
+            code = execute(job, plan['source_sha256'], budget)
             if code:
+                from evaluation.summarize_kcuu import summarize
+                summarize(root)
                 sys.exit(code)
     if args.stage == 'smoke':
         return
-    failures = [job['name'] for job in plan['formal'] if execute(job, plan['source_sha256'], 1200)]
+    failures = []
+    for job in plan['formal']:
+        budget = remaining(1200)
+        if budget == 0:
+            print('Two-hour window exhausted before', job['name'], flush=True)
+            break
+        if execute(job, plan['source_sha256'], budget):
+            failures.append(job['name'])
     from evaluation.summarize_kcuu import summarize
     summarize(root)
     print('FORMAL MATRIX FINISHED failures=', failures, flush=True)

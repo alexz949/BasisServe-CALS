@@ -71,7 +71,9 @@ def _cuda_build_paths() -> tuple[list[Path], Path, str, Path]:
     nvcc = toolkit / "bin" / "nvcc"
     if not nvcc.is_file():
         raise FileNotFoundError(f"CUDA compiler is unavailable: {nvcc}")
-    includes = [toolkit / "include"]
+    # Conda CUDA keeps the compiler at the prefix root and target headers below targets/.
+    target_include = toolkit / "targets" / "x86_64-linux" / "include"
+    includes = [target_include if target_include.is_dir() else toolkit / "include"]
     for header in ("cuda_runtime_api.h", "crt/host_defines.h", "nv/target"):
         if not any((path / header).exists() for path in includes):
             raise FileNotFoundError(f"CUDA build header {header!r} is unavailable")

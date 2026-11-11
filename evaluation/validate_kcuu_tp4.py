@@ -1,4 +1,5 @@
 """Four-rank C1 attention/output validation; run only in a one-node GPU allocation."""
+from evaluation.kcuu_platform import check_execution, check_devices, identity
 import argparse
 import json
 import os
@@ -51,11 +52,12 @@ def main():
     parser.add_argument('--factor-dir', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    assert os.environ['SLURM_NNODES'] == '1'
+    check_execution()
     rank = int(os.environ['RANK'])
     torch.cuda.set_device(int(os.environ['LOCAL_RANK']))
-    assert torch.cuda.get_device_capability() == (9, 0)
+    check_devices()
     torch.backends.cuda.matmul.allow_tf32 = False
+    torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
     device = torch.device('cuda', torch.cuda.current_device())
     group = tp_group(4, rank)
     hosts = [None] * 4
@@ -68,6 +70,7 @@ def main():
     boundaries = {mode: PreparedC1Output(group.device_group, device, heads * 64, 64,
                                          output_mode=mode, audit_routes=True)
                   for mode in ('ag', 'hybrid', 'ar')}
+    assert all(b.symmetric is not None for b in boundaries.values()), 'Symmetric AllGather is required'
     impl = C1DiffKVImpl(num_heads=heads, head_size=128, scale=128 ** -0.5,
                        num_kv_heads=2, alibi_slopes=None, sliding_window=None,
                        kv_cache_dtype='auto', value_rank=64)
@@ -168,7 +171,7 @@ def main():
     dist.all_gather_object(workers, records)
     if rank == 0:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(json.dumps(dict(status='passed', job=os.environ['SLURM_JOB_ID'],
+        args.output.write_text(json.dumps(dict(status='passed', **identity(),
             command=shlex.join([sys.executable, *sys.argv]), environment=os.environ.get('CONDA_DEFAULT_ENV'),
             hosts=hosts, workers=workers, source_sha256=source_hashes(),
             factors_sha256=file_sha256(args.factor_dir / 'results.json')), indent=2) + '\n')

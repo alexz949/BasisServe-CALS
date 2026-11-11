@@ -1,4 +1,5 @@
 """Real Llama/Qwen TP4 short-prompt smoke; no formal performance measurements."""
+from evaluation.kcuu_platform import check_execution, check_devices, identity
 import argparse
 import hashlib
 import json
@@ -20,7 +21,7 @@ def main():
     parser.add_argument('--mode', choices=('ag', 'hybrid'), required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    assert os.environ['SLURM_NNODES'] == '1'
+    check_execution()
     os.environ['VLLM_USE_V2_MODEL_RUNNER'] = '0'
     import torch
     import vllm
@@ -28,7 +29,9 @@ def main():
     from basisserve.vllm import register
     register()
     assert torch.cuda.device_count() == 4
-    assert all(torch.cuda.get_device_capability(i) == (9, 0) for i in range(4))
+    check_devices()
+    torch.backends.cuda.matmul.allow_tf32 = False
+    torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
     sha = file_sha256(args.factor_dir / 'results.json')
     manifest = load_manifest(args.factor_dir, sha)
     layers = manifest['fit_config']['num_hidden_layers']
@@ -41,7 +44,7 @@ def main():
     logits_path = args.output.with_suffix('.safetensors').resolve()
     payload = dict(status='initializing', mode=args.mode, vocab_size=model_config['vocab_size'],
         command=shlex.join([sys.executable, *sys.argv]), environment=os.environ.get('CONDA_DEFAULT_ENV'),
-        job=os.environ['SLURM_JOB_ID'], source_sha256=source_hashes(), model_revision=args.model.name,
+        **identity(), source_sha256=source_hashes(), model_revision=args.model.name,
         factors_sha256=sha, model_config_sha256=file_sha256(args.model / 'config.json'),
         topology=subprocess.check_output(['nvidia-smi', 'topo', '-m'], text=True),
         gpus=subprocess.check_output(['nvidia-smi', '--query-gpu=index,name,memory.total,uuid', '--format=csv'], text=True),
@@ -90,6 +93,7 @@ def main():
     payload['logits_sha256'] = file_sha256(logits_path)
     payload['workers'] = llm.collective_rpc('basisserve_tp4_statistics')
     payload['c1_workers'] = llm.collective_rpc('basisserve_c1_statistics')
+    assert all(w['decode_gather'] == 'nccl_symmetric_inplace' for w in payload['c1_workers'])
     payload['steps'] = llm.collective_rpc('basisserve_step_records')
     assert len({w['hostname'] for w in payload['workers']}) == 1
     assert all(w['loaded_value_layers'] == layers for w in payload['c1_workers'])

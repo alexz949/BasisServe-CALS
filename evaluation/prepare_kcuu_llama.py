@@ -15,7 +15,10 @@ from basisserve.core.tp4_c1_factors import load_manifest
 
 MODEL = Path('/u/azhang35/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659')
 FACTORS = Path('/projects/bido/azhang35/factor-banks/llama31-8b-instruct/R64-S6-D0')
-OUTPUT = Path('results/rebuttal/kcuu_gh200_tp4_8k')
+from evaluation.kcuu_platform import A100, LLAMA_MODEL, LLAMA_FACTORS
+if A100:
+    MODEL, FACTORS = LLAMA_MODEL, LLAMA_FACTORS
+OUTPUT = Path('results/rebuttal/kcuu_a100_tp4_8k' if A100 else 'results/rebuttal/kcuu_gh200_tp4_8k')
 SOURCE_FILES = [
     'basisserve/core/tp4_c1_factors.py', 'basisserve/core/tp4_step.py',
     'basisserve/vllm/tp4_c1_model.py', 'basisserve/vllm/llama_tp4_c1.py',
@@ -32,7 +35,11 @@ SOURCE_FILES = [
 
 
 def source_hashes():
-    return {name: file_sha256(Path(name)) for name in SOURCE_FILES}
+    files = set(SOURCE_FILES)
+    files.update(str(p) for directory in ('basisserve', 'evaluation') for p in Path(directory).rglob('*.py'))
+    files.update(str(p) for p in Path('basisserve/kernels/csrc').rglob('*') if p.is_file())
+    files.add('scripts/a100_tp4_env.sh')
+    return {name: file_sha256(Path(name)) for name in sorted(files)}
 
 
 def main():
@@ -108,7 +115,7 @@ def main():
                   geometry=dict(local_query_heads=8, local_kv_heads=2, head_dim=128,
                                 local_latent_width=512, gathered_width=2048, hidden_width=4096),
                   gpu_smoke_commands=commands,
-                  gpu_smoke_requires=dict(nodes=1, gpus_per_node=4, architecture='SM90'),
+                  gpu_smoke_requires=dict(nodes=1, gpus_per_node=4, architecture='SM80' if A100 else 'SM90'),
                   numerical_gates=dict(attention_relative_l2=0.01, output_relative_l2=0.02,
                       logits_relative_l2=0.02, max_absolute_error='recorded, no independent gate',
                       rationale='Reuse existing BF16 attention/output tolerances; logits 0.02 is a provisional smoke gate, not a quality claim.'),

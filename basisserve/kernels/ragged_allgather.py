@@ -80,10 +80,9 @@ def _match_loaded_cxx_runtime() -> None:
     system_cxx = Path("/usr/bin/g++")
     if "/usr/lib/" in loaded and system_cxx.is_file():
         os.environ["CXX"] = str(system_cxx)
-        # ``cpp_extension`` forwards CC to NVCC as ``-ccbin``.  Pointing it
-        # at gcc can fail on cluster nodes where only the g++ driver knows how
-        # to locate cc1plus, so use the same C++ driver for both build paths.
-        os.environ["CC"] = str(system_cxx)
+        # CC also compiles Triton's C launchers; using g++ rejects C11 constructs.
+        # NVCC accepts the matching gcc driver as its host compiler.
+        os.environ["CC"] = str(system_cxx.with_name("gcc"))
 
 
 def load_ragged_allgather_extension(*, verbose: bool | None = None) -> Any:

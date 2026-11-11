@@ -44,6 +44,11 @@ class KCuuDispatcher(CudagraphDispatcher):
 
 class KCuuWorker(Worker):
     def init_device(self):
+        import torch
+        # Keep BF16 inputs/outputs while avoiding truncated intermediate GEMM sums.
+        # This policy is identical for Dense, AG and hybrid workers.
+        torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
+        torch.backends.cuda.matmul.allow_tf32 = False
         super().init_device()
         assert not self.use_v2_model_runner
         assert not self.vllm_config.scheduler_config.async_scheduling
@@ -77,6 +82,7 @@ class KCuuWorker(Worker):
         from vllm.distributed import get_tp_group
         cache = self.model_runner.kv_cache_config
         return dict(rank=get_tp_group().rank_in_group,
+                    bf16_reduced_precision_reduction=torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction,
                     actual_max_num_seqs=self.vllm_config.scheduler_config.max_num_seqs,
                     actual_max_num_batched_tokens=self.vllm_config.scheduler_config.max_num_batched_tokens,
                     actual_max_model_len=self.vllm_config.model_config.max_model_len,
