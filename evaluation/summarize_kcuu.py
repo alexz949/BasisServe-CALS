@@ -1,4 +1,4 @@
-"""Rebuild the complete 30-cell audit and E2E table from raw JSON results."""
+"""Rebuild the E2E table and separate diagnostic profile inventory."""
 import argparse
 import csv
 import json
@@ -21,6 +21,7 @@ def summarize(root):
                    peak_allocated_gib=None, max_decode_batch=None, preemptions=None,
                    kv_token_capacity_min_rank=None, raw_json=str(path))
         if result.get('status') == 'complete':
+            assert not result['profile']
             assert result['source_sha256'] == plan['source_sha256'], path
             assert (result['prefill_tokens'], result['output_tokens']) == (8192, 128)
             runs = result['runs']; assert len(runs) == 3
@@ -55,14 +56,22 @@ def summarize(root):
         result = json.loads(path.read_text()) if path.exists() else {}
         smoke.append(dict(name=job['name'], status=result.get('status','not_run'),
                           current_source=result.get('source_sha256') == plan['source_sha256']))
-    report = dict(expected_configurations=30, completed=sum(r['median_e2e_seconds'] is not None for r in rows),
+    breakdown = []
+    for job in plan['breakdown']:
+        path = Path(job['output'])
+        result = json.loads(path.read_text()) if path.exists() else {}
+        breakdown.append(dict(name=job['name'], status=result.get('status', 'not_run'),
+            current_source=result.get('source_sha256') == plan['source_sha256'],
+            raw_json=str(path), ranks=result.get('breakdown', [])))
+    report = dict(expected_configurations=len(rows), completed=sum(r['median_e2e_seconds'] is not None for r in rows),
+                  breakdown=breakdown, expected_profiles=len(plan['breakdown']),
                   cells=rows, smoke=smoke, deferred=plan['deferred'],
                   metric_notes='Medians of three independent repeats. Speedup = Dense / arm. B is submitted requests; actual concurrency is measured. Memory includes persistent model/cache allocations; it is not live KV usage.')
     (root/'summary.json').write_text(json.dumps(report,indent=2)+'\n')
     with (root/'summary.csv').open('w',newline='') as handle:
         writer=csv.DictWriter(handle,fieldnames=list(rows[0]))
         writer.writeheader(); writer.writerows(rows)
-    print(f"Completed {report['completed']}/30; smoke",[(s['name'],s['status']) for s in smoke])
+    print(f"Completed {report['completed']}/{len(rows)}; smoke",[(s['name'],s['status']) for s in smoke])
     return report
 
 

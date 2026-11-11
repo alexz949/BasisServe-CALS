@@ -1,4 +1,4 @@
-"""Same-allocation TP4 smoke gates and the 30-configuration KCuu matrix."""
+"""TP4 smoke gates, 24 E2E configurations and six separate B128 profiles."""
 from evaluation.kcuu_platform import A100, check_execution, identity
 import argparse
 import json
@@ -21,7 +21,7 @@ if A100:
 
 def prepare(root):
     python = sys.executable
-    smoke, formal = [], []
+    smoke, formal, breakdown = [], [], []
     for model_name, (model, factors) in MODELS.items():
         common = ['--model', str(model), '--factor-dir', str(factors)]
         out = root / f'{model_name}_boundary.json'
@@ -38,7 +38,7 @@ def prepare(root):
             command=[python, '-m', 'evaluation.compare_kcuu_logits',
                      '--ag', str(root / f'{model_name}_ag_smoke.json'),
                      '--hybrid', str(root / f'{model_name}_hybrid_smoke.json'), '--output', str(out)]))
-    for batch in (64, 16, 32, 128, 256):
+    for batch in (64, 32, 128, 256):
         for model_name, (model, factors) in MODELS.items():
             for arm in ('dense', 'v64_ag', 'v64_hybrid'):
                 name = f'{model_name}_{arm}_b{batch}'
@@ -46,8 +46,15 @@ def prepare(root):
                 formal.append(dict(name=name, model=model_name, arm=arm, batch=batch, output=str(out),
                     command=[python, '-u', '-m', 'evaluation.benchmark_kcuu_tp4', '--model', str(model),
                         '--factor-dir', str(factors), '--arm', arm, '--batch', str(batch), '--output', str(out)]))
-    assert len(formal) == 30
-    return dict(source_sha256=source_hashes(), smoke=smoke, formal=formal,
+                if batch == 128:
+                    profile = dict(formal[-1])
+                    profile['name'] = name + '_profile'
+                    profile['output'] = str(root / 'breakdown' / f'{name}.json')
+                    profile['profile'] = True
+                    profile['command'] = [*formal[-1]['command'][:-1], profile['output'], '--profile']
+                    breakdown.append(profile)
+    assert len(formal) == 24 and len(breakdown) == 6
+    return dict(source_sha256=source_hashes(), smoke=smoke, formal=formal, breakdown=breakdown,
         settings=dict(nodes=1, gpus_per_node=4, prefill_tokens=8192, output_tokens=128,
                       repeats=3, warmups=1, max_num_batched_tokens=8192,
                       gpu_memory_utilization=0.8, cudagraph_mode='FULL_DECODE_ONLY',
@@ -56,7 +63,7 @@ def prepare(root):
         factor_manifest_sha256={name:file_sha256(factors/'results.json') for name,(_,factors) in MODELS.items()},
         execution_identity=identity(),
         authorization='User authorized smoke, fixes and full matrix locally on four A100s' if A100 else 'Authorized two-hour Slurm allocation',
-        deferred=['operator_breakdown', 'fixed_B64_decode_AB'])
+        deferred=['fixed_B64_decode_AB'])
 
 
 def finished(job, hashes):
@@ -69,12 +76,18 @@ def finished(job, hashes):
     if result['source_sha256'] != hashes:
         return False
     if 'batch' in job:
+        repeats = 1 if job.get('profile') else 3
         assert (result['batch'], result['arm'], result['prefill_tokens'], result['output_tokens'],
-                result['repeats'], result['warmups']) == (job['batch'], job['arm'], 8192, 128, 3, 1)
+                result['repeats'], result['warmups']) == (job['batch'], job['arm'], 8192, 128, repeats, 1)
+        assert result['profile'] == job.get('profile', False)
         model, factors = MODELS[job['model']]
         assert result['model_revision'] == model.name
         assert result['factors_sha256'] == file_sha256(factors/'results.json')
-        assert len(result['runs']) == 3
+        assert len(result['runs']) == repeats
+        if job.get('profile'):
+            assert len(result['breakdown']) == 4
+            assert {rank['rank'] for rank in result['breakdown']} == set(range(4))
+            assert all(Path(rank['trace']).is_file() and rank['gpu_events'] > 0 for rank in result['breakdown'])
     return True
 
 
@@ -139,7 +152,7 @@ def main():
                 history.write(json.dumps(previous_plan) + '\n')
     (root/'experiment_plan.json').write_text(json.dumps(plan, indent=2)+'\n')
     if args.prepare_only:
-        for job in plan['smoke'] + plan['formal']:
+        for job in plan['smoke'] + plan['formal'] + plan['breakdown']:
             print(shlex.join(job['command']))
         return
     check_execution()
@@ -161,7 +174,7 @@ def main():
     if args.stage == 'smoke':
         return
     failures = []
-    for job in plan['formal']:
+    for job in plan['formal'] + plan['breakdown']:
         budget = remaining(1200)
         if budget == 0:
             print('Two-hour window exhausted before', job['name'], flush=True)

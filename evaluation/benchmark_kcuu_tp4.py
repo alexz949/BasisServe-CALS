@@ -52,9 +52,12 @@ def main():
     parser.add_argument('--model', type=Path, required=True)
     parser.add_argument('--factor-dir', type=Path, required=True)
     parser.add_argument('--arm', choices=('dense', 'v64_ag', 'v64_hybrid'), required=True)
-    parser.add_argument('--batch', type=int, choices=(16, 32, 64, 128, 256), required=True)
+    parser.add_argument('--batch', type=int, choices=(32, 64, 128, 256), required=True)
+    parser.add_argument('--profile', action='store_true', help='Separate B128 diagnostic run; not an E2E score')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
+    assert not args.profile or args.batch == 128
+    repeats = 1 if args.profile else 3
     check_execution()
     os.environ['VLLM_USE_V2_MODEL_RUNNER'] = '0'
     import torch
@@ -88,11 +91,17 @@ def main():
         worker_cls='basisserve.vllm.kcuu_worker.KCuuWorker',
         worker_extension_cls='basisserve.vllm.worker_extension.BasisServeWorkerExtension',
         hf_overrides=overrides)
+    if args.profile:
+        config['profiler_config'] = dict(profiler='torch',
+            torch_profiler_dir=str(args.output.resolve().with_suffix('')),
+            torch_profiler_with_stack=False, torch_profiler_record_shapes=True,
+            torch_profiler_use_gzip=True, detailed_trace_annotation=True)
     previous = json.loads(args.output.read_text()) if args.output.exists() else None
     assert previous is None or previous['status'] != 'complete' or previous['source_sha256'] != source_hashes()
     payload = dict(status='initializing', command=shlex.join([sys.executable, *sys.argv]),
         environment=os.environ.get('CONDA_DEFAULT_ENV'), **identity(),
-        arm=args.arm, batch=args.batch, prefill_tokens=8192, output_tokens=128, repeats=3, warmups=1,
+        arm=args.arm, batch=args.batch, prefill_tokens=8192, output_tokens=128, repeats=repeats, warmups=1,
+        profile=args.profile, measurement_role='diagnostic_only' if args.profile else 'formal_e2e',
         configuration=config, model_revision=args.model.name, model_config=cfg,
         model_config_sha256=file_sha256(args.model / 'config.json'), factors_sha256=factor_sha,
         source_sha256=source_hashes(),
@@ -133,7 +142,12 @@ def main():
     payload['status'] = 'warming'; save()
     run_batch(llm, prompts, sampling)
     payload['status'] = 'running'; save()
-    for repeat in range(3):
+    if args.profile:
+        llm.collective_rpc('basisserve_install_profile_ranges')
+        trace_dir = Path(config['profiler_config']['torch_profiler_dir'])
+        previous_traces = set(trace_dir.glob('*.pt.trace.json.gz'))
+        llm.start_profile(profile_prefix=args.output.stem)
+    for repeat in range(repeats):
         llm.collective_rpc('basisserve_begin_measurement')
         result = run_batch(llm, prompts, sampling)
         result['repeat'] = repeat
@@ -147,6 +161,14 @@ def main():
         result['max_rank_peak_allocated_bytes'] = max(w['peak_allocated_bytes'] for w in result['workers'])
         payload['runs'].append(result); save()
         print('RUN', args.arm, args.batch, repeat, result['wall_seconds'], 'preemptions',result['preemptions'], flush=True)
+    if args.profile:
+        llm.stop_profile()
+        from evaluation.kcuu_profile import summarize_trace
+        traces = sorted(set(trace_dir.glob('*.pt.trace.json.gz')) - previous_traces)
+        assert len(traces) == 4
+        payload['breakdown'] = [summarize_trace(path) for path in traces]
+        assert {rank['rank'] for rank in payload['breakdown']} == set(range(4))
+        assert all(rank['gpu_events'] > 0 for rank in payload['breakdown'])
     if args.arm != 'dense':
         payload['c1_workers'] = llm.collective_rpc('basisserve_c1_statistics')
         assert all(w['decode_gather'] == 'nccl_symmetric_inplace' for w in payload['c1_workers'])

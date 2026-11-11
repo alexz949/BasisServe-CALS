@@ -67,6 +67,10 @@ class KCuuWorker(Worker):
     def basisserve_step_records(self):
         return list(self.model_runner.cudagraph_dispatcher.step_records)
 
+    def basisserve_install_profile_ranges(self):
+        from evaluation.kcuu_profile import install_ranges
+        install_ranges(self.get_model())
+
     def basisserve_reset_audit(self):
         self.model_runner.cudagraph_dispatcher.step_records.clear()
         if hasattr(self.get_model(), 'c1_boundary'):

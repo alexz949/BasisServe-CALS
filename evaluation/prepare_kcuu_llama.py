@@ -30,7 +30,9 @@ SOURCE_FILES = [
     'evaluation/smoke_kcuu_llama.py', 'evaluation/compare_kcuu_logits.py',
     'evaluation/run_kcuu_llama_smoke.py',
     'evaluation/benchmark_kcuu_tp4.py', 'evaluation/run_kcuu_experiments.py',
+    'evaluation/kcuu_profile.py', 'evaluation/summarize_kcuu.py',
     'scripts/gh200_tp4_env.sh', 'tests/test_tp4_c1_factors.py', 'tests/test_kcuu_tp4.py',
+    'tests/test_kcuu_profile.py',
 ]
 
 
@@ -123,7 +125,7 @@ def main():
                       prefill_tokens=8192, output_tokens=128, max_num_batched_tokens=8192,
                       max_num_seqs=batch, max_model_len=8320, gpu_memory_utilization=0.8,
                       repeats=3, warmups=1, status='not_run')
-                      for batch in (64, 16, 32, 128, 256)
+                      for batch in (64, 32, 128, 256)
                       for model in ('qwen3-32b', 'llama31-8b-instruct')
                       for arm in ('dense', 'v64_ag', 'v64_hybrid')])
     (root / 'llama_preparation.json').write_text(json.dumps(report, indent=2) + '\n')
