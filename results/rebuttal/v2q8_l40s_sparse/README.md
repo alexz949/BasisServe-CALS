@@ -1,8 +1,12 @@
 # V2Q8 sparse baselines on L40S node 2: V128, preliminary
 
-> **Round 2 is in progress.** This README describes round 1 (`formal/`). Round 2 reproduces both baselines from
-> their unmodified upstream runtimes and fixes the issues listed below (`smoke_v3/`, `formal_v2/`). See
-> `audit/COMPATIBILITY.md` sections 12 and 12.1. This README will be rewritten when round 2 finishes.
+> **Round 2 has finished (2026-11-11, `formal_v2/`). This README still describes round 1 (`formal/`); its rewrite
+> for round 2 is pending.** Round 2 reproduces both baselines from their unmodified upstream runtimes and fixes the
+> issues listed below (`smoke_v3/`, `formal_v2/`); BasisKV runs with the lean forward and the faster router
+> (`basis_koff_v128_reuse_opt`). Deviations from upstream: `audit/COMPATIBILITY.md` sections 12 to 12.3. ShadowKV
+> prefill analysis and prefill-group trials: `diagnostics/shadowkv_prefill_summary.md`. LRQK in round 2: with Keys
+> only offloaded every run is out of memory; with Keys and Values offloaded 2 of 7 Exp1 runs complete and every
+> Exp2 run is out of memory.
 
 2026-11-10, Vast.ai 4x L40S node 2, the same machine as `v2q8_palu_g4_tp4/l40s_node2`. The repository is at
 `abf8550`. The benchmark code for these runs is uncommitted, in the working tree: `bench_v2q8_tp.py`,

@@ -35,7 +35,10 @@ HF = ARTIFACTS / "sparse/hf"
 OUT = ROOT / "results/rebuttal/v2q8_l40s_sparse/smoke_v3"
 MODEL = Path("/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/"
              "0e9e39f249a16976918f6564b8830bc894c89659")
-ARMS = ("basis_koff_v128", "basis_koff_v128_reuse", "shadowkv_upstream_v128", "lrqk_upstream_koff_v128")
+# BasisKV with the lean forward and the bit-identical faster router, Base code read from the rotated Value cache
+# (requester's choice for the formal grid; basis_koff_v128_opt keeps a separate Base cache and was smoke-tested
+# only; the archived-router HF arms are basis_koff_v128[_reuse]); the baselines are their upstream runtimes.
+ARMS = ("basis_koff_v128_reuse_opt", "shadowkv_upstream_v128", "lrqk_upstream_koff_v128")
 # Upstream baselines run in their own environment: PyTorch's default CUDA allocator.
 UPSTREAM_ENV = {"PYTORCH_CUDA_ALLOC_CONF": ""}
 
@@ -75,7 +78,7 @@ def run(name, command, gpus, output=None, cwd=ROOT, extra=None):
     log.parent.mkdir(parents=True, exist_ok=True)
     if output is not None:  # a relaunch must not inherit an earlier attempt's result files
         for stale in [output / "result.json", *output.glob("rank_*.json")] if output.exists() else []:
-            stale.unlink()
+            stale.unlink(missing_ok=True)
     begin = time.time()
     with log.open("w") as handle:
         handle.write(json.dumps(dict(command=command, gpus=gpus, extra_env=extra)) + "\n")
@@ -137,7 +140,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--gpus", default="0,1,2,3")
     parser.add_argument("--stages", default="build,checks,exp1,exp2")
+    parser.add_argument("--arms", default=",".join(ARMS), help="comma list; the checks merge into the existing file")
     args = parser.parse_args()
+    arms = tuple(args.arms.split(","))
     gpus = [int(g) for g in args.gpus.split(",")]
     stages, records = args.stages.split(","), []
     if "build" in stages:
@@ -148,24 +153,26 @@ def main():
     if "checks" in stages:
         # Every arm's TP4 path against its own TP1 run, teacher-forced on real text, dense as the noise reference.
         import check_v2q8_tp_consistency
-        records += check_v2q8_tp_consistency.main()
+        records += check_v2q8_tp_consistency.main(arms)
     if "exp1" in stages:
         # Compile each BasisKV router geometry once before parallel jobs import it.
-        name, script, output, extra = bench("exp1", "basis_koff_v128", "request", 8192, 1, gpus[:1], tag="_build")
+        basis = next((arm for arm in arms if arm.startswith("basis")), None)
+        name, script, output, extra = bench("exp1", basis or arms[0], "request", 8192, 1, gpus[:1], tag="_build")
         records.append(run(name, torchrun(script, gpus[:1]), gpus[:1], output, extra=extra))
-        jobs = [bench("exp1", arm, mode, 8192, 1, [0]) for arm in ARMS for mode in ("request", "steady", "breakdown")]
+        jobs = [bench("exp1", arm, mode, 8192, 1, [0]) for arm in arms for mode in ("request", "steady", "breakdown")]
         records += single_gpu(jobs, gpus)
-        jobs = [bench("exp1", arm, mode, 130048, 1, [0]) for arm in ARMS for mode in ("request", "breakdown")]
-        # Informational: LRQK's 130K capacity under the allocator setting BasisKV uses.
-        jobs.append(bench("exp1", "lrqk_upstream_koff_v128", "request", 130048, 1, [0],
-                          extra={"PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"}, tag="_expandable"))
+        jobs = [bench("exp1", arm, mode, 130048, 1, [0]) for arm in arms for mode in ("request", "breakdown")]
+        if "lrqk_upstream_koff_v128" in arms:
+            # Informational: LRQK's 130K capacity under the allocator setting BasisKV uses.
+            jobs.append(bench("exp1", "lrqk_upstream_koff_v128", "request", 130048, 1, [0],
+                              extra={"PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"}, tag="_expandable"))
         records += single_gpu(jobs, gpus)
     if "exp2" in stages:
-        for arm in ARMS:
+        for arm in arms:
             for mode in ("request", "steady", "breakdown"):
                 name, script, output, extra = bench("exp2", arm, mode, 8192, 4, gpus)
                 records.append(run(name, torchrun(script, gpus), gpus, output, extra=extra))
-        for arm in ARMS:
+        for arm in arms:
             name, script, output, extra = bench("exp2", arm, "request", 65536, 16, gpus)
             records.append(run(name, torchrun(script, gpus), gpus, output, extra=extra))
     summary = OUT / f"runner_{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}.json"

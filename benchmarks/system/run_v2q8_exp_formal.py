@@ -45,10 +45,10 @@ def adapter_checks(arm, experiment):
     return all(parts.values()), parts
 
 
-def gates(experiment):
+def gates(experiment, arms):
     stage, batch = ("exp1", 1) if experiment == 1 else ("exp2", 4)
     decisions = {}
-    for arm in smoke.ARMS:
+    for arm in arms:
         smoke_ok = all((result(SMOKE / stage / f"{arm}_{mode}_b{batch}_t8192") or {}).get("status") == "complete"
                        for mode in ("request", "steady", "breakdown"))
         checks_ok, parts = adapter_checks(arm, experiment)
@@ -60,13 +60,15 @@ def gates(experiment):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--experiments", default="1,2")
+    parser.add_argument("--arms", default=",".join(smoke.ARMS))
     args = parser.parse_args()
+    arms = tuple(args.arms.split(","))
     smoke.OUT = OUT  # logs and outputs of formal runs go under formal/
     records, plan = [], {}
     for experiment in (int(e) for e in args.experiments.split(",")):
-        setup, decision = SETUP[experiment], gates(experiment)
+        setup, decision = SETUP[experiment], gates(experiment, arms)
         plan[f"exp{experiment}"] = decision
-        for arm in smoke.ARMS:
+        for arm in arms:
             if not decision[arm]["run"]:
                 records.append(dict(name=f"exp{experiment}_{arm}", status="skipped_by_smoke_gate", gate=decision[arm]))
                 print(json.dumps(records[-1]), flush=True)

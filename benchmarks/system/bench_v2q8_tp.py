@@ -50,13 +50,32 @@ sys.path.insert(0, str(ROOT / "benchmarks/system"))
 ARMS = {
     "basis_koff_v128": dict(method="basis", value=128, reuse=False),
     "basis_koff_v128_reuse": dict(method="basis", value=128, reuse=True),
+    # Same BasisKV attention inside the lean non-attention forward of basisserve/core/lean_llama.py (upstream
+    # ShadowKV's model computation: fused gate_up, flashinfer RMSNorm, plain local weights + AllReduce).
+    "basis_koff_v128_lean": dict(method="basis", value=128, reuse=False, lean=True),
+    "basis_koff_v128_reuse_lean": dict(method="basis", value=128, reuse=True, lean=True),
+    # Lean forward plus the faster router with bit-identical page scores (benchmarks/system/table3_router_fast.cu).
+    "basis_koff_v128_opt": dict(method="basis", value=128, reuse=False, lean=True, fast_router=True),
+    "basis_koff_v128_reuse_opt": dict(method="basis", value=128, reuse=True, lean=True, fast_router=True),
     "basis_koff_v96": dict(method="basis", value=96, reuse=False),
     "basis_koff_v96_reuse": dict(method="basis", value=96, reuse=True),
     "shadowkv_voff_v128": dict(method="shadowkv", value=128),
     # The upstream ShadowKV runtime itself (W=1) or its minimal TP port (basisserve/core/shadowkv_upstream_tp.py).
     "shadowkv_upstream_v128": dict(method="shadowkv_upstream", value=128),
+    # Requester's variants: the same runtime with 1 or 16 requests per prefill forward instead of upstream's groups of
+    # 4 (8 for 120K-200K prompts). The loop of upstream batch_prefill is repeated in this file with that one constant
+    # changed; upstream's cache already takes any group size (prefilled_batch). Not the upstream schedule.
+    "shadowkv_upstream_g1_v128": dict(method="shadowkv_upstream", value=128, prefill_group=1),
+    "shadowkv_upstream_g16_v128": dict(method="shadowkv_upstream", value=128, prefill_group=16),
+    # Where the TP port runs upstream's joint per-request SVD (basisserve/core/shadowkv_upstream_tp.py); the
+    # algorithm, the prefill groups of 4 and everything else are those of shadowkv_upstream_v128 (centralized).
+    "shadowkv_upstream_reqpar_v128": dict(method="shadowkv_upstream", value=128, svd="request_parallel"),
+    "shadowkv_upstream_repl_v128": dict(method="shadowkv_upstream", value=128, svd="replicated"),
     # The upstream LRQK runtime with Values kept on GPU (basisserve/core/lrqk_upstream.py).
     "lrqk_upstream_koff_v128": dict(method="lrqk_upstream", value=128),
+    # The upstream LRQK runtime in its own placement: exact K and V in one pinned host pool (no code of ours in the
+    # cache path).
+    "lrqk_upstream_kvoff_v128": dict(method="lrqk_upstream", value=128, kv_offload=True),
     "lrqk_koff_v128": dict(method="lrqk", value=128),
     "lrqk_koff_v96": dict(method="lrqk", value=96),
     "dense_v128": dict(method="dense", value=128),
@@ -190,8 +209,11 @@ def build_shadowkv_upstream(args, world, timers):
     from basisserve.core import shadowkv_upstream_tp as upstream_tp
 
     device = torch.device("cuda", torch.cuda.current_device())
+    svd_mode = ARMS[args.arm].get("svd", "centralized")
+    # The SVD-mode arms are compared at upstream's prefill groups of 4 (upstream switches to 8 for 120K-200K).
+    assert svd_mode == "centralized" or not 120 * 1024 < args.length < 200 * 1024
     llama = upstream_tp.build(frozen.MODEL, batch=args.batch, max_length=args.length + args.output_tokens + 8,
-                              device=device)
+                              device=device, svd_mode=svd_mode)
     instrument = args.mode == "breakdown"
     if instrument:
         base, _, _ = upstream_tp.import_upstream()
@@ -204,12 +226,13 @@ def build_shadowkv_upstream(args, world, timers):
 
         base.flash_attn_with_kvcache = timed(base.flash_attn_with_kvcache, "flash_attention")
         torch.svd = timed(torch.svd, "svd")
-        upstream_tp.PHASE = timers
+        upstream_tp.PHASE, upstream_tp.INSTRUMENT = timers, True
     cache_labels = dict(get_svd="get_svd_total", prefill_kv_cache="landmarks_outliers_and_value_offload",
                         update_kv_cache="append_new_token", get_retrieval_position_ids="selection_landmark_scores_topk",
                         get_value_cache="value_miss_fetch_h2d", get_key_cache="key_miss_reconstruct")
 
     def reset():
+        upstream_tp.reset_counts()
         cache = upstream_tp.fresh_cache(llama, length=args.length, output_tokens=args.output_tokens)
         if instrument:
             for name, label in cache_labels.items():
@@ -220,6 +243,8 @@ def build_shadowkv_upstream(args, world, timers):
     def forward(tokens, start):
         return llama.inference(input_ids=tokens, position_ids=llama.get_ctx(tokens))[:, -1].float()
 
+    group = ARMS[args.arm].get("prefill_group")
+
     def prefill_batch(prompts):
         """Upstream batch_prefill; each request's first-token time is the end of its prefill group."""
         ends = []
@@ -229,9 +254,18 @@ def build_shadowkv_upstream(args, world, timers):
             ends.extend([sync()] * input_ids.shape[0])
             return output
 
-        llama.inference = inference
-        logits = llama.batch_prefill(prompts)
-        del llama.inference
+        if group is None:
+            llama.inference = inference
+            logits = llama.batch_prefill(prompts)
+            del llama.inference
+        else:  # upstream batch_prefill's body (models/base.py) with its group size T replaced by `group`
+            llama.kv_cache.clear()
+            assert prompts.shape[0] == llama.batch_size and prompts.shape[1] <= llama.max_length
+            logits = torch.zeros(prompts.shape[0], 1, llama.vocab_size, device=llama.device, dtype=torch.float32)
+            for start in range(0, prompts.shape[0], group):
+                part = prompts[start:start + group]
+                logits[start:start + group].copy_(inference(input_ids=part, position_ids=llama.get_ctx(part)))
+            assert llama.kv_cache.get_kv_len() == prompts.shape[-1]
         return logits[:, -1].argmax(-1)[:, None], ends
 
     def place():
@@ -246,14 +280,39 @@ def build_shadowkv_upstream(args, world, timers):
                        "(ByteDance-Seed/ShadowKV@e51904cd), source unmodified" + (
                            "" if world == 1 else "; minimal TP port basisserve/core/shadowkv_upstream_tp.py"),
         shadowkv=dict(rank=upstream_tp.RANK, chunk=upstream_tp.CHUNK, sparse_budget=upstream_tp.SPARSE_BUDGET),
-        prefill="upstream batch_prefill (request groups of 4; 8 for 120K-200K prompts)",
-        tp=None if world == 1 else "local heads and MLP slice per rank, AllReduce after wo and down_proj, global "
-           "SVD on the layer owner (layer % W) with Key gather and U/SV scatter; embedding, norms, lm_head replicated",
+        prefill="upstream batch_prefill (request groups of 4; 8 for 120K-200K prompts)" if group is None else
+                f"NOT the upstream schedule: upstream batch_prefill's loop with request groups of {group} "
+                "(requester's variant; upstream uses 4, or 8 for 120K-200K prompts)",
+        tp=None if world == 1 else "local heads and MLP slice per rank, AllReduce after wo and down_proj, joint "
+           "per-request SVD of all 8 KV heads placed by svd.mode; embedding, norms, lm_head replicated",
+        svd=None if world == 1 else dict(
+            mode=svd_mode,
+            placement=dict(
+                centralized="the layer's owner (layer % W) receives the Keys of the whole prefill group, decomposes "
+                            "all its requests, sends U to every rank and each rank's SV rows",
+                request_parallel="request j of the prefill group is decomposed on rank j % W, which receives its "
+                                 "Keys from every rank; owners decompose at the same time; U to every rank and "
+                                 "each rank's SV rows",
+                replicated="every rank projects the Keys of all 8 heads during prefill (extra K rows of the other "
+                           "ranks' heads) and decomposes every request itself; no Key or factor exchange")[svd_mode],
+            decomposition="upstream: FP32 torch.svd of [T, 8*128] pre-RoPE Keys per request, first 160 components, "
+                          "BF16 factors on host until H2D",
+            housekeeping="upstream synchronize + gc.collect + empty_cache once per get_svd call on every rank"),
         generation_buffer_tokens=llama.kv_cache.k_cache_buffer.shape[-2],
         generation_buffer_policy="at least actual initial support plus output-token count; capacity only")
+    def svd_runtime():
+        """Since the last reset, on this rank: Key/factor payload sent and get_svd housekeeping calls; plus the
+        sizes of the factors and of the replicated mode's extra K rows."""
+        cache = llama.kv_cache
+        size = lambda tensor: tensor.numel() * tensor.element_size()
+        return dict(mode=svd_mode, counts={label: dict(row) for label, row in upstream_tp.COUNTS.items()},
+                    u_bytes=size(cache.U), u_device=str(cache.U.device), local_sv_bytes=size(cache.SV),
+                    extra_k_weight_bytes=sum(size(layer.wk_rest) for layer in llama.layers
+                                             if getattr(layer, "wk_rest", None) is not None))
+
     return SimpleNamespace(model=holder, layers=[], forward=forward, reset=reset, place=place,
                            prefill_batch=prefill_batch, llama=llama, configuration=configuration,
-                           state=lambda: llama)
+                           state=lambda: llama, svd_runtime=svd_runtime if world > 1 else None)
 
 
 def build_lrqk_upstream(args, world, timers):
@@ -265,7 +324,14 @@ def build_lrqk_upstream(args, world, timers):
     from evaluation.chunked_prefill_mlp import ChunkedTokenwise
     from basisserve.core import lrqk_upstream
 
-    module, split_kv, k_only, factory_class = lrqk_upstream.make_classes()
+    kv_offload = bool(ARMS[args.arm].get("kv_offload"))
+    if kv_offload:
+        # Upstream placement: the upstream classes themselves (shared K/V host pool, CPU gather of K and V).
+        module = lrqk_upstream.upstream()
+        split_kv, k_only = module.AutoIncreaseTensorSharedKV, module.LightAttentionIndicesFactory
+        factory_class = module.LightAttentionIndicesOffloadPrefill
+    else:
+        module, split_kv, k_only, factory_class = lrqk_upstream.make_classes()
     options = dict(dtype=torch.bfloat16, attn_implementation="eager", local_files_only=True)
     model = (AutoModelForCausalLM.from_pretrained(frozen.MODEL, **options).cuda() if world == 1 else
              AutoModelForCausalLM.from_pretrained(frozen.MODEL, distributed_config=DistributedConfig(tp_size=world),
@@ -283,6 +349,9 @@ def build_lrqk_upstream(args, world, timers):
         for name, label in (("cast_lrqk_prefill", "als_factor_fit"), ("cast_lrqk_decode", "factor_update"),
                             ("flash_attn_with_kvcache", "flash_attention")):
             setattr(module, name, timed(getattr(module, name), label))
+        if kv_offload:  # upstream fetches missed K and V with one CPU gather
+            module.take_along_dim_with_mask_python = timed(module.take_along_dim_with_mask_python,
+                                                           "kv_miss_fetch_cpu_gather_h2d")
         for owner, name, label in ((k_only, "compute_hit_indices", "proxy_scores_and_topk"),
                                    (k_only, "only_indices_in_cpu", "hit_miss_bookkeeping"),
                                    (split_kv, "append", "kv_store_k_host_v_gpu"),
@@ -318,11 +387,14 @@ def build_lrqk_upstream(args, world, timers):
 
     factories = lambda: [holder["cache"].lwattn[i] for i in sorted(holder["cache"].lwattn)]
     configuration = dict(value="original V128 and Wo",
-        placement="Keys offloaded: exact K in an upstream pinned host pool; Values in an upstream GPU pool; GPU "
-                  "hit cache of top-k + lite per query head; hit cache and A_K parked in host memory during prefill",
+        placement=("Keys and Values offloaded (upstream placement): exact K and V in one upstream pinned host pool; "
+                   if kv_offload else
+                   "Keys offloaded: exact K in an upstream pinned host pool; Values in an upstream GPU pool; ") +
+                  "GPU hit cache of top-k + lite per query head; hit cache and A_K parked in host memory during prefill",
         implementation="upstream lrqk_attention (tenghuilee/LRQK@caf16293): load_model_hack, DynamicLRQKCache, "
-                       "LightAttentionIndicesOffloadPrefill, torch.compile as upstream; source unmodified; "
-                       "basisserve/core/lrqk_upstream.py splits the K/V pool (Values on GPU)",
+                       "LightAttentionIndicesOffloadPrefill, torch.compile as upstream; source unmodified" + (
+                           "" if kv_offload else
+                           "; basisserve/core/lrqk_upstream.py splits the K/V pool (Values on GPU)"),
         lrqk=dict(lrqk_upstream.CONFIG, lambdas=1.0, init="randn"),
         prefill="whole batch in one forward (upstream)", mlp="ChunkedTokenwise(1024) as tp1_offline",
         tp=None if world == 1 else "HF tensor parallel; local head counts on each attention module")
@@ -357,6 +429,7 @@ def build(args, rank, world, timers):
     output = ("AllGather of local V96 coordinates + replicated GQA-tied decoder" if spec["value"] == 96 and world > 1
               else "GQA-tied V96 decoder" if spec["value"] == 96 else "o_proj" + (" (row-parallel AllReduce)" if world > 1 else ""))
     place = lambda: None
+    lean = None
     if spec["method"] == "shadowkv":
         from basisserve.core import shadowkv_tp8_attention as adapter
         from basisserve.core.shadowkv_tp8 import make_tp8_cache
@@ -406,17 +479,20 @@ def build(args, rank, world, timers):
             upstream_float32_matmul_precision=torch.get_float32_matmul_precision(),
             upstream_torch_compile=os.environ.get("LRQK_TORCH_COMPILE") == "1")
     elif spec["method"] == "basis":
-        from table3_page_router import build as build_router
+        from table3_page_router import build as build_router, build_fast
         from benchmarks.system import v2q8_basis
         geometry = BASIS_GEOMETRY[spec["value"]]
         folder = args.build_root / (f"p{geometry['page_size']}_v{spec['value']}_t{geometry['routed_tokens']}"
                                     f"_s{geometry['sink_tokens']}")
-        router = anchors = None
+        router = anchors = fast_router = None
         for turn in range(2):  # rank 0 compiles first; the others load the cached build
             if (turn == 0) == (rank == 0):
                 router, anchors = build_router(frozen.SNAPSHOT, folder, geometry["page_size"],
                                                value_dim=spec["value"], routed_tokens=geometry["routed_tokens"],
                                                sink_tokens=geometry["sink_tokens"])
+                fast_router = (build_fast(args.build_root / f"fast_p{geometry['page_size']}_v{spec['value']}",
+                                          geometry["page_size"], value_dim=spec["value"])
+                               if spec.get("fast_router") else None)
             if world > 1:
                 dist.barrier()
         layers = v2q8_basis.install(
@@ -430,6 +506,18 @@ def build(args, rank, world, timers):
             router="B16R16 full-scan page router", **geometry, recent_tokens=64,
             base_code="first 16 coordinates of the rotated Value cache" if spec["reuse"] else "separate Base cache",
             output=output, router_build=anchors)
+        if fast_router is not None:
+            for layer in layers:
+                layer.fast_router = fast_router
+            configuration["router"] += ("; page scores by table3_router_fast.cu (bit-identical to the archived "
+                                        "register router; packed BF16 math, prefetched RoPE, vector loads)")
+        if spec.get("lean"):
+            # Loaded by path: the frozen Table 3 tree on sys.path shadows this repository's basisserve package.
+            lean_llama = frozen.module_from_file("lean_llama", ROOT / "basisserve/core/lean_llama.py")
+            lean = lean_llama.LeanLlama(model, layers, world)
+            configuration["model"] = ("lean forward (basisserve/core/lean_llama.py): replicated embedding/lm_head, "
+                                      "flashinfer RMSNorm, fused gate_up + silu_and_mul, AllReduce after down_proj, "
+                                      "8192-token MLP chunks; as upstream ShadowKV's model")
     else:
         from benchmarks.system import v2q8_tp_baselines
         layers = v2q8_tp_baselines.install(model, "dense", value_checkpoint=None, batch=args.batch,
@@ -440,6 +528,8 @@ def build(args, rank, world, timers):
 
     def forward(tokens, start):
         positions = torch.arange(start, start + tokens.shape[1], device="cuda")[None].expand(tokens.shape[0], -1)
+        if lean is not None:
+            return lean.forward(tokens, positions)
         hidden = model.model(input_ids=tokens, position_ids=positions, use_cache=False).last_hidden_state
         logits = model.lm_head(hidden[:, -1:])
         logits = logits.full_tensor() if hasattr(logits, "full_tensor") else logits
@@ -457,7 +547,7 @@ def build(args, rank, world, timers):
             layer.reset()
 
     return SimpleNamespace(model=model, layers=layers, forward=forward, reset=reset, place=place,
-                           configuration=configuration, state=lambda: layers)
+                           configuration=configuration, state=lambda: (layers, lean))
 
 
 def fresh(runtime):
@@ -567,10 +657,13 @@ def steady(runtime, prompts, warmup, steps, log):
 
 
 PARENTS = {"attention_block": ("cache_append", "router_scan", "page_selection", "key_refresh", "sparse_attention"),
-           "get_svd_total": ("svd", "k_gather", "factor_redistribution_incl_owner_svd_wait"),
+           # factor_redistribution_incl_owner_svd_wait: runs before the SVD modes (wait and transfer in one label).
+           "get_svd_total": ("svd", "k_gather", "factor_redistribution_incl_owner_svd_wait", "svd_housekeeping",
+                             "svd_wait_for_owners", "factor_distribution", "factor_cpu_staging"),
            "lrqk_prefill_total": ("als_factor_fit", "proxy_scores_and_topk", "kv_store_k_host_v_gpu"),
            "lrqk_decode_total": ("factor_update", "proxy_scores_and_topk", "hit_miss_bookkeeping", "miss_indices",
-                                 "key_miss_fetch_cpu_gather_h2d", "value_miss_gather_gpu", "kv_store_k_host_v_gpu")}
+                                 "key_miss_fetch_cpu_gather_h2d", "value_miss_gather_gpu", "kv_store_k_host_v_gpu",
+                                 "kv_miss_fetch_cpu_gather_h2d")}
 
 
 def breakdown(runtime, prompts, warmup, steps, timers):
@@ -715,6 +808,8 @@ def main():
         record["measurement"] = steady(runtime, prompts, warmup, steps, log)
     else:
         record["measurement"] = breakdown(runtime, prompts, warmup, steps, timers)
+    if getattr(runtime, "svd_runtime", None):  # upstream ShadowKV under TP: counters of the measured request
+        record["svd_runtime"] = runtime.svd_runtime()
     record["support"] = support(runtime, args.arm)
     if args.mode == "steady":
         from bench_v2q8_tp1 import inventory

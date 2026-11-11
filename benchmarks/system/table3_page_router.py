@@ -98,3 +98,23 @@ def build(snapshot, folder, page_size, *, value_dim, routed_tokens, sink_tokens)
             f"-DBASIS_ROUTED_TOKENS={routed_tokens}", f"-DBASIS_SINK_TOKENS={sink_tokens}",
         ], verbose=True)
     return module, dict(anchors_found=found, anchors_expected=[2, 2, 1, 1, 1, 1, 1, 1])
+
+
+FAST = Path(__file__).with_name("table3_router_fast.cu")
+
+
+def build_fast(folder, page_size, *, value_dim, tiles=1):
+    """The faster, bit-identical decode router (table3_router_fast.cu), with the archived kernel's defines."""
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / FAST.name
+    if not path.exists() or path.read_text() != FAST.read_text():
+        path.write_text(FAST.read_text())
+    return load(
+        name=f"table3_router_fast_p{page_size}_v{value_dim}_t{tiles}",
+        sources=[str(path)],
+        extra_cflags=["-O3", "-std=c++17"],
+        extra_cuda_cflags=[
+            "-O3", "-std=c++17", "--use_fast_math", "--ptxas-options=-v",
+            f"-DBASIS_VALUE_DIM={value_dim}", "-DBASIS_GQA=4", f"-DBASIS_PAGE_SIZE={page_size}",
+            "-DBASIS_BASE_RANK=16", "-DBASIS_RESIDUAL_RANK=16", f"-DROUTER_TILES={tiles}",
+        ], verbose=True)

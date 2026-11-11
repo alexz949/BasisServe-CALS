@@ -428,3 +428,52 @@ was checked again by a separate skeptic; the confirmed findings are below. `smok
     the schedule.
   - Host memory from the inventory is taken after decode. ShadowKV's pageable host U and SV during prefill appear only
     in `process_rss` after prefill.
+
+### 12.2 BasisKV implementation used in round 2 (the authors' method) (2026-11-11) [all V]
+
+The round-2 BasisKV arms are `basis_koff_v128_opt` and `basis_koff_v128_reuse_opt` (formal grid: `basis_koff_v128_reuse_opt` only, the requester's choice; `_opt` was smoke-tested): the same method and placement as
+`basis_koff_v128[_reuse]`, with two implementation changes. The paper's Table 3 used the archived runtime. These arms
+select the same pages; only the speed differs.
+
+- **Lean forward** (`basisserve/core/lean_llama.py`). The non-attention computation is that of upstream ShadowKV's
+  model and its TP port:
+  - replicated embedding and lm_head, flashinfer RMSNorm;
+  - fused gate_up + vLLM `silu_and_mul`, plain local weights, AllReduce after down_proj;
+  - 8192-token MLP chunks.
+
+  It replaces HF's DTensor tensor-parallel path, which cost about 12 ms per decode step at TP4 B4. The two arms now
+  differ only in attention.
+  - At TP1 the generated tokens are identical to the HF path.
+  - Teacher-forced on the HF path's 128 tokens: top-1 agreement 0.992, mean |Δ logprob| 0.014 (W=1); 1.000 and
+    0.013 (W=4). Dense W=1 vs W=4 noise is 0.992 and 0.013.
+  - The replicated embedding and lm_head add 0.74 GiB per rank at TP4, as in the ShadowKV port.
+- **Faster router** (`benchmarks/system/table3_router_fast.cu`, built by `table3_page_router.build_fast`). Page scores
+  are bit-identical to the archived register router.
+  - Bit equality was checked on seven shapes, including TP1 130K, TP4 B16 64K, the strided reuse view and ragged
+    lengths. The tokens are identical to the lean arm with the archived router.
+  - Unchanged: MMA, thread-to-feature mapping, accumulation order, reductions.
+  - Changed:
+    - prefetched RoPE values and fully unrolled feature loop;
+    - vector code loads, with each residual code read once for two query heads;
+    - BF16-operand roundings done with packed BF16 FMA. These are equal by exact products and by Figueroa's
+      double-rounding bound.
+  - Per layer: 343 → 220 µs at TP1 130K, 737 → 506 µs at TP4 B16 64K.
+  - Per decode step at TP1 130K (CUDA profile): router 11.6 → 7.4 ms; total kernel time 36.5 → 32.3 ms (lean
+    forward plus fast router).
+- **Formal_v2 contents.** It keeps the HF-path BasisKV runs made before this change (`basis_koff_v128[_reuse]_*`,
+  Exp 1 and part of Exp 2) and the baseline runs. The final comparison uses the `_opt` arms.
+
+### 12.3 LRQK in its upstream placement (2026-11-11) [all V]
+
+With Values kept on GPU (`lrqk_upstream_koff_v128`), LRQK ran out of GPU memory at TP1 130K in every attempt. The
+failure is in upstream's ALS prefill fit, `_lrqk_prefill_inv_w1`. The requester then asked for LRQK with K and V both
+offloaded.
+
+- New arm `lrqk_upstream_kvoff_v128`: the upstream classes themselves: `LightAttentionIndicesOffloadPrefill` with
+  upstream's shared pinned host K/V pool and its single CPU gather for missed K and V. None of
+  `basisserve/core/lrqk_upstream.py`'s cache code is used; only `install` (load_model_hack, local head counts under
+  TP) and `new_cache` (configuration) are.
+- This is upstream's own placement, as `tp1_offline` ran it; here tol is (1e-2, 1e-2), and MLP chunking is applied
+  at every length.
+- It runs after the three-arm formal grid: smoke, teacher-forced TP check, then formal Exp 1 and Exp 2 into
+  `formal_v2/`.

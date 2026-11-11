@@ -75,6 +75,8 @@ class BasisAttention(torch.nn.Module):
         self.layer_idx = int(original.layer_idx)
         self.scaling = float(original.scaling)
         self.router, self.slot_extension, self.slot_attention = router, slot_extension, slot_attention
+        # Optional faster router with bit-identical page scores (table3_router_fast.cu); None keeps the archived one.
+        self.fast_router = None
         self.shared_rope, self.offload, self.capacity = shared_rope, bool(offload), int(capacity)
         self.page_size, self.routed_pages, self.sink_tokens = page_size, routed_tokens // page_size, sink_tokens
         self.support_tokens = routed_tokens + RECENT_TOKENS
@@ -218,11 +220,19 @@ class BasisAttention(torch.nn.Module):
         pages = math.ceil(historical / self.page_size)
         assert pages >= self.routed_pages
         self._start("router_scan")
-        self.router.conditional_router_page_lse(
-            query, self.base_cache[:, :, :historical], self.residual_cache[:, :, :historical],
-            self.base_right, self.base_bias, self.residual_query,
-            self.shared_rope["cos"][:historical], self.shared_rope["sin"][:historical],
-            self.query_code, self.router_output[:, :, :, :pages], self.scaling, False)
+        if self.fast_router is None:
+            self.router.conditional_router_page_lse(
+                query, self.base_cache[:, :, :historical], self.residual_cache[:, :, :historical],
+                self.base_right, self.base_bias, self.residual_query,
+                self.shared_rope["cos"][:historical], self.shared_rope["sin"][:historical],
+                self.query_code, self.router_output[:, :, :, :pages], self.scaling, False)
+        else:
+            self.router.conditional_router_query_code(query, self.residual_query, self.query_code)
+            self.fast_router.router_page_lse_fast(
+                query, self.base_cache[:, :, :historical], self.residual_cache[:, :, :historical],
+                self.base_right, self.base_bias,
+                self.shared_rope["cos"][:historical], self.shared_rope["sin"][:historical],
+                self.query_code, self.router_output[:, :, :, :pages], self.scaling)
         self._end("router_scan")
         self._start("page_selection")
         self.router.select_full_group_max_pages_and_pack(
