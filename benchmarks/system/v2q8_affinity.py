@@ -1,7 +1,9 @@
 """CPU placement shared by every V2Q8 arm: a process is pinned to its GPU's NUMA node and, because two GPUs share
 each node on this host, to every other logical CPU of it (`slot` picks which half). torch intra-op threads and
 OpenMP (set OMP_NUM_THREADS to the same count in the launcher) use all of them. The same policy for every arm keeps
-CPU-side work (LRQK's miss gather, host-side bookkeeping) from being throttled for one method and not another."""
+CPU-side work (LRQK's miss gather, host-side bookkeeping) from being throttled for one method and not another.
+Under a scheduler cpuset (Slurm) only the CPUs this process may use are considered: those on the GPU's node, or all
+of them when the allocation has none there; the same half split then applies."""
 
 import os
 from pathlib import Path
@@ -17,7 +19,9 @@ def bind_to_gpu_node(device_index, slot):
     for item in Path(f"/sys/devices/system/node/node{node}/cpulist").read_text().strip().split(","):
         left, _, right = item.partition("-")
         cpus.extend(range(int(left), int(right or left) + 1))
-    assigned, threads = cpus[slot % 2::2], None
+    allowed = sorted(os.sched_getaffinity(0))
+    candidates = [cpu for cpu in cpus if cpu in allowed] or allowed
+    assigned, threads = candidates[slot % 2::2], None
     # Trials only (not the policy above): V2Q8_TRIAL_CPUS="0-23" and V2Q8_TRIAL_THREADS="24" replace the CPU set
     # and the thread count; the record says so.
     trial = os.environ.get("V2Q8_TRIAL_CPUS")

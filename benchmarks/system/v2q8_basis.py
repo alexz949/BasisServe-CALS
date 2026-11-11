@@ -15,6 +15,7 @@ decode advances every row together. With a compressed checkpoint v_proj/o_proj f
 """
 
 import math
+import os
 from pathlib import Path
 
 import torch
@@ -22,6 +23,7 @@ import torch.distributed as dist
 import torch.nn.functional as F
 from safetensors.torch import load_file
 from torch.nn.attention import SDPBackend, sdpa_kernel
+from torch.utils.cpp_extension import load
 from transformers.models.llama.modeling_llama import apply_rotary_pos_emb
 
 RECENT_TOKENS = 64
@@ -47,6 +49,26 @@ def compressed_value_weights(original, checkpoint, layer, kv_start, kv_count):
                        value.float().reshape(kv_count, HEAD_DIM, hidden))
     output = decoder.cuda().float().permute(2, 0, 1).reshape(hidden, QUERY_HEADS * rank)
     return folded.reshape(kv_count * rank, hidden).to(torch.bfloat16), output.to(torch.bfloat16), rank
+
+
+def slot_extension(harness, build_root, support_tokens):
+    """The archived persistent Key-slot kernel with its per-row slot arrays sized for `support_tokens`.
+
+    The archived kernel holds at most 2048 slots per row (Table 3: 1984 routed + 64 recent) in shared memory;
+    paper Table 2's Page4 support is 2048 + 64. Only those four 2048 bounds change, so at 2048 the source is the
+    archived file byte for byte."""
+    text = (harness.REPOSITORY_ROOT / "basisserve/kernels/csrc/persistent_key_slots.cu").read_text()
+    assert text.count("2048") == 4
+    edited = text.replace("2048", str(support_tokens))
+    source = Path(build_root) / f"key_slots_s{support_tokens}" / "persistent_key_slots.cu"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    if not source.exists() or source.read_text() != edited:
+        # Atomic replace: tensor-parallel ranks build concurrently and must never read a partial file.
+        staged = source.with_name(f"{source.name}.{os.getpid()}")
+        staged.write_text(edited)
+        os.replace(staged, source)
+    return load(name=f"v2q8_persistent_key_slots_s{support_tokens}", sources=[str(source)],
+                extra_cflags=["-O3", "-std=c++17"], extra_cuda_cflags=["-O3", "-std=c++17"])
 
 
 class BasisAttention(torch.nn.Module):
@@ -313,11 +335,11 @@ class BasisAttention(torch.nn.Module):
 
 
 def install(model, *, harness, router, bank, value_checkpoint, batch, capacity, page_size, routed_tokens,
-            sink_tokens, offload, value_reuse, rank=0, world=1):
+            sink_tokens, offload, value_reuse, build_root, rank=0, world=1):
     """Replace every attention layer; harness is the frozen TP1 module (slot kernels, chunked MLP)."""
     shared_rope = {name: torch.empty(capacity, 64, device="cuda", dtype=torch.bfloat16)
                    for name in ("cos", "sin")}
-    slot_extension = harness._load_slot_extension() if offload else None
+    slots = slot_extension(harness, build_root, routed_tokens + RECENT_TOKENS) if offload else None
     kv_count = KV_HEADS // world
     layers = []
     for index, layer in enumerate(model.model.layers):
@@ -327,7 +349,7 @@ def install(model, *, harness, router, bank, value_checkpoint, batch, capacity, 
         replacement = BasisAttention(
             layer.self_attn, factors, value_weights=weights, batch=batch, capacity=capacity, page_size=page_size,
             routed_tokens=routed_tokens, sink_tokens=sink_tokens, offload=offload, router=router,
-            slot_extension=slot_extension, slot_attention=harness.slot_indexed_attention,
+            slot_extension=slots, slot_attention=harness.slot_indexed_attention,
             shared_rope=shared_rope, rank=rank, world=world)
         if value_reuse:
             replacement.read_base_from_value()

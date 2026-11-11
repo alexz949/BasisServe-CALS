@@ -1,0 +1,382 @@
+{
+  "source_review": {
+    "copy_stream_waits_for_producer": true,
+    "sources_record_copy_stream": true,
+    "k_only_uses_ordered": true,
+    "kv_uses_ordered": true
+  },
+  "source_sha256": {
+    "benchmarks/system/bench_v2q8_tp.py": "cdc1ac4c19c2587851bbbc788a82dd2dd23cda4fdf5688ef1e1b6fc21644cde3",
+    "benchmarks/system/run_lrqk_tp1_retest.py": "6265e5ba7da9f988abdee32363863ffff72a0708d8f8b4fd5bfc221cfd92f1c5",
+    "benchmarks/system/check_lrqk_offload_order.py": "db1059fac6f1ce9aaef773b8f6b0041aa76bd26b069a58245cac71a945d267ba",
+    "benchmarks/system/v2q8_affinity.py": "2e9fc5516001716417c0a5a74ee46d397f05553b1b60afe1292d7b14e22c04e2",
+    "benchmarks/system/paper_faithful_compat.py": "0b5dddfc089fcb5645b13a436b289f61f8235c4de8e7850dff4d83c711e7d867",
+    "basisserve/core/lrqk_upstream.py": "387c360192f5d76d9eda0b21dac7d4ce4f4c5f989d3ed6b3e2f8f6c876d301c1",
+    "external/LRQK/lrqk_attention.py": "2bfbc6df2bf97316ce5b086249ce8af48481b0a78f89f6650e19463fe783fab5",
+    "external/LRQK/cpp_kernel/take_along_dim_grouped.cpp": "13727bb82b285e19a93682aa7ce71209b77160688dd9731c57c440ea3ac43da5"
+  },
+  "offload_order": {
+    "exit_code": 0,
+    "ordered": {
+      "K": {
+        "wrong": 0,
+        "total": 17301504,
+        "min": 2.0,
+        "max": 2.0
+      },
+      "V": {
+        "wrong": 0,
+        "total": 17301504,
+        "min": 3.0,
+        "max": 3.0
+      },
+      "A_K": {
+        "wrong": 0,
+        "total": 16777216,
+        "min": 4.0,
+        "max": 4.0
+      }
+    },
+    "upstream_unordered": {
+      "K": {
+        "wrong": 17301504,
+        "total": 17301504,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "V": {
+        "wrong": 17301504,
+        "total": 17301504,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "A_K": {
+        "wrong": 16777216,
+        "total": 16777216,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "passed": true,
+    "scope": "Source tensors are kept alive by the script: it isolates the producer-to-copy stream ordering and is not a full allocator-lifetime regression test."
+  },
+  "smoke_8k": [
+    {
+      "name": "lrqk_upstream_koff_v128_request_b1_t8192_smoke",
+      "status": "complete",
+      "exit_code": 0,
+      "output_tokens": 8,
+      "expected_output_tokens": 8,
+      "logprobs": 7,
+      "logprobs_finite": true,
+      "loaded": {
+        "files_match": {
+          "basisserve/core/lrqk_upstream.py": true,
+          "external/LRQK/lrqk_attention.py": true,
+          "benchmarks/system/bench_v2q8_tp.py": true
+        },
+        "ordered_prefill_in_mro": true,
+        "mro": [
+          "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyOffloadPrefill",
+          "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+          "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+          "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyFactory",
+          "lrqk_attention.LightAttentionIndicesFactory"
+        ]
+      },
+      "effective": {
+        "torch_compile_disabled": false,
+        "torch_compile_disable_env": null,
+        "float32_matmul_precision": "high",
+        "cuda_matmul_allow_tf32": true,
+        "cudnn_allow_tf32": false,
+        "nvidia_tf32_override": null,
+        "omp_num_threads": "24"
+      },
+      "seconds": 51.6,
+      "passed": true
+    },
+    {
+      "name": "lrqk_upstream_kvoff_v128_request_b1_t8192_smoke",
+      "status": "complete",
+      "exit_code": 0,
+      "output_tokens": 8,
+      "expected_output_tokens": 8,
+      "logprobs": 7,
+      "logprobs_finite": true,
+      "loaded": {
+        "files_match": {
+          "basisserve/core/lrqk_upstream.py": true,
+          "external/LRQK/lrqk_attention.py": true,
+          "benchmarks/system/bench_v2q8_tp.py": true
+        },
+        "ordered_prefill_in_mro": true,
+        "mro": [
+          "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+          "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+          "lrqk_attention.LightAttentionIndicesFactory"
+        ]
+      },
+      "effective": {
+        "torch_compile_disabled": false,
+        "torch_compile_disable_env": null,
+        "float32_matmul_precision": "high",
+        "cuda_matmul_allow_tf32": true,
+        "cudnn_allow_tf32": false,
+        "nvidia_tf32_override": null,
+        "omp_num_threads": "24"
+      },
+      "seconds": 52.7,
+      "passed": true
+    }
+  ],
+  "placement_consistency": {
+    "method": "Fixed K-only (lrqk_upstream_koff_v128) decodes 128 greedy tokens from an 8192-token prompt; fixed K+V (lrqk_upstream_kvoff_v128) is fed exactly those tokens. Compared at every position on the same prefix: the K+V argmax against the K-only token (position 0 is the prefill prediction), and the log-probability each placement gives the same fed token (127 decode steps).",
+    "reference_for_the_gate": "TP8 check reached top-1 100% and max log-probability difference 0",
+    "cohorts": [
+      {
+        "cohort": 0,
+        "complete": true,
+        "reference": "results/rebuttal/v2q8_l40s_sparse/tp1_lrqk_retest/consistency/lrqk_upstream_koff_v128_reference_t8192_c0",
+        "forced": "results/rebuttal/v2q8_l40s_sparse/tp1_lrqk_retest/consistency/lrqk_upstream_kvoff_v128_forced_t8192_c0",
+        "steps": 128,
+        "argmax_matches": 128,
+        "top1_agreement": 1.0,
+        "first_argmax_mismatch": null,
+        "logprob_steps": 127,
+        "logprob_max_abs_difference": 0.0,
+        "logprob_mean_abs_difference": 0.0,
+        "logprobs_finite": true,
+        "loaded": [
+          {
+            "files_match": {
+              "basisserve/core/lrqk_upstream.py": true,
+              "external/LRQK/lrqk_attention.py": true,
+              "benchmarks/system/bench_v2q8_tp.py": true
+            },
+            "ordered_prefill_in_mro": true,
+            "mro": [
+              "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyOffloadPrefill",
+              "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+              "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+              "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyFactory",
+              "lrqk_attention.LightAttentionIndicesFactory"
+            ]
+          },
+          {
+            "files_match": {
+              "basisserve/core/lrqk_upstream.py": true,
+              "external/LRQK/lrqk_attention.py": true,
+              "benchmarks/system/bench_v2q8_tp.py": true
+            },
+            "ordered_prefill_in_mro": true,
+            "mro": [
+              "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+              "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+              "lrqk_attention.LightAttentionIndicesFactory"
+            ]
+          }
+        ]
+      },
+      {
+        "cohort": 1,
+        "complete": true,
+        "reference": "results/rebuttal/v2q8_l40s_sparse/tp1_lrqk_retest/consistency/lrqk_upstream_koff_v128_reference_t8192_c1",
+        "forced": "results/rebuttal/v2q8_l40s_sparse/tp1_lrqk_retest/consistency/lrqk_upstream_kvoff_v128_forced_t8192_c1",
+        "steps": 128,
+        "argmax_matches": 128,
+        "top1_agreement": 1.0,
+        "first_argmax_mismatch": null,
+        "logprob_steps": 127,
+        "logprob_max_abs_difference": 0.0,
+        "logprob_mean_abs_difference": 0.0,
+        "logprobs_finite": true,
+        "loaded": [
+          {
+            "files_match": {
+              "basisserve/core/lrqk_upstream.py": true,
+              "external/LRQK/lrqk_attention.py": true,
+              "benchmarks/system/bench_v2q8_tp.py": true
+            },
+            "ordered_prefill_in_mro": true,
+            "mro": [
+              "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyOffloadPrefill",
+              "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+              "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+              "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyFactory",
+              "lrqk_attention.LightAttentionIndicesFactory"
+            ]
+          },
+          {
+            "files_match": {
+              "basisserve/core/lrqk_upstream.py": true,
+              "external/LRQK/lrqk_attention.py": true,
+              "benchmarks/system/bench_v2q8_tp.py": true
+            },
+            "ordered_prefill_in_mro": true,
+            "mro": [
+              "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+              "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+              "lrqk_attention.LightAttentionIndicesFactory"
+            ]
+          }
+        ]
+      },
+      {
+        "cohort": 2,
+        "complete": true,
+        "reference": "results/rebuttal/v2q8_l40s_sparse/tp1_lrqk_retest/consistency/lrqk_upstream_koff_v128_reference_t8192_c2",
+        "forced": "results/rebuttal/v2q8_l40s_sparse/tp1_lrqk_retest/consistency/lrqk_upstream_kvoff_v128_forced_t8192_c2",
+        "steps": 128,
+        "argmax_matches": 128,
+        "top1_agreement": 1.0,
+        "first_argmax_mismatch": null,
+        "logprob_steps": 127,
+        "logprob_max_abs_difference": 0.0,
+        "logprob_mean_abs_difference": 0.0,
+        "logprobs_finite": true,
+        "loaded": [
+          {
+            "files_match": {
+              "basisserve/core/lrqk_upstream.py": true,
+              "external/LRQK/lrqk_attention.py": true,
+              "benchmarks/system/bench_v2q8_tp.py": true
+            },
+            "ordered_prefill_in_mro": true,
+            "mro": [
+              "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyOffloadPrefill",
+              "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+              "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+              "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyFactory",
+              "lrqk_attention.LightAttentionIndicesFactory"
+            ]
+          },
+          {
+            "files_match": {
+              "basisserve/core/lrqk_upstream.py": true,
+              "external/LRQK/lrqk_attention.py": true,
+              "benchmarks/system/bench_v2q8_tp.py": true
+            },
+            "ordered_prefill_in_mro": true,
+            "mro": [
+              "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+              "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+              "lrqk_attention.LightAttentionIndicesFactory"
+            ]
+          }
+        ]
+      }
+    ],
+    "pooled_top1_agreement": 1.0,
+    "pooled_logprob_max_abs_difference": 0.0,
+    "exact": true,
+    "scope": "Implementation and placement consistency only; not a quality comparison with Dense."
+  },
+  "probe_64k": [
+    {
+      "name": "lrqk_upstream_koff_v128_request_b1_t65536_smoke",
+      "status": "complete",
+      "exit_code": 0,
+      "output_tokens": 8,
+      "expected_output_tokens": 8,
+      "logprobs": 7,
+      "logprobs_finite": true,
+      "loaded": {
+        "files_match": {
+          "basisserve/core/lrqk_upstream.py": true,
+          "external/LRQK/lrqk_attention.py": true,
+          "benchmarks/system/bench_v2q8_tp.py": true
+        },
+        "ordered_prefill_in_mro": true,
+        "mro": [
+          "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyOffloadPrefill",
+          "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+          "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+          "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyFactory",
+          "lrqk_attention.LightAttentionIndicesFactory"
+        ]
+      },
+      "effective": {
+        "torch_compile_disabled": false,
+        "torch_compile_disable_env": null,
+        "float32_matmul_precision": "high",
+        "cuda_matmul_allow_tf32": true,
+        "cudnn_allow_tf32": false,
+        "nvidia_tf32_override": null,
+        "omp_num_threads": "24"
+      },
+      "seconds": 84.8,
+      "passed": true,
+      "decode_ready_seconds": 16.0855893320404,
+      "request_seconds": 18.585378036135808,
+      "memory_after_prefill": {
+        "allocated": 20402809856,
+        "reserved": 40277901312,
+        "peak_allocated": 28123329536,
+        "peak_reserved": 40277901312,
+        "device_used": 41333620736,
+        "process_rss": 21450784768
+      },
+      "memory_after_decode": {
+        "allocated": 27953077248,
+        "reserved": 32493273088,
+        "peak_allocated": 28121556480,
+        "peak_reserved": 40277901312,
+        "device_used": 33548992512,
+        "process_rss": 21450997760
+      }
+    },
+    {
+      "name": "lrqk_upstream_kvoff_v128_request_b1_t65536_smoke",
+      "status": "complete",
+      "exit_code": 0,
+      "output_tokens": 8,
+      "expected_output_tokens": 8,
+      "logprobs": 7,
+      "logprobs_finite": true,
+      "loaded": {
+        "files_match": {
+          "basisserve/core/lrqk_upstream.py": true,
+          "external/LRQK/lrqk_attention.py": true,
+          "benchmarks/system/bench_v2q8_tp.py": true
+        },
+        "ordered_prefill_in_mro": true,
+        "mro": [
+          "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+          "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+          "lrqk_attention.LightAttentionIndicesFactory"
+        ]
+      },
+      "effective": {
+        "torch_compile_disabled": false,
+        "torch_compile_disable_env": null,
+        "float32_matmul_precision": "high",
+        "cuda_matmul_allow_tf32": true,
+        "cudnn_allow_tf32": false,
+        "nvidia_tf32_override": null,
+        "omp_num_threads": "24"
+      },
+      "seconds": 99.0,
+      "passed": true,
+      "decode_ready_seconds": 18.78870801301673,
+      "request_seconds": 21.99894185992889,
+      "memory_after_prefill": {
+        "allocated": 16103123968,
+        "reserved": 32107397120,
+        "peak_allocated": 23958008832,
+        "peak_reserved": 32107397120,
+        "device_used": 33179893760,
+        "process_rss": 30034837504
+      },
+      "memory_after_decode": {
+        "allocated": 23653391360,
+        "reserved": 23899144192,
+        "peak_allocated": 23821870592,
+        "peak_reserved": 32107397120,
+        "device_used": 24971640832,
+        "process_rss": 30035128320
+      }
+    }
+  ],
+  "written_utc": "2026-11-11T21:49:53Z"
+}

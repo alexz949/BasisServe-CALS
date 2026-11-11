@@ -3,6 +3,9 @@ checks against the quality references, and 130048-token capacity probes. Each jo
 own log; jobs are spread over the GPUs, one job per GPU at a time. Smoke timings are not results.
 
 Usage: python benchmarks/system/run_v2q8_tp1_smoke.py [--gpus 0,1,2,3] [--stages build,short,check,capacity]
+           [--arms dense,basis_v96,...] [--output DIR]
+Other hosts: BASIS_ARTIFACTS (asset root), V2Q8_PYTHON (benchmark interpreter), V2Q8_CUDA_HOME (toolkit for the
+JIT builds), V2Q8_BANK_V128 (V128 router bank) and BENCH_MODEL (model snapshot, read by audit_tp1_request).
 """
 
 import argparse
@@ -16,15 +19,16 @@ import threading
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
-ARTIFACTS = Path("/workspace/basis_artifacts")
-PYTHON = ARTIFACTS / "envs/lowrank/bin/python"
+ARTIFACTS = Path(os.environ.get("BASIS_ARTIFACTS", "/workspace/basis_artifacts"))
+PYTHON = Path(os.environ.get("V2Q8_PYTHON", ARTIFACTS / "envs/lowrank/bin/python"))
+CUDA = Path(os.environ.get("V2Q8_CUDA_HOME", ARTIFACTS / "cuda/12.9"))
 HF = ARTIFACTS / "sparse/hf"
-OUT = ROOT / "results/rebuttal/v2q8_l40s_sparse/tp1_128k/smoke"
+OUT = ROOT / "results/rebuttal/v2q8_l40s_sparse/tp1_128k/smoke"  # --output replaces it
 COMMON = [
     "--inputs", str(HF / "system_benchmarks/tp1_offline/inputs/prompts.safetensors"),
     "--value-checkpoint", str(ARTIFACTS / "checkpoints/attention_c1/llama31_8b_instruct_uniform_v96_128k_als6_retrievalmix"),
     "--bank-v96", str(HF / "checkpoints/attention_c1/llama31_8b_instruct_uniform_v96_128k_als6_retrievalmix/router_page4_b16r16"),
-    "--bank-v128", "/workspace/runs/l31-router-source/v128-router/ours_b16r16",
+    "--bank-v128", os.environ.get("V2Q8_BANK_V128", "/workspace/runs/l31-router-source/v128-router/ours_b16r16"),
     "--build-root", str(ARTIFACTS / "sparse/build"),
 ]
 ARMS = ("dense", "basis_v128", "basis_v96", "basis_v96_reuse", "basis_v96_resident",
@@ -32,7 +36,7 @@ ARMS = ("dense", "basis_v128", "basis_v96", "basis_v96_reuse", "basis_v96_reside
 
 
 def environment(gpu):
-    cuda = ARTIFACTS / "cuda/12.9"
+    cuda = CUDA
     env = dict(os.environ, CUDA_HOME=str(cuda), TORCH_CUDA_ARCH_LIST="8.9", MAX_JOBS="16",
                CUDA_VISIBLE_DEVICES=str(gpu), PYTHONPATH=str(ROOT), NVIDIA_TF32_OVERRIDE="0", OMP_NUM_THREADS="24",
                PATH=f"{cuda}/bin:{PYTHON.parent}:{os.environ['PATH']}",
@@ -98,38 +102,47 @@ def parallel(jobs, gpus):
 
 
 def main():
+    global OUT
     parser = argparse.ArgumentParser()
     parser.add_argument("--gpus", default="0,1,2,3")
     parser.add_argument("--stages", default="build,short,check,capacity")
+    parser.add_argument("--arms", default=",".join(ARMS))
+    parser.add_argument("--output", type=Path, default=OUT)
     args = parser.parse_args()
+    OUT = args.output.resolve()
     gpus = [int(g) for g in args.gpus.split(",")]
     stages = args.stages.split(",")
+    arms = args.arms.split(",")
     records = []
     if "build" in stages:
-        records.append(run("build_shadowkv", [str(PYTHON), "setup.py", "build_ext", "--inplace"], gpus[0],
-                           cwd=ROOT / "external/ShadowKV"))
-        records.append(run("build_lrqk_gather", [str(PYTHON), "setup.py", "build_ext", "--inplace"], gpus[0],
-                           cwd=ROOT / "external/LRQK/cpp_kernel"))
+        if "shadowkv_native" in arms:
+            records.append(run("build_shadowkv", [str(PYTHON), "setup.py", "build_ext", "--inplace"], gpus[0],
+                               cwd=ROOT / "external/ShadowKV"))
+        if "lrqk_native" in arms:
+            records.append(run("build_lrqk_gather", [str(PYTHON), "setup.py", "build_ext", "--inplace"], gpus[0],
+                               cwd=ROOT / "external/LRQK/cpp_kernel"))
         # Compile each BasisKV router geometry once, serially, before any parallel job imports it.
         for arm in ("basis_v96", "basis_v96_reuse", "basis_v128"):
-            records.append(run(*bench(arm, "request", 8192, label="build"), gpus[0]))
+            if arm in arms:
+                records.append(run(*bench(arm, "request", 8192, label="build"), gpus[0]))
     if "short" in stages:
-        records += parallel([bench(arm, mode, 8192) for arm in ARMS for mode in ("request", "steady", "profile")], gpus)
+        records += parallel([bench(arm, mode, 8192) for arm in arms for mode in ("request", "steady", "profile")], gpus)
     if "check" in stages:
         jobs = [check(arm, length) for arm in ("basis_v96", "basis_v96_reuse", "basis_v96_resident")
-                for length in (8192, 32768)]
-        jobs += [check(arm, 8192) for arm in ("fullk_v96", "lrqk_v96", "shadowkv_v96")]
+                for length in (8192, 32768) if arm in arms]
+        jobs += [check(arm, 8192) for arm in ("fullk_v96", "lrqk_v96", "shadowkv_v96") if arm in arms]
         # Ordinal-0 sample of each of the 11 RULER tasks (100 samples per task, task-major indices).
         jobs += [check(arm, 0, ruler_index=100 * task) for arm in ("basis_v96", "lrqk_v96", "shadowkv_v96")
-                 for task in range(11)]
+                 for task in range(11) if arm in arms]
         # Runtime-paired RULER quality smoke: two Table 2 samples per arm through the timing runtime.
         for arm in ("basis_v96", "lrqk_v96", "shadowkv_v96", "fullk_v96"):
-            jobs.append((f"ruler_{arm}", [str(PYTHON), "benchmarks/system/bench_v2q8_tp1_ruler.py", "--arm", arm,
-                "--prompts", str(RULER.parent), "--max-ordinal", "1", "--shards", "6",
-                "--output", str(OUT / "ruler" / arm), *COMMON[2:]]))
+            if arm in arms:
+                jobs.append((f"ruler_{arm}", [str(PYTHON), "benchmarks/system/bench_v2q8_tp1_ruler.py", "--arm", arm,
+                    "--prompts", str(RULER.parent), "--max-ordinal", "1", "--shards", "6",
+                    "--output", str(OUT / "ruler" / arm), *COMMON[2:]]))
         records += parallel(jobs, gpus)
     if "capacity" in stages:
-        records += parallel([bench(arm, "request", 130048, label="capacity") for arm in ARMS], gpus)
+        records += parallel([bench(arm, "request", 130048, label="capacity") for arm in arms], gpus)
     summary = OUT / f"runner_{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}.json"
     summary.write_text(json.dumps(records, indent=2) + "\n")
     print(f"summary {summary}", flush=True)

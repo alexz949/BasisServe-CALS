@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import importlib
 import importlib.machinery
+import importlib.util
 from pathlib import Path
 import sys
 import types
@@ -197,6 +198,13 @@ def install_shadowkv_import_adapters(upstream_root: Path) -> object:
     if not hasattr(vllm_ops, "silu_and_mul"):
         vllm_ops.silu_and_mul = torch.ops._C.silu_and_mul
     vllm._custom_ops = vllm_ops
+    if importlib.util.find_spec("kernels") is None:
+        # No installed `kernels` distribution in this environment: upstream's own kernels directory is the package
+        # its `from kernels import shadowkv` names.
+        package = importlib.util.module_from_spec(
+            importlib.machinery.ModuleSpec("kernels", loader=None, is_package=True))
+        package.__path__ = [str(upstream_root / "kernels")]
+        sys.modules["kernels"] = package
     kernels = importlib.import_module("kernels")
     kernel_root = upstream_root / "kernels"
     sys.path.insert(0, str(kernel_root))

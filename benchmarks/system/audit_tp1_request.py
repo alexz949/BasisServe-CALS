@@ -4,6 +4,7 @@ import argparse
 import importlib.machinery
 import importlib.util
 import json
+import os
 from pathlib import Path
 import sys
 import time
@@ -16,7 +17,8 @@ from safetensors.torch import load_file
 ROOT = Path(__file__).resolve().parents[2]
 SNAPSHOT = ROOT / "results/system_benchmarks/tp1_sparse_local/frozen_source"
 sys.path.insert(0, str(ROOT))
-MODEL = Path("/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659")
+# BENCH_MODEL relocates the model snapshot on other hosts (as in launch_vllm_bench.sh).
+MODEL = Path(os.environ.get("BENCH_MODEL", "/workspace/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659"))
 TOKENS = Path("/workspace/runs/l31-cal128/calibration/windows.safetensors")
 
 

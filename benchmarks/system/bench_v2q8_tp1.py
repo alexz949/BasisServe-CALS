@@ -111,7 +111,7 @@ def build_runtime(args):
         model, harness=harness, router=router, bank=bank,
         value_checkpoint=args.value_checkpoint if value_dim == 96 else None,
         batch=1, capacity=args.length + args.output_tokens, page_size=page_size, routed_tokens=routed,
-        sink_tokens=sink, offload=offload, value_reuse=reuse)
+        sink_tokens=sink, offload=offload, value_reuse=reuse, build_root=args.build_root)
 
     def forward(tokens):
         start = layers[0].length

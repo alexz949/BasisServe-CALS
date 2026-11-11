@@ -1,0 +1,190 @@
+{
+  "source_review": {
+    "shadowkv": {
+      "get_svd_has_one_gc_collect_and_one_empty_cache": true,
+      "get_svd_cleanup_is_before_the_svd": true,
+      "get_svd_has_two_synchronize": true,
+      "h2d_has_its_own_cleanup": true,
+      "wrapper_applies_to_get_svd_only": true,
+      "wrapper_restores_on_any_exit": true,
+      "modified_arm_skips_exactly_both": true
+    },
+    "lrqk": {
+      "copy_stream_waits_for_producer": true,
+      "sources_record_copy_stream": true,
+      "k_only_uses_ordered": true,
+      "kv_uses_ordered": true
+    }
+  },
+  "source_sha256": {
+    "benchmarks/system/bench_v2q8_tp.py": "21a36fbe673c58baa4919be8ce801be4759b7b2430af65bd49de63d0720ae122",
+    "benchmarks/system/run_lrqk_tp1_retest.py": "18c339304cd39ffcb1688dbbe90e16356f26efefc6ed19000ed6cc4e7bf4a76c",
+    "benchmarks/system/check_lrqk_offload_order.py": "db1059fac6f1ce9aaef773b8f6b0041aa76bd26b069a58245cac71a945d267ba",
+    "benchmarks/system/v2q8_affinity.py": "2e9fc5516001716417c0a5a74ee46d397f05553b1b60afe1292d7b14e22c04e2",
+    "benchmarks/system/paper_faithful_compat.py": "acd7335167bba3e05eb46c175d301c584073c9ed51912d48914045b5cd683ce5",
+    "basisserve/core/lrqk_upstream.py": "387c360192f5d76d9eda0b21dac7d4ce4f4c5f989d3ed6b3e2f8f6c876d301c1",
+    "external/LRQK/lrqk_attention.py": "2bfbc6df2bf97316ce5b086249ce8af48481b0a78f89f6650e19463fe783fab5",
+    "external/LRQK/cpp_kernel/take_along_dim_grouped.cpp": "13727bb82b285e19a93682aa7ce71209b77160688dd9731c57c440ea3ac43da5",
+    "external/ShadowKV/models/kv_cache.py": "62f790d3e2cdafb7bb713c898524b0be16e68c94745c4077fd0fc8e7252f2da4",
+    "external/ShadowKV/models/base.py": "7988977966fba285f03531c326057a567da76610b84026bd7bb10794dc13f660",
+    "external/ShadowKV/models/llama.py": "fe127f1b592447701d83973ec1364c84100369dc8c93e82e1926dae7f1808c12",
+    "basisserve/core/shadowkv_upstream_tp.py": "ae0a9194b44f15c6243ca4c6c45deb9888fb1775f47644ffe8c96719e930dcd9",
+    "benchmarks/system/v2q8_basis.py": "a71553f051274f83ebea2ea3ea654479eba548aede491b53cc856d69d63a1ce1",
+    "basisserve/core/lean_llama.py": "5e243d5ccd39b494e8a94650dcaab14964d656cda5a78ab63efd5210929d3373",
+    "benchmarks/system/table3_page_router.py": "efc77ea32a7c4c0014b131d7d5fb283adb126a9d478fa0a280bc979ea61d3e23",
+    "external/ShadowKV/models/tensor_op.py": "48ef0a076adf9a3046be9d337062f7d2d9bdb9b20893c5228f32d0e94040b824",
+    "benchmarks/system/run_tp1_128k_retest.py": "c1ae0869f645e069fe33bd46f513ff826c9e729a644f628d88653981a3830a0f",
+    "benchmarks/system/check_shadowkv_cleanup_scope.py": "57a08037205208162671487a01569b28a3a8cb4b8ede2efc5dbbd9b5ceee3307",
+    "benchmarks/system/table3_router_fast.cu": "b10d2f683fd8bbe60fd0825049db84a36975c62590e13be332f5088286657343",
+    "benchmarks/system/table3_page_select.cu": "3e52c2ae62e02a28f9d2075196c16b234c4a949415dc376ef11812a3872b29cd"
+  },
+  "probe_65536": {
+    "basis": {
+      "arms": {
+        "basis_koff_v128_reuse_opt": {
+          "name": "basis_koff_v128_reuse_opt_request_b1_t65536_smoke",
+          "status": "complete",
+          "exit_code": 0,
+          "seconds": 57.3,
+          "output_tokens": 8,
+          "expected_output_tokens": 8,
+          "logprobs_finite": true,
+          "imported_files_match_review": true,
+          "effective": {
+            "torch_compile_disabled": false,
+            "torch_compile_disable_env": null,
+            "float32_matmul_precision": "highest",
+            "cuda_matmul_allow_tf32": false,
+            "cudnn_allow_tf32": false,
+            "nvidia_tf32_override": null,
+            "omp_num_threads": "24"
+          },
+          "implementation": null,
+          "failure": null,
+          "ttft_seconds": 11.02756862109527,
+          "placement_seconds": 0.0001635570079088211,
+          "decode_ready_seconds": 11.027732178103179,
+          "memory_after_prefill": {
+            "allocated": 21163716096,
+            "reserved": 25046286336,
+            "peak_allocated": 24687455232,
+            "peak_reserved": 25046286336,
+            "device_used": 26108297216,
+            "process_rss": 6190292992
+          },
+          "memory_after_decode": {
+            "allocated": 21164236288,
+            "reserved": 25046286336,
+            "peak_allocated": 21165022720,
+            "peak_reserved": 25046286336,
+            "device_used": 26108297216,
+            "process_rss": 6190301184
+          },
+          "passed": true
+        }
+      }
+    },
+    "shadowkv": {
+      "arms": {
+        "shadowkv_upstream_v128": {
+          "name": "shadowkv_upstream_v128_request_b1_t65536_smoke",
+          "status": "complete",
+          "exit_code": 0,
+          "seconds": 87.7,
+          "output_tokens": 8,
+          "expected_output_tokens": 8,
+          "logprobs_finite": true,
+          "imported_files_match_review": true,
+          "effective": {
+            "torch_compile_disabled": false,
+            "torch_compile_disable_env": null,
+            "float32_matmul_precision": "highest",
+            "cuda_matmul_allow_tf32": false,
+            "cudnn_allow_tf32": false,
+            "nvidia_tf32_override": null,
+            "omp_num_threads": "24"
+          },
+          "implementation": "upstream models.llama.Llama + ShadowKVCache_CPU + CUDA kernels (ByteDance-Seed/ShadowKV@e51904cd), source unmodified",
+          "failure": null,
+          "ttft_seconds": 22.053815361810848,
+          "placement_seconds": 0.6931030901614577,
+          "decode_ready_seconds": 22.746918451972306,
+          "memory_after_prefill": {
+            "allocated": 17667882496,
+            "reserved": 17678991360,
+            "peak_allocated": 25017863168,
+            "peak_reserved": 26652704768,
+            "device_used": 18751488000,
+            "process_rss": 10927992832
+          },
+          "memory_after_decode": {
+            "allocated": 17668402688,
+            "reserved": 17681088512,
+            "peak_allocated": 17669179904,
+            "peak_reserved": 17681088512,
+            "device_used": 18753585152,
+            "process_rss": 10927992832
+          },
+          "passed": true
+        },
+        "shadowkv_upstream_nohk_v128": {
+          "name": "shadowkv_upstream_nohk_v128_request_b1_t65536_smoke",
+          "status": "complete",
+          "exit_code": 0,
+          "seconds": 77.7,
+          "output_tokens": 8,
+          "expected_output_tokens": 8,
+          "logprobs_finite": true,
+          "imported_files_match_review": true,
+          "effective": {
+            "torch_compile_disabled": false,
+            "torch_compile_disable_env": null,
+            "float32_matmul_precision": "highest",
+            "cuda_matmul_allow_tf32": false,
+            "cudnn_allow_tf32": false,
+            "nvidia_tf32_override": null,
+            "omp_num_threads": "24"
+          },
+          "implementation": "upstream models.llama.Llama + ShadowKVCache_CPU + CUDA kernels (ByteDance-Seed/ShadowKV@e51904cd), source unmodified; NOT upstream behaviour: per-layer pre-SVD gc_collect and empty_cache disabled at run time inside get_svd",
+          "failure": null,
+          "ttft_seconds": 17.136481632944196,
+          "placement_seconds": 0.9178057808894664,
+          "decode_ready_seconds": 18.054287413833663,
+          "memory_after_prefill": {
+            "allocated": 17667883008,
+            "reserved": 17678991360,
+            "peak_allocated": 25017863680,
+            "peak_reserved": 29840375808,
+            "device_used": 18751488000,
+            "process_rss": 10926755840
+          },
+          "memory_after_decode": {
+            "allocated": 17668403200,
+            "reserved": 17681088512,
+            "peak_allocated": 17669180416,
+            "peak_reserved": 17681088512,
+            "device_used": 18753585152,
+            "process_rss": 10926755840
+          },
+          "passed": true
+        }
+      },
+      "comparison": {
+        "done": true,
+        "reference": "shadowkv_upstream_v128",
+        "teacher_forced": "shadowkv_upstream_nohk_v128",
+        "context_tokens": 65536,
+        "cohort": 0,
+        "positions": 8,
+        "argmax_matches": 8,
+        "first_argmax_mismatch": null,
+        "logprob_steps": 7,
+        "logprob_max_abs_difference": 0.0,
+        "logprob_mean_abs_difference": 0.0,
+        "identical": true,
+        "method": "The second arm is fed the first arm's greedy tokens. Compared on the same prefix: the second arm's argmax against the first arm's token at every position (position 0 is the prefill prediction), and the log-probability each arm gives the same fed token."
+      }
+    }
+  },
+  "written_utc": "2026-11-11T23:06:01Z"
+}

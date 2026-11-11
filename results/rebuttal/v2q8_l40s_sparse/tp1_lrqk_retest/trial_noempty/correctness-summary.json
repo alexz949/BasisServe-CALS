@@ -1,0 +1,89 @@
+{
+  "source_review": {
+    "copy_stream_waits_for_producer": true,
+    "sources_record_copy_stream": true,
+    "k_only_uses_ordered": true,
+    "kv_uses_ordered": true
+  },
+  "source_sha256": {
+    "benchmarks/system/bench_v2q8_tp.py": "5a71a6030a14b2f7236b69c6574fc47a3d5d85a34cb503c81cc4e2139c677e0d",
+    "benchmarks/system/run_lrqk_tp1_retest.py": "753939023da5961038510556e6289fceec03f3783d3a14ff30269ed84953afcc",
+    "benchmarks/system/check_lrqk_offload_order.py": "db1059fac6f1ce9aaef773b8f6b0041aa76bd26b069a58245cac71a945d267ba",
+    "benchmarks/system/v2q8_affinity.py": "2e9fc5516001716417c0a5a74ee46d397f05553b1b60afe1292d7b14e22c04e2",
+    "benchmarks/system/paper_faithful_compat.py": "0b5dddfc089fcb5645b13a436b289f61f8235c4de8e7850dff4d83c711e7d867",
+    "basisserve/core/lrqk_upstream.py": "387c360192f5d76d9eda0b21dac7d4ce4f4c5f989d3ed6b3e2f8f6c876d301c1",
+    "external/LRQK/lrqk_attention.py": "2bfbc6df2bf97316ce5b086249ce8af48481b0a78f89f6650e19463fe783fab5",
+    "external/LRQK/cpp_kernel/take_along_dim_grouped.cpp": "13727bb82b285e19a93682aa7ce71209b77160688dd9731c57c440ea3ac43da5"
+  },
+  "smoke_8k": [
+    {
+      "name": "lrqk_upstream_koff_noempty_v128_request_b1_t8192_smoke",
+      "status": "complete",
+      "exit_code": 0,
+      "output_tokens": 8,
+      "expected_output_tokens": 8,
+      "logprobs": 7,
+      "logprobs_finite": true,
+      "loaded": {
+        "files_match": {
+          "basisserve/core/lrqk_upstream.py": true,
+          "external/LRQK/lrqk_attention.py": true,
+          "benchmarks/system/bench_v2q8_tp.py": true
+        },
+        "ordered_prefill_in_mro": true,
+        "mro": [
+          "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyOffloadPrefill",
+          "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+          "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+          "basisserve.core.lrqk_upstream.make_classes.<locals>.KOnlyFactory",
+          "lrqk_attention.LightAttentionIndicesFactory"
+        ]
+      },
+      "effective": {
+        "torch_compile_disabled": false,
+        "torch_compile_disable_env": null,
+        "float32_matmul_precision": "high",
+        "cuda_matmul_allow_tf32": true,
+        "cudnn_allow_tf32": false,
+        "nvidia_tf32_override": null,
+        "omp_num_threads": "24"
+      },
+      "seconds": 45.3,
+      "passed": true
+    },
+    {
+      "name": "lrqk_upstream_kvoff_noempty_v128_request_b1_t8192_smoke",
+      "status": "complete",
+      "exit_code": 0,
+      "output_tokens": 8,
+      "expected_output_tokens": 8,
+      "logprobs": 7,
+      "logprobs_finite": true,
+      "loaded": {
+        "files_match": {
+          "basisserve/core/lrqk_upstream.py": true,
+          "external/LRQK/lrqk_attention.py": true,
+          "benchmarks/system/bench_v2q8_tp.py": true
+        },
+        "ordered_prefill_in_mro": true,
+        "mro": [
+          "basisserve.core.lrqk_upstream.ordered_offload_prefill.<locals>.OrderedOffloadPrefill",
+          "lrqk_attention.LightAttentionIndicesOffloadPrefill",
+          "lrqk_attention.LightAttentionIndicesFactory"
+        ]
+      },
+      "effective": {
+        "torch_compile_disabled": false,
+        "torch_compile_disable_env": null,
+        "float32_matmul_precision": "high",
+        "cuda_matmul_allow_tf32": true,
+        "cudnn_allow_tf32": false,
+        "nvidia_tf32_override": null,
+        "omp_num_threads": "24"
+      },
+      "seconds": 42.3,
+      "passed": true
+    }
+  ],
+  "written_utc": "2026-11-11T22:01:32Z"
+}

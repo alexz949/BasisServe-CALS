@@ -1,0 +1,1095 @@
+{
+  "invocations": [
+    {
+      "written_utc": "2026-11-11T23:01:33Z",
+      "phases": [
+        "formal"
+      ],
+      "cohorts": [
+        0
+      ],
+      "arms": [
+        "basis_koff_v128_reuse_opt",
+        "shadowkv_upstream_nohk_v128"
+      ],
+      "host": "node6.athena",
+      "slurm": {
+        "SLURM_JOB_ID": "240519",
+        "SLURMD_NODENAME": "node6",
+        "SLURM_JOB_GPUS": "0",
+        "SLURM_CPUS_PER_TASK": "24",
+        "SLURM_JOB_CPUS_PER_NODE": "24"
+      },
+      "gpu": {
+        "index": "0",
+        "name": "NVIDIA L40S",
+        "uuid": "GPU-6860b33e-b157-0e96-33dc-692dafd3d645",
+        "pci.bus_id": "00000000:4F:00.0",
+        "driver_version": "550.54.15",
+        "memory.total": "46068",
+        "memory.used": "0",
+        "utilization.gpu": "0",
+        "ecc.errors.uncorrected.aggregate.total": "0"
+      },
+      "cpu_model": "Intel(R) Xeon(R) Gold 6338 CPU @ 2.00GHz",
+      "cpu": {
+        "gpu_numa_node": 0,
+        "children_confined_to": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87
+        ],
+        "benchmark_keeps": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          20,
+          22,
+          64,
+          66,
+          68,
+          70,
+          72,
+          74,
+          76,
+          78,
+          80,
+          82,
+          84,
+          86
+        ],
+        "threads": 24,
+        "physical_cores": 12,
+        "hyperthread_pairs": [
+          "0,64",
+          "10,74",
+          "12,76",
+          "14,78",
+          "16,80",
+          "18,82",
+          "2,66",
+          "20,84",
+          "22,86",
+          "4,68",
+          "6,70",
+          "8,72"
+        ],
+        "archived_tp1": "24 threads on 12 physical cores x 2 hyperthreads of the GPU's NUMA node (Xeon Platinum 8558), OMP_NUM_THREADS=24",
+        "host_logical_cpus": 128,
+        "load_average": [
+          6.67529296875,
+          7.46435546875,
+          7.44140625
+        ],
+        "scheduler_affinity_of_runner": 12
+      },
+      "software": {
+        "python": "3.11.16",
+        "conda_environment": "basis",
+        "prefix": "/home/yl1139/basis_artifacts/envs/vllm/basis",
+        "torch": "2.13.0+cu129",
+        "cuda_runtime": "12.9",
+        "transformers": "5.17.0",
+        "nccl": "2.29.7",
+        "cuda_home": "/home/yl1139/basis_artifacts/cuda/12.9",
+        "allocator": "PyTorch default (PYTORCH_CUDA_ALLOC_CONF empty), as the archived upstream runs"
+      },
+      "model": {
+        "path": "/home/yl1139/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+        "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+        "files": {
+          ".gitattributes": "a6344aac8c09253b3b630fb776ae94478aa0275b",
+          "LICENSE": "a7c3ca16cee30425ed6ad841a809590f2bcbf290",
+          "README.md": "bbd5630a05b65c1a8b25141bd11ec44844107d58",
+          "USE_POLICY.md": "81ebb55902285e8dd5804ccf423d17ffb2a622ee",
+          "config.json": "0bb6fd75b3ad2fe988565929f329945262c2814e",
+          "generation_config.json": "cc7276afd599de091142c6ed3005faf8a74aa257",
+          "model-00001-of-00004.safetensors": "2b1879f356aed350030bb40eb45ad362c89d9891096f79a3ab323d3ba5607668",
+          "model-00002-of-00004.safetensors": "09d433f650646834a83c580877bd60c6d1f88f7755305c12576b5c7058f9af15",
+          "model-00003-of-00004.safetensors": "fc1cdddd6bfa91128d6e94ee73d0ce62bfcdb7af29e978ddcab30c66ae9ea7fa",
+          "model-00004-of-00004.safetensors": "92ecfe1a2414458b4821ac8c13cf8cb70aed66b5eea8dc5ad9eeb4ff309d6d7b",
+          "model.safetensors.index.json": "0fd8120f1c6acddc268ebc2583058efaf699a771",
+          "special_tokens_map.json": "02ee80b6196926a5ad790a004d9efd6ab1ba6542",
+          "tokenizer.json": "5cc5f00a5b203e90a27a3bd60d1ec393b07971e8",
+          "tokenizer_config.json": "db88166e2bc4c799fd5d1ae643b75e84d03ee70e"
+        }
+      },
+      "inputs": {
+        "path": "results/rebuttal/v2q8_l40s_sparse/tp4_64k/inputs/prompts.safetensors",
+        "sha256": "88e50b1c337df818ff150238ea7dd599fbbeca6f8c086ccabd565c685e628670",
+        "manifest": {
+          "source": "/workspace/basis_artifacts/calibration/llama31-8b-instruct-128k/c4-48x128k/windows.safetensors",
+          "source_sha256": "6cc27d18a99809cec05567e793a5152c12de3a8877459f344a2182df99455624",
+          "length": 65536,
+          "protocol": "Batch B uses rows 0..B-1 of a cohort for every method; fixed-length greedy generation"
+        },
+        "cohorts": "cohort_0 / cohort_1 / cohort_2, first row of each (three different prompts)"
+      },
+      "repository": {
+        "head": "be7c8a2349b53d260a098a16e3656cc0b7e441c7",
+        "contains_fix_be7c8a2": true,
+        "uncommitted_files": [
+          "M basisserve_cals.egg-info/SOURCES.txt",
+          " M benchmarks/system/audit_tp1_request.py",
+          " M benchmarks/system/bench_v2q8_tp.py",
+          " M benchmarks/system/bench_v2q8_tp1.py",
+          " M benchmarks/system/paper_faithful_compat.py",
+          " M benchmarks/system/run_v2q8_tp1_smoke.py",
+          " M benchmarks/system/v2q8_affinity.py",
+          " M benchmarks/system/v2q8_basis.py",
+          " M results/rebuttal/v2q8_palu_g4_tp4/RUN_L40S.md"
+        ],
+        "uncommitted_diff_sha256": "b28faa3f491c70ede18e95c157002278612ac42dfb31af1ed0f5376f6145360b",
+        "lrqk_head": "caf16293db2e4423a84ab2e895bacf64479f1eb7",
+        "lrqk_clean": true
+      },
+      "source_sha256": {
+        "benchmarks/system/bench_v2q8_tp.py": "21a36fbe673c58baa4919be8ce801be4759b7b2430af65bd49de63d0720ae122",
+        "benchmarks/system/run_lrqk_tp1_retest.py": "18c339304cd39ffcb1688dbbe90e16356f26efefc6ed19000ed6cc4e7bf4a76c",
+        "benchmarks/system/check_lrqk_offload_order.py": "db1059fac6f1ce9aaef773b8f6b0041aa76bd26b069a58245cac71a945d267ba",
+        "benchmarks/system/v2q8_affinity.py": "2e9fc5516001716417c0a5a74ee46d397f05553b1b60afe1292d7b14e22c04e2",
+        "benchmarks/system/paper_faithful_compat.py": "acd7335167bba3e05eb46c175d301c584073c9ed51912d48914045b5cd683ce5",
+        "basisserve/core/lrqk_upstream.py": "387c360192f5d76d9eda0b21dac7d4ce4f4c5f989d3ed6b3e2f8f6c876d301c1",
+        "external/LRQK/lrqk_attention.py": "2bfbc6df2bf97316ce5b086249ce8af48481b0a78f89f6650e19463fe783fab5",
+        "external/LRQK/cpp_kernel/take_along_dim_grouped.cpp": "13727bb82b285e19a93682aa7ce71209b77160688dd9731c57c440ea3ac43da5",
+        "external/ShadowKV/models/kv_cache.py": "62f790d3e2cdafb7bb713c898524b0be16e68c94745c4077fd0fc8e7252f2da4",
+        "external/ShadowKV/models/base.py": "7988977966fba285f03531c326057a567da76610b84026bd7bb10794dc13f660",
+        "external/ShadowKV/models/llama.py": "fe127f1b592447701d83973ec1364c84100369dc8c93e82e1926dae7f1808c12",
+        "basisserve/core/shadowkv_upstream_tp.py": "ae0a9194b44f15c6243ca4c6c45deb9888fb1775f47644ffe8c96719e930dcd9",
+        "benchmarks/system/v2q8_basis.py": "a71553f051274f83ebea2ea3ea654479eba548aede491b53cc856d69d63a1ce1",
+        "basisserve/core/lean_llama.py": "5e243d5ccd39b494e8a94650dcaab14964d656cda5a78ab63efd5210929d3373",
+        "benchmarks/system/table3_page_router.py": "efc77ea32a7c4c0014b131d7d5fb283adb126a9d478fa0a280bc979ea61d3e23",
+        "external/ShadowKV/models/tensor_op.py": "48ef0a076adf9a3046be9d337062f7d2d9bdb9b20893c5228f32d0e94040b824",
+        "benchmarks/system/run_tp1_128k_retest.py": "c1ae0869f645e069fe33bd46f513ff826c9e729a644f628d88653981a3830a0f",
+        "benchmarks/system/check_shadowkv_cleanup_scope.py": "57a08037205208162671487a01569b28a3a8cb4b8ede2efc5dbbd9b5ceee3307",
+        "benchmarks/system/table3_router_fast.cu": "b10d2f683fd8bbe60fd0825049db84a36975c62590e13be332f5088286657343",
+        "benchmarks/system/table3_page_select.cu": "3e52c2ae62e02a28f9d2075196c16b234c4a949415dc376ef11812a3872b29cd"
+      },
+      "source_review": {
+        "shadowkv:get_svd_has_one_gc_collect_and_one_empty_cache": true,
+        "shadowkv:get_svd_cleanup_is_before_the_svd": true,
+        "shadowkv:get_svd_has_two_synchronize": true,
+        "shadowkv:h2d_has_its_own_cleanup": true,
+        "shadowkv:wrapper_applies_to_get_svd_only": true,
+        "shadowkv:wrapper_restores_on_any_exit": true,
+        "shadowkv:modified_arm_skips_exactly_both": true,
+        "lrqk:copy_stream_waits_for_producer": true,
+        "lrqk:sources_record_copy_stream": true,
+        "lrqk:k_only_uses_ordered": true,
+        "lrqk:kv_uses_ordered": true
+      },
+      "arm_labels": {
+        "basis_koff_v128_reuse_opt": "BasisKV, exact K offloaded (Base read from V, lean forward, fast router)",
+        "shadowkv_upstream_v128": "ShadowKV, upstream (control)",
+        "shadowkv_upstream_nohk_v128": "ShadowKV with per-layer pre-SVD GC and empty-cache calls disabled",
+        "lrqk_upstream_koff_v128": "LRQK with the prefill stream-order fix, K offload (V on GPU)",
+        "lrqk_upstream_kvoff_v128": "LRQK with the prefill stream-order fix, K and V offload"
+      },
+      "context_tokens": 65536,
+      "shadowkv": {
+        "upstream_head": "e51904cdeab7d4d34013370f09f2cf5fcd655e15",
+        "cutlass_head": "2c85f497547eb441f0fe80bfb0fb2e6f9add1719",
+        "rank": 160,
+        "chunk": 8,
+        "sparse_budget": 2048,
+        "modified_arm": "gc.collect and torch.cuda.empty_cache are no-ops while get_svd runs; upstream's source is not edited"
+      },
+      "lrqk": {
+        "rank": 32,
+        "topk": 2048,
+        "lite": 64,
+        "iterations": [
+          2,
+          2
+        ],
+        "tolerance": [
+          0.01,
+          0.01
+        ]
+      },
+      "protocol": "TP1, B1, original V128/Wo, BF16; same-shape warmup request then fresh state; request = 128 tokens; steady = 16 conditioning + 128 measured steps; no component timers"
+    },
+    {
+      "written_utc": "2026-11-11T23:04:50Z",
+      "phases": [
+        "formal"
+      ],
+      "cohorts": [
+        1,
+        2
+      ],
+      "arms": [
+        "basis_koff_v128_reuse_opt",
+        "shadowkv_upstream_nohk_v128"
+      ],
+      "host": "node6.athena",
+      "slurm": {
+        "SLURM_JOB_ID": "240521",
+        "SLURMD_NODENAME": "node6",
+        "SLURM_JOB_GPUS": "1",
+        "SLURM_CPUS_PER_TASK": "24",
+        "SLURM_JOB_CPUS_PER_NODE": "24"
+      },
+      "gpu": {
+        "index": "0",
+        "name": "NVIDIA L40S",
+        "uuid": "GPU-6fe2007b-242b-4bcf-0d36-609626bcc880",
+        "pci.bus_id": "00000000:52:00.0",
+        "driver_version": "550.54.15",
+        "memory.total": "46068",
+        "memory.used": "0",
+        "utilization.gpu": "0",
+        "ecc.errors.uncorrected.aggregate.total": "2"
+      },
+      "cpu_model": "Intel(R) Xeon(R) Gold 6338 CPU @ 2.00GHz",
+      "cpu": {
+        "gpu_numa_node": 0,
+        "children_confined_to": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88
+        ],
+        "benchmark_keeps": [
+          1,
+          3,
+          5,
+          7,
+          9,
+          11,
+          13,
+          15,
+          17,
+          19,
+          21,
+          23,
+          65,
+          67,
+          69,
+          71,
+          73,
+          75,
+          77,
+          79,
+          81,
+          83,
+          85,
+          87
+        ],
+        "threads": 24,
+        "physical_cores": 12,
+        "hyperthread_pairs": [
+          "1,65",
+          "11,75",
+          "13,77",
+          "15,79",
+          "17,81",
+          "19,83",
+          "21,85",
+          "23,87",
+          "3,67",
+          "5,69",
+          "7,71",
+          "9,73"
+        ],
+        "archived_tp1": "24 threads on 12 physical cores x 2 hyperthreads of the GPU's NUMA node (Xeon Platinum 8558), OMP_NUM_THREADS=24",
+        "host_logical_cpus": 128,
+        "load_average": [
+          5.23681640625,
+          6.52099609375,
+          7.0732421875
+        ],
+        "scheduler_affinity_of_runner": 12
+      },
+      "software": {
+        "python": "3.11.16",
+        "conda_environment": "basis",
+        "prefix": "/home/yl1139/basis_artifacts/envs/vllm/basis",
+        "torch": "2.13.0+cu129",
+        "cuda_runtime": "12.9",
+        "transformers": "5.17.0",
+        "nccl": "2.29.7",
+        "cuda_home": "/home/yl1139/basis_artifacts/cuda/12.9",
+        "allocator": "PyTorch default (PYTORCH_CUDA_ALLOC_CONF empty), as the archived upstream runs"
+      },
+      "model": {
+        "path": "/home/yl1139/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+        "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+        "files": {
+          ".gitattributes": "a6344aac8c09253b3b630fb776ae94478aa0275b",
+          "LICENSE": "a7c3ca16cee30425ed6ad841a809590f2bcbf290",
+          "README.md": "bbd5630a05b65c1a8b25141bd11ec44844107d58",
+          "USE_POLICY.md": "81ebb55902285e8dd5804ccf423d17ffb2a622ee",
+          "config.json": "0bb6fd75b3ad2fe988565929f329945262c2814e",
+          "generation_config.json": "cc7276afd599de091142c6ed3005faf8a74aa257",
+          "model-00001-of-00004.safetensors": "2b1879f356aed350030bb40eb45ad362c89d9891096f79a3ab323d3ba5607668",
+          "model-00002-of-00004.safetensors": "09d433f650646834a83c580877bd60c6d1f88f7755305c12576b5c7058f9af15",
+          "model-00003-of-00004.safetensors": "fc1cdddd6bfa91128d6e94ee73d0ce62bfcdb7af29e978ddcab30c66ae9ea7fa",
+          "model-00004-of-00004.safetensors": "92ecfe1a2414458b4821ac8c13cf8cb70aed66b5eea8dc5ad9eeb4ff309d6d7b",
+          "model.safetensors.index.json": "0fd8120f1c6acddc268ebc2583058efaf699a771",
+          "special_tokens_map.json": "02ee80b6196926a5ad790a004d9efd6ab1ba6542",
+          "tokenizer.json": "5cc5f00a5b203e90a27a3bd60d1ec393b07971e8",
+          "tokenizer_config.json": "db88166e2bc4c799fd5d1ae643b75e84d03ee70e"
+        }
+      },
+      "inputs": {
+        "path": "results/rebuttal/v2q8_l40s_sparse/tp4_64k/inputs/prompts.safetensors",
+        "sha256": "88e50b1c337df818ff150238ea7dd599fbbeca6f8c086ccabd565c685e628670",
+        "manifest": {
+          "source": "/workspace/basis_artifacts/calibration/llama31-8b-instruct-128k/c4-48x128k/windows.safetensors",
+          "source_sha256": "6cc27d18a99809cec05567e793a5152c12de3a8877459f344a2182df99455624",
+          "length": 65536,
+          "protocol": "Batch B uses rows 0..B-1 of a cohort for every method; fixed-length greedy generation"
+        },
+        "cohorts": "cohort_0 / cohort_1 / cohort_2, first row of each (three different prompts)"
+      },
+      "repository": {
+        "head": "be7c8a2349b53d260a098a16e3656cc0b7e441c7",
+        "contains_fix_be7c8a2": true,
+        "uncommitted_files": [
+          "M basisserve_cals.egg-info/SOURCES.txt",
+          " M benchmarks/system/audit_tp1_request.py",
+          " M benchmarks/system/bench_v2q8_tp.py",
+          " M benchmarks/system/bench_v2q8_tp1.py",
+          " M benchmarks/system/paper_faithful_compat.py",
+          " M benchmarks/system/run_v2q8_tp1_smoke.py",
+          " M benchmarks/system/v2q8_affinity.py",
+          " M benchmarks/system/v2q8_basis.py",
+          " M results/rebuttal/v2q8_palu_g4_tp4/RUN_L40S.md"
+        ],
+        "uncommitted_diff_sha256": "b28faa3f491c70ede18e95c157002278612ac42dfb31af1ed0f5376f6145360b",
+        "lrqk_head": "caf16293db2e4423a84ab2e895bacf64479f1eb7",
+        "lrqk_clean": true
+      },
+      "source_sha256": {
+        "benchmarks/system/bench_v2q8_tp.py": "21a36fbe673c58baa4919be8ce801be4759b7b2430af65bd49de63d0720ae122",
+        "benchmarks/system/run_lrqk_tp1_retest.py": "18c339304cd39ffcb1688dbbe90e16356f26efefc6ed19000ed6cc4e7bf4a76c",
+        "benchmarks/system/check_lrqk_offload_order.py": "db1059fac6f1ce9aaef773b8f6b0041aa76bd26b069a58245cac71a945d267ba",
+        "benchmarks/system/v2q8_affinity.py": "2e9fc5516001716417c0a5a74ee46d397f05553b1b60afe1292d7b14e22c04e2",
+        "benchmarks/system/paper_faithful_compat.py": "acd7335167bba3e05eb46c175d301c584073c9ed51912d48914045b5cd683ce5",
+        "basisserve/core/lrqk_upstream.py": "387c360192f5d76d9eda0b21dac7d4ce4f4c5f989d3ed6b3e2f8f6c876d301c1",
+        "external/LRQK/lrqk_attention.py": "2bfbc6df2bf97316ce5b086249ce8af48481b0a78f89f6650e19463fe783fab5",
+        "external/LRQK/cpp_kernel/take_along_dim_grouped.cpp": "13727bb82b285e19a93682aa7ce71209b77160688dd9731c57c440ea3ac43da5",
+        "external/ShadowKV/models/kv_cache.py": "62f790d3e2cdafb7bb713c898524b0be16e68c94745c4077fd0fc8e7252f2da4",
+        "external/ShadowKV/models/base.py": "7988977966fba285f03531c326057a567da76610b84026bd7bb10794dc13f660",
+        "external/ShadowKV/models/llama.py": "fe127f1b592447701d83973ec1364c84100369dc8c93e82e1926dae7f1808c12",
+        "basisserve/core/shadowkv_upstream_tp.py": "ae0a9194b44f15c6243ca4c6c45deb9888fb1775f47644ffe8c96719e930dcd9",
+        "benchmarks/system/v2q8_basis.py": "a71553f051274f83ebea2ea3ea654479eba548aede491b53cc856d69d63a1ce1",
+        "basisserve/core/lean_llama.py": "5e243d5ccd39b494e8a94650dcaab14964d656cda5a78ab63efd5210929d3373",
+        "benchmarks/system/table3_page_router.py": "efc77ea32a7c4c0014b131d7d5fb283adb126a9d478fa0a280bc979ea61d3e23",
+        "external/ShadowKV/models/tensor_op.py": "48ef0a076adf9a3046be9d337062f7d2d9bdb9b20893c5228f32d0e94040b824",
+        "benchmarks/system/run_tp1_128k_retest.py": "c1ae0869f645e069fe33bd46f513ff826c9e729a644f628d88653981a3830a0f",
+        "benchmarks/system/check_shadowkv_cleanup_scope.py": "57a08037205208162671487a01569b28a3a8cb4b8ede2efc5dbbd9b5ceee3307",
+        "benchmarks/system/table3_router_fast.cu": "b10d2f683fd8bbe60fd0825049db84a36975c62590e13be332f5088286657343",
+        "benchmarks/system/table3_page_select.cu": "3e52c2ae62e02a28f9d2075196c16b234c4a949415dc376ef11812a3872b29cd"
+      },
+      "source_review": {
+        "shadowkv:get_svd_has_one_gc_collect_and_one_empty_cache": true,
+        "shadowkv:get_svd_cleanup_is_before_the_svd": true,
+        "shadowkv:get_svd_has_two_synchronize": true,
+        "shadowkv:h2d_has_its_own_cleanup": true,
+        "shadowkv:wrapper_applies_to_get_svd_only": true,
+        "shadowkv:wrapper_restores_on_any_exit": true,
+        "shadowkv:modified_arm_skips_exactly_both": true,
+        "lrqk:copy_stream_waits_for_producer": true,
+        "lrqk:sources_record_copy_stream": true,
+        "lrqk:k_only_uses_ordered": true,
+        "lrqk:kv_uses_ordered": true
+      },
+      "arm_labels": {
+        "basis_koff_v128_reuse_opt": "BasisKV, exact K offloaded (Base read from V, lean forward, fast router)",
+        "shadowkv_upstream_v128": "ShadowKV, upstream (control)",
+        "shadowkv_upstream_nohk_v128": "ShadowKV with per-layer pre-SVD GC and empty-cache calls disabled",
+        "lrqk_upstream_koff_v128": "LRQK with the prefill stream-order fix, K offload (V on GPU)",
+        "lrqk_upstream_kvoff_v128": "LRQK with the prefill stream-order fix, K and V offload"
+      },
+      "context_tokens": 65536,
+      "shadowkv": {
+        "upstream_head": "e51904cdeab7d4d34013370f09f2cf5fcd655e15",
+        "cutlass_head": "2c85f497547eb441f0fe80bfb0fb2e6f9add1719",
+        "rank": 160,
+        "chunk": 8,
+        "sparse_budget": 2048,
+        "modified_arm": "gc.collect and torch.cuda.empty_cache are no-ops while get_svd runs; upstream's source is not edited"
+      },
+      "lrqk": {
+        "rank": 32,
+        "topk": 2048,
+        "lite": 64,
+        "iterations": [
+          2,
+          2
+        ],
+        "tolerance": [
+          0.01,
+          0.01
+        ]
+      },
+      "protocol": "TP1, B1, original V128/Wo, BF16; same-shape warmup request then fresh state; request = 128 tokens; steady = 16 conditioning + 128 measured steps; no component timers"
+    },
+    {
+      "written_utc": "2026-11-11T23:06:00Z",
+      "phases": [
+        "formal"
+      ],
+      "cohorts": [
+        1,
+        2
+      ],
+      "arms": [
+        "basis_koff_v128_reuse_opt",
+        "shadowkv_upstream_nohk_v128"
+      ],
+      "host": "node6.athena",
+      "slurm": {
+        "SLURM_JOB_ID": "240523",
+        "SLURMD_NODENAME": "node6",
+        "SLURM_JOB_GPUS": "6",
+        "SLURM_CPUS_PER_TASK": "24",
+        "SLURM_JOB_CPUS_PER_NODE": "24"
+      },
+      "gpu": {
+        "index": "0",
+        "name": "NVIDIA L40S",
+        "uuid": "GPU-dba3f6e6-93a3-106d-073e-470f2579e9b6",
+        "pci.bus_id": "00000000:D5:00.0",
+        "driver_version": "550.54.15",
+        "memory.total": "46068",
+        "memory.used": "0",
+        "utilization.gpu": "0",
+        "ecc.errors.uncorrected.aggregate.total": "0"
+      },
+      "cpu_model": "Intel(R) Xeon(R) Gold 6338 CPU @ 2.00GHz",
+      "cpu": {
+        "gpu_numa_node": 1,
+        "children_confined_to": [
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120
+        ],
+        "benchmark_keeps": [
+          33,
+          35,
+          37,
+          39,
+          41,
+          43,
+          45,
+          47,
+          49,
+          51,
+          53,
+          55,
+          97,
+          99,
+          101,
+          103,
+          105,
+          107,
+          109,
+          111,
+          113,
+          115,
+          117,
+          119
+        ],
+        "threads": 24,
+        "physical_cores": 12,
+        "hyperthread_pairs": [
+          "33,97",
+          "35,99",
+          "37,101",
+          "39,103",
+          "41,105",
+          "43,107",
+          "45,109",
+          "47,111",
+          "49,113",
+          "51,115",
+          "53,117",
+          "55,119"
+        ],
+        "archived_tp1": "24 threads on 12 physical cores x 2 hyperthreads of the GPU's NUMA node (Xeon Platinum 8558), OMP_NUM_THREADS=24",
+        "host_logical_cpus": 128,
+        "load_average": [
+          6.94873046875,
+          6.6748046875,
+          7.07958984375
+        ],
+        "scheduler_affinity_of_runner": 12
+      },
+      "software": {
+        "python": "3.11.16",
+        "conda_environment": "basis",
+        "prefix": "/home/yl1139/basis_artifacts/envs/vllm/basis",
+        "torch": "2.13.0+cu129",
+        "cuda_runtime": "12.9",
+        "transformers": "5.17.0",
+        "nccl": "2.29.7",
+        "cuda_home": "/home/yl1139/basis_artifacts/cuda/12.9",
+        "allocator": "PyTorch default (PYTORCH_CUDA_ALLOC_CONF empty), as the archived upstream runs"
+      },
+      "model": {
+        "path": "/home/yl1139/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+        "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+        "files": {
+          ".gitattributes": "a6344aac8c09253b3b630fb776ae94478aa0275b",
+          "LICENSE": "a7c3ca16cee30425ed6ad841a809590f2bcbf290",
+          "README.md": "bbd5630a05b65c1a8b25141bd11ec44844107d58",
+          "USE_POLICY.md": "81ebb55902285e8dd5804ccf423d17ffb2a622ee",
+          "config.json": "0bb6fd75b3ad2fe988565929f329945262c2814e",
+          "generation_config.json": "cc7276afd599de091142c6ed3005faf8a74aa257",
+          "model-00001-of-00004.safetensors": "2b1879f356aed350030bb40eb45ad362c89d9891096f79a3ab323d3ba5607668",
+          "model-00002-of-00004.safetensors": "09d433f650646834a83c580877bd60c6d1f88f7755305c12576b5c7058f9af15",
+          "model-00003-of-00004.safetensors": "fc1cdddd6bfa91128d6e94ee73d0ce62bfcdb7af29e978ddcab30c66ae9ea7fa",
+          "model-00004-of-00004.safetensors": "92ecfe1a2414458b4821ac8c13cf8cb70aed66b5eea8dc5ad9eeb4ff309d6d7b",
+          "model.safetensors.index.json": "0fd8120f1c6acddc268ebc2583058efaf699a771",
+          "special_tokens_map.json": "02ee80b6196926a5ad790a004d9efd6ab1ba6542",
+          "tokenizer.json": "5cc5f00a5b203e90a27a3bd60d1ec393b07971e8",
+          "tokenizer_config.json": "db88166e2bc4c799fd5d1ae643b75e84d03ee70e"
+        }
+      },
+      "inputs": {
+        "path": "results/rebuttal/v2q8_l40s_sparse/tp4_64k/inputs/prompts.safetensors",
+        "sha256": "88e50b1c337df818ff150238ea7dd599fbbeca6f8c086ccabd565c685e628670",
+        "manifest": {
+          "source": "/workspace/basis_artifacts/calibration/llama31-8b-instruct-128k/c4-48x128k/windows.safetensors",
+          "source_sha256": "6cc27d18a99809cec05567e793a5152c12de3a8877459f344a2182df99455624",
+          "length": 65536,
+          "protocol": "Batch B uses rows 0..B-1 of a cohort for every method; fixed-length greedy generation"
+        },
+        "cohorts": "cohort_0 / cohort_1 / cohort_2, first row of each (three different prompts)"
+      },
+      "repository": {
+        "head": "be7c8a2349b53d260a098a16e3656cc0b7e441c7",
+        "contains_fix_be7c8a2": true,
+        "uncommitted_files": [
+          "M basisserve_cals.egg-info/SOURCES.txt",
+          " M benchmarks/system/audit_tp1_request.py",
+          " M benchmarks/system/bench_v2q8_tp.py",
+          " M benchmarks/system/bench_v2q8_tp1.py",
+          " M benchmarks/system/paper_faithful_compat.py",
+          " M benchmarks/system/run_v2q8_tp1_smoke.py",
+          " M benchmarks/system/v2q8_affinity.py",
+          " M benchmarks/system/v2q8_basis.py",
+          " M results/rebuttal/v2q8_palu_g4_tp4/RUN_L40S.md"
+        ],
+        "uncommitted_diff_sha256": "b28faa3f491c70ede18e95c157002278612ac42dfb31af1ed0f5376f6145360b",
+        "lrqk_head": "caf16293db2e4423a84ab2e895bacf64479f1eb7",
+        "lrqk_clean": true
+      },
+      "source_sha256": {
+        "benchmarks/system/bench_v2q8_tp.py": "21a36fbe673c58baa4919be8ce801be4759b7b2430af65bd49de63d0720ae122",
+        "benchmarks/system/run_lrqk_tp1_retest.py": "18c339304cd39ffcb1688dbbe90e16356f26efefc6ed19000ed6cc4e7bf4a76c",
+        "benchmarks/system/check_lrqk_offload_order.py": "db1059fac6f1ce9aaef773b8f6b0041aa76bd26b069a58245cac71a945d267ba",
+        "benchmarks/system/v2q8_affinity.py": "2e9fc5516001716417c0a5a74ee46d397f05553b1b60afe1292d7b14e22c04e2",
+        "benchmarks/system/paper_faithful_compat.py": "acd7335167bba3e05eb46c175d301c584073c9ed51912d48914045b5cd683ce5",
+        "basisserve/core/lrqk_upstream.py": "387c360192f5d76d9eda0b21dac7d4ce4f4c5f989d3ed6b3e2f8f6c876d301c1",
+        "external/LRQK/lrqk_attention.py": "2bfbc6df2bf97316ce5b086249ce8af48481b0a78f89f6650e19463fe783fab5",
+        "external/LRQK/cpp_kernel/take_along_dim_grouped.cpp": "13727bb82b285e19a93682aa7ce71209b77160688dd9731c57c440ea3ac43da5",
+        "external/ShadowKV/models/kv_cache.py": "62f790d3e2cdafb7bb713c898524b0be16e68c94745c4077fd0fc8e7252f2da4",
+        "external/ShadowKV/models/base.py": "7988977966fba285f03531c326057a567da76610b84026bd7bb10794dc13f660",
+        "external/ShadowKV/models/llama.py": "fe127f1b592447701d83973ec1364c84100369dc8c93e82e1926dae7f1808c12",
+        "basisserve/core/shadowkv_upstream_tp.py": "ae0a9194b44f15c6243ca4c6c45deb9888fb1775f47644ffe8c96719e930dcd9",
+        "benchmarks/system/v2q8_basis.py": "a71553f051274f83ebea2ea3ea654479eba548aede491b53cc856d69d63a1ce1",
+        "basisserve/core/lean_llama.py": "5e243d5ccd39b494e8a94650dcaab14964d656cda5a78ab63efd5210929d3373",
+        "benchmarks/system/table3_page_router.py": "efc77ea32a7c4c0014b131d7d5fb283adb126a9d478fa0a280bc979ea61d3e23",
+        "external/ShadowKV/models/tensor_op.py": "48ef0a076adf9a3046be9d337062f7d2d9bdb9b20893c5228f32d0e94040b824",
+        "benchmarks/system/run_tp1_128k_retest.py": "c1ae0869f645e069fe33bd46f513ff826c9e729a644f628d88653981a3830a0f",
+        "benchmarks/system/check_shadowkv_cleanup_scope.py": "57a08037205208162671487a01569b28a3a8cb4b8ede2efc5dbbd9b5ceee3307",
+        "benchmarks/system/table3_router_fast.cu": "b10d2f683fd8bbe60fd0825049db84a36975c62590e13be332f5088286657343",
+        "benchmarks/system/table3_page_select.cu": "3e52c2ae62e02a28f9d2075196c16b234c4a949415dc376ef11812a3872b29cd"
+      },
+      "source_review": {
+        "shadowkv:get_svd_has_one_gc_collect_and_one_empty_cache": true,
+        "shadowkv:get_svd_cleanup_is_before_the_svd": true,
+        "shadowkv:get_svd_has_two_synchronize": true,
+        "shadowkv:h2d_has_its_own_cleanup": true,
+        "shadowkv:wrapper_applies_to_get_svd_only": true,
+        "shadowkv:wrapper_restores_on_any_exit": true,
+        "shadowkv:modified_arm_skips_exactly_both": true,
+        "lrqk:copy_stream_waits_for_producer": true,
+        "lrqk:sources_record_copy_stream": true,
+        "lrqk:k_only_uses_ordered": true,
+        "lrqk:kv_uses_ordered": true
+      },
+      "arm_labels": {
+        "basis_koff_v128_reuse_opt": "BasisKV, exact K offloaded (Base read from V, lean forward, fast router)",
+        "shadowkv_upstream_v128": "ShadowKV, upstream (control)",
+        "shadowkv_upstream_nohk_v128": "ShadowKV with per-layer pre-SVD GC and empty-cache calls disabled",
+        "lrqk_upstream_koff_v128": "LRQK with the prefill stream-order fix, K offload (V on GPU)",
+        "lrqk_upstream_kvoff_v128": "LRQK with the prefill stream-order fix, K and V offload"
+      },
+      "context_tokens": 65536,
+      "shadowkv": {
+        "upstream_head": "e51904cdeab7d4d34013370f09f2cf5fcd655e15",
+        "cutlass_head": "2c85f497547eb441f0fe80bfb0fb2e6f9add1719",
+        "rank": 160,
+        "chunk": 8,
+        "sparse_budget": 2048,
+        "modified_arm": "gc.collect and torch.cuda.empty_cache are no-ops while get_svd runs; upstream's source is not edited"
+      },
+      "lrqk": {
+        "rank": 32,
+        "topk": 2048,
+        "lite": 64,
+        "iterations": [
+          2,
+          2
+        ],
+        "tolerance": [
+          0.01,
+          0.01
+        ]
+      },
+      "protocol": "TP1, B1, original V128/Wo, BF16; same-shape warmup request then fresh state; request = 128 tokens; steady = 16 conditioning + 128 measured steps; no component timers"
+    },
+    {
+      "written_utc": "2026-11-11T22:53:09Z",
+      "phases": [
+        "probe"
+      ],
+      "cohorts": [
+        0,
+        1,
+        2
+      ],
+      "arms": [
+        "basis_koff_v128_reuse_opt",
+        "shadowkv_upstream_v128",
+        "shadowkv_upstream_nohk_v128",
+        "lrqk_upstream_koff_v128",
+        "lrqk_upstream_kvoff_v128"
+      ],
+      "host": "node6.athena",
+      "slurm": {
+        "SLURM_JOB_ID": "240519",
+        "SLURMD_NODENAME": "node6",
+        "SLURM_JOB_GPUS": "0",
+        "SLURM_CPUS_PER_TASK": "24",
+        "SLURM_JOB_CPUS_PER_NODE": "24"
+      },
+      "gpu": {
+        "index": "0",
+        "name": "NVIDIA L40S",
+        "uuid": "GPU-6860b33e-b157-0e96-33dc-692dafd3d645",
+        "pci.bus_id": "00000000:4F:00.0",
+        "driver_version": "550.54.15",
+        "memory.total": "46068",
+        "memory.used": "0",
+        "utilization.gpu": "0",
+        "ecc.errors.uncorrected.aggregate.total": "0"
+      },
+      "cpu_model": "Intel(R) Xeon(R) Gold 6338 CPU @ 2.00GHz",
+      "cpu": {
+        "gpu_numa_node": 0,
+        "children_confined_to": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87
+        ],
+        "benchmark_keeps": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          20,
+          22,
+          64,
+          66,
+          68,
+          70,
+          72,
+          74,
+          76,
+          78,
+          80,
+          82,
+          84,
+          86
+        ],
+        "threads": 24,
+        "physical_cores": 12,
+        "hyperthread_pairs": [
+          "0,64",
+          "10,74",
+          "12,76",
+          "14,78",
+          "16,80",
+          "18,82",
+          "2,66",
+          "20,84",
+          "22,86",
+          "4,68",
+          "6,70",
+          "8,72"
+        ],
+        "archived_tp1": "24 threads on 12 physical cores x 2 hyperthreads of the GPU's NUMA node (Xeon Platinum 8558), OMP_NUM_THREADS=24",
+        "host_logical_cpus": 128,
+        "load_average": [
+          5.4169921875,
+          5.8134765625,
+          7.09814453125
+        ],
+        "scheduler_affinity_of_runner": 24
+      },
+      "software": {
+        "python": "3.11.16",
+        "conda_environment": "basis",
+        "prefix": "/home/yl1139/basis_artifacts/envs/vllm/basis",
+        "torch": "2.13.0+cu129",
+        "cuda_runtime": "12.9",
+        "transformers": "5.17.0",
+        "nccl": "2.29.7",
+        "cuda_home": "/home/yl1139/basis_artifacts/cuda/12.9",
+        "allocator": "PyTorch default (PYTORCH_CUDA_ALLOC_CONF empty), as the archived upstream runs"
+      },
+      "model": {
+        "path": "/home/yl1139/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+        "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+        "files": {
+          ".gitattributes": "a6344aac8c09253b3b630fb776ae94478aa0275b",
+          "LICENSE": "a7c3ca16cee30425ed6ad841a809590f2bcbf290",
+          "README.md": "bbd5630a05b65c1a8b25141bd11ec44844107d58",
+          "USE_POLICY.md": "81ebb55902285e8dd5804ccf423d17ffb2a622ee",
+          "config.json": "0bb6fd75b3ad2fe988565929f329945262c2814e",
+          "generation_config.json": "cc7276afd599de091142c6ed3005faf8a74aa257",
+          "model-00001-of-00004.safetensors": "2b1879f356aed350030bb40eb45ad362c89d9891096f79a3ab323d3ba5607668",
+          "model-00002-of-00004.safetensors": "09d433f650646834a83c580877bd60c6d1f88f7755305c12576b5c7058f9af15",
+          "model-00003-of-00004.safetensors": "fc1cdddd6bfa91128d6e94ee73d0ce62bfcdb7af29e978ddcab30c66ae9ea7fa",
+          "model-00004-of-00004.safetensors": "92ecfe1a2414458b4821ac8c13cf8cb70aed66b5eea8dc5ad9eeb4ff309d6d7b",
+          "model.safetensors.index.json": "0fd8120f1c6acddc268ebc2583058efaf699a771",
+          "special_tokens_map.json": "02ee80b6196926a5ad790a004d9efd6ab1ba6542",
+          "tokenizer.json": "5cc5f00a5b203e90a27a3bd60d1ec393b07971e8",
+          "tokenizer_config.json": "db88166e2bc4c799fd5d1ae643b75e84d03ee70e"
+        }
+      },
+      "inputs": {
+        "path": "results/rebuttal/v2q8_l40s_sparse/tp4_64k/inputs/prompts.safetensors",
+        "sha256": "88e50b1c337df818ff150238ea7dd599fbbeca6f8c086ccabd565c685e628670",
+        "manifest": {
+          "source": "/workspace/basis_artifacts/calibration/llama31-8b-instruct-128k/c4-48x128k/windows.safetensors",
+          "source_sha256": "6cc27d18a99809cec05567e793a5152c12de3a8877459f344a2182df99455624",
+          "length": 65536,
+          "protocol": "Batch B uses rows 0..B-1 of a cohort for every method; fixed-length greedy generation"
+        },
+        "cohorts": "cohort_0 / cohort_1 / cohort_2, first row of each (three different prompts)"
+      },
+      "repository": {
+        "head": "be7c8a2349b53d260a098a16e3656cc0b7e441c7",
+        "contains_fix_be7c8a2": true,
+        "uncommitted_files": [
+          "M basisserve_cals.egg-info/SOURCES.txt",
+          " M benchmarks/system/audit_tp1_request.py",
+          " M benchmarks/system/bench_v2q8_tp.py",
+          " M benchmarks/system/bench_v2q8_tp1.py",
+          " M benchmarks/system/paper_faithful_compat.py",
+          " M benchmarks/system/run_v2q8_tp1_smoke.py",
+          " M benchmarks/system/v2q8_affinity.py",
+          " M benchmarks/system/v2q8_basis.py",
+          " M results/rebuttal/v2q8_palu_g4_tp4/RUN_L40S.md"
+        ],
+        "uncommitted_diff_sha256": "b28faa3f491c70ede18e95c157002278612ac42dfb31af1ed0f5376f6145360b",
+        "lrqk_head": "caf16293db2e4423a84ab2e895bacf64479f1eb7",
+        "lrqk_clean": true
+      },
+      "source_sha256": {
+        "benchmarks/system/bench_v2q8_tp.py": "21a36fbe673c58baa4919be8ce801be4759b7b2430af65bd49de63d0720ae122",
+        "benchmarks/system/run_lrqk_tp1_retest.py": "96cf456fa9904448592da5e944206b29705333b87948039a373e134b66cd5e57",
+        "benchmarks/system/check_lrqk_offload_order.py": "db1059fac6f1ce9aaef773b8f6b0041aa76bd26b069a58245cac71a945d267ba",
+        "benchmarks/system/v2q8_affinity.py": "2e9fc5516001716417c0a5a74ee46d397f05553b1b60afe1292d7b14e22c04e2",
+        "benchmarks/system/paper_faithful_compat.py": "acd7335167bba3e05eb46c175d301c584073c9ed51912d48914045b5cd683ce5",
+        "basisserve/core/lrqk_upstream.py": "387c360192f5d76d9eda0b21dac7d4ce4f4c5f989d3ed6b3e2f8f6c876d301c1",
+        "external/LRQK/lrqk_attention.py": "2bfbc6df2bf97316ce5b086249ce8af48481b0a78f89f6650e19463fe783fab5",
+        "external/LRQK/cpp_kernel/take_along_dim_grouped.cpp": "13727bb82b285e19a93682aa7ce71209b77160688dd9731c57c440ea3ac43da5",
+        "external/ShadowKV/models/kv_cache.py": "62f790d3e2cdafb7bb713c898524b0be16e68c94745c4077fd0fc8e7252f2da4",
+        "external/ShadowKV/models/base.py": "7988977966fba285f03531c326057a567da76610b84026bd7bb10794dc13f660",
+        "external/ShadowKV/models/llama.py": "fe127f1b592447701d83973ec1364c84100369dc8c93e82e1926dae7f1808c12",
+        "basisserve/core/shadowkv_upstream_tp.py": "ae0a9194b44f15c6243ca4c6c45deb9888fb1775f47644ffe8c96719e930dcd9",
+        "benchmarks/system/v2q8_basis.py": "a71553f051274f83ebea2ea3ea654479eba548aede491b53cc856d69d63a1ce1",
+        "basisserve/core/lean_llama.py": "5e243d5ccd39b494e8a94650dcaab14964d656cda5a78ab63efd5210929d3373",
+        "benchmarks/system/table3_page_router.py": "efc77ea32a7c4c0014b131d7d5fb283adb126a9d478fa0a280bc979ea61d3e23",
+        "external/ShadowKV/models/tensor_op.py": "48ef0a076adf9a3046be9d337062f7d2d9bdb9b20893c5228f32d0e94040b824",
+        "benchmarks/system/run_tp1_128k_retest.py": "4ef1f0188cad3e07de5e27e9c7307a97537eabb6a68b9c245fda80854dbf62cc",
+        "benchmarks/system/check_shadowkv_cleanup_scope.py": "57a08037205208162671487a01569b28a3a8cb4b8ede2efc5dbbd9b5ceee3307",
+        "benchmarks/system/table3_router_fast.cu": "b10d2f683fd8bbe60fd0825049db84a36975c62590e13be332f5088286657343",
+        "benchmarks/system/table3_page_select.cu": "3e52c2ae62e02a28f9d2075196c16b234c4a949415dc376ef11812a3872b29cd"
+      },
+      "source_review": {
+        "shadowkv:get_svd_has_one_gc_collect_and_one_empty_cache": true,
+        "shadowkv:get_svd_cleanup_is_before_the_svd": true,
+        "shadowkv:get_svd_has_two_synchronize": true,
+        "shadowkv:h2d_has_its_own_cleanup": true,
+        "shadowkv:wrapper_applies_to_get_svd_only": true,
+        "shadowkv:wrapper_restores_on_any_exit": true,
+        "shadowkv:modified_arm_skips_exactly_both": true,
+        "lrqk:copy_stream_waits_for_producer": true,
+        "lrqk:sources_record_copy_stream": true,
+        "lrqk:k_only_uses_ordered": true,
+        "lrqk:kv_uses_ordered": true
+      },
+      "arm_labels": {
+        "basis_koff_v128_reuse_opt": "BasisKV, exact K offloaded (Base read from V, lean forward, fast router)",
+        "shadowkv_upstream_v128": "ShadowKV, upstream (control)",
+        "shadowkv_upstream_nohk_v128": "ShadowKV with per-layer pre-SVD GC and empty-cache calls disabled",
+        "lrqk_upstream_koff_v128": "LRQK with the prefill stream-order fix, K offload (V on GPU)",
+        "lrqk_upstream_kvoff_v128": "LRQK with the prefill stream-order fix, K and V offload"
+      },
+      "context_tokens": 65536,
+      "shadowkv": {
+        "upstream_head": "e51904cdeab7d4d34013370f09f2cf5fcd655e15",
+        "cutlass_head": "2c85f497547eb441f0fe80bfb0fb2e6f9add1719",
+        "rank": 160,
+        "chunk": 8,
+        "sparse_budget": 2048,
+        "modified_arm": "gc.collect and torch.cuda.empty_cache are no-ops while get_svd runs; upstream's source is not edited"
+      },
+      "lrqk": {
+        "rank": 32,
+        "topk": 2048,
+        "lite": 64,
+        "iterations": [
+          2,
+          2
+        ],
+        "tolerance": [
+          0.01,
+          0.01
+        ]
+      },
+      "protocol": "TP1, B1, original V128/Wo, BF16; same-shape warmup request then fresh state; request = 128 tokens; steady = 16 conditioning + 128 measured steps; no component timers"
+    }
+  ],
+  "stopped_arms": {},
+  "formal_runs": [
+    {
+      "name": "basis_koff_v128_reuse_opt_request_c0",
+      "status": "complete",
+      "physical_gpu": "00000000:4F:00.0"
+    },
+    {
+      "name": "basis_koff_v128_reuse_opt_request_c1",
+      "status": "complete",
+      "physical_gpu": "00000000:D5:00.0"
+    },
+    {
+      "name": "basis_koff_v128_reuse_opt_request_c2",
+      "status": "complete",
+      "physical_gpu": "00000000:D5:00.0"
+    },
+    {
+      "name": "shadowkv_upstream_nohk_v128_request_c0",
+      "status": "complete",
+      "physical_gpu": "00000000:4F:00.0"
+    },
+    {
+      "name": "shadowkv_upstream_nohk_v128_request_c1",
+      "status": "complete",
+      "physical_gpu": "00000000:D5:00.0"
+    },
+    {
+      "name": "shadowkv_upstream_nohk_v128_request_c2",
+      "status": "complete",
+      "physical_gpu": "00000000:D5:00.0"
+    }
+  ],
+  "deliverables": [
+    "correctness-summary.json",
+    "manifest.json",
+    "runs.csv",
+    "summary.csv",
+    "SUMMARY.md"
+  ]
+}

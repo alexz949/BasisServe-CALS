@@ -27,8 +27,9 @@ Each rank writes rank_<r>.json; rank 0 writes result.json with every rank's numb
 """
 
 import argparse
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 import gc
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -38,9 +39,12 @@ import subprocess
 import sys
 import time
 from types import SimpleNamespace
+from unittest import mock
 
 import torch
+import torch._dynamo
 import torch.distributed as dist
+import transformers
 from safetensors.torch import load_file
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -82,6 +86,12 @@ ARMS = {
     "lrqk_upstream_koff_v128": dict(method="lrqk_upstream", value=128),
     # Upstream LRQK placement: exact K and V in one pinned host pool. Both placements use ordered prefill parking.
     "lrqk_upstream_kvoff_v128": dict(method="lrqk_upstream", value=128, kv_offload=True),
+    # Trial arms, NOT the baseline: upstream calls torch.cuda.empty_cache() after every layer's decode update
+    # (DynamicLRQKCache.update, once per layer and step). Here that call is a no-op while a decode-phase update
+    # runs; upstream's source is not edited and prefill is untouched.
+    "lrqk_upstream_koff_noempty_v128": dict(method="lrqk_upstream", value=128, skip_decode_empty_cache=True),
+    "lrqk_upstream_kvoff_noempty_v128": dict(method="lrqk_upstream", value=128, kv_offload=True,
+                                             skip_decode_empty_cache=True),
     # The two upstream LRQK runtimes with torch.compile switched off by PyTorch's own switch (the launcher sets
     # TORCH_COMPILE_DISABLE=1, so upstream's decorated solvers and index helper run as plain Python; upstream's
     # source is not edited). Upstream targets PyTorch 2.5.1; on this environment's 2.13 its compiled decode solver
@@ -255,14 +265,14 @@ def build_shadowkv_upstream(args, world, timers):
         """get_svd with the named upstream cleanup calls as no-ops while it runs (they are looked up as gc.collect
         and torch.cuda.empty_cache at call time, in upstream's get_svd and in the TP port's)."""
         def run(*positional, **keywords):
-            saved = gc.collect, torch.cuda.empty_cache
-            if "gc_collect" in skip:
-                gc.collect = lambda *a, **k: 0
-            if "empty_cache" in skip:
-                torch.cuda.empty_cache = lambda: None
-            output = function(*positional, **keywords)
-            gc.collect, torch.cuda.empty_cache = saved
-            return output
+            # Upstream's get_svd makes each call exactly once, before its torch.svd; nothing else in this process
+            # runs while it does. The bindings are restored on every exit of the block, exceptions included.
+            with ExitStack() as restore:
+                if "gc_collect" in skip:
+                    restore.enter_context(mock.patch.object(gc, "collect", lambda *a, **k: 0))
+                if "empty_cache" in skip:
+                    restore.enter_context(mock.patch.object(torch.cuda, "empty_cache", lambda: None))
+                return function(*positional, **keywords)
         return run
 
     def reset():
@@ -314,7 +324,9 @@ def build_shadowkv_upstream(args, world, timers):
         placement="Values offloaded: full prompt V on pinned host (upstream ShadowKVCache_CPU)",
         implementation="upstream models.llama.Llama + ShadowKVCache_CPU + CUDA kernels "
                        "(ByteDance-Seed/ShadowKV@e51904cd), source unmodified" + (
-                           "" if world == 1 else "; minimal TP port basisserve/core/shadowkv_upstream_tp.py"),
+                           "" if world == 1 else "; minimal TP port basisserve/core/shadowkv_upstream_tp.py") + (
+                           "" if not skip else "; NOT upstream behaviour: per-layer pre-SVD " + " and ".join(skip)
+                           + " disabled at run time inside get_svd"),
         shadowkv=dict(rank=upstream_tp.RANK, chunk=upstream_tp.CHUNK, sparse_budget=upstream_tp.SPARSE_BUDGET,
                       get_svd_cleanup="upstream: synchronize + gc.collect + empty_cache before each decomposition"
                       if not skip else "NOT upstream: " + " and ".join(skip) + " are no-ops inside get_svd (trial)"),
@@ -382,6 +394,20 @@ def build_lrqk_upstream(args, world, timers):
     for layer in model.model.layers:  # as system_benchmarks/tp1_offline: exact tokenwise prefill MLP chunks
         layer.mlp = ChunkedTokenwise(layer.mlp, chunk_size=1024)
     model = lrqk_upstream.install(model, world=world)
+    skip_empty_cache = bool(ARMS[args.arm].get("skip_decode_empty_cache"))
+    if skip_empty_cache:
+        upstream_update = module.DynamicLRQKCache.update
+
+        def update(self, query_states, key_states, value_states, layer_idx, *positional, **keywords):
+            """Upstream update; torch.cuda.empty_cache (looked up at call time) is a no-op during decode updates."""
+            saved = torch.cuda.empty_cache
+            if self.sequence_state[layer_idx] == self.State.decoding:
+                torch.cuda.empty_cache = lambda: None
+            output = upstream_update(self, query_states, key_states, value_states, layer_idx, *positional, **keywords)
+            torch.cuda.empty_cache = saved
+            return output
+
+        module.DynamicLRQKCache.update = update
     if args.mode == "breakdown":
         def timed(function, label):
             def measured(*positional, **keywords):
@@ -437,11 +463,14 @@ def build_lrqk_upstream(args, world, timers):
         implementation="upstream lrqk_attention (tenghuilee/LRQK@caf16293): load_model_hack, DynamicLRQKCache, "
                        "LightAttentionIndicesOffloadPrefill, " + ("torch.compile as upstream" if compiled else
                        "torch.compile OFF (TORCH_COMPILE_DISABLE=1; NOT as upstream)") + "; source unmodified" + (
+                           "; TRIAL: torch.cuda.empty_cache() is a no-op during decode-phase cache updates "
+                           "(NOT as upstream)" if skip_empty_cache else "") + (
                            "" if kv_offload else
                            "; basisserve/core/lrqk_upstream.py splits the K/V pool (Values on GPU)"),
         lrqk=dict(lrqk_upstream.CONFIG, lambdas=1.0, init="randn"),
         prefill="whole batch in one forward (upstream)", mlp="ChunkedTokenwise(1024) as tp1_offline",
         prefill_offload_ordering="copy stream waits for producer; source tensors record copy stream",
+        prefill_class_mro=[f"{c.__module__}.{c.__qualname__}" for c in factory_class.__mro__[:-1]],
         tp=None if world == 1 else "HF tensor parallel; local head counts on each attention module")
     return SimpleNamespace(model=model, layers=[], forward=forward, reset=reset, place=lambda: None,
                            prefill_batch=prefill_batch, factories=factories, configuration=configuration,
@@ -464,6 +493,7 @@ def build(args, rank, world, timers):
         sys.path.insert(0, str(frozen.SNAPSHOT))
         harness = frozen.module_from_file(
             "frozen_request_harness", frozen.SNAPSHOT / "benchmarks/system/bench_tp1_sparse_full_v6.py")
+        PATH_LOADED.append(frozen.SNAPSHOT / "benchmarks/system/bench_tp1_sparse_full_v6.py")
     options = dict(dtype=torch.bfloat16, attn_implementation="sdpa", local_files_only=True)
     model = (AutoModelForCausalLM.from_pretrained(frozen.MODEL, **options).cuda() if world == 1 else
              AutoModelForCausalLM.from_pretrained(frozen.MODEL, distributed_config=DistributedConfig(tp_size=world),
@@ -543,7 +573,7 @@ def build(args, rank, world, timers):
         layers = v2q8_basis.install(
             model, harness=harness, router=router, bank=args.bank_v96 if spec["value"] == 96 else args.bank_v128,
             value_checkpoint=value_checkpoint, batch=args.batch, capacity=capacity, offload=True,
-            value_reuse=spec["reuse"], rank=rank, world=world, **geometry)
+            value_reuse=spec["reuse"], build_root=args.build_root, rank=rank, world=world, **geometry)
         for layer in layers:
             layer.timers = timers if args.mode == "breakdown" else None
         configuration = dict(value=value, placement="Keys offloaded: exact K in mapped pinned host memory with "
@@ -559,6 +589,7 @@ def build(args, rank, world, timers):
         if spec.get("lean"):
             # Loaded by path: the frozen Table 3 tree on sys.path shadows this repository's basisserve package.
             lean_llama = frozen.module_from_file("lean_llama", ROOT / "basisserve/core/lean_llama.py")
+            PATH_LOADED.append(ROOT / "basisserve/core/lean_llama.py")
             lean = lean_llama.LeanLlama(model, layers, world)
             configuration["model"] = ("lean forward (basisserve/core/lean_llama.py): replicated embedding/lm_head, "
                                       "flashinfer RMSNorm, fused gate_up + silu_and_mul, AllReduce after down_proj, "
@@ -794,6 +825,19 @@ def support(runtime, arm):
     return dict(mean_tokens_per_request_kv_head=statistics.fmean(counts), per_layer=counts)
 
 
+PATH_LOADED = []  # files executed with module_from_file: they never enter sys.modules
+
+
+def imported_sources():
+    """Path and sha256 of every repository file this process imported (upstream trees under external/ included)."""
+    files = {str(Path(module.__file__).resolve()) for module in list(sys.modules.values())
+             if getattr(module, "__file__", None) and Path(module.__file__).resolve().is_relative_to(ROOT)
+             and Path(module.__file__).is_file()}  # generated modules name files that do not exist
+    files |= {str(Path(path).resolve()) for path in PATH_LOADED}
+    return {str(Path(name).relative_to(ROOT)): hashlib.sha256(Path(name).read_bytes()).hexdigest()
+            for name in sorted(files)}
+
+
 @torch.inference_mode()
 def main():
     parser = argparse.ArgumentParser()
@@ -804,14 +848,19 @@ def main():
     parser.add_argument("--cohort", type=int, required=True)
     parser.add_argument("--inputs", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--value-checkpoint", type=Path, required=True)
-    parser.add_argument("--bank-v96", type=Path, required=True)
-    parser.add_argument("--bank-v128", type=Path, required=True)
-    parser.add_argument("--build-root", type=Path, required=True)
+    parser.add_argument("--model", type=Path, default=None, help="model snapshot; default audit_tp1_request.MODEL")
+    # Read only by the arms that use them: V96 arms (checkpoint, V96 bank), BasisKV arms (banks, build root).
+    parser.add_argument("--value-checkpoint", type=Path, default=None)
+    parser.add_argument("--bank-v96", type=Path, default=None)
+    parser.add_argument("--bank-v128", type=Path, default=None)
+    parser.add_argument("--build-root", type=Path, default=None)
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--force-tokens", type=Path, default=None,
                         help="request mode: JSON [B][count] token ids to feed instead of argmax (teacher forcing)")
     args = parser.parse_args()
+    from benchmarks.system import audit_tp1_request as frozen
+    if args.model:
+        frozen.MODEL = args.model  # every build function reads the model path from this module
     warmup, steps = (2, 4) if args.smoke else (16, 128)
     args.output_tokens = ((8 if args.smoke else 128) if args.mode == "request" else
                           warmup + steps + (1 if args.mode == "steady" else 0))
@@ -881,6 +930,16 @@ def main():
                 command=sys.argv, python=platform.python_version(), torch=torch.__version__,
                 cuda_runtime=torch.version.cuda, nccl=".".join(map(str, torch.cuda.nccl.version())),
                 conda_environment=Path(sys.prefix).name, host=platform.node(),
+                transformers=transformers.__version__, model=str(frozen.MODEL),
+                # Read after the measurement: upstream LRQK sets float32 matmul precision at import.
+                effective=dict(torch_compile_disabled=torch._dynamo.config.disable,
+                               torch_compile_disable_env=os.environ.get("TORCH_COMPILE_DISABLE"),
+                               float32_matmul_precision=torch.get_float32_matmul_precision(),
+                               cuda_matmul_allow_tf32=torch.backends.cuda.matmul.allow_tf32,
+                               cudnn_allow_tf32=torch.backends.cudnn.allow_tf32,
+                               nvidia_tf32_override=os.environ.get("NVIDIA_TF32_OVERRIDE"),
+                               omp_num_threads=os.environ.get("OMP_NUM_THREADS")),
+                imported_sources=imported_sources(),
                 nccl_env={k: v for k, v in os.environ.items() if k.startswith("NCCL_")},
                 pytorch_cuda_alloc_conf=os.environ.get("PYTORCH_CUDA_ALLOC_CONF"),
                 gpus=subprocess.check_output(["nvidia-smi", "--query-gpu=index,name,uuid,pci.bus_id,driver_version",

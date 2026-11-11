@@ -1,0 +1,551 @@
+{
+  "source_review": {
+    "shadowkv": {
+      "get_svd_has_one_gc_collect_and_one_empty_cache": true,
+      "get_svd_cleanup_is_before_the_svd": true,
+      "get_svd_has_two_synchronize": true,
+      "h2d_has_its_own_cleanup": true,
+      "wrapper_applies_to_get_svd_only": true,
+      "wrapper_restores_on_any_exit": true,
+      "modified_arm_skips_exactly_both": true
+    },
+    "lrqk": {
+      "copy_stream_waits_for_producer": true,
+      "sources_record_copy_stream": true,
+      "k_only_uses_ordered": true,
+      "kv_uses_ordered": true
+    }
+  },
+  "source_sha256": {
+    "benchmarks/system/bench_v2q8_tp.py": "21a36fbe673c58baa4919be8ce801be4759b7b2430af65bd49de63d0720ae122",
+    "benchmarks/system/run_lrqk_tp1_retest.py": "18c339304cd39ffcb1688dbbe90e16356f26efefc6ed19000ed6cc4e7bf4a76c",
+    "benchmarks/system/check_lrqk_offload_order.py": "db1059fac6f1ce9aaef773b8f6b0041aa76bd26b069a58245cac71a945d267ba",
+    "benchmarks/system/v2q8_affinity.py": "2e9fc5516001716417c0a5a74ee46d397f05553b1b60afe1292d7b14e22c04e2",
+    "benchmarks/system/paper_faithful_compat.py": "acd7335167bba3e05eb46c175d301c584073c9ed51912d48914045b5cd683ce5",
+    "basisserve/core/lrqk_upstream.py": "387c360192f5d76d9eda0b21dac7d4ce4f4c5f989d3ed6b3e2f8f6c876d301c1",
+    "external/LRQK/lrqk_attention.py": "2bfbc6df2bf97316ce5b086249ce8af48481b0a78f89f6650e19463fe783fab5",
+    "external/LRQK/cpp_kernel/take_along_dim_grouped.cpp": "13727bb82b285e19a93682aa7ce71209b77160688dd9731c57c440ea3ac43da5",
+    "external/ShadowKV/models/kv_cache.py": "62f790d3e2cdafb7bb713c898524b0be16e68c94745c4077fd0fc8e7252f2da4",
+    "external/ShadowKV/models/base.py": "7988977966fba285f03531c326057a567da76610b84026bd7bb10794dc13f660",
+    "external/ShadowKV/models/llama.py": "fe127f1b592447701d83973ec1364c84100369dc8c93e82e1926dae7f1808c12",
+    "basisserve/core/shadowkv_upstream_tp.py": "ae0a9194b44f15c6243ca4c6c45deb9888fb1775f47644ffe8c96719e930dcd9",
+    "benchmarks/system/v2q8_basis.py": "a71553f051274f83ebea2ea3ea654479eba548aede491b53cc856d69d63a1ce1",
+    "basisserve/core/lean_llama.py": "5e243d5ccd39b494e8a94650dcaab14964d656cda5a78ab63efd5210929d3373",
+    "benchmarks/system/table3_page_router.py": "efc77ea32a7c4c0014b131d7d5fb283adb126a9d478fa0a280bc979ea61d3e23",
+    "external/ShadowKV/models/tensor_op.py": "48ef0a076adf9a3046be9d337062f7d2d9bdb9b20893c5228f32d0e94040b824",
+    "benchmarks/system/run_tp1_128k_retest.py": "c1ae0869f645e069fe33bd46f513ff826c9e729a644f628d88653981a3830a0f",
+    "benchmarks/system/check_shadowkv_cleanup_scope.py": "57a08037205208162671487a01569b28a3a8cb4b8ede2efc5dbbd9b5ceee3307",
+    "benchmarks/system/table3_router_fast.cu": "b10d2f683fd8bbe60fd0825049db84a36975c62590e13be332f5088286657343",
+    "benchmarks/system/table3_page_select.cu": "3e52c2ae62e02a28f9d2075196c16b234c4a949415dc376ef11812a3872b29cd"
+  },
+  "shadowkv_cleanup_scope": {
+    "arms": {
+      "shadowkv_upstream_v128": {
+        "exit_code": 0,
+        "arm": "shadowkv_upstream_v128",
+        "skip_in_get_svd": [],
+        "context_tokens": 8192,
+        "layers": 32,
+        "calls_inside_get_svd": {
+          "collect": 32,
+          "empty_cache": 32,
+          "synchronize": 64,
+          "svd": 32
+        },
+        "expected_inside_get_svd": {
+          "collect": 32,
+          "empty_cache": 32,
+          "synchronize": 64,
+          "svd": 32
+        },
+        "calls_inside_h2d": {
+          "collect": 2,
+          "empty_cache": 2,
+          "synchronize": 3
+        },
+        "expected_inside_h2d": {
+          "collect": 2,
+          "empty_cache": 2,
+          "synchronize": 3
+        },
+        "gc_collect_calls_in_reset": 2,
+        "all_counts": {
+          "build:collect": 33,
+          "reset:collect": 2,
+          "get_svd:synchronize": 64,
+          "get_svd:collect": 32,
+          "get_svd:empty_cache": 32,
+          "get_svd:svd": 32,
+          "prefill_outside_get_svd:synchronize": 1,
+          "h2d:collect": 2,
+          "h2d:empty_cache": 2,
+          "h2d:synchronize": 3
+        },
+        "exception_inside_get_svd": [
+          "AttributeError"
+        ],
+        "bindings_restored_after_exception": true,
+        "passed": true,
+        "scope": "Call counts only, at 8192 tokens; not timed. Python's automatic garbage collector is untouched."
+      },
+      "shadowkv_upstream_nohk_v128": {
+        "exit_code": 0,
+        "arm": "shadowkv_upstream_nohk_v128",
+        "skip_in_get_svd": [
+          "gc_collect",
+          "empty_cache"
+        ],
+        "context_tokens": 8192,
+        "layers": 32,
+        "calls_inside_get_svd": {
+          "collect": 0,
+          "empty_cache": 0,
+          "synchronize": 64,
+          "svd": 32
+        },
+        "expected_inside_get_svd": {
+          "collect": 0,
+          "empty_cache": 0,
+          "synchronize": 64,
+          "svd": 32
+        },
+        "calls_inside_h2d": {
+          "collect": 2,
+          "empty_cache": 2,
+          "synchronize": 3
+        },
+        "expected_inside_h2d": {
+          "collect": 2,
+          "empty_cache": 2,
+          "synchronize": 3
+        },
+        "gc_collect_calls_in_reset": 2,
+        "all_counts": {
+          "build:collect": 33,
+          "reset:collect": 2,
+          "get_svd:synchronize": 64,
+          "get_svd:svd": 32,
+          "prefill_outside_get_svd:synchronize": 1,
+          "h2d:collect": 2,
+          "h2d:empty_cache": 2,
+          "h2d:synchronize": 3
+        },
+        "exception_inside_get_svd": [
+          "AttributeError"
+        ],
+        "bindings_restored_after_exception": true,
+        "passed": true,
+        "scope": "Call counts only, at 8192 tokens; not timed. Python's automatic garbage collector is untouched."
+      }
+    },
+    "same_svd_calls": true,
+    "passed": true,
+    "scope": "Call counts at 8192 tokens, one arm per process, not timed."
+  },
+  "lrqk_offload_order": {
+    "exit_code": 0,
+    "ordered": {
+      "K": {
+        "wrong": 0,
+        "total": 17301504,
+        "min": 2.0,
+        "max": 2.0
+      },
+      "V": {
+        "wrong": 0,
+        "total": 17301504,
+        "min": 3.0,
+        "max": 3.0
+      },
+      "A_K": {
+        "wrong": 0,
+        "total": 16777216,
+        "min": 4.0,
+        "max": 4.0
+      }
+    },
+    "upstream_unordered": {
+      "K": {
+        "wrong": 17301504,
+        "total": 17301504,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "V": {
+        "wrong": 17301504,
+        "total": 17301504,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "A_K": {
+        "wrong": 16777216,
+        "total": 16777216,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "passed": true,
+    "scope": "Source tensors are kept alive by the script: it isolates the producer-to-copy stream ordering and is not a full allocator-lifetime regression test."
+  },
+  "smoke_8k": {
+    "shadowkv": {
+      "arms": {
+        "shadowkv_upstream_v128": {
+          "name": "shadowkv_upstream_v128_request_b1_t8192_smoke",
+          "status": "complete",
+          "exit_code": 0,
+          "seconds": 49.8,
+          "output_tokens": 8,
+          "expected_output_tokens": 8,
+          "logprobs_finite": true,
+          "imported_files_match_review": true,
+          "effective": {
+            "torch_compile_disabled": false,
+            "torch_compile_disable_env": null,
+            "float32_matmul_precision": "highest",
+            "cuda_matmul_allow_tf32": false,
+            "cudnn_allow_tf32": false,
+            "nvidia_tf32_override": null,
+            "omp_num_threads": "24"
+          },
+          "implementation": "upstream models.llama.Llama + ShadowKVCache_CPU + CUDA kernels (ByteDance-Seed/ShadowKV@e51904cd), source unmodified",
+          "failure": null,
+          "ttft_seconds": 7.739587656222284,
+          "placement_seconds": 0.3506211338099092,
+          "decode_ready_seconds": 8.090208790032193,
+          "memory_after_prefill": {
+            "allocated": 16580141568,
+            "reserved": 16603152384,
+            "peak_allocated": 17486072832,
+            "peak_reserved": 17699962880,
+            "device_used": 17660968960,
+            "process_rss": 3428188160
+          },
+          "memory_after_decode": {
+            "allocated": 16580661760,
+            "reserved": 16605249536,
+            "peak_allocated": 16581438976,
+            "peak_reserved": 16605249536,
+            "device_used": 17663066112,
+            "process_rss": 3428188160
+          },
+          "passed": true
+        },
+        "shadowkv_upstream_nohk_v128": {
+          "name": "shadowkv_upstream_nohk_v128_request_b1_t8192_smoke",
+          "status": "complete",
+          "exit_code": 0,
+          "seconds": 33.8,
+          "output_tokens": 8,
+          "expected_output_tokens": 8,
+          "logprobs_finite": true,
+          "imported_files_match_review": true,
+          "effective": {
+            "torch_compile_disabled": false,
+            "torch_compile_disable_env": null,
+            "float32_matmul_precision": "highest",
+            "cuda_matmul_allow_tf32": false,
+            "cudnn_allow_tf32": false,
+            "nvidia_tf32_override": null,
+            "omp_num_threads": "24"
+          },
+          "implementation": "upstream models.llama.Llama + ShadowKVCache_CPU + CUDA kernels (ByteDance-Seed/ShadowKV@e51904cd), source unmodified; NOT upstream behaviour: per-layer pre-SVD gc_collect and empty_cache disabled at run time inside get_svd",
+          "failure": null,
+          "ttft_seconds": 2.717560588149354,
+          "placement_seconds": 0.370366123970598,
+          "decode_ready_seconds": 3.087926712119952,
+          "memory_after_prefill": {
+            "allocated": 16580142080,
+            "reserved": 16603152384,
+            "peak_allocated": 17486073344,
+            "peak_reserved": 18131976192,
+            "device_used": 17660968960,
+            "process_rss": 3449323520
+          },
+          "memory_after_decode": {
+            "allocated": 16580662272,
+            "reserved": 16605249536,
+            "peak_allocated": 16581439488,
+            "peak_reserved": 16605249536,
+            "device_used": 17663066112,
+            "process_rss": 3449323520
+          },
+          "passed": true
+        }
+      },
+      "comparison": {
+        "done": true,
+        "reference": "shadowkv_upstream_v128",
+        "teacher_forced": "shadowkv_upstream_nohk_v128",
+        "context_tokens": 8192,
+        "cohort": 0,
+        "positions": 8,
+        "argmax_matches": 8,
+        "first_argmax_mismatch": null,
+        "logprob_steps": 7,
+        "logprob_max_abs_difference": 0.0,
+        "logprob_mean_abs_difference": 0.0,
+        "identical": true,
+        "method": "The second arm is fed the first arm's greedy tokens. Compared on the same prefix: the second arm's argmax against the first arm's token at every position (position 0 is the prefill prediction), and the log-probability each arm gives the same fed token."
+      }
+    },
+    "basis": {
+      "arms": {
+        "basis_koff_v128_reuse_opt": {
+          "name": "basis_koff_v128_reuse_opt_request_b1_t8192_smoke",
+          "status": "complete",
+          "exit_code": 0,
+          "seconds": 263.2,
+          "output_tokens": 8,
+          "expected_output_tokens": 8,
+          "logprobs_finite": true,
+          "imported_files_match_review": false,
+          "effective": {
+            "torch_compile_disabled": false,
+            "torch_compile_disable_env": null,
+            "float32_matmul_precision": "highest",
+            "cuda_matmul_allow_tf32": false,
+            "cudnn_allow_tf32": false,
+            "nvidia_tf32_override": null,
+            "omp_num_threads": "24"
+          },
+          "implementation": null,
+          "failure": null,
+          "ttft_seconds": 0.7017615339718759,
+          "placement_seconds": 0.00017357291653752327,
+          "decode_ready_seconds": 0.7019351068884134,
+          "memory_after_prefill": {
+            "allocated": 16854658560,
+            "reserved": 17813209088,
+            "peak_allocated": 17697778688,
+            "peak_reserved": 17813209088,
+            "device_used": 18866831360,
+            "process_rss": 2468737024
+          },
+          "memory_after_decode": {
+            "allocated": 16855178752,
+            "reserved": 17813209088,
+            "peak_allocated": 16855965184,
+            "peak_reserved": 17813209088,
+            "device_used": 18866831360,
+            "process_rss": 2468737024
+          },
+          "passed": false
+        }
+      }
+    }
+  },
+  "written_utc": "2026-11-11T23:04:51Z",
+  "probe_130048": {
+    "shadowkv": {
+      "arms": {
+        "shadowkv_upstream_v128": {
+          "name": "shadowkv_upstream_v128_request_b1_t130048_smoke",
+          "status": "complete",
+          "exit_code": 0,
+          "seconds": 145.8,
+          "output_tokens": 8,
+          "expected_output_tokens": 8,
+          "logprobs_finite": true,
+          "imported_files_match_review": true,
+          "effective": {
+            "torch_compile_disabled": false,
+            "torch_compile_disable_env": null,
+            "float32_matmul_precision": "highest",
+            "cuda_matmul_allow_tf32": false,
+            "cudnn_allow_tf32": false,
+            "nvidia_tf32_override": null,
+            "omp_num_threads": "24"
+          },
+          "implementation": "upstream models.llama.Llama + ShadowKVCache_CPU + CUDA kernels (ByteDance-Seed/ShadowKV@e51904cd), source unmodified",
+          "failure": null,
+          "ttft_seconds": 51.02752906107344,
+          "placement_seconds": 1.2038517058826983,
+          "decode_ready_seconds": 52.231380766956136,
+          "memory_after_prefill": {
+            "allocated": 18891816448,
+            "reserved": 18912116736,
+            "peak_allocated": 22127270912,
+            "peak_reserved": 23819452416,
+            "device_used": 19984613376,
+            "process_rss": 10937090048
+          },
+          "memory_after_decode": {
+            "allocated": 18892336640,
+            "reserved": 18914213888,
+            "peak_allocated": 18893685760,
+            "peak_reserved": 18914213888,
+            "device_used": 19986710528,
+            "process_rss": 10937090048
+          },
+          "passed": true
+        },
+        "shadowkv_upstream_nohk_v128": {
+          "name": "shadowkv_upstream_nohk_v128_request_b1_t130048_smoke",
+          "status": "complete",
+          "exit_code": 0,
+          "seconds": 134.6,
+          "output_tokens": 8,
+          "expected_output_tokens": 8,
+          "logprobs_finite": true,
+          "imported_files_match_review": true,
+          "effective": {
+            "torch_compile_disabled": false,
+            "torch_compile_disable_env": null,
+            "float32_matmul_precision": "highest",
+            "cuda_matmul_allow_tf32": false,
+            "cudnn_allow_tf32": false,
+            "nvidia_tf32_override": null,
+            "omp_num_threads": "24"
+          },
+          "implementation": "upstream models.llama.Llama + ShadowKVCache_CPU + CUDA kernels (ByteDance-Seed/ShadowKV@e51904cd), source unmodified; NOT upstream behaviour: per-layer pre-SVD gc_collect and empty_cache disabled at run time inside get_svd",
+          "failure": null,
+          "ttft_seconds": 45.99962241202593,
+          "placement_seconds": 1.2760567250661552,
+          "decode_ready_seconds": 47.275679137092084,
+          "memory_after_prefill": {
+            "allocated": 18891816960,
+            "reserved": 18912116736,
+            "peak_allocated": 22127271424,
+            "peak_reserved": 23318233088,
+            "device_used": 19984613376,
+            "process_rss": 10934358016
+          },
+          "memory_after_decode": {
+            "allocated": 18892337152,
+            "reserved": 18914213888,
+            "peak_allocated": 18893686272,
+            "peak_reserved": 18914213888,
+            "device_used": 19986710528,
+            "process_rss": 10934358016
+          },
+          "passed": true
+        }
+      },
+      "comparison": {
+        "done": true,
+        "reference": "shadowkv_upstream_v128",
+        "teacher_forced": "shadowkv_upstream_nohk_v128",
+        "context_tokens": 130048,
+        "cohort": 0,
+        "positions": 8,
+        "argmax_matches": 8,
+        "first_argmax_mismatch": null,
+        "logprob_steps": 7,
+        "logprob_max_abs_difference": 0.0,
+        "logprob_mean_abs_difference": 0.0,
+        "identical": true,
+        "method": "The second arm is fed the first arm's greedy tokens. Compared on the same prefix: the second arm's argmax against the first arm's token at every position (position 0 is the prefill prediction), and the log-probability each arm gives the same fed token."
+      }
+    },
+    "lrqk": {
+      "arms": {
+        "lrqk_upstream_koff_v128": {
+          "name": "lrqk_upstream_koff_v128_request_b1_t130048_smoke",
+          "status": "failed",
+          "exit_code": 1,
+          "seconds": 29.0,
+          "output_tokens": 0,
+          "expected_output_tokens": 8,
+          "logprobs_finite": false,
+          "imported_files_match_review": null,
+          "effective": null,
+          "implementation": null,
+          "failure": {
+            "kind": "out_of_memory",
+            "exit_code": 1,
+            "last_phase_reached": "same_shape_warmup_request",
+            "message": "[rank0]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 508.00 MiB. GPU 0 has a total capacity of 44.52 GiB of which 46.25 MiB is free. Including non-PyTorch memory, this process has 44.46 GiB memory in use. Of the allocated memory 42.23 GiB is allocated by PyTorch, and 1.30 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)",
+            "innermost_repository_frames": [
+              "[rank0]:   File \"/home/yl1139/BasisServe-CALS/external/LRQK/lrqk_attention.py\", line 792, in cast_lrqk_prefill",
+              "[rank0]:   File \"/home/yl1139/BasisServe-CALS/external/LRQK/lrqk_attention.py\", line 399, in _lrqk_prefill_inv_w1",
+              "File \"<frozen runpy>\", line 198, in _run_module_as_main",
+              "File \"<frozen runpy>\", line 88, in _run_code"
+            ],
+            "log": "results/rebuttal/v2q8_l40s_sparse/tp1_128k_retest/probe/lrqk_upstream_koff_v128_request_b1_t130048_smoke/run.log"
+          },
+          "ordered_prefill_in_mro": false,
+          "prefill_class_mro": [],
+          "passed": false
+        },
+        "lrqk_upstream_kvoff_v128": {
+          "name": "lrqk_upstream_kvoff_v128_request_b1_t130048_smoke",
+          "status": "failed",
+          "exit_code": 1,
+          "seconds": 62.3,
+          "output_tokens": 0,
+          "expected_output_tokens": 8,
+          "logprobs_finite": false,
+          "imported_files_match_review": null,
+          "effective": null,
+          "implementation": null,
+          "failure": {
+            "kind": "out_of_memory",
+            "exit_code": 1,
+            "last_phase_reached": "same_shape_warmup_request",
+            "message": "[rank0]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 508.00 MiB. GPU 0 has a total capacity of 44.52 GiB of which 506.25 MiB is free. Including non-PyTorch memory, this process has 43.98 GiB memory in use. Of the allocated memory 42.24 GiB is allocated by PyTorch, and 820.88 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)",
+            "innermost_repository_frames": [
+              "[rank0]:   File \"/home/yl1139/BasisServe-CALS/external/LRQK/lrqk_attention.py\", line 792, in cast_lrqk_prefill",
+              "[rank0]:   File \"/home/yl1139/BasisServe-CALS/external/LRQK/lrqk_attention.py\", line 399, in _lrqk_prefill_inv_w1",
+              "File \"<frozen runpy>\", line 198, in _run_module_as_main",
+              "File \"<frozen runpy>\", line 88, in _run_code"
+            ],
+            "log": "results/rebuttal/v2q8_l40s_sparse/tp1_128k_retest/probe/lrqk_upstream_kvoff_v128_request_b1_t130048_smoke/run.log"
+          },
+          "ordered_prefill_in_mro": false,
+          "prefill_class_mro": [],
+          "passed": false
+        }
+      },
+      "comparison": {
+        "done": false,
+        "reason": "needs both arms to complete"
+      }
+    },
+    "basis": {
+      "arms": {
+        "basis_koff_v128_reuse_opt": {
+          "name": "basis_koff_v128_reuse_opt_request_b1_t130048_smoke",
+          "status": "complete",
+          "exit_code": 0,
+          "seconds": 109.3,
+          "output_tokens": 8,
+          "expected_output_tokens": 8,
+          "logprobs_finite": true,
+          "imported_files_match_review": false,
+          "effective": {
+            "torch_compile_disabled": false,
+            "torch_compile_disable_env": null,
+            "float32_matmul_precision": "highest",
+            "cuda_matmul_allow_tf32": false,
+            "cudnn_allow_tf32": false,
+            "nvidia_tf32_override": null,
+            "omp_num_threads": "24"
+          },
+          "implementation": null,
+          "failure": null,
+          "ttft_seconds": 35.00034684408456,
+          "placement_seconds": 0.00020360387861728668,
+          "decode_ready_seconds": 35.00055044796318,
+          "memory_after_prefill": {
+            "allocated": 26011405824,
+            "reserved": 33762050048,
+            "peak_allocated": 33003826176,
+            "peak_reserved": 33762050048,
+            "device_used": 34832449536,
+            "process_rss": 10420224000
+          },
+          "memory_after_decode": {
+            "allocated": 26011926016,
+            "reserved": 33762050048,
+            "peak_allocated": 26012712448,
+            "peak_reserved": 33762050048,
+            "device_used": 34832449536,
+            "process_rss": 10420236288
+          },
+          "passed": false
+        }
+      }
+    }
+  }
+}
