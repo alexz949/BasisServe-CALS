@@ -133,10 +133,11 @@ def staged_prefill(query, keys, values, rope, cu_query, seq_lens, block_table,
         kernel_diffkv_prefill_sm89[(chunk.query_tokens // (bm // 4) + count,)](
             workspace.query, workspace.keys, workspace.values, workspace.output,
             chunk.cu_query, chunk.seq_lens, chunk.table, 128 ** -0.5,
-            *workspace.query.stride()[:2], *workspace.output.stride()[:2],
-            *workspace.keys.stride()[:2], *workspace.values.stride()[:2], chunk.table.stride(0), count,
+            *workspace.query.stride()[:2], *workspace.output.stride(),
+            *workspace.keys.stride()[:3], *workspace.values.stride()[:3], chunk.table.stride(0), count,
             GROUP=4, PAGE=16, BLOCK_M=bm, BLOCK_N=bn, VALUE_DIM=width,
-            BLOCK_V=triton.next_power_of_2(width), num_warps=8, num_stages=2)
+            BLOCK_V=triton.next_power_of_2(width), LOOP_STAGES=None,
+            num_warps=8, num_stages=2)
         _scatter[(count, triton.cdiv(chunk.max_query_len * 4, 32))](
             workspace.output, out, cu_query, chunk.records, *out.stride()[:2],
             width, triton.next_power_of_2(width), 32, num_warps=4)

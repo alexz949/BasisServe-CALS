@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import torch
 from torch import Tensor
+from basisserve.core.tp4_c1_factors import local_decoder
 
 from basisserve.kernels.feature_ragged_allgather import FeatureRaggedCommunicator
 from basisserve.kernels.ragged_allgather import StaticRaggedPlan
@@ -28,7 +29,11 @@ class PreparedC1Output:
     custom operator an ordinary, non-aliasing output contract for compilation.
     """
 
-    def __init__(self, group, device, local_width: int, max_tokens: int):
+    def __init__(self, group, device, local_width: int, max_tokens: int, *, output_mode="ag", audit_routes=False):
+        assert output_mode in ("ag", "hybrid", "ar")
+        self.output_mode = output_mode
+        self.audit_routes = audit_routes
+        self.route_counts = torch.zeros(6, dtype=torch.int64, device=device)
         self.communicator = FeatureRaggedCommunicator.from_distributed(group, device=device)
         self.plan = StaticRaggedPlan.from_source_widths(
             (local_width,) * self.communicator.world_size
@@ -101,6 +106,11 @@ class PreparedC1Output:
         prepared.local_feature_major_view_fast().copy_(local.T)
         return self._decode(prepared.gather_inplace_fast(), decoder)
 
+    def local_reduce(self, local: Tensor, decoder: Tensor) -> Tensor:
+        """Sum local Z_p D_p through vLLM's production TP AllReduce dispatcher."""
+        weights = local_decoder(decoder, self.communicator.rank, self.local_width)
+        return get_tp_group().all_reduce(torch.mm(local, weights))
+
     def attention(
         self,
         attn_layer,
@@ -112,6 +122,24 @@ class PreparedC1Output:
         decoder: Tensor,
     ) -> Tensor:
         tokens = int(query.shape[0])
+        if self.audit_routes and attn_metadata is not None:
+            step = attn_metadata.basisserve_step
+            assert step is not None
+            if step.kind != 'empty':
+                index = ('prefill', 'mixed', 'decode').index(step.kind) * 2
+                index += int(step.collective(self.output_mode) == 'ar')
+                # Captured GPU increments also execute on every graph replay.
+                self.route_counts[index].add_(1)
+        if self.output_mode != "ag" and attn_metadata is not None:
+            step = attn_metadata.basisserve_step
+            assert step is not None, "Hybrid routing requires scheduler prefill metadata"
+            if step.collective(self.output_mode) == "ar":
+                output = torch.empty(
+                    (tokens, attn_layer.impl.num_heads, attn_layer.head_size_v),
+                    dtype=query.dtype, device=query.device,
+                )
+                attn_layer.impl.forward(attn_layer, query, key, value, kv_cache, attn_metadata, output)
+                return self.local_reduce(output.flatten(1), decoder)
         if (
             attn_metadata is not None
             and attn_metadata.max_query_len <= 1
@@ -162,7 +190,10 @@ class PreparedC1Output:
         return self(output.flatten(1), decoder)
 
     def statistics(self):
-        return dict(backend="uniform_nccl", decoder_gemms=1,
+        return dict(backend="uniform_nccl", decoder_gemms=1, output_mode=self.output_mode,
+                    allreduce_dispatch="vllm_tp_group.all_reduce",
+                    route_counts=dict(zip(('prefill_ag', 'prefill_ar', 'mixed_ag', 'mixed_ar',
+                                           'decode_ag', 'decode_ar'), self.route_counts.tolist())),
                     decode_gather="nccl_symmetric_inplace" if self.symmetric is not None else "uniform_nccl",
                     token_major_small=self.token_major_small,
                     capture_calls=self.capture_calls, eager_calls=self.eager_calls,

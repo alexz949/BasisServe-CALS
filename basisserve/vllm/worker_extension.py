@@ -26,6 +26,58 @@ class BasisServeWorkerExtension:
     def basisserve_c1_statistics(self) -> dict[str, Any]:
         return self.basisserve_cuda_statistics() | self.get_model().c1_statistics()
 
+    def basisserve_tp4_statistics(self) -> dict[str, Any]:
+        import socket
+        from vllm.distributed import get_tp_group
+        group = get_tp_group()
+        communicator = group.device_communicator
+        custom = communicator.ca_comm
+        return self.basisserve_cuda_statistics() | {
+            "hostname": socket.gethostname(), "tp_rank": group.rank_in_group,
+            "tp_size": group.world_size,
+            "custom_all_reduce_enabled": custom is not None and not custom.disabled,
+            "nccl_version": communicator.pynccl_comm.nccl_version,
+        }
+
+    def basisserve_tp4_validate_weights(self, model_path: str) -> list[dict]:
+        """Check real loaded Q/K and folded V weights against original shards."""
+        import json
+        from pathlib import Path
+        from safetensors import safe_open
+        from vllm.distributed import get_tp_group
+        model = self.get_model()
+        root = Path(model_path)
+        index = json.loads((root / "model.safetensors.index.json").read_text())["weight_map"]
+        rank = get_tp_group().rank_in_group
+        rows = []
+        layers = model.config.num_hidden_layers
+        hidden_size = model.config.hidden_size
+        for layer_id in (0, (layers - 1) // 2, layers - 1):
+            attn = model.model.layers[layer_id].self_attn
+            weight = attn.qkv_proj.weight
+            prefix = f"model.layers.{layer_id}.self_attn."
+            source = {}
+            for name in ("q", "k", "v"):
+                key = prefix + name + "_proj.weight"
+                with safe_open(str(root / index[key]), framework="pt", device="cpu") as handle:
+                    full = handle.get_tensor(key)
+                width = attn.num_heads * 128 if name == "q" else 256
+                source[name] = full[rank * width:(rank + 1) * width].to(weight.device)
+            q_width = attn.num_heads * 128
+            kv_offset = q_width + 256
+            assert torch.equal(weight[:q_width], source["q"])
+            assert torch.equal(weight[q_width:kv_offset], source["k"])
+            generator = torch.Generator(device=weight.device).manual_seed(71)
+            hidden = torch.randn(17, hidden_size, device=weight.device, generator=generator) / hidden_size**0.5
+            dense = (hidden @ source["v"].float().T).view(17, 2, 128)
+            expected = torch.einsum("thd,hdr->thr", dense, attn.qkv_proj.encoder.float()).flatten(1)
+            actual = hidden @ weight[kv_offset:].float().T
+            error = ((actual - expected).norm() / expected.norm()).item()
+            assert error < 0.01 and torch.isfinite(actual).all()
+            rows.append(dict(layer=layer_id, tp_rank=rank, dense_qk_exact=True,
+                             value_rank=attn.value_rank, folded_value_relative_l2=error))
+        return rows
+
     def basisserve_profile_start(self) -> None:
         """Profile rank zero only; benchmark timing runs never enable this."""
         if torch.distributed.get_rank() == 0:

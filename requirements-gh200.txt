@@ -1,0 +1,5 @@
+# Qwen3-8B quality environment, with the official ARM64 CUDA 12.6 build.
+# Python: 3.11.15 (conda environment lowrank).
+-r requirements.txt
+torch @ https://download.pytorch.org/whl/cu126/torch-2.6.0%2Bcu126-cp311-cp311-linux_aarch64.whl#sha256=d4809b188f5c9b9753f7578085b79ae1f5d9c36a3fffc122e83e446ecf251325
+transformers==5.15.1

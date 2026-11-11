@@ -14,17 +14,17 @@ def test_decode_profile_classification():
 
 
 def test_decode_launch_config():
-    assert _launch_config(1, 512, 128, 4, 64) == (16, 64, 8, 2)
-    assert _launch_config(1, 512, 128, 8, 64) == (16, 64, 4, 2)
-    assert _launch_config(1, 4096, 128, 8, 96) == (16, 128, 4, 2)
-    assert _launch_config(8, 4096, 128, 8, 64) == (16, 128, 4, 2)
-    assert _launch_config(16, 4096, 128, 4, 96) == (8, 64, 4, 3)
-    assert _launch_config(32, 4096, 128, 8, 96) == (16, 32, 4, 2)
-    assert _launch_config(64, 4096, 128, 8, 64) == (8, 32, 4, 2)
-    assert _launch_config(64, 4096, 128, 8, 96) == (1, 64, 4, 3)
-    assert _launch_config(128, 4096, 128, 4, 96) == (1, 64, 4, 3)
-    assert _launch_config(256, 4096, 128, 8, 64) == (1, 64, 4, 3)
-    assert _launch_config(256, 4096, 128, 8, 96) == (1, 32, 4, 3)
+    assert _launch_config(1, 512, 128, 4, 64) == (4, 128, 4, 2)
+    assert _launch_config(1, 512, 128, 8, 64) == (4, 128, 4, 2)
+    assert _launch_config(1, 4096, 128, 8, 96) == (4, 128, 4, 2)
+    assert _launch_config(8, 4096, 128, 8, 64) == (4, 128, 4, 2)
+    assert _launch_config(16, 4096, 128, 4, 96) == (4, 128, 4, 2)
+    assert _launch_config(32, 4096, 128, 8, 96) == (4, 128, 4, 2)
+    assert _launch_config(64, 4096, 128, 8, 64) == (4, 128, 4, 2)
+    assert _launch_config(64, 4096, 128, 8, 96) == (4, 128, 4, 2)
+    assert _launch_config(128, 4096, 128, 4, 96) == (4, 128, 4, 2)
+    assert _launch_config(256, 4096, 128, 8, 64) == (4, 128, 4, 2)
+    assert _launch_config(256, 4096, 128, 8, 96) == (4, 128, 4, 2)
 
 
 def _buffers(tokens: int, heads: int, value_dim: int, segments: int = 16):
@@ -150,15 +150,16 @@ def test_decode_writes_feature_major_output(segments, heads, value_dim):
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
 @pytest.mark.parametrize("heads,value_dim", [(4, 64), (8, 96)])
-def test_decode_cuda_graph_replay_with_changed_inputs(heads, value_dim):
+@pytest.mark.parametrize("batch", [4, 256])
+def test_decode_cuda_graph_replay_with_changed_inputs(heads, value_dim, batch):
     torch.manual_seed(20260921)
-    query_lengths = [1, 1, 1, 1]
+    query_lengths = [1] * batch
     data = _value_rank(
-        make_case(query_lengths, [15, 255, 1023, 4095],
+        make_case(query_lengths, [15, 255, 1023, 4095] * (batch // 4),
                   heads=heads, block_size=16),
         value_dim,
     )
-    arguments = data | _buffers(sum(query_lengths), heads, value_dim)
+    arguments = data | _buffers(sum(query_lengths), heads, value_dim, segments=4)
     for _ in range(3):
         diffkv_decode(**arguments, split_threshold=128, max_sequence_length=4096)
     graph = torch.cuda.CUDAGraph()

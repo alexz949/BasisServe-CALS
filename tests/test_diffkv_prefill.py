@@ -15,13 +15,13 @@ def test_prefill_profile_classification():
 @pytest.mark.parametrize(
     "group,value_rank,num_seqs,max_query_len,max_sequence_length,expected",
     [
-        (4, 64, 8, 128, 128, (32, 128, 4, 3)),
-        (8, 96, 8, 128, 128, (32, 128, 8, 2)),
-        (4, 64, 1, 8192, 8192, (128, 64, 4, 3)),
-        (4, 96, 32, 8192, 32640, (128, 128, 8, 2)),
-        (8, 64, 1, 8192, 8192, (128, 128, 8, 3)),
-        (8, 96, 1, 8192, 8192, (128, 128, 8, 2)),
-        (8, 96, 1, 8192, 32640, (128, 32, 4, 3)),
+        (4, 64, 8, 128, 128, (64, 128, 4, 2)),
+        (8, 96, 8, 128, 128, (64, 128, 4, 2)),
+        (4, 64, 1, 8192, 8192, (64, 128, 4, 2)),
+        (4, 96, 32, 8192, 32640, (64, 128, 4, 2)),
+        (8, 64, 1, 8192, 8192, (64, 128, 4, 2)),
+        (8, 96, 1, 8192, 8192, (64, 128, 4, 2)),
+        (8, 96, 1, 8192, 32640, (64, 128, 4, 2)),
     ],
 )
 def test_prefill_launch_config(
@@ -56,15 +56,21 @@ def torch_reference(data, qs):
 @pytest.mark.parametrize("heads", [4, 8])
 @pytest.mark.parametrize("value_rank", [64, 96])
 @pytest.mark.parametrize("block_size", [16, 32])
-def test_ragged_paged_prefill_and_graph(heads, value_rank, block_size):
+@pytest.mark.parametrize("feature_major", [False, True])
+def test_ragged_paged_prefill_and_graph(heads, value_rank, block_size, feature_major):
     torch.manual_seed(123)
     qs = [0, 1, 17, 65, 3, 0]
     data = make_case(
         qs, [16, 255, 31, 0, 1000, 16], heads, block_size, value_rank)
-    # Output is also allowed to have a larger physical token stride.
-    storage = torch.full((sum(qs) + 3, heads, value_rank + 16), float("nan"),
-                         device="cuda", dtype=torch.bfloat16)
-    data["out"] = storage[:sum(qs), :, :value_rank]
+    # Guard both layouts, including nonzero padding beyond the live region.
+    if feature_major:
+        storage = torch.full((heads * value_rank + 3, sum(qs) + 3), float("nan"),
+                             device="cuda", dtype=torch.bfloat16)
+        data["out"] = storage[:heads * value_rank, :sum(qs)].T.view(sum(qs), heads, value_rank)
+    else:
+        storage = torch.full((sum(qs) + 3, heads, value_rank + 16), float("nan"),
+                             device="cuda", dtype=torch.bfloat16)
+        data["out"] = storage[:sum(qs), :, :value_rank]
     stream = torch.cuda.Stream()
     stream.wait_stream(torch.cuda.current_stream())
     with torch.cuda.stream(stream):
@@ -80,5 +86,9 @@ def test_ragged_paged_prefill_and_graph(heads, value_rank, block_size):
         graph.replay()
         expected = torch_reference(data, qs)
         torch.testing.assert_close(data["out"].float(), expected, atol=0.008, rtol=0.02)
-        assert torch.isnan(storage[sum(qs):]).all()
-        assert torch.isnan(storage[:sum(qs), :, value_rank:]).all()
+        if feature_major:
+            assert torch.isnan(storage[heads * value_rank:]).all()
+            assert torch.isnan(storage[:, sum(qs):]).all()
+        else:
+            assert torch.isnan(storage[sum(qs):]).all()
+            assert torch.isnan(storage[:sum(qs), :, value_rank:]).all()

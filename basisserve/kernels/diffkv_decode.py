@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Adapted from vLLM's triton_unified_attention_diffkv.py (vLLM contributors).
-"""SM89 decode attention for QK128 GQA with four or eight local heads."""
+"""Paged QK128 decode with four or eight query heads per KV head."""
 
 from __future__ import annotations
 
@@ -31,8 +31,10 @@ def kernel_diffkv_decode_sm89(
     o_stride2: tl.int64,
     k_stride0: tl.int64,
     k_stride1: tl.int64,
+    k_stride2: tl.int64,
     v_stride0: tl.int64,
     v_stride1: tl.int64,
+    v_stride2: tl.int64,
     partial_stride0: tl.int64,
     partial_stride1: tl.int64,
     partial_stride2: tl.int64,
@@ -48,6 +50,7 @@ def kernel_diffkv_decode_sm89(
     SPLIT_KV: tl.constexpr,
 ):
     sequence = tl.program_id(0)
+    kv_head = tl.program_id(2)
     segment = tl.program_id(1) if SPLIT_KV else 0
     query_start = tl.load(CU_Q + sequence)
     query_end = tl.load(CU_Q + sequence + 1)
@@ -62,7 +65,7 @@ def kernel_diffkv_decode_sm89(
         return
 
     rows = tl.arange(0, 16)
-    heads = rows
+    heads = kv_head * NUM_HEADS + rows
     active_heads = rows < NUM_HEADS
     q_dimensions = tl.arange(0, 128)
     v_dimensions = tl.arange(0, BLOCK_V)
@@ -92,6 +95,7 @@ def kernel_diffkv_decode_sm89(
             K
             + physical_blocks[None, :] * k_stride0
             + (positions % PAGE)[None, :] * k_stride1
+            + kv_head * k_stride2
             + q_dimensions[:, None],
             mask=valid_positions[None, :],
             other=0.0,
@@ -100,6 +104,7 @@ def kernel_diffkv_decode_sm89(
             V
             + physical_blocks[:, None] * v_stride0
             + (positions % PAGE)[:, None] * v_stride1
+            + kv_head * v_stride2
             + v_dimensions[None, :],
             mask=valid_positions[:, None] & valid_v[None, :],
             other=0.0,
@@ -230,27 +235,8 @@ def _launch_config(
     value_dim: int,
 ) -> tuple[int, int, int, int]:
     assert num_heads in (4, 8) and value_dim in (64, 96)
-    if num_sequences > split_threshold:
-        if num_heads == 8 and value_dim == 64:
-            return 1, 64, 4, 3
-        return 1, 32, 4, 3
-    if num_sequences == split_threshold:
-        return 1, 64, 4, 3
-    if num_sequences == 1 and max_sequence_length <= 1024:
-        if num_heads == 8 and value_dim == 64:
-            return 16, 64, 4, 2
-        return 16, 64, 8, 2
-    if num_sequences <= 8:
-        return 16, 128, 4, 2
-    if num_sequences <= 32:
-        if value_dim == 96 and num_heads == 4:
-            return 8, 64, 4, 3
-        if value_dim == 96:
-            return 16, 32, 4, 2
-        return 16, 64, 4, 3
-    if num_sequences <= 64 and num_heads == 8 and value_dim == 64:
-        return 8, 32, 4, 2
-    return 1, 64, 4, 3
+    # Fixed launch policy selected by the GH200 parameter scan.
+    return 4, 128, 4, 2
 
 
 def diffkv_decode(
@@ -272,14 +258,17 @@ def diffkv_decode(
     tile: int | None = None,
     num_warps: int | None = None,
     num_stages: int | None = None,
-) -> None:
+) -> tuple:
     """Run fixed-geometry paged decode without the generic metadata branches."""
 
     value_dim = int(v.shape[-1])
     num_heads = int(q.shape[1])
+    kv_heads = int(k.shape[2])
+    group = num_heads // kv_heads
     block_v = triton.next_power_of_2(value_dim)
-    assert q.shape[1:] == (num_heads, 128) and num_heads in (4, 8)
-    assert k.shape[2:] == (1, 128) and v.shape[2:] == (1, value_dim)
+    assert q.shape[1:] == (num_heads, 128) and group in (4, 8)
+    assert num_heads == kv_heads * group
+    assert k.shape[2:] == (kv_heads, 128) and v.shape[2:] == (kv_heads, value_dim)
     assert out.shape[1:] == (num_heads, value_dim)
     assert value_dim in (64, 96)
     assert k.shape[1] == v.shape[1]
@@ -291,16 +280,22 @@ def diffkv_decode(
     if segments is None:
         segments, tile, num_warps, num_stages = _launch_config(
             num_sequences, max_sequence_length, split_threshold,
-            num_heads, value_dim,
+            group, value_dim,
         )
     assert segments in (1, 2, 4, 8, 16)
     assert tile in (16, 32, 64, 128)
-    assert num_warps in (4, 8) and num_stages in (2, 3, 4)
+    assert num_warps in (2, 4, 8, 16) and num_stages in (2, 3, 4)
     assert segments <= softmax_segm_output.shape[2]
     assert softmax_segm_output.shape[-1] >= block_v
     split_kv = segments > 1
+    if split_kv:
+        assert softmax_segm_output.shape[:2] == softmax_segm_max.shape[:2]
+        assert softmax_segm_max.shape == softmax_segm_expsum.shape
+        # Scratch is indexed by packed query token; empty sequences need no row.
+        assert softmax_segm_output.shape[0] >= q.shape[0]
+        assert softmax_segm_output.shape[1] == num_heads
 
-    kernel_diffkv_decode_sm89[(num_sequences, segments)](
+    attention_kernel = kernel_diffkv_decode_sm89[(num_sequences, segments, kv_heads)](
         q,
         k,
         v,
@@ -319,8 +314,10 @@ def diffkv_decode(
         out.stride(2),
         k.stride(0),
         k.stride(1),
+        k.stride(2),
         v.stride(0),
         v.stride(1),
+        v.stride(2),
         softmax_segm_output.stride(0),
         softmax_segm_output.stride(1),
         softmax_segm_output.stride(2),
@@ -332,13 +329,13 @@ def diffkv_decode(
         SEGMENTS=segments,
         VALUE_DIM=value_dim,
         BLOCK_V=block_v,
-        NUM_HEADS=num_heads,
+        NUM_HEADS=group,
         SPLIT_KV=split_kv,
         num_warps=num_warps,
         num_stages=num_stages,
     )
     if split_kv:
-        kernel_diffkv_decode_reduce_sm89[(num_sequences, num_heads)](
+        reduce_kernel = kernel_diffkv_decode_reduce_sm89[(num_sequences, num_heads)](
             out,
             softmax_segm_output,
             softmax_segm_max,
@@ -360,6 +357,8 @@ def diffkv_decode(
             num_warps=4,
             num_stages=1,
         )
+        return attention_kernel, reduce_kernel
+    return (attention_kernel,)
 
 
 __all__ = ["diffkv_decode"]

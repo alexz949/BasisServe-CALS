@@ -1,8 +1,8 @@
-"""C1 DiffKV prefill and decode specializations for L40S.
+"""C1 DiffKV prefill and decode with one or two physical KV heads per rank.
 
-Keep vLLM's DiffKV backend identity and cache layout. Four- and eight-head TP8
-decode use the fixed-QK SM89 path for every supported V rank. Rank-specific
-metadata builders make variable per-layer V dimensions safe.
+Keep vLLM's DiffKV backend identity and cache layout. Launch parameters use
+the fixed policy validated on GH200; rank-specific metadata builders preserve
+V64/V96 cache dimensions and reserve split-KV scratch for all batch sizes.
 """
 
 from functools import lru_cache
@@ -17,6 +17,7 @@ from vllm.v1.attention.backends.triton_attn_diffkv import (
 from vllm.v1.attention.backends.triton_attn import TritonAttentionMetadataBuilder
 from basisserve.kernels.diffkv_decode import diffkv_decode
 from basisserve.kernels.diffkv_prefill import diffkv_prefill
+from basisserve.core.tp4_step import CURRENT_OUTPUT_STEP, classify_step
 
 
 class C1DiffKVBackend(TritonAttentionDiffKVBackend):
@@ -29,8 +30,9 @@ class C1DiffKVImpl(TritonAttentionDiffKVImpl):
     def __init__(self, *args, **kwargs):
         self.value_rank = int(kwargs.pop("value_rank", 64))
         super().__init__(*args, **kwargs)
-        assert self.head_size == 128 and self.num_heads in (4, 8)
-        assert self.num_kv_heads == 1
+        assert self.head_size == 128 and self.num_kv_heads in (1, 2)
+        assert self.num_heads // self.num_kv_heads in (4, 8)
+        assert self.num_heads % self.num_kv_heads == 0
         assert self.value_rank in (64, 96)
         assert self.alibi_slopes is None and self.sinks is None
         assert self.sliding_window == (-1, -1) and self.logits_soft_cap == 0
@@ -83,18 +85,52 @@ def c1_diffkv_backend(value_rank: int):
     assert selected_rank in (64, 96)
 
     class RankedMetadataBuilder(TritonAttentionMetadataBuilder):
+        def build(self, common_prefix_len, common_attn_metadata, fast_build=False):
+            metadata = super().build(common_prefix_len, common_attn_metadata, fast_build)
+            common = common_attn_metadata
+            flags = common.is_prefilling
+            metadata.basisserve_step = CURRENT_OUTPUT_STEP.get()
+            if metadata.basisserve_step is not None:
+                return metadata
+            if flags is not None:
+                assert flags.device.type == 'cpu'
+                lengths = common.query_start_loc_cpu.diff().tolist()
+                flags = flags.tolist()
+                # Padded rows can have a synthetic query token but no context.
+                if common.seq_lens_cpu_upper_bound is not None:
+                    lengths = [n if context > 0 else 0 for n, context in
+                               zip(lengths, common.seq_lens_cpu_upper_bound.tolist())]
+                metadata.basisserve_step = classify_step(lengths, flags)
+            return metadata
+
+        def build_for_cudagraph_capture(self, common_attn_metadata):
+            metadata = super().build_for_cudagraph_capture(common_attn_metadata)
+            assert common_attn_metadata.max_query_len == 1
+            metadata.basisserve_step = classify_step(
+                [1] * common_attn_metadata.num_reqs, [False] * common_attn_metadata.num_reqs)
+            return metadata
+
         def __init__(self, kv_cache_spec, layer_names, vllm_config, device):
             super().__init__(kv_cache_spec, layer_names, vllm_config, device)
+            # Fixed split-KV decode also needs scratch for large/padded batches.
+            capture_sizes = vllm_config.compilation_config.cudagraph_capture_sizes
+            scratch_sequences = max(
+                vllm_config.scheduler_config.max_num_seqs,
+                max(capture_sizes or [0]),
+            )
+            self.num_par_softmax_segments = 4
+            scratch_shape = (
+                scratch_sequences, self.num_heads_q, self.num_par_softmax_segments
+            )
             self.softmax_segm_output = torch.empty(
-                (
-                    self.seq_threshold_3D,
-                    self.num_heads_q,
-                    self.num_par_softmax_segments,
-                    next_power_of_2(selected_rank),
-                ),
+                (*scratch_shape, next_power_of_2(selected_rank)),
                 dtype=torch.float32,
                 device=device,
             )
+            self.softmax_segm_max = torch.empty(
+                scratch_shape, dtype=torch.float32, device=device
+            )
+            self.softmax_segm_expsum = torch.empty_like(self.softmax_segm_max)
 
     class RankedBackend(C1DiffKVBackend):
         head_size_v = selected_rank
