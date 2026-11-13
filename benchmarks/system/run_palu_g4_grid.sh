@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# PaLU G-LRD4 TP4 deployment grid: Dense, BasisKV V96/V64, PaLU-A and PaLU-B at R96/R64.
-# Usage: run_palu_g4_grid.sh <phase smoke|formal> <graph full|eager> [arm ...]
+# PaLU G-LRD4 TP4/TP8 deployment grid: Dense, BasisKV V96/V64, PaLU-A and PaLU-B at R96/R64.
+# Usage: run_palu_g4_grid.sh <phase smoke|capacity|formal> <graph full|eager> [arm ...]
+# GRID_TP selects 4 (default) or 8; output directories include the TP size.
 # GRID_BATCHES overrides the formal batch list; GRID_EXPERIMENTS the formal experiment list (default "request decode"); GRID_ROOT overrides the phase directory (other hardware).
 # BASIS_ARTIFACTS and BENCH_MODEL relocate the assets (see launch_vllm_bench.sh).
 # Each cell is one fresh vLLM process (warmup trial plus three repetitions inside it); cells
@@ -8,6 +9,8 @@
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 phase=$1; graph=$2; shift 2
+tp_size=${GRID_TP:-4}
+test "$tp_size" = 4 || test "$tp_size" = 8 || exit 1
 checkpoints=${BASIS_ARTIFACTS:-/home/yl1139/basis_artifacts}/checkpoints
 declare -A arm_of=(
     [dense]=dense [basis_v96]=als_full [basis_v64]=als_full
@@ -21,10 +24,15 @@ declare -A factors_of=(
     [palu_g4_sharded_r96]=$checkpoints/palu_g4/L31-8B-I-PALUG4-R96
     [palu_g4_sharded_r64]=$checkpoints/palu_g4/L31-8B-I-PALUG4-R64)
 arms=("$@"); [[ ${#arms[@]} == 0 ]] && arms=(dense basis_v96 basis_v64 palu_g4_r96 palu_g4_r64 palu_g4_sharded_r96 palu_g4_sharded_r64)
-if [[ $phase == smoke ]]; then batches=(32); experiments=(request); extra=(--smoke); else read -r -a batches <<< "${GRID_BATCHES:-32 64 128}"; read -r -a experiments <<< "${GRID_EXPERIMENTS:-request decode}"; extra=(); fi
-root=${GRID_ROOT:-results/rebuttal/v2q8_palu_g4_tp4/$phase}/$graph
+case "$phase" in
+  smoke) batches=(32); experiments=(request); extra=(--smoke) ;;
+  capacity) read -r -a batches <<< "${GRID_BATCHES:-32 64}"; experiments=(decode); extra=(--capacity-smoke) ;;
+  formal) read -r -a batches <<< "${GRID_BATCHES:-32 64 128}"; read -r -a experiments <<< "${GRID_EXPERIMENTS:-request decode}"; extra=() ;;
+  *) exit 1 ;;
+esac
+root=${GRID_ROOT:-results/rebuttal/palu_g4_tp${tp_size}/$phase}/$graph
 mkdir -p "$root"
-echo "grid start $(date -u +%FT%TZ) node=${SLURMD_NODENAME:-?} physical_gpus=${SLURM_STEP_GPUS:-${SLURM_JOB_GPUS:-?}} phase=$phase graph=$graph arms=${arms[*]}"
+echo "grid start $(date -u +%FT%TZ) node=${SLURMD_NODENAME:-?} physical_gpus=${SLURM_STEP_GPUS:-${SLURM_JOB_GPUS:-?}} tp=$tp_size phase=$phase graph=$graph arms=${arms[*]}"
 for batch in "${batches[@]}"; do
   for name in "${arms[@]}"; do
     for experiment in "${experiments[@]}"; do
@@ -32,7 +40,7 @@ for batch in "${batches[@]}"; do
       if grep -q '"status": "complete"' "$out/summary.json" 2>/dev/null; then echo "skip $out"; continue; fi
       echo "=== $name b$batch $experiment $(date -u +%T)"
       mkdir -p "$(dirname "$out")"
-      BENCH_FACTORS=${factors_of[$name]} bash benchmarks/system/launch_vllm_bench.sh 4 "$out" "${arm_of[$name]}" 4096 "$batch" "$experiment" --graph "$graph" "${extra[@]}" > "$out.log" 2>&1
+      BENCH_FACTORS=${factors_of[$name]} bash benchmarks/system/launch_vllm_bench.sh "$tp_size" "$out" "${arm_of[$name]}" 4096 "$batch" "$experiment" --graph "$graph" "${extra[@]}" > "$out.log" 2>&1
       echo "exit=$? $(grep -oE '"status": "[a-z_]+"' "$out/summary.json" 2>/dev/null | tail -1)"
     done
   done

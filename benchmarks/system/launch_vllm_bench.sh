@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
-# BASIS_ARTIFACTS holds envs/vllm/basis, cuda/12.9, checkpoints and calibration; BENCH_MODEL is the model snapshot.
+# Activate lowrank/lowrankarena first. BASIS_ARTIFACTS holds CUDA, checkpoints and calibration.
 artifacts=${BASIS_ARTIFACTS:-/home/yl1139/basis_artifacts}
 model=${BENCH_MODEL:-/home/yl1139/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659}
 tp_size=$1
@@ -29,14 +29,15 @@ CUDA_VISIBLE_DEVICES=$(IFS=,; echo "${selected_gpus[*]}")
 export NCCL_P2P_DISABLE=${NCCL_P2P_DISABLE:-1} NVIDIA_TF32_OVERRIDE=0 OMP_NUM_THREADS=2
 export VLLM_WORKER_MULTIPROC_METHOD=spawn VLLM_ENABLE_V1_MULTIPROCESSING=0 HF_HUB_OFFLINE=1
 export CUDA_HOME="$artifacts/cuda/12.9"
-export PATH="$CUDA_HOME/bin:$artifacts/envs/vllm/basis/bin:$PATH"
-export LD_LIBRARY_PATH="$artifacts/envs/vllm/basis/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-export MAX_JOBS=2 TORCH_CUDA_ARCH_LIST=8.9
+export PATH="$CUDA_HOME/bin:${CONDA_PREFIX:?Activate lowrank or lowrankarena}/bin:$PATH"
+export LD_LIBRARY_PATH="$CONDA_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export MAX_JOBS=2
 mkdir -p "$output_dir"
 printf 'node=%s tp=%s gpus=%s\n' "${SLURMD_NODENAME:-unknown}" "$tp_size" "$CUDA_VISIBLE_DEVICES"
 python -m pip check
 nvidia-smi topo -m > "$output_dir/topology.txt"
 nvidia-smi --query-gpu=index,uuid,name,pci.bus_id,driver_version,memory.total,memory.used --format=csv > "$output_dir/devices.csv"
+nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv > "$output_dir/processes_before.csv"
 lscpu > "$output_dir/cpu.txt"
 python -c 'from pathlib import Path; import json; print(json.dumps({str(p): p.read_text() for pattern in ("node*/cpulist", "node*/meminfo", "node*/distance") for p in Path("/sys/devices/system/node").glob(pattern)}, indent=2))' > "$output_dir/numa.json"
 set -x
@@ -45,4 +46,5 @@ exec python -m benchmarks.system.bench_llama_vllm \
     --factors "${BENCH_FACTORS:-$artifacts/checkpoints/attention_c1/llama31_8b_instruct_uniform_v96_128k_als6_retrievalmix}" \
     --windows "$artifacts/calibration/llama31-8b-instruct-128k/c4-48x128k/windows.safetensors" \
     --tp "$tp_size" --output "$output_dir" --arm "$arm" \
+    --gpu-memory-utilization "${BENCH_GPU_MEMORY_UTILIZATION:-0.8}" \
     --prompt "$prompt" --batch "$batch" --experiment "$experiment" "$@"

@@ -1,4 +1,4 @@
-"""Tables for the PaLU G-LRD4 TP4 deployment grid produced by run_palu_g4_grid.sh.
+"""Tables for the PaLU G-LRD4 TP4/TP8 grid produced by run_palu_g4_grid.sh.
 
 Reads every cell's config.json, summary.json, request_trials.jsonl and memory_by_rank.jsonl.
 Memory is reported two ways because vLLM pre-allocates its KV pool up to the utilization
@@ -13,7 +13,7 @@ from pathlib import Path
 import statistics
 
 GIB = 2 ** 30
-LAYERS, KV_HEADS_PER_RANK, HEAD_DIM = 32, 2, 128
+LAYERS, KV_HEADS, HEAD_DIM = 32, 8, 128
 ORDER = ["dense", "basis_v96", "basis_v64", "palu_g4_r96", "palu_g4_r64",
          "palu_g4_sharded_r96", "palu_g4_sharded_r64"]
 
@@ -27,13 +27,14 @@ def label(config):
             "palu_g4_sharded": f"palu_g4_sharded_{rank}"}[arm]
 
 
-def per_token_bytes(name, deployment):
+def per_token_bytes(name, deployment, tp):
     """Per layer, per rank: Keys plus Value state in BF16."""
-    keys = KV_HEADS_PER_RANK * HEAD_DIM * 2
+    local_heads = KV_HEADS // tp
+    keys = local_heads * HEAD_DIM * 2
     if name == "dense":
-        values = [KV_HEADS_PER_RANK * HEAD_DIM * 2] * LAYERS
+        values = [local_heads * HEAD_DIM * 2] * LAYERS
     elif name.startswith("basis"):
-        values = [KV_HEADS_PER_RANK * int(name[-2:]) * 2] * LAYERS
+        values = [local_heads * int(name[-2:]) * 2] * LAYERS
     else:
         values = list(deployment["latent_bytes_per_token"])
     return keys, values
@@ -49,12 +50,13 @@ def read_cell(path):
     start = phases.get("decode_ready") or phases.get("request_start") or memory[0]["ranks"]
     rank0 = end[0]
     name = label(config)
-    keys, values = per_token_bytes(name, rank0.get("deployment") or {})
+    tp = config["configuration"]["tensor_parallel_size"]
+    keys, values = per_token_bytes(name, rank0.get("deployment") or {}, tp)
     per_token = sum(keys + value for value in values)
     tokens = config["batch"] * (config["prompt_tokens"] + config["generation_tokens"])
     layer_bytes = rank0.get("gpu_cache_layer_bytes") or []
     capacity = min(layer / (keys + value) for layer, value in zip(layer_bytes, values)) if layer_bytes else None
-    row = dict(arm=name, graph=config.get("graph", "full"), experiment=config["experiment"], batch=config["batch"],
+    row = dict(arm=name, tp=tp, graph=config.get("graph", "full"), experiment=config["experiment"], batch=config["batch"],
         status=summary["trials"][-1]["status"] if summary.get("trials") else config.get("status"),
         repetitions=len(trials), e2e_s=summary["medians"].get("cohort_e2e_s"),
         ttft_p50_ms=summary["medians"].get("ttft_p50_ms"), tpot_p50_ms=summary["medians"].get("tpot_p50_ms"),
@@ -67,7 +69,8 @@ def read_cell(path):
         key_bytes_per_token_rank=keys * LAYERS, value_bytes_per_token_rank=sum(values),
         kv_bytes_per_token_rank=per_token, mean_value_width_per_rank=sum(values) / LAYERS / 2,
         workload_kv_gib_per_rank=tokens * per_token / GIB,
-        workload_value_gib_all_ranks=tokens * sum(values) * 4 / GIB,
+        workload_value_gib_all_ranks=tokens * sum(
+            sum(per_token_bytes(name, rank.get("deployment") or {}, tp)[1]) for rank in end) / GIB,
         pool_gib_per_rank=rank0["gpu_cache_pool_bytes"] / GIB, pool_capacity_tokens=capacity,
         peak_allocated_gib_max_rank=max(r["peak_allocated_bytes"] for r in end) / GIB,
         peak_reserved_gib_max_rank=max(r["peak_reserved_bytes"] for r in end) / GIB,
@@ -75,13 +78,13 @@ def read_cell(path):
         model_gib_per_rank=(rank0["model_parameter_storage_bytes"] + rank0["model_buffer_storage_bytes"]) / GIB,
         attention_impl=rank0.get("attention_impl"))
     deployment_end, deployment_start = rank0.get("deployment") or {}, start[0].get("deployment") or {}
-    if "pair_traffic_bytes_since_load" in deployment_end:
-        delta = {k: deployment_end["pair_traffic_bytes_since_load"][k] - deployment_start.get(
-            "pair_traffic_bytes_since_load", {}).get(k, 0) for k in deployment_end["pair_traffic_bytes_since_load"]}
+    if "group_traffic_bytes_since_load" in deployment_end:
+        delta = {k: deployment_end["group_traffic_bytes_since_load"][k] - deployment_start.get(
+            "group_traffic_bytes_since_load", {}).get(k, 0) for k in deployment_end["group_traffic_bytes_since_load"]}
         steps = max(delta["decode_steps"] / LAYERS, 1)
-        row.update(pair_decode_weight_mib_per_step_per_rank=delta["decode_weight_bytes"] / steps / 2 ** 20,
-                   pair_decode_partial_mib_per_step_per_rank=delta["decode_partial_bytes"] / steps / 2 ** 20,
-                   pair_prefill_shard_mib_total_per_rank=delta["prefill_shard_bytes"] / 2 ** 20)
+        row.update(group_decode_weight_mib_per_step_per_rank=delta["decode_weight_bytes"] / steps / 2 ** 20,
+                   group_decode_partial_mib_per_step_per_rank=delta["decode_partial_bytes"] / steps / 2 ** 20,
+                   group_prefill_shard_mib_total_per_rank=delta["prefill_shard_bytes"] / 2 ** 20)
     return row
 
 
@@ -100,14 +103,17 @@ def main():
     args = parser.parse_args()
     cells = sorted(p.parent for p in args.root.glob("**/summary.json"))
     rows = [read_cell(cell) for cell in cells]
+    tp_sizes = {row["tp"] for row in rows}
+    assert len(tp_sizes) == 1, "Summarize each TP size separately"
+    tp = tp_sizes.pop()
     rows.sort(key=lambda r: (r["experiment"], r["batch"], ORDER.index(r["arm"]) if r["arm"] in ORDER else 99))
     with (args.root / "cells.csv").open("w", newline="") as handle:
         columns = sorted({k for r in rows for k in r}, key=lambda k: (k not in ("arm", "graph", "experiment", "batch"), k))
         writer = csv.DictWriter(handle, fieldnames=columns)
         writer.writeheader()
         writer.writerows(rows)
-    text = [f"# PaLU G-LRD4 TP4 grid: {args.root}", "",
-            "Llama-3.1-8B-Instruct BF16, TP4, 4096-token prompts, 128 generated tokens, greedy. Medians over "
+    text = [f"# PaLU G-LRD4 TP{tp} grid: {args.root}", "",
+            f"Llama-3.1-8B-Instruct BF16, TP{tp}, 4096-token prompts, 128 generated tokens, greedy. Medians over "
             "the repetitions inside one process after a warmup trial. Per-token bytes come from the deployed "
             "cache layout per rank (Keys are dense in every arm); pool capacity is the number of tokens the "
             "pre-allocated KV pool holds for that layout.", ""]
@@ -131,13 +137,14 @@ def main():
                              r["kv_bytes_per_token_rank"], number(r["mean_value_width_per_rank"], 0),
                              number(r["workload_kv_gib_per_rank"]), number(r["pool_capacity_tokens"], 0),
                              number(r["peak_allocated_gib_max_rank"])] for r in subset]), ""]
-            traffic = [r for r in subset if "pair_decode_weight_mib_per_step_per_rank" in r]
+            traffic = [r for r in subset if "group_decode_weight_mib_per_step_per_rank" in r]
             if traffic:
-                text += ["Pair exchange of the sharded arm (actual tensor bytes, per rank):", "",
+                text += ["Group exchange of the sharded arm (logical bytes sent to peers per rank, "
+                         "excluding self and transport overhead):", "",
                          table(["Arm", "Weights MiB/step", "Partial outputs MiB/step", "Prefill shards MiB total"],
-                               [[f"`{r['arm']}`", number(r["pair_decode_weight_mib_per_step_per_rank"]),
-                                 number(r["pair_decode_partial_mib_per_step_per_rank"], 3),
-                                 number(r["pair_prefill_shard_mib_total_per_rank"])] for r in traffic]), ""]
+                               [[f"`{r['arm']}`", number(r["group_decode_weight_mib_per_step_per_rank"]),
+                                 number(r["group_decode_partial_mib_per_step_per_rank"], 3),
+                                 number(r["group_prefill_shard_mib_total_per_rank"])] for r in traffic]), ""]
     (args.root / "SUMMARY.md").write_text("\n".join(text) + "\n")
     print("\n".join(text))
 

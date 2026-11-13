@@ -22,7 +22,8 @@ from vllm.model_executor.models.llama import LlamaForCausalLM
 from vllm.model_executor.models.utils import AutoWeightsLoader
 
 from basisserve.vllm.palu_group_attention import palu_group_backend
-from basisserve.vllm.palu_shard_attention import pair_group, palu_shard_backend
+from basisserve.vllm.palu_collectives import latent_group
+from basisserve.vllm.palu_shard_attention import palu_shard_backend
 
 MODEL_ARCHITECTURE = "BasisServeLlamaPaluG4ForCausalLM"
 SHARDED_MODEL_ARCHITECTURE = "BasisServeLlamaPaluG4ShardedForCausalLM"
@@ -166,15 +167,17 @@ class BasisServeLlamaPaluG4ForCausalLM(LlamaForCausalLM):
 
 
 class PaluShardAttention(nn.Module):
-    """Half of the group encoder per rank; the latent is completed inside the attention pair."""
+    """One encoder shard per rank; attention reconstructs outputs inside the head group."""
 
     def __init__(self, original, writer, decoder, config):
         super().__init__()
         self.num_heads, self.num_kv_heads = original.num_heads, original.num_kv_heads
         self.rank = writer.shape[0]
-        self.shard = self.rank // 2
-        pair = pair_group(get_tp_group())
-        side = pair[1]
+        group = latent_group(get_tp_group(), KV_HEADS, GROUP_HEADS)
+        group_size = GROUP_HEADS // self.num_kv_heads
+        assert self.rank % group_size == 0
+        self.shard = self.rank // group_size
+        side = group[1]
         name = original.attn.layer_name
         assert config.compilation_config.static_forward_context.pop(name) is original.attn
         self.qkv_proj = GroupLatentQKV(writer[side * self.shard:(side + 1) * self.shard].contiguous(),
@@ -183,8 +186,8 @@ class PaluShardAttention(nn.Module):
         self.attn = Attention(
             self.num_heads, HEAD_DIM, original.scaling, num_kv_heads=self.num_kv_heads,
             cache_config=config.cache_config, prefix=name,
-            attn_backend=palu_shard_backend(self.rank), head_size_v=self.rank,
-            value_rank=self.rank, pair=pair)
+            attn_backend=palu_shard_backend(self.rank, group_size), head_size_v=self.rank,
+            value_rank=self.rank, latent_group=group)
         self.o_proj = FoldedOutput(decoder, self.num_heads, self.rank,
                                    get_tp_group().rank_in_group, writer.device)
 
@@ -203,7 +206,7 @@ class PaluShardAttention(nn.Module):
 
 class BasisServeLlamaPaluG4ShardedForCausalLM(BasisServeLlamaPaluG4ForCausalLM):
     def __init__(self, *, vllm_config, prefix=""):
-        assert get_tp_group().world_size == 4  # one group per rank pair
+        assert get_tp_group().world_size in (4, 8)
         super().__init__(vllm_config=vllm_config, prefix=prefix)
 
     def attention_module(self, original, writer, decoder, config):
@@ -214,10 +217,12 @@ class BasisServeLlamaPaluG4ShardedForCausalLM(BasisServeLlamaPaluG4ForCausalLM):
         impls = [layer.self_attn.attn.impl for layer in self.model.layers]
         traffic = {key: sum(impl.traffic[key] for impl in impls) for key in impls[0].traffic}
         result.update(
-            method="PaLU G-LRD4, group latent sharded across the rank pair",
-            latent_bytes_per_token=[rank for rank in self.layer_ranks],  # rank // 2 features in BF16
-            latent_replicas_per_group=1, pair_side=impls[0].side,
-            attention_collective="all_reduce plus pairwise weight and partial-output exchange",
-            pair_traffic_bytes_since_load=traffic,
+            method="PaLU G-LRD4, group latent sharded across its TP ranks",
+            latent_bytes_per_token=[impl.shard * 2 for impl in impls],
+            latent_replicas_per_group=1, latent_group_rank=impls[0].group_rank,
+            latent_group_size=impls[0].group_size,
+            attention_collective="all_reduce plus group weight all_gather and partial-output all_to_all",
+            group_traffic_bytes_since_load=traffic,
+            traffic_scope="logical bytes sent to other subgroup ranks, excluding self and transport overhead",
             exchange_dtype="bfloat16 attention weights and partial outputs")
         return result

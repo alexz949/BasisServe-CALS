@@ -131,5 +131,8 @@ class LlamaBenchWorker:
             # Logical bytes of each layer's view into the shared cache pool.
             gpu_cache_layer_bytes=[sum(t.numel() * t.element_size() for t in (cache if isinstance(cache, list) else [cache]))
                                    for cache in caches],
+            # Physical layout of each layer's cache, including any padding of the stored width.
+            gpu_cache_layer_shapes=[[list(t.shape) for t in (cache if isinstance(cache, list) else [cache])]
+                                    for cache in caches],
             deployment=model.deployment_statistics() if hasattr(model, "deployment_statistics") else None,
         )

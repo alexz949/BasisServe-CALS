@@ -1,9 +1,9 @@
-"""vLLM attention for a PaLU G-LRD group latent sharded across the two ranks of its group.
+"""vLLM attention for a PaLU G-LRD group latent sharded across its TP ranks.
 
-Each rank stores its dense Keys and half of the group's latent features. Decode exchanges
-attention weights inside the pair: every rank computes softmax(q K^T) for its own query heads,
-both ranks swap those weights, each applies its own latent shard to both sets of weights, and
-the partial outputs are swapped back. Prefill instead swaps the latent shards of the scheduled
+Each rank stores its dense Keys and one shard of the group's latent features. Decode gathers
+attention weights inside the group: every rank computes softmax(q K^T) for its own query heads,
+each applies its own latent shard to all sets of weights, and AllToAll sends partial outputs
+back to their query owners. Prefill instead gathers the latent shards of the scheduled
 sequences and attends over a transient full-latent copy with the fused kernel. The output per
 query head is the complete rank-r latent-weighted sum, in canonical feature order.
 """
@@ -21,18 +21,9 @@ from vllm.v1.attention.ops.triton_unified_attention_diffkv import unified_attent
 from basisserve.vllm.palu_group_attention import (
     KEY_DIM, PaluGroupImpl, PaluGroupMetadataBuilder, group_cache_views, pack_group_slots,
     palu_group_backend)
+from basisserve.vllm.palu_collectives import assemble_latent, exchange_outputs, gather_group
 
-PAIR_GROUPS = {}
 WEIGHT_TILE = 64
-
-
-def pair_group(tp_group):
-    """2-rank process group of this rank and its partner; every rank creates both groups."""
-    ranks = list(tp_group.ranks)
-    if "groups" not in PAIR_GROUPS:
-        PAIR_GROUPS["groups"] = [dist.new_group(ranks[i:i + 2]) for i in range(0, len(ranks), 2)]
-    index = tp_group.rank_in_group // 2
-    return PAIR_GROUPS["groups"][index], tp_group.rank_in_group % 2
 
 
 @triton.jit
@@ -110,28 +101,19 @@ def apply_weights(weights, flat, block_table, lengths, kv_heads, shard):
     return out
 
 
-def exchange(tensor, group):
-    """Return the partner's copy of a same-shaped tensor (2-rank all-gather)."""
-    gathered = torch.empty((2, *tensor.shape), device=tensor.device, dtype=tensor.dtype)
-    dist.all_gather_into_tensor(gathered, tensor.contiguous(), group=group)
-    return gathered
-
-
 class PaluShardImpl(PaluGroupImpl):
-    """value_rank is the full group rank; the cache holds value_rank // 2 features per token."""
+    """The cache holds one equal shard of the full value_rank latent per token."""
 
-    def __init__(self, *args, pair, **kwargs):
+    def __init__(self, *args, latent_group, **kwargs):
         super().__init__(*args, **kwargs)
-        self.shard = self.value_rank // 2
-        self.group, self.side = pair
+        self.group, self.group_rank = latent_group
+        self.group_size = dist.get_world_size(self.group)
+        self.shard = self.value_rank // self.group_size
         self.traffic = dict(decode_weight_bytes=0, decode_partial_bytes=0, prefill_shard_bytes=0,
                             decode_steps=0, prefill_steps=0)
 
     def do_kv_cache_update(self, layer, key, value, kv_cache, slot_mapping):
         pack_group_slots(key, value[:, 0, :self.shard], kv_cache[:, 0], slot_mapping)
-
-    def assemble(self, local, partner):
-        return torch.cat((local, partner) if self.side == 0 else (partner, local), dim=-1)
 
     def forward(self, layer, query, key, value, kv_cache, attn_metadata, output,
                 output_scale=None, output_block_scale=None):
@@ -151,13 +133,16 @@ class PaluShardImpl(PaluGroupImpl):
             table = attn_metadata.block_table[:seqs] if all_decode else attn_metadata.block_table[:seqs][decode]
             weights = decode_weights(query[rows], flat, table, lengths, attn_metadata.max_seq_len,
                                      self.num_kv_heads, self.scale)
-            both = exchange(weights, self.group)
-            local = apply_weights(weights, flat, table, lengths, self.num_kv_heads, self.shard)
-            for_partner = apply_weights(both[1 - self.side], flat, table, lengths, self.num_kv_heads, self.shard)
-            partials = exchange(for_partner.to(query.dtype), self.group)
-            output[rows] = self.assemble(local.to(query.dtype), partials[1 - self.side])
-            self.traffic["decode_weight_bytes"] += weights.numel() * weights.element_size()
-            self.traffic["decode_partial_bytes"] += for_partner.numel() * query.element_size()
+            gathered = gather_group(weights, self.group)
+            # Apply this latent shard to every group's query head in one kernel launch.
+            all_weights = gathered.permute(1, 0, 2, 3).flatten(1, 2)
+            partials = apply_weights(all_weights, flat, table, lengths, self.num_kv_heads, self.shard)
+            partials = partials.view(weights.shape[0], self.group_size, weights.shape[1], self.shard)
+            partials = partials.permute(1, 0, 2, 3).to(query.dtype).contiguous()
+            output[rows] = exchange_outputs(partials, self.group)
+            peers = self.group_size - 1
+            self.traffic["decode_weight_bytes"] += peers * weights.numel() * weights.element_size()
+            self.traffic["decode_partial_bytes"] += peers * partials[0].numel() * partials.element_size()
             self.traffic["decode_steps"] += 1
         if not all_decode and bool((~decode).any()):
             self.prefill(query, output, flat, attn_metadata, starts, query_lengths, ~decode)
@@ -183,8 +168,7 @@ class PaluShardImpl(PaluGroupImpl):
         rows = flat[blocks_of[valid], within[valid]]
         keys = rows[:, :self.num_kv_heads * KEY_DIM]
         shard = rows[:, self.num_kv_heads * KEY_DIM:self.num_kv_heads * KEY_DIM + self.shard]
-        both = exchange(shard, self.group)
-        latent = self.assemble(shard, both[1 - self.side])
+        latent = assemble_latent(gather_group(shard, self.group))
         scratch = torch.zeros(int(blocks.sum()), 1, block_size, self.num_kv_heads * KEY_DIM + self.value_rank,
                               device=device, dtype=query.dtype)
         pack_group_slots(keys.reshape(-1, self.num_kv_heads, KEY_DIM), latent, scratch[:, 0], transient.to(torch.int64))
@@ -200,19 +184,19 @@ class PaluShardImpl(PaluGroupImpl):
             use_alibi_sqrt=self.use_alibi_sqrt, window_size=self.sliding_window, block_table=compact,
             softcap=self.logits_soft_cap, sinks=self.sinks, max_seqlen_q=int(query_lengths[chosen].max()))
         output[token_rows] = result
-        self.traffic["prefill_shard_bytes"] += shard.numel() * shard.element_size()
+        self.traffic["prefill_shard_bytes"] += (self.group_size - 1) * shard.numel() * shard.element_size()
         self.traffic["prefill_steps"] += 1
 
 
 @lru_cache(maxsize=None)
-def palu_shard_backend(rank):
+def palu_shard_backend(rank, group_size):
     base = palu_group_backend(rank)
 
     class PaluShardBackend(base):
         @classmethod
         def customize_spec(cls, spec):
             return replace(spec, num_head_slots=1,
-                           state_content_bytes=(spec.num_kv_heads * KEY_DIM + rank // 2) * 2)
+                           state_content_bytes=(spec.num_kv_heads * KEY_DIM + rank // group_size) * 2)
 
         @staticmethod
         def get_impl_cls():
@@ -222,6 +206,6 @@ def palu_shard_backend(rank):
         def get_builder_cls():
             return PaluGroupMetadataBuilder
 
-    PaluShardBackend.__name__ = f"PaluShardBackendR{rank}"
+    PaluShardBackend.__name__ = f"PaluShardBackendR{rank}G{group_size}"
     PaluShardBackend.__qualname__ = PaluShardBackend.__name__
     return PaluShardBackend

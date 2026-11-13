@@ -1,5 +1,6 @@
-"""Llama with a uniform low-rank Value latent, native vLLM paged attention and latent TP AllGather."""
+"""Llama with a per-layer low-rank Value latent, native vLLM paged attention and latent TP AllGather."""
 
+from functools import lru_cache
 import hashlib
 import json
 from pathlib import Path
@@ -13,10 +14,76 @@ from vllm.model_executor.layers.attention import Attention
 from vllm.model_executor.layers.linear import QKVParallelLinear
 from vllm.model_executor.models.llama import LlamaForCausalLM
 from vllm.model_executor.models.utils import AutoWeightsLoader
-from vllm.v1.attention.backends.triton_attn_diffkv import TritonAttentionDiffKVBackend
+from vllm.utils.math_utils import next_power_of_2
+from vllm.v1.attention.backends.triton_attn import TritonAttentionMetadataBuilder
+from vllm.v1.attention.backends.triton_attn_diffkv import (
+    TritonAttentionDiffKVBackend,
+    TritonAttentionDiffKVImpl,
+)
+from vllm.v1.attention.ops.triton_unified_attention_diffkv import unified_attention_diffkv
 
 
 MODEL_ARCHITECTURE = "BasisServeLlamaJointALSForCausalLM"
+FORMATS = ("basisserve.uniform_c1_als.v1", "basisserve.llama31_8b_instruct.iclr_v_factors.v1")
+
+
+class JointValueMetadataBuilder(TritonAttentionMetadataBuilder):
+    """Split-KV partial outputs take the layer's Value width from its cache spec."""
+
+    def __init__(self, kv_cache_spec, layer_names, vllm_config, device):
+        super().__init__(kv_cache_spec, layer_names, vllm_config, device)
+        self.softmax_segm_output = torch.empty(
+            (self.seq_threshold_3D, self.num_heads_q, self.num_par_softmax_segments,
+             next_power_of_2(kv_cache_spec.head_size_v)),
+            dtype=torch.float32, device=device)
+
+
+class JointValueImpl(TritonAttentionDiffKVImpl):
+    """vLLM's DiffKV forward reads one process-wide Value width; this reads the layer's rank."""
+
+    def __init__(self, *args, value_rank, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.value_rank = value_rank
+
+    def forward(self, layer, query, key, value, kv_cache, attn_metadata, output,
+                output_scale=None, output_block_scale=None):
+        if attn_metadata is None:
+            return output.fill_(0)
+        count = attn_metadata.num_actual_tokens
+        cache = kv_cache.transpose(1, 2)
+        unified_attention_diffkv(
+            q=query[:count], k=cache[..., :128], v=cache[..., 128:128 + self.value_rank],
+            out=output[:count], cu_seqlens_q=attn_metadata.query_start_loc,
+            seqused_k=attn_metadata.seq_lens, softmax_scale=self.scale, causal=True,
+            alibi_slopes=self.alibi_slopes, use_alibi_sqrt=self.use_alibi_sqrt,
+            window_size=self.sliding_window, block_table=attn_metadata.block_table,
+            softcap=self.logits_soft_cap, sinks=self.sinks,
+            max_seqlen_q=attn_metadata.max_query_len,
+            seq_threshold_3D=attn_metadata.seq_threshold_3D,
+            num_par_softmax_segments=attn_metadata.num_par_softmax_segments,
+            softmax_segm_output=attn_metadata.softmax_segm_output,
+            softmax_segm_max=attn_metadata.softmax_segm_max,
+            softmax_segm_expsum=attn_metadata.softmax_segm_expsum)
+        return output
+
+
+@lru_cache(maxsize=None)
+def value_backend(rank):
+    """DiffKV backend with its own Value width, so every layer caches exactly its rank."""
+
+    class ValueBackend(TritonAttentionDiffKVBackend):
+        head_size_v = rank
+
+        @staticmethod
+        def get_impl_cls():
+            return JointValueImpl
+
+        @staticmethod
+        def get_builder_cls():
+            return JointValueMetadataBuilder
+
+    ValueBackend.__name__ = ValueBackend.__qualname__ = f"JointValueBackendV{rank}"
+    return ValueBackend
 
 
 class JointQKV(QKVParallelLinear):
@@ -64,15 +131,15 @@ class JointAttention(nn.Module):
         self.rank = encoder.shape[-1]
         self.qkv_proj = JointQKV(encoder, name[:-5] + ".qkv_proj")
         self.rotary_emb = original.rotary_emb
-        TritonAttentionDiffKVBackend.set_head_size_v(self.rank)
-        backend = TritonAttentionDiffKVBackend
+        backend, extra = value_backend(self.rank), dict(value_rank=self.rank)
         if router is not None:
             from basisserve.vllm.llama_joint_backend import JointRoutingBackend
-            backend = JointRoutingBackend
+            TritonAttentionDiffKVBackend.set_head_size_v(self.rank)
+            backend, extra = JointRoutingBackend, {}
         self.attn = Attention(
             self.num_heads, 128, original.scaling, num_kv_heads=self.num_kv_heads,
             cache_config=config.cache_config, prefix=name,
-            attn_backend=backend, head_size_v=self.rank,
+            attn_backend=backend, head_size_v=self.rank, **extra,
         )
         self.register_buffer("decoder", decoder, persistent=False)
         if router is not None:
@@ -116,10 +183,11 @@ class BasisServeLlamaJointALSForCausalLM(LlamaForCausalLM):
         manifest_bytes = (root / "manifest.json").read_bytes()
         assert hashlib.sha256(manifest_bytes).hexdigest() == cfg.basisserve_joint_manifest_sha256
         manifest = json.loads(manifest_bytes)
-        assert manifest["format"] == "basisserve.uniform_c1_als.v1"
-        rank = manifest["compression"]["rank"]
-        assert rank in (64, 96)
-        assert len(manifest["layers"]) == 32
+        assert manifest["format"] in FORMATS
+        compression = manifest["compression"]
+        # Uniform banks record one rank; adaptive checkpoints record every layer's KV-head ranks.
+        layer_ranks = compression.get("layer_ranks") or [[compression["rank"]] * 8] * 32
+        assert len(manifest["layers"]) == len(layer_ranks) == 32
         super().__init__(vllm_config=vllm_config, prefix=prefix)
         device = next(self.parameters()).device
         count = 8 // group.world_size
@@ -132,6 +200,9 @@ class BasisServeLlamaJointALSForCausalLM(LlamaForCausalLM):
             assert record["layer"] == index
             assert hashlib.sha256(path.read_bytes()).hexdigest() == record["sha256"]
             factors = load_file(str(path))
+            # The latent AllGather concatenates equal widths, so a layer has one rank on every TP rank.
+            rank = layer_ranks[index][0]
+            assert set(layer_ranks[index]) == {rank} and 0 < rank <= 128
             assert factors["value_coordinate_encoders"].shape == (8, 128, rank)
             assert factors["head_output_decoders"].shape == (32, rank, 4096)
             assert "source_ranks" not in factors or bool((factors["source_ranks"] == rank).all())
@@ -169,10 +240,22 @@ class BasisServeLlamaJointALSForCausalLM(LlamaForCausalLM):
             (name, value) for name, value in weights if not name.startswith(skips)
         )
 
+    def deployment_statistics(self):
+        attention = [layer.self_attn for layer in self.model.layers]
+        kv_heads = attention[0].num_kv_heads
+        return dict(
+            method="BasisKV low-rank Value coordinates, latent AllGather",
+            tp_rank=get_tp_group().rank_in_group, layer_ranks=[a.rank for a in attention],
+            key_bytes_per_token=kv_heads * 128 * 2,
+            latent_bytes_per_token=[kv_heads * a.rank * 2 for a in attention],
+            attention_collective="all_gather",
+            loaded_value_layers=sum(a.qkv_proj.value_loaded for a in attention),
+            attention_impl=type(attention[0].attn.impl).__name__)
+
     def joint_statistics(self):
         routed = bool(self.router_hashes)
         result = dict(
-            value_rank=self.model.layers[0].self_attn.rank, key_rank=128, decoder_replicated=True,
+            value_ranks=[layer.self_attn.rank for layer in self.model.layers], key_rank=128, decoder_replicated=True,
             attention_collective="vllm_all_gather", key_placement="pinned_host" if routed else "gpu",
             loaded_value_layers=sum(layer.self_attn.qkv_proj.value_loaded for layer in self.model.layers),
             attention_impl=type(self.model.layers[0].self_attn.attn.impl).__name__,

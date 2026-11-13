@@ -78,18 +78,23 @@ def main():
     parser.add_argument("--prompt", type=int, required=True)
     parser.add_argument("--batch", type=int, required=True)
     parser.add_argument("--experiment", choices=("request", "decode", "profile"), required=True)
-    parser.add_argument("--smoke", action="store_true")
+    smoke = parser.add_mutually_exclusive_group()
+    smoke.add_argument("--smoke", action="store_true")
+    smoke.add_argument("--capacity-smoke", action="store_true")
+    parser.add_argument("--gpu-memory-utilization", type=float, default=.8)
+    parser.add_argument("--repetitions", type=int, choices=(1, 3), default=3,
+                        help="measured prompt cohorts after the separate warmup cohort")
     parser.add_argument("--graph", choices=("full", "eager"), default="full",
                         help="CUDA Graph policy; the sharded PaLU arm always runs eager")
     args = parser.parse_args()
     if args.arm == "palu_g4_sharded":
         args.graph = "eager"
-    assert Path(sys.prefix).name == "basis"
+    assert Path(sys.prefix).name in ("basis", "lowrank")
     assert os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] == "0"
     assert os.environ["NCCL_P2P_DISABLE"] in ("0", "1")
     assert os.environ["NVIDIA_TF32_OVERRIDE"] == "0"
     assert torch.cuda.device_count() == args.tp
-    assert args.batch > 0 and args.prompt in (4096, 16384, 65536, 130048)
+    assert args.batch > 0 and args.prompt in (512, 4096, 16384, 65536, 130048)
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
     args.output.mkdir(parents=True, exist_ok=True)
@@ -97,7 +102,7 @@ def main():
     generation = 8 if args.smoke else 128
     conditioning = 2 if args.smoke else 16
     steps = 4 if args.smoke else 32 if args.experiment == "profile" else 128
-    repetitions = 1 if args.smoke or args.experiment == "profile" else 3
+    repetitions = 1 if args.smoke or args.capacity_smoke or args.experiment == "profile" else args.repetitions
     config = json.loads((args.model / "config.json").read_text())
     assert args.prompt + max(generation, 1 + conditioning + steps + 1) <= config["max_position_embeddings"]
     max_length = min(args.prompt + 1024, config["max_position_embeddings"])
@@ -124,7 +129,7 @@ def main():
         distributed_executor_backend="mp", dtype="bfloat16", seed=0,
         max_model_len=max_length, max_num_seqs=args.batch, max_num_batched_tokens=8192,
         enable_chunked_prefill=True, enable_prefix_caching=False, async_scheduling=False,
-        gpu_memory_utilization=.8, block_size=32, disable_log_stats=False,
+        gpu_memory_utilization=args.gpu_memory_utilization, block_size=32, disable_log_stats=False,
         disable_custom_all_reduce=False,
         enforce_eager=args.graph == "eager",
         compilation_config=dict(cudagraph_mode="NONE" if args.graph == "eager" else "FULL_AND_PIECEWISE",
@@ -145,7 +150,8 @@ def main():
                            Path("benchmarks/system/vllm_bench_worker.py")])
     metadata = dict(
         status="initializing", experiment=args.experiment, arm=args.arm, tp=args.tp, graph=args.graph,
-        prompt_tokens=args.prompt, batch=args.batch, smoke=args.smoke,
+        prompt_tokens=args.prompt, batch=args.batch, smoke=args.smoke, capacity_smoke=args.capacity_smoke,
+        result_scope="capacity only; shared GPU timings are not formal performance results" if args.capacity_smoke else "benchmark",
         generation_tokens=generation, conditioning_steps=conditioning, measured_decode_steps=steps,
         repetitions=repetitions, configuration=configuration, prompt_cohorts=manifests,
         conda_environment=sys.prefix, command=shlex.join([sys.executable, *sys.argv]),
@@ -160,6 +166,8 @@ def main():
         request_boundary="common monotonic release before first scheduler step, native first/last token timestamps",
         decode_boundary="all requests fully prefilled before conditioning; one native scheduler step emits B tokens",
         nccl_p2p_disabled=os.environ["NCCL_P2P_DISABLE"] == "1", host_key_pool_limit_per_rank=40 * 1024**3,
+        process_environment={key: value for key, value in sorted(os.environ.items()) if key.startswith(
+            ("NCCL_", "CUDA_", "VLLM_", "OMP_", "NVIDIA_", "TORCH_", "TRITON_", "CONDA_", "PYTHONPATH", "HF_HUB_OFFLINE"))},
         model_loaded_memory=None,
     )
     write(args.output / "config.json", metadata)
@@ -182,11 +190,14 @@ def main():
             arm=args.arm, tp=args.tp, prompt_tokens=args.prompt, batch=args.batch, **details))
         print("BENCH failed " + json.dumps(dict(reason=reason, **details)), flush=True)
 
+    # These arms use one full-attention block pool with a 32-token block.
+    # Include the final measured token and the pool's reserved null block.
+    cached_tokens = args.prompt + (generation if args.experiment == "request" else conditioning + steps)
+    needed = args.batch * ((cached_tokens + 31) // 32)
+    available = scheduler.kv_cache_manager.block_pool.get_num_free_blocks()
+    metadata["kv_capacity"] = dict(required_blocks=needed, free_blocks=available, block_size=32)
+    write(args.output / "config.json", metadata)
     if args.experiment != "request":
-        # These arms use one full-attention block pool with a 32-token block.
-        # Include the final measured token and the pool's reserved null block.
-        needed = args.batch * ((args.prompt + conditioning + steps + 31) // 32)
-        available = scheduler.kv_cache_manager.block_pool.get_num_free_blocks()
         if needed > available:
             failed_cohort("gpu_cache_capacity", required_blocks=needed, free_blocks=available,
                           failure_stage="before_prefill", block_size=32)
@@ -251,6 +262,8 @@ def main():
             assert all(len(row["token_ids"]) == generation for row in records.values())
             ttft = [(m["first_token_ts"] - release) * 1000 for m in metrics]
             tpot = [(m["last_token_ts"] - m["first_token_ts"]) * 1000 / (generation - 1) for m in metrics]
+            for row, first, rest in zip(records.values(), ttft, tpot):
+                row.update(ttft_ms=first, tpot_ms=rest)
             e2e = max(m["last_token_ts"] for m in metrics) - release
             summary = dict(cohort_e2e_s=e2e, engine_loop_s=finish - release,
                            cohort_output_tokens_s=args.batch * generation / e2e,
@@ -330,7 +343,7 @@ def main():
         print("BENCH " + json.dumps(summary), flush=True)
     metadata.update(status="complete", trials=trials)
     write(args.output / "config.json", metadata)
-    write(args.output / "summary.json", dict(trials=trials, aggregation="median across three distinct prompt cohorts",
+    write(args.output / "summary.json", dict(trials=trials, aggregation=f"median across {repetitions} distinct prompt cohorts",
           medians={key: statistics.median([r[key] for r in trials]) for key in trials[0]
                    if key.endswith(("_ms", "_s")) and all(isinstance(r[key], (int, float)) for r in trials)}))
     print("BENCH complete", flush=True)

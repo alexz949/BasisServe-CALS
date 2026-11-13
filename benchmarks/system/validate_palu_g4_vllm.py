@@ -1,6 +1,7 @@
 """Numerical check of the vLLM PaLU G-LRD4 deployments against a single-GPU reference.
 
-reference: HF Transformers Llama with V_k = D_k E_g x (dense or PaLU); teacher-forced
+reference: HF Transformers Llama with V_k = D_k E_g x (dense or PaLU) or the BasisKV
+           coordinates E_k^T V_k with per-head output decoders; teacher-forced
            log-softmax at the tail positions plus a greedy continuation.
 serve:     vLLM TP run of an arm; prompt log-probabilities at the same positions (teacher
            forced by construction) plus the same greedy continuation.
@@ -42,6 +43,22 @@ def palu_value_projection(factors, manifest, layer):
     return torch.cat(rows)
 
 
+def basis_projections(root, record, value):
+    """Dense-shaped V and O weights of one BasisKV layer: rank-r coordinates in the first
+    r value features of every KV head, the output decoder in the matching o_proj columns."""
+    factors = load_file(str(root / record["file"]))
+    ranks = record.get("ranks") or factors["source_ranks"].tolist()
+    assert len(set(ranks)) == 1
+    rank = ranks[0]
+    encoders = factors["value_coordinate_encoders"].float()[..., :rank]
+    decoders = factors["head_output_decoders"].float()[:, :rank]
+    folded_value = torch.zeros(8, 128, 4096)
+    folded_value[:, :rank] = encoders.transpose(1, 2) @ value.float().cpu().view(8, 128, 4096)
+    folded_output = torch.zeros(4096, 32, 128)
+    folded_output[:, :, :rank] = decoders.permute(2, 0, 1)
+    return folded_value.view(1024, 4096), folded_output.view(4096, 4096)
+
+
 def reference(args):
     from transformers import AutoModelForCausalLM
     model = AutoModelForCausalLM.from_pretrained(str(MODEL), dtype=torch.bfloat16,
@@ -53,6 +70,16 @@ def reference(args):
         record["factor_sha256"] = manifest["artifact"]["sha256"]
         for index, layer in enumerate(model.model.layers):
             layer.self_attn.v_proj.weight.data.copy_(palu_value_projection(factors, manifest, index))
+    if args.variant == "basis":
+        manifest_bytes = (args.factors / "manifest.json").read_bytes()
+        manifest = json.loads(manifest_bytes)
+        record["manifest_sha256"] = hashlib.sha256(manifest_bytes).hexdigest()
+        record["layer_ranks"] = [layer["ranks"] for layer in manifest["layers"]]
+        for index, layer in enumerate(model.model.layers):
+            value, output = basis_projections(args.factors, manifest["layers"][index],
+                                              layer.self_attn.v_proj.weight.data)
+            layer.self_attn.v_proj.weight.data.copy_(value)
+            layer.self_attn.o_proj.weight.data.copy_(output)
     prompts = windows(args.windows, args.prompts).cuda()
     logprobs, continuations = [], []
     with torch.inference_mode():
@@ -81,10 +108,15 @@ def serve(args):
         overrides = dict(architectures=[architecture],
                          basisserve_palu_factor_dir=str(args.factors),
                          basisserve_palu_manifest_sha256=hashlib.sha256(manifest_bytes).hexdigest())
+    if args.arm == "als_full":
+        manifest_bytes = (args.factors / "manifest.json").read_bytes()
+        overrides = dict(architectures=["BasisServeLlamaJointALSForCausalLM"],
+                         basisserve_joint_factor_dir=str(args.factors),
+                         basisserve_joint_manifest_sha256=hashlib.sha256(manifest_bytes).hexdigest())
     llm = LLM(model=str(MODEL), tensor_parallel_size=args.tp, dtype="bfloat16",
               distributed_executor_backend="mp", max_model_len=PROMPT + TAIL + CONTINUATION + 16,
               max_num_seqs=4, max_num_batched_tokens=8192, enable_chunked_prefill=True,
-              enable_prefix_caching=False, gpu_memory_utilization=0.6, enforce_eager=True,
+              enable_prefix_caching=False, gpu_memory_utilization=args.gpu_memory_utilization, enforce_eager=True,
               disable_custom_all_reduce=True, seed=0, hf_overrides=overrides, block_size=32,
               worker_extension_cls="benchmarks.system.vllm_smoke_worker.LlamaSmokeWorker")
     prompts = windows(args.windows, args.prompts)
@@ -108,6 +140,7 @@ def serve(args):
                    continuations=torch.stack(continuations), prompts=prompts),
               str(args.output.with_suffix(".safetensors")))
     args.output.write_text(json.dumps(dict(arm=args.arm, tp=args.tp, status="complete", workers=workers,
+                                           gpu_memory_utilization=args.gpu_memory_utilization,
                                            hf_overrides=overrides), indent=2) + "\n")
 
 
@@ -121,6 +154,7 @@ def compare(args):
     same_continuation = (ref["continuations"] == run["continuations"])
     first_divergence = [int(row.numel()) if row.all() else int((~row).nonzero()[0]) for row in same_continuation]
     result = dict(reference=str(args.reference), served=str(args.served),
+        all_finite=bool(torch.isfinite(run["tail_logprobs"]).all() and torch.isfinite(ref_logprob).all()),
         same_prompts=bool(torch.equal(prompts, run["prompts"])), prompts=int(prompts.shape[0]),
         tail_positions=TAIL, teacher_forced_top1_agreement=float((ref_top1 == run["tail_top1"]).float().mean()),
         teacher_forced_logprob_max_abs_difference=float((ref_logprob - run["tail_logprobs"]).abs().max()),
@@ -135,12 +169,13 @@ def compare(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("stage", choices=("reference", "serve", "compare"))
-    parser.add_argument("--variant", choices=("dense", "palu"), default="dense")
-    parser.add_argument("--arm", choices=("dense", "palu_g4", "palu_g4_sharded"), default="dense")
+    parser.add_argument("--variant", choices=("dense", "palu", "basis"), default="dense")
+    parser.add_argument("--arm", choices=("dense", "als_full", "palu_g4", "palu_g4_sharded"), default="dense")
     parser.add_argument("--factors", type=Path)
     parser.add_argument("--windows", type=Path)
     parser.add_argument("--prompts", type=int, default=4)
     parser.add_argument("--tp", type=int, default=4)
+    parser.add_argument("--gpu-memory-utilization", type=float, default=.6)
     parser.add_argument("--reference", type=Path)
     parser.add_argument("--served", type=Path)
     parser.add_argument("--output", type=Path, required=True)
