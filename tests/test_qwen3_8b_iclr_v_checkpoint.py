@@ -17,7 +17,7 @@ from evaluation.build_qwen3_8b_iclr_v_checkpoint import (
 from evaluation.eval_qwen3_8b_iclr_quality import (
     TASKS,
     activate_quality_profile,
-    _cuda_device,
+    commonsense_example_records,
     summarize_commonsense,
 )
 from evaluation.merge_iclr_quality_shards import merge as merge_quality_shards
@@ -283,12 +283,33 @@ def test_quality_profiles_pin_model_specific_formats() -> None:
         activate_quality_profile("qwen3_8b")
 
 
-@pytest.mark.parametrize(
-    ("value", "expected"),
-    [(0, 0), ("2", 2), ("cuda:3", 3), ("cpu", None), ("disk", None)],
-)
-def test_cuda_device_map_values_are_normalized(value: object, expected: int | None) -> None:
-    assert _cuda_device(value) == expected
+def test_example_records_reproduce_the_reported_task_accuracy() -> None:
+    def sample(doc_id: int, acc: float, acc_norm: float) -> dict[str, object]:
+        return {
+            "doc_id": doc_id,
+            "doc": {"id": f"doc-{doc_id}", "passage": "shared passage"},
+            "doc_hash": f"hash-{doc_id}",
+            "prompt_hash": f"prompt-{doc_id}",
+            "target": 1,
+            "filtered_resps": [(-2.0, False), (-1.0, True)],
+            "acc": acc,
+            "acc_norm": acc_norm,
+        }
+
+    evaluation = {
+        "samples": {"piqa": [sample(0, 1.0, 0.0), sample(1, 1.0, 1.0)]},
+        "n-samples": {"piqa": {"effective": 2}},
+    }
+    rows = [{"task": "piqa", "metric": "acc_norm", "value": 0.5}]
+    records = commonsense_example_records(evaluation, rows)
+    assert records is not None
+    assert [record["correct"] for record in records] == [0.0, 1.0]
+    assert records[0]["example_id"] == "piqa:0"
+    assert records[0]["native"] == {"id": "doc-0"}
+    assert records[0]["choice_loglikelihoods"] == [-2.0, -1.0]
+    assert len(records[0]["passage_sha256"]) == 64
+    wrong = [{"task": "piqa", "metric": "acc_norm", "value": 1.0}]
+    assert commonsense_example_records(evaluation, wrong) is None
 
 
 def test_matrix_trend_audit_checks_dense_svd_and_palu_geometry() -> None:

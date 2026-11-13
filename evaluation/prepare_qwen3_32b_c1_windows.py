@@ -30,6 +30,7 @@ def activate_model_profile(name: str) -> None:
         "qwen3_8b",
         "qwen3_32b",
         "llama31_8b",
+        "llama31_8b_instruct",
         "llama31_70b",
         "llama2_7b",
     }:

@@ -126,6 +126,17 @@ def activate_model_profile(name: str) -> None:
         NUM_KV_HEADS = 8
         HEAD_DIM = 128
         HIDDEN_SIZE = 4096
+    elif name == "llama31_8b_instruct":
+        FORMAT = "basisserve.llama31_8b_instruct.gqa_c1.tp_source_global_kl_allocation.v1"
+        FACTOR_FORMAT = "basiskv.value_factors.v1"
+        MODEL_LABEL = "Llama-3.1-8B-Instruct"
+        MODEL_TYPE = "llama"
+        ATTENTION_TYPE = "gqa"
+        NUM_LAYERS = 32
+        NUM_QUERY_HEADS = 32
+        NUM_KV_HEADS = 8
+        HEAD_DIM = 128
+        HIDDEN_SIZE = 4096
     elif name == "llama31_70b":
         FORMAT = "basisserve.llama31_70b.gqa_c1.tp_source_global_kl_allocation.v1"
         FACTOR_FORMAT = "basiskv.value_factors.v1"

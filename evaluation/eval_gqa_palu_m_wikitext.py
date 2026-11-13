@@ -51,6 +51,7 @@ def _cuda_device_indices() -> tuple[int, ...]:
 SUPPORTED_CHECKPOINT_FORMATS = {
     "basisserve.llama2_7b.iclr_v_factors.v1",
     "basisserve.llama31_8b.iclr_v_factors.v1",
+    "basisserve.llama31_8b_instruct.iclr_v_factors.v1",
     "basisserve.llama31_70b.iclr_v_factors.v1",
     "basisserve.qwen3_8b.iclr_v_factors.v1",
     "basisserve.qwen3_32b.iclr_v_factors.v1",

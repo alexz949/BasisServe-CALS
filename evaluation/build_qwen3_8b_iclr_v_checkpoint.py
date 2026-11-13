@@ -45,6 +45,11 @@ EXPERIMENT_PROFILES = {
         "fisher_format": "basisserve.gqa.palu_projection_fisher_stats.v1",
         "run_id_prefix": "L31-8B",
     },
+    "llama31_8b_instruct": {
+        "format": "basisserve.llama31_8b_instruct.iclr_v_factors.v1",
+        "fisher_format": "basisserve.gqa.palu_projection_fisher_stats.v1",
+        "run_id_prefix": "L31-8B-I",
+    },
     "llama2_7b": {
         "format": "basisserve.llama2_7b.iclr_v_factors.v1",
         "fisher_format": "basisserve.gqa.palu_projection_fisher_stats.v1",

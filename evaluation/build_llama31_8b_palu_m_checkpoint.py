@@ -85,6 +85,18 @@ MODEL_PROFILES = {
         "head_dim": 128,
         "format_slug": "llama31_8b",
     },
+    "llama31_8b_instruct": {
+        "label": "Llama-3.1-8B-Instruct",
+        "model_type": "llama",
+        "repo": "meta-llama/Llama-3.1-8B-Instruct",
+        "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+        "num_layers": 32,
+        "hidden_size": 4096,
+        "num_query_heads": 32,
+        "num_kv_heads": 8,
+        "head_dim": 128,
+        "format_slug": "llama31_8b_instruct",
+    },
     "qwen3_8b": {
         "label": "Qwen3-8B-Base",
         "model_type": "qwen3",

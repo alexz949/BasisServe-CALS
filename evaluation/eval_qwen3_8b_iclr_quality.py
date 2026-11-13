@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import importlib.metadata
 import json
 import os
@@ -58,6 +59,12 @@ QUALITY_PROFILES = {
         "checkpoint": "basisserve.llama31_8b.iclr_v_factors.v1",
         "quality": "basisserve.llama31_8b.iclr_quality.v1",
         "slug": "llama31_8b",
+    },
+    "llama31_8b_instruct": {
+        "label": "Llama-3.1-8B-Instruct",
+        "checkpoint": "basisserve.llama31_8b_instruct.iclr_v_factors.v1",
+        "quality": "basisserve.llama31_8b_instruct.iclr_quality.v1",
+        "slug": "llama31_8b_instruct",
     },
     "llama2_7b": {
         "label": "Llama-2-7B",
@@ -133,25 +140,15 @@ def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
     os.replace(temporary, path)
 
 
-def _cuda_device(value: Any) -> int | None:
-    if isinstance(value, int):
-        return value
-    text = str(value)
-    if text.isdigit():
-        return int(text)
-    if text.startswith("cuda:") and text.removeprefix("cuda:").isdigit():
-        return int(text.removeprefix("cuda:"))
-    return None
-
-
 def _model_cuda_devices(model: torch.nn.Module) -> list[int]:
-    device_map = getattr(model, "hf_device_map", {})
-    devices = {
-        device
-        for value in device_map.values()
-        if (device := _cuda_device(value)) is not None
-    }
-    return sorted(devices)
+    # A single-GPU load has no hf_device_map, so read the parameters themselves.
+    return sorted(
+        {
+            int(parameter.device.index)
+            for parameter in model.parameters()
+            if parameter.device.type == "cuda"
+        }
+    )
 
 
 @torch.no_grad()
@@ -444,6 +441,87 @@ def summarize_commonsense(
     return rows, sum(row["value"] for row in rows) / len(rows)
 
 
+# Dataset-native identifiers and gold labels copied into each example record.
+NATIVE_EXAMPLE_FIELDS = (
+    "id",
+    "idx",
+    "ind",
+    "qID",
+    "source_id",
+    "answer",
+    "answerKey",
+    "label",
+)
+
+
+def commonsense_example_records(
+    evaluation: Mapping[str, Any],
+    task_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]] | None:
+    """Flatten lm-eval's logged samples into one scored record per example.
+
+    ``correct`` is the per-example value of the metric this protocol reports
+    for the task, so its task mean must reproduce the lm-eval aggregate.
+    """
+
+    samples = evaluation.get("samples", {})
+    records: list[dict[str, Any]] = []
+    for row in task_rows:
+        task, metric = str(row["task"]), str(row["metric"])
+        task_records = []
+        for sample in samples.get(task, ()):
+            doc = sample["doc"]
+            record = {
+                "task": task,
+                "example_id": f"{task}:{int(sample['doc_id'])}",
+                "doc_id": int(sample["doc_id"]),
+                "doc_hash": sample["doc_hash"],
+                "prompt_hash": sample["prompt_hash"],
+                "native": {
+                    key: doc[key] for key in NATIVE_EXAMPLE_FIELDS if key in doc
+                },
+                "gold": sample["target"],
+                "choice_loglikelihoods": [
+                    float(response[0]) for response in sample["filtered_resps"]
+                ],
+                "metric": metric,
+                "correct": float(sample[metric]),
+            }
+            if "passage" in doc:
+                record["passage_sha256"] = hashlib.sha256(
+                    str(doc["passage"]).encode("utf-8")
+                ).hexdigest()
+            task_records.append(record)
+        expected = int(evaluation.get("n-samples", {}).get(task, {}).get("effective", -1))
+        recomputed = sum(item["correct"] for item in task_records) / max(len(task_records), 1)
+        consistent = all(
+            (
+                _check(len(task_records) == expected, f"{task}: logged {len(task_records)} of {expected} examples"),
+                _check(
+                    len({item["doc_id"] for item in task_records}) == len(task_records),
+                    f"{task}: duplicate example IDs",
+                ),
+                _check(
+                    abs(recomputed - float(row["value"])) < 1.0e-9,
+                    f"{task}: per-example {metric} {recomputed} differs from aggregate {row['value']}",
+                ),
+            )
+        )
+        if not consistent:
+            return None
+        records.extend(task_records)
+    return records
+
+
+def _write_jsonl(path: Path, records: list[dict[str, Any]]) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
+        "".join(json.dumps(record, sort_keys=True, default=_json_default) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    os.replace(temporary, path)
+
+
 def _csv_selection(
     value: str,
     *,
@@ -477,6 +555,10 @@ def _load_stage(
             == checkpoint_manifest_sha256,
         )
     )
+    if stage == "commonsense":
+        examples = payload.get("examples", {})
+        examples_path = path.parent / str(examples.get("file", ""))
+        matches = matches and examples_path.is_file() and _sha256(examples_path) == examples.get("sha256")
     if not _check(matches, f"existing {stage} stage does not match this checkpoint"):
         return {"status": "mismatch"}
     print(f"[Resume] reusing {path}", flush=True)
@@ -775,7 +857,8 @@ def evaluate(args: argparse.Namespace) -> int:
             tasks=list(selected_tasks),
             num_fewshot=0,
             task_manager=TaskManager(),
-            log_samples=False,
+            log_samples=True,
+            limit=args.mcq_limit,
         )
         if not _check(evaluation is not None, "lm-eval returned no results"):
             return 2
@@ -783,6 +866,14 @@ def evaluate(args: argparse.Namespace) -> int:
         if summarized is None:
             return 2
         task_rows, average_accuracy = summarized
+        example_records = commonsense_example_records(evaluation, task_rows)
+        if example_records is None:
+            return 2
+        evaluation.pop("samples")
+        examples_path = stage_paths["commonsense"].with_name(
+            stage_paths["commonsense"].stem + "-examples.jsonl"
+        )
+        _write_jsonl(examples_path, example_records)
         stages["commonsense"] = {
             **_stage_base(
                 stage="commonsense",
@@ -798,12 +889,19 @@ def evaluate(args: argparse.Namespace) -> int:
                 "num_fewshot": 0,
                 "batch_size": args.lm_eval_batch_size,
                 "max_length": 4096,
+                "examples_per_task_limit": args.mcq_limit,
                 "metric_selection": "acc_norm when present, otherwise acc",
                 "quality_shard_index": args.quality_shard_index,
                 "quality_shard_count": args.quality_shard_count,
             },
             "task_accuracy": task_rows,
             "average_accuracy": average_accuracy,
+            "examples": {
+                "file": examples_path.name,
+                "sha256": _sha256(examples_path),
+                "records": len(example_records),
+                "correct": "per-example value of the reported metric",
+            },
             "evaluation": evaluation,
             "elapsed_seconds": time.perf_counter() - commonsense_started,
         }
@@ -849,6 +947,7 @@ def evaluate(args: argparse.Namespace) -> int:
             "task_accuracy": commonsense["task_accuracy"],
             "average_accuracy": commonsense["average_accuracy"],
         },
+        "commonsense_examples": commonsense["examples"],
         "stages": {
             stage: {
                 "file": path.name,
@@ -906,6 +1005,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--quality-shard-index", type=int, default=0)
     parser.add_argument("--quality-shard-count", type=int, default=1)
     parser.add_argument("--expected-gpu-count", type=int, default=4)
+    parser.add_argument(
+        "--mcq-limit",
+        type=int,
+        help="Smoke tests only: score the first N examples of every commonsense task",
+    )
     return parser.parse_args()
 
 

@@ -80,6 +80,10 @@ def activate_model_profile(name: str) -> None:
         slug = "llama31_8b"
         MODEL_LABEL = "Llama-3.1-8B"
         attention = "gqa"
+    elif name == "llama31_8b_instruct":
+        slug = "llama31_8b_instruct"
+        MODEL_LABEL = "Llama-3.1-8B-Instruct"
+        attention = "gqa"
     elif name == "llama31_70b":
         slug = "llama31_70b"
         MODEL_LABEL = "Llama-3.1-70B"
